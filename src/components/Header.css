@@ -1,0 +1,114 @@
+.header {
+  margin-top: 0;
+  padding-top: 0;
+  position: sticky;
+}
+
+.header-container {
+  margin: 0;
+  padding: 0 1rem;
+}
+
+.header-content {
+  /* below line makes the heading all on one line */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+.header-logo {
+  font-size: 2rem;
+  font-family: "Savate", sans-serif;
+  font-optical-sizing: auto;
+
+  color: rgb(99, 82, 61);
+  margin: 0;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  color: #374151;
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.dropdown-toggle:hover {
+  color: #111827;
+  background: #f9fafb;
+}
+
+.dropdown-icon {
+  margin-left: 0.25rem;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  width: 12rem;
+  background: #fff;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(16, 24, 40, 0.08);
+  border: 1px solid #f3f4f6;
+  z-index: 50;
+}
+
+.dropdown-list {
+  padding: 0.25rem 0;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  color: #374151;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.icon-btn {
+  padding: 0.5rem;
+  color: #374151;
+  background: none;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: color 0.2;
+}
+
+.icon-btn:hover {
+  color: #111827;
+  background: #f9fafb;
+}
+
+.dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}

@@ -1,10 +1,10 @@
 import "./App.css";
-import { Carrot } from "lucide-react";
+import Header from "./components/header";
 
 function App() {
   return (
     <>
-      <Carrot color="white" size={36} />
+      <Header />
     </>
   );
 }
