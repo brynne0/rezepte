@@ -1,0 +1,127 @@
+.header {
+  margin-top: 0;
+  padding-top: 0;
+  position: sticky;
+  background-color: antiquewhite;
+}
+
+.header-container {
+  margin: 0;
+  padding: 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between; /* or space-evenly */
+  align-items: center;
+  height: 4rem;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* For screens 600px and narrower, use inline block */
+@media (max-width: 600px) {
+  .header-content {
+    display: inline-block;
+  }
+  .header-logo {
+    display: inline-block;
+  }
+}
+
+.header-title {
+  font-size: 3rem;
+  font-family: "Savate", sans-serif;
+  font-optical-sizing: auto;
+  color: var(--dark_brown);
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  color: var(--dark_brown);
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.dropdown-toggle:hover {
+  color: #111827;
+  background: #f9fafb;
+}
+
+.dropdown-icon {
+  margin-left: 0.25rem;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  width: 12rem;
+  background: #fff;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(16, 24, 40, 0.08);
+  border: 1px solid #f3f4f6;
+  z-index: 50;
+}
+
+.dropdown-list {
+  padding: 0.25rem 0;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  color: var(--dark_brown);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.dropdown-item:hover {
+  color: red; /* Not working? */
+}
+
+.icon-btn {
+  padding: 0.5rem;
+  color: var(--dark_brown);
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  size: 40;
+}
+
+.icon-btn:hover {
+  background: white;
+  border-radius: 50%;
+}
+
+.dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
