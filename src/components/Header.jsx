@@ -1,5 +1,11 @@
-import React, { useState } from "react";
-import { Search, ShoppingBasket, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import {
+  Search,
+  ShoppingBasket,
+  ChevronDown,
+  Plus,
+  Squirrel,
+} from "lucide-react";
 import "./header.css";
 
 const Header = () => {
@@ -19,7 +25,10 @@ const Header = () => {
       <header className="header">
         <div className="header-container">
           <div className="header-content">
-            <h1 className="header-logo">Rezepte</h1>
+            <div className="header-logo">
+              <Squirrel size={60} color="var(--dark_brown)" />
+              <h1 className="header-title">Rezepte</h1>
+            </div>
 
             <nav className="header-nav">
               {/* Drop down */}
@@ -29,7 +38,7 @@ const Header = () => {
                   className="dropdown-toggle"
                 >
                   Alle Rezepte
-                  <ChevronDown size={16} className="dropdown-icon" />
+                  <ChevronDown size={"1rem"} className="dropdown-icon" />
                 </button>
                 {showDropdown && (
                   <div className="dropdown-menu">
@@ -52,11 +61,14 @@ const Header = () => {
               </div>
               {/* Cart */}
               <button className="icon-btn">
-                <ShoppingBasket size={20} />
+                <ShoppingBasket size={28} />
+              </button>
+              <button className="icon-btn">
+                <Plus size={28} />
               </button>
               {/* Search */}
               <button className="icon-btn">
-                <Search size={20} />
+                <Search size={28} />
               </button>
             </nav>
           </div>
