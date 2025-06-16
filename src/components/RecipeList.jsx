@@ -1,21 +1,26 @@
+import { useNavigate } from "react-router-dom";
 import RecipeCard from "./RecipeCard";
 import "./Recipe.css";
 
 // Temporary recipe sample data
 const sampleRecipes = [
   {
-    id: 1,
+    id: "smoothie",
     title: "Smoothie",
     description: "Fruit and protien smoothie.",
+    category: "Brunch",
   },
   {
-    id: 2,
+    id: "tofu-noodle-soup",
     title: "Tofu Noodle Soup",
     description: "Einfach so.",
+    category: "Abenessen",
   },
 ];
 
 const RecipeList = ({ selectedCategory }) => {
+  const navigate = useNavigate();
+  
   // Filter recipes
   const filteredRecipes =
     selectedCategory === "Alle Rezepte"
@@ -25,8 +30,12 @@ const RecipeList = ({ selectedCategory }) => {
   return (
     <>
       <div className="recipe-list">
-        {filteredRecipes.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
+        {filteredRecipes.map((r) => (
+          <RecipeCard
+            key={r.id}
+            recipe={r}
+            onClick={() => navigate(`/${r.id}`)}
+          />
         ))}
       </div>
     </>

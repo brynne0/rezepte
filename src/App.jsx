@@ -1,5 +1,7 @@
-import { useState } from "react";
 import "./App.css";
+import Recipe from "./components/Recipe";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 import Header from "./components/header";
 import RecipeList from "./components/RecipeList";
 
@@ -7,9 +9,10 @@ const categories = [
   "Alle Rezepte",
   "Backen",
   "Nachtisch",
+  "Brunch",
   "Abendessen",
-  "Mittagessen",
   "Snacks",
+  "GrundRezepte",
 ];
 
 function App() {
@@ -17,12 +20,20 @@ function App() {
 
   return (
     <>
-      <Header
-        categories={categories}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
-      <RecipeList selectedCategory={selectedCategory} />
+      <Router>
+        <Header
+          categories={categories}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+        />
+        <Routes>
+          <Route
+            path="/"
+            element={<RecipeList selectedCategory={selectedCategory} />}
+          ></Route>
+          <Route path="/:id" element={<Recipe />} />
+        </Routes>
+      </Router>
     </>
   );
 }
