@@ -1,8 +1,0 @@
-.recipe-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.4rem;
-  justify-content: start;
-  flex-wrap: wrap;
-  overflow-y: auto;
-}

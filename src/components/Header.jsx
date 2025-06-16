@@ -8,17 +8,8 @@ import {
 } from "lucide-react";
 import "./header.css";
 
-const Header = () => {
+const Header = ({ categories, selectedCategory, setSelectedCategory }) => {
   const [showDropdown, setShowDropdown] = useState(false);
-
-  const categories = [
-    "Alle Rezepte",
-    "Backen",
-    "Nachtisch",
-    "Abendessen",
-    "Mittagessen",
-    "Snacks",
-  ];
 
   return (
     <>
@@ -32,13 +23,19 @@ const Header = () => {
             </div>
 
             <nav className="header-nav">
-              {/* Drop down */}
+              {/* Dropdown menu */}
               <div className="dropdown">
+                {showDropdown && (
+                  <div
+                    className="dropdown-overlay"
+                    onClick={() => setShowDropdown(false)}
+                  />
+                )}
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="dropdown-toggle"
                 >
-                  Alle Rezepte
+                  {selectedCategory}
                   <ChevronDown size={"1rem"} className="dropdown-icon" />
                 </button>
                 {showDropdown && (
@@ -49,8 +46,8 @@ const Header = () => {
                           key={category}
                           className="dropdown-item"
                           onClick={() => {
+                            setSelectedCategory(category);
                             setShowDropdown(false);
-                            console.log("Selected:", category);
                           }}
                         >
                           {category}
@@ -60,14 +57,15 @@ const Header = () => {
                   </div>
                 )}
               </div>
-              {/* Cart */}
+              {/* Grocery List */}
               <button className="icon-btn">
                 <ShoppingBasket size={28} />
               </button>
+              {/* Plus Recipe */}
               <button className="icon-btn">
                 <Plus size={28} />
               </button>
-              {/* Search */}
+              {/* Search Recipe */}
               <button className="icon-btn">
                 <Search size={28} />
               </button>
@@ -75,12 +73,6 @@ const Header = () => {
           </div>
         </div>
       </header>
-      {showDropdown && (
-        <div
-          className="dropdown-overlay"
-          onClick={() => setShowDropdown(false)}
-        />
-      )}
     </>
   );
 };

@@ -1,4 +1,4 @@
-import "./RecipeCard.css";
+import "./Recipe.css";
 
 const RecipeCard = ({ recipe, onClick }) => {
   return (

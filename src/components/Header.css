@@ -72,6 +72,11 @@
 .dropdown-icon {
   margin-left: 0.25rem;
 }
+.dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
 
 .dropdown-menu {
   position: absolute;
@@ -120,10 +125,4 @@
 .icon-btn:hover {
   background: white;
   border-radius: 50%;
-}
-
-.dropdown-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
 }

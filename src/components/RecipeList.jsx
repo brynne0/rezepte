@@ -1,5 +1,5 @@
 import RecipeCard from "./RecipeCard";
-import "./RecipeList.css";
+import "./Recipe.css";
 
 // Temporary recipe sample data
 const sampleRecipes = [
@@ -15,11 +15,17 @@ const sampleRecipes = [
   },
 ];
 
-const RecipeList = () => {
+const RecipeList = ({ selectedCategory }) => {
+  // Filter recipes
+  const filteredRecipes =
+    selectedCategory === "Alle Rezepte"
+      ? sampleRecipes
+      : sampleRecipes.filter((r) => r.category === selectedCategory);
+
   return (
     <>
       <div className="recipe-list">
-        {sampleRecipes.map((recipe) => (
+        {filteredRecipes.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} />
         ))}
       </div>
