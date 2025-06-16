@@ -25,6 +25,7 @@ const Header = () => {
       <header className="header">
         <div className="header-container">
           <div className="header-content">
+            {/* Title */}
             <div className="header-logo">
               <Squirrel size={60} color="var(--dark_brown)" />
               <h1 className="header-title">Rezepte</h1>
