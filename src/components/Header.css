@@ -108,7 +108,7 @@
 }
 
 .dropdown-item:hover {
-  color: red; /* Not working? */
+  color: var(--dark_red); /* Not working? */
 }
 
 .icon-btn {
@@ -125,4 +125,5 @@
 .icon-btn:hover {
   background: white;
   border-radius: 50%;
+  display: flex;
 }
