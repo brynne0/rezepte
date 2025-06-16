@@ -64,11 +64,6 @@
   flex-wrap: nowrap;
 }
 
-.dropdown-toggle:hover {
-  color: var(--dark_brown);
-  background: white;
-}
-
 .dropdown-icon {
   margin-left: 0.25rem;
 }
