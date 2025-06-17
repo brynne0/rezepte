@@ -20,7 +20,7 @@
 }
 
 .recipe-card-title:hover {
-  color: var(--dark_red);
+  color: var(--red);
 }
 
 .recipe-card-image {

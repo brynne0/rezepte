@@ -21,7 +21,7 @@ function App() {
   const { recipes, loading } = useRecipes();
 
   if (loading) {
-    return <div>Loading recipes...</div>;
+    return <div>Loading...</div>;
   }
 
   return (
