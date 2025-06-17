@@ -1,0 +1,28 @@
+.recipe-card {
+  /* change dark brown below to white to remove border */
+  border: 1px solid var(--dark_brown);
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.recipe-card-title {
+  margin: 0;
+  padding: 0.2rem;
+  font-size: 1rem;
+  text-align: center;
+  flex: 1;
+}
+
+.recipe-card-title:hover {
+  color: var(--dark_red);
+}
+
+.recipe-card-image {
+  /* TODO */
+}

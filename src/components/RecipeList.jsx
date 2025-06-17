@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import RecipeCard from "./RecipeCard";
-import "./Recipe.css";
+import "./RecipeList.css";
 
 const RecipeList = ({ selectedCategory, recipes }) => {
   const navigate = useNavigate();
