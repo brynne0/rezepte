@@ -20,7 +20,7 @@ const sampleRecipes = [
 
 const RecipeList = ({ selectedCategory }) => {
   const navigate = useNavigate();
-  
+
   // Filter recipes
   const filteredRecipes =
     selectedCategory === "Alle Rezepte"

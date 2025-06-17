@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   ShoppingBasket,
@@ -10,6 +11,7 @@ import "./header.css";
 
 const Header = ({ categories, selectedCategory, setSelectedCategory }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -48,6 +50,7 @@ const Header = ({ categories, selectedCategory, setSelectedCategory }) => {
                           onClick={() => {
                             setSelectedCategory(category);
                             setShowDropdown(false);
+                            navigate("/"); // Go to home page
                           }}
                         >
                           {category}
