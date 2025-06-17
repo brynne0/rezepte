@@ -1,0 +1,32 @@
+.recipe-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.4rem;
+  justify-content: start;
+  flex-wrap: wrap;
+  overflow-y: auto;
+}
+
+.recipe-card {
+  /* change dark brown below to white to remove border */
+  border: 1px solid var(--dark_brown);
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  overflow-y: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.recipe-title {
+  margin: 0;
+  padding: 0.2rem;
+  font-size: 1rem;
+}
+
+.recipe-image {
+  /* TODO */
+}

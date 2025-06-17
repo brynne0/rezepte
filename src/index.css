@@ -1,19 +1,24 @@
 :root {
+  /* Color scheme and background */
   color-scheme: light dark;
   background-color: antiquewhite;
   --dark_brown: rgb(99, 82, 61);
+  --dark_red: rgb(191, 49, 49);
 
+  /* Typography */
   font-family: "Noto Sans", sans-serif;
-  font-optical-sizing: auto;
   font-style: normal;
+  font-weight: 400;
+  font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
   line-height: 1.5;
-  font-weight: 400;
+  color: #333;
 
-  /* font-synthesis: none;
+  /* Font rendering */
+  font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale; */
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html,
