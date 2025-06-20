@@ -38,7 +38,7 @@ function App() {
             <RecipeList selectedCategory={selectedCategory} recipes={recipes} />
           }
         />
-        <Route path="/:id" element={<Recipe />} />
+        <Route path="/:slug" element={<Recipe />} />
       </Routes>
     </Router>
   );

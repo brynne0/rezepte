@@ -8,7 +8,7 @@ export const useRecipes = () => {
   useEffect(() => {
     const getRecipes = async () => {
       try {
-        const { data, error } = await supabase.from("rezepte").select("*");
+        const { data, error } = await supabase.from("recipes").select("*");
         if (error) {
           console.error("Error fetching recipes:", error);
           setRecipes([]);

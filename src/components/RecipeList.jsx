@@ -18,7 +18,7 @@ const RecipeList = ({ selectedCategory, recipes }) => {
           <RecipeCard
             key={r.id}
             recipe={r}
-            onClick={() => navigate(`/${r.id}`)}
+            onClick={() => navigate(`/${r.slug}`)}
           />
         ))}
       </div>
