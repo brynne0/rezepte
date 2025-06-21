@@ -19,7 +19,14 @@ const Header = ({ categories, selectedCategory, setSelectedCategory }) => {
         <div className="header-container">
           <div className="header-content">
             {/* Title */}
-            <div className="header-logo">
+            <div
+              onClick={() => {
+                navigate("/");
+                setSelectedCategory("Alle Rezepte");
+              }}
+              style={{ cursor: "pointer" }}
+              className="header-logo"
+            >
               <Squirrel size={60} color="var(--dark_brown)" />
               <h1 className="header-title">Rezepte</h1>
             </div>
