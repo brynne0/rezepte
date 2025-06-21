@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import RecipeCard from "./RecipeCard";
+import RecipeCard from "../RecipeCard/RecipeCard";
 import "./RecipeList.css";
 
 const RecipeList = ({ selectedCategory, recipes }) => {

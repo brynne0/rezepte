@@ -1,9 +1,9 @@
 import "./App.css";
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Header from "./components/header";
-import RecipeList from "./components/RecipeList";
-import Recipe from "./components/Recipe";
+import Header from "./components/Header/Header";
+import RecipeList from "./components/RecipeList/RecipeList";
+import Recipe from "./components/recipe/Recipe";
 import { useRecipes } from "./hooks/useRecipes";
 
 const defaultCategories = [

@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useRecipe } from "../hooks/useRecipe";
+import { useRecipe } from "../../hooks/useRecipe";
 import "./Recipe.css";
 
 const Recipe = () => {
