@@ -103,7 +103,7 @@
 }
 
 .dropdown-item:hover {
-  color: var(--red); /* Not working? */
+  color: var(--red);
 }
 
 .icon-btn {

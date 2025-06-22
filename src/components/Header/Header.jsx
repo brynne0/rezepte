@@ -72,7 +72,10 @@ const Header = ({ categories, selectedCategory, setSelectedCategory }) => {
                 <ShoppingBasket size={28} />
               </button>
               {/* Plus Recipe */}
-              <button className="icon-btn">
+              <button
+                onClick={() => navigate("/add-recipe")}
+                className="icon-btn"
+              >
                 <Plus size={28} />
               </button>
               {/* Search Recipe */}

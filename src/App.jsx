@@ -5,6 +5,7 @@ import Header from "./components/Header/Header";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Recipe from "./components/recipe/Recipe";
 import { useRecipes } from "./hooks/useRecipes";
+import AddRecipePage from "./pages/AddRecipe/AddRecipePage";
 
 const defaultCategories = [
   "Alle Rezepte",
@@ -39,6 +40,10 @@ function App() {
           }
         />
         <Route path="/:slug" element={<Recipe />} />
+        <Route
+          path="/add-recipe"
+          element={<AddRecipePage categories={defaultCategories} />}
+        />
       </Routes>
     </Router>
   );
