@@ -241,91 +241,10 @@ export const useRecipeActions = () => {
     }
   };
 
-  // Helper function to get recipes with ingredient details
-  const getRecipeWithIngredients = async (id) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from("recipes")
-        .select(
-          `
-          *,
-          recipe_ingredients (
-            id,
-            quantity,
-            unit,
-            notes,
-            ingredients (
-              id,
-              name
-            )
-          )
-        `
-        )
-        .eq("id", id)
-        .single();
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      return data;
-    } catch (err) {
-      const errorMessage = err.message || "Failed to fetch recipe";
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Helper function to get all recipes with ingredient details
-  const getAllRecipesWithIngredients = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from("recipes")
-        .select(
-          `
-          *,
-          recipe_ingredients (
-            id,
-            quantity,
-            unit,
-            notes,
-            ingredients (
-              id,
-              name
-            )
-          )
-        `
-        )
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      return data;
-    } catch (err) {
-      const errorMessage = err.message || "Failed to fetch recipes";
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return {
     createRecipe,
     updateRecipe,
     deleteRecipe,
-    getRecipeWithIngredients,
-    getAllRecipesWithIngredients,
     loading,
     error,
   };
