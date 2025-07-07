@@ -3,7 +3,9 @@
   padding-top: 0;
   margin-bottom: 1rem;
   position: sticky;
-  background-color: antiquewhite;
+  top: 0;
+  background-color: var(--cream);
+  z-index: 100;
 }
 
 .header-container {
@@ -16,29 +18,27 @@
   justify-content: space-between; /* or space-evenly */
   align-items: center;
   height: 4rem;
+  position: relative; /* Add this for proper positioning context */
 }
 
 .header-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* For screens 600px and narrower, use inline block */
-@media (max-width: 600px) {
-  .header-content {
-    display: inline-block;
-  }
-  .header-logo {
-    display: inline-block;
-  }
+  color: var(--dark_brown);
+  width: 3rem;
+  height: 3rem;
 }
 
 .header-title {
   font-size: 3rem;
-  font-family: "Savate", sans-serif;
-  font-optical-sizing: auto;
+  font-family: var(--heading-font-family);
   color: var(--dark_brown);
+  font-optical-sizing: auto;
+  /* Center the title within the header */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  z-index: 101;
 }
 
 .header-nav {
@@ -59,7 +59,34 @@
 }
 
 .icon-btn:hover {
-  background: white;
+  background: var(--sand);
   border-radius: 50%;
   display: flex;
+}
+
+/* For screens 600px and narrower, use inline block */
+@media (max-width: 600px) {
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    padding: 0.5rem 0;
+    gap: 0.5rem;
+  }
+  .header-logo {
+    order: 1;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .header-title {
+    order: 2;
+    font-size: 2rem;
+    position: static;
+    transform: none;
+  }
+
+  .header-nav {
+    order: 3;
+  }
 }

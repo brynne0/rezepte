@@ -10,18 +10,19 @@ const Header = ({ setSelectedCategory }) => {
       <header className="header">
         <div className="header-container">
           <div className="header-content">
+            <Squirrel className="header-logo" />
+
             {/* Title */}
-            <div
+            <h1
               onClick={() => {
                 navigate("/");
                 setSelectedCategory("Alle Rezepte");
               }}
               style={{ cursor: "pointer" }}
-              className="header-logo"
+              className="header-title"
             >
-              <Squirrel size={50} color="var(--dark_brown)" />
-              <h1 className="header-title">Rezepte</h1>
-            </div>
+              Rezepte
+            </h1>
 
             <nav className="header-nav">
               {/* Grocery List */}
