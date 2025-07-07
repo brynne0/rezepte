@@ -1,16 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Search,
-  ShoppingBasket,
-  ChevronDown,
-  Plus,
-  Squirrel,
-} from "lucide-react";
+import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import "./header.css";
 
-const Header = ({ categories, selectedCategory, setSelectedCategory }) => {
-  const [showDropdown, setShowDropdown] = useState(false);
+const Header = ({ setSelectedCategory }) => {
   const navigate = useNavigate();
 
   return (
@@ -27,46 +19,11 @@ const Header = ({ categories, selectedCategory, setSelectedCategory }) => {
               style={{ cursor: "pointer" }}
               className="header-logo"
             >
-              <Squirrel size={60} color="var(--dark_brown)" />
+              <Squirrel size={50} color="var(--dark_brown)" />
               <h1 className="header-title">Rezepte</h1>
             </div>
 
             <nav className="header-nav">
-              {/* Dropdown menu */}
-              <div className="dropdown">
-                {showDropdown && (
-                  <div
-                    className="dropdown-overlay"
-                    onClick={() => setShowDropdown(false)}
-                  />
-                )}
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="dropdown-toggle"
-                >
-                  {selectedCategory}
-                  <ChevronDown size={"1rem"} className="dropdown-icon" />
-                </button>
-                {showDropdown && (
-                  <div className="dropdown-menu">
-                    <div className="dropdown-list">
-                      {categories.map((category) => (
-                        <button
-                          key={category}
-                          className="dropdown-item"
-                          onClick={() => {
-                            setSelectedCategory(category);
-                            setShowDropdown(false);
-                            navigate("/"); // Go to home page
-                          }}
-                        >
-                          {category}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
               {/* Grocery List */}
               <button className="icon-btn">
                 <ShoppingBasket size={28} />

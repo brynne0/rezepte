@@ -6,6 +6,7 @@ import RecipeList from "./components/RecipeList/RecipeList";
 import Recipe from "./components/recipe/Recipe";
 import { useRecipes } from "./hooks/useRecipes";
 import AddRecipePage from "./pages/AddRecipe/AddRecipePage";
+import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 
 const defaultCategories = [
   "Alle Rezepte",
@@ -27,16 +28,22 @@ function App() {
 
   return (
     <Router>
-      <Header
-        categories={defaultCategories}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
+      <Header setSelectedCategory={setSelectedCategory} />
       <Routes>
         <Route
           path="/"
           element={
-            <RecipeList selectedCategory={selectedCategory} recipes={recipes} />
+            <>
+              <CategoryFilter
+                categories={defaultCategories}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+              />
+              <RecipeList
+                selectedCategory={selectedCategory}
+                recipes={recipes}
+              />
+            </>
           }
         />
         <Route path="/:slug" element={<Recipe />} />
