@@ -3,7 +3,8 @@
   color-scheme: light dark;
   background-color: antiquewhite;
   --dark_brown: rgb(99, 82, 61);
-  --dark_red: rgb(191, 49, 49);
+  --red: rgb(191, 49, 49);
+  --dark_red: rgb(143, 38, 38);
 
   /* Typography */
   font-family: "Noto Sans", sans-serif;
@@ -30,6 +31,7 @@ body {
 button {
   font-size: 1rem;
 }
+
 /* button {
   border-radius: 8px;
   border: 1px solid transparent;

@@ -1,0 +1,8 @@
+.recipe-container {
+  text-align: left;
+}
+
+.recipe-title {
+  color: var(--dark_red);
+  font-weight: 600;
+}

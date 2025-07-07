@@ -1,40 +1,58 @@
 import "./App.css";
-import Recipe from "./components/Recipe";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
-import Header from "./components/header";
-import RecipeList from "./components/RecipeList";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Header from "./components/Header/Header";
+import RecipeList from "./components/RecipeList/RecipeList";
+import Recipe from "./components/recipe/Recipe";
+import { useRecipes } from "./hooks/useRecipes";
+import AddRecipePage from "./pages/AddRecipe/AddRecipePage";
+import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 
-const categories = [
+const defaultCategories = [
   "Alle Rezepte",
   "Backen",
   "Nachtisch",
   "Brunch",
   "Abendessen",
   "Snacks",
-  "GrundRezepte",
+  "Grundrezepte",
 ];
 
 function App() {
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState("Alle Rezepte");
+  const { recipes, loading } = useRecipes();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <>
-      <Router>
-        <Header
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
+    <Router>
+      <Header setSelectedCategory={setSelectedCategory} />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <CategoryFilter
+                categories={defaultCategories}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+              />
+              <RecipeList
+                selectedCategory={selectedCategory}
+                recipes={recipes}
+              />
+            </>
+          }
         />
-        <Routes>
-          <Route
-            path="/"
-            element={<RecipeList selectedCategory={selectedCategory} />}
-          ></Route>
-          <Route path="/:id" element={<Recipe />} />
-        </Routes>
-      </Router>
-    </>
+        <Route path="/:slug" element={<Recipe />} />
+        <Route
+          path="/add-recipe"
+          element={<AddRecipePage categories={defaultCategories} />}
+        />
+      </Routes>
+    </Router>
   );
 }
 
