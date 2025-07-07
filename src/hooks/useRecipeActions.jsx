@@ -1,5 +1,5 @@
 import { useState } from "react";
-import supabase from "../supabaseClient"; // Adjust path as needed
+import supabase from "../supabaseClient";
 
 export const useRecipeActions = () => {
   const [loading, setLoading] = useState(false);
@@ -10,7 +10,7 @@ export const useRecipeActions = () => {
     const trimmedName = ingredientName.trim();
 
     try {
-      // First, try to find existing ingredient
+      // Try to find existing ingredient
       const { data: existingIngredients, error: findError } = await supabase
         .from("ingredients")
         .select("id")
@@ -25,7 +25,7 @@ export const useRecipeActions = () => {
         return existingIngredients[0].id;
       }
 
-      // If not found, create new ingredient
+      // If no ingredient exists, create new ingredient
       const { data: newIngredient, error: createError } = await supabase
         .from("ingredients")
         .insert([{ name: trimmedName }])

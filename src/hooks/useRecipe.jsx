@@ -40,7 +40,7 @@ export const useRecipe = (slug) => {
             })) || [],
         };
 
-        // Remove the nested recipe_ingredients since we've flattened it
+        // Remove the nested recipe_ingredients since it's flattened
         delete transformedData.recipe_ingredients;
 
         setRecipeData(transformedData);

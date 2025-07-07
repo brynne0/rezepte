@@ -50,7 +50,7 @@
   font-size: 16px;
   transition: all 0.2s ease;
   background: white;
-  color: #000;
+  color: rgb(117, 117, 117);
 }
 
 .form-input:focus,
@@ -193,7 +193,7 @@
 
 .step-number {
   font-weight: 600;
-  color: var(--dark_red);
+  color: var(--dark_brown);
   font-size: 16px;
   margin-top: 4px;
 }
