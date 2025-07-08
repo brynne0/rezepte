@@ -97,6 +97,34 @@ const AddRecipePage = ({ categories }) => {
     }));
   };
 
+  function handleEnter(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+
+      // Find next textarea or create new instruction
+      const current = event.target;
+      const allTextareas = [
+        ...document.querySelectorAll(".instruction-textarea"),
+      ];
+      const currentIndex = allTextareas.indexOf(current);
+      const nextTextarea = allTextareas[currentIndex + 1];
+
+      if (nextTextarea) {
+        nextTextarea.focus();
+      } else {
+        // Call your existing addNewInstruction function
+        addInstruction();
+        // Focus the new textarea after it's created
+        setTimeout(() => {
+          const newTextareas = document.querySelectorAll(
+            ".instruction-textarea"
+          );
+          newTextareas[newTextareas.length - 1].focus();
+        }, 10);
+      }
+    }
+  }
+
   const validateForm = () => {
     const errors = {};
 
@@ -205,7 +233,7 @@ const AddRecipePage = ({ categories }) => {
                 validationErrors.category ? "error" : ""
               }`}
             >
-              <option value="" disabled>
+              <option value="" disabled selected>
                 Select a category
               </option>
               {categories
@@ -392,6 +420,7 @@ const AddRecipePage = ({ categories }) => {
                     className="instruction-textarea"
                     placeholder={`Step ${index + 1} instructions...`}
                     rows="2"
+                    onKeyDown={handleEnter}
                   />
                   {formData.instructions.length > 1 && (
                     <button

@@ -5,10 +5,11 @@
   --cream: #ede1c5;
   --sand: rgba(255, 255, 255, 0.6);
   --light_brown: #523f19bf;
-  --dark_brown: #534019;
+  --brown: #534019;
+  --dark_brown: #423314;
   --red: #933c1f;
   --dark_red: #7e341b;
-  --error_red: ef4444;
+  --error_red: #ef4444;
   --pink: #fee2e2;
 
   background-color: var(--cream);

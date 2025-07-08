@@ -1,17 +1,14 @@
 .categories {
-  position: relative;
-}
-
-.category-list {
   padding-bottom: 1rem;
   overflow-x: auto;
   display: block;
   flex-flow: row nowrap;
+  position: relative;
 }
 
 .category-item {
   padding: 0.5rem 1rem;
-  color: var(--dark_brown);
+  color: var(--brown);
   background: none;
   border: none;
   cursor: pointer;

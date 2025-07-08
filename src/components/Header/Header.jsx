@@ -8,40 +8,38 @@ const Header = ({ setSelectedCategory }) => {
   return (
     <>
       <header className="header">
-        <div className="header-container">
-          <div className="header-content">
-            <Squirrel className="header-logo" />
+        <div className="header-content">
+          <Squirrel className="header-logo" />
 
-            {/* Title */}
-            <h1
-              onClick={() => {
-                navigate("/");
-                setSelectedCategory("Alle Rezepte");
-              }}
-              style={{ cursor: "pointer" }}
-              className="header-title"
+          {/* Title */}
+          <h1
+            onClick={() => {
+              navigate("/");
+              setSelectedCategory("Alle Rezepte");
+            }}
+            style={{ cursor: "pointer" }}
+            className="header-title"
+          >
+            Rezepte
+          </h1>
+
+          <nav className="header-nav">
+            {/* Grocery List */}
+            <button className="icon-btn">
+              <ShoppingBasket size={28} />
+            </button>
+            {/* Plus Recipe */}
+            <button
+              onClick={() => navigate("/add-recipe")}
+              className="icon-btn"
             >
-              Rezepte
-            </h1>
-
-            <nav className="header-nav">
-              {/* Grocery List */}
-              <button className="icon-btn">
-                <ShoppingBasket size={28} />
-              </button>
-              {/* Plus Recipe */}
-              <button
-                onClick={() => navigate("/add-recipe")}
-                className="icon-btn"
-              >
-                <Plus size={28} />
-              </button>
-              {/* Search Recipe */}
-              <button className="icon-btn">
-                <Search size={28} />
-              </button>
-            </nav>
-          </div>
+              <Plus size={28} />
+            </button>
+            {/* Search Recipe */}
+            <button className="icon-btn">
+              <Search size={28} />
+            </button>
+          </nav>
         </div>
       </header>
     </>
