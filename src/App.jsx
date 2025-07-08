@@ -23,6 +23,7 @@ function App() {
   const { recipes, loading } = useRecipes();
 
   if (loading) {
+    // TODO - add a loading animation only if a certain amount of time has passed
     return <div>Loading...</div>;
   }
 

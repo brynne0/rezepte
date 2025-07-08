@@ -26,6 +26,14 @@ const AddRecipePage = ({ categories }) => {
     ],
   });
 
+  const toTitleCase = (str) => {
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   const [validationErrors, setValidationErrors] = useState({});
 
   const handleInputChange = (field, value) => {
@@ -194,6 +202,23 @@ const AddRecipePage = ({ categories }) => {
     navigate(-1); // Go back to previous page
   };
 
+  const unitOptions = [
+    { value: "", label: "Unit", disabled: true },
+    { value: "tsp", label: "tsp" },
+    { value: "tbsp", label: "tbsp" },
+    { value: "cup", label: "cup" },
+    { value: "cups", label: "cups" },
+    { value: "ml", label: "ml" },
+    { value: "g", label: "g" },
+    { value: "kg", label: "kg" },
+    { value: "can", label: "can" },
+    { value: "cans", label: "cans" },
+    { value: "piece", label: "piece" },
+    { value: "pieces", label: "pieces" },
+    { value: "clove", label: "clove" },
+    { value: "cloves", label: "cloves" },
+  ];
+
   return (
     <div className="add-recipe-page">
       <div className="add-recipe-container">
@@ -212,9 +237,11 @@ const AddRecipePage = ({ categories }) => {
               id="title"
               type="text"
               value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("title", toTitleCase(e.target.value))
+              }
               className={`form-input ${validationErrors.title ? "error" : ""}`}
-              placeholder="Enter recipe title"
+              // placeholder="Enter recipe title"
             />
             {validationErrors.title && (
               <span className="field-error">{validationErrors.title}</span>
@@ -260,7 +287,7 @@ const AddRecipePage = ({ categories }) => {
               value={formData.servings}
               onChange={(e) => handleInputChange("servings", e.target.value)}
               className="form-input"
-              placeholder="Number of servings"
+              // placeholder="Number of servings"
             />
           </div>
 
@@ -274,7 +301,7 @@ const AddRecipePage = ({ categories }) => {
               value={formData.image_url}
               onChange={(e) => handleInputChange("image_url", e.target.value)}
               className="form-input"
-              placeholder="https://example.com/image.jpg"
+              // placeholder="https://example.com/image.jpg"
             />
           </div>
 
@@ -303,7 +330,7 @@ const AddRecipePage = ({ categories }) => {
                       handleIngredientChange(
                         ingredient.tempId,
                         "name",
-                        e.target.value
+                        e.target.value.toLowerCase()
                       )
                     }
                     className="ingredient-name"
@@ -313,7 +340,7 @@ const AddRecipePage = ({ categories }) => {
                     id={`ingredient-quantity-${ingredient.tempId}`}
                     type="number"
                     min="0"
-                    step="0.1"
+                    step="0.01"
                     value={ingredient.quantity}
                     onChange={(e) =>
                       handleIngredientChange(
@@ -339,27 +366,15 @@ const AddRecipePage = ({ categories }) => {
                       validationErrors.unit ? "error" : ""
                     }`}
                   >
-                    <option value="" disabled>
-                      Unit
-                    </option>
-                    <option key="tsp" value="tsp">
-                      tsp
-                    </option>
-                    <option key="tbsp" value="tbsp">
-                      tbsp
-                    </option>
-                    <option key="cup" value="cup">
-                      cup
-                    </option>
-                    <option key="ml" value="ml">
-                      ml
-                    </option>
-                    <option key="g" value="g">
-                      g
-                    </option>
-                    <option key="kg" value="kg">
-                      kg
-                    </option>
+                    {unitOptions.map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
 
                   <input
@@ -418,7 +433,7 @@ const AddRecipePage = ({ categories }) => {
                       handleInstructionChange(index, e.target.value)
                     }
                     className="instruction-textarea"
-                    placeholder={`Step ${index + 1} instructions...`}
+                    // placeholder={`Step ${index + 1} instructions...`}
                     rows="2"
                     onKeyDown={handleEnter}
                   />

@@ -16,6 +16,7 @@ const Header = ({ setSelectedCategory }) => {
             onClick={() => {
               navigate("/");
               setSelectedCategory("Alle Rezepte");
+              window.location.reload();
             }}
             style={{ cursor: "pointer" }}
             className="header-title"

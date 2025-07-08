@@ -2,6 +2,18 @@
   text-align: left;
 }
 
+.recipe-container h1,
+.recipe-container h3 {
+  margin-top: 0em;
+  margin-bottom: 0em;
+  padding: 0;
+}
+
+.recipe-container ul,
+.recipe-container ol {
+  margin-top: 0.5em;
+}
+
 .recipe-title {
   color: var(--dark_red);
   font-weight: 600;
