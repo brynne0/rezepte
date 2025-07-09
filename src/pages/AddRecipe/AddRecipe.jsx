@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "../../hooks/useRecipeActions";
 import { X } from "lucide-react";
 
-import "./AddRecipePage.css";
+import "./AddRecipe.css";
 
 const AddRecipePage = ({ categories }) => {
   const navigate = useNavigate();

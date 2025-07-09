@@ -12,9 +12,33 @@
 .recipe-container ul,
 .recipe-container ol {
   margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.recipe-heading {
+  color: var(--dark_red);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .recipe-title {
-  color: var(--dark_red);
   font-weight: 600;
+  font-family: forta;
+}
+
+.edit-btn,
+.cart-btn {
+  color: var(--dark_red);
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color 0.2s, transform 0.2s;
+  padding: 0;
+  display: flex;
+}
+
+.cart-btn:hover,
+.edit-btn:hover {
+  transform: translateY(-3px);
 }
