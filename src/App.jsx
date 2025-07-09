@@ -7,6 +7,7 @@ import Recipe from "./components/recipe/Recipe";
 import { useRecipes } from "./hooks/useRecipes";
 import AddRecipePage from "./pages/AddRecipe/AddRecipePage";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
+import { Squirrel } from "lucide-react";
 
 const defaultCategories = [
   "Alle Rezepte",
@@ -22,9 +23,13 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState("Alle Rezepte");
   const { recipes, loading } = useRecipes();
 
+  // Show loading screen
   if (loading) {
-    // TODO - add a loading animation only if a certain amount of time has passed
-    return <div>Loading...</div>;
+    return (
+      <div className={"loading-animation"}>
+        <Squirrel />
+      </div>
+    );
   }
 
   return (
