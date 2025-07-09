@@ -19,7 +19,7 @@ const Recipe = () => {
         <button
           className="edit-btn"
           onClick={() => {
-            navigate("/edit-recipe");
+            navigate(`/edit-recipe/${recipe.slug}`);
           }}
         >
           <Pencil />

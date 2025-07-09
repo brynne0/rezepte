@@ -59,7 +59,7 @@ function App() {
           element={<AddRecipePage categories={defaultCategories} />}
         />
         <Route
-          path="/edit-recipe"
+          path="/edit-recipe/:slug"
           element={<EditRecipePage categories={defaultCategories} />}
         />
       </Routes>

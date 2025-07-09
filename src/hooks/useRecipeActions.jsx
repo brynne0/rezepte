@@ -46,23 +46,94 @@ export const useRecipeActions = () => {
     }
   };
 
+  // Get a single recipe by slug with its ingredients
+  const getRecipe = async (slug) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // First, get the recipe by slug
+      const { data: recipe, error: recipeError } = await supabase
+        .from("recipes")
+        .select("*")
+        .eq("slug", slug)
+        .single();
+
+      if (recipeError) {
+        if (recipeError.code === "PGRST116") {
+          throw new Error("Recipe not found");
+        }
+        throw new Error(recipeError.message);
+      }
+
+      // Then get the recipe ingredients with ingredient details
+      const { data: recipeIngredients, error: ingredientsError } =
+        await supabase
+          .from("recipe_ingredients")
+          .select(
+            `
+          id,
+          quantity,
+          unit,
+          notes,
+          ingredients (
+            id,
+            name
+          )
+        `
+          )
+          .eq("recipe_id", recipe.id);
+
+      if (ingredientsError) {
+        throw new Error(
+          `Failed to fetch ingredients: ${ingredientsError.message}`
+        );
+      }
+
+      // Format the ingredients to match your form structure
+      const formattedIngredients =
+        recipeIngredients?.map((ri) => ({
+          tempId: ri.id || Date.now() + Math.random(),
+          ingredient_id: ri.ingredients.id,
+          name: ri.ingredients.name,
+          quantity: ri.quantity,
+          unit: ri.unit,
+          notes: ri.notes,
+        })) || [];
+
+      // Return the recipe with formatted ingredients
+      return {
+        ...recipe,
+        ingredients: formattedIngredients,
+      };
+    } catch (err) {
+      const errorMessage = err.message || "Failed to fetch recipe";
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const createRecipe = async (recipeData) => {
     setLoading(true);
     setError(null);
 
     try {
       // Create the main recipe record
+      const cleanRecipeData = Object.fromEntries(
+        Object.entries({
+          title: recipeData.title,
+          category: recipeData.category,
+          servings: recipeData.servings,
+          instructions: recipeData.instructions,
+          image_url: recipeData.image_url,
+        }).filter(([, v]) => v !== undefined)
+      );
+
       const { data: recipe, error: recipeError } = await supabase
         .from("recipes")
-        .insert([
-          {
-            title: recipeData.title,
-            category: recipeData.category,
-            servings: recipeData.servings,
-            instructions: recipeData.instructions,
-            image_url: recipeData.image_url,
-          },
-        ])
+        .insert([cleanRecipeData])
         .select()
         .single();
 
@@ -124,16 +195,19 @@ export const useRecipeActions = () => {
     setError(null);
 
     try {
-      // Update the main recipe record
-      const { data: recipe, error: recipeError } = await supabase
-        .from("recipes")
-        .update({
+      const cleanRecipeData = Object.fromEntries(
+        Object.entries({
           title: recipeData.title,
           category: recipeData.category,
           servings: recipeData.servings,
           instructions: recipeData.instructions,
           image_url: recipeData.image_url,
-        })
+        }).filter(([, v]) => v !== undefined)
+      );
+
+      const { data: recipe, error: recipeError } = await supabase
+        .from("recipes")
+        .update(cleanRecipeData)
         .eq("id", id)
         .select()
         .single();
@@ -242,6 +316,7 @@ export const useRecipeActions = () => {
   };
 
   return {
+    getRecipe,
     createRecipe,
     updateRecipe,
     deleteRecipe,
