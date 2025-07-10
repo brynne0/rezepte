@@ -77,10 +77,11 @@ export const useRecipeForm = (initialRecipe = null) => {
       .join(" ");
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field, value, clearError = false) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (validationErrors[field]) {
-      setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+
+    if (clearError) {
+      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 

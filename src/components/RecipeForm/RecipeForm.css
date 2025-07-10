@@ -11,6 +11,17 @@
   padding: 0 3rem 3rem 3rem;
 }
 
+.page-header {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.back_arrow {
+  color: var(--dark_brown);
+}
+
 /* Headers */
 .page-header h1 {
   padding: 1rem;
@@ -24,7 +35,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
@@ -36,7 +47,7 @@
 
 /* Input boxes */
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .form-input {
@@ -84,7 +95,7 @@
 .field-error {
   display: block;
   color: var(--error_red);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   margin-top: 0.25rem;
   font-weight: 500;
 }
@@ -114,7 +125,7 @@
     minmax(60px, 1fr) /* quantity */
     minmax(80px, 1fr) /* unit */
     minmax(100px, 2fr) /* notes */
-    2.5rem;
+    auto;
 }
 
 .ingredient-name,
@@ -124,7 +135,7 @@
   padding: 0.5rem 0.75rem;
   border: 0.1rem solid var(--cream);
   border-radius: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   background: white;
   transition: border-color 0.2s ease;
   color: var(--dark_brown);
@@ -163,7 +174,7 @@
 .ingredient-row .form-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .instructions-list {
@@ -188,9 +199,9 @@
 
 .instruction-textarea {
   padding: 0.5rem 0.75rem;
-  border: 0.0625rem solid #d1d5db;
+  border: 0.0625rem solid var(--cream);
   border-radius: 0.375rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   background: white;
   transition: border-color 0.2s ease;
   color: var(--dark_brown);
@@ -205,30 +216,37 @@
   border-color: var(--dark_red);
 }
 
-/* Submit or Cancel */
+/* Buttons */
 .form-actions {
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
 }
 
-/* Buttons */
-.primary-btn {
+.form-actions button:first-child {
+  margin-right: auto;
+}
+
+.primary-btn,
+.cancel-btn,
+.delete-btn {
   padding: 0.75rem 1.5rem;
-  background: var(--brown);
-  color: white;
-  border: none;
   border-radius: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  border: none;
+}
+
+/* Primary Button */
+.primary-btn {
+  background: var(--brown);
+  color: white;
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
 }
 
 .primary-btn:hover:not(:disabled) {
-  background: var(--dark_red);
-  transform: translateY(-0.0625rem);
+  background: var(--light_brown);
   box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
 }
 
@@ -239,43 +257,34 @@
   box-shadow: none;
 }
 
-.secondary-btn {
-  padding: 0.75rem 1.5rem;
+/* Cancel Button */
+.cancel-btn {
   background: white;
+  color: var(--light_brown);
+  border: 0.125rem solid var(--light_brown);
+}
+
+.cancel-btn:hover {
   color: var(--brown);
-  border: 0.125rem solid #e5e7eb;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  border-color: var(--brown);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
 }
 
-.secondary-btn:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  color: #374151;
+/* Delete Button */
+.delete-btn {
+  background: white;
+  color: var(--red);
+  border: 0.125rem solid var(--red);
 }
 
-.add-btn {
-  padding: 0.5rem 1rem;
-  background: rgb(42, 144, 93);
+.delete-btn:hover {
+  background: var(--red);
   color: white;
-  border: none;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
 }
 
-.add-btn:hover {
-  background: #059669;
-  transform: translateY(-0.0625rem);
-}
-
-.remove-btn {
-  color: var(--error_red);
+.remove-btn,
+.add-btn {
   cursor: pointer;
   background: none;
   border: none;
@@ -284,7 +293,16 @@
   display: flex;
 }
 
-.remove-btn :hover {
+.remove-btn {
+  color: var(--error_red);
+}
+
+.add-btn {
+  color: var(--green);
+}
+
+.remove-btn:hover,
+.add-btn:hover {
   transform: translateY(-1px);
 }
 
@@ -302,14 +320,27 @@
     font-size: 1.5rem;
   }
 
+  .page-header {
+    padding: 0;
+  }
+
   .recipe-form {
     padding: 1.25rem;
+  }
+
+  .ingredients-header,
+  .instructions-header {
+    margin-bottom: 0rem;
   }
 
   .ingredient-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
     padding: 0.75rem;
+  }
+
+  .ingredient-row:not(:only-child) {
+    grid-template-columns: 1fr;
   }
 
   .ingredient-row .remove-btn {
@@ -322,19 +353,27 @@
   .ingredient-quantity,
   .ingredient-unit,
   .ingredient-notes {
-    font-size: 0.8125rem;
+    font-size: 0.8rem;
     font-family: inherit;
     padding: 0.5rem 0.625rem;
   }
 
+  .ingredient-row .form-input {
+    font-size: 0.8rem;
+  }
+
+  .form-input {
+    font-size: 0.8rem;
+  }
+
   .instruction-row {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
     gap: 0.5rem;
   }
 
   .instruction-row .remove-btn {
     grid-row: 1;
-    grid-column: 2;
+    grid-column: 3;
     justify-self: end;
     width: 1.75rem;
     height: 1.75rem;
@@ -344,23 +383,14 @@
     flex-direction: column-reverse;
   }
 
-  .secondary-btn,
-  .primary-btn {
-    padding: 0.875rem 1.25rem;
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 30rem) {
-  .ingredients-header,
-  .instructions-header {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: flex-start;
+  .form-actions button:first-child {
+    margin-right: 0;
   }
 
-  .add-btn {
-    align-self: stretch;
-    text-align: center;
+  .cancel-btn,
+  .primary-btn,
+  .delete-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
   }
 }

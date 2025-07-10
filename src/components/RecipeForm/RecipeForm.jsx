@@ -1,6 +1,7 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
 import "./RecipeForm.css";
+import { useRecipeActions } from "../../hooks/useRecipeActions";
 
 const RecipeForm = ({
   categories,
@@ -25,6 +26,7 @@ const RecipeForm = ({
     handleCancel,
     toTitleCase,
   } = useRecipeForm(initialRecipe);
+  const { handleDelete } = useRecipeActions();
 
   const unitOptions = [
     { value: "", label: "Unit", disabled: true },
@@ -46,6 +48,13 @@ const RecipeForm = ({
   return (
     <div className="recipe-form-container">
       <header className="page-header">
+        <ArrowBigLeft
+          className="back-arrow"
+          size={30}
+          onClick={() => {
+            handleCancel();
+          }}
+        />
         <h1>{title}</h1>
       </header>
 
@@ -136,7 +145,7 @@ const RecipeForm = ({
           <div className="ingredients-header">
             <label className="form-header">Ingredients</label>
             <button type="button" onClick={addIngredient} className="add-btn">
-              + Add Ingredient
+              <Plus size={16} />
             </button>
           </div>
 
@@ -160,9 +169,9 @@ const RecipeForm = ({
                     )
                   }
                   className="ingredient-name"
-                  placeholder="Ingredient name (lowercase)"
+                  placeholder="Ingredient name"
                 />
-                {/* Ingredient Qunaitity */}
+                {/* Ingredient Quantity */}
                 <input
                   id={`ingredient-quantity-${ingredient.tempId}`}
                   type="number"
@@ -182,7 +191,6 @@ const RecipeForm = ({
                     e.target.blur();
                   }}
                 />
-
                 {/* Ingredient Unit */}
                 <select
                   id={`ingredient-unit-${ingredient.tempId}`}
@@ -243,7 +251,7 @@ const RecipeForm = ({
           <div className="instructions-header">
             <label className="form-header">Instructions</label>
             <button type="button" onClick={addInstruction} className="add-btn">
-              + Add Step
+              <Plus size={16} />
             </button>
           </div>
 
@@ -279,12 +287,28 @@ const RecipeForm = ({
         </div>
 
         <div className="form-actions">
+          {/* Delete Button */}
+          {isEditMode && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to delete this recipe?"
+                    )
+                  ) {
+                    handleDelete();
+                  }
+                }}
+                className="delete-btn"
+              >
+                Delete Recipe
+              </button>
+            </>
+          )}
           {/* Cancel Button */}
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="secondary-btn"
-          >
+          <button type="button" onClick={handleCancel} className="cancel-btn">
             Cancel
           </button>
           {/* Submit button */}

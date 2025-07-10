@@ -11,6 +11,7 @@
   --dark_red: #7e341b;
   --error_red: #ef4444;
   --pink: #fee2e2;
+  --green: rgb(42, 144, 93);
 
   background-color: var(--cream);
   color-scheme: light dark;
