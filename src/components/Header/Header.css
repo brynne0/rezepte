@@ -10,10 +10,10 @@
 
 .header-content {
   display: flex;
-  justify-content: space-between; /* or space-evenly */
+  justify-content: space-between;
   align-items: center;
   height: 4rem;
-  position: relative; /* Add this for proper positioning context */
+  position: relative;
 }
 
 .header-logo {
@@ -26,14 +26,15 @@
   font-size: 3rem;
   font-family: var(--heading-font-family);
   color: var(--brown);
-  font-optical-sizing: auto;
-  /* Center the title within the header */
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0;
+  inset: 0;
+  margin: auto;
+  width: max-content;
+  height: max-content;
   z-index: 101;
+  cursor: pointer;
+  font-optical-sizing: auto;
+  transform: none;
 }
 
 .header-nav {
@@ -59,7 +60,7 @@
   display: flex;
 }
 
-/* For screens 600px and narrower, use inline block */
+/* Responsive Design */
 @media (max-width: 600px) {
   .header-content {
     display: flex;

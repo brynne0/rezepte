@@ -1,18 +1,22 @@
 .recipe-container {
   text-align: left;
 }
+.recipe-container h1 {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+}
 
-.recipe-container h1,
 .recipe-container h3 {
-  margin-top: 0em;
-  margin-bottom: 0em;
+  margin-top: 1rem;
+  margin-bottom: 0;
   padding: 0;
 }
 
 .recipe-container ul,
 .recipe-container ol {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .recipe-heading {
@@ -20,11 +24,25 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.recipe-title {
   font-weight: 600;
   font-family: forta;
+}
+.servings {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.ingredient-list {
+  padding: 0;
+  list-style: none;
+}
+
+.ingredient {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .edit-btn,

@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import "./CategoryFilter.css";
 
 const CategoryFilter = ({
@@ -6,8 +5,6 @@ const CategoryFilter = ({
   selectedCategory,
   setSelectedCategory,
 }) => {
-  const navigate = useNavigate();
-
   return (
     <div className="categories">
       {categories.map((category) => (
@@ -17,11 +14,7 @@ const CategoryFilter = ({
             category === selectedCategory ? " selected" : ""
           }`}
           onClick={() => {
-            // Don't refresh if current category already selected
-            if (category !== selectedCategory) {
-              setSelectedCategory(category);
-              navigate("/"); // Go to home page
-            }
+            setSelectedCategory(category);
           }}
         >
           {category}

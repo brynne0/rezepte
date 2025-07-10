@@ -1,6 +1,6 @@
+import "./header.css";
 import { useNavigate } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
-import "./header.css";
 
 const Header = ({ setSelectedCategory }) => {
   const navigate = useNavigate();
@@ -18,7 +18,6 @@ const Header = ({ setSelectedCategory }) => {
               setSelectedCategory("Alle Rezepte");
               window.location.reload();
             }}
-            style={{ cursor: "pointer" }}
             className="header-title"
           >
             Rezepte
@@ -31,8 +30,8 @@ const Header = ({ setSelectedCategory }) => {
             </button>
             {/* Plus Recipe */}
             <button
-              onClick={() => navigate("/add-recipe")}
               className="icon-btn"
+              onClick={() => navigate("/add-recipe")}
             >
               <Plus size={28} />
             </button>

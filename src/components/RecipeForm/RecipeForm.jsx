@@ -1,6 +1,4 @@
-import React from "react";
 import { Trash2 } from "lucide-react";
-
 import { useRecipeForm } from "../../hooks/UseRecipeForm";
 import "./RecipeForm.css";
 
@@ -54,6 +52,7 @@ const RecipeForm = ({
       <form onSubmit={handleSubmit} className="recipe-form">
         {error && <div className="error-message">{error}</div>}
 
+        {/* Recipe Title */}
         <div className="form-group">
           <label htmlFor="title" className="form-header">
             Recipe Title
@@ -72,6 +71,7 @@ const RecipeForm = ({
           )}
         </div>
 
+        {/* Category */}
         <div className="form-group">
           <label htmlFor="category" className="form-header">
             Category
@@ -98,6 +98,7 @@ const RecipeForm = ({
           )}
         </div>
 
+        {/* Servings */}
         <div className="form-group">
           <label htmlFor="servings" className="form-header">
             Servings
@@ -115,6 +116,7 @@ const RecipeForm = ({
           />
         </div>
 
+        {/* Source */}
         <div className="form-group">
           <label htmlFor="source" className="form-header">
             Source
@@ -129,6 +131,7 @@ const RecipeForm = ({
           />
         </div>
 
+        {/* Ingredients */}
         <div className="form-group">
           <div className="ingredients-header">
             <label className="form-header">Ingredients</label>
@@ -144,6 +147,7 @@ const RecipeForm = ({
           <div className="ingredients-list">
             {formData.ingredients.map((ingredient) => (
               <div key={ingredient.tempId} className="ingredient-row">
+                {/* Ingredient Name */}
                 <input
                   id={`ingredient-name-${ingredient.tempId}`}
                   type="text"
@@ -156,8 +160,9 @@ const RecipeForm = ({
                     )
                   }
                   className="ingredient-name"
-                  placeholder="Ingredient name"
+                  placeholder="Ingredient name (lowercase)"
                 />
+                {/* Ingredient Qunaitity */}
                 <input
                   id={`ingredient-quantity-${ingredient.tempId}`}
                   type="number"
@@ -178,6 +183,7 @@ const RecipeForm = ({
                   }}
                 />
 
+                {/* Ingredient Unit */}
                 <select
                   id={`ingredient-unit-${ingredient.tempId}`}
                   value={ingredient.unit}
@@ -203,6 +209,7 @@ const RecipeForm = ({
                   ))}
                 </select>
 
+                {/* Ingredient Notes */}
                 <input
                   id={`ingredient-notes-${ingredient.tempId}`}
                   type="text"
@@ -231,6 +238,7 @@ const RecipeForm = ({
           </div>
         </div>
 
+        {/* Instructions */}
         <div className="form-group">
           <div className="instructions-header">
             <label className="form-header">Instructions</label>
@@ -271,6 +279,7 @@ const RecipeForm = ({
         </div>
 
         <div className="form-actions">
+          {/* Cancel Button */}
           <button
             type="button"
             onClick={handleCancel}
@@ -278,6 +287,7 @@ const RecipeForm = ({
           >
             Cancel
           </button>
+          {/* Submit button */}
           <button type="submit" disabled={loading} className="primary-btn">
             {loading
               ? isEditMode

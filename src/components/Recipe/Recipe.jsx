@@ -15,7 +15,8 @@ const Recipe = () => {
   return (
     <div className="recipe-container">
       <div className="recipe-heading">
-        <h1 className="recipe-title">{recipe.title}</h1>
+        <h1>{recipe.title}</h1>
+        {/* TODO - Show edit button only when logged in  */}
         <button
           className="edit-btn"
           onClick={() => {
@@ -26,20 +27,17 @@ const Recipe = () => {
         </button>
       </div>
       {recipe.servings && (
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5em" }}>
+        <div className="servings">
           <h3>Servings:</h3>
-          <p>{recipe.servings}</p>
+          {recipe.servings}
         </div>
       )}
-      {recipe.ingredients && recipe.ingredients.length > 0 && (
+      {recipe.ingredients && (
         <>
           <h3>Ingredients:</h3>
-          <ul style={{ listStyle: "none", padding: 0 }}>
+          <ul className="ingredient-list">
             {recipe.ingredients.map((ingredient) => (
-              <li
-                key={ingredient.id}
-                style={{ display: "flex", alignItems: "center", gap: "0.5em" }}
-              >
+              <li key={ingredient.id} className="ingredient">
                 <input type="checkbox" id={`ingredient-${ingredient.id}`} />
                 <label htmlFor={`ingredient-${ingredient.id}`}>
                   {ingredient.quantity && `${ingredient.quantity} `}
@@ -53,7 +51,6 @@ const Recipe = () => {
       )}
 
       <button className="cart-btn">
-        {/* TODO - add a counter in the top right of the icon to keep trcak of how many items in cart */}
         <ShoppingBasket size={28} />
       </button>
 
