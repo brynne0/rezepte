@@ -1,13 +1,8 @@
 import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
 import "./RecipeForm.css";
-import { useRecipeActions } from "../../hooks/useRecipeActions";
 
-const RecipeForm = ({
-  categories,
-  initialRecipe = null,
-  title = "Add New Recipe",
-}) => {
+const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const {
     formData,
     validationErrors,
@@ -24,9 +19,9 @@ const RecipeForm = ({
     handleEnter,
     handleSubmit,
     handleCancel,
+    handleDelete,
     toTitleCase,
   } = useRecipeForm(initialRecipe);
-  const { handleDelete } = useRecipeActions();
 
   const unitOptions = [
     { value: "", label: "Unit", disabled: true },
@@ -294,6 +289,7 @@ const RecipeForm = ({
                 type="button"
                 onClick={() => {
                   if (
+                    // TODO - change this to a popup
                     window.confirm(
                       "Are you sure you want to delete this recipe?"
                     )

@@ -4,7 +4,8 @@ import { useRecipeActions } from "./useRecipeActions";
 
 export const useRecipeForm = (initialRecipe = null) => {
   const navigate = useNavigate();
-  const { createRecipe, updateRecipe, loading, error } = useRecipeActions();
+  const { createRecipe, updateRecipe, deleteRecipe, loading, error } =
+    useRecipeActions();
 
   const getInitialFormData = useCallback(() => {
     if (initialRecipe) {
@@ -247,6 +248,17 @@ export const useRecipeForm = (initialRecipe = null) => {
     navigate(-1);
   };
 
+  const handleDelete = async () => {
+    if (!initialRecipe) return;
+    try {
+      await deleteRecipe(initialRecipe.id);
+      navigate("/");
+      window.location.reload();
+    } catch (err) {
+      console.error("Failed to delete recipe:", err);
+    }
+  };
+
   return {
     formData,
     validationErrors,
@@ -263,6 +275,7 @@ export const useRecipeForm = (initialRecipe = null) => {
     handleEnter,
     handleSubmit,
     handleCancel,
+    handleDelete,
     toTitleCase,
   };
 };
