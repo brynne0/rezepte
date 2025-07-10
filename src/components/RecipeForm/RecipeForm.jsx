@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import { useRecipeForm } from "../../hooks/UseRecipeForm";
+import { useRecipeForm } from "../../hooks/useRecipeForm";
 import "./RecipeForm.css";
 
 const RecipeForm = ({

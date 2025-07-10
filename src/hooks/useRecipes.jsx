@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import supabase from "../supabaseClient";
 
+// Fetch all recipes
 export const useRecipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);

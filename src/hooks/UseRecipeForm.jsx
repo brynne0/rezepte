@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRecipeActions } from "../hooks/useRecipeActions";
+import { useRecipeActions } from "./useRecipeActions";
 
 export const useRecipeForm = (initialRecipe = null) => {
   const navigate = useNavigate();
   const { createRecipe, updateRecipe, loading, error } = useRecipeActions();
 
-  const getInitialFormData = () => {
+  const getInitialFormData = useCallback(() => {
     if (initialRecipe) {
       return {
         title: initialRecipe.title || "",
@@ -57,7 +57,7 @@ export const useRecipeForm = (initialRecipe = null) => {
         },
       ],
     };
-  };
+  }, [initialRecipe]);
 
   const [formData, setFormData] = useState(getInitialFormData);
   const [validationErrors, setValidationErrors] = useState({});
@@ -67,7 +67,7 @@ export const useRecipeForm = (initialRecipe = null) => {
     if (initialRecipe) {
       setFormData(getInitialFormData());
     }
-  }, [initialRecipe]);
+  }, [initialRecipe, getInitialFormData]);
 
   const toTitleCase = (str) => {
     return str

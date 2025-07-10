@@ -1,6 +1,7 @@
 import { useState } from "react";
 import supabase from "../supabaseClient";
 
+// Hooks for manual CRUD operations
 export const useRecipeActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -43,75 +44,6 @@ export const useRecipeActions = () => {
         error
       );
       throw error;
-    }
-  };
-
-  // Get a single recipe by slug with its ingredients
-  const getRecipe = async (slug) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // First, get the recipe by slug
-      const { data: recipe, error: recipeError } = await supabase
-        .from("recipes")
-        .select("*")
-        .eq("slug", slug)
-        .single();
-
-      if (recipeError) {
-        if (recipeError.code === "PGRST116") {
-          throw new Error("Recipe not found");
-        }
-        throw new Error(recipeError.message);
-      }
-
-      // Then get the recipe ingredients with ingredient details
-      const { data: recipeIngredients, error: ingredientsError } =
-        await supabase
-          .from("recipe_ingredients")
-          .select(
-            `
-          id,
-          quantity,
-          unit,
-          notes,
-          ingredients (
-            id,
-            name
-          )
-        `
-          )
-          .eq("recipe_id", recipe.id);
-
-      if (ingredientsError) {
-        throw new Error(
-          `Failed to fetch ingredients: ${ingredientsError.message}`
-        );
-      }
-
-      // Format the ingredients to match your form structure
-      const formattedIngredients =
-        recipeIngredients?.map((ri) => ({
-          tempId: ri.id || Date.now() + Math.random(),
-          ingredient_id: ri.ingredients.id,
-          name: ri.ingredients.name,
-          quantity: ri.quantity,
-          unit: ri.unit,
-          notes: ri.notes,
-        })) || [];
-
-      // Return the recipe with formatted ingredients
-      return {
-        ...recipe,
-        ingredients: formattedIngredients,
-      };
-    } catch (err) {
-      const errorMessage = err.message || "Failed to fetch recipe";
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -315,12 +247,14 @@ export const useRecipeActions = () => {
     }
   };
 
+  const clearError = () => setError(null);
+
   return {
-    getRecipe,
     createRecipe,
     updateRecipe,
     deleteRecipe,
     loading,
     error,
+    clearError,
   };
 };
