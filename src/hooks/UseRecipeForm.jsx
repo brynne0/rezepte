@@ -16,7 +16,7 @@ export const useRecipeForm = (initialRecipe = null) => {
           initialRecipe.instructions?.length > 0
             ? initialRecipe.instructions
             : [""],
-        image_url: initialRecipe.image_url || "",
+        source: initialRecipe.source || "",
         ingredients:
           initialRecipe.ingredients?.length > 0
             ? initialRecipe.ingredients.map((ing) => ({
@@ -45,7 +45,7 @@ export const useRecipeForm = (initialRecipe = null) => {
       category: "",
       servings: "",
       instructions: [""],
-      image_url: "",
+      source: "",
       ingredients: [
         {
           tempId: Date.now() + Math.random(),
@@ -215,7 +215,7 @@ export const useRecipeForm = (initialRecipe = null) => {
         category: formData.category.trim(),
         servings: formData.servings ? parseInt(formData.servings) : null,
         instructions: validInstructions,
-        image_url: formData.image_url.trim() || null,
+        source: formData.source.trim() || null,
         ingredients: validIngredients.map((ing) => ({
           name: ing.name.trim(),
           quantity: ing.quantity ? parseFloat(ing.quantity) : null,

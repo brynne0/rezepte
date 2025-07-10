@@ -127,7 +127,7 @@ export const useRecipeActions = () => {
           category: recipeData.category,
           servings: recipeData.servings,
           instructions: recipeData.instructions,
-          image_url: recipeData.image_url,
+          source: recipeData.source,
         }).filter(([, v]) => v !== undefined)
       );
 
@@ -201,7 +201,7 @@ export const useRecipeActions = () => {
           category: recipeData.category,
           servings: recipeData.servings,
           instructions: recipeData.instructions,
-          image_url: recipeData.image_url,
+          source: recipeData.source,
         }).filter(([, v]) => v !== undefined)
       );
 
