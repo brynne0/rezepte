@@ -13,6 +13,7 @@ const Header = ({ setSelectedCategory }) => {
   const [showLogoutForm, setShowLogoutForm] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
+  const [isMe, setIsMe] = useState(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -62,6 +63,23 @@ const Header = ({ setSelectedCategory }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Check if I am logged in
+  useEffect(() => {
+    const checkMe = async () => {
+      if (isLoggedIn) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        console.log(user);
+        setIsMe(user?.user_metadata?.is_me || false);
+      } else {
+        setIsMe(false);
+      }
+    };
+
+    checkMe();
+  }, [isLoggedIn]);
+
   return (
     <>
       <header className="header">
@@ -76,7 +94,7 @@ const Header = ({ setSelectedCategory }) => {
               }
             >
               <Squirrel className="header-logo" />
-              {isLoggedIn && <Squirrel className="header-logo-2" />}
+              {isLoggedIn && isMe && <Squirrel className="header-logo-2" />}
             </div>
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
