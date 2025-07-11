@@ -1,5 +1,5 @@
 import { useState } from "react";
-import supabase from "../supabaseClient";
+import supabase from "../utils/supabaseClient";
 
 // Hooks for manual CRUD operations
 export const useRecipeActions = () => {
@@ -51,6 +51,10 @@ export const useRecipeActions = () => {
     setLoading(true);
     setError(null);
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     try {
       // Create the main recipe record
       const cleanRecipeData = Object.fromEntries(
@@ -60,6 +64,7 @@ export const useRecipeActions = () => {
           servings: recipeData.servings,
           instructions: recipeData.instructions,
           source: recipeData.source,
+          user_id: user.id,
         }).filter(([, v]) => v !== undefined)
       );
 

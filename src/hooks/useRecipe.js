@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import supabase from "../supabaseClient";
+import supabase from "../utils/supabaseClient";
 
 // Fetches a single recipe and all associated data
 export const useRecipe = (slug) => {

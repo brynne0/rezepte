@@ -5,10 +5,9 @@ import { Pencil, ShoppingBasket, ArrowBigLeft } from "lucide-react";
 
 const Recipe = () => {
   const { slug } = useParams();
-  const { recipe, loading, error } = useRecipe(slug);
+  const { recipe, error } = useRecipe(slug);
   const navigate = useNavigate();
 
-  if (loading) return <div>Loading...</div>; // TODO - add loading animation after a certain amount of time
   if (error) return <div>Error: {error}</div>;
   if (!recipe) return <div>Recipe not found</div>;
 
