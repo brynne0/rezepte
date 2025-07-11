@@ -2,8 +2,8 @@ import "./Header.css";
 import { useNavigate } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signIn, signOut } from "../../services/auth";
-import { useState, useEffect } from "react";
-import supabase from "../../utils/supabaseClient";
+import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 const Header = ({ setSelectedCategory }) => {
   const navigate = useNavigate();
@@ -11,9 +11,8 @@ const Header = ({ setSelectedCategory }) => {
   const [password, setPassword] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showLogoutForm, setShowLogoutForm] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
-  const [isMe, setIsMe] = useState(null);
+  const { isLoggedIn, isMe } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -47,38 +46,6 @@ const Header = ({ setSelectedCategory }) => {
 
     setShowLogoutForm(false);
   };
-
-  // Check if user is logged in
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsLoggedIn(!!session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Check if I am logged in
-  useEffect(() => {
-    const checkMe = async () => {
-      if (isLoggedIn) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        console.log(user);
-        setIsMe(user?.user_metadata?.is_me || false);
-      } else {
-        setIsMe(false);
-      }
-    };
-
-    checkMe();
-  }, [isLoggedIn]);
 
   return (
     <>
@@ -141,21 +108,23 @@ const Header = ({ setSelectedCategory }) => {
           </h1>
 
           <nav className="header-nav">
-            {/* Grocery List */}
-            <button className="icon-btn">
-              <ShoppingBasket size={28} />
-            </button>
-            {/* Plus Recipe */}
-            <button
-              className="icon-btn"
-              onClick={() => navigate("/add-recipe")}
-            >
-              <Plus size={28} />
-            </button>
             {/* Search Recipe */}
             <button className="icon-btn">
               <Search size={28} />
             </button>
+            {/* Grocery List */}
+            <button className="icon-btn">
+              <ShoppingBasket size={28} />
+            </button>
+            {/* Plus Recipe - only display if user logged in */}
+            {isLoggedIn && (
+              <button
+                className="icon-btn"
+                onClick={() => navigate("/add-recipe")}
+              >
+                <Plus size={28} />
+              </button>
+            )}
           </nav>
         </div>
       </header>
