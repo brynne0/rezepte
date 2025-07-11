@@ -14,13 +14,13 @@ const Recipe = () => {
 
   return (
     <div className="recipe-container">
-      {/* <ArrowBigLeft
-        className="back-arrow"
+      <ArrowBigLeft
+        className="recipe-back-arrow"
         size={30}
         onClick={() => {
           navigate(-1);
         }}
-      /> */}
+      />
       <div className="recipe-heading">
         <h1>{recipe.title}</h1>
         {/* TODO - Show edit button only when logged in  */}
