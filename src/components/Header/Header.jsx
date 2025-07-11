@@ -1,4 +1,4 @@
-import "./header.css";
+import "./Header.css";
 import { useNavigate } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 
