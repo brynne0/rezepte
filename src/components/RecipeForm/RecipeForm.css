@@ -1,0 +1,392 @@
+.recipe-form-container {
+  max-width: 50rem;
+  margin: 0 auto;
+  background: var(--sand);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.25rem 0.375rem rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.recipe-form {
+  padding: 0 3rem 3rem 3rem;
+}
+
+.page-header {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+/* Headers */
+.page-header h1 {
+  padding: 1rem;
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.ingredients-header,
+.instructions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.form-header {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* Input boxes */
+.form-group {
+  margin-bottom: 0.8rem;
+}
+
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 1rem;
+  border: 0.1rem solid var(--cream);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+  color: var(--dark_brown);
+  font-family: inherit;
+}
+
+.form-input::placeholder {
+  color: var(--dark_brown);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--dark_red);
+}
+
+/* Errors */
+.error-message {
+  background: var(--pink);
+  color: var(--error_red);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border: 0.0625rem solid var(--pink);
+  font-size: 0.875rem;
+}
+
+.form-input.error {
+  border-color: var(--error_red);
+}
+
+.form-input.error:focus {
+  border-color: var(--error_red);
+  box-shadow: 0 0 0 0.1875rem rgba(239, 68, 68, 0.1);
+}
+
+.field-error {
+  display: block;
+  color: var(--error_red);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Ingredients */
+.ingredients-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ingredient-row {
+  display: grid;
+  grid-template-columns:
+    minmax(120px, 2fr) /* name */
+    minmax(60px, 1fr) /* quantity */
+    minmax(80px, 1fr) /* unit */
+    minmax(100px, 2fr); /* notes */
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ingredient-row:not(:only-child) {
+  /* Add space for the remove button if more than one ingredient */
+  grid-template-columns:
+    minmax(120px, 2fr) /* name */
+    minmax(60px, 1fr) /* quantity */
+    minmax(80px, 1fr) /* unit */
+    minmax(100px, 2fr) /* notes */
+    auto;
+}
+
+.ingredient-name,
+.ingredient-quantity,
+.ingredient-unit,
+.ingredient-notes {
+  padding: 0.5rem 0.75rem;
+  border: 0.1rem solid var(--cream);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: white;
+  transition: border-color 0.2s ease;
+  color: var(--dark_brown);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.ingredient-name::placeholder,
+.ingredient-quantity::placeholder,
+.ingredient-unit::placeholder,
+.ingredient-notes::placeholder {
+  color: var(--dark_brown);
+  opacity: 0.8;
+}
+
+.ingredient-name:focus,
+.ingredient-quantity:focus,
+.ingredient-unit:focus,
+.ingredient-notes:focus {
+  outline: none;
+  border-color: var(--dark_red);
+}
+
+.ingredient-name {
+  font-weight: 500;
+}
+
+.ingredient-unit {
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1rem;
+  padding-right: 2rem;
+  font-family: inherit;
+}
+
+/* Instructions */
+.ingredient-row .form-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+}
+
+.instructions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.instruction-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.step-number {
+  font-weight: 600;
+  color: var(--brown);
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.instruction-textarea {
+  padding: 0.5rem 0.75rem;
+  border: 0.0625rem solid var(--cream);
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  background: white;
+  transition: border-color 0.2s ease;
+  color: var(--dark_brown);
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.instruction-textarea:focus {
+  outline: none;
+  border-color: var(--dark_red);
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-actions button:first-child {
+  margin-right: auto;
+}
+
+.primary-btn,
+.cancel-btn,
+.delete-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+/* Primary Button */
+.primary-btn {
+  background: var(--brown);
+  color: white;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: var(--light_brown);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.primary-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Cancel Button */
+.cancel-btn {
+  background: white;
+  color: var(--light_brown);
+  border: 0.125rem solid var(--light_brown);
+}
+
+.cancel-btn:hover {
+  color: var(--brown);
+  border-color: var(--brown);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+/* Delete Button */
+.delete-btn {
+  background: white;
+  color: var(--red);
+  border: 0.125rem solid var(--red);
+}
+
+.delete-btn:hover {
+  background: var(--red);
+  color: white;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.remove-btn,
+.add-btn {
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: flex;
+}
+
+.remove-btn {
+  color: var(--error_red);
+}
+
+.add-btn {
+  color: var(--green);
+}
+
+.remove-btn:hover,
+.add-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .add-recipe-container {
+    border-radius: 0.5rem;
+  }
+
+  .page-header {
+    padding: 1.5rem 1.25rem 1rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .page-header {
+    padding: 0;
+  }
+
+  .recipe-form {
+    padding: 1.25rem;
+  }
+
+  .ingredients-header,
+  .instructions-header {
+    margin-bottom: 0rem;
+  }
+
+  .ingredient-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .ingredient-row:not(:only-child) {
+    grid-template-columns: 1fr;
+  }
+
+  .ingredient-row .remove-btn {
+    justify-self: end;
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .ingredient-name,
+  .ingredient-quantity,
+  .ingredient-unit,
+  .ingredient-notes {
+    font-size: 0.8rem;
+    font-family: inherit;
+    padding: 0.5rem 0.625rem;
+  }
+
+  .ingredient-row .form-input {
+    font-size: 0.8rem;
+  }
+
+  .form-input {
+    font-size: 0.8rem;
+  }
+
+  .instruction-row {
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+  }
+
+  .instruction-row .remove-btn {
+    grid-row: 1;
+    grid-column: 3;
+    justify-self: end;
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button:first-child {
+    margin-right: 0;
+  }
+
+  .cancel-btn,
+  .primary-btn,
+  .delete-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+  }
+}

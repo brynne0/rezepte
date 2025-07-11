@@ -1,6 +1,7 @@
 import { useState } from "react";
 import supabase from "../supabaseClient";
 
+// Hooks for manual CRUD operations
 export const useRecipeActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -52,17 +53,19 @@ export const useRecipeActions = () => {
 
     try {
       // Create the main recipe record
+      const cleanRecipeData = Object.fromEntries(
+        Object.entries({
+          title: recipeData.title,
+          category: recipeData.category,
+          servings: recipeData.servings,
+          instructions: recipeData.instructions,
+          source: recipeData.source,
+        }).filter(([, v]) => v !== undefined)
+      );
+
       const { data: recipe, error: recipeError } = await supabase
         .from("recipes")
-        .insert([
-          {
-            title: recipeData.title,
-            category: recipeData.category,
-            servings: recipeData.servings,
-            instructions: recipeData.instructions,
-            image_url: recipeData.image_url,
-          },
-        ])
+        .insert([cleanRecipeData])
         .select()
         .single();
 
@@ -124,16 +127,19 @@ export const useRecipeActions = () => {
     setError(null);
 
     try {
-      // Update the main recipe record
-      const { data: recipe, error: recipeError } = await supabase
-        .from("recipes")
-        .update({
+      const cleanRecipeData = Object.fromEntries(
+        Object.entries({
           title: recipeData.title,
           category: recipeData.category,
           servings: recipeData.servings,
           instructions: recipeData.instructions,
-          image_url: recipeData.image_url,
-        })
+          source: recipeData.source,
+        }).filter(([, v]) => v !== undefined)
+      );
+
+      const { data: recipe, error: recipeError } = await supabase
+        .from("recipes")
+        .update(cleanRecipeData)
         .eq("id", id)
         .select()
         .single();
@@ -241,11 +247,14 @@ export const useRecipeActions = () => {
     }
   };
 
+  const clearError = () => setError(null);
+
   return {
     createRecipe,
     updateRecipe,
     deleteRecipe,
     loading,
     error,
+    clearError,
   };
 };

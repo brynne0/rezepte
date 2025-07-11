@@ -1,11 +1,10 @@
 .recipe-card {
-  /* change dark brown below to white to remove border */
-  border: 1px solid var(--dark_brown);
+  border: 0.0625rem solid var(--brown);
   display: flex;
   flex-direction: column;
-  border-radius: 8px;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  background-color: var(--sand);
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;

@@ -5,7 +5,7 @@ import "./RecipeList.css";
 const RecipeList = ({ selectedCategory, recipes }) => {
   const navigate = useNavigate();
 
-  // Filter recipes
+  // Filter recipes based on selected category
   const filteredRecipes =
     selectedCategory === "Alle Rezepte"
       ? recipes
@@ -13,6 +13,7 @@ const RecipeList = ({ selectedCategory, recipes }) => {
 
   return (
     <>
+      {/* Display all recipes in selected category */}
       <div className="recipe-list">
         {filteredRecipes.map((r) => (
           <RecipeCard

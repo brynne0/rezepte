@@ -1,19 +1,31 @@
+@import "../public/fonts/fonts.css";
+
 :root {
   /* Color scheme and background */
+  --cream: #ede1c5;
+  --sand: rgba(255, 255, 255, 0.6);
+  --light_brown: #523f19bf;
+  --brown: #534019;
+  --dark_brown: #423314;
+  --red: #933c1f;
+  --dark_red: #7e341b;
+  --error_red: #ef4444;
+  --pink: #fee2e2;
+  --green: rgb(42, 144, 93);
+
+  background-color: var(--cream);
   color-scheme: light dark;
-  background-color: antiquewhite;
-  --dark_brown: rgb(99, 82, 61);
-  --red: rgb(191, 49, 49);
-  --dark_red: rgb(143, 38, 38);
 
   /* Typography */
-  font-family: "Noto Sans", sans-serif;
+  /* Old font - font-family: "Noto Sans", sans-serif; */
+  font-family: "Gabarito", sans-serif;
+  --heading-font-family: "Forta", sans-serif;
   font-style: normal;
   font-weight: 400;
   font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
   line-height: 1.5;
-  color: #333;
+  color: #433314;
 
   /* Font rendering */
   font-synthesis: none;
@@ -31,22 +43,3 @@ body {
 button {
   font-size: 1rem;
 }
-
-/* button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-} */

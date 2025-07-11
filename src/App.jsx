@@ -5,8 +5,10 @@ import Header from "./components/Header/Header";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Recipe from "./components/recipe/Recipe";
 import { useRecipes } from "./hooks/useRecipes";
-import AddRecipePage from "./pages/AddRecipe/AddRecipePage";
+import AddRecipePage from "./pages/AddRecipe/AddRecipe";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
+import { Squirrel } from "lucide-react";
+import EditRecipePage from "./pages/AddRecipe/EditRecipe";
 
 const defaultCategories = [
   "Alle Rezepte",
@@ -22,8 +24,13 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState("Alle Rezepte");
   const { recipes, loading } = useRecipes();
 
+  // Show loading screen
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className={"loading-animation"}>
+        <Squirrel />
+      </div>
+    );
   }
 
   return (
@@ -50,6 +57,10 @@ function App() {
         <Route
           path="/add-recipe"
           element={<AddRecipePage categories={defaultCategories} />}
+        />
+        <Route
+          path="/edit-recipe/:slug"
+          element={<EditRecipePage categories={defaultCategories} />}
         />
       </Routes>
     </Router>

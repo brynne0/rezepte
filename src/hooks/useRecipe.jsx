@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import supabase from "../supabaseClient";
 
+// Fetches a single recipe and all associated data
 export const useRecipe = (slug) => {
-  const [recipeData, setRecipeData] = useState(null);
+  const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getRecipeWithIngredients = async () => {
+    const fetchRecipe = async () => {
       if (!slug) {
-        setRecipeData(null);
+        setRecipe(null);
         setLoading(false);
         return;
       }
@@ -20,7 +21,9 @@ export const useRecipe = (slug) => {
 
         const { data, error: supabaseError } = await supabase
           .from("recipes")
-          .select("*,recipe_ingredients(quantity,unit,ingredients(id,name))")
+          .select(
+            "*, recipe_ingredients(quantity, unit, ingredients(id, name))"
+          )
           .eq("slug", slug)
           .single();
 
@@ -43,18 +46,18 @@ export const useRecipe = (slug) => {
         // Remove the nested recipe_ingredients since it's flattened
         delete transformedData.recipe_ingredients;
 
-        setRecipeData(transformedData);
+        setRecipe(transformedData);
       } catch (err) {
-        console.error("Error fetching recipe with ingredients:", err);
-        setError(err.message);
-        setRecipeData(null);
+        console.error("Error fetching recipe:", err);
+        setError(err.message || "Failed to fetch recipe");
+        setRecipe(null);
       } finally {
         setLoading(false);
       }
     };
 
-    getRecipeWithIngredients();
+    fetchRecipe();
   }, [slug]);
 
-  return { recipe: recipeData, loading, error };
+  return { recipe, loading, error };
 };
