@@ -32,6 +32,7 @@ const Header = ({ setSelectedCategory }) => {
     }, 3000);
 
     setShowLoginForm(false);
+    setEmail("");
     setPassword("");
   };
 

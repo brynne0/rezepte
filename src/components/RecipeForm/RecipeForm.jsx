@@ -127,7 +127,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           </label>
           <input
             id="source"
-            type="url"
+            type="text"
             value={formData.source}
             onChange={(e) => handleInputChange("source", e.target.value)}
             className="form-input"
