@@ -3,7 +3,7 @@ import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header/Header";
 import RecipeList from "./components/RecipeList/RecipeList";
-import Recipe from "./components/recipe/Recipe";
+import Recipe from "./components/Recipe/Recipe";
 import { useRecipes } from "./hooks/useRecipes";
 import AddRecipePage from "./pages/AddRecipe/AddRecipe";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
