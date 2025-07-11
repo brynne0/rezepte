@@ -68,14 +68,16 @@ const Header = ({ setSelectedCategory }) => {
         <div className="header-content">
           {/* Login and Logout */}
           <div className="login-container">
-            <Squirrel
-              className="header-logo"
+            <div
               onClick={() =>
                 isLoggedIn
                   ? setShowLogoutForm((prev) => !prev)
                   : setShowLoginForm((prev) => !prev)
               }
-            />
+            >
+              <Squirrel className="header-logo" />
+              {isLoggedIn && <Squirrel className="header-logo-2" />}
+            </div>
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
             {/* Login form - email and password */}

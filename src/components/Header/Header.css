@@ -16,11 +16,17 @@
   position: relative;
 }
 
-.header-logo {
+.header-logo,
+.header-logo-2 {
   color: var(--brown);
   width: 3rem;
   height: 3rem;
   cursor: pointer;
+}
+
+.header-logo-2 {
+  color: var(--light_brown);
+  transform: scaleX(-1);
 }
 
 .header-title {
