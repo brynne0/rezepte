@@ -60,6 +60,11 @@
   padding: 0.5rem;
 }
 
+.login-inputs {
+  display: flex;
+  gap: 0.25rem;
+}
+
 .login-input,
 .login-btn {
   padding: 0.5rem;
@@ -141,6 +146,13 @@
   }
 
   .login-form {
+    flex-direction: column;
+  }
+}
+
+/* When login input form intersects with heading, stack vertically */
+@media (max-width: 1150px) {
+  .login-inputs {
     flex-direction: column;
   }
 }

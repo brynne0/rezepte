@@ -68,20 +68,22 @@ const Header = ({ setSelectedCategory }) => {
             {/* Login form - email and password */}
             {showLoginForm && (
               <form onSubmit={handleLogin} className="login-form">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  className="login-input"
-                />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="login-input"
-                />
+                <div className="login-inputs">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                    className="login-input"
+                  />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="login-input"
+                  />
+                </div>
                 <button className="login-btn" type="submit">
                   Login
                 </button>
