@@ -46,7 +46,7 @@
 
 .login-container {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -55,6 +55,14 @@
   gap: 0.25rem;
   justify-content: center;
   align-items: center;
+  background: var(--cream);
+  z-index: 102;
+  padding: 0.5rem;
+}
+
+.login-inputs {
+  display: flex;
+  gap: 0.25rem;
 }
 
 .login-input,
@@ -138,6 +146,13 @@
   }
 
   .login-form {
+    flex-direction: column;
+  }
+}
+
+/* When login input form intersects with heading, stack vertically */
+@media (max-width: 1150px) {
+  .login-inputs {
     flex-direction: column;
   }
 }
