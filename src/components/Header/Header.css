@@ -115,7 +115,8 @@
     gap: 0.5rem;
   }
 
-  .header-logo {
+  .header-logo,
+  .header-logo-2 {
     order: 1;
     width: 2rem;
     height: 2rem;
@@ -132,7 +133,7 @@
     order: 3;
   }
 
-  .login {
+  .login-container {
     flex-direction: column-reverse;
   }
 
