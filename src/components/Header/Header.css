@@ -46,7 +46,7 @@
 
 .login-container {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -55,6 +55,9 @@
   gap: 0.25rem;
   justify-content: center;
   align-items: center;
+  background: var(--cream);
+  z-index: 102;
+  padding: 0.5rem;
 }
 
 .login-input,
