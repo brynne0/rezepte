@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useRecipe } from "../../hooks/useRecipe";
 import "./Recipe.css";
-import { Pencil, ShoppingBasket } from "lucide-react";
+import { Pencil, ShoppingBasket, ArrowBigLeft } from "lucide-react";
 
 const Recipe = () => {
   const { slug } = useParams();
@@ -14,6 +14,13 @@ const Recipe = () => {
 
   return (
     <div className="recipe-container">
+      {/* <ArrowBigLeft
+        className="back-arrow"
+        size={30}
+        onClick={() => {
+          navigate(-1);
+        }}
+      /> */}
       <div className="recipe-heading">
         <h1>{recipe.title}</h1>
         {/* TODO - Show edit button only when logged in  */}
