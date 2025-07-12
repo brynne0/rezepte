@@ -188,10 +188,6 @@ export const useRecipeForm = (initialRecipe = null) => {
       errors.ingredients = "At least one ingredient is required";
     }
 
-    if (formData.instructions.every((inst) => !inst.trim())) {
-      errors.instructions = "At least one instruction is required";
-    }
-
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };

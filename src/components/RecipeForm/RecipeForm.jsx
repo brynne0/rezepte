@@ -137,7 +137,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Ingredients */}
         <div className="form-group">
-          <div className="ingredients-header">
+          <div className="form-ingredients-heading">
             <label className="form-header">Ingredients</label>
             <button type="button" onClick={addIngredient} className="add-btn">
               <Plus size={16} />
@@ -243,16 +243,12 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Instructions */}
         <div className="form-group">
-          <div className="instructions-header">
+          <div className="form-instructions-header">
             <label className="form-header">Instructions</label>
             <button type="button" onClick={addInstruction} className="add-btn">
               <Plus size={16} />
             </button>
           </div>
-
-          {validationErrors.instructions && (
-            <span className="field-error">{validationErrors.instructions}</span>
-          )}
 
           <div className="instructions-list">
             {formData.instructions.map((instruction, index) => (

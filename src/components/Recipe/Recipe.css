@@ -8,8 +8,7 @@
 }
 
 .recipe-container h3 {
-  margin-top: 1rem;
-  margin-bottom: 0;
+  margin: 0;
   padding: 0;
 }
 
@@ -19,7 +18,7 @@
   margin-bottom: 0.5rem;
 }
 
-.recipe-heading {
+.recipe-heading-container {
   color: var(--dark_red);
   display: flex;
   align-items: center;
@@ -27,6 +26,17 @@
   font-weight: 600;
   font-family: forta;
 }
+
+.recipe-subheading {
+  margin-top: 1rem;
+  margin-bottom: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .servings {
   display: flex;
   flex-direction: row;
@@ -61,7 +71,7 @@
   transform: translateY(-3px);
 }
 
-.recipe-back-arrow {
+/* .recipe-back-arrow {
   position: relative;
   cursor: pointer;
-}
+} */

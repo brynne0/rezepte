@@ -33,8 +33,8 @@
   font-weight: 700;
 }
 
-.ingredients-header,
-.instructions-header {
+.form-ingredients-heading,
+.form-instructions-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -56,7 +56,7 @@
 .form-input {
   width: 100%;
   box-sizing: border-box;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   border: 0.1rem solid var(--cream);
   border-radius: 0.5rem;
   font-size: 1rem;
@@ -64,10 +64,6 @@
   background: white;
   color: var(--dark_brown);
   font-family: inherit;
-}
-
-.form-input::placeholder {
-  color: var(--dark_brown);
 }
 
 .form-input:focus {
@@ -144,13 +140,6 @@
   color: var(--dark_brown);
   box-sizing: border-box;
   font-family: inherit;
-}
-.ingredient-name::placeholder,
-.ingredient-quantity::placeholder,
-.ingredient-unit::placeholder,
-.ingredient-notes::placeholder {
-  color: var(--dark_brown);
-  opacity: 0.8;
 }
 
 .ingredient-name:focus,
@@ -329,10 +318,11 @@
 
   .recipe-form {
     padding: 1.25rem;
+    padding-top: 0;
   }
 
-  .ingredients-header,
-  .instructions-header {
+  .form-ingredients-heading,
+  .form-instructions-header {
     margin-bottom: 0rem;
   }
 
@@ -380,6 +370,10 @@
     justify-self: end;
     width: 1.75rem;
     height: 1.75rem;
+  }
+
+  .instruction-textarea {
+    font-size: 0.8rem;
   }
 
   .form-actions {
