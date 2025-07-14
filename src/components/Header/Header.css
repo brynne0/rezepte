@@ -44,7 +44,7 @@
   transform: none;
 }
 
-.login-container {
+.login-wrapper {
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -141,7 +141,7 @@
     order: 3;
   }
 
-  .login-container {
+  .login-wrapper {
     flex-direction: column-reverse;
   }
 

@@ -11,7 +11,7 @@
   padding: 0 3rem 3rem 3rem;
 }
 
-.page-header {
+.page-header-wrapper {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -26,15 +26,15 @@
 }
 
 /* Headers */
-.page-header h1 {
+.page-header-wrapper h1 {
   padding: 1rem;
   margin: 0;
   font-size: 1.75rem;
   font-weight: 700;
 }
 
-.ingredients-header,
-.instructions-header {
+.form-ingredients-header,
+.form-instructions-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -56,7 +56,7 @@
 .form-input {
   width: 100%;
   box-sizing: border-box;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   border: 0.1rem solid var(--cream);
   border-radius: 0.5rem;
   font-size: 1rem;
@@ -66,13 +66,25 @@
   font-family: inherit;
 }
 
-.form-input::placeholder {
-  color: var(--dark_brown);
-}
-
 .form-input:focus {
   outline: none;
   border-color: var(--dark_red);
+}
+
+.form-input:invalid {
+  color: #757575;
+}
+
+.form-input select,
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==);
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+  cursor: pointer;
 }
 
 /* Errors */
@@ -112,74 +124,21 @@
 
 .ingredient-row {
   display: grid;
-  grid-template-columns:
-    minmax(120px, 2fr) /* name */
-    minmax(60px, 1fr) /* quantity */
-    minmax(80px, 1fr) /* unit */
-    minmax(100px, 2fr); /* notes */
+  grid-template-columns: 2fr 1fr 1fr 2fr;
   gap: 0.5rem;
   align-items: center;
 }
 
 .ingredient-row:not(:only-child) {
   /* Add space for the remove button if more than one ingredient */
-  grid-template-columns:
-    minmax(120px, 2fr) /* name */
-    minmax(60px, 1fr) /* quantity */
-    minmax(80px, 1fr) /* unit */
-    minmax(100px, 2fr) /* notes */
-    auto;
+  grid-template-columns: 2fr 1fr 1fr 2fr auto;
 }
 
-.ingredient-name,
-.ingredient-quantity,
-.ingredient-unit,
-.ingredient-notes {
-  padding: 0.5rem 0.75rem;
-  border: 0.1rem solid var(--cream);
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  background: white;
-  transition: border-color 0.2s ease;
-  color: var(--dark_brown);
-  box-sizing: border-box;
-  font-family: inherit;
-}
-.ingredient-name::placeholder,
-.ingredient-quantity::placeholder,
-.ingredient-unit::placeholder,
-.ingredient-notes::placeholder {
-  color: var(--dark_brown);
-  opacity: 0.8;
-}
-
-.ingredient-name:focus,
-.ingredient-quantity:focus,
-.ingredient-unit:focus,
-.ingredient-notes:focus {
-  outline: none;
-  border-color: var(--dark_red);
-}
-
-.ingredient-name {
-  font-weight: 500;
-}
-
-.ingredient-unit {
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1rem;
-  padding-right: 2rem;
-  font-family: inherit;
+.ingredient-details {
+  display: contents;
 }
 
 /* Instructions */
-.ingredient-row .form-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-}
-
 .instructions-list {
   display: flex;
   flex-direction: column;
@@ -190,7 +149,7 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 0.75rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .step-number {
@@ -294,6 +253,7 @@
   transition: all 0.2s ease;
   padding: 0;
   display: flex;
+  align-items: center;
 }
 
 .remove-btn {
@@ -311,93 +271,78 @@
 
 /* Responsive Design */
 @media (max-width: 600px) {
+  /* Container adjustments */
   .add-recipe-container {
     border-radius: 0.5rem;
   }
-
-  .page-header {
-    padding: 1.5rem 1.25rem 1rem;
-  }
-
-  .page-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .page-header {
-    padding: 0;
-  }
-
   .recipe-form {
     padding: 1.25rem;
+    padding-top: 0;
   }
 
-  .ingredients-header,
-  .instructions-header {
+  /* Header adjustments */
+  .page-header-wrapper {
+    padding: 0;
+  }
+  .page-header-wrapper h1 {
+    font-size: 1.5rem;
+  }
+  .form-back-arrow {
+    left: 1.25rem;
+  }
+
+  /* Form spacing */
+  .form-group {
+    margin-bottom: 0.5rem;
+  }
+  .form-ingredients-header,
+  .form-instructions-header {
     margin-bottom: 0rem;
   }
 
+  /* Ingredient rows and fields */
   .ingredient-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
-
   .ingredient-row:not(:only-child) {
     grid-template-columns: 1fr;
   }
-
+  .ingredient-details {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .ingredient-details input[type="number"] {
+    flex: 0 0 60px;
+  }
+  .ingredient-details select {
+    flex: 0 0 80px;
+  }
   .ingredient-row .remove-btn {
     justify-self: end;
     grid-row: 1;
     grid-column: 1;
   }
 
-  .ingredient-name,
-  .ingredient-quantity,
-  .ingredient-unit,
-  .ingredient-notes {
-    font-size: 0.8rem;
-    font-family: inherit;
-    padding: 0.5rem 0.625rem;
-  }
-
-  .ingredient-row .form-input {
+  /* Input and textarea font size */
+  .form-input,
+  .instruction-textarea {
     font-size: 0.8rem;
   }
 
-  .form-input {
-    font-size: 0.8rem;
-  }
-
-  .instruction-row {
-    grid-template-columns: auto 1fr auto;
-    gap: 0.5rem;
-  }
-
-  .instruction-row .remove-btn {
-    grid-row: 1;
-    grid-column: 3;
-    justify-self: end;
-    width: 1.75rem;
-    height: 1.75rem;
-  }
-
+  /* Actions and buttons */
   .form-actions {
     flex-direction: column-reverse;
   }
-
   .form-actions button:first-child {
     margin-right: 0;
   }
-
   .cancel-btn,
   .primary-btn,
   .delete-btn {
     padding: 0.75rem 1rem;
     font-size: 0.8rem;
-  }
-
-  .form-back-arrow {
-    left: 1.25rem;
   }
 }

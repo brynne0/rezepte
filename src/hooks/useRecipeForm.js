@@ -86,7 +86,7 @@ export const useRecipeForm = (initialRecipe = null) => {
     }
   };
 
-  const handleIngredientChange = (tempId, field, value) => {
+  const handleIngredientChange = (tempId, field, value, clearError) => {
     setFormData((prev) => ({
       ...prev,
       ingredients: prev.ingredients.map((ingredient) =>
@@ -95,6 +95,10 @@ export const useRecipeForm = (initialRecipe = null) => {
           : ingredient
       ),
     }));
+
+    if (clearError) {
+      setValidationErrors((prev) => ({ ...prev, [clearError]: undefined }));
+    }
   };
 
   const handleInstructionChange = (index, value) => {
@@ -186,10 +190,6 @@ export const useRecipeForm = (initialRecipe = null) => {
 
     if (formData.ingredients.every((ing) => !ing.name || !ing.name.trim())) {
       errors.ingredients = "At least one ingredient is required";
-    }
-
-    if (formData.instructions.every((inst) => !inst.trim())) {
-      errors.instructions = "At least one instruction is required";
     }
 
     setValidationErrors(errors);

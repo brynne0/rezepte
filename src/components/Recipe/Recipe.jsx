@@ -15,15 +15,15 @@ const Recipe = () => {
 
   return (
     <div className="recipe-container">
-      {/* Back Arrow */}
+      {/* Back Arrow
       <ArrowBigLeft
         className="recipe-back-arrow"
         size={30}
         onClick={() => {
           navigate(-1);
         }}
-      />
-      <div className="recipe-heading">
+      /> */}
+      <div className="recipe-heading-container">
         <h1>{recipe.title}</h1>
 
         {/* Show edit button only when logged in  */}
@@ -41,7 +41,7 @@ const Recipe = () => {
 
       {/* Servings */}
       {recipe.servings && (
-        <div className="servings">
+        <div className="recipe-subheading">
           <h3>Servings:</h3>
           {recipe.servings}
         </div>
@@ -50,7 +50,13 @@ const Recipe = () => {
       {/* Ingredients */}
       {recipe.ingredients && (
         <>
-          <h3>Ingredients:</h3>
+          <div className="recipe-subheading">
+            <h3>Ingredients:</h3>
+            {/* Grocery Cart */}
+            <button className="cart-btn">
+              <ShoppingBasket size={24} />
+            </button>
+          </div>
           <ul className="ingredient-list">
             {recipe.ingredients.map((ingredient) => (
               <li key={ingredient.id} className="ingredient">
@@ -66,20 +72,27 @@ const Recipe = () => {
         </>
       )}
 
-      {/* Grocery Cart */}
-      <button className="cart-btn">
-        <ShoppingBasket size={28} />
-      </button>
-
       {/* Instructions */}
-      {recipe.instructions && (
+      {recipe.instructions && recipe.instructions.length > 0 && (
         <>
-          <h3>Instructions:</h3>
+          <div className="recipe-subheading">
+            <h3>Instructions:</h3>
+          </div>
           <ol>
             {recipe.instructions.map((instruction, i) => (
               <li key={i}>{instruction}</li>
             ))}
           </ol>
+        </>
+      )}
+
+      {/* Source */}
+      {recipe.source && (
+        <>
+          <div className="recipe-subheading">
+            <h3>Source:</h3>
+            {recipe.source}
+          </div>
         </>
       )}
     </div>

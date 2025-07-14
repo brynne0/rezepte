@@ -42,7 +42,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
   return (
     <div className="recipe-form-container">
-      <header className="page-header">
+      <header className="page-header-wrapper">
         <ArrowBigLeft
           className="form-back-arrow"
           size={30}
@@ -61,18 +61,22 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <label htmlFor="title" className="form-header">
             Recipe Title
           </label>
+          {validationErrors.title && (
+            <span className="field-error">{validationErrors.title}</span>
+          )}
           <input
             id="title"
             type="text"
             value={formData.title}
             onChange={(e) =>
-              handleInputChange("title", toTitleCase(e.target.value))
+              handleInputChange(
+                "title",
+                toTitleCase(e.target.value),
+                !!validationErrors.title
+              )
             }
             className={`form-input ${validationErrors.title ? "error" : ""}`}
           />
-          {validationErrors.title && (
-            <span className="field-error">{validationErrors.title}</span>
-          )}
         </div>
 
         {/* Category */}
@@ -80,11 +84,21 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <label htmlFor="category" className="form-header">
             Category
           </label>
+          {validationErrors.category && (
+            <span className="field-error">{validationErrors.category}</span>
+          )}
           <select
             id="category"
             value={formData.category}
-            onChange={(e) => handleInputChange("category", e.target.value)}
+            onChange={(e) =>
+              handleInputChange(
+                "category",
+                e.target.value,
+                !!validationErrors.category
+              )
+            }
             className={`form-input ${validationErrors.category ? "error" : ""}`}
+            required
           >
             <option value="" disabled>
               Select a category
@@ -97,9 +111,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 </option>
               ))}
           </select>
-          {validationErrors.category && (
-            <span className="field-error">{validationErrors.category}</span>
-          )}
         </div>
 
         {/* Servings */}
@@ -137,7 +148,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Ingredients */}
         <div className="form-group">
-          <div className="ingredients-header">
+          <div className="form-ingredients-header">
             <label className="form-header">Ingredients</label>
             <button type="button" onClick={addIngredient} className="add-btn">
               <Plus size={16} />
@@ -156,86 +167,88 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   id={`ingredient-name-${ingredient.tempId}`}
                   type="text"
                   value={ingredient.name || ""}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     handleIngredientChange(
                       ingredient.tempId,
                       "name",
-                      e.target.value.toLowerCase()
-                    )
-                  }
-                  className="ingredient-name"
+                      e.target.value.toLowerCase(),
+                      validationErrors.ingredients ? "ingredients" : null
+                    );
+                  }}
+                  className="form-input"
                   placeholder="Ingredient name"
                 />
                 {/* Ingredient Quantity */}
-                <input
-                  id={`ingredient-quantity-${ingredient.tempId}`}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={ingredient.quantity}
-                  onChange={(e) =>
-                    handleIngredientChange(
-                      ingredient.tempId,
-                      "quantity",
-                      e.target.value
-                    )
-                  }
-                  className="ingredient-quantity"
-                  placeholder="Qty"
-                  onWheel={(e) => {
-                    e.target.blur();
-                  }}
-                />
-                {/* Ingredient Unit */}
-                <select
-                  id={`ingredient-unit-${ingredient.tempId}`}
-                  value={ingredient.unit}
-                  onChange={(e) =>
-                    handleIngredientChange(
-                      ingredient.tempId,
-                      "unit",
-                      e.target.value
-                    )
-                  }
-                  className={`form-input ${
-                    validationErrors.unit ? "error" : ""
-                  }`}
-                >
-                  {unitOptions.map((option) => (
-                    <option
-                      key={option.value}
-                      value={option.value}
-                      disabled={option.disabled}
-                    >
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Ingredient Notes */}
-                <input
-                  id={`ingredient-notes-${ingredient.tempId}`}
-                  type="text"
-                  value={ingredient.notes}
-                  onChange={(e) =>
-                    handleIngredientChange(
-                      ingredient.tempId,
-                      "notes",
-                      e.target.value
-                    )
-                  }
-                  className="ingredient-notes"
-                  placeholder="Notes (optional)"
-                />
-                {formData.ingredients.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeIngredient(ingredient.tempId)}
-                    className="remove-btn"
+                <div className="ingredient-details">
+                  <input
+                    id={`ingredient-quantity-${ingredient.tempId}`}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={ingredient.quantity}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        ingredient.tempId,
+                        "quantity",
+                        e.target.value
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Qty"
+                    onWheel={(e) => {
+                      e.target.blur();
+                    }}
+                  />
+                  {/* Ingredient Unit */}
+                  <select
+                    id={`ingredient-unit-${ingredient.tempId}`}
+                    value={ingredient.unit}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        ingredient.tempId,
+                        "unit",
+                        e.target.value
+                      )
+                    }
+                    className={"form-input"}
+                    required
                   >
-                    <Trash2 size={16} />
-                  </button>
-                )}
+                    {unitOptions.map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Ingredient Notes */}
+                  <input
+                    id={`ingredient-notes-${ingredient.tempId}`}
+                    type="text"
+                    value={ingredient.notes}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        ingredient.tempId,
+                        "notes",
+                        e.target.value
+                      )
+                    }
+                    className="form-input"
+                    placeholder={`Notes${isEditMode ? "" : " (optional)"}`}
+                  />
+                  {formData.ingredients.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeIngredient(ingredient.tempId)}
+                      className="remove-btn"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -243,16 +256,12 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Instructions */}
         <div className="form-group">
-          <div className="instructions-header">
+          <div className="form-instructions-header">
             <label className="form-header">Instructions</label>
             <button type="button" onClick={addInstruction} className="add-btn">
               <Plus size={16} />
             </button>
           </div>
-
-          {validationErrors.instructions && (
-            <span className="field-error">{validationErrors.instructions}</span>
-          )}
 
           <div className="instructions-list">
             {formData.instructions.map((instruction, index) => (
@@ -267,15 +276,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   rows="2"
                   onKeyDown={handleEnter}
                 />
-                {formData.instructions.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeInstruction(index)}
-                    className="remove-btn"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => removeInstruction(index)}
+                  className="remove-btn"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))}
           </div>
