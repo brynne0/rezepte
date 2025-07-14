@@ -179,7 +179,7 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 0.75rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .step-number {
@@ -283,6 +283,7 @@
   transition: all 0.2s ease;
   padding: 0;
   display: flex;
+  align-items: center;
 }
 
 .remove-btn {
@@ -357,19 +358,6 @@
 
   .form-input {
     font-size: 0.8rem;
-  }
-
-  .instruction-row {
-    grid-template-columns: auto 1fr auto;
-    gap: 0.5rem;
-  }
-
-  .instruction-row .remove-btn {
-    grid-row: 1;
-    grid-column: 3;
-    justify-self: end;
-    width: 1.75rem;
-    height: 1.75rem;
   }
 
   .instruction-textarea {

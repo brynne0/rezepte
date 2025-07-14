@@ -73,7 +73,7 @@ const Recipe = () => {
       )}
 
       {/* Instructions */}
-      {recipe.instructions && (
+      {recipe.instructions && recipe.instructions.length > 0 && (
         <>
           <div className="recipe-subheading">
             <h3>Instructions:</h3>

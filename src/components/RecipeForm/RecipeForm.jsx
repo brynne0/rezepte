@@ -263,15 +263,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   rows="2"
                   onKeyDown={handleEnter}
                 />
-                {formData.instructions.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeInstruction(index)}
-                    className="remove-btn"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => removeInstruction(index)}
+                  className="remove-btn"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))}
           </div>
