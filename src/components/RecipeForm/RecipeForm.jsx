@@ -98,6 +98,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               )
             }
             className={`form-input ${validationErrors.category ? "error" : ""}`}
+            required
           >
             <option value="" disabled>
               Select a category
@@ -147,14 +148,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Ingredients */}
         <div className="form-group">
-          <div className="form-ingredients-heading">
+          <div className="form-ingredients-header">
             <label className="form-header">Ingredients</label>
             <button type="button" onClick={addIngredient} className="add-btn">
               <Plus size={16} />
             </button>
           </div>
 
-          {/* TODO - fix ingredients validation error  */}
           {validationErrors.ingredients && (
             <span className="field-error">{validationErrors.ingredients}</span>
           )}
@@ -175,7 +175,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       validationErrors.ingredients ? "ingredients" : null
                     );
                   }}
-                  className="ingredient-name"
+                  className="form-input"
                   placeholder="Ingredient name"
                 />
                 {/* Ingredient Quantity */}
@@ -192,7 +192,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       e.target.value
                     )
                   }
-                  className="ingredient-quantity"
+                  className="form-input"
                   placeholder="Qty"
                   onWheel={(e) => {
                     e.target.blur();
@@ -209,9 +209,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       e.target.value
                     )
                   }
-                  className={`form-input ${
-                    validationErrors.unit ? "error" : ""
-                  }`}
+                  className={"form-input"}
+                  required
                 >
                   {unitOptions.map((option) => (
                     <option
@@ -236,7 +235,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       e.target.value
                     )
                   }
-                  className="ingredient-notes"
+                  className="form-input"
                   placeholder="Notes (optional)"
                 />
                 {formData.ingredients.length > 1 && (

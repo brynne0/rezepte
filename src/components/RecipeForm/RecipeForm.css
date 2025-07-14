@@ -33,7 +33,7 @@
   font-weight: 700;
 }
 
-.form-ingredients-heading,
+.form-ingredients-header,
 .form-instructions-header {
   display: flex;
   justify-content: space-between;
@@ -69,6 +69,22 @@
 .form-input:focus {
   outline: none;
   border-color: var(--dark_red);
+}
+
+.form-input:invalid {
+  color: #757575;
+}
+
+.form-input select,
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==);
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+  cursor: pointer;
 }
 
 /* Errors */
@@ -127,48 +143,7 @@
     auto;
 }
 
-.ingredient-name,
-.ingredient-quantity,
-.ingredient-unit,
-.ingredient-notes {
-  padding: 0.5rem 0.75rem;
-  border: 0.1rem solid var(--cream);
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  background: white;
-  transition: border-color 0.2s ease;
-  color: var(--dark_brown);
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-.ingredient-name:focus,
-.ingredient-quantity:focus,
-.ingredient-unit:focus,
-.ingredient-notes:focus {
-  outline: none;
-  border-color: var(--dark_red);
-}
-
-.ingredient-name {
-  font-weight: 500;
-}
-
-.ingredient-unit {
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1rem;
-  padding-right: 2rem;
-  font-family: inherit;
-}
-
 /* Instructions */
-.ingredient-row .form-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-}
-
 .instructions-list {
   display: flex;
   flex-direction: column;
@@ -322,7 +297,7 @@
     padding-top: 0;
   }
 
-  .form-ingredients-heading,
+  .form-ingredients-header,
   .form-instructions-header {
     margin-bottom: 0rem;
   }
@@ -341,19 +316,6 @@
     justify-self: end;
     grid-row: 1;
     grid-column: 1;
-  }
-
-  .ingredient-name,
-  .ingredient-quantity,
-  .ingredient-unit,
-  .ingredient-notes {
-    font-size: 0.8rem;
-    font-family: inherit;
-    padding: 0.5rem 0.625rem;
-  }
-
-  .ingredient-row .form-input {
-    font-size: 0.8rem;
   }
 
   .form-input {
