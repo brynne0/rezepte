@@ -42,7 +42,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
   return (
     <div className="recipe-form-container">
-      <header className="page-header">
+      <header className="page-header-wrapper">
         <ArrowBigLeft
           className="form-back-arrow"
           size={30}
@@ -224,29 +224,31 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 </select>
 
                 {/* Ingredient Notes */}
-                <input
-                  id={`ingredient-notes-${ingredient.tempId}`}
-                  type="text"
-                  value={ingredient.notes}
-                  onChange={(e) =>
-                    handleIngredientChange(
-                      ingredient.tempId,
-                      "notes",
-                      e.target.value
-                    )
-                  }
-                  className="form-input"
-                  placeholder="Notes (optional)"
-                />
-                {formData.ingredients.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeIngredient(ingredient.tempId)}
-                    className="remove-btn"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
+                <div className="ingredient-notes-wrapper">
+                  <input
+                    id={`ingredient-notes-${ingredient.tempId}`}
+                    type="text"
+                    value={ingredient.notes}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        ingredient.tempId,
+                        "notes",
+                        e.target.value
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Notes (optional)"
+                  />
+                  {formData.ingredients.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeIngredient(ingredient.tempId)}
+                      className="remove-btn"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>

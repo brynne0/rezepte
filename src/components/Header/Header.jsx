@@ -52,7 +52,7 @@ const Header = ({ setSelectedCategory }) => {
       <header className="header">
         <div className="header-content">
           {/* Login and Logout */}
-          <div className="login-container">
+          <div className="login-wrapper">
             <div
               onClick={() =>
                 isLoggedIn

@@ -11,7 +11,7 @@
   padding: 0 3rem 3rem 3rem;
 }
 
-.page-header {
+.page-header-wrapper {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -26,7 +26,7 @@
 }
 
 /* Headers */
-.page-header h1 {
+.page-header-wrapper h1 {
   padding: 1rem;
   margin: 0;
   font-size: 1.75rem;
@@ -141,6 +141,21 @@ select.form-input {
     minmax(80px, 1fr) /* unit */
     minmax(100px, 2fr) /* notes */
     auto;
+}
+
+/* Put notes and remove button on same row for mobile */
+.ingredient-notes-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ingredient-notes-wrapper .form-input {
+  flex: 1;
+}
+
+.ingredient-notes-wrapper .remove-btn {
+  flex-shrink: 0;
 }
 
 /* Instructions */
@@ -280,15 +295,15 @@ select.form-input {
     border-radius: 0.5rem;
   }
 
-  .page-header {
+  .page-header-wrapper {
     padding: 1.5rem 1.25rem 1rem;
   }
 
-  .page-header h1 {
+  .page-header-wrapper h1 {
     font-size: 1.5rem;
   }
 
-  .page-header {
+  .page-header-wrapper {
     padding: 0;
   }
 
