@@ -124,38 +124,18 @@ select.form-input {
 
 .ingredient-row {
   display: grid;
-  grid-template-columns:
-    minmax(120px, 2fr) /* name */
-    minmax(60px, 1fr) /* quantity */
-    minmax(80px, 1fr) /* unit */
-    minmax(100px, 2fr); /* notes */
+  grid-template-columns: 2fr 1fr 1fr 2fr;
   gap: 0.5rem;
   align-items: center;
 }
 
 .ingredient-row:not(:only-child) {
   /* Add space for the remove button if more than one ingredient */
-  grid-template-columns:
-    minmax(120px, 2fr) /* name */
-    minmax(60px, 1fr) /* quantity */
-    minmax(80px, 1fr) /* unit */
-    minmax(100px, 2fr) /* notes */
-    auto;
+  grid-template-columns: 2fr 1fr 1fr 2fr auto;
 }
 
-/* Put notes and remove button on same row for mobile */
-.ingredient-notes-wrapper {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.ingredient-notes-wrapper .form-input {
-  flex: 1;
-}
-
-.ingredient-notes-wrapper .remove-btn {
-  flex-shrink: 0;
+.ingredient-details {
+  display: contents;
 }
 
 /* Instructions */
@@ -291,72 +271,78 @@ select.form-input {
 
 /* Responsive Design */
 @media (max-width: 600px) {
+  /* Container adjustments */
   .add-recipe-container {
     border-radius: 0.5rem;
   }
-
-  .page-header-wrapper {
-    padding: 1.5rem 1.25rem 1rem;
-  }
-
-  .page-header-wrapper h1 {
-    font-size: 1.5rem;
-  }
-
-  .page-header-wrapper {
-    padding: 0;
-  }
-
   .recipe-form {
     padding: 1.25rem;
     padding-top: 0;
   }
 
+  /* Header adjustments */
+  .page-header-wrapper {
+    padding: 0;
+  }
+  .page-header-wrapper h1 {
+    font-size: 1.5rem;
+  }
+  .form-back-arrow {
+    left: 1.25rem;
+  }
+
+  /* Form spacing */
+  .form-group {
+    margin-bottom: 0.5rem;
+  }
   .form-ingredients-header,
   .form-instructions-header {
     margin-bottom: 0rem;
   }
 
+  /* Ingredient rows and fields */
   .ingredient-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
-
   .ingredient-row:not(:only-child) {
     grid-template-columns: 1fr;
   }
-
+  .ingredient-details {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .ingredient-details input[type="number"] {
+    flex: 0 0 60px;
+  }
+  .ingredient-details select {
+    flex: 0 0 80px;
+  }
   .ingredient-row .remove-btn {
     justify-self: end;
     grid-row: 1;
     grid-column: 1;
   }
 
-  .form-input {
-    font-size: 0.8rem;
-  }
-
+  /* Input and textarea font size */
+  .form-input,
   .instruction-textarea {
     font-size: 0.8rem;
   }
 
+  /* Actions and buttons */
   .form-actions {
     flex-direction: column-reverse;
   }
-
   .form-actions button:first-child {
     margin-right: 0;
   }
-
   .cancel-btn,
   .primary-btn,
   .delete-btn {
     padding: 0.75rem 1rem;
     font-size: 0.8rem;
-  }
-
-  .form-back-arrow {
-    left: 1.25rem;
   }
 }

@@ -179,52 +179,52 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   placeholder="Ingredient name"
                 />
                 {/* Ingredient Quantity */}
-                <input
-                  id={`ingredient-quantity-${ingredient.tempId}`}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={ingredient.quantity}
-                  onChange={(e) =>
-                    handleIngredientChange(
-                      ingredient.tempId,
-                      "quantity",
-                      e.target.value
-                    )
-                  }
-                  className="form-input"
-                  placeholder="Qty"
-                  onWheel={(e) => {
-                    e.target.blur();
-                  }}
-                />
-                {/* Ingredient Unit */}
-                <select
-                  id={`ingredient-unit-${ingredient.tempId}`}
-                  value={ingredient.unit}
-                  onChange={(e) =>
-                    handleIngredientChange(
-                      ingredient.tempId,
-                      "unit",
-                      e.target.value
-                    )
-                  }
-                  className={"form-input"}
-                  required
-                >
-                  {unitOptions.map((option) => (
-                    <option
-                      key={option.value}
-                      value={option.value}
-                      disabled={option.disabled}
-                    >
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="ingredient-details">
+                  <input
+                    id={`ingredient-quantity-${ingredient.tempId}`}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={ingredient.quantity}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        ingredient.tempId,
+                        "quantity",
+                        e.target.value
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Qty"
+                    onWheel={(e) => {
+                      e.target.blur();
+                    }}
+                  />
+                  {/* Ingredient Unit */}
+                  <select
+                    id={`ingredient-unit-${ingredient.tempId}`}
+                    value={ingredient.unit}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        ingredient.tempId,
+                        "unit",
+                        e.target.value
+                      )
+                    }
+                    className={"form-input"}
+                    required
+                  >
+                    {unitOptions.map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
 
-                {/* Ingredient Notes */}
-                <div className="ingredient-notes-wrapper">
+                  {/* Ingredient Notes */}
                   <input
                     id={`ingredient-notes-${ingredient.tempId}`}
                     type="text"
