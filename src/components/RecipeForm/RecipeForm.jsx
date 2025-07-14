@@ -61,18 +61,22 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <label htmlFor="title" className="form-header">
             Recipe Title
           </label>
+          {validationErrors.title && (
+            <span className="field-error">{validationErrors.title}</span>
+          )}
           <input
             id="title"
             type="text"
             value={formData.title}
             onChange={(e) =>
-              handleInputChange("title", toTitleCase(e.target.value))
+              handleInputChange(
+                "title",
+                toTitleCase(e.target.value),
+                !!validationErrors.title
+              )
             }
             className={`form-input ${validationErrors.title ? "error" : ""}`}
           />
-          {validationErrors.title && (
-            <span className="field-error">{validationErrors.title}</span>
-          )}
         </div>
 
         {/* Category */}
@@ -80,10 +84,19 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <label htmlFor="category" className="form-header">
             Category
           </label>
+          {validationErrors.category && (
+            <span className="field-error">{validationErrors.category}</span>
+          )}
           <select
             id="category"
             value={formData.category}
-            onChange={(e) => handleInputChange("category", e.target.value)}
+            onChange={(e) =>
+              handleInputChange(
+                "category",
+                e.target.value,
+                !!validationErrors.category
+              )
+            }
             className={`form-input ${validationErrors.category ? "error" : ""}`}
           >
             <option value="" disabled>
@@ -97,9 +110,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 </option>
               ))}
           </select>
-          {validationErrors.category && (
-            <span className="field-error">{validationErrors.category}</span>
-          )}
         </div>
 
         {/* Servings */}
@@ -144,6 +154,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             </button>
           </div>
 
+          {/* TODO - fix ingredients validation error  */}
           {validationErrors.ingredients && (
             <span className="field-error">{validationErrors.ingredients}</span>
           )}
@@ -156,13 +167,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   id={`ingredient-name-${ingredient.tempId}`}
                   type="text"
                   value={ingredient.name || ""}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     handleIngredientChange(
                       ingredient.tempId,
                       "name",
-                      e.target.value.toLowerCase()
-                    )
-                  }
+                      e.target.value.toLowerCase(),
+                      validationErrors.ingredients ? "ingredients" : null
+                    );
+                  }}
                   className="ingredient-name"
                   placeholder="Ingredient name"
                 />

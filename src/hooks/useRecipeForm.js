@@ -86,7 +86,7 @@ export const useRecipeForm = (initialRecipe = null) => {
     }
   };
 
-  const handleIngredientChange = (tempId, field, value) => {
+  const handleIngredientChange = (tempId, field, value, clearError) => {
     setFormData((prev) => ({
       ...prev,
       ingredients: prev.ingredients.map((ingredient) =>
@@ -95,6 +95,10 @@ export const useRecipeForm = (initialRecipe = null) => {
           : ingredient
       ),
     }));
+
+    if (clearError) {
+      setValidationErrors((prev) => ({ ...prev, [clearError]: undefined }));
+    }
   };
 
   const handleInstructionChange = (index, value) => {
