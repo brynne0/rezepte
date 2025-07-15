@@ -4,6 +4,7 @@ const CategoryFilter = ({
   categories,
   selectedCategory,
   setSelectedCategory,
+  setSearchTerm,
 }) => {
   return (
     <div className="categories">
@@ -15,6 +16,7 @@ const CategoryFilter = ({
           }`}
           onClick={() => {
             setSelectedCategory(category);
+            setSearchTerm("");
           }}
         >
           {category}

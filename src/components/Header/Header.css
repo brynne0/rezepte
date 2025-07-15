@@ -66,7 +66,8 @@
 }
 
 .login-input,
-.login-btn {
+.header-btn,
+.search-bar-input {
   padding: 0.5rem;
   border-radius: 0.5rem;
   background: var(--sand);
@@ -78,13 +79,14 @@
   font-size: 0.8rem;
 }
 
-.login-btn {
-  cursor: pointer;
-  transition: all 0.2s ease;
+.search-bar {
+  gap: 0.25rem;
+  display: flex;
 }
 
-.login-btn:hover {
-  transform: translateY(-1px);
+.header-btn {
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .header-nav {

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useRecipe } from "../../hooks/useRecipe";
 import "./Recipe.css";
-import { Pencil, ShoppingBasket, ArrowBigLeft } from "lucide-react";
+import { Pencil, ShoppingBasket } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
 const Recipe = () => {

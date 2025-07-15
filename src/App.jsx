@@ -23,6 +23,7 @@ const defaultCategories = [
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("Alle Rezepte");
   const { recipes, loading } = useRecipes();
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Show loading screen
   if (loading) {
@@ -35,7 +36,10 @@ function App() {
 
   return (
     <Router>
-      <Header setSelectedCategory={setSelectedCategory} />
+      <Header
+        setSelectedCategory={setSelectedCategory}
+        setSearchTerm={setSearchTerm}
+      />
       <Routes>
         <Route
           path="/"
@@ -45,10 +49,12 @@ function App() {
                 categories={defaultCategories}
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
+                setSearchTerm={setSearchTerm}
               />
               <RecipeList
                 selectedCategory={selectedCategory}
                 recipes={recipes}
+                searchTerm={searchTerm}
               />
             </>
           }
