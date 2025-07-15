@@ -54,7 +54,7 @@ const Recipe = () => {
             <h3>Ingredients:</h3>
             {/* Grocery Cart */}
             <button className="cart-btn">
-              <ShoppingBasket size={24} />
+              <ShoppingBasket />
             </button>
           </div>
           <ul className="ingredient-list">
