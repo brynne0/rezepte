@@ -15,14 +15,6 @@ const Recipe = () => {
 
   return (
     <div className="recipe-container">
-      {/* Back Arrow
-      <ArrowBigLeft
-        className="recipe-back-arrow"
-        size={30}
-        onClick={() => {
-          navigate(-1);
-        }}
-      /> */}
       <div className="recipe-heading-container">
         <h1>{recipe.title}</h1>
 
