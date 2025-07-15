@@ -141,6 +141,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                   e.preventDefault();
                   setSearchTerm(e.target.elements.search.value);
                   setShowSearchBar(false);
+                  navigate("/");
                 }}
               >
                 <input id="search" type="text" className="search-bar-input" />
@@ -151,7 +152,6 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             )}
             <button
               onClick={() => {
-                navigate("/");
                 setShowSearchBar((prev) => !prev);
                 // Clear search when closing search bar
                 if (showSearchBar) {
