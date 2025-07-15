@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useRecipe } from "../../hooks/useRecipe";
 import "./Recipe.css";
-import { Pencil, ShoppingBasket, ArrowBigLeft } from "lucide-react";
+import { Pencil, ShoppingBasket } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
 const Recipe = () => {
@@ -15,14 +15,6 @@ const Recipe = () => {
 
   return (
     <div className="recipe-container">
-      {/* Back Arrow
-      <ArrowBigLeft
-        className="recipe-back-arrow"
-        size={30}
-        onClick={() => {
-          navigate(-1);
-        }}
-      /> */}
       <div className="recipe-heading-container">
         <h1>{recipe.title}</h1>
 

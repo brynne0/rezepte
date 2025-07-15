@@ -211,7 +211,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       )
                     }
                     className={"form-input"}
-                    required
                   >
                     {unitOptions.map((option) => (
                       <option
@@ -288,7 +287,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           </div>
         </div>
 
-        <div className="form-actions">
+        <div className={`form-actions ${isEditMode ? "edit" : ""}`}>
           {/* Delete Button */}
           {isEditMode && (
             <>

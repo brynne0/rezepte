@@ -4,15 +4,34 @@ import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signIn, signOut } from "../../services/auth";
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+// import useClickOutside from "../../hooks/useClickOutside";
 
-const Header = ({ setSelectedCategory }) => {
+const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const navigate = useNavigate();
+
+  // Login and logout state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showLogoutForm, setShowLogoutForm] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const { isLoggedIn, isMe } = useAuth();
+
+  // Search state
+  const [showSearchBar, setShowSearchBar] = useState(false);
+
+  // Refs for click outside detection
+  // const searchBarRef = useClickOutside(() => {
+  //   setShowSearchBar(false);
+  // });
+
+  // const loginFormRef = useClickOutside(() => {
+  //   setShowLoginForm(false);
+  // });
+
+  // const logoutFormRef = useClickOutside(() => {
+  //   setShowLogoutForm(false);
+  // });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -70,6 +89,7 @@ const Header = ({ setSelectedCategory }) => {
               <form onSubmit={handleLogin} className="login-form">
                 <div className="login-inputs">
                   <input
+                    id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -77,6 +97,7 @@ const Header = ({ setSelectedCategory }) => {
                     className="login-input"
                   />
                   <input
+                    id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -84,16 +105,18 @@ const Header = ({ setSelectedCategory }) => {
                     className="login-input"
                   />
                 </div>
-                <button className="login-btn" type="submit">
+                <button className="header-btn" type="submit">
                   Login
                 </button>
               </form>
             )}
             {/* Logout form */}
             {showLogoutForm && (
-              <button className="login-btn" onClick={handleLogout}>
-                Logout
-              </button>
+              <div>
+                <button className="header-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
             )}
           </div>
 
@@ -110,8 +133,42 @@ const Header = ({ setSelectedCategory }) => {
           </h1>
 
           <nav className="header-nav">
-            {/* Search Recipe */}
-            <button className="icon-btn">
+            {/*  Search Recipe  */}
+            {showSearchBar && (
+              <form
+                className="search-bar"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSearchTerm(e.target.elements.search.value);
+                  setShowSearchBar(false);
+                }}
+              >
+                <input id="search" type="text" className="search-bar-input" />
+                <button type="submit" className="header-btn">
+                  Search
+                </button>
+              </form>
+            )}
+            <button
+              onClick={() => {
+                navigate("/");
+                setShowSearchBar((prev) => !prev);
+                // Clear search when closing search bar
+                if (showSearchBar) {
+                  setSearchTerm("");
+                }
+                // Focus on search bar
+                if (!showSearchBar) {
+                  setTimeout(() => {
+                    const searchInput = document.getElementById("search");
+                    if (searchInput) {
+                      searchInput.focus();
+                    }
+                  }, 0);
+                }
+              }}
+              className="icon-btn"
+            >
               <Search size={28} />
             </button>
             {/* Grocery List */}

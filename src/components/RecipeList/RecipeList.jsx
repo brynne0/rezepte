@@ -2,14 +2,22 @@ import { useNavigate } from "react-router-dom";
 import RecipeCard from "../RecipeCard/RecipeCard";
 import "./RecipeList.css";
 
-const RecipeList = ({ selectedCategory, recipes }) => {
+const RecipeList = ({ selectedCategory, recipes, searchTerm }) => {
   const navigate = useNavigate();
 
-  // Filter recipes based on selected category
-  const filteredRecipes =
-    selectedCategory === "Alle Rezepte"
-      ? recipes
-      : recipes.filter((r) => r.category === selectedCategory);
+  // First filter by search term if it exists
+  const searchFilteredRecipes = searchTerm
+    ? recipes.filter((recipe) =>
+        recipe.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : recipes;
+
+  // Then filter by category (only if not searching or if "Alle Rezepte" is selected)
+  const filteredRecipes = searchTerm
+    ? searchFilteredRecipes // When searching, show all search results regardless of category
+    : selectedCategory === "Alle Rezepte"
+    ? recipes
+    : recipes.filter((r) => r.category === selectedCategory);
 
   return (
     <>
@@ -23,6 +31,9 @@ const RecipeList = ({ selectedCategory, recipes }) => {
           />
         ))}
       </div>
+      {filteredRecipes.length === 0 && searchTerm && (
+        <p>No recipes for "{searchTerm}" found</p>
+      )}
     </>
   );
 };
