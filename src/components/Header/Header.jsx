@@ -4,7 +4,7 @@ import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signIn, signOut } from "../../services/auth";
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import useClickOutside from "../../hooks/useClickOutside";
+// import useClickOutside from "../../hooks/useClickOutside";
 
 const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const navigate = useNavigate();
@@ -21,17 +21,17 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const [showSearchBar, setShowSearchBar] = useState(false);
 
   // Refs for click outside detection
-  const searchBarRef = useClickOutside(() => {
-    setShowSearchBar(false);
-  });
+  // const searchBarRef = useClickOutside(() => {
+  //   setShowSearchBar(false);
+  // });
 
-  const loginFormRef = useClickOutside(() => {
-    setShowLoginForm(false);
-  });
+  // const loginFormRef = useClickOutside(() => {
+  //   setShowLoginForm(false);
+  // });
 
-  const logoutFormRef = useClickOutside(() => {
-    setShowLogoutForm(false);
-  });
+  // const logoutFormRef = useClickOutside(() => {
+  //   setShowLogoutForm(false);
+  // });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -86,11 +86,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             {loginMessage && <div>{loginMessage}</div>}
             {/* Login form - email and password */}
             {showLoginForm && (
-              <form
-                onSubmit={handleLogin}
-                className="login-form"
-                ref={loginFormRef}
-              >
+              <form onSubmit={handleLogin} className="login-form">
                 <div className="login-inputs">
                   <input
                     id="email"
@@ -116,7 +112,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             )}
             {/* Logout form */}
             {showLogoutForm && (
-              <div ref={logoutFormRef}>
+              <div>
                 <button className="header-btn" onClick={handleLogout}>
                   Logout
                 </button>
@@ -141,7 +137,6 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             {showSearchBar && (
               <form
                 className="search-bar"
-                ref={searchBarRef}
                 onSubmit={(e) => {
                   e.preventDefault();
                   setSearchTerm(e.target.elements.search.value);
