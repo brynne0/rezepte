@@ -83,7 +83,6 @@
   box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
   border: 0.0625rem solid var(--brown);
   font-size: 1rem;
-  font-size: 0.8rem;
 }
 
 .search-bar {
@@ -127,15 +126,16 @@
 }
 
 /* Responsive Design */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .header {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
   }
+
   .header-content {
     display: flex;
     flex-direction: column;
     height: auto;
-    padding: 0.5rem 0;
+    padding: 0.25rem 0;
     gap: 0.5rem;
   }
 
@@ -171,7 +171,7 @@
 }
 
 /* When login input form intersects with heading, stack vertically */
-@media (max-width: 1150px) {
+@media (max-width: 1250px) {
   .login-inputs {
     flex-direction: column;
   }
