@@ -5,7 +5,7 @@
   position: sticky;
   top: 0;
   background-color: var(--cream);
-  z-index: 100;
+  gap: 0.25rem;
 }
 
 .header-content {
@@ -38,10 +38,12 @@
   margin: auto;
   width: max-content;
   height: max-content;
-  z-index: 101;
+  z-index: 100;
   cursor: pointer;
   font-optical-sizing: auto;
   transform: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .login-wrapper {
@@ -50,14 +52,19 @@
   align-items: center;
 }
 
-.login-form {
+.login-form,
+.signup-form {
   display: flex;
   gap: 0.25rem;
   justify-content: center;
   align-items: center;
   background: var(--cream);
-  z-index: 102;
-  padding: 0.5rem;
+  z-index: 101;
+  /* padding: 0.5rem; */
+}
+
+.signup-form .login-inputs {
+  flex-direction: column;
 }
 
 .login-inputs {
@@ -82,6 +89,13 @@
 .search-bar {
   gap: 0.25rem;
   display: flex;
+  z-index: 101;
+}
+
+.search-bar-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
 }
 
 .header-btn {
@@ -115,7 +129,7 @@
 /* Responsive Design */
 @media (max-width: 600px) {
   .header {
-    margin-bottom: 0;
+    margin-bottom: 0.25rem;
   }
   .header-content {
     display: flex;
@@ -149,6 +163,10 @@
 
   .login-form {
     flex-direction: column;
+  }
+
+  .search-bar-wrapper {
+    margin-top: 0;
   }
 }
 
