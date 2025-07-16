@@ -54,8 +54,11 @@ const Recipe = () => {
               <li key={ingredient.id} className="ingredient">
                 <input type="checkbox" id={`ingredient-${ingredient.id}`} />
                 <label htmlFor={`ingredient-${ingredient.id}`}>
+                  {/* Make quantity and unit bold */}
+                  {/* <strong> */}
                   {ingredient.quantity && `${ingredient.quantity} `}
                   {ingredient.unit && `${ingredient.unit} `}
+                  {/* </strong> */}
                   {ingredient.name}
                 </label>
               </li>

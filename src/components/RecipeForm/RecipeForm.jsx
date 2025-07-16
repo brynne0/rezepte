@@ -1,6 +1,7 @@
 import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
 import "./RecipeForm.css";
+import { useState } from "react";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const {
@@ -39,6 +40,31 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     { value: "clove", label: "clove" },
     { value: "cloves", label: "cloves" },
   ];
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Delete Recipe Modal Component
+  const DeleteRecipeModal = ({ isOpen, onClose, onConfirm }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="delete-modal-overlay" onClick={onClose}>
+        <div className="delete-modal-content">
+          <p className="delete-modal-message">
+            Are you sure you want to delete this recipe?
+          </p>
+          <div className="delete-modal-actions">
+            <button onClick={onClose} className="cancel-btn">
+              Cancel
+            </button>
+            <button onClick={onConfirm} className="delete-btn">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="recipe-form-container">
@@ -294,16 +320,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             <>
               <button
                 type="button"
-                onClick={() => {
-                  if (
-                    // TODO - change this to a popup
-                    window.confirm(
-                      "Are you sure you want to delete this recipe?"
-                    )
-                  ) {
-                    handleDelete();
-                  }
-                }}
+                onClick={() => setIsDeleteModalOpen(true)}
                 className="delete-btn"
               >
                 Delete Recipe
@@ -326,6 +343,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           </button>
         </div>
       </form>
+
+      {/* Delete Modal */}
+      <DeleteRecipeModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        recipeName={formData.title}
+      />
     </div>
   );
 };
