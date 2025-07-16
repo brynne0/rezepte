@@ -16,11 +16,9 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
-  position: relative;
 }
 
 .form-back-arrow {
-  position: absolute;
   left: 3rem;
   cursor: pointer;
 }
@@ -327,25 +325,10 @@ select.form-input {
     grid-column: 1;
   }
 
-  /* Input and textarea font size */
-  /* .form-input,
-  .instruction-textarea {
-    font-size: 0.8rem;
-  } */
-
-  /* Actions and buttons */
-  /* .form-actions {
-    flex-direction: column-reverse;
-  }
-    /*
-  .form-actions button:first-child {
-    margin-right: 0;
-  } */
-
   .cancel-btn,
   .primary-btn,
   .delete-btn {
     padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 }

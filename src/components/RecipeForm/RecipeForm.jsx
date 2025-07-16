@@ -236,13 +236,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       )
                     }
                     className="form-input"
-                    placeholder={`Notes${isEditMode ? "" : " (optional)"}`}
+                    placeholder={isEditMode ? "Notes" : "Extra notes"}
                   />
                   {formData.ingredients.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeIngredient(ingredient.tempId)}
                       className="remove-btn"
+                      aria-label="Remove ingredient"
                     >
                       <Trash2 size={16} />
                     </button>

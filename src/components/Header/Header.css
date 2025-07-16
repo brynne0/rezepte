@@ -38,7 +38,6 @@
   margin: auto;
   width: max-content;
   height: max-content;
-  z-index: 100;
   cursor: pointer;
   font-optical-sizing: auto;
   transform: none;
@@ -59,7 +58,6 @@
   justify-content: center;
   align-items: center;
   background: var(--cream);
-  z-index: 101;
   /* padding: 0.5rem; */
 }
 
@@ -88,7 +86,6 @@
 .search-bar {
   gap: 0.25rem;
   display: flex;
-  z-index: 101;
 }
 
 .search-bar-wrapper {
