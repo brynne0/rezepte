@@ -50,7 +50,7 @@
 
 /* Input boxes */
 .form-group {
-  margin-bottom: 0.8rem;
+  margin-bottom: 1rem;
 }
 
 .form-input {
@@ -72,7 +72,7 @@
 }
 
 .form-input:invalid {
-  color: #757575;
+  color: grey;
 }
 
 .form-input select,
@@ -95,7 +95,7 @@ select.form-input {
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
   border: 0.0625rem solid var(--pink);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 }
 
 .form-input.error {
@@ -110,9 +110,8 @@ select.form-input {
 .field-error {
   display: block;
   color: var(--error_red);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   margin-top: 0.25rem;
-  font-weight: 500;
 }
 
 /* Ingredients */
@@ -272,7 +271,7 @@ select.form-input {
 }
 
 /* Responsive Design */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   /* Container adjustments */
   .add-recipe-container {
     border-radius: 0.5rem;
@@ -320,7 +319,7 @@ select.form-input {
     flex: 0 0 60px;
   }
   .ingredient-details select {
-    flex: 0 0 80px;
+    flex: 0 0 100px;
   }
   .ingredient-row .remove-btn {
     justify-self: end;
@@ -329,10 +328,10 @@ select.form-input {
   }
 
   /* Input and textarea font size */
-  .form-input,
+  /* .form-input,
   .instruction-textarea {
     font-size: 0.8rem;
-  }
+  } */
 
   /* Actions and buttons */
   /* .form-actions {
