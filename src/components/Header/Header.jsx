@@ -9,14 +9,13 @@ import { useAuth } from "../../hooks/useAuth";
 const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const navigate = useNavigate();
 
-  // Login and logout state
+  // Single auth state 
+  const [authState, setAuthState] = useState("closed"); // 'closed', 'options', 'login', 'signup', 'logout'
+
+  // Form input states
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showLoginForm, setShowLoginForm] = useState(false);
-  const [showLogoutForm, setShowLogoutForm] = useState(false);
-  const [showSignUpForm, setShowSignUpForm] = useState(false);
-  const [showLoginOptions, setShowLoginOptions] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const { isLoggedIn, isMe } = useAuth();
 
@@ -29,11 +28,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   // });
 
   // const loginFormRef = useClickOutside(() => {
-  //   setShowLoginForm(false);
-  // });
-
-  // const logoutFormRef = useClickOutside(() => {
-  //   setShowLogoutForm(false);
+  //   setAuthState('closed');
   // });
 
   const handleLogin = async (e) => {
@@ -53,7 +48,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
       setLoginMessage("");
     }, 3000);
 
-    setShowLoginForm(false);
+    setAuthState("closed");
     setUsername("");
     setPassword("");
   };
@@ -73,7 +68,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
       setLoginMessage("");
     }, 3000);
 
-    setShowSignUpForm(false);
+    setAuthState("closed");
     setEmail("");
     setUsername("");
     setPassword("");
@@ -87,7 +82,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
       setLoginMessage("");
     }, 3000);
 
-    setShowLogoutForm(false);
+    setAuthState("closed");
   };
 
   return (
@@ -98,51 +93,46 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
           <div className="login-wrapper">
             <div
               onClick={() => {
+                if (loginMessage) return; // Don't do anything if there's a message
+
                 if (isLoggedIn) {
-                  setShowLogoutForm((prev) => !prev);
+                  setAuthState((prev) =>
+                    prev === "logout" ? "closed" : "logout"
+                  );
                 } else {
-                  // If any form is open, close all forms
-                  if (showLoginOptions || showSignUpForm || showLoginForm) {
-                    setShowLoginOptions(false);
-                    setShowSignUpForm(false);
-                    setShowLoginForm(false);
-                  } else {
-                    // If no forms are open, show login options
-                    setShowLoginOptions(true);
-                  }
+                  setAuthState((prev) =>
+                    prev === "closed" ? "options" : "closed"
+                  );
                 }
               }}
             >
               <Squirrel className="header-logo" />
               {isLoggedIn && isMe && <Squirrel className="header-logo-2" />}
             </div>
+
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
+
             {/* Show sign up or log in options */}
-            {showLoginOptions && (
+            {authState === "options" && (
               <div className="login-inputs">
                 <button
                   className="header-btn"
-                  onClick={() => {
-                    setShowLoginForm(true);
-                    setShowLoginOptions(false);
-                  }}
+                  onClick={() => setAuthState("login")}
                 >
                   Login
                 </button>
                 <button
                   className="header-btn"
-                  onClick={() => {
-                    setShowSignUpForm(true);
-                    setShowLoginOptions(false);
-                  }}
+                  onClick={() => setAuthState("signup")}
                 >
                   Sign Up
                 </button>
               </div>
             )}
-            {/* Sign up form  */}
-            {showSignUpForm && (
+
+            {/* Sign up form */}
+            {authState === "signup" && (
               <form onSubmit={handleSignUp} className="signup-form">
                 <div className="login-inputs">
                   <input
@@ -178,13 +168,14 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 </button>
               </form>
             )}
+
             {/* Login form - username and password */}
-            {showLoginForm && (
+            {authState === "login" && (
               <form onSubmit={handleLogin} className="login-form">
                 <div className="login-inputs">
                   <input
                     id="username"
-                    type="test"
+                    type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username"
@@ -206,8 +197,9 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 </button>
               </form>
             )}
+
             {/* Logout form */}
-            {showLogoutForm && (
+            {authState === "logout" && (
               <div>
                 <button className="header-btn" onClick={handleLogout}>
                   Logout
