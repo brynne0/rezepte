@@ -1,7 +1,7 @@
 import "./Header.css";
 import { useNavigate } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
-import { signIn, signOut } from "../../services/auth";
+import { signIn, signUp, signOut } from "../../services/auth";
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 // import useClickOutside from "../../hooks/useClickOutside";
@@ -11,9 +11,12 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
 
   // Login and logout state
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showLogoutForm, setShowLogoutForm] = useState(false);
+  const [showSignUpForm, setShowSignUpForm] = useState(false);
+  const [showLoginOptions, setShowLoginOptions] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const { isLoggedIn, isMe } = useAuth();
 
@@ -35,7 +38,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(username, password);
     if (error) {
       console.error("Login error:", error.message);
     }
@@ -51,7 +54,28 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
     }, 3000);
 
     setShowLoginForm(false);
+    setUsername("");
+    setPassword("");
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+
+    const { error } = await signUp(email, username, password);
+
+    if (error) {
+      setLoginMessage("Sign up failed. Please try again.");
+    } else {
+      setLoginMessage("Account created!");
+    }
+
+    setTimeout(() => {
+      setLoginMessage("");
+    }, 3000);
+
+    setShowSignUpForm(false);
     setEmail("");
+    setUsername("");
     setPassword("");
   };
 
@@ -73,20 +97,53 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
           {/* Login and Logout */}
           <div className="login-wrapper">
             <div
-              onClick={() =>
-                isLoggedIn
-                  ? setShowLogoutForm((prev) => !prev)
-                  : setShowLoginForm((prev) => !prev)
-              }
+              onClick={() => {
+                if (isLoggedIn) {
+                  setShowLogoutForm((prev) => !prev);
+                } else {
+                  // If any form is open, close all forms
+                  if (showLoginOptions || showSignUpForm || showLoginForm) {
+                    setShowLoginOptions(false);
+                    setShowSignUpForm(false);
+                    setShowLoginForm(false);
+                  } else {
+                    // If no forms are open, show login options
+                    setShowLoginOptions(true);
+                  }
+                }
+              }}
             >
               <Squirrel className="header-logo" />
               {isLoggedIn && isMe && <Squirrel className="header-logo-2" />}
             </div>
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
-            {/* Login form - email and password */}
-            {showLoginForm && (
-              <form onSubmit={handleLogin} className="login-form">
+            {/* Show sign up or log in options */}
+            {showLoginOptions && (
+              <div className="login-inputs">
+                <button
+                  className="header-btn"
+                  onClick={() => {
+                    setShowLoginForm(true);
+                    setShowLoginOptions(false);
+                  }}
+                >
+                  Login
+                </button>
+                <button
+                  className="header-btn"
+                  onClick={() => {
+                    setShowSignUpForm(true);
+                    setShowLoginOptions(false);
+                  }}
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
+            {/* Sign up form  */}
+            {showSignUpForm && (
+              <form onSubmit={handleSignUp} className="signup-form">
                 <div className="login-inputs">
                   <input
                     id="email"
@@ -95,6 +152,16 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
                     className="login-input"
+                    required
+                  />
+                  <input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Username"
+                    className="login-input"
+                    required
                   />
                   <input
                     id="password"
@@ -103,6 +170,35 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                     className="login-input"
+                    required
+                  />
+                </div>
+                <button className="header-btn" type="submit">
+                  Sign Up
+                </button>
+              </form>
+            )}
+            {/* Login form - username and password */}
+            {showLoginForm && (
+              <form onSubmit={handleLogin} className="login-form">
+                <div className="login-inputs">
+                  <input
+                    id="username"
+                    type="test"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Username"
+                    className="login-input"
+                    required
+                  />
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="login-input"
+                    required
                   />
                 </div>
                 <button className="header-btn" type="submit">

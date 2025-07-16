@@ -42,6 +42,8 @@
   cursor: pointer;
   font-optical-sizing: auto;
   transform: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .login-wrapper {
@@ -50,14 +52,19 @@
   align-items: center;
 }
 
-.login-form {
+.login-form,
+.signup-form {
   display: flex;
   gap: 0.25rem;
   justify-content: center;
   align-items: center;
   background: var(--cream);
   z-index: 101;
-  padding: 0.5rem;
+  /* padding: 0.5rem; */
+}
+
+.signup-form .login-inputs {
+  flex-direction: column;
 }
 
 .login-inputs {
