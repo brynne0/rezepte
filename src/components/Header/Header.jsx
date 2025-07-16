@@ -133,23 +133,6 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
           </h1>
 
           <nav className="header-nav">
-            {/*  Search Recipe  */}
-            {showSearchBar && (
-              <form
-                className="search-bar"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSearchTerm(e.target.elements.search.value);
-                  setShowSearchBar(false);
-                  navigate("/");
-                }}
-              >
-                <input id="search" type="text" className="search-bar-input" />
-                <button type="submit" className="header-btn">
-                  Search
-                </button>
-              </form>
-            )}
             <button
               onClick={() => {
                 setShowSearchBar((prev) => !prev);
@@ -185,6 +168,25 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
               </button>
             )}
           </nav>
+        </div>
+        {/*  Search Recipe  */}
+        <div className="search-bar-wrapper">
+          {showSearchBar && (
+            <form
+              className="search-bar"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSearchTerm(e.target.elements.search.value);
+                setShowSearchBar(false);
+                navigate("/");
+              }}
+            >
+              <input id="search" type="text" className="search-bar-input" />
+              <button type="submit" className="header-btn">
+                Search
+              </button>
+            </form>
+          )}
         </div>
       </header>
     </>
