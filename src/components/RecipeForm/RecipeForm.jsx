@@ -188,26 +188,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           />
         </div>
 
-        {/* Source */}
-        <div className="form-group">
-          <label htmlFor="source" className="form-header">
-            Source
-          </label>
-          <input
-            id="source"
-            type="text"
-            value={formData.source}
-            onChange={(e) => handleInputChange("source", e.target.value)}
-            className="form-input"
-            placeholder="Source link or note"
-          />
-        </div>
-
         {/* Ingredients */}
         <div className="form-group">
-          <div className="form-header-left">
-            <label className="form-header">Ingredients</label>
-          </div>
+          <label className="form-header">Ingredients</label>
 
           {validationErrors.ingredients && (
             <span className="field-error">{validationErrors.ingredients}</span>
@@ -315,9 +298,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Instructions */}
         <div className="form-group">
-          <div className="form-header-left">
-            <label className="form-header">Instructions</label>
-          </div>
+          <label className="form-header">Instructions</label>
 
           <div className="instructions-list">
             {formData.instructions.map((instruction, index) => (
@@ -346,6 +327,21 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               <Plus size={16} />
             </button>
           </div>
+        </div>
+
+        {/* Source */}
+        <div className="form-group">
+          <label htmlFor="source" className="form-header">
+            Source
+          </label>
+          <input
+            id="source"
+            type="text"
+            value={formData.source}
+            onChange={(e) => handleInputChange("source", e.target.value)}
+            className="form-input"
+            placeholder="Source link or note"
+          />
         </div>
 
         <div className={`form-actions ${isEditMode ? "edit" : ""}`}>

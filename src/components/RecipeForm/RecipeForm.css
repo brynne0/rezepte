@@ -31,16 +31,10 @@
   font-weight: 700;
 }
 
-.form-header-left {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
 .form-header {
-  display: block;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
@@ -181,6 +175,7 @@ select.form-input {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
+  padding-top: 1rem;
 }
 
 .edit button:first-child {
@@ -271,7 +266,7 @@ select.form-input {
 .add-btn-wrapper {
   display: flex;
   justify-content: center;
-  padding: 1rem;
+  padding: 0.5rem;
 }
 
 /* Delete Modal */
@@ -334,9 +329,6 @@ select.form-input {
   .form-group {
     margin-bottom: 0.5rem;
   }
-  .form-header-left {
-    margin-bottom: 0rem;
-  }
 
   /* Ingredient rows and fields */
   .ingredient-row {
@@ -367,7 +359,7 @@ select.form-input {
   .cancel-btn,
   .primary-btn,
   .delete-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
   }
 }
