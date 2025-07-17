@@ -2,16 +2,18 @@
 
 :root {
   /* Color scheme and background */
-  --cream: #ede1c5;
-  --sand: rgba(255, 255, 255, 0.6);
+  --cream: #f2e7d2;
+  --cream_opaque: #ffffff99;
   --light_brown: #523f19bf;
-  --brown: #534019;
+  --brown: #523f19;
   --dark_brown: #423314;
   --red: #933c1f;
   --dark_red: #7e341b;
   --error_red: #ef4444;
+  --error_shadow: #ef444411;
   --pink: #fee2e2;
-  --green: rgb(42, 144, 93);
+  --green: #2a905d;
+  --shadow_black: #0000000d;
 
   background-color: var(--cream);
   color-scheme: light dark;
@@ -25,7 +27,7 @@
   font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
   line-height: 1.5;
-  color: #433314;
+  color: var(--dark_brown);
 
   /* Font rendering */
   font-synthesis: none;
