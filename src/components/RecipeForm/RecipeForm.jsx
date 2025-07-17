@@ -1,7 +1,7 @@
 import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
 import "./RecipeForm.css";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const {
@@ -42,6 +42,37 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   ];
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const AutoResizeTextarea = ({ value, onChange, onKeyDown, className }) => {
+    const textareaRef = useRef(null);
+
+    const resizeTextarea = () => {
+      const textarea = textareaRef.current;
+      if (textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = textarea.scrollHeight + "px";
+      }
+    };
+
+    useEffect(() => {
+      resizeTextarea();
+    }, [value]); // Resize when value changes
+
+    const handleChange = (e) => {
+      onChange(e);
+      resizeTextarea();
+    };
+
+    return (
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={handleChange}
+        onKeyDown={onKeyDown}
+        className={className}
+      />
+    );
+  };
 
   // Delete Recipe Modal Component
   const DeleteRecipeModal = ({ isOpen, onClose, onConfirm }) => {
@@ -293,14 +324,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             {formData.instructions.map((instruction, index) => (
               <div key={index} className="instruction-row">
                 <span className="step-number">{index + 1}.</span>
-                <textarea
+                <AutoResizeTextarea
                   value={instruction}
                   onChange={(e) =>
                     handleInstructionChange(index, e.target.value)
                   }
-                  className="instruction-textarea"
-                  rows="2"
                   onKeyDown={handleEnter}
+                  className="instruction-textarea"
                 />
                 <button
                   type="button"
