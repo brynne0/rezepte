@@ -31,8 +31,7 @@
   font-weight: 700;
 }
 
-.form-ingredients-header,
-.form-instructions-header {
+.form-header-left {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -181,7 +180,6 @@ select.form-input {
 .form-actions {
   display: flex;
   gap: 1rem;
-  padding-top: 0.5rem;
   justify-content: flex-end;
 }
 
@@ -270,6 +268,12 @@ select.form-input {
   transform: translateY(-1px);
 }
 
+.add-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
 /* Delete Modal */
 .delete-modal-overlay {
   position: fixed;
@@ -330,8 +334,7 @@ select.form-input {
   .form-group {
     margin-bottom: 0.5rem;
   }
-  .form-ingredients-header,
-  .form-instructions-header {
+  .form-header-left {
     margin-bottom: 0rem;
   }
 

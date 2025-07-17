@@ -205,11 +205,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Ingredients */}
         <div className="form-group">
-          <div className="form-ingredients-header">
+          <div className="form-header-left">
             <label className="form-header">Ingredients</label>
-            <button type="button" onClick={addIngredient} className="add-btn">
-              <Plus size={16} />
-            </button>
           </div>
 
           {validationErrors.ingredients && (
@@ -309,15 +306,17 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               </div>
             ))}
           </div>
+          <div className="add-btn-wrapper">
+            <button type="button" onClick={addIngredient} className="add-btn">
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Instructions */}
         <div className="form-group">
-          <div className="form-instructions-header">
+          <div className="form-header-left">
             <label className="form-header">Instructions</label>
-            <button type="button" onClick={addInstruction} className="add-btn">
-              <Plus size={16} />
-            </button>
           </div>
 
           <div className="instructions-list">
@@ -341,6 +340,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 </button>
               </div>
             ))}
+          </div>
+          <div className="add-btn-wrapper">
+            <button type="button" onClick={addInstruction} className="add-btn">
+              <Plus size={16} />
+            </button>
           </div>
         </div>
 

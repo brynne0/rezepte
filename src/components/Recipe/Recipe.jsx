@@ -6,10 +6,11 @@ import { useAuth } from "../../hooks/useAuth";
 
 const Recipe = () => {
   const { slug } = useParams();
-  const { recipe, error } = useRecipe(slug);
+  const { recipe, loading, error } = useRecipe(slug);
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
 
+  if (loading) return;
   if (error) return <div>Error: {error}</div>;
   if (!recipe) return <div>Recipe not found</div>;
 
