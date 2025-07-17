@@ -6,10 +6,11 @@ import { useAuth } from "../../hooks/useAuth";
 
 const Recipe = () => {
   const { slug } = useParams();
-  const { recipe, error } = useRecipe(slug);
+  const { recipe, loading, error } = useRecipe(slug);
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
 
+  if (loading) return;
   if (error) return <div>Error: {error}</div>;
   if (!recipe) return <div>Recipe not found</div>;
 
@@ -54,8 +55,11 @@ const Recipe = () => {
               <li key={ingredient.id} className="ingredient">
                 <input type="checkbox" id={`ingredient-${ingredient.id}`} />
                 <label htmlFor={`ingredient-${ingredient.id}`}>
+                  {/* Make quantity and unit bold */}
+                  {/* <strong> */}
                   {ingredient.quantity && `${ingredient.quantity} `}
                   {ingredient.unit && `${ingredient.unit} `}
+                  {/* </strong> */}
                   {ingredient.name}
                 </label>
               </li>
@@ -80,12 +84,22 @@ const Recipe = () => {
 
       {/* Source */}
       {recipe.source && (
-        <>
-          <div className="recipe-subheading">
-            <h3>Source:</h3>
-            {recipe.source}
-          </div>
-        </>
+        <div className="recipe-subheading">
+          <h3>Source:</h3>
+
+          {/^https?:\/\/[^\s]+/.test(recipe.source) ? (
+            <a
+              href={recipe.source.match(/^https?:\/\/[^\s]+/)[0]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="source-link"
+            >
+              {recipe.source}
+            </a>
+          ) : (
+            <span>{recipe.source}</span>
+          )}
+        </div>
       )}
     </div>
   );

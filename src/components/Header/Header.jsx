@@ -1,5 +1,5 @@
 import "./Header.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signIn, signUp, signOut } from "../../services/auth";
 import { useState } from "react";
@@ -8,8 +8,12 @@ import { useAuth } from "../../hooks/useAuth";
 
 const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isEditingOrAdding =
+    location.pathname === "/add-recipe" ||
+    location.pathname.startsWith("/edit-recipe");
 
-  // Single auth state 
+  // Single auth state
   const [authState, setAuthState] = useState("closed"); // 'closed', 'options', 'login', 'signup', 'logout'
 
   // Form input states
@@ -220,43 +224,48 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             Rezepte
           </h1>
 
-          <nav className="header-nav">
-            <button
-              onClick={() => {
-                setShowSearchBar((prev) => !prev);
-                // Clear search when closing search bar
-                if (showSearchBar) {
-                  setSearchTerm("");
-                }
-                // Focus on search bar
-                if (!showSearchBar) {
-                  setTimeout(() => {
-                    const searchInput = document.getElementById("search");
-                    if (searchInput) {
-                      searchInput.focus();
+          {!isEditingOrAdding && (
+            <>
+              <nav className="header-nav">
+                <button
+                  onClick={() => {
+                    setShowSearchBar((prev) => !prev);
+                    // Clear search when closing search bar
+                    if (showSearchBar) {
+                      setSearchTerm("");
                     }
-                  }, 0);
-                }
-              }}
-              className="icon-btn"
-            >
-              <Search size={28} />
-            </button>
-            {/* Grocery List */}
-            <button className="icon-btn">
-              <ShoppingBasket size={28} />
-            </button>
-            {/* Plus Recipe - only display if user logged in */}
-            {isLoggedIn && (
-              <button
-                className="icon-btn"
-                onClick={() => navigate("/add-recipe")}
-              >
-                <Plus size={28} />
-              </button>
-            )}
-          </nav>
+                    // Focus on search bar
+                    if (!showSearchBar) {
+                      setTimeout(() => {
+                        const searchInput = document.getElementById("search");
+                        if (searchInput) {
+                          searchInput.focus();
+                        }
+                      }, 0);
+                    }
+                  }}
+                  className="icon-btn"
+                >
+                  <Search size={28} />
+                </button>
+                {/* Grocery List */}
+                <button className="icon-btn">
+                  <ShoppingBasket size={28} />
+                </button>
+                {/* Plus Recipe - only display if user logged in */}
+                {isLoggedIn && (
+                  <button
+                    className="icon-btn"
+                    onClick={() => navigate("/add-recipe")}
+                  >
+                    <Plus size={28} />
+                  </button>
+                )}
+              </nav>
+            </>
+          )}
         </div>
+
         {/*  Search Recipe  */}
         <div className="search-bar-wrapper">
           {showSearchBar && (

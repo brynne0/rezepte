@@ -38,7 +38,6 @@
   margin: auto;
   width: max-content;
   height: max-content;
-  z-index: 100;
   cursor: pointer;
   font-optical-sizing: auto;
   transform: none;
@@ -59,7 +58,6 @@
   justify-content: center;
   align-items: center;
   background: var(--cream);
-  z-index: 101;
   /* padding: 0.5rem; */
 }
 
@@ -77,10 +75,10 @@
 .search-bar-input {
   padding: 0.5rem;
   border-radius: 0.5rem;
-  background: var(--sand);
+  background: var(--cream_opaque);
   color: var(--dark_brown);
   font-family: inherit;
-  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
   border: 0.0625rem solid var(--brown);
   font-size: 1rem;
 }
@@ -88,7 +86,6 @@
 .search-bar {
   gap: 0.25rem;
   display: flex;
-  z-index: 101;
 }
 
 .search-bar-wrapper {
@@ -120,7 +117,7 @@
 }
 
 .icon-btn:hover {
-  background: var(--sand);
+  background: var(--cream_opaque);
   border-radius: 50%;
   display: flex;
 }

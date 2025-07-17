@@ -1,6 +1,7 @@
 import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
 import "./RecipeForm.css";
+import { useState, useEffect, useRef } from "react";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const {
@@ -39,6 +40,62 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     { value: "clove", label: "clove" },
     { value: "cloves", label: "cloves" },
   ];
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const AutoResizeTextarea = ({ value, onChange, onKeyDown, className }) => {
+    const textareaRef = useRef(null);
+
+    const resizeTextarea = () => {
+      const textarea = textareaRef.current;
+      if (textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = textarea.scrollHeight + "px";
+      }
+    };
+
+    useEffect(() => {
+      resizeTextarea();
+    }, [value]); // Resize when value changes
+
+    const handleChange = (e) => {
+      onChange(e);
+      resizeTextarea();
+    };
+
+    return (
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={handleChange}
+        onKeyDown={onKeyDown}
+        className={className}
+      />
+    );
+  };
+
+  // Delete Recipe Modal Component
+  const DeleteRecipeModal = ({ isOpen, onClose, onConfirm }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="delete-modal-overlay" onClick={onClose}>
+        <div className="delete-modal-content">
+          <p className="delete-modal-message">
+            Are you sure you want to delete this recipe?
+          </p>
+          <div className="delete-modal-actions">
+            <button onClick={onClose} className="cancel-btn">
+              Cancel
+            </button>
+            <button onClick={onConfirm} className="delete-btn">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="recipe-form-container">
@@ -131,29 +188,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           />
         </div>
 
-        {/* Source */}
-        <div className="form-group">
-          <label htmlFor="source" className="form-header">
-            Source
-          </label>
-          <input
-            id="source"
-            type="text"
-            value={formData.source}
-            onChange={(e) => handleInputChange("source", e.target.value)}
-            className="form-input"
-            placeholder="Source link or note"
-          />
-        </div>
-
         {/* Ingredients */}
         <div className="form-group">
-          <div className="form-ingredients-header">
-            <label className="form-header">Ingredients</label>
-            <button type="button" onClick={addIngredient} className="add-btn">
-              <Plus size={16} />
-            </button>
-          </div>
+          <label className="form-header">Ingredients</label>
 
           {validationErrors.ingredients && (
             <span className="field-error">{validationErrors.ingredients}</span>
@@ -236,13 +273,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       )
                     }
                     className="form-input"
-                    placeholder={`Notes${isEditMode ? "" : " (optional)"}`}
+                    placeholder={isEditMode ? "Notes" : "Extra notes"}
                   />
                   {formData.ingredients.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeIngredient(ingredient.tempId)}
                       className="remove-btn"
+                      aria-label="Remove ingredient"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -251,29 +289,28 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               </div>
             ))}
           </div>
+          <div className="add-btn-wrapper">
+            <button type="button" onClick={addIngredient} className="add-btn">
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Instructions */}
         <div className="form-group">
-          <div className="form-instructions-header">
-            <label className="form-header">Instructions</label>
-            <button type="button" onClick={addInstruction} className="add-btn">
-              <Plus size={16} />
-            </button>
-          </div>
+          <label className="form-header">Instructions</label>
 
           <div className="instructions-list">
             {formData.instructions.map((instruction, index) => (
               <div key={index} className="instruction-row">
                 <span className="step-number">{index + 1}.</span>
-                <textarea
+                <AutoResizeTextarea
                   value={instruction}
                   onChange={(e) =>
                     handleInstructionChange(index, e.target.value)
                   }
-                  className="instruction-textarea"
-                  rows="2"
                   onKeyDown={handleEnter}
+                  className="instruction-textarea"
                 />
                 <button
                   type="button"
@@ -285,6 +322,26 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               </div>
             ))}
           </div>
+          <div className="add-btn-wrapper">
+            <button type="button" onClick={addInstruction} className="add-btn">
+              <Plus size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Source */}
+        <div className="form-group">
+          <label htmlFor="source" className="form-header">
+            Source
+          </label>
+          <input
+            id="source"
+            type="text"
+            value={formData.source}
+            onChange={(e) => handleInputChange("source", e.target.value)}
+            className="form-input"
+            placeholder="Source link or note"
+          />
         </div>
 
         <div className={`form-actions ${isEditMode ? "edit" : ""}`}>
@@ -293,16 +350,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             <>
               <button
                 type="button"
-                onClick={() => {
-                  if (
-                    // TODO - change this to a popup
-                    window.confirm(
-                      "Are you sure you want to delete this recipe?"
-                    )
-                  ) {
-                    handleDelete();
-                  }
-                }}
+                onClick={() => setIsDeleteModalOpen(true)}
                 className="delete-btn"
               >
                 Delete Recipe
@@ -325,6 +373,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           </button>
         </div>
       </form>
+
+      {/* Delete Modal */}
+      <DeleteRecipeModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        recipeName={formData.title}
+      />
     </div>
   );
 };
