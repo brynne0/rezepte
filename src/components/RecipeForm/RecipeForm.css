@@ -266,7 +266,7 @@ select.form-input {
 .add-btn-wrapper {
   display: flex;
   justify-content: center;
-  padding: 0.5rem;
+  padding: 1rem;
 }
 
 /* Delete Modal */
@@ -354,6 +354,10 @@ select.form-input {
     justify-self: end;
     grid-row: 1;
     grid-column: 1;
+  }
+
+  .add-btn-wrapper {
+    padding: 0.5rem;
   }
 
   .cancel-btn,
