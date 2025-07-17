@@ -79,3 +79,7 @@
 .edit-btn:hover {
   transform: translateY(-3px);
 }
+
+.source-link {
+  color: var(--dark_red);
+}

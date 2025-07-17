@@ -84,12 +84,22 @@ const Recipe = () => {
 
       {/* Source */}
       {recipe.source && (
-        <>
-          <div className="recipe-subheading">
-            <h3>Source:</h3>
-            {recipe.source}
-          </div>
-        </>
+        <div className="recipe-subheading">
+          <h3>Source:</h3>
+
+          {/^https?:\/\/[^\s]+/.test(recipe.source) ? (
+            <a
+              href={recipe.source.match(/^https?:\/\/[^\s]+/)[0]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="source-link"
+            >
+              {recipe.source}
+            </a>
+          ) : (
+            <span>{recipe.source}</span>
+          )}
+        </div>
       )}
     </div>
   );
