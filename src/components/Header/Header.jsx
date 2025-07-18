@@ -214,28 +214,30 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 </button>
               </div>
             )}
-            {/* Language Selection */}
-            {showLanguages && (
-              <div className="language-wrapper">
-                <p
-                  className={`language${
-                    i18n.language === "en" ? " selected" : ""
-                  }`}
-                  onClick={() => i18n.changeLanguage("en")}
-                >
-                  EN
-                </p>{" "}
-                |{" "}
-                <p
-                  className={`language${
-                    i18n.language === "de" ? " selected" : ""
-                  }`}
-                  onClick={() => i18n.changeLanguage("de")}
-                >
-                  DE
-                </p>
-              </div>
-            )}
+
+            {!isEditingOrAdding &&
+              /* Language Selection */
+              showLanguages && (
+                <div className="language-wrapper">
+                  <p
+                    className={`language${
+                      i18n.language === "en" ? " selected" : ""
+                    }`}
+                    onClick={() => i18n.changeLanguage("en")}
+                  >
+                    EN
+                  </p>{" "}
+                  |{" "}
+                  <p
+                    className={`language${
+                      i18n.language === "de" ? " selected" : ""
+                    }`}
+                    onClick={() => i18n.changeLanguage("de")}
+                  >
+                    DE
+                  </p>
+                </div>
+              )}
           </div>
 
           {/* Title */}
