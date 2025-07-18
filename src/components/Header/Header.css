@@ -47,8 +47,19 @@
 
 .login-wrapper {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
   align-items: center;
+}
+
+.language-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.language:hover {
+  color: var(--dark_red);
+  cursor: pointer;
 }
 
 .login-form,
@@ -156,6 +167,7 @@
 
   .login-wrapper {
     flex-direction: column-reverse;
+    gap: 0.5rem;
   }
 
   .login-form {

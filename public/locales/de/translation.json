@@ -1,0 +1,24 @@
+{
+  "category": "kategorie",
+  "instructions": "schritte",
+  "servings": "portionen",
+  "title": "titel",
+  "source": "quelle",
+  "quantity": "menge",
+  "unit": "einheit",
+  "notes": "notizen",
+  "name": "name",
+  "username": "benutzername",
+  "password": "passwort",
+  "login": "TEST",
+
+  "all recipes": "Alle Rezepte",
+  "baking": "Backen",
+  "dessert": "Nachtisch",
+  "brunch": "Brunch",
+  "dinner": "Abendessen",
+  "snacks": "Snacks",
+  "staples": "Grundrezepte",
+
+  "logout": "Ausloggen"
+}

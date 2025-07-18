@@ -1,0 +1,24 @@
+{
+  "category": "Category",
+  "Instructions": "Instructions",
+  "servings": "Servings",
+  "title": "Title",
+  "source": "Source",
+  "quantity": "Quantity",
+  "unit": "Unit",
+  "notes": "Notes",
+  "name": "Name",
+  "username": "Username",
+  "password": "Password",
+  "login": "login",
+
+  "all recipes": "All Recipes",
+  "baking": "Baking",
+  "dessert": "Dessert",
+  "brunch": "Brunch",
+  "dinner": "Dinner",
+  "snacks": "Snacks",
+  "staples": "Staples",
+
+  "logout": "Logout"
+}

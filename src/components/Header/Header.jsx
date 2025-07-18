@@ -4,6 +4,7 @@ import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signIn, signUp, signOut } from "../../services/auth";
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 // import useClickOutside from "../../hooks/useClickOutside";
 
 const Header = ({ setSelectedCategory, setSearchTerm }) => {
@@ -25,6 +26,9 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
 
   // Search state
   const [showSearchBar, setShowSearchBar] = useState(false);
+
+  // Language
+  const { t, i18n } = useTranslation();
 
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {
@@ -65,7 +69,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
     if (error) {
       setLoginMessage("Sign up failed. Please try again.");
     } else {
-      setLoginMessage("Account created!");
+      setLoginMessage("Account created! Please confirm your email");
     }
 
     setTimeout(() => {
@@ -206,10 +210,21 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             {authState === "logout" && (
               <div>
                 <button className="header-btn" onClick={handleLogout}>
-                  Logout
+                  {t("logout")}
                 </button>
               </div>
             )}
+
+            {/* Language */}
+            <di className="language-wrapper">
+              <p className="language" onClick={() => i18n.changeLanguage("en")}>
+                EN
+              </p>{" "}
+              |{" "}
+              <p className="language" onClick={() => i18n.changeLanguage("de")}>
+                DE
+              </p>
+            </di>
           </div>
 
           {/* Title */}

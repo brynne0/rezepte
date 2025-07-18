@@ -9,21 +9,24 @@ import AddRecipePage from "./pages/AddRecipe/AddRecipe";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { Squirrel } from "lucide-react";
 import EditRecipePage from "./pages/AddRecipe/EditRecipe";
-
-const defaultCategories = [
-  "Alle Rezepte",
-  "Backen",
-  "Nachtisch",
-  "Brunch",
-  "Abendessen",
-  "Snacks",
-  "Grundrezepte",
-];
+import { useTranslation } from "react-i18next";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("Alle Rezepte");
   const { recipes, loading } = useRecipes();
   const [searchTerm, setSearchTerm] = useState("");
+  const [language, setLanguage] = useState("en");
+  const { t } = useTranslation();
+
+  const categories = [
+    "all recipes",
+    "baking",
+    "dessert",
+    "brunch",
+    "dinner",
+    "snacks",
+    "staples",
+  ];
 
   // Show loading screen
   if (loading) {
@@ -36,17 +39,14 @@ function App() {
 
   return (
     <Router>
-      <Header
-        setSelectedCategory={setSelectedCategory}
-        setSearchTerm={setSearchTerm}
-      />
+      <Header language={language} setLanguage={setLanguage} t={t} />
       <Routes>
         <Route
           path="/"
           element={
             <>
               <CategoryFilter
-                categories={defaultCategories}
+                categories={categories.map((cat) => t(cat))}
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
                 setSearchTerm={setSearchTerm}
@@ -62,11 +62,15 @@ function App() {
         <Route path="/:slug" element={<Recipe />} />
         <Route
           path="/add-recipe"
-          element={<AddRecipePage categories={defaultCategories} />}
+          element={
+            <AddRecipePage categories={categories.map((cat) => t(cat))} />
+          }
         />
         <Route
           path="/edit-recipe/:slug"
-          element={<EditRecipePage categories={defaultCategories} />}
+          element={
+            <EditRecipePage categories={categories.map((cat) => t(cat))} />
+          }
         />
       </Routes>
     </Router>
