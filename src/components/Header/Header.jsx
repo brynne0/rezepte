@@ -2,8 +2,9 @@ import "./Header.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signIn, signUp, signOut } from "../../services/auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 // import useClickOutside from "../../hooks/useClickOutside";
 
 const Header = ({ setSelectedCategory, setSearchTerm }) => {
@@ -26,6 +27,17 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   // Search state
   const [showSearchBar, setShowSearchBar] = useState(false);
 
+  // Language
+  const { t, i18n } = useTranslation();
+
+  // Language state
+  const [showLanguages, setShowLanguages] = useState(authState === "closed");
+
+  // Show languages only when authState is "closed" (no login popups)
+  useEffect(() => {
+    setShowLanguages(authState === "closed");
+  }, [authState]);
+
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {
   //   setShowSearchBar(false);
@@ -38,14 +50,11 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     const { error } = await signIn(username, password);
-    if (error) {
-      console.error("Login error:", error.message);
-    }
 
     if (error) {
-      setLoginMessage("Login failed. Please try again.");
+      setLoginMessage(t("login_failed"));
     } else {
-      setLoginMessage("Logged in!");
+      setLoginMessage(t("login_success"));
     }
 
     setTimeout(() => {
@@ -63,9 +72,9 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
     const { error } = await signUp(email, username, password);
 
     if (error) {
-      setLoginMessage("Sign up failed. Please try again.");
+      setLoginMessage(t("signup_failed"));
     } else {
-      setLoginMessage("Account created!");
+      setLoginMessage(t("signup_success"));
     }
 
     setTimeout(() => {
@@ -81,7 +90,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const handleLogout = async () => {
     await signOut();
 
-    setLoginMessage("Logged out");
+    setLoginMessage(t("logged_out"));
     setTimeout(() => {
       setLoginMessage("");
     }, 3000);
@@ -113,10 +122,8 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
               <Squirrel className="header-logo" />
               {isLoggedIn && isMe && <Squirrel className="header-logo-2" />}
             </div>
-
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
-
             {/* Show sign up or log in options */}
             {authState === "options" && (
               <div className="login-inputs">
@@ -124,17 +131,16 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                   className="header-btn"
                   onClick={() => setAuthState("login")}
                 >
-                  Login
+                  {t("login")}
                 </button>
                 <button
                   className="header-btn"
                   onClick={() => setAuthState("signup")}
                 >
-                  Sign Up
+                  {t("sign_up")}
                 </button>
               </div>
             )}
-
             {/* Sign up form */}
             {authState === "signup" && (
               <form onSubmit={handleSignUp} className="signup-form">
@@ -144,7 +150,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
+                    placeholder={t("email")}
                     className="login-input"
                     required
                   />
@@ -153,7 +159,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    placeholder={t("username")}
                     className="login-input"
                     required
                   />
@@ -162,17 +168,16 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder={t("password")}
                     className="login-input"
                     required
                   />
                 </div>
                 <button className="header-btn" type="submit">
-                  Sign Up
+                  {t("sign_up")}
                 </button>
               </form>
             )}
-
             {/* Login form - username and password */}
             {authState === "login" && (
               <form onSubmit={handleLogin} className="login-form">
@@ -182,7 +187,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    placeholder={t("username")}
                     className="login-input"
                     required
                   />
@@ -191,32 +196,55 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder={t("password")}
                     className="login-input"
                     required
                   />
                 </div>
                 <button className="header-btn" type="submit">
-                  Login
+                  {t("login")}
                 </button>
               </form>
             )}
-
             {/* Logout form */}
             {authState === "logout" && (
               <div>
                 <button className="header-btn" onClick={handleLogout}>
-                  Logout
+                  {t("logout")}
                 </button>
               </div>
             )}
+
+            {!isEditingOrAdding &&
+              /* Language Selection */
+              showLanguages && (
+                <div className="language-wrapper">
+                  <p
+                    className={`language${
+                      i18n.language === "en" ? " selected" : ""
+                    }`}
+                    onClick={() => i18n.changeLanguage("en")}
+                  >
+                    EN
+                  </p>{" "}
+                  |{" "}
+                  <p
+                    className={`language${
+                      i18n.language === "de" ? " selected" : ""
+                    }`}
+                    onClick={() => i18n.changeLanguage("de")}
+                  >
+                    DE
+                  </p>
+                </div>
+              )}
           </div>
 
           {/* Title */}
           <h1
             onClick={() => {
               navigate("/");
-              setSelectedCategory("Alle Rezepte");
+              setSelectedCategory("all");
               window.location.reload();
             }}
             className="header-title"
@@ -280,7 +308,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             >
               <input id="search" type="text" className="search-bar-input" />
               <button type="submit" className="header-btn">
-                Search
+                {t("search")}
               </button>
             </form>
           )}

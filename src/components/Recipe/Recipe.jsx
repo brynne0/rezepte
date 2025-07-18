@@ -3,16 +3,18 @@ import { useRecipe } from "../../hooks/useRecipe";
 import "./Recipe.css";
 import { Pencil, ShoppingBasket } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const Recipe = () => {
   const { slug } = useParams();
   const { recipe, loading, error } = useRecipe(slug);
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
+  const { t } = useTranslation();
 
   if (loading) return;
-  if (error) return <div>Error: {error}</div>;
-  if (!recipe) return <div>Recipe not found</div>;
+  if (error) return <div>{error}</div>;
+  if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
   return (
     <div className="recipe-container">
@@ -35,7 +37,7 @@ const Recipe = () => {
       {/* Servings */}
       {recipe.servings && (
         <div className="recipe-subheading">
-          <h3>Servings:</h3>
+          <h3>{t("servings")}:</h3>
           {recipe.servings}
         </div>
       )}
@@ -44,7 +46,7 @@ const Recipe = () => {
       {recipe.ingredients && (
         <>
           <div className="recipe-subheading">
-            <h3>Ingredients:</h3>
+            <h3>{t("ingredients")}:</h3>
             {/* Grocery Cart */}
             <button className="cart-btn">
               <ShoppingBasket />
@@ -72,7 +74,7 @@ const Recipe = () => {
       {recipe.instructions && recipe.instructions.length > 0 && (
         <>
           <div className="recipe-subheading">
-            <h3>Instructions:</h3>
+            <h3>{t("instructions")}:</h3>
           </div>
           <ol>
             {recipe.instructions.map((instruction, i) => (
@@ -85,7 +87,7 @@ const Recipe = () => {
       {/* Source */}
       {recipe.source && (
         <div className="recipe-subheading">
-          <h3>Source:</h3>
+          <h3>{t("source")}:</h3>
 
           {/^https?:\/\/[^\s]+/.test(recipe.source) ? (
             <a

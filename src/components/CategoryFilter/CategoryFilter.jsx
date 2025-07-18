@@ -10,16 +10,16 @@ const CategoryFilter = ({
     <div className="categories">
       {categories.map((category) => (
         <button
-          key={category}
+          key={category.value}
           className={`category-item${
-            category === selectedCategory ? " selected" : ""
+            category.value === selectedCategory ? " selected" : ""
           }`}
           onClick={() => {
-            setSelectedCategory(category);
+            setSelectedCategory(category.value);
             setSearchTerm("");
           }}
         >
-          {category}
+          {category.label}
         </button>
       ))}
     </div>

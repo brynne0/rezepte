@@ -1,0 +1,67 @@
+{
+  "all": "Alle Rezepte",
+  "baking": "Backen",
+  "dessert": "Nachtisch",
+  "brunch": "Brunch",
+  "dinner": "Abendessen",
+  "snacks": "Snacks",
+  "staples": "Grundrezepte",
+
+  "login_failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+  "login_success": "Eingeloggt!",
+  "signup_failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+  "signup_success": "Konto erstellt! Bitte bestätigen Sie Ihre E-Mail.",
+  "logged_out": "Abgemeldet",
+  "login": "Anmelden",
+  "sign_up": "Melden Sie sich an",
+  "logout": "Ausloggen",
+  "email": "E-Mail",
+  "username": "Benutzername",
+  "password": "Passwort",
+
+  "search": "Suchen",
+  "recipe_not_found": "Rezept nicht gefunden.",
+
+  "servings": "Portionen",
+  "ingredients": "Zutaten",
+  "instructions": "Schritte",
+  "source": "Quelle",
+  "source_link": "Quellenlink oder Hinweis",
+
+  "units": [
+    { "value": "", "label": "Einheit", "disabled": true },
+    { "value": "tsp", "label": "TL" },
+    { "value": "tbsp", "label": "EL" },
+    { "value": "cup", "label": "Tasse" },
+    { "value": "cups", "label": "Tassen" },
+    { "value": "ml", "label": "ml" },
+    { "value": "g", "label": "g" },
+    { "value": "kg", "label": "kg" },
+    { "value": "can", "label": "Dose" },
+    { "value": "cans", "label": "Dosen" },
+    { "value": "piece", "label": "Stück" },
+    { "value": "pieces", "label": "Stücke" }
+  ],
+
+  "recipe_delete_confirmation": "Möchten Sie dieses Rezept wirklich löschen?",
+  "cancel": "Stornieren",
+  "delete": "Löschen",
+  "delete_recipe": "Rezept Löschen",
+  "update_recipe": "Rezept Aktualisieren",
+  "create_recipe": "Rezept Erstellen",
+
+  "recipe_title": "Rezepttitel",
+  "category": "Kategorie",
+  "select_category": "Wählen Sie eine Kategorie",
+
+  "ingredient_name": "Name der Zutat",
+  "quantity": "Menge",
+  "notes": "Notizen",
+
+  "add_new_recipe": "Neues Rezept Hinzufügen",
+  "edit_recipe": "Rezept bearbeiten",
+
+  "title_required": "Rezepttitel ist erforderlich",
+  "category_required": "Kategorie ist erforderlich",
+  "ingredient_required": "Mindestens eine Zutat ist erforderlich"
+}

@@ -1,0 +1,67 @@
+{
+  "all": "All Recipes",
+  "baking": "Baking",
+  "dessert": "Dessert",
+  "brunch": "Brunch",
+  "dinner": "Dinner",
+  "snacks": "Snacks",
+  "staples": "Staples",
+
+  "login_failed": "Login failed. Please try again.",
+  "login_success": "Logged in!",
+  "signup_failed": "Sign up failed. Please try again.",
+  "signup_success": "Account created! Please confirm your email.",
+  "logged_out": "Logged Out",
+  "login": "Login",
+  "sign_up": "Sign Up",
+  "logout": "Logout",
+  "email": "Email",
+  "username": "Username",
+  "password": "Password",
+
+  "search": "Search",
+  "recipe_not_found": "Recipe not found.",
+
+  "servings": "Servings",
+  "ingredients": "Ingredients",
+  "instructions": "Instructions",
+  "source": "Source",
+  "source_link": "Source link or note",
+
+  "units": [
+    { "value": "", "label": "Unit", "disabled": true },
+    { "value": "tsp", "label": "tsp" },
+    { "value": "tbsp", "label": "tbsp" },
+    { "value": "cup", "label": "cup" },
+    { "value": "cups", "label": "cups" },
+    { "value": "ml", "label": "ml" },
+    { "value": "g", "label": "g" },
+    { "value": "kg", "label": "kg" },
+    { "value": "can", "label": "can" },
+    { "value": "cans", "label": "cans" },
+    { "value": "piece", "label": "piece" },
+    { "value": "pieces", "label": "pieces" }
+  ],
+
+  "recipe_delete_confirmation": "Are you sure you want to delete this recipe?",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "delete_recipe": "Delete Recipe",
+  "update_recipe": "Update Recipe",
+  "create_recipe": "Create Recipe",
+
+  "recipe_title": "Recipe Title",
+  "category": "Category",
+  "select_category": "Select a Category",
+
+  "ingredient_name": "Ingredient name",
+  "quantity": "Qty",
+  "notes": "Notes",
+
+  "add_new_recipe": "Add New Recipe",
+  "edit_recipe": "Edit Recipe",
+
+  "title_required": "Recipe title is required",
+  "category_required": "Category is required",
+  "ingredient_required": "At least one ingredient is required"
+}

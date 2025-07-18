@@ -2,8 +2,11 @@ import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
 import "./RecipeForm.css";
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
+  const { t } = useTranslation();
+
   const {
     formData,
     validationErrors,
@@ -24,22 +27,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     toTitleCase,
   } = useRecipeForm(initialRecipe);
 
-  const unitOptions = [
-    { value: "", label: "Unit", disabled: true },
-    { value: "tsp", label: "tsp" },
-    { value: "tbsp", label: "tbsp" },
-    { value: "cup", label: "cup" },
-    { value: "cups", label: "cups" },
-    { value: "ml", label: "ml" },
-    { value: "g", label: "g" },
-    { value: "kg", label: "kg" },
-    { value: "can", label: "can" },
-    { value: "cans", label: "cans" },
-    { value: "piece", label: "piece" },
-    { value: "pieces", label: "pieces" },
-    { value: "clove", label: "clove" },
-    { value: "cloves", label: "cloves" },
-  ];
+  const units = t("units", { returnObjects: true });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -82,14 +70,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
       <div className="delete-modal-overlay" onClick={onClose}>
         <div className="delete-modal-content">
           <p className="delete-modal-message">
-            Are you sure you want to delete this recipe?
+            {t("recipe_delete_confirmation")}
           </p>
           <div className="delete-modal-actions">
             <button onClick={onClose} className="cancel-btn">
-              Cancel
+              {t("cancel")}
             </button>
             <button onClick={onConfirm} className="delete-btn">
-              Delete
+              {t("delete")}
             </button>
           </div>
         </div>
@@ -116,7 +104,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         {/* Recipe Title */}
         <div className="form-group">
           <label htmlFor="title" className="form-header">
-            Recipe Title
+            {t("recipe_title")}
           </label>
           {validationErrors.title && (
             <span className="field-error">{validationErrors.title}</span>
@@ -139,14 +127,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         {/* Category */}
         <div className="form-group">
           <label htmlFor="category" className="form-header">
-            Category
+            {t("category")}
           </label>
           {validationErrors.category && (
             <span className="field-error">{validationErrors.category}</span>
           )}
           <select
             id="category"
-            value={formData.category}
+            value={formData.category.value}
             onChange={(e) =>
               handleInputChange(
                 "category",
@@ -158,13 +146,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             required
           >
             <option value="" disabled>
-              Select a category
+              {t("select_category")}
             </option>
             {categories
-              ?.filter((cat) => cat.toLowerCase() !== "alle rezepte")
+              ?.filter((cat) => cat.value.toLowerCase() !== "all")
               .map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+                <option key={cat.value} value={cat.value}>
+                  {cat.label || cat.value}
                 </option>
               ))}
           </select>
@@ -173,7 +161,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         {/* Servings */}
         <div className="form-group">
           <label htmlFor="servings" className="form-header">
-            Servings
+            {t("servings")}
           </label>
           <input
             id="servings"
@@ -190,7 +178,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Ingredients */}
         <div className="form-group">
-          <label className="form-header">Ingredients</label>
+          <label className="form-header">{t("ingredients")}</label>
 
           {validationErrors.ingredients && (
             <span className="field-error">{validationErrors.ingredients}</span>
@@ -213,7 +201,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                     );
                   }}
                   className="form-input"
-                  placeholder="Ingredient name"
+                  placeholder={t("ingredient_name")}
                 />
                 {/* Ingredient Quantity */}
                 <div className="ingredient-details">
@@ -231,7 +219,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       )
                     }
                     className="form-input"
-                    placeholder="Qty"
+                    placeholder={t("quantity")}
                     onWheel={(e) => {
                       e.target.blur();
                     }}
@@ -249,13 +237,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                     }
                     className={"form-input"}
                   >
-                    {unitOptions.map((option) => (
+                    {units.map((unit) => (
                       <option
-                        key={option.value}
-                        value={option.value}
-                        disabled={option.disabled}
+                        key={unit.value}
+                        value={unit.value}
+                        disabled={unit.disabled}
                       >
-                        {option.label}
+                        {unit.label}
                       </option>
                     ))}
                   </select>
@@ -273,7 +261,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       )
                     }
                     className="form-input"
-                    placeholder={isEditMode ? "Notes" : "Extra notes"}
+                    placeholder={t("notes")}
                   />
                   {formData.ingredients.length > 1 && (
                     <button
@@ -298,7 +286,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Instructions */}
         <div className="form-group">
-          <label className="form-header">Instructions</label>
+          <label className="form-header">{t("instructions")}</label>
 
           <div className="instructions-list">
             {formData.instructions.map((instruction, index) => (
@@ -332,7 +320,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         {/* Source */}
         <div className="form-group">
           <label htmlFor="source" className="form-header">
-            Source
+            {t("source")}
           </label>
           <input
             id="source"
@@ -340,7 +328,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             value={formData.source}
             onChange={(e) => handleInputChange("source", e.target.value)}
             className="form-input"
-            placeholder="Source link or note"
+            placeholder={t("source_link")}
           />
         </div>
 
@@ -353,13 +341,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 onClick={() => setIsDeleteModalOpen(true)}
                 className="delete-btn"
               >
-                Delete Recipe
+                {t("delete_recipe")}
               </button>
             </>
           )}
           {/* Cancel Button */}
           <button type="button" onClick={handleCancel} className="cancel-btn">
-            Cancel
+            {t("cancel")}
           </button>
           {/* Submit button */}
           <button type="submit" disabled={loading} className="primary-btn">
@@ -368,8 +356,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 ? "Updating..."
                 : "Creating..."
               : isEditMode
-              ? "Update Recipe"
-              : "Create Recipe"}
+              ? t("update_recipe")
+              : t("create_recipe")}
           </button>
         </div>
       </form>

@@ -5,25 +5,33 @@ import Header from "./components/Header/Header";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Recipe from "./components/Recipe/Recipe";
 import { useRecipes } from "./hooks/useRecipes";
-import AddRecipePage from "./pages/AddRecipe/AddRecipe";
+import AddRecipePage from "./pages/AddRecipe";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { Squirrel } from "lucide-react";
-import EditRecipePage from "./pages/AddRecipe/EditRecipe";
-
-const defaultCategories = [
-  "Alle Rezepte",
-  "Backen",
-  "Nachtisch",
-  "Brunch",
-  "Abendessen",
-  "Snacks",
-  "Grundrezepte",
-];
+import EditRecipePage from "./pages/EditRecipe";
+import { useTranslation } from "react-i18next";
 
 function App() {
-  const [selectedCategory, setSelectedCategory] = useState("Alle Rezepte");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const { recipes, loading } = useRecipes();
   const [searchTerm, setSearchTerm] = useState("");
+  const [language, setLanguage] = useState("en");
+  const { t } = useTranslation();
+
+  const categoryKeys = [
+    "all",
+    "baking",
+    "dessert",
+    "brunch",
+    "dinner",
+    "snacks",
+    "staples",
+  ];
+
+  const categories = categoryKeys.map((key) => ({
+    value: key,
+    label: t(key),
+  }));
 
   // Show loading screen
   if (loading) {
@@ -37,8 +45,11 @@ function App() {
   return (
     <Router>
       <Header
+        language={language}
+        setLanguage={setLanguage}
         setSelectedCategory={setSelectedCategory}
         setSearchTerm={setSearchTerm}
+        t={t}
       />
       <Routes>
         <Route
@@ -46,7 +57,7 @@ function App() {
           element={
             <>
               <CategoryFilter
-                categories={defaultCategories}
+                categories={categories}
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
                 setSearchTerm={setSearchTerm}
@@ -62,11 +73,11 @@ function App() {
         <Route path="/:slug" element={<Recipe />} />
         <Route
           path="/add-recipe"
-          element={<AddRecipePage categories={defaultCategories} />}
+          element={<AddRecipePage categories={categories} />}
         />
         <Route
           path="/edit-recipe/:slug"
-          element={<EditRecipePage categories={defaultCategories} />}
+          element={<EditRecipePage categories={categories} />}
         />
       </Routes>
     </Router>

@@ -77,7 +77,7 @@
 
 .cart-btn:hover,
 .edit-btn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-1px);
 }
 
 .source-link {
