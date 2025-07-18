@@ -2,7 +2,7 @@ import "./Header.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signIn, signUp, signOut } from "../../services/auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTranslation } from "react-i18next";
 // import useClickOutside from "../../hooks/useClickOutside";
@@ -29,6 +29,14 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
 
   // Language
   const { t, i18n } = useTranslation();
+
+  // Language state
+  const [showLanguages, setShowLanguages] = useState(authState === "closed");
+
+  // Show languages only when authState is "closed" (no login popups)
+  useEffect(() => {
+    setShowLanguages(authState === "closed");
+  }, [authState]);
 
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {
@@ -114,10 +122,8 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
               <Squirrel className="header-logo" />
               {isLoggedIn && isMe && <Squirrel className="header-logo-2" />}
             </div>
-
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
-
             {/* Show sign up or log in options */}
             {authState === "options" && (
               <div className="login-inputs">
@@ -135,7 +141,6 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 </button>
               </div>
             )}
-
             {/* Sign up form */}
             {authState === "signup" && (
               <form onSubmit={handleSignUp} className="signup-form">
@@ -173,7 +178,6 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 </button>
               </form>
             )}
-
             {/* Login form - username and password */}
             {authState === "login" && (
               <form onSubmit={handleLogin} className="login-form">
@@ -202,7 +206,6 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 </button>
               </form>
             )}
-
             {/* Logout form */}
             {authState === "logout" && (
               <div>
@@ -211,27 +214,28 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 </button>
               </div>
             )}
-
             {/* Language Selection */}
-            <div className="language-wrapper">
-              <p
-                className={`language${
-                  i18n.language === "en" ? " selected" : ""
-                }`}
-                onClick={() => i18n.changeLanguage("en")}
-              >
-                EN
-              </p>{" "}
-              |{" "}
-              <p
-                className={`language${
-                  i18n.language === "de" ? " selected" : ""
-                }`}
-                onClick={() => i18n.changeLanguage("de")}
-              >
-                DE
-              </p>
-            </div>
+            {showLanguages && (
+              <div className="language-wrapper">
+                <p
+                  className={`language${
+                    i18n.language === "en" ? " selected" : ""
+                  }`}
+                  onClick={() => i18n.changeLanguage("en")}
+                >
+                  EN
+                </p>{" "}
+                |{" "}
+                <p
+                  className={`language${
+                    i18n.language === "de" ? " selected" : ""
+                  }`}
+                  onClick={() => i18n.changeLanguage("de")}
+                >
+                  DE
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Title */}

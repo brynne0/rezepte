@@ -1,4 +1,4 @@
-import RecipeForm from "../../components/RecipeForm/RecipeForm";
+import RecipeForm from "../components/RecipeForm/RecipeForm";
 import { useTranslation } from "react-i18next";
 
 const AddRecipePage = ({ categories }) => {

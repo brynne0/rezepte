@@ -5,10 +5,10 @@ import Header from "./components/Header/Header";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Recipe from "./components/Recipe/Recipe";
 import { useRecipes } from "./hooks/useRecipes";
-import AddRecipePage from "./pages/AddRecipe/AddRecipe";
+import AddRecipePage from "./pages/AddRecipe";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { Squirrel } from "lucide-react";
-import EditRecipePage from "./pages/AddRecipe/EditRecipe";
+import EditRecipePage from "./pages/EditRecipe";
 import { useTranslation } from "react-i18next";
 
 function App() {
