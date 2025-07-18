@@ -14,6 +14,7 @@ Built to have all my recipes in one place and add ingredients to a grocery list.
 - Search recipes (search icon)
 - Login functionality (squirrel icon)
 - Responsive design for mobiles
+- Multi-language interface (German and English)
 
 ### In Progress/Future functionality:
 - Grocery list (cart icon) to contain all ingredients added from recipes 
