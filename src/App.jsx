@@ -12,14 +12,14 @@ import EditRecipePage from "./pages/AddRecipe/EditRecipe";
 import { useTranslation } from "react-i18next";
 
 function App() {
-  const [selectedCategory, setSelectedCategory] = useState("Alle Rezepte");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const { recipes, loading } = useRecipes();
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
 
-  const categories = [
-    "all recipes",
+  const categoryKeys = [
+    "all",
     "baking",
     "dessert",
     "brunch",
@@ -27,6 +27,11 @@ function App() {
     "snacks",
     "staples",
   ];
+
+  const categories = categoryKeys.map((key) => ({
+    value: key,
+    label: t(key),
+  }));
 
   // Show loading screen
   if (loading) {
@@ -39,14 +44,20 @@ function App() {
 
   return (
     <Router>
-      <Header language={language} setLanguage={setLanguage} t={t} />
+      <Header
+        language={language}
+        setLanguage={setLanguage}
+        setSelectedCategory={setSelectedCategory}
+        setSearchTerm={setSearchTerm}
+        t={t}
+      />
       <Routes>
         <Route
           path="/"
           element={
             <>
               <CategoryFilter
-                categories={categories.map((cat) => t(cat))}
+                categories={categories}
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
                 setSearchTerm={setSearchTerm}
@@ -62,15 +73,11 @@ function App() {
         <Route path="/:slug" element={<Recipe />} />
         <Route
           path="/add-recipe"
-          element={
-            <AddRecipePage categories={categories.map((cat) => t(cat))} />
-          }
+          element={<AddRecipePage categories={categories} />}
         />
         <Route
           path="/edit-recipe/:slug"
-          element={
-            <EditRecipePage categories={categories.map((cat) => t(cat))} />
-          }
+          element={<EditRecipePage categories={categories} />}
         />
       </Routes>
     </Router>

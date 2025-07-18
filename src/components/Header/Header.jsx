@@ -42,14 +42,11 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     const { error } = await signIn(username, password);
-    if (error) {
-      console.error("Login error:", error.message);
-    }
 
     if (error) {
-      setLoginMessage("Login failed. Please try again.");
+      setLoginMessage(t("login_failed"));
     } else {
-      setLoginMessage("Logged in!");
+      setLoginMessage(t("login_success"));
     }
 
     setTimeout(() => {
@@ -67,9 +64,9 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
     const { error } = await signUp(email, username, password);
 
     if (error) {
-      setLoginMessage("Sign up failed. Please try again.");
+      setLoginMessage(t("signup_failed"));
     } else {
-      setLoginMessage("Account created! Please confirm your email");
+      setLoginMessage(t("signup_success"));
     }
 
     setTimeout(() => {
@@ -85,7 +82,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const handleLogout = async () => {
     await signOut();
 
-    setLoginMessage("Logged out");
+    setLoginMessage(t("logged_out"));
     setTimeout(() => {
       setLoginMessage("");
     }, 3000);
@@ -128,13 +125,13 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                   className="header-btn"
                   onClick={() => setAuthState("login")}
                 >
-                  Login
+                  {t("login")}
                 </button>
                 <button
                   className="header-btn"
                   onClick={() => setAuthState("signup")}
                 >
-                  Sign Up
+                  {t("sign_up")}
                 </button>
               </div>
             )}
@@ -148,7 +145,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
+                    placeholder={t("email")}
                     className="login-input"
                     required
                   />
@@ -157,7 +154,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    placeholder={t("username")}
                     className="login-input"
                     required
                   />
@@ -166,13 +163,13 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder={t("password")}
                     className="login-input"
                     required
                   />
                 </div>
                 <button className="header-btn" type="submit">
-                  Sign Up
+                  {t("sign_up")}
                 </button>
               </form>
             )}
@@ -186,7 +183,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    placeholder={t("username")}
                     className="login-input"
                     required
                   />
@@ -195,13 +192,13 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder={t("password")}
                     className="login-input"
                     required
                   />
                 </div>
                 <button className="header-btn" type="submit">
-                  Login
+                  {t("login")}
                 </button>
               </form>
             )}
@@ -216,7 +213,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             )}
 
             {/* Language */}
-            <di className="language-wrapper">
+            <div className="language-wrapper">
               <p className="language" onClick={() => i18n.changeLanguage("en")}>
                 EN
               </p>{" "}
@@ -224,14 +221,14 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
               <p className="language" onClick={() => i18n.changeLanguage("de")}>
                 DE
               </p>
-            </di>
+            </div>
           </div>
 
           {/* Title */}
           <h1
             onClick={() => {
               navigate("/");
-              setSelectedCategory("Alle Rezepte");
+              setSelectedCategory("all");
               window.location.reload();
             }}
             className="header-title"
@@ -295,7 +292,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             >
               <input id="search" type="text" className="search-bar-input" />
               <button type="submit" className="header-btn">
-                Search
+                {t("search")}
               </button>
             </form>
           )}
