@@ -62,6 +62,10 @@
   cursor: pointer;
 }
 
+.language.selected {
+  color: var(--dark_red);
+}
+
 .login-form,
 .signup-form {
   display: flex;

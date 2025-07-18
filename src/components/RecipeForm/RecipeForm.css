@@ -74,7 +74,7 @@ select.form-input {
   background-repeat: no-repeat;
   background-position: right 0.5rem center;
   background-size: 1rem;
-  padding-right: 2.5rem;
+  padding-right: 2rem;
   cursor: pointer;
 }
 
@@ -330,6 +330,10 @@ select.form-input {
     margin-bottom: 0.5rem;
   }
 
+  .form-input {
+    padding: 0.5rem;
+  }
+
   /* Ingredient rows and fields */
   .ingredient-row {
     grid-template-columns: 1fr;
@@ -345,10 +349,10 @@ select.form-input {
     align-items: center;
   }
   .ingredient-details input[type="number"] {
-    flex: 0 0 60px;
+    flex: 0 0 70px;
   }
   .ingredient-details select {
-    flex: 0 0 100px;
+    flex: 0 0 90px;
   }
   .ingredient-row .remove-btn {
     justify-self: end;

@@ -212,13 +212,23 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
               </div>
             )}
 
-            {/* Language */}
+            {/* Language Selection */}
             <div className="language-wrapper">
-              <p className="language" onClick={() => i18n.changeLanguage("en")}>
+              <p
+                className={`language${
+                  i18n.language === "en" ? " selected" : ""
+                }`}
+                onClick={() => i18n.changeLanguage("en")}
+              >
                 EN
               </p>{" "}
               |{" "}
-              <p className="language" onClick={() => i18n.changeLanguage("de")}>
+              <p
+                className={`language${
+                  i18n.language === "de" ? " selected" : ""
+                }`}
+                onClick={() => i18n.changeLanguage("de")}
+              >
                 DE
               </p>
             </div>

@@ -57,7 +57,6 @@
   "ingredient_name": "Name der Zutat",
   "quantity": "Menge",
   "notes": "Notizen",
-  "extra_notes": "Zusätzliche Notizen",
 
   "add_new_recipe": "Neues Rezept Hinzufügen",
   "edit_recipe": "Rezept bearbeiten",

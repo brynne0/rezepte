@@ -261,7 +261,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       )
                     }
                     className="form-input"
-                    placeholder={isEditMode ? t("notes") : t("extra_notes")}
+                    placeholder={t("notes")}
                   />
                   {formData.ingredients.length > 1 && (
                     <button
