@@ -60,5 +60,9 @@
   "extra_notes": "Zusätzliche Notizen",
 
   "add_new_recipe": "Neues Rezept Hinzufügen",
-  "edit_recipe": "Rezept bearbeiten"
+  "edit_recipe": "Rezept bearbeiten",
+
+  "title_required": "Rezepttitel ist erforderlich",
+  "category_required": "Kategorie ist erforderlich",
+  "ingredient_required": "Mindestens eine Zutat ist erforderlich"
 }

@@ -60,5 +60,9 @@
   "extra_notes": "Extra Notes",
 
   "add_new_recipe": "Add New Recipe",
-  "edit_recipe": "Edit Recipe"
+  "edit_recipe": "Edit Recipe",
+
+  "title_required": "Recipe title is required",
+  "category_required": "Category is required",
+  "ingredient_required": "At least one ingredient is required"
 }

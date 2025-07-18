@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "./useRecipeActions";
+import { useTranslation } from "react-i18next";
 
 export const useRecipeForm = (initialRecipe = null) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { createRecipe, updateRecipe, deleteRecipe, loading, error } =
     useRecipeActions();
@@ -181,15 +183,15 @@ export const useRecipeForm = (initialRecipe = null) => {
     const errors = {};
 
     if (!formData.title.trim()) {
-      errors.title = "Recipe title is required";
+      errors.title = t("title_required");
     }
 
     if (!formData.category.trim()) {
-      errors.category = "Category is required";
+      errors.category = t("category_required");
     }
 
     if (formData.ingredients.every((ing) => !ing.name || !ing.name.trim())) {
-      errors.ingredients = "At least one ingredient is required";
+      errors.ingredients = t("ingredient_required");
     }
 
     setValidationErrors(errors);
