@@ -10,9 +10,10 @@ import { useTranslation } from "react-i18next";
 const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isEditingOrAdding =
+  const hideNavBar =
     location.pathname === "/add-recipe" ||
-    location.pathname.startsWith("/edit-recipe");
+    location.pathname.startsWith("/edit-recipe") ||
+    location.pathname === "/grocery-list";
 
   // Single auth state
   const [authState, setAuthState] = useState("closed"); // 'closed', 'options', 'login', 'signup', 'logout'
@@ -215,7 +216,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
               </div>
             )}
 
-            {!isEditingOrAdding &&
+            {!hideNavBar &&
               /* Language Selection */
               showLanguages && (
                 <div className="language-wrapper">
@@ -252,7 +253,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             Rezepte
           </h1>
 
-          {!isEditingOrAdding && (
+          {!hideNavBar && (
             <>
               <nav className="header-nav">
                 <button
