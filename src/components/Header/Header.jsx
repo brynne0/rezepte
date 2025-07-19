@@ -277,7 +277,10 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                   <Search size={28} />
                 </button>
                 {/* Grocery List */}
-                <button className="icon-btn">
+                <button
+                  className="icon-btn"
+                  onClick={() => navigate("/grocery-list")}
+                >
                   <ShoppingBasket size={28} />
                 </button>
                 {/* Plus Recipe - only display if user logged in */}

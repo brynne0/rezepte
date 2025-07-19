@@ -10,6 +10,7 @@ import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { Squirrel } from "lucide-react";
 import EditRecipePage from "./pages/EditRecipe";
 import { useTranslation } from "react-i18next";
+import GroceryList from "./pages/GroceryList";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -79,6 +80,7 @@ function App() {
           path="/edit-recipe/:slug"
           element={<EditRecipePage categories={categories} />}
         />
+        <Route path="/grocery-list" element={<GroceryList />} />
       </Routes>
     </Router>
   );
