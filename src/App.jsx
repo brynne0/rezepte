@@ -10,7 +10,7 @@ import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { Squirrel } from "lucide-react";
 import EditRecipePage from "./pages/EditRecipe";
 import { useTranslation } from "react-i18next";
-import GroceryList from "./pages/GroceryList";
+import GroceryList from "./pages/GroceryList/GroceryList";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
