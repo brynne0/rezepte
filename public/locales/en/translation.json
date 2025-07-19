@@ -29,7 +29,7 @@
   "source_link": "Source link or note",
 
   "units": [
-    { "value": "", "label": "Unit", "disabled": true },
+    { "value": "", "label": "Unit" },
     { "value": "tsp", "label": "tsp" },
     { "value": "tbsp", "label": "tbsp" },
     { "value": "cup", "label": "cup" },
@@ -63,5 +63,7 @@
 
   "title_required": "Recipe title is required",
   "category_required": "Category is required",
-  "ingredient_required": "At least one ingredient is required"
+  "ingredient_required": "At least one ingredient is required",
+
+  "added_to_groceries": "Added to groceries list"
 }

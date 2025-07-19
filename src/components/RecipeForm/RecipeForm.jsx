@@ -238,11 +238,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                     className={"form-input"}
                   >
                     {units.map((unit) => (
-                      <option
-                        key={unit.value}
-                        value={unit.value}
-                        disabled={unit.disabled}
-                      >
+                      <option key={unit.value} value={unit.value}>
                         {unit.label}
                       </option>
                     ))}

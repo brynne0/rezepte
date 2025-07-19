@@ -4,6 +4,7 @@ import "./Recipe.css";
 import { Pencil, ShoppingBasket } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { useGroceryList } from "../../hooks/useGroceryList";
 
 const Recipe = () => {
   const { slug } = useParams();
@@ -11,6 +12,15 @@ const Recipe = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   const { t } = useTranslation();
+
+  // Use the grocery list hook
+  const {
+    checkedIngredients,
+
+    showSuccess,
+    handleCheckboxChange,
+    addToGroceryList,
+  } = useGroceryList();
 
   if (loading) return;
   if (error) return <div>{error}</div>;
@@ -48,16 +58,33 @@ const Recipe = () => {
           <div className="recipe-subheading">
             <h3>{t("ingredients")}:</h3>
             {/* Grocery Cart */}
-            <button className="cart-btn">
-              <ShoppingBasket />
-            </button>
+            <div className="cart-container">
+              <button
+                onClick={() => addToGroceryList(recipe.ingredients)}
+                className="cart-btn"
+              >
+                <ShoppingBasket />
+                {/* Selected ingredients counter */}
+                {Object.values(checkedIngredients).filter(Boolean).length >
+                  0 && (
+                  <span className="cart-counter">
+                    {Object.values(checkedIngredients).filter(Boolean).length}
+                  </span>
+                )}
+              </button>
+            </div>
+            {showSuccess && t("added_to_groceries")}
           </div>
           <ul className="ingredient-list">
             {recipe.ingredients.map((ingredient) => (
               <li key={ingredient.id} className="ingredient">
-                <input type="checkbox" id={`ingredient-${ingredient.id}`} />
+                <input
+                  type="checkbox"
+                  checked={checkedIngredients[ingredient.id] || false}
+                  onChange={() => handleCheckboxChange(ingredient.id)}
+                  id={`ingredient-${ingredient.id}`}
+                />
                 <label htmlFor={`ingredient-${ingredient.id}`}>
-                  {/* Make quantity and unit bold */}
                   {/* <strong> */}
                   {ingredient.quantity && `${ingredient.quantity} `}
                   {ingredient.unit && `${ingredient.unit} `}

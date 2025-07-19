@@ -1,7 +1,6 @@
 .header {
-  margin-top: 0;
+  margin: 0;
   padding-top: 0;
-  margin-bottom: 1rem;
   position: sticky;
   top: 0;
   background-color: var(--cream);
@@ -139,16 +138,11 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .header {
-    margin-bottom: 0.5rem;
-  }
-
   .header-content {
     display: flex;
     flex-direction: column;
     height: auto;
     padding: 0.25rem 0;
-    gap: 0.5rem;
   }
 
   .header-logo,
@@ -171,7 +165,7 @@
 
   .login-wrapper {
     flex-direction: column-reverse;
-    gap: 0.5rem;
+    gap: 0rem;
   }
 
   .login-form {

@@ -29,7 +29,7 @@
   "source_link": "Quellenlink oder Hinweis",
 
   "units": [
-    { "value": "", "label": "Einheit", "disabled": true },
+    { "value": "", "label": "Einheit" },
     { "value": "tsp", "label": "TL" },
     { "value": "tbsp", "label": "EL" },
     { "value": "cup", "label": "Tasse" },
@@ -63,5 +63,7 @@
 
   "title_required": "Rezepttitel ist erforderlich",
   "category_required": "Kategorie ist erforderlich",
-  "ingredient_required": "Mindestens eine Zutat ist erforderlich"
+  "ingredient_required": "Mindestens eine Zutat ist erforderlich",
+
+  "added_to_groceries": "Zur Einkaufsliste hinzugefügt"
 }

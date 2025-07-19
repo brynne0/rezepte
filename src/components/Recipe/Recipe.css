@@ -83,3 +83,24 @@
 .source-link {
   color: var(--dark_red);
 }
+
+.cart-counter {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  color: var(--dark_red);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 20px;
+}
+
+.cart-container {
+  position: relative;
+  display: inline-block;
+}
