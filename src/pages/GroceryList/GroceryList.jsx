@@ -45,6 +45,29 @@ const GroceryList = () => {
     setEditedList(updatedList);
   };
 
+  const addNewItem = () => {
+    if (!isEditing) {
+      startEditing();
+    }
+
+    const newItem = {
+      tempId: `temp-${Date.now()}`,
+      name: "",
+      quantity: "",
+      unit: "",
+      source_recipes: [],
+    };
+
+    const updatedList = isEditing
+      ? [...editedList, newItem]
+      : [...groceryList, newItem];
+    setEditedList(updatedList);
+
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
+
   const currentList = isEditing ? editedList : groceryList;
 
   return (
@@ -64,10 +87,13 @@ const GroceryList = () => {
       </header>
 
       <div className="list-items">
-        {currentList.length === 0 ? (
+        {currentList.length === 0 && !isEditing ? (
           <div>
             {/* TODO */}
-            {t("no_items_in_list")}
+            <p>{t("no_items_in_list")}</p>
+            <button className="add-btn" onClick={addNewItem}>
+              <Plus size={20} />
+            </button>
           </div>
         ) : (
           currentList.map((item, index) => {
@@ -83,7 +109,7 @@ const GroceryList = () => {
                   value={item.name || ""}
                   className="item-input"
                   readOnly={!isEditing}
-                  placeholder={t("item_name")}
+                  placeholder={t("name")}
                   onChange={(e) =>
                     handleInputChange(index, "name", e.target.value)
                   }
@@ -96,7 +122,7 @@ const GroceryList = () => {
                   value={item.quantity || ""}
                   className="item-input"
                   readOnly={!isEditing}
-                  placeholder="0"
+                  placeholder={t("quantity")}
                   onChange={(e) =>
                     handleInputChange(
                       index,
@@ -114,7 +140,6 @@ const GroceryList = () => {
                     handleInputChange(index, "unit", e.target.value)
                   }
                 >
-                  <option value="">{t("select_unit")}</option>
                   {units &&
                     Array.isArray(units) &&
                     units.map((unit) => (
@@ -142,6 +167,11 @@ const GroceryList = () => {
               </div>
             );
           })
+        )}
+        {isEditing && (
+          <button className="add-btn" onClick={addNewItem}>
+            <Plus size={20} />
+          </button>
         )}
       </div>
 

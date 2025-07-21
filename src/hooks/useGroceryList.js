@@ -59,7 +59,7 @@ export const useGroceryList = () => {
     loadGroceryList();
   }, []);
 
-  // Update grocery list
+  // Update grocery list - handles both new items and existing items
   const updateGroceryList = async (updatedList) => {
     try {
       setLoading(true);
@@ -95,8 +95,16 @@ export const useGroceryList = () => {
         (item) => item.id && currentItemIds.has(item.id)
       );
 
-      // Items to insert (new items without id)
-      const itemsToInsert = updatedList.filter((item) => !item.id);
+      // Items to insert (new items without id or with tempId)
+      const itemsToInsert = updatedList
+        .filter(
+          (item) => !item.id || (item.tempId && item.tempId.startsWith("temp-"))
+        )
+        .filter(
+          (item) =>
+            // Only insert items that have a name (avoid empty items)
+            item.name && item.name.trim() !== ""
+        );
 
       // Delete removed items
       if (itemsToDelete.length > 0) {
@@ -117,7 +125,7 @@ export const useGroceryList = () => {
           .from("grocery_items")
           .update({
             name: item.name,
-            quantity: item.quantity,
+            quantity: parseFloat(item.quantity) || 0,
             unit: item.unit,
             source_recipes: item.source_recipes || [],
           })
@@ -129,8 +137,10 @@ export const useGroceryList = () => {
       // Insert new items
       if (itemsToInsert.length > 0) {
         const itemsWithUserId = itemsToInsert.map((item) => ({
-          ...item,
           user_id: user.id,
+          name: item.name.trim(),
+          quantity: parseFloat(item.quantity) || 0,
+          unit: item.unit || "",
           source_recipes: item.source_recipes || [],
         }));
 

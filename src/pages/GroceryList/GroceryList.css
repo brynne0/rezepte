@@ -52,7 +52,7 @@
 
 /* Second input - quantity field */
 .list-item .item-input:nth-child(2) {
-  flex: 0 0 50px;
+  flex: 0 0 60px;
 }
 
 /* Third input - unit select */
