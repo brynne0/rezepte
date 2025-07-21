@@ -1,42 +1,35 @@
 import "./Header.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
-import { signIn, signUp, signOut } from "../../services/auth";
-import { useState, useEffect } from "react";
+import { signOut } from "../../services/auth";
+import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTranslation } from "react-i18next";
 // import useClickOutside from "../../hooks/useClickOutside";
 
-const Header = ({ setSelectedCategory, setSearchTerm }) => {
+const Header = ({
+  setSelectedCategory,
+  setSearchTerm,
+  setLoginMessage,
+  loginMessage,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isEditingOrAdding =
-    location.pathname === "/add-recipe" ||
-    location.pathname.startsWith("/edit-recipe");
 
-  // Single auth state
-  const [authState, setAuthState] = useState("closed"); // 'closed', 'options', 'login', 'signup', 'logout'
+  // Temporary solution to hide nav bar for mobiles on all screens except home screen
+  const isSmallScreen = window.matchMedia("(max-width: 768px)").matches;
+  const hideNavBar = location.pathname !== "/" && isSmallScreen;
 
-  // Form input states
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginMessage, setLoginMessage] = useState("");
-  const { isLoggedIn, isMe } = useAuth();
+  const { isLoggedIn, isMe, isGuest } = useAuth();
 
   // Search state
   const [showSearchBar, setShowSearchBar] = useState(false);
 
+  const [showLogOut, setShowLogOut] = useState(false);
+  const [showLogIn, setShowLogIn] = useState(false);
+
   // Language
   const { t, i18n } = useTranslation();
-
-  // Language state
-  const [showLanguages, setShowLanguages] = useState(authState === "closed");
-
-  // Show languages only when authState is "closed" (no login popups)
-  useEffect(() => {
-    setShowLanguages(authState === "closed");
-  }, [authState]);
 
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {
@@ -47,55 +40,15 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   //   setAuthState('closed');
   // });
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const { error } = await signIn(username, password);
-
-    if (error) {
-      setLoginMessage(t("login_failed"));
-    } else {
-      setLoginMessage(t("login_success"));
-    }
-
-    setTimeout(() => {
-      setLoginMessage("");
-    }, 3000);
-
-    setAuthState("closed");
-    setUsername("");
-    setPassword("");
-  };
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-
-    const { error } = await signUp(email, username, password);
-
-    if (error) {
-      setLoginMessage(t("signup_failed"));
-    } else {
-      setLoginMessage(t("signup_success"));
-    }
-
-    setTimeout(() => {
-      setLoginMessage("");
-    }, 3000);
-
-    setAuthState("closed");
-    setEmail("");
-    setUsername("");
-    setPassword("");
-  };
-
   const handleLogout = async () => {
     await signOut();
 
     setLoginMessage(t("logged_out"));
+    setShowLogOut(false);
     setTimeout(() => {
       setLoginMessage("");
+      window.location.reload();
     }, 3000);
-
-    setAuthState("closed");
   };
 
   return (
@@ -109,135 +62,58 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 if (loginMessage) return; // Don't do anything if there's a message
 
                 if (isLoggedIn) {
-                  setAuthState((prev) =>
-                    prev === "logout" ? "closed" : "logout"
-                  );
+                  // Logout form
+                  setShowLogOut((prev) => !prev);
                 } else {
-                  setAuthState((prev) =>
-                    prev === "closed" ? "options" : "closed"
-                  );
+                  // Sign in/up form
+                  // TODO - don't display if in login page already
+                  setShowLogIn((prev) => !prev);
                 }
               }}
             >
               <Squirrel className="header-logo" />
-              {isLoggedIn && isMe && <Squirrel className="header-logo-2" />}
+              {isMe && <Squirrel className="header-logo-2" />}
             </div>
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
-            {/* Show sign up or log in options */}
-            {authState === "options" && (
-              <div className="login-inputs">
-                <button
-                  className="header-btn"
-                  onClick={() => setAuthState("login")}
-                >
-                  {t("login")}
-                </button>
-                <button
-                  className="header-btn"
-                  onClick={() => setAuthState("signup")}
-                >
-                  {t("sign_up")}
-                </button>
-              </div>
-            )}
-            {/* Sign up form */}
-            {authState === "signup" && (
-              <form onSubmit={handleSignUp} className="signup-form">
-                <div className="login-inputs">
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t("email")}
-                    className="login-input"
-                    required
-                  />
-                  <input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder={t("username")}
-                    className="login-input"
-                    required
-                  />
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t("password")}
-                    className="login-input"
-                    required
-                  />
-                </div>
-                <button className="header-btn" type="submit">
-                  {t("sign_up")}
-                </button>
-              </form>
-            )}
-            {/* Login form - username and password */}
-            {authState === "login" && (
-              <form onSubmit={handleLogin} className="login-form">
-                <div className="login-inputs">
-                  <input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder={t("username")}
-                    className="login-input"
-                    required
-                  />
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t("password")}
-                    className="login-input"
-                    required
-                  />
-                </div>
-                <button className="header-btn" type="submit">
-                  {t("login")}
-                </button>
-              </form>
-            )}
-            {/* Logout form */}
-            {authState === "logout" && (
+            {isLoggedIn && showLogOut && (
               <div>
                 <button className="header-btn" onClick={handleLogout}>
                   {t("logout")}
                 </button>
               </div>
             )}
-
-            {!isEditingOrAdding &&
-              /* Language Selection */
-              showLanguages && (
-                <div className="language-wrapper">
-                  <p
-                    className={`language${
-                      i18n.language === "en" ? " selected" : ""
-                    }`}
-                    onClick={() => i18n.changeLanguage("en")}
-                  >
-                    EN
-                  </p>{" "}
-                  |{" "}
-                  <p
-                    className={`language${
-                      i18n.language === "de" ? " selected" : ""
-                    }`}
-                    onClick={() => i18n.changeLanguage("de")}
-                  >
-                    DE
-                  </p>
-                </div>
-              )}
+            {showLogIn && (
+              <button
+                className="header-btn"
+                onClick={() => {
+                  setShowLogIn(false);
+                  navigate("/auth-page");
+                }}
+              >
+                {t("login")}
+              </button>
+            )}
+            {/* Language Selection */}
+            <div className="language-wrapper">
+              <p
+                className={`language${
+                  i18n.language === "en" ? " selected" : ""
+                }`}
+                onClick={() => i18n.changeLanguage("en")}
+              >
+                EN
+              </p>{" "}
+              |{" "}
+              <p
+                className={`language${
+                  i18n.language === "de" ? " selected" : ""
+                }`}
+                onClick={() => i18n.changeLanguage("de")}
+              >
+                DE
+              </p>
+            </div>
           </div>
 
           {/* Title */}
@@ -252,7 +128,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
             Rezepte
           </h1>
 
-          {!isEditingOrAdding && (
+          {!hideNavBar && (
             <>
               <nav className="header-nav">
                 <button
@@ -276,18 +152,24 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 >
                   <Search size={28} />
                 </button>
-                {/* Grocery List */}
-                <button className="icon-btn">
-                  <ShoppingBasket size={28} />
-                </button>
-                {/* Plus Recipe - only display if user logged in */}
-                {isLoggedIn && (
-                  <button
-                    className="icon-btn"
-                    onClick={() => navigate("/add-recipe")}
-                  >
-                    <Plus size={28} />
-                  </button>
+
+                {/* Only display if user logged in and isn't guest */}
+                {isLoggedIn && !isGuest && (
+                  <>
+                    <button
+                      className="icon-btn"
+                      onClick={() => navigate("/add-recipe")}
+                    >
+                      <Plus size={28} />
+                    </button>
+                    {/* Grocery List */}
+                    <button
+                      className="icon-btn"
+                      onClick={() => navigate("/grocery-list")}
+                    >
+                      <ShoppingBasket size={28} />
+                    </button>
+                  </>
                 )}
               </nav>
             </>

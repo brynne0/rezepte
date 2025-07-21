@@ -18,11 +18,6 @@
   justify-content: center;
 }
 
-.form-back-arrow {
-  left: 3rem;
-  cursor: pointer;
-}
-
 /* Headers */
 .page-header-wrapper h1 {
   padding: 1rem;
@@ -321,7 +316,7 @@ select.form-input {
   .page-header-wrapper h1 {
     font-size: 1.25rem;
   }
-  .form-back-arrow {
+  .back-arrow {
     left: 1.25rem;
   }
 

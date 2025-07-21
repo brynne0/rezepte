@@ -1,0 +1,50 @@
+.auth-page-container {
+  padding-top: 8rem;
+}
+
+.auth-form {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  flex-direction: column;
+}
+
+.auth-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  max-width: 15rem;
+}
+
+.auth-input {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--cream_opaque);
+  color: var(--dark_brown);
+  font-family: inherit;
+  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
+  border: 0.0625rem solid var(--brown);
+  font-size: 1rem;
+}
+
+.auth-option {
+  padding: 0.5rem 1rem;
+  color: var(--brown);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  font-size: 1rem;
+  font-family: "Forta", sans-serif;
+}
+
+.auth-option:hover {
+  color: var(--red);
+}
+
+.auth-option.selected {
+  color: var(--red);
+}

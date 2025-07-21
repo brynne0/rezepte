@@ -1,7 +1,6 @@
 .header {
-  margin-top: 0;
+  margin: 0;
   padding-top: 0;
-  margin-bottom: 1rem;
   position: sticky;
   top: 0;
   background-color: var(--cream);
@@ -62,30 +61,14 @@
   cursor: pointer;
 }
 
+.language {
+  margin: 0;
+}
+
 .language.selected {
   color: var(--dark_red);
 }
 
-.login-form,
-.signup-form {
-  display: flex;
-  gap: 0.25rem;
-  justify-content: center;
-  align-items: center;
-  background: var(--cream);
-  /* padding: 0.5rem; */
-}
-
-.signup-form .login-inputs {
-  flex-direction: column;
-}
-
-.login-inputs {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.login-input,
 .header-btn,
 .search-bar-input {
   padding: 0.5rem;
@@ -139,16 +122,11 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .header {
-    margin-bottom: 0.5rem;
-  }
-
   .header-content {
     display: flex;
     flex-direction: column;
     height: auto;
     padding: 0.25rem 0;
-    gap: 0.5rem;
   }
 
   .header-logo,
@@ -174,18 +152,7 @@
     gap: 0.5rem;
   }
 
-  .login-form {
-    flex-direction: column;
-  }
-
   .search-bar-wrapper {
     margin-top: 0;
-  }
-}
-
-/* When login input form intersects with heading, stack vertically */
-@media (max-width: 1250px) {
-  .login-inputs {
-    flex-direction: column;
   }
 }

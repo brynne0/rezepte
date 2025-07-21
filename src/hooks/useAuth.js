@@ -3,6 +3,7 @@ import supabase from "../utils/supabaseClient";
 
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
   const [isMe, setIsMe] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -11,6 +12,8 @@ export const useAuth = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsLoggedIn(!!session);
       setUser(session?.user || null);
+      setIsGuest(session?.user?.user_metadata?.is_guest === true);
+      setIsMe(session?.user?.user_metadata?.is_me === true);
     });
 
     const {
@@ -18,26 +21,12 @@ export const useAuth = () => {
     } = supabase.auth.onAuthStateChange((event, session) => {
       setIsLoggedIn(!!session);
       setUser(session?.user || null);
+      setIsGuest(session?.user?.user_metadata?.is_guest === true);
+      setIsMe(session?.user?.user_metadata?.is_me === true);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Check if I am logged in
-  useEffect(() => {
-    const checkMe = async () => {
-      if (isLoggedIn) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        setIsMe(user?.user_metadata?.is_me || false);
-      } else {
-        setIsMe(false);
-      }
-    };
-
-    checkMe();
-  }, [isLoggedIn]);
-
-  return { isLoggedIn, isMe, user };
+  return { isGuest, isLoggedIn, isMe, user };
 };

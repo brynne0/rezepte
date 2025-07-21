@@ -16,6 +16,7 @@
   "sign_up": "Sign Up",
   "logout": "Logout",
   "email": "Email",
+  "first_name": "First Name",
   "username": "Username",
   "password": "Password",
 
@@ -29,7 +30,7 @@
   "source_link": "Source link or note",
 
   "units": [
-    { "value": "", "label": "Unit", "disabled": true },
+    { "value": "", "label": "Unit" },
     { "value": "tsp", "label": "tsp" },
     { "value": "tbsp", "label": "tbsp" },
     { "value": "cup", "label": "cup" },
@@ -44,6 +45,7 @@
   ],
 
   "recipe_delete_confirmation": "Are you sure you want to delete this recipe?",
+  "save": "Save",
   "cancel": "Cancel",
   "delete": "Delete",
   "delete_recipe": "Delete Recipe",
@@ -63,5 +65,9 @@
 
   "title_required": "Recipe title is required",
   "category_required": "Category is required",
-  "ingredient_required": "At least one ingredient is required"
+  "ingredient_required": "At least one ingredient is required",
+
+  "added_to_groceries": "Added to grocery list",
+  "grocery_list": "Grocery List",
+  "item_name": "Item name"
 }

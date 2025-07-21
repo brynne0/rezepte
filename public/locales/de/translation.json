@@ -16,6 +16,7 @@
   "sign_up": "Melden Sie sich an",
   "logout": "Ausloggen",
   "email": "E-Mail",
+  "first_name": "Vorname",
   "username": "Benutzername",
   "password": "Passwort",
 
@@ -29,7 +30,7 @@
   "source_link": "Quellenlink oder Hinweis",
 
   "units": [
-    { "value": "", "label": "Einheit", "disabled": true },
+    { "value": "", "label": "Einheit" },
     { "value": "tsp", "label": "TL" },
     { "value": "tbsp", "label": "EL" },
     { "value": "cup", "label": "Tasse" },
@@ -44,6 +45,7 @@
   ],
 
   "recipe_delete_confirmation": "Möchten Sie dieses Rezept wirklich löschen?",
+  "save": "Speichern",
   "cancel": "Stornieren",
   "delete": "Löschen",
   "delete_recipe": "Rezept Löschen",
@@ -63,5 +65,9 @@
 
   "title_required": "Rezepttitel ist erforderlich",
   "category_required": "Kategorie ist erforderlich",
-  "ingredient_required": "Mindestens eine Zutat ist erforderlich"
+  "ingredient_required": "Mindestens eine Zutat ist erforderlich",
+
+  "added_to_groceries": "Zur Einkaufsliste hinzugefügt",
+  "grocery_list": "Einkaufsliste",
+  "item_name": "Name"
 }

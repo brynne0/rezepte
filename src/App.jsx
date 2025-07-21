@@ -10,9 +10,12 @@ import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { Squirrel } from "lucide-react";
 import EditRecipePage from "./pages/EditRecipe";
 import { useTranslation } from "react-i18next";
+import GroceryList from "./pages/GroceryList/GroceryList";
+import AuthPage from "./pages/AuthPage/AuthPage";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [loginMessage, setLoginMessage] = useState("");
   const { recipes, loading } = useRecipes();
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("en");
@@ -49,6 +52,8 @@ function App() {
         setLanguage={setLanguage}
         setSelectedCategory={setSelectedCategory}
         setSearchTerm={setSearchTerm}
+        setLoginMessage={setLoginMessage}
+        loginMessage={loginMessage}
         t={t}
       />
       <Routes>
@@ -78,6 +83,12 @@ function App() {
         <Route
           path="/edit-recipe/:slug"
           element={<EditRecipePage categories={categories} />}
+        />
+
+        <Route path="/grocery-list" element={<GroceryList />} />
+        <Route
+          path="/auth-page"
+          element={<AuthPage setLoginMessage={setLoginMessage} />}
         />
       </Routes>
     </Router>

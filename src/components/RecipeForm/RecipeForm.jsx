@@ -89,7 +89,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     <div className="recipe-form-container">
       <header className="page-header-wrapper">
         <ArrowBigLeft
-          className="form-back-arrow"
+          className="back-arrow"
           size={30}
           onClick={() => {
             handleCancel();
@@ -238,11 +238,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                     className={"form-input"}
                   >
                     {units.map((unit) => (
-                      <option
-                        key={unit.value}
-                        value={unit.value}
-                        disabled={unit.disabled}
-                      >
+                      <option key={unit.value} value={unit.value}>
                         {unit.label}
                       </option>
                     ))}
