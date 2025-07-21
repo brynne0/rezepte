@@ -24,12 +24,12 @@
   align-items: center;
   flex-direction: column;
   width: 100%;
+  gap: 0.5rem;
 }
 
 .list-item {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
   align-items: center;
 }
 
@@ -59,10 +59,10 @@
 }
 
 /* First input - name field */
-/* .list-item .item-input:nth-child(1) {
+.list-item .item-input:nth-child(1) {
   flex: 2;
-  min-width: 150px;
-} */
+  /* min-width: 150px; */
+}
 
 /* Second input - quantity field */
 .list-item .item-input:nth-child(2) {
@@ -102,11 +102,11 @@
 }
 
 .save-btn {
-  width: 6rem;
+  min-width: 6rem;
 }
 
 .cancel-btn {
-  width: 6rem;
+  min-width: 6rem;
 }
 
 @media (max-width: 768px) {

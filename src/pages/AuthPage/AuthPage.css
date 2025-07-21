@@ -1,3 +1,7 @@
+.auth-page-container {
+  padding-top: 8rem;
+}
+
 .auth-form {
   display: flex;
   gap: 0.5rem;

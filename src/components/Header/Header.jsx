@@ -152,21 +152,24 @@ const Header = ({
                 >
                   <Search size={28} />
                 </button>
-                {/* Grocery List */}
-                <button
-                  className="icon-btn"
-                  onClick={() => navigate("/grocery-list")}
-                >
-                  <ShoppingBasket size={28} />
-                </button>
-                {/* Plus Recipe - only display if user logged in and isn't guest */}
+
+                {/* Only display if user logged in and isn't guest */}
                 {isLoggedIn && !isGuest && (
-                  <button
-                    className="icon-btn"
-                    onClick={() => navigate("/add-recipe")}
-                  >
-                    <Plus size={28} />
-                  </button>
+                  <>
+                    <button
+                      className="icon-btn"
+                      onClick={() => navigate("/add-recipe")}
+                    >
+                      <Plus size={28} />
+                    </button>
+                    {/* Grocery List */}
+                    <button
+                      className="icon-btn"
+                      onClick={() => navigate("/grocery-list")}
+                    >
+                      <ShoppingBasket size={28} />
+                    </button>
+                  </>
                 )}
               </nav>
             </>

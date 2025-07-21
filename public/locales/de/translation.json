@@ -68,5 +68,6 @@
   "ingredient_required": "Mindestens eine Zutat ist erforderlich",
 
   "added_to_groceries": "Zur Einkaufsliste hinzugefügt",
-  "grocery_list": "Einkaufsliste"
+  "grocery_list": "Einkaufsliste",
+  "item_name": "Name"
 }

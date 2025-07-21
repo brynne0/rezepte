@@ -76,7 +76,7 @@ const AuthPage = ({ setLoginMessage }) => {
   };
 
   return (
-    <div>
+    <div className="auth-page-container">
       {/* Headers to toggle log in or sign up  */}
       <div className="auth-toggle">
         <button

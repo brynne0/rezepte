@@ -68,5 +68,6 @@
   "ingredient_required": "At least one ingredient is required",
 
   "added_to_groceries": "Added to grocery list",
-  "grocery_list": "Grocery List"
+  "grocery_list": "Grocery List",
+  "item_name": "Item name"
 }

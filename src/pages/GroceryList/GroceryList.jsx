@@ -89,8 +89,6 @@ const GroceryList = () => {
       <div className="list-items">
         {currentList.length === 0 && !isEditing ? (
           <div>
-            {/* TODO */}
-            <p>{t("no_items_in_list")}</p>
             <button className="add-btn" onClick={addNewItem}>
               <Plus size={20} />
             </button>
@@ -109,7 +107,7 @@ const GroceryList = () => {
                   value={item.name || ""}
                   className="item-input"
                   readOnly={!isEditing}
-                  placeholder={t("name")}
+                  placeholder={t("item_name")}
                   onChange={(e) =>
                     handleInputChange(index, "name", e.target.value)
                   }
