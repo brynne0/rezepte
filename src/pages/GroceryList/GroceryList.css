@@ -12,14 +12,12 @@
   padding-top: 0;
 }
 
-.page-header-wrapper {
+.grocery-page-header-wrapper {
   align-items: center;
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between;
 }
-
-
 
 .list-items {
   display: flex;
@@ -47,10 +45,10 @@
 }
 
 /* First input - name field */
-.list-item .item-input:nth-child(1) {
+/* .list-item .item-input:nth-child(1) {
   flex: 2;
   min-width: 150px;
-}
+} */
 
 /* Second input - quantity field */
 .list-item .item-input:nth-child(2) {
@@ -76,4 +74,36 @@
 
 .remove-btn:hover {
   transform: translateY(-1px);
+}
+
+.btn-wrapper {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+}
+
+.spacer {
+  flex-shrink: 0;
+}
+
+.save-btn {
+  width: 6rem;
+}
+
+.cancel-btn {
+  width: 6rem;
+}
+
+@media (max-width: 768px) {
+  /* Header adjustments */
+  .grocery-page-header-wrapper {
+    padding: 0;
+  }
+  .grocery-page-header-wrapper h1 {
+    font-size: 1.25rem;
+  }
+  .back-arrow {
+    left: 1.25rem;
+  }
 }

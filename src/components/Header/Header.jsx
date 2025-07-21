@@ -15,12 +15,10 @@ const Header = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  // Temporary solution to hide nav bar - TODO
-  const hideNavBar =
-    location.pathname === "/add-recipe" ||
-    location.pathname.startsWith("/edit-recipe") ||
-    location.pathname === "/grocery-list" ||
-    location.pathname === "/auth-page";
+
+  // Temporary solution to hide nav bar for mobiles on all screens except home screen
+  const isSmallScreen = window.matchMedia("(max-width: 768px)").matches;
+  const hideNavBar = location.pathname !== "/" && isSmallScreen;
 
   const { isLoggedIn, isMe, isGuest } = useAuth();
 

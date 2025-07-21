@@ -1,64 +1,160 @@
 import "./GroceryList.css";
 import { useGroceryList } from "../../hooks/useGroceryList";
-import { Trash2, Pencil, ArrowBigLeft } from "lucide-react";
+import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 const GroceryList = () => {
-  const { groceryList, removeFromGroceryList } = useGroceryList();
+  const { groceryList, updateGroceryList } = useGroceryList();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const units = t("units", { returnObjects: true });
 
+  // Overall edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedList, setEditedList] = useState([]);
+
+  const startEditing = () => {
+    setIsEditing(true);
+    setEditedList([...groceryList]); // Create a copy to edit
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setEditedList([]);
+  };
+
+  const saveChanges = () => {
+    updateGroceryList(editedList);
+    setIsEditing(false);
+    setEditedList([]);
+  };
+
+  const handleInputChange = (index, field, value) => {
+    const updatedList = [...editedList];
+    updatedList[index] = {
+      ...updatedList[index],
+      [field]: value,
+    };
+    setEditedList(updatedList);
+  };
+
+  const removeItemFromEdit = (index) => {
+    const updatedList = editedList.filter((_, i) => i !== index);
+    setEditedList(updatedList);
+  };
+
+  const currentList = isEditing ? editedList : groceryList;
+
   return (
     <div className="grocery-list-wrapper">
-      <header className="page-header-wrapper">
+      <header className="grocery-page-header-wrapper">
         <ArrowBigLeft
           className="back-arrow"
           size={30}
-          onClick={() => {
-            navigate(-1);
-          }}
+          onClick={() => navigate(-1)}
         />
         <h1>{t("grocery_list")}</h1>
+        {!isEditing ? (
+          <Pencil onClick={startEditing} />
+        ) : (
+          <div style={{ width: 24, height: 24 }}></div>
+        )}
       </header>
-      <div className="list-items">
-        {groceryList.map((item) => (
-          // FIX TEMP ID - undefined
-          <div className="list-item" key={item.id}>
-            <input
-              id={`item-name-${item.tempId}`}
-              type="text"
-              value={item.name}
-              className="item-input"
-            />
-            <input
-              id={`item-quantity-${item.tempId}`}
-              type="text"
-              value={item.quantity}
-              className="item-input"
-            />
-            <select
-              id={`ingredient-unit-${item.tempId}`}
-              value={item.unit}
-              className={"item-input"}
-            >
-              {units.map((unit) => (
-                <option key={unit.value} value={unit.value}>
-                  {unit.label}
-                </option>
-              ))}
-            </select>
 
-            <button
-              className="remove-btn"
-              onClick={() => removeFromGroceryList(item.id)}
-            >
-              <Trash2 size={16} />
-            </button>
+      <div className="list-items">
+        {currentList.length === 0 ? (
+          <div>
+            {/* TODO */}
+            {t("no_items_in_list")}
           </div>
-        ))}
+        ) : (
+          currentList.map((item, index) => {
+            // Generate a unique key using id or tempId or index as fallback
+            const itemKey = item.id || item.tempId || `item-${index}`;
+            const itemId = item.id || item.tempId || index;
+
+            return (
+              <div className="list-item" key={itemKey}>
+                <input
+                  id={`item-name-${itemId}`}
+                  type="text"
+                  value={item.name || ""}
+                  className="item-input"
+                  readOnly={!isEditing}
+                  placeholder={t("item_name")}
+                  onChange={(e) =>
+                    handleInputChange(index, "name", e.target.value)
+                  }
+                />
+                <input
+                  id={`item-quantity-${itemId}`}
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={item.quantity || ""}
+                  className="item-input"
+                  readOnly={!isEditing}
+                  placeholder="0"
+                  onChange={(e) =>
+                    handleInputChange(
+                      index,
+                      "quantity",
+                      parseFloat(e.target.value) || 0
+                    )
+                  }
+                />
+                <select
+                  id={`item-unit-${itemId}`}
+                  value={item.unit || ""}
+                  className="item-input"
+                  disabled={!isEditing}
+                  onChange={(e) =>
+                    handleInputChange(index, "unit", e.target.value)
+                  }
+                >
+                  <option value="">{t("select_unit")}</option>
+                  {units &&
+                    Array.isArray(units) &&
+                    units.map((unit) => (
+                      <option key={unit.value} value={unit.value}>
+                        {unit.label}
+                      </option>
+                    ))}
+                </select>
+
+                {isEditing ? (
+                  <button
+                    className="remove-btn"
+                    onClick={() => removeItemFromEdit(index)}
+                    title={t("remove_item")}
+                    aria-label={t("remove_item")}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                ) : (
+                  <div
+                    className="spacer"
+                    style={{ width: 16, height: 16 }}
+                  ></div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
+
+      {isEditing && (
+        <div className="btn-wrapper">
+          <button className="primary-btn cancel-btn" onClick={cancelEditing}>
+            {t("cancel")}
+          </button>
+          <button className="primary-btn save-btn" onClick={saveChanges}>
+            {t("save")}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

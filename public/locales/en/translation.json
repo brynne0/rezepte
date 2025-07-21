@@ -45,6 +45,7 @@
   ],
 
   "recipe_delete_confirmation": "Are you sure you want to delete this recipe?",
+  "save": "Save",
   "cancel": "Cancel",
   "delete": "Delete",
   "delete_recipe": "Delete Recipe",

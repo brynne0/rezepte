@@ -59,6 +59,108 @@ export const useGroceryList = () => {
     loadGroceryList();
   }, []);
 
+  // Update grocery list
+  const updateGroceryList = async (updatedList) => {
+    try {
+      setLoading(true);
+
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Get current items from database
+      const { data: currentItems, error: fetchError } = await supabase
+        .from("grocery_items")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (fetchError) throw fetchError;
+
+      const currentItemIds = new Set(currentItems.map((item) => item.id));
+      const updatedItemIds = new Set(
+        updatedList.filter((item) => item.id).map((item) => item.id)
+      );
+
+      // Items to delete (in current but not in updated)
+      const itemsToDelete = currentItems.filter(
+        (item) => !updatedItemIds.has(item.id)
+      );
+
+      // Items to update (existing items with changes)
+      const itemsToUpdate = updatedList.filter(
+        (item) => item.id && currentItemIds.has(item.id)
+      );
+
+      // Items to insert (new items without id)
+      const itemsToInsert = updatedList.filter((item) => !item.id);
+
+      // Delete removed items
+      if (itemsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from("grocery_items")
+          .delete()
+          .in(
+            "id",
+            itemsToDelete.map((item) => item.id)
+          );
+
+        if (deleteError) throw deleteError;
+      }
+
+      // Update existing items
+      for (const item of itemsToUpdate) {
+        const { error: updateError } = await supabase
+          .from("grocery_items")
+          .update({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            source_recipes: item.source_recipes || [],
+          })
+          .eq("id", item.id);
+
+        if (updateError) throw updateError;
+      }
+
+      // Insert new items
+      if (itemsToInsert.length > 0) {
+        const itemsWithUserId = itemsToInsert.map((item) => ({
+          ...item,
+          user_id: user.id,
+          source_recipes: item.source_recipes || [],
+        }));
+
+        const { error: insertError } = await supabase
+          .from("grocery_items")
+          .insert(itemsWithUserId);
+
+        if (insertError) throw insertError;
+      }
+
+      // Reload the grocery list to get fresh data
+      const { data: refreshedList, error: reloadError } = await supabase
+        .from("grocery_items")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("id", { ascending: false });
+
+      if (reloadError) throw reloadError;
+
+      setGroceryList(refreshedList || []);
+      setError(null);
+    } catch (err) {
+      console.error("Error updating grocery list:", err);
+      setError(err.message);
+      throw err; // Re-throw so component can handle the error
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Add selected ingredients to grocery list
   const addToGroceryList = async (recipeIngredients, recipeTitle = "") => {
     const selectedIngredients = recipeIngredients.filter(
@@ -236,5 +338,6 @@ export const useGroceryList = () => {
     addToGroceryList,
     clearGroceryList,
     removeFromGroceryList,
+    updateGroceryList,
   };
 };

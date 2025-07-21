@@ -45,6 +45,7 @@
   ],
 
   "recipe_delete_confirmation": "Möchten Sie dieses Rezept wirklich löschen?",
+  "save": "Speichern",
   "cancel": "Stornieren",
   "delete": "Löschen",
   "delete_recipe": "Rezept Löschen",
