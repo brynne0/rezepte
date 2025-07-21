@@ -23,7 +23,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginMessage, setLoginMessage] = useState("");
-  const { isLoggedIn, isMe } = useAuth();
+  const { isLoggedIn, isMe, isGuest } = useAuth();
 
   // Search state
   const [showSearchBar, setShowSearchBar] = useState(false);
@@ -121,7 +121,7 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
               }}
             >
               <Squirrel className="header-logo" />
-              {isLoggedIn && isMe && <Squirrel className="header-logo-2" />}
+              {isMe && <Squirrel className="header-logo-2" />}
             </div>
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
@@ -284,8 +284,8 @@ const Header = ({ setSelectedCategory, setSearchTerm }) => {
                 >
                   <ShoppingBasket size={28} />
                 </button>
-                {/* Plus Recipe - only display if user logged in */}
-                {isLoggedIn && (
+                {/* Plus Recipe - only display if user logged in and isn't guest */}
+                {isLoggedIn && !isGuest && (
                   <button
                     className="icon-btn"
                     onClick={() => navigate("/add-recipe")}

@@ -10,7 +10,7 @@ const Recipe = () => {
   const { slug } = useParams();
   const { recipe, loading, error } = useRecipe(slug);
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
 
   // Use the grocery list hook
@@ -32,7 +32,7 @@ const Recipe = () => {
         <h1>{recipe.title}</h1>
 
         {/* Show edit button only when logged in  */}
-        {isLoggedIn && (
+        {isLoggedIn && !isGuest && (
           <button
             className="edit-btn"
             onClick={() => {
