@@ -15,10 +15,12 @@ const Header = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  // Temporary solution to hide nav bar - TODO
   const hideNavBar =
     location.pathname === "/add-recipe" ||
     location.pathname.startsWith("/edit-recipe") ||
-    location.pathname === "/grocery-list";
+    location.pathname === "/grocery-list" ||
+    location.pathname === "/auth-page";
 
   const { isLoggedIn, isMe, isGuest } = useAuth();
 

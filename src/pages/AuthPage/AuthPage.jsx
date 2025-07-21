@@ -149,7 +149,7 @@ const AuthPage = ({ setLoginMessage }) => {
           disabled={isSignUpMode ? !isSignUpFormValid : !isLoginFormValid}
           onClick={() => {
             navigate("/");
-            // TODO - show login success message
+            window.location.reload();
           }}
         >
           {isSignUpMode ? t("sign_up") : t("login")}
