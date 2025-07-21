@@ -25,10 +25,14 @@ const AuthPage = ({ setLoginMessage }) => {
       setLoginMessage(t("login_failed"));
     } else {
       setLoginMessage(t("login_success"));
+      // Navigate on successful login
+      navigate("/");
     }
 
     setTimeout(() => {
       setLoginMessage("");
+      // Refresh page to display recipes
+      window.location.reload();
     }, 3000);
 
     setUsername("");
@@ -44,10 +48,14 @@ const AuthPage = ({ setLoginMessage }) => {
       setLoginMessage(t("signup_failed"));
     } else {
       setLoginMessage(t("signup_success"));
+      // Navigate on successful sign up
+      navigate("/");
     }
 
     setTimeout(() => {
       setLoginMessage("");
+      // Refresh page to display recipes
+      window.location.reload();
     }, 3000);
 
     setEmail("");
@@ -147,10 +155,6 @@ const AuthPage = ({ setLoginMessage }) => {
           className="header-btn submit-btn"
           type="submit"
           disabled={isSignUpMode ? !isSignUpFormValid : !isLoginFormValid}
-          onClick={() => {
-            navigate("/");
-            window.location.reload();
-          }}
         >
           {isSignUpMode ? t("sign_up") : t("login")}
         </button>
