@@ -61,30 +61,14 @@
   cursor: pointer;
 }
 
+.language {
+  margin: 0;
+}
+
 .language.selected {
   color: var(--dark_red);
 }
 
-.login-form,
-.signup-form {
-  display: flex;
-  gap: 0.25rem;
-  justify-content: center;
-  align-items: center;
-  background: var(--cream);
-  /* padding: 0.5rem; */
-}
-
-.signup-form .login-inputs {
-  flex-direction: column;
-}
-
-.login-inputs {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.login-input,
 .header-btn,
 .search-bar-input {
   padding: 0.5rem;
@@ -165,21 +149,10 @@
 
   .login-wrapper {
     flex-direction: column-reverse;
-    gap: 0rem;
-  }
-
-  .login-form {
-    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .search-bar-wrapper {
     margin-top: 0;
-  }
-}
-
-/* When login input form intersects with heading, stack vertically */
-@media (max-width: 1250px) {
-  .login-inputs {
-    flex-direction: column;
   }
 }

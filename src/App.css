@@ -17,6 +17,12 @@
   width: 5rem;
   height: 5rem;
 }
+
+.back-arrow {
+  left: 3rem;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   #root {
     padding: 0.75rem;

@@ -19,10 +19,7 @@
   justify-content: center;
 }
 
-.back-arrow {
-  left: 3rem;
-  cursor: pointer;
-}
+
 
 .list-items {
   display: flex;
