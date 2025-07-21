@@ -44,6 +44,20 @@
   font-family: inherit;
 }
 
+.item-input:disabled {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none;
+}
+
+/* For WebKit browsers */
+.item-input:disabled::-webkit-outer-spin-button,
+.item-input:disabled::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* First input - name field */
 /* .list-item .item-input:nth-child(1) {
   flex: 2;
