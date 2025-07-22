@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "./useRecipeActions";
 import { useTranslation } from "react-i18next";
 
-export const useRecipeForm = (initialRecipe = null) => {
+export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { createRecipe, updateRecipe, deleteRecipe, loading, error } =
@@ -237,6 +237,11 @@ export const useRecipeForm = (initialRecipe = null) => {
         result = await createRecipe(recipeData);
       }
 
+      // Refresh recipes after successful create/update
+      if (refreshRecipes) {
+        refreshRecipes();
+      }
+
       navigate(`/${result.slug}`);
     } catch (err) {
       console.error(
@@ -254,8 +259,13 @@ export const useRecipeForm = (initialRecipe = null) => {
     if (!initialRecipe) return;
     try {
       await deleteRecipe(initialRecipe.id);
+
+      // Refresh recipes after successful delete
+      if (refreshRecipes) {
+        refreshRecipes();
+      }
+
       navigate("/");
-      window.location.reload();
     } catch (err) {
       console.error("Failed to delete recipe:", err);
     }

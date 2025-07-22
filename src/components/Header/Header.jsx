@@ -12,6 +12,7 @@ const Header = ({
   setSearchTerm,
   setLoginMessage,
   loginMessage,
+  refreshRecipes,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -47,7 +48,7 @@ const Header = ({
     setShowLogOut(false);
     setTimeout(() => {
       setLoginMessage("");
-      window.location.reload();
+      refreshRecipes();
     }, 3000);
   };
 
@@ -121,7 +122,7 @@ const Header = ({
             onClick={() => {
               navigate("/");
               setSelectedCategory("all");
-              window.location.reload();
+              refreshRecipes();
             }}
             className="header-title"
           >

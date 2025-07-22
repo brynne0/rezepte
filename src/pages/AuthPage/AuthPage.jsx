@@ -2,9 +2,10 @@ import { signUp, signIn } from "../../services/auth";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+
 import "./AuthPage.css";
 
-const AuthPage = ({ setLoginMessage }) => {
+const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
   // Form input states
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -32,7 +33,7 @@ const AuthPage = ({ setLoginMessage }) => {
     setTimeout(() => {
       setLoginMessage("");
       // Refresh page to display recipes
-      window.location.reload();
+      refreshRecipes();
     }, 3000);
 
     setUsername("");
@@ -55,7 +56,7 @@ const AuthPage = ({ setLoginMessage }) => {
     setTimeout(() => {
       setLoginMessage("");
       // Refresh page to display recipes
-      window.location.reload();
+      refreshRecipes();
     }, 3000);
 
     setEmail("");

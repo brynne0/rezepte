@@ -16,7 +16,7 @@ import AuthPage from "./pages/AuthPage/AuthPage";
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loginMessage, setLoginMessage] = useState("");
-  const { recipes, loading } = useRecipes();
+  const { recipes, loading, refreshRecipes } = useRecipes();
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
@@ -54,6 +54,7 @@ function App() {
         setSearchTerm={setSearchTerm}
         setLoginMessage={setLoginMessage}
         loginMessage={loginMessage}
+        refreshRecipes={refreshRecipes}
         t={t}
       />
       <Routes>
@@ -88,7 +89,12 @@ function App() {
         <Route path="/grocery-list" element={<GroceryList />} />
         <Route
           path="/auth-page"
-          element={<AuthPage setLoginMessage={setLoginMessage} />}
+          element={
+            <AuthPage
+              setLoginMessage={setLoginMessage}
+              refreshRecipes={refreshRecipes}
+            />
+          }
         />
       </Routes>
     </Router>

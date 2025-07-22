@@ -1,11 +1,13 @@
 import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
+import { useRecipes } from "../../hooks/useRecipes";
 import "./RecipeForm.css";
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const { t } = useTranslation();
+  const { refreshRecipes } = useRecipes();
 
   const {
     formData,
@@ -25,10 +27,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     handleCancel,
     handleDelete,
     toTitleCase,
-  } = useRecipeForm(initialRecipe);
+  } = useRecipeForm({ initialRecipe, refreshRecipes }); // Pass refreshRecipes here
 
   const units = t("units", { returnObjects: true });
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const AutoResizeTextarea = ({ value, onChange, onKeyDown, className }) => {
