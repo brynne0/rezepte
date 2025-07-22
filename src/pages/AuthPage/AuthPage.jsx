@@ -30,10 +30,13 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
       navigate("/");
     }
 
-    setTimeout(() => {
-      setLoginMessage("");
-      // Refresh page to display recipes
+    if (refreshRecipes) {
       refreshRecipes(true);
+    }
+
+    setTimeout(() => {
+      // Reset login message
+      setLoginMessage("");
     }, 3000);
 
     setUsername("");
@@ -53,10 +56,13 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
       navigate("/");
     }
 
-    setTimeout(() => {
-      setLoginMessage("");
-      // Refresh page to display recipes
+    if (refreshRecipes) {
       refreshRecipes(true);
+    }
+
+    setTimeout(() => {
+      // Reset login message
+      setLoginMessage("");
     }, 3000);
 
     setEmail("");

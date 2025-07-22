@@ -132,14 +132,12 @@ const Recipe = () => {
       )}
 
       {/* Extra Notes */}
-      {recipe.notes &&
-        recipe.notes.length >
-          0(
-            <div className="recipe-subheading">
-              <h3>{t("notes")}:</h3>
-              {recipe.notes}
-            </div>
-          )}
+      {recipe.notes && recipe.notes.length > 0 && (
+        <div className="recipe-subheading">
+          <h3>{t("notes")}:</h3>
+          {recipe.notes}
+        </div>
+      )}
     </div>
   );
 };

@@ -46,9 +46,13 @@ const Header = ({
 
     setLoginMessage(t("logged_out"));
     setShowLogOut(false);
+
+    if (refreshRecipes) {
+      refreshRecipes(false);
+    }
+
     setTimeout(() => {
       setLoginMessage("");
-      refreshRecipes(false);
     }, 3000);
   };
 
@@ -123,9 +127,9 @@ const Header = ({
               setSelectedCategory("all");
               setSearchTerm("");
               navigate("/");
-              setTimeout(() => {
+              if (refreshRecipes) {
                 refreshRecipes(false);
-              }, 0);
+              }
             }}
             className="header-title"
           >

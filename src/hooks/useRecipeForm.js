@@ -271,7 +271,6 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
       await deleteRecipe(initialRecipe.id);
 
       // Refresh recipes after successful delete
-      // TODO - not working
       if (refreshRecipes) {
         refreshRecipes(false);
       }
