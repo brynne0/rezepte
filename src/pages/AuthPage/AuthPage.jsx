@@ -2,16 +2,17 @@ import { signUp, signIn } from "../../services/auth";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+
 import "./AuthPage.css";
 
-const AuthPage = ({ setLoginMessage }) => {
+const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
   // Form input states
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // Toggle between login and signup modes
+  // Toggle between different modes
   const [isSignUpMode, setIsSignUpMode] = useState(false);
 
   const navigate = useNavigate();
@@ -25,10 +26,14 @@ const AuthPage = ({ setLoginMessage }) => {
       setLoginMessage(t("login_failed"));
     } else {
       setLoginMessage(t("login_success"));
+      // Navigate on successful login
+      navigate("/");
     }
 
     setTimeout(() => {
       setLoginMessage("");
+      // Refresh page to display recipes
+      refreshRecipes(true);
     }, 3000);
 
     setUsername("");
@@ -44,10 +49,14 @@ const AuthPage = ({ setLoginMessage }) => {
       setLoginMessage(t("signup_failed"));
     } else {
       setLoginMessage(t("signup_success"));
+      // Navigate on successful sign up
+      navigate("/");
     }
 
     setTimeout(() => {
       setLoginMessage("");
+      // Refresh page to display recipes
+      refreshRecipes(true);
     }, 3000);
 
     setEmail("");
@@ -56,7 +65,7 @@ const AuthPage = ({ setLoginMessage }) => {
     setPassword("");
   };
 
-  // Check if form is valid for submission
+  // Check if forms are valid for submission
   const isLoginFormValid = username.trim() && password.trim();
   const isSignUpFormValid = email.trim() && username.trim() && password.trim();
 
@@ -75,9 +84,16 @@ const AuthPage = ({ setLoginMessage }) => {
     setPassword("");
   };
 
+  const switchToForgotPassword = () => {
+    setIsSignUpMode(false);
+    setUsername("");
+    setPassword("");
+    navigate("/forgot-password");
+  };
+
   return (
     <div className="auth-page-container">
-      {/* Headers to toggle log in or sign up  */}
+      {/* Headers to toggle between modes */}
       <div className="auth-toggle">
         <button
           className={`auth-option ${!isSignUpMode ? "selected" : ""}`}
@@ -102,6 +118,7 @@ const AuthPage = ({ setLoginMessage }) => {
         <div className="auth-inputs">
           {isSignUpMode && (
             <>
+              {/* Email */}
               <input
                 id="email"
                 type="email"
@@ -111,6 +128,7 @@ const AuthPage = ({ setLoginMessage }) => {
                 className="auth-input"
                 required
               />
+              {/* First Name */}
               <input
                 id="name"
                 type="text"
@@ -119,10 +137,11 @@ const AuthPage = ({ setLoginMessage }) => {
                 placeholder={t("first_name")}
                 className="auth-input"
                 required
-              ></input>
+              />
             </>
           )}
 
+          {/* Username */}
           <input
             id="username"
             type="text"
@@ -132,6 +151,7 @@ const AuthPage = ({ setLoginMessage }) => {
             className="auth-input"
             required
           />
+          {/* Password */}
           <input
             id="password"
             type="password"
@@ -143,14 +163,20 @@ const AuthPage = ({ setLoginMessage }) => {
           />
         </div>
 
+        {/* Forgot Password  */}
+        {!isSignUpMode && (
+          <div className="auth-links">
+            <span onClick={switchToForgotPassword} className="auth-link">
+              {t("forgot_password")}
+            </span>
+          </div>
+        )}
+
+        {/* Submit button */}
         <button
           className="header-btn submit-btn"
           type="submit"
           disabled={isSignUpMode ? !isSignUpFormValid : !isLoginFormValid}
-          onClick={() => {
-            navigate("/");
-            window.location.reload();
-          }}
         >
           {isSignUpMode ? t("sign_up") : t("login")}
         </button>

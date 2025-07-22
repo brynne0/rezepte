@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "./useRecipeActions";
 import { useTranslation } from "react-i18next";
 
-export const useRecipeForm = (initialRecipe = null) => {
+export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { createRecipe, updateRecipe, deleteRecipe, loading, error } =
@@ -40,12 +40,14 @@ export const useRecipeForm = (initialRecipe = null) => {
                   notes: "",
                 },
               ],
+        link_only: initialRecipe.link_only,
+        notes: initialRecipe.notes,
       };
     }
 
     return {
       title: "",
-      category: "",
+      category: { value: "", label: "" },
       servings: "",
       instructions: [""],
       source: "",
@@ -59,6 +61,8 @@ export const useRecipeForm = (initialRecipe = null) => {
           notes: "",
         },
       ],
+      link_only: false,
+      notes: "",
     };
   }, [initialRecipe]);
 
@@ -190,7 +194,11 @@ export const useRecipeForm = (initialRecipe = null) => {
       errors.category = t("category_required");
     }
 
-    if (formData.ingredients.every((ing) => !ing.name || !ing.name.trim())) {
+    // Only require an ingredient if it isn't a link only recipe
+    if (
+      !formData.link_only &&
+      formData.ingredients.every((ing) => !ing.name || !ing.name.trim())
+    ) {
       errors.ingredients = t("ingredient_required");
     }
 
@@ -226,6 +234,8 @@ export const useRecipeForm = (initialRecipe = null) => {
           unit: ing.unit.trim() || null,
           notes: ing.notes.trim() || null,
         })),
+        link_only: formData.link_only,
+        notes: formData.notes,
       };
 
       let result;
@@ -237,7 +247,12 @@ export const useRecipeForm = (initialRecipe = null) => {
         result = await createRecipe(recipeData);
       }
 
-      navigate(`/${result.slug}`);
+      // Refresh recipes after successful create/update
+      if (refreshRecipes) {
+        refreshRecipes(false);
+      }
+
+      navigate(`/${result.id}/${result.slug}`);
     } catch (err) {
       console.error(
         `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
@@ -254,8 +269,14 @@ export const useRecipeForm = (initialRecipe = null) => {
     if (!initialRecipe) return;
     try {
       await deleteRecipe(initialRecipe.id);
+
+      // Refresh recipes after successful delete
+      // TODO - not working
+      if (refreshRecipes) {
+        refreshRecipes(false);
+      }
+
       navigate("/");
-      window.location.reload();
     } catch (err) {
       console.error("Failed to delete recipe:", err);
     }

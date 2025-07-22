@@ -12,11 +12,12 @@ import EditRecipePage from "./pages/EditRecipe";
 import { useTranslation } from "react-i18next";
 import GroceryList from "./pages/GroceryList/GroceryList";
 import AuthPage from "./pages/AuthPage/AuthPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loginMessage, setLoginMessage] = useState("");
-  const { recipes, loading } = useRecipes();
+  const { recipes, loading, refreshRecipes } = useRecipes();
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
@@ -54,6 +55,7 @@ function App() {
         setSearchTerm={setSearchTerm}
         setLoginMessage={setLoginMessage}
         loginMessage={loginMessage}
+        refreshRecipes={refreshRecipes}
         t={t}
       />
       <Routes>
@@ -75,21 +77,27 @@ function App() {
             </>
           }
         />
-        <Route path="/:slug" element={<Recipe />} />
+        <Route path="/:id/:slug" element={<Recipe />} />
         <Route
           path="/add-recipe"
           element={<AddRecipePage categories={categories} />}
         />
         <Route
-          path="/edit-recipe/:slug"
+          path="/edit-recipe/:id/:slug"
           element={<EditRecipePage categories={categories} />}
         />
 
         <Route path="/grocery-list" element={<GroceryList />} />
         <Route
           path="/auth-page"
-          element={<AuthPage setLoginMessage={setLoginMessage} />}
+          element={
+            <AuthPage
+              setLoginMessage={setLoginMessage}
+              refreshRecipes={refreshRecipes}
+            />
+          }
         />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Routes>
     </Router>
   );

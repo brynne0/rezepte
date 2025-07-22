@@ -20,6 +20,13 @@
   "username": "Username",
   "password": "Password",
 
+  "forgot_password": "Forgot password?",
+  "reset_password": "Reset Password",
+  "send_reset_email": "Send Reset Email",
+  "email_required": "Email is required",
+  "password_reset_sent": "Password reset email sent! Please check your inbox.",
+  "password_reset_failed": "Failed to send password reset email. Please try again.",
+
   "search": "Search",
   "recipe_not_found": "Recipe not found.",
 
@@ -27,7 +34,8 @@
   "ingredients": "Ingredients",
   "instructions": "Instructions",
   "source": "Source",
-  "source_link": "Source link or note",
+  "source_link": "Source link",
+  "source_link_or_note": "Source link or note",
 
   "units": [
     { "value": "", "label": "Unit" },
@@ -55,6 +63,8 @@
   "recipe_title": "Recipe Title",
   "category": "Category",
   "select_category": "Select a Category",
+  "full_recipe": "Full Recipe",
+  "link_only": "Link Only",
 
   "ingredient_name": "Ingredient name",
   "quantity": "Qty",

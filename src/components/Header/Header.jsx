@@ -12,6 +12,7 @@ const Header = ({
   setSearchTerm,
   setLoginMessage,
   loginMessage,
+  refreshRecipes,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -47,7 +48,7 @@ const Header = ({
     setShowLogOut(false);
     setTimeout(() => {
       setLoginMessage("");
-      window.location.reload();
+      refreshRecipes(false);
     }, 3000);
   };
 
@@ -59,14 +60,14 @@ const Header = ({
           <div className="login-wrapper">
             <div
               onClick={() => {
-                if (loginMessage) return; // Don't do anything if there's a message
+                // Don't do anything if there's a message or already on auth page
+                if (loginMessage || location.pathname === "/auth-page") return;
 
                 if (isLoggedIn) {
                   // Logout form
                   setShowLogOut((prev) => !prev);
                 } else {
                   // Sign in/up form
-                  // TODO - don't display if in login page already
                   setShowLogIn((prev) => !prev);
                 }
               }}
@@ -119,9 +120,12 @@ const Header = ({
           {/* Title */}
           <h1
             onClick={() => {
-              navigate("/");
               setSelectedCategory("all");
-              window.location.reload();
+              setSearchTerm("");
+              navigate("/");
+              setTimeout(() => {
+                refreshRecipes(false);
+              }, 0);
             }}
             className="header-title"
           >

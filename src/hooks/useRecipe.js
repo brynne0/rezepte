@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import supabase from "../utils/supabaseClient";
 
 // Fetches a single recipe and all associated data
-export const useRecipe = (slug) => {
+export const useRecipe = (id) => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchRecipe = async () => {
-      if (!slug) {
+      if (!id) {
         setRecipe(null);
         setLoading(false);
         return;
@@ -24,7 +24,7 @@ export const useRecipe = (slug) => {
           .select(
             "*, recipe_ingredients(quantity, unit, ingredients(id, name))"
           )
-          .eq("slug", slug)
+          .eq("id", id)
           .single();
 
         if (supabaseError) {
@@ -57,7 +57,7 @@ export const useRecipe = (slug) => {
     };
 
     fetchRecipe();
-  }, [slug]);
+  }, [id]);
 
   return { recipe, loading, error };
 };
