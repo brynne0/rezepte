@@ -48,7 +48,7 @@ const Header = ({
     setShowLogOut(false);
     setTimeout(() => {
       setLoginMessage("");
-      refreshRecipes();
+      refreshRecipes(false);
     }, 3000);
   };
 
@@ -120,9 +120,12 @@ const Header = ({
           {/* Title */}
           <h1
             onClick={() => {
-              navigate("/");
               setSelectedCategory("all");
-              refreshRecipes();
+              setSearchTerm("");
+              navigate("/");
+              setTimeout(() => {
+                refreshRecipes(false);
+              }, 0);
             }}
             className="header-title"
           >

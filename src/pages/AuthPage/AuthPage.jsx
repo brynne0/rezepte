@@ -33,7 +33,7 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
     setTimeout(() => {
       setLoginMessage("");
       // Refresh page to display recipes
-      refreshRecipes();
+      refreshRecipes(true);
     }, 3000);
 
     setUsername("");
@@ -56,7 +56,7 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
     setTimeout(() => {
       setLoginMessage("");
       // Refresh page to display recipes
-      refreshRecipes();
+      refreshRecipes(true);
     }, 3000);
 
     setEmail("");

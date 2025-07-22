@@ -249,7 +249,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
 
       // Refresh recipes after successful create/update
       if (refreshRecipes) {
-        refreshRecipes();
+        refreshRecipes(false);
       }
 
       navigate(`/${result.id}/${result.slug}`);
@@ -273,7 +273,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
       // Refresh recipes after successful delete
       // TODO - not working
       if (refreshRecipes) {
-        refreshRecipes();
+        refreshRecipes(false);
       }
 
       navigate("/");

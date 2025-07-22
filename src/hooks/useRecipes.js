@@ -34,18 +34,18 @@ export const useRecipes = () => {
     }
   }, []);
 
-  const refreshRecipes = useCallback(async () => {
+  const refreshRecipes = useCallback(async (showLoading = false) => {
     // Check if user is still authenticated before refreshing
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
       setRecipes([]);
-      setLoading(false);
+      if (showLoading) setLoading(false);
       return;
     }
 
-    setLoading(true);
+    if (showLoading) setLoading(true);
     try {
       const { data, error } = await supabase.from("recipes").select("*");
       if (error) {
@@ -58,7 +58,7 @@ export const useRecipes = () => {
       console.log("Error refreshing: ", err);
       setRecipes([]);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, []);
 
