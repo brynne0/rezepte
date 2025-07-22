@@ -60,14 +60,14 @@ const Header = ({
           <div className="login-wrapper">
             <div
               onClick={() => {
-                if (loginMessage) return; // Don't do anything if there's a message
+                // Don't do anything if there's a message or already on auth page
+                if (loginMessage || location.pathname === "/auth-page") return;
 
                 if (isLoggedIn) {
                   // Logout form
                   setShowLogOut((prev) => !prev);
                 } else {
                   // Sign in/up form
-                  // TODO - don't display if in login page already
                   setShowLogIn((prev) => !prev);
                 }
               }}
