@@ -7,8 +7,8 @@ import { useTranslation } from "react-i18next";
 import { useGroceryList } from "../../hooks/useGroceryList";
 
 const Recipe = () => {
-  const { slug } = useParams();
-  const { recipe, loading, error } = useRecipe(slug);
+  const { id } = useParams();
+  const { recipe, loading, error } = useRecipe(id);
   const navigate = useNavigate();
   const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
@@ -36,7 +36,7 @@ const Recipe = () => {
           <button
             className="edit-btn"
             onClick={() => {
-              navigate(`/edit-recipe/${recipe.slug}`);
+              navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
             }}
           >
             <Pencil />

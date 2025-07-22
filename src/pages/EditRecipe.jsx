@@ -4,8 +4,8 @@ import { useRecipe } from "../hooks/useRecipe";
 import { useTranslation } from "react-i18next";
 
 const EditRecipePage = ({ categories }) => {
-  const { slug } = useParams();
-  const { recipe, loading } = useRecipe(slug);
+  const { id } = useParams();
+  const { recipe, loading } = useRecipe(id);
   const { t } = useTranslation();
 
   if (loading) {

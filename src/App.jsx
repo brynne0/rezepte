@@ -76,13 +76,13 @@ function App() {
             </>
           }
         />
-        <Route path="/:slug" element={<Recipe />} />
+        <Route path="/:id/:slug" element={<Recipe />} />
         <Route
           path="/add-recipe"
           element={<AddRecipePage categories={categories} />}
         />
         <Route
-          path="/edit-recipe/:slug"
+          path="/edit-recipe/:id/:slug"
           element={<EditRecipePage categories={categories} />}
         />
 

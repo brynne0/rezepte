@@ -252,7 +252,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
         refreshRecipes();
       }
 
-      navigate(`/${result.slug}`);
+      navigate(`/${result.id}/${result.slug}`);
     } catch (err) {
       console.error(
         `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
