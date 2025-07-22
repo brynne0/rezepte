@@ -70,8 +70,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         <h1>{title}</h1>
       </header>
 
-      {/* Recipe type toggle  - TODO only for add recipe */}
+      {/* Recipe type toggle */}
       <div>
+        {/* Full Recipe */}
         <button
           className={`type-option ${!IsLinkRecipe ? "selected" : ""}`}
           type="button"
@@ -81,6 +82,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         >
           {t("full_recipe")}
         </button>
+        {/* Link Only Recipe */}
         <button
           className={`type-option ${IsLinkRecipe ? "selected" : ""}`}
           type="button"
@@ -332,7 +334,24 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             value={formData.source}
             onChange={(e) => handleInputChange("source", e.target.value)}
             className="form-input"
-            placeholder={t("source_link")}
+            placeholder={
+              IsLinkRecipe ? t("source_link") : t("source_link_or_note")
+            }
+          />
+        </div>
+
+        {/* Extra Notes */}
+        <div className="form-group">
+          <label htmlFor="extra-notes" className="form-header">
+            {t("notes")}
+          </label>
+          <input
+            id="extra-notes"
+            type="text"
+            value={formData.notes}
+            onChange={(e) => handleInputChange("notes", e.target.value)}
+            className="form-input"
+            placeholder={t("notes")}
           />
         </div>
 

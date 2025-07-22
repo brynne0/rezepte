@@ -27,7 +27,8 @@
   "ingredients": "Zutaten",
   "instructions": "Schritte",
   "source": "Quelle",
-  "source_link": "Quellenlink oder Hinweis",
+  "source_link": "Quellenlink",
+  "source_link_or_note": "Quellenlink oder Hinweis",
 
   "units": [
     { "value": "", "label": "Einheit" },

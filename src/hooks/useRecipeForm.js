@@ -41,6 +41,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
                 },
               ],
         link_only: initialRecipe.link_only,
+        notes: initialRecipe.notes,
       };
     }
 
@@ -61,6 +62,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
         },
       ],
       link_only: false,
+      notes: "",
     };
   }, [initialRecipe]);
 
@@ -233,6 +235,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
           notes: ing.notes.trim() || null,
         })),
         link_only: formData.link_only,
+        notes: formData.notes,
       };
 
       let result;
@@ -268,6 +271,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
       await deleteRecipe(initialRecipe.id);
 
       // Refresh recipes after successful delete
+      // TODO - not working
       if (refreshRecipes) {
         refreshRecipes();
       }

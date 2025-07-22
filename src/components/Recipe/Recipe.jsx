@@ -53,7 +53,7 @@ const Recipe = () => {
       )}
 
       {/* Ingredients */}
-      {recipe.ingredients && (
+      {recipe.ingredients && recipe.ingredients.length > 0 && (
         <>
           <div className="recipe-subheading">
             <h3>{t("ingredients")}:</h3>
@@ -130,6 +130,16 @@ const Recipe = () => {
           )}
         </div>
       )}
+
+      {/* Extra Notes */}
+      {recipe.notes &&
+        recipe.notes.length >
+          0(
+            <div className="recipe-subheading">
+              <h3>{t("notes")}:</h3>
+              {recipe.notes}
+            </div>
+          )}
     </div>
   );
 };

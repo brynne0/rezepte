@@ -27,7 +27,8 @@
   "ingredients": "Ingredients",
   "instructions": "Instructions",
   "source": "Source",
-  "source_link": "Source link or note",
+  "source_link": "Source link",
+  "source_link_or_note": "Source link or note",
 
   "units": [
     { "value": "", "label": "Unit" },

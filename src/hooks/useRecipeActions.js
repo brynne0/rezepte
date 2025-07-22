@@ -66,6 +66,7 @@ export const useRecipeActions = () => {
           source: recipeData.source,
           user_id: user.id,
           link_only: recipeData.link_only,
+          notes: recipeData.notes,
         }).filter(([, v]) => v !== undefined)
       );
 
@@ -141,6 +142,7 @@ export const useRecipeActions = () => {
           instructions: recipeData.instructions,
           source: recipeData.source,
           link_only: recipeData.link_only,
+          notes: recipeData.notes,
         }).filter(([, v]) => v !== undefined)
       );
 

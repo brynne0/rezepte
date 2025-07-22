@@ -27,7 +27,13 @@ const RecipeList = ({ selectedCategory, recipes, searchTerm }) => {
           <RecipeCard
             key={r.id}
             recipe={r}
-            onClick={() => navigate(`/${r.slug}`)}
+            onClick={() => {
+              navigate(`/${r.slug}`);
+              // Link to external link for link_only recipes
+              // r.link_only
+              //   ? (window.location.href = r.source)
+              //   : navigate(`/${r.slug}`);
+            }}
           />
         ))}
       </div>
