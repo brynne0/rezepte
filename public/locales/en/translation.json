@@ -55,6 +55,8 @@
   "recipe_title": "Recipe Title",
   "category": "Category",
   "select_category": "Select a Category",
+  "full_recipe": "Full Recipe",
+  "link_only": "Link Only",
 
   "ingredient_name": "Ingredient name",
   "quantity": "Qty",

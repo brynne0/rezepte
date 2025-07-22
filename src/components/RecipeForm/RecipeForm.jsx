@@ -32,6 +32,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
   const units = t("units", { returnObjects: true });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const IsLinkRecipe = formData.link_only;
 
   // Delete Recipe Modal Component
   const DeleteRecipeModal = ({ isOpen, onClose, onConfirm }) => {
@@ -68,6 +69,28 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         />
         <h1>{title}</h1>
       </header>
+
+      {/* Recipe type toggle  - TODO only for add recipe */}
+      <div>
+        <button
+          className={`type-option ${!IsLinkRecipe ? "selected" : ""}`}
+          type="button"
+          onClick={() => {
+            handleInputChange("link_only", false);
+          }}
+        >
+          {t("full_recipe")}
+        </button>
+        <button
+          className={`type-option ${IsLinkRecipe ? "selected" : ""}`}
+          type="button"
+          onClick={() => {
+            handleInputChange("link_only", true);
+          }}
+        >
+          {t("link_only")}
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="recipe-form">
         {error && <div className="error-message">{error}</div>}
@@ -129,160 +152,174 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           </select>
         </div>
 
-        {/* Servings */}
-        <div className="form-group">
-          <label htmlFor="servings" className="form-header">
-            {t("servings")}
-          </label>
-          <input
-            id="servings"
-            type="number"
-            min="1"
-            value={formData.servings}
-            onChange={(e) => handleInputChange("servings", e.target.value)}
-            className="form-input"
-            onWheel={(e) => {
-              e.target.blur();
-            }}
-          />
-        </div>
+        {!IsLinkRecipe && (
+          <>
+            {/* Servings */}
+            <div className="form-group">
+              <label htmlFor="servings" className="form-header">
+                {t("servings")}
+              </label>
+              <input
+                id="servings"
+                type="number"
+                min="1"
+                value={formData.servings}
+                onChange={(e) => handleInputChange("servings", e.target.value)}
+                className="form-input"
+                onWheel={(e) => {
+                  e.target.blur();
+                }}
+              />
+            </div>
 
-        {/* Ingredients */}
-        <div className="form-group">
-          <label className="form-header">{t("ingredients")}</label>
+            {/* Ingredients */}
+            <div className="form-group">
+              <label className="form-header">{t("ingredients")}</label>
 
-          {validationErrors.ingredients && (
-            <span className="field-error">{validationErrors.ingredients}</span>
-          )}
+              {validationErrors.ingredients && (
+                <span className="field-error">
+                  {validationErrors.ingredients}
+                </span>
+              )}
 
-          <div className="ingredients-list">
-            {formData.ingredients.map((ingredient) => (
-              <div key={ingredient.tempId} className="ingredient-row">
-                {/* Ingredient Name */}
-                <input
-                  id={`ingredient-name-${ingredient.tempId}`}
-                  type="text"
-                  value={ingredient.name || ""}
-                  onChange={(e) => {
-                    handleIngredientChange(
-                      ingredient.tempId,
-                      "name",
-                      e.target.value.toLowerCase(),
-                      validationErrors.ingredients ? "ingredients" : null
-                    );
-                  }}
-                  className="form-input"
-                  placeholder={t("ingredient_name")}
-                />
-                {/* Ingredient Quantity */}
-                <div className="ingredient-details">
-                  <input
-                    id={`ingredient-quantity-${ingredient.tempId}`}
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={ingredient.quantity}
-                    onChange={(e) =>
-                      handleIngredientChange(
-                        ingredient.tempId,
-                        "quantity",
-                        e.target.value
-                      )
-                    }
-                    className="form-input"
-                    placeholder={t("quantity")}
-                    onWheel={(e) => {
-                      e.target.blur();
-                    }}
-                  />
-                  {/* Ingredient Unit */}
-                  <select
-                    id={`ingredient-unit-${ingredient.tempId}`}
-                    value={ingredient.unit}
-                    onChange={(e) =>
-                      handleIngredientChange(
-                        ingredient.tempId,
-                        "unit",
-                        e.target.value
-                      )
-                    }
-                    className={"form-input"}
-                  >
-                    {units.map((unit) => (
-                      <option key={unit.value} value={unit.value}>
-                        {unit.label}
-                      </option>
-                    ))}
-                  </select>
+              <div className="ingredients-list">
+                {formData.ingredients.map((ingredient) => (
+                  <div key={ingredient.tempId} className="ingredient-row">
+                    {/* Ingredient Name */}
+                    <input
+                      id={`ingredient-name-${ingredient.tempId}`}
+                      type="text"
+                      value={ingredient.name || ""}
+                      onChange={(e) => {
+                        handleIngredientChange(
+                          ingredient.tempId,
+                          "name",
+                          e.target.value.toLowerCase(),
+                          validationErrors.ingredients ? "ingredients" : null
+                        );
+                      }}
+                      className="form-input"
+                      placeholder={t("ingredient_name")}
+                    />
+                    {/* Ingredient Quantity */}
+                    <div className="ingredient-details">
+                      <input
+                        id={`ingredient-quantity-${ingredient.tempId}`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={ingredient.quantity}
+                        onChange={(e) =>
+                          handleIngredientChange(
+                            ingredient.tempId,
+                            "quantity",
+                            e.target.value
+                          )
+                        }
+                        className="form-input"
+                        placeholder={t("quantity")}
+                        onWheel={(e) => {
+                          e.target.blur();
+                        }}
+                      />
+                      {/* Ingredient Unit */}
+                      <select
+                        id={`ingredient-unit-${ingredient.tempId}`}
+                        value={ingredient.unit}
+                        onChange={(e) =>
+                          handleIngredientChange(
+                            ingredient.tempId,
+                            "unit",
+                            e.target.value
+                          )
+                        }
+                        className={"form-input"}
+                      >
+                        {units.map((unit) => (
+                          <option key={unit.value} value={unit.value}>
+                            {unit.label}
+                          </option>
+                        ))}
+                      </select>
 
-                  {/* Ingredient Notes */}
-                  <input
-                    id={`ingredient-notes-${ingredient.tempId}`}
-                    type="text"
-                    value={ingredient.notes}
-                    onChange={(e) =>
-                      handleIngredientChange(
-                        ingredient.tempId,
-                        "notes",
-                        e.target.value
-                      )
-                    }
-                    className="form-input"
-                    placeholder={t("notes")}
-                  />
-                  {formData.ingredients.length > 1 && (
+                      {/* Ingredient Notes */}
+                      <input
+                        id={`ingredient-notes-${ingredient.tempId}`}
+                        type="text"
+                        value={ingredient.notes}
+                        onChange={(e) =>
+                          handleIngredientChange(
+                            ingredient.tempId,
+                            "notes",
+                            e.target.value
+                          )
+                        }
+                        className="form-input"
+                        placeholder={t("notes")}
+                      />
+                      {formData.ingredients.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeIngredient(ingredient.tempId)}
+                          className="remove-btn"
+                          aria-label="Remove ingredient"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="add-btn-wrapper">
+                <button
+                  type="button"
+                  onClick={addIngredient}
+                  className="add-btn"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Instructions */}
+            <div className="form-group">
+              <label className="form-header">{t("instructions")}</label>
+
+              <div className="instructions-list">
+                {formData.instructions.map((instruction, index) => (
+                  <div key={index} className="instruction-row">
+                    <span className="step-number">{index + 1}.</span>
+                    <AutoResizeTextArea
+                      value={instruction}
+                      onChange={(e) =>
+                        handleInstructionChange(index, e.target.value)
+                      }
+                      onKeyDown={handleEnter}
+                      className="instruction-textarea"
+                    />
                     <button
                       type="button"
-                      onClick={() => removeIngredient(ingredient.tempId)}
+                      onClick={() => removeInstruction(index)}
                       className="remove-btn"
-                      aria-label="Remove ingredient"
                     >
                       <Trash2 size={16} />
                     </button>
-                  )}
-                </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="add-btn-wrapper">
-            <button type="button" onClick={addIngredient} className="add-btn">
-              <Plus size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* Instructions */}
-        <div className="form-group">
-          <label className="form-header">{t("instructions")}</label>
-
-          <div className="instructions-list">
-            {formData.instructions.map((instruction, index) => (
-              <div key={index} className="instruction-row">
-                <span className="step-number">{index + 1}.</span>
-                <AutoResizeTextArea
-                  value={instruction}
-                  onChange={(e) =>
-                    handleInstructionChange(index, e.target.value)
-                  }
-                  onKeyDown={handleEnter}
-                  className="instruction-textarea"
-                />
+              <div className="add-btn-wrapper">
                 <button
                   type="button"
-                  onClick={() => removeInstruction(index)}
-                  className="remove-btn"
+                  onClick={addInstruction}
+                  className="add-btn"
                 >
-                  <Trash2 size={16} />
+                  <Plus size={16} />
                 </button>
               </div>
-            ))}
-          </div>
-          <div className="add-btn-wrapper">
-            <button type="button" onClick={addInstruction} className="add-btn">
-              <Plus size={16} />
-            </button>
-          </div>
-        </div>
+            </div>
+          </>
+        )}
 
         {/* Source */}
         <div className="form-group">

@@ -55,6 +55,8 @@
   "recipe_title": "Rezepttitel",
   "category": "Kategorie",
   "select_category": "Wählen Sie eine Kategorie",
+  "full_recipe": "Vollständiges Rezept",
+  "link_only": "Nur Link",
 
   "ingredient_name": "Name der Zutat",
   "quantity": "Menge",

@@ -40,6 +40,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
                   notes: "",
                 },
               ],
+        link_only: initialRecipe.link_only,
       };
     }
 
@@ -59,6 +60,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
           notes: "",
         },
       ],
+      link_only: false,
     };
   }, [initialRecipe]);
 
@@ -190,7 +192,11 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
       errors.category = t("category_required");
     }
 
-    if (formData.ingredients.every((ing) => !ing.name || !ing.name.trim())) {
+    // Only require an ingredient if it isn't a link only recipe
+    if (
+      !formData.link_only &&
+      formData.ingredients.every((ing) => !ing.name || !ing.name.trim())
+    ) {
       errors.ingredients = t("ingredient_required");
     }
 
@@ -226,6 +232,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
           unit: ing.unit.trim() || null,
           notes: ing.notes.trim() || null,
         })),
+        link_only: formData.link_only,
       };
 
       let result;
