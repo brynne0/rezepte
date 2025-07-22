@@ -20,6 +20,13 @@
   "username": "Benutzername",
   "password": "Passwort",
 
+  "forgot_password": "Passwort vergessen?",
+  "reset_password": "Passwort Zürucksetzen",
+  "send_reset_email": "E-Mail zum Zurücksetzen senden",
+  "email_required": "E-Mail ist erforderlich",
+  "password_reset_sent": "E-Mail zum Zurücksetzen des Passworts wurde gesendet! Bitte überprüfen Sie Ihren Posteingang.",
+  "password_reset_failed": "E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",
 

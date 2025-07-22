@@ -20,6 +20,13 @@
   "username": "Username",
   "password": "Password",
 
+  "forgot_password": "Forgot password?",
+  "reset_password": "Reset Password",
+  "send_reset_email": "Send Reset Email",
+  "email_required": "Email is required",
+  "password_reset_sent": "Password reset email sent! Please check your inbox.",
+  "password_reset_failed": "Failed to send password reset email. Please try again.",
+
   "search": "Search",
   "recipe_not_found": "Recipe not found.",
 

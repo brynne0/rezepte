@@ -12,6 +12,7 @@ import EditRecipePage from "./pages/EditRecipe";
 import { useTranslation } from "react-i18next";
 import GroceryList from "./pages/GroceryList/GroceryList";
 import AuthPage from "./pages/AuthPage/AuthPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -96,6 +97,7 @@ function App() {
             />
           }
         />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Routes>
     </Router>
   );

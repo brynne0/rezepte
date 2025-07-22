@@ -12,7 +12,7 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // Toggle between login and signup modes
+  // Toggle between different modes
   const [isSignUpMode, setIsSignUpMode] = useState(false);
 
   const navigate = useNavigate();
@@ -65,7 +65,7 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
     setPassword("");
   };
 
-  // Check if form is valid for submission
+  // Check if forms are valid for submission
   const isLoginFormValid = username.trim() && password.trim();
   const isSignUpFormValid = email.trim() && username.trim() && password.trim();
 
@@ -84,9 +84,16 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
     setPassword("");
   };
 
+  const switchToForgotPassword = () => {
+    setIsSignUpMode(false);
+    setUsername("");
+    setPassword("");
+    navigate("/forgot-password");
+  };
+
   return (
     <div className="auth-page-container">
-      {/* Headers to toggle log in or sign up  */}
+      {/* Headers to toggle between modes */}
       <div className="auth-toggle">
         <button
           className={`auth-option ${!isSignUpMode ? "selected" : ""}`}
@@ -111,6 +118,7 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
         <div className="auth-inputs">
           {isSignUpMode && (
             <>
+              {/* Email */}
               <input
                 id="email"
                 type="email"
@@ -120,6 +128,7 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
                 className="auth-input"
                 required
               />
+              {/* First Name */}
               <input
                 id="name"
                 type="text"
@@ -128,10 +137,11 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
                 placeholder={t("first_name")}
                 className="auth-input"
                 required
-              ></input>
+              />
             </>
           )}
 
+          {/* Username */}
           <input
             id="username"
             type="text"
@@ -141,6 +151,7 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
             className="auth-input"
             required
           />
+          {/* Password */}
           <input
             id="password"
             type="password"
@@ -152,6 +163,16 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
           />
         </div>
 
+        {/* Forgot Password  */}
+        {!isSignUpMode && (
+          <div className="auth-links">
+            <span onClick={switchToForgotPassword} className="auth-link">
+              {t("forgot_password")}
+            </span>
+          </div>
+        )}
+
+        {/* Submit button */}
         <button
           className="header-btn submit-btn"
           type="submit"
