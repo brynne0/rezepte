@@ -45,7 +45,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
 
     return {
       title: "",
-      category: "",
+      category: { value: "", label: "" },
       servings: "",
       instructions: [""],
       source: "",
