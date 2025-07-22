@@ -2,8 +2,9 @@ import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
 import { useRecipes } from "../../hooks/useRecipes";
 import "./RecipeForm.css";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import AutoResizeTextArea from "../AutoResizeTextArea";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const { t } = useTranslation();
@@ -27,41 +28,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     handleCancel,
     handleDelete,
     toTitleCase,
-  } = useRecipeForm({ initialRecipe, refreshRecipes }); // Pass refreshRecipes here
+  } = useRecipeForm({ initialRecipe, refreshRecipes });
 
   const units = t("units", { returnObjects: true });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const AutoResizeTextarea = ({ value, onChange, onKeyDown, className }) => {
-    const textareaRef = useRef(null);
-
-    const resizeTextarea = () => {
-      const textarea = textareaRef.current;
-      if (textarea) {
-        textarea.style.height = "auto";
-        textarea.style.height = textarea.scrollHeight + "px";
-      }
-    };
-
-    useEffect(() => {
-      resizeTextarea();
-    }, [value]); // Resize when value changes
-
-    const handleChange = (e) => {
-      onChange(e);
-      resizeTextarea();
-    };
-
-    return (
-      <textarea
-        ref={textareaRef}
-        value={value}
-        onChange={handleChange}
-        onKeyDown={onKeyDown}
-        className={className}
-      />
-    );
-  };
 
   // Delete Recipe Modal Component
   const DeleteRecipeModal = ({ isOpen, onClose, onConfirm }) => {
@@ -289,7 +259,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             {formData.instructions.map((instruction, index) => (
               <div key={index} className="instruction-row">
                 <span className="step-number">{index + 1}.</span>
-                <AutoResizeTextarea
+                <AutoResizeTextArea
                   value={instruction}
                   onChange={(e) =>
                     handleInstructionChange(index, e.target.value)
