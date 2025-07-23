@@ -1,8 +1,8 @@
 import "./Header.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
-import { signOut } from "../../services/auth";
-import { useState } from "react";
+import { signOut, getDisplayName } from "../../services/auth";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTranslation } from "react-i18next";
 // import useClickOutside from "../../hooks/useClickOutside";
@@ -26,11 +26,26 @@ const Header = ({
   // Search state
   const [showSearchBar, setShowSearchBar] = useState(false);
 
+  // Log in and out
   const [showLogOut, setShowLogOut] = useState(false);
   const [showLogIn, setShowLogIn] = useState(false);
 
   // Language
   const { t, i18n } = useTranslation();
+
+  // Get user's display name
+  const [displayName, setDisplayName] = useState("");
+
+  useEffect(() => {
+    const loadDisplayName = async () => {
+      const name = await getDisplayName();
+      if (name) {
+        setDisplayName(name);
+      }
+    };
+
+    loadDisplayName();
+  }, []);
 
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {
@@ -59,7 +74,7 @@ const Header = ({
   return (
     <>
       <header className="header">
-        <div className="header-content">
+        <div className="header-container">
           {/* Login and Logout */}
           <div className="login-wrapper">
             <div
@@ -122,19 +137,22 @@ const Header = ({
           </div>
 
           {/* Title */}
-          <h1
-            onClick={() => {
-              setSelectedCategory("all");
-              setSearchTerm("");
-              navigate("/");
-              if (refreshRecipes) {
-                refreshRecipes(false);
-              }
-            }}
-            className="header-title"
-          >
-            Rezepte
-          </h1>
+          <div className="title-wrapper">
+            {/* Display user's first name above header */}
+            {displayName && <h2> {displayName}</h2>}
+            <h1
+              onClick={() => {
+                setSelectedCategory("all");
+                setSearchTerm("");
+                navigate("/");
+                if (refreshRecipes) {
+                  refreshRecipes(false);
+                }
+              }}
+            >
+              Rezepte
+            </h1>
+          </div>
 
           {!hideNavBar && (
             <>
