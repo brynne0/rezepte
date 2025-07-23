@@ -15,8 +15,8 @@ const CategoryFilter = ({
             category.value === selectedCategory ? " selected" : ""
           }`}
           onClick={() => {
+            setSearchTerm(""); // TODO - this isn't working
             setSelectedCategory(category.value);
-            setSearchTerm("");
           }}
         >
           {category.label}

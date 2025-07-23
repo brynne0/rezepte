@@ -56,7 +56,6 @@ button {
   background: var(--cream_opaque);
   color: var(--dark_brown);
   font-family: inherit;
-  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
   border: 0.0625rem solid var(--brown);
   font-size: 1rem;
   cursor: pointer;
@@ -65,6 +64,10 @@ button {
 
 button .auth-btn {
   min-width: 3rem;
+}
+
+button .shadow-btn {
+  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
 }
 
 input {

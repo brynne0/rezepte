@@ -59,7 +59,11 @@ const ForgotPasswordPage = () => {
           </div>
 
           {errorMessage && <div>{errorMessage}</div>}
-          <button type="submit" disabled={!isForgotPasswordFormValid}>
+          <button
+            className={"shadow-btn"}
+            type="submit"
+            disabled={!isForgotPasswordFormValid}
+          >
             {t("send_reset_email")}
           </button>
         </form>

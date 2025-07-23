@@ -66,6 +66,7 @@ const Header = ({
     setLoginMessage(t("logged_out"));
     setShowLogOut(false);
     setDisplayName("");
+    setSearchTerm("");
     navigate("/");
 
     setTimeout(() => {
@@ -100,13 +101,17 @@ const Header = ({
             {loginMessage && <div>{loginMessage}</div>}
             {isLoggedIn && showLogOut && (
               <div>
-                <button onClick={handleLogout}>{t("logout")}</button>
+                <button className={"shadow-btn"} onClick={handleLogout}>
+                  {t("logout")}
+                </button>
               </div>
             )}
             {showLogIn && (
               <button
+                className={"shadow-btn"}
                 onClick={() => {
                   setShowLogIn(false);
+                  setSearchTerm("");
                   navigate("/auth-page");
                 }}
               >
@@ -206,12 +211,13 @@ const Header = ({
               onSubmit={(e) => {
                 e.preventDefault();
                 setSearchTerm(e.target.elements.search.value);
-                setShowSearchBar(false);
                 navigate("/");
               }}
             >
               <input id="search" type="text" />
-              <button type="submit">{t("search")}</button>
+              <button className={"shadow-btn"} type="submit">
+                {t("search")}
+              </button>
             </form>
           )}
         </div>
