@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import GroceryList from "./pages/GroceryList/GroceryList";
 import AuthPage from "./pages/AuthPage/AuthPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
+import { useAuth } from "./hooks/useAuth";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -77,6 +78,7 @@ function App() {
 function AppRoutes(props) {
   const location = useLocation();
   const { refreshRecipes } = props;
+  const { isLoggedIn } = useAuth();
 
   // Refresh recipes when navigating to home page
   useEffect(() => {
@@ -84,6 +86,11 @@ function AppRoutes(props) {
       refreshRecipes();
     }
   }, [location.pathname, refreshRecipes]);
+
+  // Refresh recipes when login state changes
+  useEffect(() => {
+    refreshRecipes();
+  }, [isLoggedIn, refreshRecipes]);
 
   return (
     <>

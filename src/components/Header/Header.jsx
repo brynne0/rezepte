@@ -44,8 +44,12 @@ const Header = ({
       }
     };
 
-    loadDisplayName();
-  }, [setDisplayName]);
+    if (isLoggedIn) {
+      loadDisplayName();
+    } else {
+      setDisplayName("");
+    }
+  }, [isLoggedIn, setDisplayName]);
 
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {
