@@ -30,6 +30,12 @@
   line-height: 1.5;
   color: var(--dark_brown);
 
+  /* Z-indexes */
+  --z-content: 1;
+  --z-dropdown: 10;
+  --z-header: 100;
+  --z-modal: 1000;
+
   /* Font rendering */
   font-synthesis: none;
   text-rendering: optimizeLegibility;

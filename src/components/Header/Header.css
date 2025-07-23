@@ -5,6 +5,7 @@
   top: 0;
   background-color: var(--cream);
   gap: 0.25rem;
+  z-index: var(--z-header);
 }
 
 .header-content {

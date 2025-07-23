@@ -47,59 +47,61 @@ function App() {
   }
 
   return (
-    <Router>
-      <Header
-        language={language}
-        setLanguage={setLanguage}
-        setSelectedCategory={setSelectedCategory}
-        setSearchTerm={setSearchTerm}
-        setLoginMessage={setLoginMessage}
-        loginMessage={loginMessage}
-        refreshRecipes={refreshRecipes}
-        t={t}
-      />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <CategoryFilter
-                categories={categories}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                setSearchTerm={setSearchTerm}
-              />
-              <RecipeList
-                selectedCategory={selectedCategory}
-                recipes={recipes}
-                searchTerm={searchTerm}
-              />
-            </>
-          }
+    <div className="app">
+      <Router>
+        <Header
+          language={language}
+          setLanguage={setLanguage}
+          setSelectedCategory={setSelectedCategory}
+          setSearchTerm={setSearchTerm}
+          setLoginMessage={setLoginMessage}
+          loginMessage={loginMessage}
+          refreshRecipes={refreshRecipes}
+          t={t}
         />
-        <Route path="/:id/:slug" element={<Recipe />} />
-        <Route
-          path="/add-recipe"
-          element={<AddRecipePage categories={categories} />}
-        />
-        <Route
-          path="/edit-recipe/:id/:slug"
-          element={<EditRecipePage categories={categories} />}
-        />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <CategoryFilter
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  setSearchTerm={setSearchTerm}
+                />
+                <RecipeList
+                  selectedCategory={selectedCategory}
+                  recipes={recipes}
+                  searchTerm={searchTerm}
+                />
+              </>
+            }
+          />
+          <Route path="/:id/:slug" element={<Recipe />} />
+          <Route
+            path="/add-recipe"
+            element={<AddRecipePage categories={categories} />}
+          />
+          <Route
+            path="/edit-recipe/:id/:slug"
+            element={<EditRecipePage categories={categories} />}
+          />
 
-        <Route path="/grocery-list" element={<GroceryList />} />
-        <Route
-          path="/auth-page"
-          element={
-            <AuthPage
-              setLoginMessage={setLoginMessage}
-              refreshRecipes={refreshRecipes}
-            />
-          }
-        />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      </Routes>
-    </Router>
+          <Route path="/grocery-list" element={<GroceryList />} />
+          <Route
+            path="/auth-page"
+            element={
+              <AuthPage
+                setLoginMessage={setLoginMessage}
+                refreshRecipes={refreshRecipes}
+              />
+            }
+          />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 
