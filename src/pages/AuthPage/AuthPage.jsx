@@ -93,16 +93,16 @@ const AuthPage = ({ setLoginMessage }) => {
   return (
     <div className="auth-page-container">
       {/* Headers to toggle between modes */}
-      <div className="auth-toggle">
+      <div>
         <button
-          className={`auth-option ${!isSignUpMode ? "selected" : ""}`}
+          className={`subheading ${!isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToLogin}
         >
           {t("login")}
         </button>
         <button
-          className={`auth-option ${isSignUpMode ? "selected" : ""}`}
+          className={`subheading ${isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToSignUp}
         >
@@ -114,7 +114,7 @@ const AuthPage = ({ setLoginMessage }) => {
         onSubmit={isSignUpMode ? handleSignUp : handleLogin}
         className="auth-form"
       >
-        <div className="auth-inputs">
+        <div className="auth-input-wrapper">
           {isSignUpMode && (
             <>
               {/* Email */}
@@ -124,7 +124,6 @@ const AuthPage = ({ setLoginMessage }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("email")}
-                className="auth-input"
                 required
               />
               {/* First Name */}
@@ -134,7 +133,6 @@ const AuthPage = ({ setLoginMessage }) => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder={t("first_name")}
-                className="auth-input"
                 required
               />
             </>
@@ -147,7 +145,6 @@ const AuthPage = ({ setLoginMessage }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder={t("username")}
-            className="auth-input"
             required
           />
           {/* Password */}
@@ -157,23 +154,19 @@ const AuthPage = ({ setLoginMessage }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t("password")}
-            className="auth-input"
             required
           />
         </div>
 
         {/* Forgot Password  */}
         {!isSignUpMode && (
-          <div className="auth-links">
-            <span onClick={switchToForgotPassword} className="auth-link">
-              {t("forgot_password")}
-            </span>
-          </div>
+          <span onClick={switchToForgotPassword} className="auth-link">
+            {t("forgot_password")}
+          </span>
         )}
 
         {/* Submit button */}
         <button
-          className="header-btn submit-btn"
           type="submit"
           disabled={isSignUpMode ? !isSignUpFormValid : !isLoginFormValid}
         >

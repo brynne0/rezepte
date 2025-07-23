@@ -72,7 +72,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
       <div>
         {/* Full Recipe */}
         <button
-          className={`type-option ${!IsLinkRecipe ? "selected" : ""}`}
+          className={`subheading ${!IsLinkRecipe ? "selected" : ""}`}
           type="button"
           onClick={() => {
             handleInputChange("link_only", false);
@@ -82,7 +82,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         </button>
         {/* Link Only Recipe */}
         <button
-          className={`type-option ${IsLinkRecipe ? "selected" : ""}`}
+          className={`subheading ${IsLinkRecipe ? "selected" : ""}`}
           type="button"
           onClick={() => {
             handleInputChange("link_only", true);

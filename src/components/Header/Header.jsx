@@ -100,14 +100,11 @@ const Header = ({
             {loginMessage && <div>{loginMessage}</div>}
             {isLoggedIn && showLogOut && (
               <div>
-                <button className="header-btn" onClick={handleLogout}>
-                  {t("logout")}
-                </button>
+                <button onClick={handleLogout}>{t("logout")}</button>
               </div>
             )}
             {showLogIn && (
               <button
-                className="header-btn"
                 onClick={() => {
                   setShowLogIn(false);
                   navigate("/auth-page");
@@ -213,10 +210,8 @@ const Header = ({
                 navigate("/");
               }}
             >
-              <input id="search" type="text" className="search-bar-input" />
-              <button type="submit" className="header-btn">
-                {t("search")}
-              </button>
+              <input id="search" type="text" />
+              <button type="submit">{t("search")}</button>
             </form>
           )}
         </div>

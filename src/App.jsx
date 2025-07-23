@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import GroceryList from "./pages/GroceryList/GroceryList";
 import AuthPage from "./pages/AuthPage/AuthPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
 import { useAuth } from "./hooks/useAuth";
 
 function App() {
@@ -138,6 +139,7 @@ function AppRoutes(props) {
           element={<AuthPage setLoginMessage={props.setLoginMessage} />}
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/change-password" element={<ChangePasswordPage />} />
       </Routes>
     </>
   );

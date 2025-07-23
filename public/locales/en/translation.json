@@ -27,6 +27,15 @@
   "password_reset_sent": "Password reset email sent! Please check your inbox.",
   "password_reset_failed": "Failed to send password reset email. Please try again.",
 
+  "set_new_password": "Set New Password",
+  "new_password": "New password",
+  "new_password_repeat": "Repeat new password",
+  "confirm": "Confirm",
+  "passwords_do_not_match": "Passwords do not match",
+  "password_required": "Password is required",
+  "password_changed": "Password has been changed!",
+  "password_change_failed": "Failed to change password. Please try again.",
+
   "search": "Search",
   "recipe_not_found": "Recipe not found.",
 

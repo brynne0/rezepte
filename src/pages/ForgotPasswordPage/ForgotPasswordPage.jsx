@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { resetPassword } from "../../services/auth";
+import { forgotPassword } from "../../services/auth";
 import "./ForgotPasswordPage.css";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { t } = useTranslation();
 
   const handleForgotPassword = async (e) => {
@@ -17,12 +18,13 @@ const ForgotPasswordPage = () => {
     }
 
     try {
-      const { error } = await resetPassword(email);
+      const { error } = await forgotPassword(email);
 
       if (error) {
         setErrorMessage(t("password_reset_failed"));
       } else {
-        setErrorMessage(t("password_reset_sent"));
+        setErrorMessage();
+        setShowSuccessMessage(true);
         setEmail("");
         // Switch back to login mode after sending reset email
       }
@@ -40,29 +42,28 @@ const ForgotPasswordPage = () => {
 
   return (
     <div className="forgot-password-page-container">
-      <form onSubmit={handleForgotPassword} className="auth-form">
-        <h2 className="forgot-password-header">{t("reset_password")}</h2>
-        <div className="auth-inputs">
-          <input
-            id="reset-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t("email")}
-            className="auth-input"
-            required
-          />
-        </div>
-        {/* TODO - update the error/succuess message display below and hide the rest of the form? */}
-        {errorMessage && <div>{errorMessage}</div>}
-        <button
-          className="header-btn submit-btn"
-          type="submit"
-          disabled={!isForgotPasswordFormValid}
-        >
-          {t("send_reset_email")}
-        </button>
-      </form>
+      {showSuccessMessage ? (
+        <h3>{t("password_reset_sent")}</h3>
+      ) : (
+        <form onSubmit={handleForgotPassword} className="auth-form">
+          <h3 className="forgot-password-header">{t("reset_password")}</h3>
+          <div className="auth-input-wrapper">
+            <input
+              id="reset-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t("email")}
+              required
+            />
+          </div>
+
+          {errorMessage && <div>{errorMessage}</div>}
+          <button type="submit" disabled={!isForgotPasswordFormValid}>
+            {t("send_reset_email")}
+          </button>
+        </form>
+      )}
     </div>
   );
 };
