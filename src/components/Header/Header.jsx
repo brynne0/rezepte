@@ -1,8 +1,8 @@
 import "./Header.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
-import { signOut } from "../../services/auth";
-import { useState } from "react";
+import { signOut, getDisplayName } from "../../services/auth";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTranslation } from "react-i18next";
 // import useClickOutside from "../../hooks/useClickOutside";
@@ -13,8 +13,6 @@ const Header = ({
   setLoginMessage,
   loginMessage,
   refreshRecipes,
-  displayName,
-  setDisplayName,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,6 +32,21 @@ const Header = ({
 
   // Language
   const { t, i18n } = useTranslation();
+
+  // Display name
+  const [displayName, setDisplayName] = useState("");
+
+  // Load display name on app startup
+  useEffect(() => {
+    const loadDisplayName = async () => {
+      const name = await getDisplayName();
+      if (name) {
+        setDisplayName(name);
+      }
+    };
+
+    loadDisplayName();
+  }, [setDisplayName]);
 
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {

@@ -1,11 +1,11 @@
-import { signUp, signIn, getDisplayName } from "../../services/auth";
-import { useState, useEffect } from "react";
+import { signUp, signIn } from "../../services/auth";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import "./AuthPage.css";
 
-const AuthPage = ({ setLoginMessage, refreshRecipes, setDisplayName }) => {
+const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
   // Form input states
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -18,18 +18,6 @@ const AuthPage = ({ setLoginMessage, refreshRecipes, setDisplayName }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  // Get user's display name
-  useEffect(() => {
-    const loadDisplayName = async () => {
-      const name = await getDisplayName();
-      if (name) {
-        setDisplayName(name);
-      }
-    };
-
-    loadDisplayName();
-  }, [setDisplayName]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     const { error } = await signIn(username, password);
@@ -38,7 +26,7 @@ const AuthPage = ({ setLoginMessage, refreshRecipes, setDisplayName }) => {
       setLoginMessage(t("login_failed"));
     } else {
       setLoginMessage(t("login_success"));
-      setDisplayName(getDisplayName());
+
       // Navigate on successful login
       navigate("/");
     }

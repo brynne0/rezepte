@@ -21,7 +21,6 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
-  const [displayName, setDisplayName] = useState("");
 
   const categoryKeys = [
     "all",
@@ -58,8 +57,6 @@ function App() {
           setLoginMessage={setLoginMessage}
           loginMessage={loginMessage}
           refreshRecipes={refreshRecipes}
-          setDisplayName={setDisplayName}
-          displayName={displayName}
           t={t}
         />
         <Routes>
@@ -98,7 +95,6 @@ function App() {
               <AuthPage
                 setLoginMessage={setLoginMessage}
                 refreshRecipes={refreshRecipes}
-                setDisplayName={setDisplayName}
               />
             }
           />
