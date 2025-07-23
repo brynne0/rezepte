@@ -34,25 +34,6 @@
   font-weight: 600;
 }
 
-.type-option {
-  padding: 0.5rem 1rem;
-  color: var(--brown);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s;
-  font-size: 1rem;
-  font-family: "Forta", sans-serif;
-}
-
-.type-option:hover {
-  color: var(--red);
-}
-
-.type-option.selected {
-  color: var(--red);
-}
-
 /* Input boxes */
 .form-group {
   margin-bottom: 1rem;

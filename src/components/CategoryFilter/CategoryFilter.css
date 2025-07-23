@@ -5,22 +5,3 @@
   flex-flow: row nowrap;
   position: relative;
 }
-
-.category-item {
-  padding: 0.5rem 1rem;
-  color: var(--brown);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s;
-  font-size: 1rem;
-  font-family: "Forta", sans-serif;
-}
-
-.category-item:hover {
-  color: var(--red);
-}
-
-.category-item.selected {
-  color: var(--red);
-}

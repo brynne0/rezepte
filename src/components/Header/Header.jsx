@@ -44,8 +44,12 @@ const Header = ({
       }
     };
 
-    loadDisplayName();
-  }, [setDisplayName]);
+    if (isLoggedIn) {
+      loadDisplayName();
+    } else {
+      setDisplayName("");
+    }
+  }, [isLoggedIn, setDisplayName]);
 
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {
@@ -62,6 +66,7 @@ const Header = ({
     setLoginMessage(t("logged_out"));
     setShowLogOut(false);
     setDisplayName("");
+    setSearchTerm("");
     navigate("/");
 
     setTimeout(() => {
@@ -96,16 +101,17 @@ const Header = ({
             {loginMessage && <div>{loginMessage}</div>}
             {isLoggedIn && showLogOut && (
               <div>
-                <button className="header-btn" onClick={handleLogout}>
+                <button className={"shadow-btn"} onClick={handleLogout}>
                   {t("logout")}
                 </button>
               </div>
             )}
             {showLogIn && (
               <button
-                className="header-btn"
+                className={"shadow-btn"}
                 onClick={() => {
                   setShowLogIn(false);
+                  setSearchTerm("");
                   navigate("/auth-page");
                 }}
               >
@@ -205,12 +211,11 @@ const Header = ({
               onSubmit={(e) => {
                 e.preventDefault();
                 setSearchTerm(e.target.elements.search.value);
-                setShowSearchBar(false);
                 navigate("/");
               }}
             >
-              <input id="search" type="text" className="search-bar-input" />
-              <button type="submit" className="header-btn">
+              <input id="search" type="text" />
+              <button className={"shadow-btn"} type="submit">
                 {t("search")}
               </button>
             </form>

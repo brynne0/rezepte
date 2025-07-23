@@ -11,12 +11,12 @@ const CategoryFilter = ({
       {categories.map((category) => (
         <button
           key={category.value}
-          className={`category-item${
+          className={`subheading${
             category.value === selectedCategory ? " selected" : ""
           }`}
           onClick={() => {
+            setSearchTerm(""); // TODO - this isn't working
             setSelectedCategory(category.value);
-            setSearchTerm("");
           }}
         >
           {category.label}

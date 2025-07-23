@@ -13,9 +13,10 @@
   align-items: center;
   padding: 0.5rem;
   flex-direction: column;
+  min-width: 15rem;
 }
 
-.auth-inputs {
+.auth-input-wrapper {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -23,32 +24,12 @@
   max-width: 15rem;
 }
 
-.auth-input {
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  background: var(--cream_opaque);
-  color: var(--dark_brown);
-  font-family: inherit;
-  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
-  border: 0.0625rem solid var(--brown);
-  font-size: 1rem;
-}
-
-.auth-option {
-  padding: 0.5rem 1rem;
-  color: var(--brown);
-  background: none;
-  border: none;
+.auth-link {
   cursor: pointer;
-  transition: color 0.2s;
-  font-size: 1rem;
-  font-family: "Forta", sans-serif;
+  font-size: 0.9rem;
+  margin: 0;
 }
 
-.auth-option:hover {
-  color: var(--red);
-}
-
-.auth-option.selected {
+.auth-link:hover {
   color: var(--red);
 }

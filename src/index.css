@@ -51,4 +51,51 @@ body {
 
 button {
   font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--cream_opaque);
+  color: var(--dark_brown);
+  font-family: inherit;
+  border: 0.0625rem solid var(--brown);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button .auth-btn {
+  min-width: 3rem;
+}
+
+button .shadow-btn {
+  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
+}
+
+input {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--cream_opaque);
+  color: var(--dark_brown);
+  font-family: inherit;
+  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
+  border: 0.0625rem solid var(--brown);
+  font-size: 1rem;
+}
+
+.subheading {
+  padding: 0.5rem 1rem;
+  color: var(--brown);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  font-size: 1rem;
+  font-family: "Forta", sans-serif;
+}
+
+.subheading :hover {
+  color: var(--red);
+}
+
+.subheading.selected {
+  color: var(--red);
 }

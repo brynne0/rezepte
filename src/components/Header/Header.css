@@ -87,18 +87,6 @@
   color: var(--dark_red);
 }
 
-.header-btn,
-.search-bar-input {
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  background: var(--cream_opaque);
-  color: var(--dark_brown);
-  font-family: inherit;
-  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
-  border: 0.0625rem solid var(--brown);
-  font-size: 1rem;
-}
-
 .search-bar {
   gap: 0.25rem;
   display: flex;
@@ -108,11 +96,6 @@
   display: flex;
   justify-content: center;
   margin-top: 0.5rem;
-}
-
-.header-btn {
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .header-nav {
