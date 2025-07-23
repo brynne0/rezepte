@@ -54,11 +54,12 @@
   line-height: 1;
 }
 
-.header h2 {
+.header h3 {
   font-size: 1rem;
   font-family: var(--heading-font-family);
   color: var(--brown);
   margin: 0;
+  line-height: 1;
 }
 
 .login-wrapper {
@@ -153,11 +154,18 @@
     height: 2rem;
   }
 
-  .header-title {
+  .header .title-wrapper {
     order: 2;
-    font-size: 2rem;
     position: static;
     transform: none;
+  }
+
+  .header h3 {
+    font-size: 0.8rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
   }
 
   .header-nav {

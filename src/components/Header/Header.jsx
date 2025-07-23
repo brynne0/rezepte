@@ -1,8 +1,8 @@
 import "./Header.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
-import { signOut, getDisplayName } from "../../services/auth";
-import { useState, useEffect } from "react";
+import { signOut } from "../../services/auth";
+import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTranslation } from "react-i18next";
 // import useClickOutside from "../../hooks/useClickOutside";
@@ -13,6 +13,8 @@ const Header = ({
   setLoginMessage,
   loginMessage,
   refreshRecipes,
+  displayName,
+  setDisplayName,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,20 +35,6 @@ const Header = ({
   // Language
   const { t, i18n } = useTranslation();
 
-  // Get user's display name
-  const [displayName, setDisplayName] = useState("");
-
-  useEffect(() => {
-    const loadDisplayName = async () => {
-      const name = await getDisplayName();
-      if (name) {
-        setDisplayName(name);
-      }
-    };
-
-    loadDisplayName();
-  }, []);
-
   // Refs for click outside detection
   // const searchBarRef = useClickOutside(() => {
   //   setShowSearchBar(false);
@@ -61,6 +49,7 @@ const Header = ({
 
     setLoginMessage(t("logged_out"));
     setShowLogOut(false);
+    setDisplayName("");
 
     if (refreshRecipes) {
       refreshRecipes(false);
@@ -139,7 +128,7 @@ const Header = ({
           {/* Title */}
           <div className="title-wrapper">
             {/* Display user's first name above header */}
-            {displayName && <h2> {displayName}</h2>}
+            {displayName && <h3> {displayName}</h3>}
             <h1
               onClick={() => {
                 setSelectedCategory("all");
