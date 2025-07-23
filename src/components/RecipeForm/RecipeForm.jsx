@@ -1,6 +1,5 @@
 import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
-import { useRecipes } from "../../hooks/useRecipes";
 import "./RecipeForm.css";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,7 +7,6 @@ import AutoResizeTextArea from "../AutoResizeTextArea";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const { t } = useTranslation();
-  const { refreshRecipes } = useRecipes();
 
   const {
     formData,
@@ -28,7 +26,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     handleCancel,
     handleDelete,
     toTitleCase,
-  } = useRecipeForm({ initialRecipe, refreshRecipes });
+  } = useRecipeForm({ initialRecipe });
 
   const units = t("units", { returnObjects: true });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -130,7 +128,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           )}
           <select
             id="category"
-            value={formData.category.value}
+            value={formData.category}
             onChange={(e) =>
               handleInputChange(
                 "category",
@@ -165,7 +163,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 id="servings"
                 type="number"
                 min="1"
-                value={formData.servings}
+                value={formData.servings || ""}
                 onChange={(e) => handleInputChange("servings", e.target.value)}
                 className="form-input"
                 onWheel={(e) => {
@@ -210,7 +208,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                         type="number"
                         min="0"
                         step="0.01"
-                        value={ingredient.quantity}
+                        value={ingredient.quantity || ""}
                         onChange={(e) =>
                           handleIngredientChange(
                             ingredient.tempId,
@@ -227,7 +225,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       {/* Ingredient Unit */}
                       <select
                         id={`ingredient-unit-${ingredient.tempId}`}
-                        value={ingredient.unit}
+                        value={ingredient.unit || ""}
                         onChange={(e) =>
                           handleIngredientChange(
                             ingredient.tempId,
@@ -331,7 +329,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <input
             id="source"
             type="text"
-            value={formData.source}
+            value={formData.source || ""}
             onChange={(e) => handleInputChange("source", e.target.value)}
             className="form-input"
             placeholder={
@@ -348,7 +346,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <input
             id="extra-notes"
             type="text"
-            value={formData.notes}
+            value={formData.notes || ""}
             onChange={(e) => handleInputChange("notes", e.target.value)}
             className="form-input"
             placeholder={t("notes")}

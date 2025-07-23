@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import "./AuthPage.css";
 
-const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
+const AuthPage = ({ setLoginMessage }) => {
   // Form input states
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -31,10 +31,6 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
       navigate("/");
     }
 
-    if (refreshRecipes) {
-      refreshRecipes(true);
-    }
-
     setTimeout(() => {
       // Reset login message
       setLoginMessage("");
@@ -55,10 +51,6 @@ const AuthPage = ({ setLoginMessage, refreshRecipes }) => {
       setLoginMessage(t("signup_success"));
       // Navigate on successful sign up
       navigate("/");
-    }
-
-    if (refreshRecipes) {
-      refreshRecipes(true);
     }
 
     setTimeout(() => {

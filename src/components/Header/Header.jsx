@@ -12,7 +12,6 @@ const Header = ({
   setSearchTerm,
   setLoginMessage,
   loginMessage,
-  refreshRecipes,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,10 +62,7 @@ const Header = ({
     setLoginMessage(t("logged_out"));
     setShowLogOut(false);
     setDisplayName("");
-
-    if (refreshRecipes) {
-      refreshRecipes(false);
-    }
+    navigate("/");
 
     setTimeout(() => {
       setLoginMessage("");
@@ -147,9 +143,6 @@ const Header = ({
                 setSelectedCategory("all");
                 setSearchTerm("");
                 navigate("/");
-                if (refreshRecipes) {
-                  refreshRecipes(false);
-                }
               }}
             >
               Rezepte
