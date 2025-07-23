@@ -1,5 +1,9 @@
 .auth-page-container {
-  padding-top: 12rem;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .auth-form {

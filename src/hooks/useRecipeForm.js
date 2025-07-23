@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "./useRecipeActions";
 import { useTranslation } from "react-i18next";
 
-export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
+export const useRecipeForm = ({ initialRecipe = null }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { createRecipe, updateRecipe, deleteRecipe, loading, error } =
@@ -47,7 +47,7 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
 
     return {
       title: "",
-      category: { value: "", label: "" },
+      category: "",
       servings: "",
       instructions: [""],
       source: "",
@@ -247,11 +247,6 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
         result = await createRecipe(recipeData);
       }
 
-      // Refresh recipes after successful create/update
-      if (refreshRecipes) {
-        refreshRecipes(false);
-      }
-
       navigate(`/${result.id}/${result.slug}`);
     } catch (err) {
       console.error(
@@ -269,11 +264,6 @@ export const useRecipeForm = ({ initialRecipe = null, refreshRecipes }) => {
     if (!initialRecipe) return;
     try {
       await deleteRecipe(initialRecipe.id);
-
-      // Refresh recipes after successful delete
-      if (refreshRecipes) {
-        refreshRecipes(false);
-      }
 
       navigate("/");
     } catch (err) {

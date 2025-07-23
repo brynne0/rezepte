@@ -1,15 +1,25 @@
 #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.app {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .loading-animation {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80vh;
+  height: 100vh;
 }
 
 .loading-animation svg {
@@ -24,7 +34,7 @@
 }
 
 @media (max-width: 768px) {
-  #root {
+  .app {
     padding: 0.75rem;
   }
 }

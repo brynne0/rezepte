@@ -12,7 +12,7 @@
   --error_red: #ef4444;
   --error_shadow: #ef444411;
   --pink: #fee2e2;
-  --dark_pink: #c95572a4;
+  --dark_pink: #c58293a4;
   --green: #2a905d;
   --shadow_black: #0000000d;
 
@@ -29,6 +29,12 @@
   font-variation-settings: "wdth" 100;
   line-height: 1.5;
   color: var(--dark_brown);
+
+  /* Z-indexes */
+  --z-content: 1;
+  --z-dropdown: 10;
+  --z-header: 100;
+  --z-modal: 1000;
 
   /* Font rendering */
   font-synthesis: none;

@@ -1,6 +1,11 @@
 import "./App.css";
-import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import Header from "./components/Header/Header";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Recipe from "./components/Recipe/Recipe";
@@ -22,6 +27,7 @@ function App() {
   const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
 
+  // Categories
   const categoryKeys = [
     "all",
     "baking",
@@ -47,16 +53,49 @@ function App() {
   }
 
   return (
-    <Router>
+    <div className="app">
+      <Router>
+        <AppRoutes
+          language={language}
+          setLanguage={setLanguage}
+          setSelectedCategory={setSelectedCategory}
+          setSearchTerm={setSearchTerm}
+          setLoginMessage={setLoginMessage}
+          loginMessage={loginMessage}
+          refreshRecipes={refreshRecipes}
+          t={t}
+          categories={categories}
+          selectedCategory={selectedCategory}
+          recipes={recipes}
+          searchTerm={searchTerm}
+        />
+      </Router>
+    </div>
+  );
+}
+
+function AppRoutes(props) {
+  const location = useLocation();
+  const { refreshRecipes } = props;
+
+  // Refresh recipes when navigating to home page
+  useEffect(() => {
+    if (location.pathname === "/") {
+      refreshRecipes();
+    }
+  }, [location.pathname, refreshRecipes]);
+
+  return (
+    <>
       <Header
-        language={language}
-        setLanguage={setLanguage}
-        setSelectedCategory={setSelectedCategory}
-        setSearchTerm={setSearchTerm}
-        setLoginMessage={setLoginMessage}
-        loginMessage={loginMessage}
-        refreshRecipes={refreshRecipes}
-        t={t}
+        language={props.language}
+        setLanguage={props.setLanguage}
+        setSelectedCategory={props.setSelectedCategory}
+        setSearchTerm={props.setSearchTerm}
+        setLoginMessage={props.setLoginMessage}
+        loginMessage={props.loginMessage}
+        refreshRecipes={props.refreshRecipes}
+        t={props.t}
       />
       <Routes>
         <Route
@@ -64,15 +103,15 @@ function App() {
           element={
             <>
               <CategoryFilter
-                categories={categories}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                setSearchTerm={setSearchTerm}
+                categories={props.categories}
+                selectedCategory={props.selectedCategory}
+                setSelectedCategory={props.setSelectedCategory}
+                setSearchTerm={props.setSearchTerm}
               />
               <RecipeList
-                selectedCategory={selectedCategory}
-                recipes={recipes}
-                searchTerm={searchTerm}
+                selectedCategory={props.selectedCategory}
+                recipes={props.recipes}
+                searchTerm={props.searchTerm}
               />
             </>
           }
@@ -80,26 +119,20 @@ function App() {
         <Route path="/:id/:slug" element={<Recipe />} />
         <Route
           path="/add-recipe"
-          element={<AddRecipePage categories={categories} />}
+          element={<AddRecipePage categories={props.categories} />}
         />
         <Route
           path="/edit-recipe/:id/:slug"
-          element={<EditRecipePage categories={categories} />}
+          element={<EditRecipePage categories={props.categories} />}
         />
-
         <Route path="/grocery-list" element={<GroceryList />} />
         <Route
           path="/auth-page"
-          element={
-            <AuthPage
-              setLoginMessage={setLoginMessage}
-              refreshRecipes={refreshRecipes}
-            />
-          }
+          element={<AuthPage setLoginMessage={props.setLoginMessage} />}
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Routes>
-    </Router>
+    </>
   );
 }
 
