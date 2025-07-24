@@ -173,7 +173,7 @@ const AuthPage = ({ setLoginMessage }) => {
         <button
           type="submit"
           disabled={isSignUpMode ? !isSignUpFormValid : !isLoginFormValid}
-          className={"btn"}
+          className={"btn btn-standard"}
         >
           {isSignUpMode ? t("sign_up") : t("login")}
         </button>

@@ -61,7 +61,7 @@ const ForgotPasswordPage = () => {
 
           {errorMessage && <div>{errorMessage}</div>}
           <button
-            className={"btn"}
+            className={"btn btn-standard"}
             type="submit"
             disabled={!isForgotPasswordFormValid}
           >

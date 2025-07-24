@@ -89,7 +89,10 @@ const GroceryList = () => {
       <div className="list-items">
         {currentList.length === 0 && !isEditing ? (
           <div>
-            <button className="add-btn" onClick={addNewItem}>
+            <button
+              className="btn btn-icon btn-icon-success"
+              onClick={addNewItem}
+            >
               <Plus size={20} />
             </button>
           </div>
@@ -149,7 +152,7 @@ const GroceryList = () => {
 
                 {isEditing ? (
                   <button
-                    className="remove-btn"
+                    className="btn btn-icon btn-icon-remove"
                     onClick={() => removeItemFromEdit(index)}
                     title={t("remove_item")}
                     aria-label={t("remove_item")}
@@ -167,18 +170,25 @@ const GroceryList = () => {
           })
         )}
         {isEditing && (
-          <button className="add-btn" onClick={addNewItem}>
+          <button
+            className="btn btn-icon btn-icon-success"
+            onClick={addNewItem}
+          >
             <Plus size={20} />
           </button>
         )}
       </div>
 
       {isEditing && (
+        // TODO
         <div className="btn-wrapper">
-          <button className="primary-btn cancel-btn" onClick={cancelEditing}>
+          <button
+            className="btn btn-action btn-secondary"
+            onClick={cancelEditing}
+          >
             {t("cancel")}
           </button>
-          <button className="primary-btn save-btn" onClick={saveChanges}>
+          <button className="btn btn-action btn-primary" onClick={saveChanges}>
             {t("save")}
           </button>
         </div>

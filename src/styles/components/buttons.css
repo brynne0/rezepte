@@ -1,5 +1,5 @@
 /* Base button foundation - shared properties */
-.btn-base {
+.btn {
   font-size: 1rem;
   font-family: inherit;
   cursor: pointer;
@@ -11,169 +11,119 @@
   justify-content: center;
 }
 
-.btn,
-.auth-btn {
-  font-size: 1rem;
+.btn-standard {
   padding: 0.5rem;
-  border-radius: 0.5rem;
   background: var(--cream_opaque);
   color: var(--dark_brown);
-  font-family: inherit;
   border: 0.0625rem solid var(--brown);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn {
   box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
 }
 
-.auth-btn {
-  min-width: 3rem;
-}
+/* ==============================================
+   ACTION BUTTONS (primary, secondary, danger)
+   ============================================== */
 
-.icon-btn {
-  padding: 0.5rem;
-  color: var(--brown);
-  background: none;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.icon-btn:hover {
-  background: var(--cream_opaque);
-  border-radius: 50%;
-  display: flex;
-}
-
-.edit-btn,
-.cart-btn {
-  color: var(--dark_red);
-  cursor: pointer;
-  background: none;
-  border: none;
-  transition: color 0.2s, transform 0.2s;
-  padding: 0;
-  display: flex;
-}
-
-.cart-btn:hover,
-.edit-btn:hover {
-  transform: translateY(-1px);
-}
-
-.primary-btn,
-.cancel-btn,
-.delete-btn {
+/* Action button foundation */
+.btn-action {
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
+  min-width: 6rem;
 }
 
-/* Primary Button */
-.primary-btn {
+/* Primary action button */
+.btn-primary {
   background: var(--brown);
   color: white;
   box-shadow: 0 0.125rem 0.25rem var(--shadow_black);
 }
 
-.primary-btn:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled) {
   background: var(--light_brown);
   box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
 }
 
-.primary-btn:disabled {
+.btn-primary:disabled {
   background: #9ca3af;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-/* Cancel Button */
-.cancel-btn {
+/* Secondary action button (cancel) */
+.btn-secondary {
   background: white;
   color: var(--light_brown);
   border: 0.125rem solid var(--light_brown);
 }
 
-.cancel-btn:hover {
+.btn-secondary:hover {
   color: var(--brown);
   border-color: var(--brown);
   box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
 }
 
-/* Delete Button */
-.delete-btn {
+/* Danger action button (delete) */
+.btn-danger {
   background: white;
   color: var(--red);
   border: 0.125rem solid var(--red);
 }
 
-.delete-btn:hover {
+.btn-danger:hover {
   background: var(--red);
   color: white;
   box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
 }
 
-.remove-btn,
-.add-btn {
-  cursor: pointer;
+/* ==============================================
+   ICON BUTTONS (minimal styling)
+   ============================================== */
+
+/* Icon button foundation */
+.btn-icon {
+  padding: 0.5rem;
   background: none;
   border: none;
-  transition: all 0.2s ease;
-  padding: 0;
-  display: flex;
-  align-items: center;
+  border-radius: 0.5rem;
 }
 
-.remove-btn {
-  color: var(--error_red);
+/* Neutral icon button */
+.btn-icon-neutral {
+  color: var(--brown);
+}
+.btn-icon-neutral:hover {
+  background: var(--cream_opaque);
+  border-radius: 50%;
 }
 
-.add-btn {
+/* Success icon button (add) */
+.btn-icon-success {
   color: var(--green);
 }
 
-.remove-btn:hover,
-.add-btn:hover {
-  transform: translateY(-1px);
+/* Danger icon buttons (edit, cart, remove) */
+.btn-icon-danger {
+  color: var(--dark_red);
 }
 
-.remove-btn {
-  cursor: pointer;
-  background: none;
-  border: none;
-  transition: all 0.2s ease;
-  padding: 0;
-  display: flex;
-  align-items: center;
+/* Error icon button (remove) */
+.btn-icon-remove {
   color: var(--error_red);
   flex-shrink: 0;
 }
 
-.remove-btn:hover {
+.btn-icon-success:hover,
+.btn-icon-remove:hover,
+.btn-icon-danger:hover {
   transform: translateY(-1px);
 }
 
-.save-btn {
-  min-width: 6rem;
-}
-
-.cancel-btn {
-  min-width: 6rem;
-}
+/* ==============================================
+   RESPONSIVE DESIGN
+   ============================================== */
 
 @media (max-width: 768px) {
-  .cancel-btn,
-  .primary-btn,
-  .delete-btn {
+  .btn-action {
     padding: 0.75rem 0.5rem;
     font-size: 0.8rem;
   }

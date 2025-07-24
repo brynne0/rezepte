@@ -43,10 +43,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             {t("recipe_delete_confirmation")}
           </p>
           <div className="delete-modal-actions">
-            <button onClick={onClose} className="cancel-btn">
+            <button onClick={onClose} className="btn btn-action btn-secondary">
               {t("cancel")}
             </button>
-            <button onClick={onConfirm} className="delete-btn">
+            <button onClick={onConfirm} className="btn btn-action btn-danger">
               {t("delete")}
             </button>
           </div>
@@ -261,7 +261,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                         <button
                           type="button"
                           onClick={() => removeIngredient(ingredient.tempId)}
-                          className="remove-btn"
+                          className="btn btn-icon btn-icon-remove"
                           aria-label="Remove ingredient"
                         >
                           <Trash2 size={16} />
@@ -271,11 +271,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   </div>
                 ))}
               </div>
-              <div className="add-btn-wrapper">
+              <div className="btn-icon-success-wrapper">
                 <button
                   type="button"
                   onClick={addIngredient}
-                  className="add-btn"
+                  className="btn btn-icon btn-icon-success"
                 >
                   <Plus size={16} />
                 </button>
@@ -301,18 +301,18 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                     <button
                       type="button"
                       onClick={() => removeInstruction(index)}
-                      className="remove-btn"
+                      className="btn btn-icon btn-icon-remove"
                     >
                       <Trash2 size={16} />
                     </button>
                   </div>
                 ))}
               </div>
-              <div className="add-btn-wrapper">
+              <div className="btn-icon-success-wrapper">
                 <button
                   type="button"
                   onClick={addInstruction}
-                  className="add-btn"
+                  className="btn btn-icon btn-icon-success"
                 >
                   <Plus size={16} />
                 </button>
@@ -360,18 +360,22 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               <button
                 type="button"
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="delete-btn"
+                className="btn btn-action btn-danger"
               >
                 {t("delete_recipe")}
               </button>
             </>
           )}
           {/* Cancel Button */}
-          <button type="button" onClick={handleCancel} className="cancel-btn">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="btn btn-action btn-secondary"
+          >
             {t("cancel")}
           </button>
           {/* Submit button */}
-          <button type="submit" disabled={loading} className="primary-btn">
+          <button type="submit" disabled={loading} className="btn btn-action btn-primary">
             {loading
               ? isEditMode
                 ? "Updating..."

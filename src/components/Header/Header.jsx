@@ -101,14 +101,14 @@ const Header = ({
             {loginMessage && <div>{loginMessage}</div>}
             {isLoggedIn && showLogOut && (
               <div>
-                <button className={"btn"} onClick={handleLogout}>
+                <button className={"btn btn-standard"} onClick={handleLogout}>
                   {t("logout")}
                 </button>
               </div>
             )}
             {showLogIn && (
               <button
-                className={"btn"}
+                className={"btn btn-standard"}
                 onClick={() => {
                   setShowLogIn(false);
                   setSearchTerm("");
@@ -175,7 +175,7 @@ const Header = ({
                       }, 0);
                     }
                   }}
-                  className="icon-btn"
+                  className="btn btn-icon btn-icon-neutral"
                 >
                   <Search size={28} />
                 </button>
@@ -184,14 +184,14 @@ const Header = ({
                 {isLoggedIn && !isGuest && (
                   <>
                     <button
-                      className="icon-btn"
+                      className="btn btn-icon btn-icon-neutral"
                       onClick={() => navigate("/add-recipe")}
                     >
                       <Plus size={28} />
                     </button>
                     {/* Grocery List */}
                     <button
-                      className="icon-btn"
+                      className="btn btn-icon btn-icon-neutral"
                       onClick={() => navigate("/grocery-list")}
                     >
                       <ShoppingBasket size={28} />
@@ -215,7 +215,7 @@ const Header = ({
               }}
             >
               <input id="search" type="text" className="input-box" />
-              <button className={"btn"} type="submit">
+              <button className={"btn btn-standard"} type="submit">
                 {t("search")}
               </button>
             </form>

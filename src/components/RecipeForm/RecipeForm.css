@@ -205,7 +205,7 @@
   .ingredient-details select {
     flex: 0 0 90px;
   }
-  .ingredient-row .btn-icon-error {
+  .ingredient-row .btn-icon-remove {
     justify-self: end;
     grid-row: 1;
     grid-column: 1;

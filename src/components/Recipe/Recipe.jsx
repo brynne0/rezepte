@@ -34,7 +34,7 @@ const Recipe = () => {
         {/* Show edit button only when logged in  */}
         {isLoggedIn && !isGuest && (
           <button
-            className="edit-btn"
+            className="btn btn-icon btn-icon-danger"
             onClick={() => {
               navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
             }}
@@ -58,21 +58,23 @@ const Recipe = () => {
           <div className="recipe-subheading">
             <h3>{t("ingredients")}:</h3>
             {/* Grocery Cart */}
-            <div className="cart-container">
-              <button
-                onClick={() => addToGroceryList(recipe.ingredients)}
-                className="cart-btn"
-              >
-                <ShoppingBasket />
-                {/* Selected ingredients counter */}
-                {Object.values(checkedIngredients).filter(Boolean).length >
-                  0 && (
-                  <span className="cart-counter">
-                    {Object.values(checkedIngredients).filter(Boolean).length}
-                  </span>
-                )}
-              </button>
-            </div>
+            {isLoggedIn && (
+              <div className="cart-container">
+                <button
+                  onClick={() => addToGroceryList(recipe.ingredients)}
+                  className="btn btn-icon btn-icon-danger"
+                >
+                  <ShoppingBasket />
+                  {/* Selected ingredients counter */}
+                  {Object.values(checkedIngredients).filter(Boolean).length >
+                    0 && (
+                    <span className="cart-counter">
+                      {Object.values(checkedIngredients).filter(Boolean).length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
             {showSuccess && t("added_to_groceries")}
           </div>
           <ul className="ingredient-list">

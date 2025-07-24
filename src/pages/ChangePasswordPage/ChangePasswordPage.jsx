@@ -56,7 +56,7 @@ const ChangePasswordPage = () => {
           <h3>{t("password_changed")}</h3>
           {/* Login button after successful password change */}
           <button
-            className={"btn"}
+            className={"btn btn-standard"}
             type="button"
             onClick={() => navigate("/auth-page")}
           >
@@ -97,7 +97,7 @@ const ChangePasswordPage = () => {
 
           {errorMessage && <div>{errorMessage}</div>}
           <button
-            className={"btn"}
+            className={"btn btn-standard"}
             type="submit"
             disabled={!isChangePasswordFormValid}
           >
