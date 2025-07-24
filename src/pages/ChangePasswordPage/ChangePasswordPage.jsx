@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { changePassword } from "../../services/auth";
-import "./ChangePasswordPage.css";
 import { useNavigate } from "react-router-dom";
 
 const ChangePasswordPage = () => {
@@ -50,7 +49,7 @@ const ChangePasswordPage = () => {
     newPassword.trim() && newPasswordRepeat.trim();
 
   return (
-    <div className="change-password-page-container">
+    <div className="auth-page-container">
       {showSuccessMessage ? (
         <div>
           <h3>{t("password_changed")}</h3>
@@ -65,7 +64,7 @@ const ChangePasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleChangePassword} className="auth-form">
-          <h3 className="change-password-header">{t("set_new_password")}</h3>
+          <h3 className="forgot-password-header">{t("set_new_password")}</h3>
           <div className="auth-input-wrapper">
             <input
               id="new-password"

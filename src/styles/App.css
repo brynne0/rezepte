@@ -30,6 +30,7 @@
   height: 5rem;
 }
 
+/* TODO - move back arrow and maybe loading animation too  */
 .back-arrow {
   left: 3rem;
   cursor: pointer;

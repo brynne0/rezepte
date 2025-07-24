@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { forgotPassword } from "../../services/auth";
-import "./ForgotPasswordPage.css";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -41,7 +40,7 @@ const ForgotPasswordPage = () => {
   const isForgotPasswordFormValid = email.trim();
 
   return (
-    <div className="forgot-password-page-container">
+    <div className="auth-page-container">
       {showSuccessMessage ? (
         <h3>{t("password_reset_sent")}</h3>
       ) : (

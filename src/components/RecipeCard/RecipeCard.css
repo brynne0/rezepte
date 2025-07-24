@@ -10,18 +10,6 @@
   transition: transform 0.2s ease-in-out;
 }
 
-.recipe-card-title {
-  margin: 0;
-  padding: 0.2rem;
-  font-size: 1rem;
-  text-align: center;
-  flex: 1;
-}
-
-.recipe-card-title:hover {
-  color: var(--red);
-}
-
 .recipe-card-image {
   /* TODO */
 }

@@ -1,34 +1,8 @@
-.recipe-form-container {
-  max-width: 50rem;
-  margin: 0 auto;
-  margin-top: 1rem;
-  background: var(--cream_opaque);
-  border-radius: 0.75rem;
-  box-shadow: 0 0.25rem 0.375rem var(--shadow_black);
-  overflow: hidden;
-}
-
 .recipe-form {
   padding: 0 3rem 3rem 3rem;
 }
 
-.page-header-wrapper {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
 /* Errors */
-.error-message {
-  background: var(--pink);
-  color: var(--error_red);
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-  border: 0.0625rem solid var(--pink);
-  font-size: 0.8rem;
-}
 
 .field-error {
   display: block;
@@ -81,27 +55,6 @@
   margin-top: 0.25rem;
 }
 
-.instruction-textarea {
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  font-family: inherit;
-  line-height: 1.5;
-  color: var(--dark_brown);
-  background: white;
-  border: 0.0625rem solid var(--cream);
-  border-radius: 0.375rem;
-  box-sizing: border-box;
-  transition: all 0.2s ease;
-  resize: none;
-  height: auto;
-  overflow-y: hidden;
-}
-
-.instruction-textarea:focus {
-  outline: none;
-  border-color: var(--dark_red);
-}
-
 /* Buttons */
 .form-actions {
   display: flex;
@@ -112,12 +65,6 @@
 
 .edit button:first-child {
   margin-right: auto;
-}
-
-.btn-icon-success-wrapper {
-  display: flex;
-  justify-content: center;
-  padding: 1rem;
 }
 
 /* Delete Modal */
@@ -156,22 +103,11 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  /* Container adjustments */
-  .add-recipe-container {
-    border-radius: 0.5rem;
-  }
   .recipe-form {
     padding: 1.25rem;
     padding-top: 0;
   }
 
-  /* Header adjustments */
-  .page-header-wrapper {
-    padding: 0;
-  }
-  .page-header-wrapper h1 {
-    font-size: 1.25rem;
-  }
   .back-arrow {
     left: 1.25rem;
   }
@@ -179,10 +115,6 @@
   /* Form spacing */
   .form-group {
     margin-bottom: 0.5rem;
-  }
-
-  .form-input {
-    padding: 0.5rem;
   }
 
   /* Ingredient rows and fields */
@@ -209,9 +141,5 @@
     justify-self: end;
     grid-row: 1;
     grid-column: 1;
-  }
-
-  .btn-icon-success-wrapper {
-    padding: 0.5rem;
   }
 }
