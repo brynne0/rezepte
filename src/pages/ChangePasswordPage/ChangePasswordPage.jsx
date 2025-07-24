@@ -56,7 +56,7 @@ const ChangePasswordPage = () => {
           <h3>{t("password_changed")}</h3>
           {/* Login button after successful password change */}
           <button
-            className={"shadow-btn"}
+            className={"btn"}
             type="button"
             onClick={() => navigate("/auth-page")}
           >
@@ -76,6 +76,7 @@ const ChangePasswordPage = () => {
                 setErrorMessage(""); // Clear error message
               }}
               placeholder={t("new_password")}
+              className="input-box"
               required
             />
             <input
@@ -89,13 +90,14 @@ const ChangePasswordPage = () => {
                 }
               }}
               placeholder={t("new_password_repeat")}
+              className="input-box"
               required
             />
           </div>
 
           {errorMessage && <div>{errorMessage}</div>}
           <button
-            className={"shadow-btn"}
+            className={"btn"}
             type="submit"
             disabled={!isChangePasswordFormValid}
           >

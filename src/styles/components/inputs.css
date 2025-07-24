@@ -1,0 +1,57 @@
+.input-box {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--cream_opaque);
+  color: var(--dark_brown);
+  font-family: inherit;
+  border: 0.0625rem solid var(--brown);
+  font-size: 1rem;
+}
+
+/* Form Group Input boxes */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  border: 0.1rem solid var(--cream);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+  color: var(--dark_brown);
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--dark_red);
+}
+
+.form-input:invalid {
+  color: grey;
+}
+
+.form-input select,
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==);
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.form-input.error {
+  border-color: var(--error_red);
+}
+
+.form-input.error:focus {
+  border-color: var(--error_red);
+  box-shadow: 0 0 0 0.1875rem var(error_shadow);
+}

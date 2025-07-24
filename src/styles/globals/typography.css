@@ -1,0 +1,88 @@
+/* BELOW IS AN EXAMPLE */
+/* h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+h2 {
+  font-size: 2rem;
+}
+h3 {
+  font-size: 1.5rem;
+} */
+
+:root {
+  font-family: "Gabarito", sans-serif;
+  --heading-font-family: "Forta", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-variation-settings: "wdth" 100;
+  line-height: 1.5;
+  color: var(--dark_brown);
+
+  /* Font rendering */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.subheading {
+  padding: 0.5rem 1rem;
+  color: var(--brown);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  font-size: 1rem;
+  font-family: "Forta", sans-serif;
+}
+
+.subheading :hover {
+  color: var(--red);
+}
+
+.subheading.selected {
+  color: var(--red);
+}
+
+/* Headers */
+.page-header-wrapper h1 {
+  padding: 1rem;
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.form-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.recipe-subheading {
+  margin-top: 1rem;
+  margin-bottom: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* TODO - where do i put this one */
+.source-link {
+  color: var(--dark_red);
+}

@@ -4,12 +4,12 @@
   justify-content: center;
   max-width: 50rem;
   margin: 0 auto;
+  margin-top: 1rem;
   background: var(--cream_opaque);
   border-radius: 0.75rem;
   box-shadow: 0 0.25rem 0.375rem var(--shadow_black);
   overflow: hidden;
   padding: 1.25rem;
-  padding-top: 0;
 }
 
 .grocery-page-header-wrapper {
@@ -17,6 +17,11 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.grocery-page-header-wrapper h1 {
+  margin: 0;
 }
 
 .list-items {
@@ -74,22 +79,6 @@
   flex: 0 0 80px;
 }
 
-.remove-btn {
-  cursor: pointer;
-  background: none;
-  border: none;
-  transition: all 0.2s ease;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  color: var(--error_red);
-  flex-shrink: 0;
-}
-
-.remove-btn:hover {
-  transform: translateY(-1px);
-}
-
 .btn-wrapper {
   display: flex;
   gap: 1rem;
@@ -99,14 +88,6 @@
 
 .spacer {
   flex-shrink: 0;
-}
-
-.save-btn {
-  min-width: 6rem;
-}
-
-.cancel-btn {
-  min-width: 6rem;
 }
 
 @media (max-width: 768px) {

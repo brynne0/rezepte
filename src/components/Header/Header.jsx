@@ -101,14 +101,14 @@ const Header = ({
             {loginMessage && <div>{loginMessage}</div>}
             {isLoggedIn && showLogOut && (
               <div>
-                <button className={"shadow-btn"} onClick={handleLogout}>
+                <button className={"btn"} onClick={handleLogout}>
                   {t("logout")}
                 </button>
               </div>
             )}
             {showLogIn && (
               <button
-                className={"shadow-btn"}
+                className={"btn"}
                 onClick={() => {
                   setShowLogIn(false);
                   setSearchTerm("");
@@ -214,8 +214,8 @@ const Header = ({
                 navigate("/");
               }}
             >
-              <input id="search" type="text" />
-              <button className={"shadow-btn"} type="submit">
+              <input id="search" type="text" className="input-box" />
+              <button className={"btn"} type="submit">
                 {t("search")}
               </button>
             </form>

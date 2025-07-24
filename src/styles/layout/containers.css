@@ -1,0 +1,13 @@
+.recipe-container {
+  text-align: left;
+  margin: 0.5rem;
+}
+
+.recipe-heading-container {
+  color: var(--dark_red);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-family: forta;
+}

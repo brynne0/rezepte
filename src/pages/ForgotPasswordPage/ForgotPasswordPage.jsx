@@ -49,6 +49,7 @@ const ForgotPasswordPage = () => {
           <h3 className="forgot-password-header">{t("reset_password")}</h3>
           <div className="auth-input-wrapper">
             <input
+              className="input-box"
               id="reset-email"
               type="email"
               value={email}
@@ -60,7 +61,7 @@ const ForgotPasswordPage = () => {
 
           {errorMessage && <div>{errorMessage}</div>}
           <button
-            className={"shadow-btn"}
+            className={"btn"}
             type="submit"
             disabled={!isForgotPasswordFormValid}
           >

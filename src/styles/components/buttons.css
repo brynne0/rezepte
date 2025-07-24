@@ -1,0 +1,180 @@
+/* Base button foundation - shared properties */
+.btn-base {
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn,
+.auth-btn {
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--cream_opaque);
+  color: var(--dark_brown);
+  font-family: inherit;
+  border: 0.0625rem solid var(--brown);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn {
+  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
+}
+
+.auth-btn {
+  min-width: 3rem;
+}
+
+.icon-btn {
+  padding: 0.5rem;
+  color: var(--brown);
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.icon-btn:hover {
+  background: var(--cream_opaque);
+  border-radius: 50%;
+  display: flex;
+}
+
+.edit-btn,
+.cart-btn {
+  color: var(--dark_red);
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color 0.2s, transform 0.2s;
+  padding: 0;
+  display: flex;
+}
+
+.cart-btn:hover,
+.edit-btn:hover {
+  transform: translateY(-1px);
+}
+
+.primary-btn,
+.cancel-btn,
+.delete-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+/* Primary Button */
+.primary-btn {
+  background: var(--brown);
+  color: white;
+  box-shadow: 0 0.125rem 0.25rem var(--shadow_black);
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: var(--light_brown);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+}
+
+.primary-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Cancel Button */
+.cancel-btn {
+  background: white;
+  color: var(--light_brown);
+  border: 0.125rem solid var(--light_brown);
+}
+
+.cancel-btn:hover {
+  color: var(--brown);
+  border-color: var(--brown);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+}
+
+/* Delete Button */
+.delete-btn {
+  background: white;
+  color: var(--red);
+  border: 0.125rem solid var(--red);
+}
+
+.delete-btn:hover {
+  background: var(--red);
+  color: white;
+  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+}
+
+.remove-btn,
+.add-btn {
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.remove-btn {
+  color: var(--error_red);
+}
+
+.add-btn {
+  color: var(--green);
+}
+
+.remove-btn:hover,
+.add-btn:hover {
+  transform: translateY(-1px);
+}
+
+.remove-btn {
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: var(--error_red);
+  flex-shrink: 0;
+}
+
+.remove-btn:hover {
+  transform: translateY(-1px);
+}
+
+.save-btn {
+  min-width: 6rem;
+}
+
+.cancel-btn {
+  min-width: 6rem;
+}
+
+@media (max-width: 768px) {
+  .cancel-btn,
+  .primary-btn,
+  .delete-btn {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}

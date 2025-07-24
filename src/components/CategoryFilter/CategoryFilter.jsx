@@ -7,7 +7,7 @@ const CategoryFilter = ({
   setSearchTerm,
 }) => {
   return (
-    <div className="categories">
+    <div className="categories-wrapper">
       {categories.map((category) => (
         <button
           key={category.value}

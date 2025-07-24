@@ -124,6 +124,7 @@ const AuthPage = ({ setLoginMessage }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("email")}
+                className="input-box"
                 required
               />
               {/* First Name */}
@@ -133,6 +134,7 @@ const AuthPage = ({ setLoginMessage }) => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder={t("first_name")}
+                className="input-box"
                 required
               />
             </>
@@ -145,6 +147,7 @@ const AuthPage = ({ setLoginMessage }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder={t("username")}
+            className="input-box"
             required
           />
           {/* Password */}
@@ -154,6 +157,7 @@ const AuthPage = ({ setLoginMessage }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t("password")}
+            className="input-box"
             required
           />
         </div>
@@ -169,7 +173,7 @@ const AuthPage = ({ setLoginMessage }) => {
         <button
           type="submit"
           disabled={isSignUpMode ? !isSignUpFormValid : !isLoginFormValid}
-          className={"shadow-btn"}
+          className={"btn"}
         >
           {isSignUpMode ? t("sign_up") : t("login")}
         </button>

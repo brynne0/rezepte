@@ -1,0 +1,30 @@
+/* Fonts */
+@import "../../public/fonts/fonts.css";
+
+/* Components */
+@import "./components/buttons.css";
+@import "./components/inputs.css";
+
+/* Globals */
+@import "./globals/typography.css";
+@import "./globals/variables.css";
+
+/* Layout */
+@import "./layout/containers.css";
+@import "./layout/header.css";
+
+/* Utilities */
+@import "./utilites/spacing.css";
+@import "./utilites/text.css";
+
+/* TODO - remove the below  */
+:root {
+  background-color: var(--cream);
+  color-scheme: light dark;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
