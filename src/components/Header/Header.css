@@ -31,6 +31,7 @@
   font-size: 1rem;
   color: var(--brown);
   line-height: 1;
+  font-family: var(--font-forta);
 }
 
 /* Title Section */
