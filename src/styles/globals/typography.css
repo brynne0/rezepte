@@ -1,6 +1,9 @@
 :root {
+  background-color: var(--cream);
+  color-scheme: light dark;
+
   font-family: "Gabarito", sans-serif;
-  --heading-font-family: "Forta", sans-serif;
+  --font-forta: "Forta", sans-serif;
   font-style: normal;
   font-weight: 400;
   font-optical-sizing: auto;
@@ -13,6 +16,12 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 h1,
@@ -30,7 +39,7 @@ h2 {
 }
 
 h2.forta {
-  font-family: "Forta", sans-serif;
+  font-family: var(--font-forta);
   font-size: 1rem;
 }
 

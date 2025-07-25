@@ -1,3 +1,4 @@
+/* Header Layout */
 .header {
   margin: 0;
   position: sticky;
@@ -14,6 +15,37 @@
   position: relative;
 }
 
+/* Header Typography - Override global heading styles */
+.header h1 {
+  font-family: var(--font-forta);
+  font-size: 3rem;
+  color: var(--brown);
+  cursor: pointer;
+  font-optical-sizing: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  line-height: 1;
+}
+
+.header h3 {
+  font-size: 1rem;
+  color: var(--brown);
+  line-height: 1;
+}
+
+/* Title Section */
+.title-wrapper {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: max-content;
+  height: max-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Logo Icons */
 .header-logo,
 .header-logo-2 {
   color: var(--brown);
@@ -27,82 +59,53 @@
   transform: scaleX(-1);
 }
 
-.header .title-wrapper {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: max-content;
-  height: max-content;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.header h1 {
-  font-size: 3rem;
-  font-family: var(--heading-font-family);
-  color: var(--brown);
-  cursor: pointer;
-  font-optical-sizing: auto;
-  transform: none;
-  user-select: none;
-  -webkit-user-select: none;
-  line-height: 1;
-}
-
-.header h3 {
-  font-size: 1rem;
-  font-family: var(--heading-font-family);
-  color: var(--brown);
-  line-height: 1;
-}
-
+/* Login Section */
 .login-wrapper {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
+/* Language Selection */
 .language-wrapper {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-.language:hover {
-  color: var(--dark_red);
-  cursor: pointer;
-}
-
 .language {
   margin: 0;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
+.language:hover,
 .language.selected {
   color: var(--dark_red);
 }
 
-.search-bar {
-  gap: 0.25rem;
-  display: flex;
-}
-
-.search-bar-wrapper {
-  display: flex;
-  justify-content: center;
-  margin: 0.25rem;
-}
-
+/* Navigation */
 .header-nav {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* Responsive Design */
+/* Search Bar */
+.search-bar-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 0.25rem;
+}
+
+.search-bar {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
   .header-container {
-    display: flex;
     flex-direction: column;
     height: auto;
   }
@@ -114,18 +117,9 @@
     height: 2rem;
   }
 
-  .header .title-wrapper {
+  .title-wrapper {
     order: 2;
     position: static;
-    transform: none;
-  }
-
-  .header h3 {
-    font-size: 0.8rem;
-  }
-
-  .header h1 {
-    font-size: 2rem;
   }
 
   .header-nav {
@@ -135,5 +129,14 @@
   .login-wrapper {
     flex-direction: column-reverse;
     gap: 0.5rem;
+  }
+
+  /* Mobile typography */
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .header h3 {
+    font-size: 0.8rem;
   }
 }
