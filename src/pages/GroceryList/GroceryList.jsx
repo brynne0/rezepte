@@ -108,7 +108,7 @@ const GroceryList = () => {
                   id={`item-name-${itemId}`}
                   type="text"
                   value={item.name || ""}
-                  className="item-input"
+                  className="input input--borderless input--full-width"
                   readOnly={!isEditing}
                   placeholder={t("item_name")}
                   onChange={(e) =>
@@ -121,7 +121,7 @@ const GroceryList = () => {
                   min="0"
                   step="0.1"
                   value={item.quantity || ""}
-                  className="item-input"
+                  className="input input--borderless input--full-width"
                   readOnly={!isEditing}
                   placeholder={t("quantity")}
                   onChange={(e) =>
@@ -135,7 +135,7 @@ const GroceryList = () => {
                 <select
                   id={`item-unit-${itemId}`}
                   value={item.unit || ""}
-                  className="item-input"
+                  className="input input--borderless input--full-width"
                   disabled={!isEditing}
                   onChange={(e) =>
                     handleInputChange(index, "unit", e.target.value)

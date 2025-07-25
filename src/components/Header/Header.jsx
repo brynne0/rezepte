@@ -214,7 +214,7 @@ const Header = ({
                 navigate("/");
               }}
             >
-              <input id="search" type="text" className="input-box" />
+              <input id="search" type="text" className="input input--cream" />
               <button className={"btn btn-standard"} type="submit">
                 {t("search")}
               </button>

@@ -8,12 +8,4 @@
   min-width: 15rem;
 }
 
-.auth-link {
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin: 0;
-}
 
-.auth-link:hover {
-  color: var(--red);
-}

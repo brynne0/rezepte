@@ -49,7 +49,7 @@ const ChangePasswordPage = () => {
     newPassword.trim() && newPasswordRepeat.trim();
 
   return (
-    <div className="page-layout">
+    <div className="page-layout flex-center">
       {showSuccessMessage ? (
         <div>
           <h3>{t("password_changed")}</h3>
@@ -75,7 +75,7 @@ const ChangePasswordPage = () => {
                 setErrorMessage(""); // Clear error message
               }}
               placeholder={t("new_password")}
-              className="input-box"
+              className="input input--cream"
               required
             />
             <input
@@ -89,7 +89,7 @@ const ChangePasswordPage = () => {
                 }
               }}
               placeholder={t("new_password_repeat")}
-              className="input-box"
+              className="input input--cream"
               required
             />
           </div>

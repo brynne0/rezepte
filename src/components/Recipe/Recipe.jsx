@@ -123,7 +123,7 @@ const Recipe = () => {
               href={recipe.source.match(/^https?:\/\/[^\s]+/)[0]}
               target="_blank"
               rel="noopener noreferrer"
-              className="source-link"
+              className="link-red"
             >
               {recipe.source}
             </a>

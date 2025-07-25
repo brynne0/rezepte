@@ -33,7 +33,16 @@ h2.forta {
   font-family: "Forta", sans-serif;
 }
 
-.source-link {
+.link {
+  cursor: pointer;
+  margin: 0;
+}
+
+.link:hover {
+  color: var(--red);
+}
+
+.link-red {
   color: var(--dark_red);
 }
 

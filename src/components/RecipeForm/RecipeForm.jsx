@@ -114,7 +114,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 !!validationErrors.title
               )
             }
-            className={`form-input ${validationErrors.title ? "error" : ""}`}
+            className={`input--full-width input${
+              validationErrors.title ? "input--error" : ""
+            }`}
           />
         </div>
 
@@ -137,7 +139,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 !!validationErrors.category
               )
             }
-            className={`form-input ${validationErrors.category ? "error" : ""}`}
+            className={`input--full-width input--select input ${
+              validationErrors.category ? "input--error" : ""
+            }`}
             required
           >
             <option value="" disabled>
@@ -166,7 +170,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 min="1"
                 value={formData.servings || ""}
                 onChange={(e) => handleInputChange("servings", e.target.value)}
-                className="form-input"
+                className="input input--full-width "
                 onWheel={(e) => {
                   e.target.blur();
                 }}
@@ -201,7 +205,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                           validationErrors.ingredients ? "ingredients" : null
                         );
                       }}
-                      className="form-input"
+                      className="input input--full-width "
                       placeholder={t("ingredient_name")}
                     />
                     {/* Ingredient Quantity */}
@@ -219,7 +223,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                             e.target.value
                           )
                         }
-                        className="form-input"
+                        className="input input--full-width "
                         placeholder={t("quantity")}
                         onWheel={(e) => {
                           e.target.blur();
@@ -236,7 +240,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                             e.target.value
                           )
                         }
-                        className={"form-input"}
+                        className={"input input--full-width input--select "}
                       >
                         {units.map((unit) => (
                           <option key={unit.value} value={unit.value}>
@@ -257,7 +261,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                             e.target.value
                           )
                         }
-                        className="form-input"
+                        className="input input--full-width "
                         placeholder={t("notes")}
                       />
                       {formData.ingredients.length > 1 && (
@@ -301,7 +305,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                         handleInstructionChange(index, e.target.value)
                       }
                       onKeyDown={handleEnter}
-                      className="instruction-textarea"
+                      className="input input--full-width input--textarea"
                     />
                     <button
                       type="button"
@@ -336,7 +340,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             type="text"
             value={formData.source || ""}
             onChange={(e) => handleInputChange("source", e.target.value)}
-            className="form-input"
+            className="input input--full-width "
             placeholder={
               IsLinkRecipe ? t("source_link") : t("source_link_or_note")
             }
@@ -353,7 +357,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             type="text"
             value={formData.notes || ""}
             onChange={(e) => handleInputChange("notes", e.target.value)}
-            className="form-input"
+            className="input input--full-width "
             placeholder={t("notes")}
           />
         </div>

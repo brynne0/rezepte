@@ -91,7 +91,7 @@ const AuthPage = ({ setLoginMessage }) => {
   };
 
   return (
-    <div className="page-layout">
+    <div className="page-layout flex-center">
       {/* Headers to toggle between modes */}
       <div>
         <button
@@ -124,7 +124,7 @@ const AuthPage = ({ setLoginMessage }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("email")}
-                className="input-box"
+                className="input input--cream"
                 required
               />
               {/* First Name */}
@@ -134,7 +134,7 @@ const AuthPage = ({ setLoginMessage }) => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder={t("first_name")}
-                className="input-box"
+                className="input input--cream"
                 required
               />
             </>
@@ -147,7 +147,7 @@ const AuthPage = ({ setLoginMessage }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder={t("username")}
-            className="input-box"
+            className="input input--cream"
             required
           />
           {/* Password */}
@@ -157,14 +157,14 @@ const AuthPage = ({ setLoginMessage }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t("password")}
-            className="input-box"
+            className="input input--cream"
             required
           />
         </div>
 
         {/* Forgot Password  */}
         {!isSignUpMode && (
-          <span onClick={switchToForgotPassword} className="auth-link">
+          <span onClick={switchToForgotPassword} className="link">
             {t("forgot_password")}
           </span>
         )}

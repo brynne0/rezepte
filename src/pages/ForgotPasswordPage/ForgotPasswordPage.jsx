@@ -40,7 +40,7 @@ const ForgotPasswordPage = () => {
   const isForgotPasswordFormValid = email.trim();
 
   return (
-    <div className="page-layout">
+    <div className="page-layout flex-center">
       {showSuccessMessage ? (
         <h3>{t("password_reset_sent")}</h3>
       ) : (
@@ -48,7 +48,7 @@ const ForgotPasswordPage = () => {
           <h2 className="forta">{t("reset_password")}</h2>
           <div className="input-wrapper input-wrapper-sm">
             <input
-              className="input-box"
+              className="input input--cream"
               id="reset-email"
               type="email"
               value={email}
