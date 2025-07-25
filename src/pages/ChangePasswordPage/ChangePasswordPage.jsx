@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { changePassword } from "../../services/auth";
-import "./ChangePasswordPage.css";
 import { useNavigate } from "react-router-dom";
 
 const ChangePasswordPage = () => {
@@ -50,13 +49,13 @@ const ChangePasswordPage = () => {
     newPassword.trim() && newPasswordRepeat.trim();
 
   return (
-    <div className="change-password-page-container">
+    <div className="page-layout flex-center">
       {showSuccessMessage ? (
         <div>
           <h3>{t("password_changed")}</h3>
           {/* Login button after successful password change */}
           <button
-            className={"shadow-btn"}
+            className={"btn btn-standard"}
             type="button"
             onClick={() => navigate("/auth-page")}
           >
@@ -65,8 +64,8 @@ const ChangePasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleChangePassword} className="auth-form">
-          <h3 className="change-password-header">{t("set_new_password")}</h3>
-          <div className="auth-input-wrapper">
+          <h2 className="forta">{t("set_new_password")}</h2>
+          <div className="input-wrapper input-wrapper-sm">
             <input
               id="new-password"
               type="password"
@@ -76,6 +75,7 @@ const ChangePasswordPage = () => {
                 setErrorMessage(""); // Clear error message
               }}
               placeholder={t("new_password")}
+              className="input input--cream"
               required
             />
             <input
@@ -89,13 +89,14 @@ const ChangePasswordPage = () => {
                 }
               }}
               placeholder={t("new_password_repeat")}
+              className="input input--cream"
               required
             />
           </div>
 
           {errorMessage && <div>{errorMessage}</div>}
           <button
-            className={"shadow-btn"}
+            className={"btn btn-standard"}
             type="submit"
             disabled={!isChangePasswordFormValid}
           >

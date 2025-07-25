@@ -34,7 +34,7 @@ const Recipe = () => {
         {/* Show edit button only when logged in  */}
         {isLoggedIn && !isGuest && (
           <button
-            className="edit-btn"
+            className="btn btn-icon btn-icon-danger"
             onClick={() => {
               navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
             }}
@@ -46,8 +46,8 @@ const Recipe = () => {
 
       {/* Servings */}
       {recipe.servings && (
-        <div className="recipe-subheading">
-          <h3>{t("servings")}:</h3>
+        <div className="recipe-subheading flex-row">
+          <h2>{t("servings")}:</h2>
           {recipe.servings}
         </div>
       )}
@@ -55,24 +55,26 @@ const Recipe = () => {
       {/* Ingredients */}
       {recipe.ingredients && recipe.ingredients.length > 0 && (
         <>
-          <div className="recipe-subheading">
-            <h3>{t("ingredients")}:</h3>
+          <div className="recipe-subheading flex-row">
+            <h2>{t("ingredients")}:</h2>
             {/* Grocery Cart */}
-            <div className="cart-container">
-              <button
-                onClick={() => addToGroceryList(recipe.ingredients)}
-                className="cart-btn"
-              >
-                <ShoppingBasket />
-                {/* Selected ingredients counter */}
-                {Object.values(checkedIngredients).filter(Boolean).length >
-                  0 && (
-                  <span className="cart-counter">
-                    {Object.values(checkedIngredients).filter(Boolean).length}
-                  </span>
-                )}
-              </button>
-            </div>
+            {isLoggedIn && (
+              <div className="cart-container">
+                <button
+                  onClick={() => addToGroceryList(recipe.ingredients)}
+                  className="btn btn-icon btn-icon-danger"
+                >
+                  <ShoppingBasket />
+                  {/* Selected ingredients counter */}
+                  {Object.values(checkedIngredients).filter(Boolean).length >
+                    0 && (
+                    <span className="cart-counter">
+                      {Object.values(checkedIngredients).filter(Boolean).length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
             {showSuccess && t("added_to_groceries")}
           </div>
           <ul className="ingredient-list">
@@ -100,8 +102,8 @@ const Recipe = () => {
       {/* Instructions */}
       {recipe.instructions && recipe.instructions.length > 0 && (
         <>
-          <div className="recipe-subheading">
-            <h3>{t("instructions")}:</h3>
+          <div className="recipe-subheading flex-row">
+            <h2>{t("instructions")}:</h2>
           </div>
           <ol>
             {recipe.instructions.map((instruction, i) => (
@@ -113,15 +115,15 @@ const Recipe = () => {
 
       {/* Source */}
       {recipe.source && (
-        <div className="recipe-subheading">
-          <h3>{t("source")}:</h3>
+        <div className="recipe-subheading flex-row">
+          <h2>{t("source")}:</h2>
 
           {/^https?:\/\/[^\s]+/.test(recipe.source) ? (
             <a
               href={recipe.source.match(/^https?:\/\/[^\s]+/)[0]}
               target="_blank"
               rel="noopener noreferrer"
-              className="source-link"
+              className="link-red"
             >
               {recipe.source}
             </a>
@@ -133,8 +135,8 @@ const Recipe = () => {
 
       {/* Extra Notes */}
       {recipe.notes && recipe.notes.length > 0 && (
-        <div className="recipe-subheading">
-          <h3>{t("notes")}:</h3>
+        <div className="recipe-subheading flex-row">
+          <h2>{t("notes")}:</h2>
           {recipe.notes}
         </div>
       )}

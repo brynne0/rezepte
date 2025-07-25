@@ -1,0 +1,91 @@
+/* Base input styles - all inputs inherit from this */
+.input {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--dark_brown);
+  background: white;
+  border: 0.0625rem solid var(--cream);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--dark_red);
+}
+
+.input:invalid {
+  color: grey;
+}
+
+/* Variations */
+.input--cream {
+  background: var(--cream_opaque);
+  border-color: var(--brown);
+  padding: 0.5rem;
+}
+
+.input--shadow {
+  box-shadow: 0 0.125rem 0.2rem var(--shadow_black);
+}
+
+.input--full-width {
+  width: 100%;
+}
+
+.input--borderless {
+  background: none;
+  border: none;
+}
+
+.input--textarea {
+  line-height: 1.5;
+  resize: none;
+  height: auto;
+  overflow-y: hidden;
+}
+
+/* Select dropdown styling */
+.input--select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==);
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+/* Error state */
+.input--error {
+  border-color: var(--error_red);
+}
+
+.input--error:focus {
+  border-color: var(--error_red);
+  box-shadow: 0 0 0 0.2rem var(--error_shadow);
+}
+
+/* Disabled state cleanup */
+.input:disabled {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none;
+}
+
+.input:disabled::-webkit-outer-spin-button,
+.input:disabled::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .input {
+    padding: 0.5rem;
+  }
+}

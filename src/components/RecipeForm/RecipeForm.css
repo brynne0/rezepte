@@ -1,98 +1,8 @@
-.recipe-form-container {
-  max-width: 50rem;
-  margin: 0 auto;
-  background: var(--cream_opaque);
-  border-radius: 0.75rem;
-  box-shadow: 0 0.25rem 0.375rem var(--shadow_black);
-  overflow: hidden;
-}
-
 .recipe-form {
   padding: 0 3rem 3rem 3rem;
 }
 
-.page-header-wrapper {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
-/* Headers */
-.page-header-wrapper h1 {
-  padding: 1rem;
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
-}
-
-.form-header {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-/* Input boxes */
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.5rem 0.75rem;
-  border: 0.1rem solid var(--cream);
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  background: white;
-  color: var(--dark_brown);
-  font-family: inherit;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--dark_red);
-}
-
-.form-input:invalid {
-  color: grey;
-}
-
-.form-input select,
-select.form-input {
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==);
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 1rem;
-  padding-right: 2rem;
-  cursor: pointer;
-}
-
 /* Errors */
-.error-message {
-  background: var(--pink);
-  color: var(--error_red);
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-  border: 0.0625rem solid var(--pink);
-  font-size: 0.8rem;
-}
-
-.form-input.error {
-  border-color: var(--error_red);
-}
-
-.form-input.error:focus {
-  border-color: var(--error_red);
-  box-shadow: 0 0 0 0.1875rem var(error_shadow);
-}
-
 .field-error {
   display: block;
   color: var(--error_red);
@@ -144,28 +54,7 @@ select.form-input {
   margin-top: 0.25rem;
 }
 
-.instruction-textarea {
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  font-family: inherit;
-  line-height: 1.5;
-  color: var(--dark_brown);
-  background: white;
-  border: 0.0625rem solid var(--cream);
-  border-radius: 0.375rem;
-  box-sizing: border-box;
-  transition: all 0.2s ease;
-  resize: none;
-  height: auto;
-  overflow-y: hidden;
-}
-
-.instruction-textarea:focus {
-  outline: none;
-  border-color: var(--dark_red);
-}
-
-/* Buttons */
+/* Buttons wrapers */
 .form-actions {
   display: flex;
   gap: 1rem;
@@ -175,93 +64,6 @@ select.form-input {
 
 .edit button:first-child {
   margin-right: auto;
-}
-
-.primary-btn,
-.cancel-btn,
-.delete-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-}
-
-/* Primary Button */
-.primary-btn {
-  background: var(--brown);
-  color: white;
-  box-shadow: 0 0.125rem 0.25rem var(--shadow_black);
-}
-
-.primary-btn:hover:not(:disabled) {
-  background: var(--light_brown);
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
-}
-
-.primary-btn:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Cancel Button */
-.cancel-btn {
-  background: white;
-  color: var(--light_brown);
-  border: 0.125rem solid var(--light_brown);
-}
-
-.cancel-btn:hover {
-  color: var(--brown);
-  border-color: var(--brown);
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
-}
-
-/* Delete Button */
-.delete-btn {
-  background: white;
-  color: var(--red);
-  border: 0.125rem solid var(--red);
-}
-
-.delete-btn:hover {
-  background: var(--red);
-  color: white;
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
-}
-
-.remove-btn,
-.add-btn {
-  cursor: pointer;
-  background: none;
-  border: none;
-  transition: all 0.2s ease;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-.remove-btn {
-  color: var(--error_red);
-}
-
-.add-btn {
-  color: var(--green);
-}
-
-.remove-btn:hover,
-.add-btn:hover {
-  transform: translateY(-1px);
-}
-
-.add-btn-wrapper {
-  display: flex;
-  justify-content: center;
-  padding: 1rem;
 }
 
 /* Delete Modal */
@@ -298,24 +100,17 @@ select.form-input {
   gap: 1rem;
 }
 
+.form-group {
+  margin-bottom: 1rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-  /* Container adjustments */
-  .add-recipe-container {
-    border-radius: 0.5rem;
-  }
   .recipe-form {
     padding: 1.25rem;
     padding-top: 0;
   }
 
-  /* Header adjustments */
-  .page-header-wrapper {
-    padding: 0;
-  }
-  .page-header-wrapper h1 {
-    font-size: 1.25rem;
-  }
   .back-arrow {
     left: 1.25rem;
   }
@@ -323,10 +118,6 @@ select.form-input {
   /* Form spacing */
   .form-group {
     margin-bottom: 0.5rem;
-  }
-
-  .form-input {
-    padding: 0.5rem;
   }
 
   /* Ingredient rows and fields */
@@ -349,20 +140,9 @@ select.form-input {
   .ingredient-details select {
     flex: 0 0 90px;
   }
-  .ingredient-row .remove-btn {
+  .ingredient-row .btn-icon-remove {
     justify-self: end;
     grid-row: 1;
     grid-column: 1;
-  }
-
-  .add-btn-wrapper {
-    padding: 0.5rem;
-  }
-
-  .cancel-btn,
-  .primary-btn,
-  .delete-btn {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.8rem;
   }
 }

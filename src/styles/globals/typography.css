@@ -1,0 +1,54 @@
+:root {
+  font-family: "Gabarito", sans-serif;
+  --heading-font-family: "Forta", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-variation-settings: "wdth" 100;
+  line-height: 1.5;
+  color: var(--dark_brown);
+
+  /* Font rendering */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+}
+
+h1 {
+  font-size: 2rem;
+}
+h2 {
+  font-size: 1.2rem;
+}
+
+h2.forta {
+  font-family: "Forta", sans-serif;
+  font-size: 1rem;
+}
+
+.link {
+  cursor: pointer;
+  margin: 0;
+}
+
+.link:hover {
+  color: var(--red);
+}
+
+.link-red {
+  color: var(--dark_red);
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+}

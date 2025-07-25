@@ -7,11 +7,11 @@ const CategoryFilter = ({
   setSearchTerm,
 }) => {
   return (
-    <div className="categories">
+    <div className="categories-wrapper ">
       {categories.map((category) => (
         <button
           key={category.value}
-          className={`subheading${
+          className={`subheading-wrapper${
             category.value === selectedCategory ? " selected" : ""
           }`}
           onClick={() => {
@@ -19,7 +19,7 @@ const CategoryFilter = ({
             setSelectedCategory(category.value);
           }}
         >
-          {category.label}
+          <h2 className="forta">{category.label}</h2>
         </button>
       ))}
     </div>

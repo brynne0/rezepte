@@ -91,22 +91,22 @@ const AuthPage = ({ setLoginMessage }) => {
   };
 
   return (
-    <div className="auth-page-container">
+    <div className="page-layout flex-center">
       {/* Headers to toggle between modes */}
       <div>
         <button
-          className={`subheading ${!isSignUpMode ? "selected" : ""}`}
+          className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToLogin}
         >
-          {t("login")}
+          <h2 className="forta"> {t("login")}</h2>
         </button>
         <button
-          className={`subheading ${isSignUpMode ? "selected" : ""}`}
+          className={`subheading-wrapper ${isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToSignUp}
         >
-          {t("sign_up")}
+          <h2 className="forta"> {t("sign_up")}</h2>
         </button>
       </div>
 
@@ -114,7 +114,7 @@ const AuthPage = ({ setLoginMessage }) => {
         onSubmit={isSignUpMode ? handleSignUp : handleLogin}
         className="auth-form"
       >
-        <div className="auth-input-wrapper">
+        <div className="input-wrapper input-wrapper-sm">
           {isSignUpMode && (
             <>
               {/* Email */}
@@ -124,6 +124,7 @@ const AuthPage = ({ setLoginMessage }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("email")}
+                className="input input--cream"
                 required
               />
               {/* First Name */}
@@ -133,6 +134,7 @@ const AuthPage = ({ setLoginMessage }) => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder={t("first_name")}
+                className="input input--cream"
                 required
               />
             </>
@@ -145,6 +147,7 @@ const AuthPage = ({ setLoginMessage }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder={t("username")}
+            className="input input--cream"
             required
           />
           {/* Password */}
@@ -154,13 +157,14 @@ const AuthPage = ({ setLoginMessage }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t("password")}
+            className="input input--cream"
             required
           />
         </div>
 
         {/* Forgot Password  */}
         {!isSignUpMode && (
-          <span onClick={switchToForgotPassword} className="auth-link">
+          <span onClick={switchToForgotPassword} className="link">
             {t("forgot_password")}
           </span>
         )}
@@ -169,7 +173,7 @@ const AuthPage = ({ setLoginMessage }) => {
         <button
           type="submit"
           disabled={isSignUpMode ? !isSignUpFormValid : !isLoginFormValid}
-          className={"shadow-btn"}
+          className={"btn btn-standard"}
         >
           {isSignUpMode ? t("sign_up") : t("login")}
         </button>

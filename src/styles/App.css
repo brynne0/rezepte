@@ -1,3 +1,5 @@
+@import "./components/buttons.css";
+
 #root {
   margin: 0;
   padding: 0;
@@ -8,6 +10,7 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
+  padding-top: 1rem;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -28,6 +31,7 @@
   height: 5rem;
 }
 
+/* TODO - move back arrow and maybe loading animation too  */
 .back-arrow {
   left: 3rem;
   cursor: pointer;

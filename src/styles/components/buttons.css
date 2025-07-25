@@ -1,0 +1,130 @@
+/* Base button foundation - shared properties */
+.btn {
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-standard {
+  padding: 0.5rem;
+  background: var(--cream_opaque);
+  color: var(--dark_brown);
+  border: 0.0625rem solid var(--brown);
+  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
+}
+
+/* ==============================================
+   ACTION BUTTONS (primary, secondary, danger)
+   ============================================== */
+
+/* Action button foundation */
+.btn-action {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  min-width: 6rem;
+}
+
+/* Primary action button */
+.btn-primary {
+  background: var(--brown);
+  color: white;
+  box-shadow: 0 0.125rem 0.25rem var(--shadow_black);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--light_brown);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Secondary action button (cancel) */
+.btn-secondary {
+  background: white;
+  color: var(--light_brown);
+  border: 0.125rem solid var(--light_brown);
+}
+
+.btn-secondary:hover {
+  color: var(--brown);
+  border-color: var(--brown);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+}
+
+/* Danger action button (delete) */
+.btn-danger {
+  background: white;
+  color: var(--red);
+  border: 0.125rem solid var(--red);
+}
+
+.btn-danger:hover {
+  background: var(--red);
+  color: white;
+  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+}
+
+/* ==============================================
+   ICON BUTTONS (minimal styling)
+   ============================================== */
+
+/* Icon button foundation */
+.btn-icon {
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
+}
+
+/* Neutral icon button */
+.btn-icon-neutral {
+  color: var(--brown);
+}
+.btn-icon-neutral:hover {
+  background: var(--cream_opaque);
+  border-radius: 50%;
+}
+
+/* Success icon button (add) */
+.btn-icon-success {
+  color: var(--green);
+}
+
+/* Danger icon buttons (edit, cart, remove) */
+.btn-icon-danger {
+  color: var(--dark_red);
+}
+
+/* Error icon button (remove) */
+.btn-icon-remove {
+  color: var(--error_red);
+  flex-shrink: 0;
+}
+
+.btn-icon-success:hover,
+.btn-icon-remove:hover,
+.btn-icon-danger:hover {
+  transform: translateY(-1px);
+}
+
+/* ==============================================
+   RESPONSIVE DESIGN
+   ============================================== */
+
+@media (max-width: 768px) {
+  .btn-action {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}

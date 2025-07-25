@@ -163,9 +163,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       event.preventDefault();
 
       const current = event.target;
-      const allTextareas = [
-        ...document.querySelectorAll(".instruction-textarea"),
-      ];
+      const allTextareas = [...document.querySelectorAll(".input--textarea")];
       const currentIndex = allTextareas.indexOf(current);
       const nextTextarea = allTextareas[currentIndex + 1];
 
@@ -174,9 +172,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       } else {
         addInstruction();
         setTimeout(() => {
-          const newTextareas = document.querySelectorAll(
-            ".instruction-textarea"
-          );
+          const newTextareas = document.querySelectorAll(".input--textarea");
           newTextareas[newTextareas.length - 1].focus();
         }, 10);
       }

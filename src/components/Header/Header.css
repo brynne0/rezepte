@@ -1,10 +1,8 @@
 .header {
   margin: 0;
-  padding-top: 0;
   position: sticky;
   top: 0;
   background-color: var(--cream);
-  gap: 0.25rem;
   z-index: var(--z-header);
 }
 
@@ -12,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 4rem;
+  height: 5rem;
   position: relative;
 }
 
@@ -41,8 +39,6 @@
 }
 
 .header h1 {
-  margin: 0;
-  padding: 0;
   font-size: 3rem;
   font-family: var(--heading-font-family);
   color: var(--brown);
@@ -58,7 +54,6 @@
   font-size: 1rem;
   font-family: var(--heading-font-family);
   color: var(--brown);
-  margin: 0;
   line-height: 1;
 }
 
@@ -95,7 +90,7 @@
 .search-bar-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 0.5rem;
+  margin: 0.25rem;
 }
 
 .header-nav {
@@ -104,30 +99,12 @@
   gap: 0.5rem;
 }
 
-.icon-btn {
-  padding: 0.5rem;
-  color: var(--brown);
-  background: none;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: color 0.2s;
-  size: 40;
-}
-
-.icon-btn:hover {
-  background: var(--cream_opaque);
-  border-radius: 50%;
-  display: flex;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-container {
     display: flex;
     flex-direction: column;
     height: auto;
-    padding: 0.25rem 0;
   }
 
   .header-logo,
@@ -158,9 +135,5 @@
   .login-wrapper {
     flex-direction: column-reverse;
     gap: 0.5rem;
-  }
-
-  .search-bar-wrapper {
-    margin-top: 0;
   }
 }

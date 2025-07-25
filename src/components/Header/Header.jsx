@@ -101,14 +101,14 @@ const Header = ({
             {loginMessage && <div>{loginMessage}</div>}
             {isLoggedIn && showLogOut && (
               <div>
-                <button className={"shadow-btn"} onClick={handleLogout}>
+                <button className={"btn btn-standard"} onClick={handleLogout}>
                   {t("logout")}
                 </button>
               </div>
             )}
             {showLogIn && (
               <button
-                className={"shadow-btn"}
+                className={"btn btn-standard"}
                 onClick={() => {
                   setShowLogIn(false);
                   setSearchTerm("");
@@ -175,7 +175,7 @@ const Header = ({
                       }, 0);
                     }
                   }}
-                  className="icon-btn"
+                  className="btn btn-icon btn-icon-neutral"
                 >
                   <Search size={28} />
                 </button>
@@ -184,14 +184,14 @@ const Header = ({
                 {isLoggedIn && !isGuest && (
                   <>
                     <button
-                      className="icon-btn"
+                      className="btn btn-icon btn-icon-neutral"
                       onClick={() => navigate("/add-recipe")}
                     >
                       <Plus size={28} />
                     </button>
                     {/* Grocery List */}
                     <button
-                      className="icon-btn"
+                      className="btn btn-icon btn-icon-neutral"
                       onClick={() => navigate("/grocery-list")}
                     >
                       <ShoppingBasket size={28} />
@@ -214,8 +214,8 @@ const Header = ({
                 navigate("/");
               }}
             >
-              <input id="search" type="text" />
-              <button className={"shadow-btn"} type="submit">
+              <input id="search" type="text" className="input input--cream" />
+              <button className={"btn btn-standard"} type="submit">
                 {t("search")}
               </button>
             </form>

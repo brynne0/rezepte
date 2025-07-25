@@ -43,10 +43,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             {t("recipe_delete_confirmation")}
           </p>
           <div className="delete-modal-actions">
-            <button onClick={onClose} className="cancel-btn">
+            <button onClick={onClose} className="btn btn-action btn-secondary">
               {t("cancel")}
             </button>
-            <button onClick={onConfirm} className="delete-btn">
+            <button onClick={onConfirm} className="btn btn-action btn-danger">
               {t("delete")}
             </button>
           </div>
@@ -56,8 +56,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   };
 
   return (
-    <div className="recipe-form-container">
-      <header className="page-header-wrapper">
+    <div className="card card-form">
+      <header className="page-header flex-center">
         <ArrowBigLeft
           className="back-arrow"
           size={30}
@@ -72,23 +72,23 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
       <div>
         {/* Full Recipe */}
         <button
-          className={`subheading ${!IsLinkRecipe ? "selected" : ""}`}
+          className={`subheading-wrapper ${!IsLinkRecipe ? "selected" : ""}`}
           type="button"
           onClick={() => {
             handleInputChange("link_only", false);
           }}
         >
-          {t("full_recipe")}
+          <h2 className="forta">{t("full_recipe")}</h2>
         </button>
         {/* Link Only Recipe */}
         <button
-          className={`subheading ${IsLinkRecipe ? "selected" : ""}`}
+          className={`subheading-wrapper ${IsLinkRecipe ? "selected" : ""}`}
           type="button"
           onClick={() => {
             handleInputChange("link_only", true);
           }}
         >
-          {t("link_only")}
+          <h2 className="forta">{t("link_only")}</h2>
         </button>
       </div>
 
@@ -97,8 +97,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Recipe Title */}
         <div className="form-group">
-          <label htmlFor="title" className="form-header">
-            {t("recipe_title")}
+          <label htmlFor="title" className="form-header-wrapper">
+            <h3>{t("recipe_title")}</h3>
           </label>
           {validationErrors.title && (
             <span className="field-error">{validationErrors.title}</span>
@@ -114,15 +114,18 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 !!validationErrors.title
               )
             }
-            className={`form-input ${validationErrors.title ? "error" : ""}`}
+            className={`input--full-width input--shadow input${
+              validationErrors.title ? "input--error" : ""
+            }`}
           />
         </div>
 
         {/* Category */}
         <div className="form-group">
-          <label htmlFor="category" className="form-header">
-            {t("category")}
+          <label htmlFor="category" className="form-header-wrapper">
+            <h3>{t("category")}</h3>
           </label>
+
           {validationErrors.category && (
             <span className="field-error">{validationErrors.category}</span>
           )}
@@ -136,7 +139,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 !!validationErrors.category
               )
             }
-            className={`form-input ${validationErrors.category ? "error" : ""}`}
+            className={`input--full-width input--shadow input--select input ${
+              validationErrors.category ? "input--error" : ""
+            }`}
             required
           >
             <option value="" disabled>
@@ -156,8 +161,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <>
             {/* Servings */}
             <div className="form-group">
-              <label htmlFor="servings" className="form-header">
-                {t("servings")}
+              <label htmlFor="servings" className="form-header-wrapper">
+                <h3> {t("servings")}</h3>
               </label>
               <input
                 id="servings"
@@ -165,7 +170,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 min="1"
                 value={formData.servings || ""}
                 onChange={(e) => handleInputChange("servings", e.target.value)}
-                className="form-input"
+                className="input input--full-width input--shadow "
                 onWheel={(e) => {
                   e.target.blur();
                 }}
@@ -174,7 +179,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
             {/* Ingredients */}
             <div className="form-group">
-              <label className="form-header">{t("ingredients")}</label>
+              <label className="form-header-wrapper">
+                <h3>{t("ingredients")}</h3>
+              </label>
 
               {validationErrors.ingredients && (
                 <span className="field-error">
@@ -198,7 +205,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                           validationErrors.ingredients ? "ingredients" : null
                         );
                       }}
-                      className="form-input"
+                      className="input input--full-width input--shadow "
                       placeholder={t("ingredient_name")}
                     />
                     {/* Ingredient Quantity */}
@@ -216,7 +223,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                             e.target.value
                           )
                         }
-                        className="form-input"
+                        className="input input--full-width input--shadow "
                         placeholder={t("quantity")}
                         onWheel={(e) => {
                           e.target.blur();
@@ -233,7 +240,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                             e.target.value
                           )
                         }
-                        className={"form-input"}
+                        className={
+                          "input input--full-width input--select input--shadow "
+                        }
                       >
                         {units.map((unit) => (
                           <option key={unit.value} value={unit.value}>
@@ -254,14 +263,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                             e.target.value
                           )
                         }
-                        className="form-input"
+                        className="input input--full-width input--shadow "
                         placeholder={t("notes")}
                       />
                       {formData.ingredients.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeIngredient(ingredient.tempId)}
-                          className="remove-btn"
+                          className="btn btn-icon btn-icon-remove"
                           aria-label="Remove ingredient"
                         >
                           <Trash2 size={16} />
@@ -271,11 +280,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   </div>
                 ))}
               </div>
-              <div className="add-btn-wrapper">
+              <div className="btn-icon-success-wrapper">
                 <button
                   type="button"
                   onClick={addIngredient}
-                  className="add-btn"
+                  className="btn btn-icon btn-icon-success"
                 >
                   <Plus size={16} />
                 </button>
@@ -284,7 +293,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
             {/* Instructions */}
             <div className="form-group">
-              <label className="form-header">{t("instructions")}</label>
+              <label className="form-header-wrapper">
+                <h3>{t("instructions")}</h3>
+              </label>
 
               <div className="instructions-list">
                 {formData.instructions.map((instruction, index) => (
@@ -296,23 +307,23 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                         handleInstructionChange(index, e.target.value)
                       }
                       onKeyDown={handleEnter}
-                      className="instruction-textarea"
+                      className="input input--full-width input--textarea input--shadow "
                     />
                     <button
                       type="button"
                       onClick={() => removeInstruction(index)}
-                      className="remove-btn"
+                      className="btn btn-icon btn-icon-remove"
                     >
                       <Trash2 size={16} />
                     </button>
                   </div>
                 ))}
               </div>
-              <div className="add-btn-wrapper">
+              <div className="btn-icon-success-wrapper">
                 <button
                   type="button"
                   onClick={addInstruction}
-                  className="add-btn"
+                  className="btn btn-icon btn-icon-success"
                 >
                   <Plus size={16} />
                 </button>
@@ -323,15 +334,15 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Source */}
         <div className="form-group">
-          <label htmlFor="source" className="form-header">
-            {t("source")}
+          <label htmlFor="source" className="form-header-wrapper">
+            <h3>{t("source")}</h3>
           </label>
           <input
             id="source"
             type="text"
             value={formData.source || ""}
             onChange={(e) => handleInputChange("source", e.target.value)}
-            className="form-input"
+            className="input input--full-width input--shadow "
             placeholder={
               IsLinkRecipe ? t("source_link") : t("source_link_or_note")
             }
@@ -340,15 +351,15 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Extra Notes */}
         <div className="form-group">
-          <label htmlFor="extra-notes" className="form-header">
-            {t("notes")}
+          <label htmlFor="extra-notes" className="form-header-wrapper">
+            <h3> {t("notes")}</h3>
           </label>
           <input
             id="extra-notes"
             type="text"
             value={formData.notes || ""}
             onChange={(e) => handleInputChange("notes", e.target.value)}
-            className="form-input"
+            className="input input--full-width input--shadow "
             placeholder={t("notes")}
           />
         </div>
@@ -360,18 +371,26 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               <button
                 type="button"
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="delete-btn"
+                className="btn btn-action btn-danger"
               >
                 {t("delete_recipe")}
               </button>
             </>
           )}
           {/* Cancel Button */}
-          <button type="button" onClick={handleCancel} className="cancel-btn">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="btn btn-action btn-secondary"
+          >
             {t("cancel")}
           </button>
           {/* Submit button */}
-          <button type="submit" disabled={loading} className="primary-btn">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-action btn-primary"
+          >
             {loading
               ? isEditMode
                 ? "Updating..."

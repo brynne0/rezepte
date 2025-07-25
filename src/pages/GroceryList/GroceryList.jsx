@@ -71,8 +71,8 @@ const GroceryList = () => {
   const currentList = isEditing ? editedList : groceryList;
 
   return (
-    <div className="grocery-list-wrapper">
-      <header className="grocery-page-header-wrapper">
+    <div className="card card-padded">
+      <header className="page-header flex-between">
         <ArrowBigLeft
           className="back-arrow"
           size={30}
@@ -89,7 +89,10 @@ const GroceryList = () => {
       <div className="list-items">
         {currentList.length === 0 && !isEditing ? (
           <div>
-            <button className="add-btn" onClick={addNewItem}>
+            <button
+              className="btn btn-icon btn-icon-success"
+              onClick={addNewItem}
+            >
               <Plus size={20} />
             </button>
           </div>
@@ -105,7 +108,7 @@ const GroceryList = () => {
                   id={`item-name-${itemId}`}
                   type="text"
                   value={item.name || ""}
-                  className="item-input"
+                  className="input input--borderless input--full-width"
                   readOnly={!isEditing}
                   placeholder={t("item_name")}
                   onChange={(e) =>
@@ -118,7 +121,7 @@ const GroceryList = () => {
                   min="0"
                   step="0.1"
                   value={item.quantity || ""}
-                  className="item-input"
+                  className="input input--borderless input--full-width"
                   readOnly={!isEditing}
                   placeholder={t("quantity")}
                   onChange={(e) =>
@@ -132,7 +135,7 @@ const GroceryList = () => {
                 <select
                   id={`item-unit-${itemId}`}
                   value={item.unit || ""}
-                  className="item-input"
+                  className="input input--borderless input--full-width"
                   disabled={!isEditing}
                   onChange={(e) =>
                     handleInputChange(index, "unit", e.target.value)
@@ -149,7 +152,7 @@ const GroceryList = () => {
 
                 {isEditing ? (
                   <button
-                    className="remove-btn"
+                    className="btn btn-icon btn-icon-remove"
                     onClick={() => removeItemFromEdit(index)}
                     title={t("remove_item")}
                     aria-label={t("remove_item")}
@@ -167,18 +170,25 @@ const GroceryList = () => {
           })
         )}
         {isEditing && (
-          <button className="add-btn" onClick={addNewItem}>
+          <button
+            className="btn btn-icon btn-icon-success"
+            onClick={addNewItem}
+          >
             <Plus size={20} />
           </button>
         )}
       </div>
 
       {isEditing && (
+        // TODO
         <div className="btn-wrapper">
-          <button className="primary-btn cancel-btn" onClick={cancelEditing}>
+          <button
+            className="btn btn-action btn-secondary"
+            onClick={cancelEditing}
+          >
             {t("cancel")}
           </button>
-          <button className="primary-btn save-btn" onClick={saveChanges}>
+          <button className="btn btn-action btn-primary" onClick={saveChanges}>
             {t("save")}
           </button>
         </div>
