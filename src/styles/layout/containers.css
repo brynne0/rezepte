@@ -1,12 +1,131 @@
+/* ===================================
+   BASE CONTAINERS
+   =================================== */
+
+/* Main content containers */
+.container {
+  margin: 0 auto;
+}
+
+.container-sm {
+  max-width: 25rem; /* 400px - for auth forms */
+}
+
+.container-md {
+  max-width: 50rem; /* 800px - for recipe forms */
+}
+
+.container-lg {
+  max-width: 75rem; /* 1200px - for wide layouts */
+}
+
+/* ===================================
+   CARD CONTAINERS 
+   =================================== */
+
+.card {
+  background: var(--cream_opaque);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.25rem 0.375rem var(--shadow_black);
+  overflow: hidden;
+  margin: 0.5rem auto 0.5rem;
+}
+
+.card-padded {
+  padding: 1.25rem;
+  padding-top: 0;
+  max-width: 50rem;
+}
+
+.card-form {
+  max-width: 50rem;
+  width: -webkit-fill-available;
+}
+
+/* ===================================
+   LAYOUT CONTAINERS
+   =================================== */
+
+/* Flex layouts */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Page layouts */
+.page-layout {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* ===================================
+   WRAPPER UTILITIES
+   =================================== */
+
+.btn-wrapper {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+}
+
+.btn-icon-success-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.input-wrapper-sm {
+  max-width: 15rem;
+}
+
+/* ===================================
+   SPECIFIC CONTAINERS (when needed)
+   =================================== */
+
 .recipe-container {
   text-align: left;
   margin: 0.5rem;
 }
 
 .recipe-heading-container {
-  /* TODO - remove the colour from the container and move to recipe title  */
   color: var(--dark_red);
-
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -19,85 +138,30 @@
   display: inline-block;
 }
 
-.recipe-form-container {
-  max-width: 50rem;
-  margin: 0 auto;
-  margin-top: 1rem;
-  background: var(--cream_opaque);
-  border-radius: 0.75rem;
-  box-shadow: 0 0.25rem 0.375rem var(--shadow_black);
-  overflow: hidden;
-}
-
-.auth-page-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-
-.page-header-wrapper {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
-.btn-icon-success-wrapper {
-  display: flex;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.grocery-list-wrapper {
-  flex-direction: column;
-  display: flex;
-  justify-content: center;
-  max-width: 50rem;
-  margin: 0 auto;
-  margin-top: 1rem;
-  background: var(--cream_opaque);
-  border-radius: 0.75rem;
-  box-shadow: 0 0.25rem 0.375rem var(--shadow_black);
-  overflow: hidden;
-  padding: 1.25rem;
-}
-
-.grocery-page-header-wrapper {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
+.grocery-page-header {
   justify-content: space-between;
-  margin-bottom: 1rem;
-}
-.btn-wrapper {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  padding-top: 1rem;
-}
-.auth-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  width: 100%;
-  max-width: 15rem;
 }
 
-/* Responsive Design */
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
 @media (max-width: 768px) {
-  .add-recipe-container {
-    border-radius: 0.5rem;
-  }
-
-  .page-header-wrapper {
+  .page-header {
     padding: 0;
   }
-  .btn-icon-success-wrapper {
+
+  .btn-icon-wrapper {
     padding: 0.5rem;
   }
-  .grocery-page-header-wrapper {
+
+  .grocery-page-header {
     padding: 0;
+  }
+
+  /* Stack flex containers on mobile */
+  .flex-between {
+    flex-direction: column;
+    gap: 1rem;
   }
 }

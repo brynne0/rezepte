@@ -1,10 +1,8 @@
 .header {
   margin: 0;
-  padding-top: 0.5rem;
   position: sticky;
   top: 0;
   background-color: var(--cream);
-  gap: 0.25rem;
   z-index: var(--z-header);
 }
 
@@ -12,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 4rem;
+  height: 5rem;
   position: relative;
 }
 
@@ -95,7 +93,7 @@
 .search-bar-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 0.5rem;
+  margin: 0.25rem;
 }
 
 .header-nav {
@@ -110,7 +108,6 @@
     display: flex;
     flex-direction: column;
     height: auto;
-    padding: 0.25rem 0;
   }
 
   .header-logo,
@@ -141,9 +138,5 @@
   .login-wrapper {
     flex-direction: column-reverse;
     gap: 0.5rem;
-  }
-
-  .search-bar-wrapper {
-    margin-top: 0;
   }
 }

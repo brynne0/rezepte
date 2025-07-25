@@ -49,7 +49,7 @@ const ChangePasswordPage = () => {
     newPassword.trim() && newPasswordRepeat.trim();
 
   return (
-    <div className="auth-page-container">
+    <div className="page-layout">
       {showSuccessMessage ? (
         <div>
           <h3>{t("password_changed")}</h3>
@@ -65,7 +65,7 @@ const ChangePasswordPage = () => {
       ) : (
         <form onSubmit={handleChangePassword} className="auth-form">
           <h3 className="forgot-password-header">{t("set_new_password")}</h3>
-          <div className="auth-input-wrapper">
+          <div className="input-wrapper input-wrapper-sm">
             <input
               id="new-password"
               type="password"

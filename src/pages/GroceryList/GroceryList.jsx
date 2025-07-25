@@ -71,8 +71,8 @@ const GroceryList = () => {
   const currentList = isEditing ? editedList : groceryList;
 
   return (
-    <div className="grocery-list-wrapper">
-      <header className="grocery-page-header-wrapper">
+    <div className="card card-padded">
+      <header className="page-header grocery-page-header">
         <ArrowBigLeft
           className="back-arrow"
           size={30}

@@ -91,7 +91,7 @@ const AuthPage = ({ setLoginMessage }) => {
   };
 
   return (
-    <div className="auth-page-container">
+    <div className="page-layout">
       {/* Headers to toggle between modes */}
       <div>
         <button
@@ -114,7 +114,7 @@ const AuthPage = ({ setLoginMessage }) => {
         onSubmit={isSignUpMode ? handleSignUp : handleLogin}
         className="auth-form"
       >
-        <div className="auth-input-wrapper">
+        <div className="input-wrapper input-wrapper-sm">
           {isSignUpMode && (
             <>
               {/* Email */}

@@ -48,7 +48,7 @@ h3 {
   font-family: "Forta", sans-serif;
 }
 
-.subheading :hover {
+.subheading:hover {
   color: var(--red);
 }
 
@@ -90,10 +90,6 @@ h3 {
   color: var(--dark_red);
 }
 
-.grocery-page-header-wrapper h1 {
-  margin: 0;
-}
-
 .recipe-card-title {
   margin: 0;
   padding: 0.2rem;
@@ -117,10 +113,12 @@ h3 {
 }
 
 @media (max-width: 768px) {
-  .grocery-page-header-wrapper h1 {
-    font-size: 1.25rem;
-  }
-  .page-header-wrapper h1 {
+  .page-header h1 {
     font-size: 1.25rem;
   }
 }
+
+/* TODO - ix below, only temporary for the grocery list heading */
+/* h1 {
+  margin: 0;
+} */

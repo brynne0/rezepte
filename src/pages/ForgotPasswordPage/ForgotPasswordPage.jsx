@@ -40,13 +40,13 @@ const ForgotPasswordPage = () => {
   const isForgotPasswordFormValid = email.trim();
 
   return (
-    <div className="auth-page-container">
+    <div className="page-layout">
       {showSuccessMessage ? (
         <h3>{t("password_reset_sent")}</h3>
       ) : (
         <form onSubmit={handleForgotPassword} className="auth-form">
           <h3 className="forgot-password-header">{t("reset_password")}</h3>
-          <div className="auth-input-wrapper">
+          <div className="input-wrapper input-wrapper-sm">
             <input
               className="input-box"
               id="reset-email"

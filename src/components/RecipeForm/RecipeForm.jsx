@@ -56,8 +56,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   };
 
   return (
-    <div className="recipe-form-container">
-      <header className="page-header-wrapper">
+    <div className="card card-form">
+      <header className="page-header">
         <ArrowBigLeft
           className="back-arrow"
           size={30}
@@ -375,7 +375,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             {t("cancel")}
           </button>
           {/* Submit button */}
-          <button type="submit" disabled={loading} className="btn btn-action btn-primary">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-action btn-primary"
+          >
             {loading
               ? isEditMode
                 ? "Updating..."
