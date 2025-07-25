@@ -95,18 +95,18 @@ const AuthPage = ({ setLoginMessage }) => {
       {/* Headers to toggle between modes */}
       <div>
         <button
-          className={`subheading ${!isSignUpMode ? "selected" : ""}`}
+          className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToLogin}
         >
-          {t("login")}
+          <h2 className="forta"> {t("login")}</h2>
         </button>
         <button
-          className={`subheading ${isSignUpMode ? "selected" : ""}`}
+          className={`subheading-wrapper ${isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToSignUp}
         >
-          {t("sign_up")}
+          <h2 className="forta"> {t("sign_up")}</h2>
         </button>
       </div>
 

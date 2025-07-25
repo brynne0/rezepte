@@ -72,7 +72,7 @@ const GroceryList = () => {
 
   return (
     <div className="card card-padded">
-      <header className="page-header grocery-page-header">
+      <header className="page-header flex-between">
         <ArrowBigLeft
           className="back-arrow"
           size={30}

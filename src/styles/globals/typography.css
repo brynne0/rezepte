@@ -1,25 +1,3 @@
-/* BELOW IS AN EXAMPLE */
-/* h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 600;
-  line-height: 1.2;
-  margin-bottom: 0.5rem;
-}
-
-h1 {
-  font-size: 2.5rem;
-}
-h2 {
-  font-size: 2rem;
-}
-h3 {
-  font-size: 1.5rem;
-} */
-
 :root {
   font-family: "Gabarito", sans-serif;
   --heading-font-family: "Forta", sans-serif;
@@ -37,88 +15,33 @@ h3 {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.subheading {
-  padding: 0.5rem 1rem;
-  color: var(--brown);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s;
-  font-size: 1rem;
-  font-family: "Forta", sans-serif;
-}
-
-.subheading:hover {
-  color: var(--red);
-}
-
-.subheading.selected {
-  color: var(--red);
-}
-
-/* Headers */
-.page-header-wrapper h1 {
-  padding: 1rem;
+h1,
+h2,
+h3,
+h4 {
   margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
 }
 
-.form-header {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
+h1 {
+  font-size: 2rem;
+}
+h2 {
+  font-size: 1.2rem;
 }
 
-.recipe-subheading {
-  margin-top: 1rem;
-  margin-bottom: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.forgot-password-header {
-  margin: 0rem;
+h2.forta {
+  font-family: "Forta", sans-serif;
 }
 
 .source-link {
   color: var(--dark_red);
 }
 
-.recipe-card-title {
-  margin: 0;
-  padding: 0.2rem;
-  font-size: 1rem;
-  text-align: center;
-  flex: 1;
-}
-
-.recipe-card-title:hover {
-  color: var(--red);
-}
-
-.error-message {
-  background: var(--pink);
-  color: var(--error_red);
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-  border: 0.0625rem solid var(--pink);
-  font-size: 0.8rem;
-}
-
 @media (max-width: 768px) {
-  .page-header h1 {
-    font-size: 1.25rem;
+  h1 {
+    font-size: 1.5rem;
+  }
+  h2.forta {
+    font-size: 1rem;
   }
 }
-
-/* TODO - ix below, only temporary for the grocery list heading */
-/* h1 {
-  margin: 0;
-} */

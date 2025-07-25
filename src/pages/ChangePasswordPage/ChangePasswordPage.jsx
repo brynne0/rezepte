@@ -64,7 +64,7 @@ const ChangePasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleChangePassword} className="auth-form">
-          <h3 className="forgot-password-header">{t("set_new_password")}</h3>
+          <h2 className="forta">{t("set_new_password")}</h2>
           <div className="input-wrapper input-wrapper-sm">
             <input
               id="new-password"

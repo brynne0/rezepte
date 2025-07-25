@@ -57,7 +57,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
   return (
     <div className="card card-form">
-      <header className="page-header">
+      <header className="page-header flex-center">
         <ArrowBigLeft
           className="back-arrow"
           size={30}
@@ -72,23 +72,23 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
       <div>
         {/* Full Recipe */}
         <button
-          className={`subheading ${!IsLinkRecipe ? "selected" : ""}`}
+          className={`subheading-wrapper ${!IsLinkRecipe ? "selected" : ""}`}
           type="button"
           onClick={() => {
             handleInputChange("link_only", false);
           }}
         >
-          {t("full_recipe")}
+          <h2 className="forta">{t("full_recipe")}</h2>
         </button>
         {/* Link Only Recipe */}
         <button
-          className={`subheading ${IsLinkRecipe ? "selected" : ""}`}
+          className={`subheading-wrapper ${IsLinkRecipe ? "selected" : ""}`}
           type="button"
           onClick={() => {
             handleInputChange("link_only", true);
           }}
         >
-          {t("link_only")}
+          <h2 className="forta">{t("link_only")}</h2>
         </button>
       </div>
 
@@ -97,8 +97,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Recipe Title */}
         <div className="form-group">
-          <label htmlFor="title" className="form-header">
-            {t("recipe_title")}
+          <label htmlFor="title" className="form-header-wrapper">
+            <h3>{t("recipe_title")}</h3>
           </label>
           {validationErrors.title && (
             <span className="field-error">{validationErrors.title}</span>
@@ -120,9 +120,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Category */}
         <div className="form-group">
-          <label htmlFor="category" className="form-header">
-            {t("category")}
+          <label htmlFor="category" className="form-header-wrapper">
+            <h3>{t("category")}</h3>
           </label>
+
           {validationErrors.category && (
             <span className="field-error">{validationErrors.category}</span>
           )}
@@ -156,8 +157,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <>
             {/* Servings */}
             <div className="form-group">
-              <label htmlFor="servings" className="form-header">
-                {t("servings")}
+              <label htmlFor="servings" className="form-header-wrapper">
+                <h3> {t("servings")}</h3>
               </label>
               <input
                 id="servings"
@@ -174,7 +175,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
             {/* Ingredients */}
             <div className="form-group">
-              <label className="form-header">{t("ingredients")}</label>
+              <label className="form-header-wrapper">
+                <h3>{t("ingredients")}</h3>
+              </label>
 
               {validationErrors.ingredients && (
                 <span className="field-error">
@@ -284,7 +287,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
             {/* Instructions */}
             <div className="form-group">
-              <label className="form-header">{t("instructions")}</label>
+              <label className="form-header-wrapper">
+                <h3>{t("instructions")}</h3>
+              </label>
 
               <div className="instructions-list">
                 {formData.instructions.map((instruction, index) => (
@@ -323,8 +328,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Source */}
         <div className="form-group">
-          <label htmlFor="source" className="form-header">
-            {t("source")}
+          <label htmlFor="source" className="form-header-wrapper">
+            <h3>{t("source")}</h3>
           </label>
           <input
             id="source"
@@ -340,8 +345,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Extra Notes */}
         <div className="form-group">
-          <label htmlFor="extra-notes" className="form-header">
-            {t("notes")}
+          <label htmlFor="extra-notes" className="form-header-wrapper">
+            <h3> {t("notes")}</h3>
           </label>
           <input
             id="extra-notes"

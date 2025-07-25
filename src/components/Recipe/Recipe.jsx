@@ -46,8 +46,8 @@ const Recipe = () => {
 
       {/* Servings */}
       {recipe.servings && (
-        <div className="recipe-subheading">
-          <h3>{t("servings")}:</h3>
+        <div className="recipe-subheading flex-row">
+          <h2>{t("servings")}:</h2>
           {recipe.servings}
         </div>
       )}
@@ -55,8 +55,8 @@ const Recipe = () => {
       {/* Ingredients */}
       {recipe.ingredients && recipe.ingredients.length > 0 && (
         <>
-          <div className="recipe-subheading">
-            <h3>{t("ingredients")}:</h3>
+          <div className="recipe-subheading flex-row">
+            <h2>{t("ingredients")}:</h2>
             {/* Grocery Cart */}
             {isLoggedIn && (
               <div className="cart-container">
@@ -102,8 +102,8 @@ const Recipe = () => {
       {/* Instructions */}
       {recipe.instructions && recipe.instructions.length > 0 && (
         <>
-          <div className="recipe-subheading">
-            <h3>{t("instructions")}:</h3>
+          <div className="recipe-subheading flex-row">
+            <h2>{t("instructions")}:</h2>
           </div>
           <ol>
             {recipe.instructions.map((instruction, i) => (
@@ -115,8 +115,8 @@ const Recipe = () => {
 
       {/* Source */}
       {recipe.source && (
-        <div className="recipe-subheading">
-          <h3>{t("source")}:</h3>
+        <div className="recipe-subheading flex-row">
+          <h2>{t("source")}:</h2>
 
           {/^https?:\/\/[^\s]+/.test(recipe.source) ? (
             <a
@@ -135,8 +135,8 @@ const Recipe = () => {
 
       {/* Extra Notes */}
       {recipe.notes && recipe.notes.length > 0 && (
-        <div className="recipe-subheading">
-          <h3>{t("notes")}:</h3>
+        <div className="recipe-subheading flex-row">
+          <h2>{t("notes")}:</h2>
           {recipe.notes}
         </div>
       )}

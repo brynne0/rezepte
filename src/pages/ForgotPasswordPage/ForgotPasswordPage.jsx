@@ -45,7 +45,7 @@ const ForgotPasswordPage = () => {
         <h3>{t("password_reset_sent")}</h3>
       ) : (
         <form onSubmit={handleForgotPassword} className="auth-form">
-          <h3 className="forgot-password-header">{t("reset_password")}</h3>
+          <h2 className="forta">{t("reset_password")}</h2>
           <div className="input-wrapper input-wrapper-sm">
             <input
               className="input-box"
