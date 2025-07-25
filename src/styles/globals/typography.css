@@ -31,6 +31,7 @@ h2 {
 
 h2.forta {
   font-family: "Forta", sans-serif;
+  font-size: 1rem;
 }
 
 .link {
@@ -49,8 +50,5 @@ h2.forta {
 @media (max-width: 768px) {
   h1 {
     font-size: 1.5rem;
-  }
-  h2.forta {
-    font-size: 1rem;
   }
 }

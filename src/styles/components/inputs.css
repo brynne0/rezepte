@@ -24,7 +24,11 @@
 .input--cream {
   background: var(--cream_opaque);
   border-color: var(--brown);
-  padding: 0.5rem; /* Less padding for this variant */
+  padding: 0.5rem;
+}
+
+.input--shadow {
+  box-shadow: 0 0.125rem 0.2rem var(--shadow_black);
 }
 
 .input--full-width {
