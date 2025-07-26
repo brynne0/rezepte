@@ -28,7 +28,7 @@
 }
 
 .input--shadow {
-  box-shadow: 0 0.125rem 0.2rem var(--shadow_black);
+  box-shadow: 0 0.0625rem 0.1rem var(--shadow_black);
 }
 
 .input--full-width {
@@ -62,6 +62,7 @@
 /* Error state */
 .input--error {
   border-color: var(--error_red);
+  border-width: 0.1rem;
 }
 
 .input--error:focus {
