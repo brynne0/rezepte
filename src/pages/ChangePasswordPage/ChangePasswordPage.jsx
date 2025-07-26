@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { changePassword } from "../../services/auth";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,29 @@ const ChangePasswordPage = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // DEBUGGING STARTS HERE
+  useEffect(() => {
+    console.log("=== CHANGE PASSWORD PAGE DEBUG ===");
+    console.log("Current URL:", window.location.href);
+    console.log("URL Hash:", window.location.hash);
+    console.log("URL Search:", window.location.search);
+
+    // Check if user came from password reset
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const searchParams = new URLSearchParams(window.location.search);
+
+    console.log("Hash params:", Object.fromEntries(hashParams));
+    console.log("Search params:", Object.fromEntries(searchParams));
+
+    const accessToken =
+      hashParams.get("access_token") || searchParams.get("access_token");
+    const type = hashParams.get("type") || searchParams.get("type");
+
+    console.log("Access token:", accessToken);
+    console.log("Type:", type);
+  }, []);
+  // DEBGUGGING ENDS HERE
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
