@@ -23,7 +23,7 @@
   "forgot_password": "Forgot password?",
   "reset_password": "Reset Password",
   "send_reset_email": "Send Reset Email",
-  "email_required": "Email is required",
+
   "password_reset_sent": "Password reset email sent! Please check your inbox.",
   "password_reset_failed": "Failed to send password reset email. Please try again.",
 
@@ -32,9 +32,14 @@
   "new_password_repeat": "Repeat new password",
   "confirm": "Confirm",
   "passwords_do_not_match": "Passwords do not match",
-  "password_required": "Password is required",
+
   "password_changed": "Password has been changed!",
   "password_change_failed": "Failed to change password. Please try again.",
+
+  "username_required": "Username is required",
+  "email_required": "Email is required",
+  "email_invalid": "Email is invalid",
+  "password_required": "Password is required",
 
   "search": "Search",
   "recipe_not_found": "Recipe not found.",

@@ -58,7 +58,7 @@ const ForgotPasswordPage = () => {
             />
           </div>
 
-          {errorMessage && <div>{errorMessage}</div>}
+          {errorMessage && <span>{errorMessage}</span>}
           <button
             className={"btn btn-standard"}
             type="submit"

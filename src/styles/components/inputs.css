@@ -62,6 +62,7 @@
 /* Error state */
 .input--error {
   border-color: var(--error_red);
+  border-width: 0.1rem;
 }
 
 .input--error:focus {

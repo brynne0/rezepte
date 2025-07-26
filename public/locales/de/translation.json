@@ -23,7 +23,6 @@
   "forgot_password": "Passwort vergessen?",
   "reset_password": "Passwort Zürucksetzen",
   "send_reset_email": "E-Mail zum Zurücksetzen senden",
-  "email_required": "E-Mail ist erforderlich",
   "password_reset_sent": "E-Mail zum Zurücksetzen des Passworts wurde gesendet! Bitte überprüfen Sie Ihren Posteingang.",
   "password_reset_failed": "E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
 
@@ -32,9 +31,13 @@
   "new_password_repeat": "Neues Passwort wiederholen",
   "confirm": "Bestätigen",
   "passwords_do_not_match": "Passwörter stimmen nicht überein",
-  "password_required": "Passwort ist erforderlich",
   "password_changed": "Passwort wurde geändert!",
   "password_change_failed": "Passwort konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
+
+  "username_required": "Benutzername ist erforderlich",
+  "email_required": "E-Mail ist erforderlich",
+  "email_invalid": "E-Mail ist ungültig",
+  "password_required": "Passwort ist erforderlich",
 
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",

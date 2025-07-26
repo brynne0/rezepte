@@ -125,6 +125,7 @@
 
   .header-nav {
     order: 3;
+    padding-top: 0.5rem;
   }
 
   .login-wrapper {
