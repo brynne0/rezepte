@@ -1,4 +1,5 @@
 import { signUp, signIn } from "../../services/auth";
+import { validateAuthForm } from "../../services/validation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -22,19 +23,9 @@ const AuthPage = ({ setLoginMessage }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const validateAuthForm = () => {
-    const errors = {};
-
-    if (!username.trim()) errors.username = t("username_required");
-
-    if (!password.trim()) errors.password = t("password_required");
-
-    if (isSignUpMode) {
-      if (!email.trim()) errors.email = t("email_required");
-      else if (!/\S+@\S+\.\S+/.test(email)) {
-        errors.email = t("email_invalid");
-      }
-    }
+  const handleValidation = () => {
+    const formData = { email, firstName, username, password };
+    const errors = validateAuthForm(formData, isSignUpMode, t);
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -43,7 +34,7 @@ const AuthPage = ({ setLoginMessage }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!validateAuthForm()) {
+    if (!handleValidation()) {
       return;
     }
 
@@ -71,7 +62,7 @@ const AuthPage = ({ setLoginMessage }) => {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    if (!validateAuthForm()) {
+    if (!handleValidation()) {
       return;
     }
 
@@ -142,7 +133,7 @@ const AuthPage = ({ setLoginMessage }) => {
         </button>
       </header>
 
-      {errorMessage && <span>{errorMessage}</span>}
+      {errorMessage && <span className="error-message">{errorMessage}</span>}
 
       <form
         onSubmit={isSignUpMode ? handleSignUp : handleLogin}
@@ -167,7 +158,9 @@ const AuthPage = ({ setLoginMessage }) => {
                 }`}
               />
               {validationErrors.email && (
-                <span className="error-message">{validationErrors.email}</span>
+                <span className="error-message-small">
+                  {validationErrors.email}
+                </span>
               )}
               {/* First Name */}
               <input
@@ -184,7 +177,7 @@ const AuthPage = ({ setLoginMessage }) => {
                 }`}
               />
               {validationErrors.firstName && (
-                <span className="error-message">
+                <span className="error-message-small">
                   {validationErrors.firstName}
                 </span>
               )}
@@ -206,7 +199,9 @@ const AuthPage = ({ setLoginMessage }) => {
             }`}
           />
           {validationErrors.username && (
-            <span className="error-message">{validationErrors.username}</span>
+            <span className="error-message-small">
+              {validationErrors.username}
+            </span>
           )}
           {/* Password */}
           <input
@@ -224,7 +219,9 @@ const AuthPage = ({ setLoginMessage }) => {
             }`}
           />
           {validationErrors.password && (
-            <span className="error-message">{validationErrors.password}</span>
+            <span className="error-message-small">
+              {validationErrors.password}
+            </span>
           )}
         </div>
 

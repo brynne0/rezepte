@@ -36,10 +36,12 @@
   "password_changed": "Password has been changed!",
   "password_change_failed": "Failed to change password. Please try again.",
 
+  "firstname_required": "First name is required",
   "username_required": "Username is required",
   "email_required": "Email is required",
   "email_invalid": "Email is invalid",
   "password_required": "Password is required",
+  "password_repeat_required": "Password repeat is required",
 
   "search": "Search",
   "recipe_not_found": "Recipe not found.",

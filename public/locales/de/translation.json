@@ -34,10 +34,12 @@
   "password_changed": "Passwort wurde geändert!",
   "password_change_failed": "Passwort konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
 
+  "firstname_required": "Vorname ist erforderlich",
   "username_required": "Benutzername ist erforderlich",
   "email_required": "E-Mail ist erforderlich",
   "email_invalid": "E-Mail ist ungültig",
   "password_required": "Passwort ist erforderlich",
+  " password_repeat_required": "Neues Passwort wiederholen ist erforderlich",
 
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",

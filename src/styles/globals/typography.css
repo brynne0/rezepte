@@ -56,9 +56,14 @@ h2.forta {
   color: var(--dark_red);
 }
 
-.error-message {
+.error-message-small {
   color: var(--error_red);
   font-size: 0.8rem;
+}
+
+.error-message {
+  color: var(--error_red);
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
