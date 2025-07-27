@@ -121,6 +121,16 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       ...prev,
       instructions: [...prev.instructions, ""],
     }));
+
+    // Focus on the new ingredient text box
+    setTimeout(() => {
+      const ingredientTextareas = document.querySelectorAll(
+        ".instruction-row .input--textarea"
+      );
+      if (ingredientTextareas.length > 0) {
+        ingredientTextareas[ingredientTextareas.length - 1].focus();
+      }
+    }, 10);
   };
 
   const removeInstruction = (index) => {
@@ -133,12 +143,14 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   };
 
   const addIngredient = () => {
+    const newTempId = Date.now() + Math.random();
+
     setFormData((prev) => ({
       ...prev,
       ingredients: [
         ...prev.ingredients,
         {
-          tempId: Date.now() + Math.random(),
+          tempId: newTempId,
           ingredient_id: "",
           name: "",
           quantity: "",
@@ -147,6 +159,16 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         },
       ],
     }));
+
+    // Focus on the new ingredient name input
+    setTimeout(() => {
+      const newIngredientNameInput = document.getElementById(
+        `ingredient-name-${newTempId}`
+      );
+      if (newIngredientNameInput) {
+        newIngredientNameInput.focus();
+      }
+    }, 10);
   };
 
   const removeIngredient = (tempId) => {
