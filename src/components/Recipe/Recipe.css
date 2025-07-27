@@ -30,8 +30,8 @@
 
 .cart-counter {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -2px;
+  right: -2px;
   color: var(--dark_red);
   border-radius: 50%;
   width: 20px;
