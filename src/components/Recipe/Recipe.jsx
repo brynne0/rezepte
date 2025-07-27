@@ -92,6 +92,7 @@ const Recipe = () => {
                   {ingredient.unit && `${ingredient.unit} `}
                   {/* </strong> */}
                   {ingredient.name}
+                  {ingredient.notes}
                 </label>
               </li>
             ))}
