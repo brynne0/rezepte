@@ -60,6 +60,7 @@
     { "value": "cup", "label": "cup" },
     { "value": "cups", "label": "cups" },
     { "value": "ml", "label": "ml" },
+    { "value": "l", "label": "l" },
     { "value": "g", "label": "g" },
     { "value": "kg", "label": "kg" },
     { "value": "can", "label": "can" },

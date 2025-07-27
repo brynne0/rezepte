@@ -22,7 +22,7 @@ export const useRecipe = (id) => {
         const { data, error: supabaseError } = await supabase
           .from("recipes")
           .select(
-            "*, recipe_ingredients(quantity, unit, ingredients(id, name))"
+            "*, recipe_ingredients(quantity, unit, ingredients(id, name), notes)"
           )
           .eq("id", id)
           .single();
@@ -40,6 +40,7 @@ export const useRecipe = (id) => {
               name: item.ingredients.name,
               quantity: item.quantity,
               unit: item.unit,
+              notes: item.notes,
             })) || [],
         };
 

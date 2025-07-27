@@ -38,6 +38,11 @@ h2 {
   font-size: 1.2rem;
 }
 
+h1.forta {
+  font-family: var(--font-forta);
+  color: var(--dark_red);
+}
+
 h2.forta {
   font-family: var(--font-forta);
   font-size: 1rem;

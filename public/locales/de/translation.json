@@ -58,6 +58,7 @@
     { "value": "cup", "label": "Tasse" },
     { "value": "cups", "label": "Tassen" },
     { "value": "ml", "label": "ml" },
+    { "value": "l", "label": "l" },
     { "value": "g", "label": "g" },
     { "value": "kg", "label": "kg" },
     { "value": "can", "label": "Dose" },
