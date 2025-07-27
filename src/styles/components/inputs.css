@@ -59,6 +59,11 @@
   cursor: pointer;
 }
 
+.input--password {
+  width: 100%;
+  padding-right: 2.5rem; /* Make room for the eye icon */
+}
+
 /* Error state */
 .input--error {
   border-color: var(--error_red);

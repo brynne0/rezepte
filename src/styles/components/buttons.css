@@ -11,6 +11,7 @@
   justify-content: center;
 }
 
+/* Standard button */
 .btn-standard {
   padding: 0.5rem;
   background: var(--cream_opaque);
@@ -19,18 +20,13 @@
   box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
 }
 
-/* ==============================================
-   ACTION BUTTONS (primary, secondary, danger)
-   ============================================== */
-
-/* Action button foundation */
+/* Action buttons (primary, secondary, danger) */
 .btn-action {
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   min-width: 6rem;
 }
 
-/* Primary action button */
 .btn-primary {
   background: var(--brown);
   color: white;
@@ -49,7 +45,6 @@
   box-shadow: none;
 }
 
-/* Secondary action button (cancel) */
 .btn-secondary {
   background: white;
   color: var(--light_brown);
@@ -62,7 +57,6 @@
   box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
 }
 
-/* Danger action button (delete) */
 .btn-danger {
   background: white;
   color: var(--red);
@@ -75,11 +69,7 @@
   box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
 }
 
-/* ==============================================
-   ICON BUTTONS (minimal styling)
-   ============================================== */
-
-/* Icon button foundation */
+/* Icon buttons */
 .btn-icon {
   padding: 0.5rem;
   background: none;
@@ -87,29 +77,33 @@
   border-radius: 0.5rem;
 }
 
-/* Neutral icon button */
 .btn-icon-neutral {
   color: var(--brown);
 }
+
 .btn-icon-neutral:hover {
   background: var(--cream_opaque);
   border-radius: 50%;
 }
 
-/* Success icon button (add) */
 .btn-icon-success {
   color: var(--green);
 }
 
-/* Danger icon buttons (edit, cart, remove) */
 .btn-icon-danger {
   color: var(--dark_red);
 }
 
-/* Error icon button (remove) */
 .btn-icon-remove {
   color: var(--error_red);
   flex-shrink: 0;
+}
+
+.btn-icon-password {
+  color: var(--brown);
+  padding: 0.25rem;
+  position: absolute;
+  right: 0.5rem;
 }
 
 .btn-icon-success:hover,
@@ -118,10 +112,11 @@
   transform: translateY(-1px);
 }
 
-/* ==============================================
-   RESPONSIVE DESIGN
-   ============================================== */
+.btn-icon-password:hover {
+  color: var(--dark_red);
+}
 
+/* Responsive design */
 @media (max-width: 768px) {
   .btn-action {
     padding: 0.75rem 0.5rem;

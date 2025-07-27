@@ -4,6 +4,7 @@ import { changePassword } from "../../services/auth";
 import { useNavigate } from "react-router-dom";
 import { validateChangePasswordForm } from "../../services/validation";
 import supabase from "../../utils/supabaseClient";
+import PasswordInput from "../../components/PasswordInput";
 
 const ChangePasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");
@@ -232,7 +233,7 @@ const ChangePasswordPage = () => {
             <span className="error-message">{errorMessage}</span>
           )}
           <div className="input-wrapper input-wrapper-sm">
-            <input
+            <PasswordInput
               id="new-password"
               type="password"
               value={newPassword}
@@ -251,7 +252,7 @@ const ChangePasswordPage = () => {
                 {validationErrors.newPassword}
               </span>
             )}
-            <input
+            <PasswordInput
               id="new-password-repeat"
               type="password"
               value={newPasswordRepeat}

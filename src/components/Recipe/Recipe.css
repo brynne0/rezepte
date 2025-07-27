@@ -43,3 +43,8 @@
   font-weight: bold;
   min-width: 20px;
 }
+
+.cart-container {
+  position: relative;
+  display: inline-block;
+}

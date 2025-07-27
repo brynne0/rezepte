@@ -29,7 +29,7 @@ const Recipe = () => {
   return (
     <div className="recipe-container">
       <div className="recipe-heading-container">
-        <h1>{recipe.title}</h1>
+        <h1 className="forta">{recipe.title}</h1>
 
         {/* Show edit button only when logged in  */}
         {isLoggedIn && !isGuest && (

@@ -119,18 +119,11 @@
   margin: 0.5rem;
 }
 
+/* TODO */
 .recipe-heading-container {
-  color: var(--dark_red);
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 600;
-  font-family: forta;
-}
-
-.cart-container {
-  position: relative;
-  display: inline-block;
 }
 
 .subheading-wrapper {
@@ -156,6 +149,12 @@
   display: flex;
   justify-content: flex-start;
   margin: 1rem 0rem 0.5rem 0rem;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 /* ===================================

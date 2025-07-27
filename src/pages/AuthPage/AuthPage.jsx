@@ -3,6 +3,7 @@ import { validateAuthForm } from "../../services/validation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import PasswordInput from "../../components/PasswordInput";
 
 import "./AuthPage.css";
 
@@ -204,16 +205,14 @@ const AuthPage = ({ setLoginMessage }) => {
             </span>
           )}
           {/* Password */}
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               setValidationErrors((prev) => ({ ...prev, password: "" }));
             }}
             placeholder={t("password")}
-            c
             className={`input input--cream ${
               validationErrors.password ? "input--error" : ""
             }`}
