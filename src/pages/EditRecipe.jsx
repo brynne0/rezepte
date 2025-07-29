@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import RecipeForm from "../components/RecipeForm/RecipeForm";
 import { useRecipe } from "../hooks/data/useRecipe";
 import { useTranslation } from "react-i18next";
+import LoadingAcorn from "../components/LoadingAcorn/LoadingAcorn";
 
 const EditRecipePage = ({ categories }) => {
   const { id } = useParams();
@@ -9,7 +10,7 @@ const EditRecipePage = ({ categories }) => {
   const { t } = useTranslation();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingAcorn />;
   }
 
   if (!recipe) {

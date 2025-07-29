@@ -1,18 +1,3 @@
-/* Base containers */
-.container {
-  margin: 0 auto;
-}
-
-.container-sm {
-  max-width: 25rem;
-}
-.container-md {
-  max-width: 50rem;
-}
-.container-lg {
-  max-width: 75rem;
-}
-
 /* Cards */
 .card {
   background: var(--cream_opaque);
@@ -25,6 +10,11 @@
 .card-padded {
   padding: 0 1.25rem 1.25rem;
   max-width: 50rem;
+}
+
+.card-recipe {
+  padding: 2rem;
+  width: -webkit-fill-available;
 }
 
 .card-form {

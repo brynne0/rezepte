@@ -1,5 +1,5 @@
 .recipe-form {
-  padding: 0 3rem 3rem 3rem;
+  padding: 0 3rem 3rem;
 }
 
 /* Errors */
@@ -109,10 +109,6 @@
   .recipe-form {
     padding: 1.25rem;
     padding-top: 0;
-  }
-
-  .back-arrow {
-    left: 1.25rem;
   }
 
   /* Form spacing */

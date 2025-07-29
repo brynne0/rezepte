@@ -39,7 +39,7 @@
 }
 
 .btn-primary:disabled {
-  background: #9ca3af;
+  background: var(--light_brown);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -116,10 +116,20 @@
   color: var(--dark_red);
 }
 
+/* Navigation buttons */
+.back-arrow {
+  left: 3rem;
+  cursor: pointer;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .btn-action {
     padding: 0.75rem 0.5rem;
     font-size: 0.8rem;
+  }
+
+  .back-arrow {
+    left: 1.25rem;
   }
 }

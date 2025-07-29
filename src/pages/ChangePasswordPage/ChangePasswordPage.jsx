@@ -12,7 +12,7 @@ const ChangePasswordPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [isValidSession, setIsValidSession] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -110,7 +110,7 @@ const ChangePasswordPage = () => {
       console.error("Error initializing password reset:", error);
       setErrorMessage(t("invalid_reset_link") || "Invalid reset link");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -188,12 +188,8 @@ const ChangePasswordPage = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="page-layout flex-center">
-        <div>Loading...</div>
-      </div>
-    );
+  if (loading) {
+    return <LoadingAcorn />;
   }
 
   if (!isValidSession && !showSuccessMessage) {
@@ -217,7 +213,7 @@ const ChangePasswordPage = () => {
     <div className="page-layout flex-center">
       {showSuccessMessage ? (
         <div>
-          <h3>{t("password_changed")}</h3>
+          <p>{t("password_changed")}</p>
           <button
             className={"btn btn-standard"}
             type="button"

@@ -41,7 +41,7 @@ const ForgotPasswordPage = () => {
   return (
     <div className="page-layout flex-center">
       {showSuccessMessage ? (
-        <h3>{t("password_reset_sent")}</h3>
+        <p>{t("password_reset_sent")}</p>
       ) : (
         <form onSubmit={handleForgotPassword} className="auth-form">
           <h2 className="forta">{t("reset_password")}</h2>
