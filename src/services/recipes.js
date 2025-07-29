@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { getCurrentLanguage } from "./translation";
 
 // Helper function to get or create ingredient by name
 const getOrCreateIngredient = async (ingredientName) => {
@@ -98,6 +99,9 @@ export const createRecipe = async (recipeData) => {
     throw new Error("User not authenticated");
   }
 
+  // Get current language from i18n
+  const currentLanguage = getCurrentLanguage();
+
   // Create the main recipe record
   const cleanRecipeData = Object.fromEntries(
     Object.entries({
@@ -109,6 +113,7 @@ export const createRecipe = async (recipeData) => {
       user_id: user.id,
       link_only: recipeData.link_only,
       notes: recipeData.notes,
+      original_language: currentLanguage, // Set the original language from i18n
     }).filter(([, v]) => v !== undefined)
   );
 

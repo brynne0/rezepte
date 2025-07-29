@@ -156,16 +156,17 @@ export const shouldTranslateRecipe = (recipe, currentLanguage) => {
     return false;
   }
 
+  // Normalise language codes (remove region codes like 'en-US' -> 'en')
+  const normalisedCurrentLang = currentLanguage.split('-')[0].toLowerCase();
+
   // If recipe has an original_language field, compare it with current language
   if (recipe.original_language) {
-    return (
-      recipe.original_language.toLowerCase() !== currentLanguage.toLowerCase()
-    );
+    const normalisedOriginalLang = recipe.original_language.split('-')[0].toLowerCase();
+    return normalisedOriginalLang !== normalisedCurrentLang;
   }
 
-  // If no original_language field, we could implement language detection
-  // For now, assume translation is needed if current language is not English
-  return currentLanguage.toLowerCase() !== "en";
+  // If no original_language field, assume English and only translate if current language is not English
+  return normalisedCurrentLang !== "en";
 };
 
 // Get the current language from i18n

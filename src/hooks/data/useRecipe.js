@@ -46,7 +46,7 @@ export const useRecipe = (id) => {
     };
 
     loadRecipe();
-  }, [id]);
+  }, [id, getCurrentLanguage()]); // Now depends on current language
 
   return { recipe, loading, error };
 };
