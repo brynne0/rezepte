@@ -144,7 +144,7 @@ const GroceryList = () => {
                 <select
                   id={`item-unit-${itemId}`}
                   value={item.unit || ""}
-                  className="input input--borderless input--full-width"
+                  className="input input--borderless input--full-width input--select"
                   disabled={!isEditing}
                   onChange={(e) =>
                     handleInputChange(index, "unit", e.target.value)

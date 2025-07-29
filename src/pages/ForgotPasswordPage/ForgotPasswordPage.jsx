@@ -39,7 +39,7 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="page-layout flex-center">
+    <div className="page-centered">
       {showSuccessMessage ? (
         <p>{t("password_reset_sent")}</p>
       ) : (

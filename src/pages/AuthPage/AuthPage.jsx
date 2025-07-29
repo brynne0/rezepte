@@ -115,7 +115,7 @@ const AuthPage = ({ setLoginMessage }) => {
   };
 
   return (
-    <div className="page-layout flex-center">
+    <div className="page-centered">
       {/* Headers to toggle between modes */}
       <header>
         <button
