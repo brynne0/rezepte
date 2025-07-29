@@ -3,9 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signOut, getDisplayName } from "../../services/auth";
 import { useState, useEffect } from "react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
-// import useClickOutside from "../../hooks/useClickOutside";
+// import useClickOutside from "../../hooks/ui/useClickOutside";
 
 const Header = ({
   setSelectedCategory,

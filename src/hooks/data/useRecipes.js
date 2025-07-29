@@ -1,20 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
-import supabase from "../utils/supabaseClient";
+import { fetchRecipes } from "../../services/recipes";
+import supabase from "../../lib/supabase";
 
 // Fetch all recipes
 export const useRecipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchRecipes = useCallback(async () => {
+  const loadRecipes = useCallback(async () => {
     try {
-      const { data, error } = await supabase.from("recipes").select("*");
-      if (error) {
-        console.error("Error fetching recipes:", error);
-        setRecipes([]);
-      } else {
-        setRecipes(data || []);
-      }
+      const data = await fetchRecipes();
+      setRecipes(data);
     } catch (err) {
       console.log("Error: ", err);
       setRecipes([]);
@@ -26,13 +22,8 @@ export const useRecipes = () => {
   const refreshRecipes = useCallback(async (showLoading = false) => {
     if (showLoading) setLoading(true);
     try {
-      const { data, error } = await supabase.from("recipes").select("*");
-      if (error) {
-        console.error("Error refreshing recipes:", error);
-        setRecipes([]);
-      } else {
-        setRecipes(data || []);
-      }
+      const data = await fetchRecipes();
+      setRecipes(data);
     } catch (err) {
       console.log("Error refreshing: ", err);
       setRecipes([]);
@@ -42,7 +33,7 @@ export const useRecipes = () => {
   }, []);
 
   useEffect(() => {
-    fetchRecipes();
+    loadRecipes();
 
     // Listen to auth state changes
     const {
@@ -52,12 +43,12 @@ export const useRecipes = () => {
         setRecipes([]);
         setLoading(false);
       } else if (event === "SIGNED_IN") {
-        fetchRecipes();
+        loadRecipes();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchRecipes]);
+  }, [loadRecipes]);
 
   return { recipes, loading, refreshRecipes };
 };

@@ -1,5 +1,5 @@
 import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
-import { useRecipeForm } from "../../hooks/useRecipeForm";
+import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import "./RecipeForm.css";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

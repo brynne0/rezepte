@@ -1,0 +1,133 @@
+import { useState, useEffect } from "react";
+import {
+  fetchGroceryList,
+  updateGroceryList,
+  addIngredientsToGroceryList,
+  clearGroceryList,
+  removeFromGroceryList,
+} from "../../services/groceryListService";
+
+export const useGroceryList = () => {
+  const [groceryList, setGroceryList] = useState([]);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [checkedIngredients, setCheckedIngredients] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Handle checkbox change
+  const handleCheckboxChange = (ingredientId) => {
+    setCheckedIngredients((prev) => ({
+      ...prev,
+      [ingredientId]: !prev[ingredientId],
+    }));
+  };
+
+  // Load grocery list from database on mount
+  useEffect(() => {
+    const loadGroceryList = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchGroceryList();
+        setGroceryList(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error loading grocery list:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadGroceryList();
+  }, []);
+
+  // Update grocery list
+  const handleUpdateGroceryList = async (updatedList) => {
+    try {
+      setLoading(true);
+      const data = await updateGroceryList(updatedList);
+      setGroceryList(data);
+      setError(null);
+    } catch (err) {
+      console.error("Error updating grocery list:", err);
+      setError(err.message);
+      throw err; // Re-throw so component can handle the error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add selected ingredients to grocery list
+  const addToGroceryList = async (recipeIngredients, recipeTitle = "") => {
+    const selectedIngredients = recipeIngredients.filter(
+      (ingredient) => checkedIngredients[ingredient.id]
+    );
+
+    if (selectedIngredients.length === 0) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const data = await addIngredientsToGroceryList(
+        recipeIngredients,
+        checkedIngredients,
+        recipeTitle
+      );
+      setGroceryList(data);
+
+      // Show success message
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+
+      // Clear selections
+      setCheckedIngredients({});
+      setError(null);
+    } catch (err) {
+      console.error("Error adding to grocery list:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Clear grocery list
+  const handleClearGroceryList = async () => {
+    try {
+      setLoading(true);
+      const data = await clearGroceryList();
+      setGroceryList(data);
+      setError(null);
+    } catch (err) {
+      console.error("Error clearing grocery list:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Remove item from grocery list
+  const handleRemoveFromGroceryList = async (itemId) => {
+    try {
+      const data = await removeFromGroceryList(itemId);
+      setGroceryList(data);
+      setError(null);
+    } catch (err) {
+      console.error("Error removing item from grocery list:", err);
+      setError(err.message);
+    }
+  };
+
+  return {
+    checkedIngredients,
+    groceryList,
+    showSuccess,
+    loading,
+    error,
+    handleCheckboxChange,
+    addToGroceryList,
+    clearGroceryList: handleClearGroceryList,
+    removeFromGroceryList: handleRemoveFromGroceryList,
+    updateGroceryList: handleUpdateGroceryList,
+  };
+};

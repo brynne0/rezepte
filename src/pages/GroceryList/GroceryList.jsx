@@ -1,5 +1,5 @@
 import "./GroceryList.css";
-import { useGroceryList } from "../../hooks/useGroceryList";
+import { useGroceryList } from "../../hooks/data/useGroceryList";
 import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
