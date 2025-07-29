@@ -9,7 +9,7 @@ import {
 import Header from "./components/Header/Header";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Recipe from "./components/Recipe/Recipe";
-import { useRecipes } from "./hooks/useRecipes";
+import { useRecipes } from "./hooks/data/useRecipes";
 import AddRecipePage from "./pages/AddRecipe";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { Squirrel } from "lucide-react";
@@ -19,7 +19,7 @@ import GroceryList from "./pages/GroceryList/GroceryList";
 import AuthPage from "./pages/AuthPage/AuthPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
-import { useAuth } from "./hooks/useAuth";
+import { useAuth } from "./hooks/data/useAuth";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -80,6 +80,8 @@ function AppRoutes(props) {
   const location = useLocation();
   const { refreshRecipes } = props;
   const { isLoggedIn } = useAuth();
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language;
 
   // Refresh recipes when navigating to home page
   useEffect(() => {
@@ -92,6 +94,11 @@ function AppRoutes(props) {
   useEffect(() => {
     refreshRecipes();
   }, [isLoggedIn, refreshRecipes]);
+
+  // Refresh recipes when language changes
+  useEffect(() => {
+    refreshRecipes();
+  }, [currentLanguage, refreshRecipes]);
 
   return (
     <>

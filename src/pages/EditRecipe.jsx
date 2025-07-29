@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import RecipeForm from "../components/RecipeForm/RecipeForm";
-import { useRecipe } from "../hooks/useRecipe";
+import { useRecipe } from "../hooks/data/useRecipe";
 import { useTranslation } from "react-i18next";
 
 const EditRecipePage = ({ categories }) => {

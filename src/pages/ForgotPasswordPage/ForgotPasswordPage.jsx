@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { forgotPassword } from "../../services/auth";
-import { validateForgotPasswordForm } from "../../services/validation";
+import { validateForgotPasswordForm } from "../../utils/validation";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");

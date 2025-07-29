@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { changePassword } from "../../services/auth";
 import { useNavigate } from "react-router-dom";
-import { validateChangePasswordForm } from "../../services/validation";
-import supabase from "../../utils/supabaseClient";
+import { validateChangePasswordForm } from "../../utils/validation";
+import supabase from "../../lib/supabase";
 import PasswordInput from "../../components/PasswordInput";
 
 const ChangePasswordPage = () => {

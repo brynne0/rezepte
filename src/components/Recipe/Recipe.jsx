@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useRecipe } from "../../hooks/useRecipe";
+import { useRecipe } from "../../hooks/data/useRecipe";
 import "./Recipe.css";
 import { Pencil, ShoppingBasket } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
-import { useGroceryList } from "../../hooks/useGroceryList";
+import { useGroceryList } from "../../hooks/data/useGroceryList";
 
 const Recipe = () => {
   const { id } = useParams();
