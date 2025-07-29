@@ -82,6 +82,7 @@ function AppRoutes(props) {
   const { isLoggedIn } = useAuth();
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
+  const isEditRecipePage = location.pathname.startsWith("/edit-recipe/");
 
   // Refresh recipes when navigating to home page
   useEffect(() => {
@@ -111,6 +112,7 @@ function AppRoutes(props) {
         loginMessage={props.loginMessage}
         refreshRecipes={props.refreshRecipes}
         t={props.t}
+        disableLanguageSwitch={isEditRecipePage}
       />
       <Routes>
         <Route

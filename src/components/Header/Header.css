@@ -85,6 +85,15 @@
   color: var(--dark_red);
 }
 
+.language.disabled {
+  color: var(--light_brown);
+  opacity: 0.5;
+}
+
+.language.disabled:hover {
+  color: var(--light_brown);
+}
+
 /* Navigation */
 .header-nav {
   display: flex;

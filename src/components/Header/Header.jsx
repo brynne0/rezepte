@@ -12,6 +12,7 @@ const Header = ({
   setSearchTerm,
   setLoginMessage,
   loginMessage,
+  disableLanguageSwitch = false,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -123,8 +124,8 @@ const Header = ({
               <p
                 className={`language${
                   i18n.language === "en" ? " selected" : ""
-                }`}
-                onClick={() => i18n.changeLanguage("en")}
+                }${disableLanguageSwitch ? " disabled" : ""}`}
+                onClick={() => !disableLanguageSwitch && i18n.changeLanguage("en")}
               >
                 EN
               </p>{" "}
@@ -132,8 +133,8 @@ const Header = ({
               <p
                 className={`language${
                   i18n.language === "de" ? " selected" : ""
-                }`}
-                onClick={() => i18n.changeLanguage("de")}
+                }${disableLanguageSwitch ? " disabled" : ""}`}
+                onClick={() => !disableLanguageSwitch && i18n.changeLanguage("de")}
               >
                 DE
               </p>

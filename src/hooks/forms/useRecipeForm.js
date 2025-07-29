@@ -4,7 +4,7 @@ import { useRecipeActions } from "../data/useRecipeActions";
 import { useTranslation } from "react-i18next";
 
 export const useRecipeForm = ({ initialRecipe = null }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { createRecipe, updateRecipe, deleteRecipe, loading, error } =
     useRecipeActions();
@@ -255,6 +255,11 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         link_only: formData.link_only,
         notes: formData.notes,
       };
+
+      // Only set original_language when creating a new recipe
+      if (!initialRecipe) {
+        recipeData.original_language = i18n.language;
+      }
 
       let result;
       if (initialRecipe) {

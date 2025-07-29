@@ -109,6 +109,7 @@ export const createRecipe = async (recipeData) => {
       user_id: user.id,
       link_only: recipeData.link_only,
       notes: recipeData.notes,
+      original_language: recipeData.original_language,
     }).filter(([, v]) => v !== undefined)
   );
 
