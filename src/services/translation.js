@@ -14,7 +14,7 @@ const translateText = async (text, targetLanguage, sourceLanguage = null) => {
   }
 
   try {
-    const { data, error } = await supabase.functions.invoke("translate-deepl", {
+    const { data, error } = await supabase.functions.invoke("translate", {
       body: {
         text: text.trim(),
         target_lang: targetLanguage.toUpperCase(),
