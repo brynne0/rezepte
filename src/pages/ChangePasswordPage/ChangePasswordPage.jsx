@@ -194,7 +194,7 @@ const ChangePasswordPage = () => {
 
   if (!isValidSession && !showSuccessMessage) {
     return (
-      <div className="page-layout flex-center">
+      <div className="page-centered">
         <div>
           <h3>{t("invalid_reset_link")}</h3>
           <p>{t("redirecting_to_login")}</p>
@@ -210,7 +210,7 @@ const ChangePasswordPage = () => {
   }
 
   return (
-    <div className="page-layout flex-center">
+    <div className="page-centered">
       {showSuccessMessage ? (
         <div>
           <p>{t("password_changed")}</p>

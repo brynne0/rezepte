@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  flex: 1;
+  min-height: 70vh;
   stroke: var(--brown);
 }
 
@@ -38,7 +38,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 60vh;
 }
 
 .loading-squirrel svg {
