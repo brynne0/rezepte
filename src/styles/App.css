@@ -1,5 +1,3 @@
-@import "./components/buttons.css";
-
 #root {
   margin: 0;
   padding: 0;
@@ -16,25 +14,6 @@
   flex-direction: column;
   text-align: center;
   box-sizing: border-box;
-}
-
-.loading-animation {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.loading-animation svg {
-  color: var(--brown);
-  width: 5rem;
-  height: 5rem;
-}
-
-/* TODO - move back arrow and maybe loading animation too  */
-.back-arrow {
-  left: 3rem;
-  cursor: pointer;
 }
 
 @media (max-width: 768px) {

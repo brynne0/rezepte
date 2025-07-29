@@ -5,6 +5,7 @@ import { Pencil, ShoppingBasket } from "lucide-react";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
+import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 
 const Recipe = () => {
   const { id } = useParams();
@@ -22,7 +23,9 @@ const Recipe = () => {
     addToGroceryList,
   } = useGroceryList();
 
-  if (loading) return;
+  if (loading) {
+    return <LoadingAcorn />;
+  }
   if (error) return <div>{error}</div>;
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
