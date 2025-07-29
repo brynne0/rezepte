@@ -8,11 +8,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log("SUPABASE EDGE FUNCTION - Recipe Translation");
-
-  // Handle CORS preflight - this is crucial!
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    console.log("Handling OPTIONS preflight request");
     return new Response("ok", {
       status: 200,
       headers: corsHeaders,
@@ -23,11 +20,7 @@ serve(async (req) => {
     const { text, target_lang, source_lang } = await req.json();
     const DEEPL_API_KEY = Deno.env.get("DEEPL_API_KEY");
 
-    console.log("Input text:", text);
-    console.log("From:", source_lang, "To:", target_lang);
-    console.log("API Key exists:", !!DEEPL_API_KEY);
-
-    // Return original text if no API key (don't crash)
+    // Return original text if no API key
     if (!DEEPL_API_KEY) {
       console.warn("No DEEPL_API_KEY found, returning original text");
       return new Response(
@@ -75,7 +68,6 @@ serve(async (req) => {
     }
 
     const trimmedText = text.trim();
-    console.log(`Translating: "${trimmedText}"`);
 
     try {
       const requestBody = new URLSearchParams({
@@ -100,8 +92,6 @@ serve(async (req) => {
       if (response.ok) {
         const data = await response.json();
         const translatedText = data.translations[0].text.trim();
-
-        console.log(`Success: "${trimmedText}" -> "${translatedText}"`);
 
         return new Response(
           JSON.stringify({

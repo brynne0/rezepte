@@ -1,59 +1,47 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchRecipes } from "../../services/recipes";
-import { translateRecipe, shouldTranslateRecipe } from "../../services/translation";
+import {
+  translateRecipe,
+  shouldTranslateRecipe,
+} from "../../services/translation";
 import supabase from "../../lib/supabase";
 
 // Fetch all recipes
 export const useRecipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentLanguage, setCurrentLanguage] = useState('en');
   const { i18n } = useTranslation();
-  
-  // Listen for language changes
-  useEffect(() => {
-    const handleLanguageChange = (lng) => {
-      console.log('Language changed in useRecipes to:', lng);
-      setCurrentLanguage(lng);
-    };
-
-    console.log('Setting initial language in useRecipes:', i18n.language);
-    setCurrentLanguage(i18n.language);
-    i18n.on('languageChanged', handleLanguageChange);
-
-    return () => {
-      i18n.off('languageChanged', handleLanguageChange);
-    };
-  }, [i18n]);
+  const currentLanguage = i18n.language; // This automatically updates when language changes
 
   const loadRecipes = useCallback(async () => {
     try {
       const data = await fetchRecipes();
-      
+
       // Translate recipe titles if needed
       const translatedRecipes = await Promise.all(
         data.map(async (recipe) => {
           if (shouldTranslateRecipe(recipe, currentLanguage)) {
-            console.log(`Translating recipe list title: "${recipe.title}" to ${currentLanguage}`);
             // For recipe list, we only translate the title to keep it fast
             try {
               const translatedTitle = await translateRecipe(
-                { title: recipe.title }, 
-                currentLanguage, 
-                recipe.original_language || 'auto'
+                { title: recipe.title },
+                currentLanguage,
+                recipe.original_language || "auto"
               );
-              console.log(`Translated title: "${translatedTitle.title}"`);
               return { ...recipe, title: translatedTitle.title };
             } catch (error) {
-              console.error(`Failed to translate title for recipe ${recipe.id}:`, error);
+              console.error(
+                `Failed to translate title for recipe ${recipe.id}:`,
+                error
+              );
               return recipe; // Return original on error
             }
           }
           return recipe;
         })
       );
-      
+
       setRecipes(translatedRecipes);
     } catch (err) {
       console.log("Error: ", err);
@@ -63,51 +51,55 @@ export const useRecipes = () => {
     }
   }, [currentLanguage]); // Depend on currentLanguage
 
-  const refreshRecipes = useCallback(async (showLoading = false) => {
-    if (showLoading) setLoading(true);
-    try {
-      const data = await fetchRecipes();
-      
-      // Translate recipe titles if needed
-      const translatedRecipes = await Promise.all(
-        data.map(async (recipe) => {
-          if (shouldTranslateRecipe(recipe, currentLanguage)) {
-            // For recipe list, we only translate the title to keep it fast
-            try {
-              const translatedTitle = await translateRecipe(
-                { title: recipe.title }, 
-                currentLanguage, 
-                recipe.original_language || 'auto'
-              );
-              return { ...recipe, title: translatedTitle.title };
-            } catch (error) {
-              console.error(`Failed to translate title for recipe ${recipe.id}:`, error);
-              return recipe; // Return original on error
+  const refreshRecipes = useCallback(
+    async (showLoading = false) => {
+      if (showLoading) setLoading(true);
+      try {
+        const data = await fetchRecipes();
+
+        // Translate recipe titles if needed
+        const translatedRecipes = await Promise.all(
+          data.map(async (recipe) => {
+            if (shouldTranslateRecipe(recipe, currentLanguage)) {
+              // For recipe list, we only translate the title to keep it fast
+              try {
+                const translatedTitle = await translateRecipe(
+                  { title: recipe.title },
+                  currentLanguage,
+                  recipe.original_language || "auto"
+                );
+                return { ...recipe, title: translatedTitle.title };
+              } catch (error) {
+                console.error(
+                  `Failed to translate title for recipe ${recipe.id}:`,
+                  error
+                );
+                return recipe; // Return original on error
+              }
             }
-          }
-          return recipe;
-        })
-      );
-      
-      setRecipes(translatedRecipes);
-    } catch (err) {
-      console.log("Error refreshing: ", err);
-      setRecipes([]);
-    } finally {
-      if (showLoading) setLoading(false);
-    }
-  }, [currentLanguage]); // Depend on currentLanguage
+            return recipe;
+          })
+        );
+
+        setRecipes(translatedRecipes);
+      } catch (err) {
+        console.log("Error refreshing: ", err);
+        setRecipes([]);
+      } finally {
+        if (showLoading) setLoading(false);
+      }
+    },
+    [currentLanguage]
+  ); // Depend on currentLanguage
 
   // Separate effect for language changes - this will definitely trigger
   useEffect(() => {
     if (currentLanguage) {
-      console.log(`Language changed - reloading recipes in: ${currentLanguage}`);
       loadRecipes();
     }
   }, [currentLanguage, loadRecipes]); // Only depends on currentLanguage
 
   useEffect(() => {
-    console.log(`Initial load of recipes`);
     loadRecipes();
 
     // Listen to auth state changes

@@ -157,11 +157,13 @@ export const shouldTranslateRecipe = (recipe, currentLanguage) => {
   }
 
   // Normalise language codes (remove region codes like 'en-US' -> 'en')
-  const normalisedCurrentLang = currentLanguage.split('-')[0].toLowerCase();
+  const normalisedCurrentLang = currentLanguage.split("-")[0].toLowerCase();
 
   // If recipe has an original_language field, compare it with current language
   if (recipe.original_language) {
-    const normalisedOriginalLang = recipe.original_language.split('-')[0].toLowerCase();
+    const normalisedOriginalLang = recipe.original_language
+      .split("-")[0]
+      .toLowerCase();
     return normalisedOriginalLang !== normalisedCurrentLang;
   }
 
