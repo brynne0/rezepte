@@ -48,6 +48,8 @@ const AuthPage = ({ setLoginMessage }) => {
 
       // Navigate on successful login
       navigate("/");
+      // Scroll to top after navigation
+      window.scrollTo(0, 0);
     }
 
     setTimeout(() => {
@@ -75,6 +77,8 @@ const AuthPage = ({ setLoginMessage }) => {
       setLoginMessage(t("signup_success"));
       // Navigate on successful sign up
       navigate("/");
+      // Scroll to top after navigation
+      window.scrollTo(0, 0);
     }
 
     setTimeout(() => {
