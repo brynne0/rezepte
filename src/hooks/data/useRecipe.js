@@ -8,8 +8,23 @@ export const useRecipe = (id) => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentLanguage, setCurrentLanguage] = useState('en');
   const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
+  
+  // Listen for language changes
+  useEffect(() => {
+    const handleLanguageChange = (lng) => {
+      console.log('Language changed to:', lng);
+      setCurrentLanguage(lng);
+    };
+
+    setCurrentLanguage(i18n.language);
+    i18n.on('languageChanged', handleLanguageChange);
+
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n]);
 
   useEffect(() => {
     const loadRecipe = async () => {
@@ -23,6 +38,7 @@ export const useRecipe = (id) => {
         setLoading(true);
         setError(null);
         
+        console.log(`Loading recipe ${id} in language: ${currentLanguage}`);
         const data = await fetchRecipe(id);
         
         // Check if translation is needed
@@ -35,6 +51,7 @@ export const useRecipe = (id) => {
           );
           setRecipe(translatedData);
         } else {
+          console.log(`No translation needed for ${currentLanguage}`);
           setRecipe(data);
         }
       } catch (err) {
@@ -46,8 +63,11 @@ export const useRecipe = (id) => {
       }
     };
 
-    loadRecipe();
-  }, [id, currentLanguage]); // Now properly depends on current language
+    // Only load if we have both id and currentLanguage
+    if (id && currentLanguage) {
+      loadRecipe();
+    }
+  }, [id, currentLanguage]); // Triggers when either id or language changes
 
   return { recipe, loading, error };
 };

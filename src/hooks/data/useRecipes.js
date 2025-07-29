@@ -8,8 +8,23 @@ import supabase from "../../lib/supabase";
 export const useRecipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentLanguage, setCurrentLanguage] = useState('en');
   const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
+  
+  // Listen for language changes
+  useEffect(() => {
+    const handleLanguageChange = (lng) => {
+      console.log('Language changed in useRecipes to:', lng);
+      setCurrentLanguage(lng);
+    };
+
+    setCurrentLanguage(i18n.language);
+    i18n.on('languageChanged', handleLanguageChange);
+
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n]);
 
   const loadRecipes = useCallback(async () => {
     try {
@@ -83,7 +98,11 @@ export const useRecipes = () => {
   }, [currentLanguage]); // Depend on currentLanguage
 
   useEffect(() => {
-    loadRecipes();
+    // Only load if we have currentLanguage set
+    if (currentLanguage) {
+      console.log(`Loading recipes in language: ${currentLanguage}`);
+      loadRecipes();
+    }
 
     // Listen to auth state changes
     const {
@@ -98,7 +117,7 @@ export const useRecipes = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [loadRecipes, currentLanguage]); // Now depends on current language
+  }, [loadRecipes, currentLanguage]); // Triggers when language changes
 
   return { recipes, loading, refreshRecipes };
 };
