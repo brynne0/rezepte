@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { fetchRecipe } from "../../services/recipes";
-import { translateRecipe, shouldTranslateRecipe, getCurrentLanguage } from "../../services/translation";
+import { translateRecipe, shouldTranslateRecipe } from "../../services/translation";
 
 // Fetches a single recipe and all associated data
 export const useRecipe = (id) => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language;
 
   useEffect(() => {
     const loadRecipe = async () => {
@@ -23,8 +26,6 @@ export const useRecipe = (id) => {
         const data = await fetchRecipe(id);
         
         // Check if translation is needed
-        const currentLanguage = getCurrentLanguage();
-        
         if (shouldTranslateRecipe(data, currentLanguage)) {
           console.log(`Translating recipe to ${currentLanguage}`);
           const translatedData = await translateRecipe(
@@ -46,7 +47,7 @@ export const useRecipe = (id) => {
     };
 
     loadRecipe();
-  }, [id, getCurrentLanguage()]); // Now depends on current language
+  }, [id, currentLanguage]); // Now properly depends on current language
 
   return { recipe, loading, error };
 };
