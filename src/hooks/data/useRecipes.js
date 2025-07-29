@@ -18,6 +18,7 @@ export const useRecipes = () => {
       setCurrentLanguage(lng);
     };
 
+    console.log('Setting initial language in useRecipes:', i18n.language);
     setCurrentLanguage(i18n.language);
     i18n.on('languageChanged', handleLanguageChange);
 
@@ -97,12 +98,17 @@ export const useRecipes = () => {
     }
   }, [currentLanguage]); // Depend on currentLanguage
 
+  // Separate effect for language changes - this will definitely trigger
   useEffect(() => {
-    // Only load if we have currentLanguage set
     if (currentLanguage) {
-      console.log(`Loading recipes in language: ${currentLanguage}`);
+      console.log(`Language changed - reloading recipes in: ${currentLanguage}`);
       loadRecipes();
     }
+  }, [currentLanguage, loadRecipes]); // Only depends on currentLanguage
+
+  useEffect(() => {
+    console.log(`Initial load of recipes`);
+    loadRecipes();
 
     // Listen to auth state changes
     const {
@@ -117,7 +123,7 @@ export const useRecipes = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [loadRecipes, currentLanguage]); // Triggers when language changes
+  }, [loadRecipes]); // Initial load and auth changes
 
   return { recipes, loading, refreshRecipes };
 };

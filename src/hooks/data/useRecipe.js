@@ -14,10 +14,11 @@ export const useRecipe = (id) => {
   // Listen for language changes
   useEffect(() => {
     const handleLanguageChange = (lng) => {
-      console.log('Language changed to:', lng);
+      console.log('Language changed in useRecipe to:', lng);
       setCurrentLanguage(lng);
     };
 
+    console.log('Setting initial language in useRecipe:', i18n.language);
     setCurrentLanguage(i18n.language);
     i18n.on('languageChanged', handleLanguageChange);
 
