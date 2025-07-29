@@ -30,7 +30,7 @@ const Recipe = () => {
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
   return (
-    <div className="recipe-container">
+    <div className="recipe-container card card-recipe">
       <div className="recipe-heading-container">
         <h1 className="forta">{recipe.title}</h1>
 

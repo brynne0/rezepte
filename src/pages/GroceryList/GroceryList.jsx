@@ -4,9 +4,10 @@ import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const GroceryList = () => {
-  const { groceryList, updateGroceryList } = useGroceryList();
+  const { groceryList, updateGroceryList, loading } = useGroceryList();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const units = t("units", { returnObjects: true });
@@ -69,6 +70,14 @@ const GroceryList = () => {
   };
 
   const currentList = isEditing ? editedList : groceryList;
+
+  if (loading) {
+    return (
+      <div className="loading-acorn">
+        <LoadingAcorn />
+      </div>
+    );
+  }
 
   return (
     <div className="card card-padded">
