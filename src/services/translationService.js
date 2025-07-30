@@ -40,7 +40,7 @@ const translateTexts = async (texts, targetLanguage) => {
   });
 };
 
-// Get translated recipe with ingredients
+// Get translated recipe with ingredients (for full recipe view)
 export const getTranslatedRecipe = async (recipe, targetLanguage) => {
   // If target language is the same as original, return original recipe
   if (recipe.original_language === targetLanguage) {
@@ -68,7 +68,48 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
   };
 };
 
-// Get translated recipe data (title, instructions, notes, category)
+// Get translated recipe title only (for recipe lists)
+export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
+  // If target language is the same as original, return original recipe
+  if (recipe.original_language === targetLanguage) {
+    return recipe;
+  }
+
+  // Check if title translation exists in storage
+  const cachedTranslation = recipe.translated_recipe?.[targetLanguage];
+  if (cachedTranslation?.title) {
+    return {
+      ...recipe,
+      title: cachedTranslation.title,
+      isTranslated: true,
+      translatedFrom: recipe.original_language,
+    };
+  }
+
+  // Title not cached, translate only the title
+  try {
+    const translatedTitle = await translateText(recipe.title, targetLanguage);
+
+    // Save just the title translation (don't overwrite other fields)
+    await saveRecipeTitleTranslation(
+      recipe.id,
+      targetLanguage,
+      translatedTitle
+    );
+
+    return {
+      ...recipe,
+      title: translatedTitle,
+      isTranslated: true,
+      translatedFrom: recipe.original_language,
+    };
+  } catch (error) {
+    console.error("Recipe title translation failed:", error);
+    return recipe; // Return original if translation fails
+  }
+};
+
+// Get translated recipe data (title, instructions, notes, category, source)
 const getTranslatedRecipeData = async (recipe, targetLanguage) => {
   // Check if translation exists in storage
   const cachedTranslation = recipe.translated_recipe?.[targetLanguage];
@@ -78,6 +119,7 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
       category: cachedTranslation.category,
       instructions: cachedTranslation.instructions,
       notes: cachedTranslation.notes,
+      source: cachedTranslation.source,
     };
   }
 
@@ -86,6 +128,7 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
     recipe.title,
     recipe.category,
     recipe.notes || "",
+    recipe.source || "",
     ...recipe.instructions,
   ];
 
@@ -99,7 +142,8 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
       title: translatedTexts[0],
       category: translatedTexts[1],
       notes: translatedTexts[2] || null,
-      instructions: translatedTexts.slice(3),
+      source: translatedTexts[3] || null,
+      instructions: translatedTexts.slice(4),
     };
 
     // Save translation to database
@@ -230,12 +274,54 @@ const saveRecipeTranslationToStorage = async (
     if (updateError) {
       throw updateError;
     }
-
-    console.log(
-      `Recipe translation stored for recipe ${recipeId} in ${language}`
-    );
   } catch (error) {
     console.error("Failed to store recipe translation:", error);
+    // Don't throw error - translation worked, just storage failed
+  }
+};
+
+// Save just recipe title translation (for recipe lists)
+const saveRecipeTitleTranslation = async (
+  recipeId,
+  language,
+  translatedTitle
+) => {
+  try {
+    // Get current translated_recipe data
+    const { data: currentRecipe, error: fetchError } = await supabase
+      .from("recipes")
+      .select("translated_recipe")
+      .eq("id", recipeId)
+      .single();
+
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    // Merge title with existing translations, keeping other fields intact
+    const existingTranslation =
+      currentRecipe.translated_recipe?.[language] || {};
+    const updatedTranslations = {
+      ...(currentRecipe.translated_recipe || {}),
+      [language]: {
+        ...existingTranslation,
+        title: translatedTitle,
+      },
+    };
+
+    // Update the database
+    const { error: updateError } = await supabase
+      .from("recipes")
+      .update({ translated_recipe: updatedTranslations })
+      .eq("id", recipeId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    console.log(`Recipe title stored for recipe ${recipeId} in ${language}`);
+  } catch (error) {
+    console.error("Failed to store recipe title:", error);
     // Don't throw error - translation worked, just storage failed
   }
 };
@@ -273,10 +359,6 @@ const saveIngredientTranslation = async (
     if (updateError) {
       throw updateError;
     }
-
-    console.log(
-      `Ingredient translation stored for ingredient ${ingredientId} in ${language}`
-    );
   } catch (error) {
     console.error("Failed to store ingredient translation:", error);
     // Don't throw error - translation worked, just storage failed
@@ -341,6 +423,15 @@ export const updateRecipeTranslations = async (
         fieldsToUpdate.notes = translation.notes;
       }
 
+      if (oldRecipeData.source !== newRecipeData.source) {
+        fieldsToUpdate.source = newRecipeData.source
+          ? await translateText(newRecipeData.source, language)
+          : null;
+        needsUpdate = true;
+      } else {
+        fieldsToUpdate.source = translation.source;
+      }
+
       // Check instructions (compare arrays)
       if (
         JSON.stringify(oldRecipeData.instructions) !==
@@ -358,7 +449,6 @@ export const updateRecipeTranslations = async (
       // Update translation if any field changed
       if (needsUpdate) {
         updatedTranslations[language] = fieldsToUpdate;
-        console.log(`Updated ${language} translation for recipe ${recipeId}`);
       }
     }
 

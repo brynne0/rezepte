@@ -171,7 +171,7 @@ export const updateRecipe = async (id, recipeData) => {
   // First fetch the original recipe for smart translation updates
   const { data: originalRecipe, error: fetchError } = await supabase
     .from("recipes")
-    .select("title, category, instructions, notes")
+    .select("title, category, instructions, notes, source")
     .eq("id", id)
     .single();
 
