@@ -1,0 +1,67 @@
+# .github/workflows/backup-database.yml
+name: Backup Supabase Database
+
+on:
+  schedule:
+    # Run daily at 1 AM UTC
+    - cron: "0 1 * * *"
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout backup repository
+        uses: actions/checkout@v4
+        with:
+          repository: brynne0/rezepte-backups
+          token: ${{ secrets.BACKUP_REPO_TOKEN }}
+          path: backup-repo
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create backup
+        run: |
+          mkdir -p backup-repo/backups
+          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+          BACKUP_FILE="backup-repo/backups/supabase-backup-${TIMESTAMP}.sql"
+          
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" > "$BACKUP_FILE"
+          gzip "$BACKUP_FILE"
+          
+          echo "Backup created: ${BACKUP_FILE}.gz"
+
+      - name: Commit and push backup
+        run: |
+          cd backup-repo
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Add the new backup file
+          git add backups/
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Database backup $(date +%Y-%m-%d_%H-%M-%S)"
+            git push
+          fi
+
+      - name: Clean up old backups (keep last 30)
+        run: |
+          cd backup-repo/backups
+          # Keep only the 30 most recent backups
+          ls -t *.sql.gz | tail -n +31 | xargs -r rm
+
+          # Commit cleanup if files were removed
+          cd ..
+          if ! git diff --quiet; then
+            git add .
+            git commit -m "Clean up old backups"
+            git push
+          fi
