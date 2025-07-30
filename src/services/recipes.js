@@ -61,7 +61,7 @@ export const fetchRecipe = async (id) => {
   const { data, error } = await supabase
     .from("recipes")
     .select(
-      "*, recipe_ingredients(quantity, unit, ingredients(id, name), notes)"
+      "*, recipe_ingredients(id, quantity, unit, ingredients(id, name), notes)"
     )
     .eq("id", id)
     .single();
@@ -76,6 +76,7 @@ export const fetchRecipe = async (id) => {
     ingredients:
       data.recipe_ingredients?.map((item) => ({
         id: item.ingredients.id,
+        recipe_ingredient_id: item.id,
         name: item.ingredients.name,
         quantity: item.quantity,
         unit: item.unit,
