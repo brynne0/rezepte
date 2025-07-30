@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { fetchRecipe } from "../../services/recipes";
+import { getTranslatedRecipe } from "../../services/translationService";
+import { useTranslation } from "react-i18next";
 
-// Fetches a single recipe and all associated data
+// Fetches a single recipe and all associated data with translation
 export const useRecipe = (id) => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     const loadRecipe = async () => {
@@ -19,8 +22,14 @@ export const useRecipe = (id) => {
         setLoading(true);
         setError(null);
         
-        const data = await fetchRecipe(id);
-        setRecipe(data);
+        // Fetch the original recipe
+        const originalRecipe = await fetchRecipe(id);
+        
+        // Get translated recipe if needed
+        const currentLanguage = i18n.language;
+        const translatedRecipe = await getTranslatedRecipe(originalRecipe, currentLanguage);
+        
+        setRecipe(translatedRecipe);
       } catch (err) {
         console.error("Error fetching recipe:", err);
         setError(err.message || "Failed to fetch recipe");
@@ -31,7 +40,7 @@ export const useRecipe = (id) => {
     };
 
     loadRecipe();
-  }, [id]);
+  }, [id, i18n.language]); // Re-fetch when language changes
 
   return { recipe, loading, error };
 };

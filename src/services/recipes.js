@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { updateRecipeTranslations } from "./translationService";
 
 // Helper function to get or create ingredient by name
 const getOrCreateIngredient = async (ingredientName) => {
@@ -167,6 +168,17 @@ export const createRecipe = async (recipeData) => {
 
 // Update an existing recipe
 export const updateRecipe = async (id, recipeData) => {
+  // First fetch the original recipe for smart translation updates
+  const { data: originalRecipe, error: fetchError } = await supabase
+    .from("recipes")
+    .select("title, category, instructions, notes")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch original recipe: ${fetchError.message}`);
+  }
+
   const cleanRecipeData = Object.fromEntries(
     Object.entries({
       title: recipeData.title,
@@ -189,6 +201,9 @@ export const updateRecipe = async (id, recipeData) => {
   if (recipeError) {
     throw new Error(recipeError.message);
   }
+
+  // Smart update translations based on what changed
+  await updateRecipeTranslations(id, originalRecipe, cleanRecipeData);
 
   // Delete existing ingredients for this recipe
   const { error: deleteError } = await supabase
