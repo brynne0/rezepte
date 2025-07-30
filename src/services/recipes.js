@@ -100,9 +100,6 @@ export const createRecipe = async (recipeData) => {
     throw new Error("User not authenticated");
   }
 
-  // Get current language from i18n
-  const currentLanguage = getCurrentLanguage();
-
   // Create the main recipe record
   const cleanRecipeData = Object.fromEntries(
     Object.entries({
@@ -141,9 +138,7 @@ export const createRecipe = async (recipeData) => {
       } else if (ingredient.name) {
         ingredientId = await getOrCreateIngredient(ingredient.name);
       } else {
-        throw new Error(
-          "Ingredient must have either ingredient_id or name"
-        );
+        throw new Error("Ingredient must have either ingredient_id or name");
       }
 
       recipeIngredientsToInsert.push({
@@ -234,9 +229,7 @@ export const updateRecipe = async (id, recipeData) => {
       } else if (ingredient.name) {
         ingredientId = await getOrCreateIngredient(ingredient.name);
       } else {
-        throw new Error(
-          "Ingredient must have either ingredient_id or name"
-        );
+        throw new Error("Ingredient must have either ingredient_id or name");
       }
 
       recipeIngredientsToInsert.push({
