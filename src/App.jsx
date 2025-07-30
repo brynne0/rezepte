@@ -88,6 +88,13 @@ function AppRoutes(props) {
   useEffect(() => {
     if (location.pathname === "/") {
       refreshRecipes();
+      // Restore scroll position when returning to home page
+      const savedScrollPosition = sessionStorage.getItem('homeScrollPosition');
+      if (savedScrollPosition) {
+        setTimeout(() => {
+          window.scrollTo(0, parseInt(savedScrollPosition));
+        }, 100);
+      }
     }
   }, [location.pathname, refreshRecipes]);
 
@@ -100,6 +107,26 @@ function AppRoutes(props) {
   useEffect(() => {
     refreshRecipes();
   }, [currentLanguage, refreshRecipes]);
+
+  // Handle scroll behavior on route change
+  useEffect(() => {
+    const isHomePage = location.pathname === "/";
+    const isRecipePage = location.pathname.match(/^\/\d+\/.+$/);
+    
+    if (isHomePage) {
+      // Don't scroll to top when arriving at home page (handled above)
+      return;
+    } else if (isRecipePage) {
+      // Save scroll position before navigating to recipe page
+      sessionStorage.setItem('homeScrollPosition', window.scrollY.toString());
+      // Don't scroll to top when going to recipe page
+      return;
+    } else {
+      // For all other pages, scroll to top and clear saved position
+      sessionStorage.removeItem('homeScrollPosition');
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
 
   return (
     <>
