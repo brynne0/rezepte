@@ -1,47 +1,25 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchRecipes } from "../../services/recipes";
-import {
-  translateRecipe,
-  shouldTranslateRecipe,
-} from "../../services/translation";
+import { getTranslatedRecipeTitle } from "../../services/translationService";
+
 import supabase from "../../lib/supabase";
 
-// Fetch all recipes
+// Fetch all recipes with translation
 export const useRecipes = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const { i18n } = useTranslation();
-  const currentLanguage = i18n.language; // This automatically updates when language changes
 
   const loadRecipes = useCallback(async () => {
     try {
       const data = await fetchRecipes();
 
-      // Translate recipe titles if needed
+      // Translate only recipe titles for the current language
+      const currentLanguage = i18n.language;
       const translatedRecipes = await Promise.all(
-        data.map(async (recipe) => {
-          if (shouldTranslateRecipe(recipe, currentLanguage)) {
-            // For recipe list, we only translate the title to keep it fast
-            try {
-              const translatedTitle = await translateRecipe(
-                { title: recipe.title },
-                currentLanguage,
-                recipe.original_language || "auto"
-              );
-              return { ...recipe, title: translatedTitle.title };
-            } catch (error) {
-              console.error(
-                `Failed to translate title for recipe ${recipe.id}:`,
-                error
-              );
-              return recipe; // Return original on error
-            }
-          }
-          return recipe;
-        })
+        data.map((recipe) => getTranslatedRecipeTitle(recipe, currentLanguage))
       );
-
       setRecipes(translatedRecipes);
     } catch (err) {
       console.log("Error: ", err);
@@ -49,7 +27,7 @@ export const useRecipes = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentLanguage]); // Depend on currentLanguage
+  }, [i18n.language]);
 
   const refreshRecipes = useCallback(
     async (showLoading = false) => {
@@ -57,30 +35,13 @@ export const useRecipes = () => {
       try {
         const data = await fetchRecipes();
 
-        // Translate recipe titles if needed
+        // Translate only recipe titles for the current language
+        const currentLanguage = i18n.language;
         const translatedRecipes = await Promise.all(
-          data.map(async (recipe) => {
-            if (shouldTranslateRecipe(recipe, currentLanguage)) {
-              // For recipe list, we only translate the title to keep it fast
-              try {
-                const translatedTitle = await translateRecipe(
-                  { title: recipe.title },
-                  currentLanguage,
-                  recipe.original_language || "auto"
-                );
-                return { ...recipe, title: translatedTitle.title };
-              } catch (error) {
-                console.error(
-                  `Failed to translate title for recipe ${recipe.id}:`,
-                  error
-                );
-                return recipe; // Return original on error
-              }
-            }
-            return recipe;
-          })
+          data.map((recipe) =>
+            getTranslatedRecipeTitle(recipe, currentLanguage)
+          )
         );
-
         setRecipes(translatedRecipes);
       } catch (err) {
         console.log("Error refreshing: ", err);
@@ -89,15 +50,8 @@ export const useRecipes = () => {
         if (showLoading) setLoading(false);
       }
     },
-    [currentLanguage]
-  ); // Depend on currentLanguage
-
-  // Separate effect for language changes - this will definitely trigger
-  useEffect(() => {
-    if (currentLanguage) {
-      loadRecipes();
-    }
-  }, [currentLanguage, loadRecipes]); // Only depends on currentLanguage
+    [i18n.language]
+  );
 
   useEffect(() => {
     loadRecipes();

@@ -1,5 +1,5 @@
 import supabase from "../lib/supabase";
-import { getCurrentLanguage } from "./translation";
+import { updateRecipeTranslations } from "./translationService";
 
 // Helper function to get or create ingredient by name
 const getOrCreateIngredient = async (ingredientName) => {
@@ -61,7 +61,7 @@ export const fetchRecipe = async (id) => {
   const { data, error } = await supabase
     .from("recipes")
     .select(
-      "*, recipe_ingredients(quantity, unit, ingredients(id, name), notes)"
+      "*, recipe_ingredients(id, quantity, unit, ingredients(id, name), notes)"
     )
     .eq("id", id)
     .single();
@@ -76,6 +76,7 @@ export const fetchRecipe = async (id) => {
     ingredients:
       data.recipe_ingredients?.map((item) => ({
         id: item.ingredients.id,
+        recipe_ingredient_id: item.id,
         name: item.ingredients.name,
         quantity: item.quantity,
         unit: item.unit,
@@ -99,9 +100,6 @@ export const createRecipe = async (recipeData) => {
     throw new Error("User not authenticated");
   }
 
-  // Get current language from i18n
-  const currentLanguage = getCurrentLanguage();
-
   // Create the main recipe record
   const cleanRecipeData = Object.fromEntries(
     Object.entries({
@@ -113,7 +111,7 @@ export const createRecipe = async (recipeData) => {
       user_id: user.id,
       link_only: recipeData.link_only,
       notes: recipeData.notes,
-      original_language: currentLanguage, // Set the original language from i18n
+      original_language: recipeData.original_language,
     }).filter(([, v]) => v !== undefined)
   );
 
@@ -140,9 +138,7 @@ export const createRecipe = async (recipeData) => {
       } else if (ingredient.name) {
         ingredientId = await getOrCreateIngredient(ingredient.name);
       } else {
-        throw new Error(
-          "Ingredient must have either ingredient_id or name"
-        );
+        throw new Error("Ingredient must have either ingredient_id or name");
       }
 
       recipeIngredientsToInsert.push({
@@ -171,6 +167,17 @@ export const createRecipe = async (recipeData) => {
 
 // Update an existing recipe
 export const updateRecipe = async (id, recipeData) => {
+  // First fetch the original recipe for smart translation updates
+  const { data: originalRecipe, error: fetchError } = await supabase
+    .from("recipes")
+    .select("title, category, instructions, notes, source")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch original recipe: ${fetchError.message}`);
+  }
+
   const cleanRecipeData = Object.fromEntries(
     Object.entries({
       title: recipeData.title,
@@ -193,6 +200,9 @@ export const updateRecipe = async (id, recipeData) => {
   if (recipeError) {
     throw new Error(recipeError.message);
   }
+
+  // Smart update translations based on what changed
+  await updateRecipeTranslations(id, originalRecipe, cleanRecipeData);
 
   // Delete existing ingredients for this recipe
   const { error: deleteError } = await supabase
@@ -219,9 +229,7 @@ export const updateRecipe = async (id, recipeData) => {
       } else if (ingredient.name) {
         ingredientId = await getOrCreateIngredient(ingredient.name);
       } else {
-        throw new Error(
-          "Ingredient must have either ingredient_id or name"
-        );
+        throw new Error("Ingredient must have either ingredient_id or name");
       }
 
       recipeIngredientsToInsert.push({

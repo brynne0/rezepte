@@ -70,6 +70,7 @@ function App() {
           selectedCategory={selectedCategory}
           recipes={recipes}
           searchTerm={searchTerm}
+          loading={loading}
         />
       </Router>
     </div>
@@ -82,6 +83,7 @@ function AppRoutes(props) {
   const { isLoggedIn } = useAuth();
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
+  const isEditRecipePage = location.pathname.startsWith("/edit-recipe/");
 
   // Refresh recipes when navigating to home page
   useEffect(() => {
@@ -100,6 +102,11 @@ function AppRoutes(props) {
     refreshRecipes();
   }, [currentLanguage, refreshRecipes]);
 
+  // Scroll to top on all navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <>
       <Header
@@ -111,6 +118,7 @@ function AppRoutes(props) {
         loginMessage={props.loginMessage}
         refreshRecipes={props.refreshRecipes}
         t={props.t}
+        disableLanguageSwitch={isEditRecipePage}
       />
       <Routes>
         <Route

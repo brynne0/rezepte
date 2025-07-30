@@ -56,7 +56,7 @@
 }
 
 .header-logo-2 {
-  color: var(--dark_pink);
+  color: var(--light_brown);
   transform: scaleX(-1);
 }
 
@@ -85,6 +85,15 @@
   color: var(--dark_red);
 }
 
+.language.disabled {
+  color: var(--light_brown);
+  opacity: 0.5;
+}
+
+.language.disabled:hover {
+  color: var(--light_brown);
+}
+
 /* Navigation */
 .header-nav {
   display: flex;
@@ -109,6 +118,7 @@
   .header-container {
     flex-direction: column;
     height: auto;
+    gap: 0.5rem;
   }
 
   .header-logo,
@@ -125,7 +135,6 @@
 
   .header-nav {
     order: 3;
-    padding-top: 0.5rem;
   }
 
   .login-wrapper {
