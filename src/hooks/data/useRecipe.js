@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { fetchRecipe } from "../../services/recipes";
 import { getTranslatedRecipe } from "../../services/translationService";
 import { useTranslation } from "react-i18next";
@@ -21,6 +22,7 @@ export const useRecipe = (id) => {
       try {
         setLoading(true);
         setError(null);
+
         
         // Fetch the original recipe
         const originalRecipe = await fetchRecipe(id);
@@ -30,6 +32,7 @@ export const useRecipe = (id) => {
         const translatedRecipe = await getTranslatedRecipe(originalRecipe, currentLanguage);
         
         setRecipe(translatedRecipe);
+
       } catch (err) {
         console.error("Error fetching recipe:", err);
         setError(err.message || "Failed to fetch recipe");

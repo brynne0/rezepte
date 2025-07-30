@@ -100,6 +100,9 @@ export const createRecipe = async (recipeData) => {
     throw new Error("User not authenticated");
   }
 
+  // Get current language from i18n
+  const currentLanguage = getCurrentLanguage();
+
   // Create the main recipe record
   const cleanRecipeData = Object.fromEntries(
     Object.entries({

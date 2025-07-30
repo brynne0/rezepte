@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { fetchRecipes } from "../../services/recipes";
 import { getTranslatedRecipeTitle } from "../../services/translationService";
 import { useTranslation } from "react-i18next";
+
 import supabase from "../../lib/supabase";
 
 // Fetch all recipes with translation
@@ -13,7 +15,7 @@ export const useRecipes = () => {
   const loadRecipes = useCallback(async () => {
     try {
       const data = await fetchRecipes();
-      
+
       // Translate only recipe titles for the current language
       const currentLanguage = i18n.language;
       const translatedRecipes = await Promise.all(
@@ -65,7 +67,7 @@ export const useRecipes = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [loadRecipes]);
+  }, [loadRecipes]); // Initial load and auth changes
 
   return { recipes, loading, refreshRecipes };
 };
