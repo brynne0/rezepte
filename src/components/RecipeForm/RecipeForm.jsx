@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import AutoResizeTextArea from "../AutoResizeTextArea";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const {
     formData,
@@ -198,10 +198,15 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       type="text"
                       value={ingredient.name || ""}
                       onChange={(e) => {
+                        // Apply language-specific capitalisation
+                        const value = i18n.language === 'de' ? 
+                          e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1).toLowerCase() :
+                          e.target.value.toLowerCase();
+                        
                         handleIngredientChange(
                           ingredient.tempId,
                           "name",
-                          e.target.value.toLowerCase(),
+                          value,
                           validationErrors.ingredients ? "ingredients" : null
                         );
                       }}
@@ -260,7 +265,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                           handleIngredientChange(
                             ingredient.tempId,
                             "notes",
-                            e.target.value
+                            e.target.value.toLowerCase()
                           )
                         }
                         className="input input--full-width input--shadow "
