@@ -1,52 +1,302 @@
 import supabase from "../lib/supabase";
 import { updateRecipeTranslations } from "./translationService";
+import pluralize from "pluralize";
 
-// Helper function to get or create ingredient by name
-const getOrCreateIngredient = async (ingredientName) => {
-  const trimmedName = ingredientName.trim();
+// Import translateText from translation.js (the DeepL service)
+const translateText = async (text, targetLanguage, sourceLanguage = null) => {
+  if (!text || text.trim() === "") {
+    return text;
+  }
 
   try {
-    // Try to find existing ingredient
-    const { data: existingIngredients, error: findError } = await supabase
-      .from("ingredients")
-      .select("id")
-      .eq("name", trimmedName);
+    const { data, error } = await supabase.functions.invoke("translate", {
+      body: {
+        text: text.trim(),
+        target_lang: targetLanguage.toUpperCase(),
+        source_lang: sourceLanguage ? sourceLanguage.toUpperCase() : null,
+      },
+    });
 
-    if (findError) {
-      throw new Error(`Error looking up ingredient: ${findError.message}`);
+    if (error) {
+      return text; // Return original text on error
     }
 
-    // If ingredient exists, return its ID
-    if (existingIngredients && existingIngredients.length > 0) {
-      return existingIngredients[0].id;
+    return data?.translatedText || text;
+  } catch {
+    return text; // Return original text on error
+  }
+};
+
+// Helper function to get English singular and plural forms
+const getEnglishForms = (ingredientName) => {
+  const trimmedName = ingredientName.trim().toLowerCase();
+  const singular = pluralize.singular(trimmedName);
+  const plural = pluralize.plural(singular);
+
+  return {
+    singular,
+    plural,
+  };
+};
+
+// Helper function to find ingredient by English name or translation
+const findIngredientByNameOrTranslation = async (
+  ingredientName,
+  currentLanguage
+) => {
+  const trimmedName = ingredientName.trim();
+  const searchName = trimmedName.toLowerCase();
+
+  // Get all ingredients with their English names and translations
+  const { data: ingredients, error } = await supabase
+    .from("ingredients")
+    .select("id, singular_name, plural_name, translated_names");
+
+  if (error) {
+    throw new Error(`Error looking up ingredients: ${error.message}`);
+  }
+
+  // If current language is English, search English names directly
+  if (currentLanguage === "en") {
+    for (const ingredient of ingredients) {
+      if (
+        ingredient.singular_name.toLowerCase() === searchName ||
+        (ingredient.plural_name &&
+          ingredient.plural_name.toLowerCase() === searchName)
+      ) {
+        return ingredient.id;
+      }
+    }
+  } else {
+    // For non-English languages, search translations first, then try English as fallback
+    for (const ingredient of ingredients) {
+      // Check translations for current language
+      const translation = ingredient.translated_names?.[currentLanguage];
+      if (translation && typeof translation === "object") {
+        if (
+          (translation.singular_name &&
+            translation.singular_name.toLowerCase() === searchName) ||
+          (translation.plural_name &&
+            translation.plural_name.toLowerCase() === searchName)
+        ) {
+          return ingredient.id;
+        }
+      }
     }
 
-    // If no ingredient exists, create new ingredient
-    const { data: newIngredient, error: createError } = await supabase
+    // Fallback 1: try to find English ingredient that matches (user might have typed English name)
+    for (const ingredient of ingredients) {
+      if (
+        ingredient.singular_name.toLowerCase() === searchName ||
+        (ingredient.plural_name &&
+          ingredient.plural_name.toLowerCase() === searchName)
+      ) {
+        // Found English match, need to add translation for current language
+        await addTranslationToIngredient(
+          ingredient.id,
+          trimmedName,
+          currentLanguage
+        );
+        return ingredient.id;
+      }
+    }
+
+    // Fallback 2: translate to English and search for that
+    try {
+      const translatedToEnglish = await translateText(trimmedName, "en");
+      const englishSearchName = translatedToEnglish.toLowerCase();
+
+      for (const ingredient of ingredients) {
+        if (
+          ingredient.singular_name.toLowerCase() === englishSearchName ||
+          (ingredient.plural_name &&
+            ingredient.plural_name.toLowerCase() === englishSearchName)
+        ) {
+          // Found English ingredient that matches the translation, add current language translation
+          await addTranslationToIngredient(
+            ingredient.id,
+            trimmedName,
+            currentLanguage
+          );
+          return ingredient.id;
+        }
+      }
+    } catch {
+      // Translation failed, continue without fallback search
+    }
+  }
+
+  return null; // No matching ingredient found
+};
+
+// Helper function to add translation to existing English ingredient
+const addTranslationToIngredient = async (
+  ingredientId,
+  originalInput,
+  targetLanguage
+) => {
+  try {
+    // Get current translations and English ingredient names
+    const { data: ingredient, error: fetchError } = await supabase
       .from("ingredients")
-      .insert([{ name: trimmedName }])
-      .select("id")
+      .select("singular_name, plural_name, translated_names")
+      .eq("id", ingredientId)
       .single();
 
-    if (createError) {
-      throw new Error(`Error creating ingredient: ${createError.message}`);
-    }
+    if (fetchError) throw fetchError;
 
-    return newIngredient.id;
-  } catch (error) {
-    console.error(
-      `Failed to get or create ingredient "${trimmedName}":`,
-      error
+    // Translate the English ingredient names to the target language
+    const singularTranslation = await translateText(
+      ingredient.singular_name,
+      targetLanguage
     );
-    throw error;
+
+    const pluralTranslation = await translateText(
+      ingredient.plural_name,
+      targetLanguage
+    );
+
+    // Use proper pluralization as fallback if translation fails
+    const fallbackPlural =
+      targetLanguage === "de"
+        ? singularTranslation.endsWith("e")
+          ? singularTranslation + "n"
+          : singularTranslation + "e"
+        : pluralize.plural(singularTranslation);
+
+    const newTranslation = {
+      singular_name: singularTranslation || originalInput.toLowerCase(),
+      plural_name: pluralTranslation || fallbackPlural,
+    };
+
+    const updatedTranslations = {
+      ...(ingredient.translated_names || {}),
+      [targetLanguage]: newTranslation,
+    };
+
+    const { error: updateError } = await supabase
+      .from("ingredients")
+      .update({ translated_names: updatedTranslations })
+      .eq("id", ingredientId);
+
+    if (updateError) {
+      throw new Error(
+        `Failed to update ingredient translations: ${updateError.message}`
+      );
+    }
+  } catch (error) {
+    throw new Error(
+      `Failed to add translation to ingredient: ${error.message}`
+    );
   }
+};
+
+// Helper function to get or create ingredient by name
+const getOrCreateIngredient = async (
+  ingredientName,
+  currentLanguage = "en"
+) => {
+  const trimmedName = ingredientName.trim();
+
+  // First, try to find existing ingredient
+  const existingIngredientId = await findIngredientByNameOrTranslation(
+    trimmedName,
+    currentLanguage
+  );
+
+  if (existingIngredientId) {
+    return existingIngredientId;
+  }
+
+  // No existing ingredient found - create new English ingredient
+  let englishSingular,
+    englishPlural,
+    translations = {};
+
+  if (currentLanguage === "en") {
+    // Creating in English - use as master
+    const { singular, plural } = getEnglishForms(trimmedName);
+    englishSingular = singular;
+    englishPlural = plural;
+  } else {
+    // Creating in non-English - need to translate to English first to get canonical name
+
+    try {
+      // Translate the non-English ingredient to English
+      const translatedToEnglish = await translateText(trimmedName, "en");
+
+      // Get proper English forms
+      const { singular, plural } = getEnglishForms(translatedToEnglish);
+      englishSingular = singular;
+      englishPlural = plural;
+
+      // Add the original language as a translation
+      const originalSingular =
+        currentLanguage === "de"
+          ? trimmedName.charAt(0).toUpperCase() +
+            trimmedName.slice(1).toLowerCase()
+          : trimmedName.toLowerCase();
+
+      const originalPlural =
+        currentLanguage === "de"
+          ? originalSingular.endsWith("e")
+            ? originalSingular + "n"
+            : originalSingular + "e"
+          : pluralize.plural(originalSingular);
+
+      translations = {
+        [currentLanguage]: {
+          singular_name: originalSingular,
+          plural_name: originalPlural,
+        },
+      };
+    } catch {
+      // Failed to translate to English, use fallback
+
+      // Fallback: use the foreign word as English (not ideal, but prevents crashes)
+      const { singular, plural } = getEnglishForms(trimmedName);
+      englishSingular = singular;
+      englishPlural = plural;
+
+      // Still add the original language
+      translations = {
+        [currentLanguage]: {
+          singular_name: trimmedName,
+          plural_name:
+            currentLanguage === "de"
+              ? trimmedName.endsWith("e")
+                ? trimmedName + "n"
+                : trimmedName + "e"
+              : pluralize.plural(trimmedName),
+        },
+      };
+    }
+  }
+
+  const { data: newIngredient, error: createError } = await supabase
+    .from("ingredients")
+    .insert([
+      {
+        singular_name: englishSingular,
+        plural_name: englishPlural,
+        translated_names:
+          Object.keys(translations).length > 0 ? translations : null,
+      },
+    ])
+    .select("id")
+    .single();
+
+  if (createError) {
+    throw new Error(`Error creating ingredient: ${createError.message}`);
+  }
+
+  return newIngredient.id;
 };
 
 // Fetch all recipes
 export const fetchRecipes = async () => {
   const { data, error } = await supabase.from("recipes").select("*");
   if (error) {
-    console.error("Error fetching recipes:", error);
     throw error;
   }
   return data || [];
@@ -61,7 +311,7 @@ export const fetchRecipe = async (id) => {
   const { data, error } = await supabase
     .from("recipes")
     .select(
-      "*, recipe_ingredients(id, quantity, unit, ingredients(id, name), notes)"
+      "*, recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes)"
     )
     .eq("id", id)
     .single();
@@ -77,7 +327,9 @@ export const fetchRecipe = async (id) => {
       data.recipe_ingredients?.map((item) => ({
         id: item.ingredients.id,
         recipe_ingredient_id: item.id,
-        name: item.ingredients.name,
+        singular_name: item.ingredients.singular_name,
+        plural_name: item.ingredients.plural_name,
+        translated_names: item.ingredients.translated_names,
         quantity: item.quantity,
         unit: item.unit,
         notes: item.notes,
@@ -136,7 +388,10 @@ export const createRecipe = async (recipeData) => {
       if (ingredient.ingredient_id) {
         ingredientId = ingredient.ingredient_id;
       } else if (ingredient.name) {
-        ingredientId = await getOrCreateIngredient(ingredient.name);
+        ingredientId = await getOrCreateIngredient(
+          ingredient.name,
+          recipeData.original_language
+        );
       } else {
         throw new Error("Ingredient must have either ingredient_id or name");
       }
@@ -155,7 +410,6 @@ export const createRecipe = async (recipeData) => {
       .insert(recipeIngredientsToInsert);
 
     if (ingredientsError) {
-      console.error("Failed to insert ingredients:", ingredientsError);
       throw new Error(
         `Recipe created but failed to add ingredients: ${ingredientsError.message}`
       );
@@ -227,7 +481,16 @@ export const updateRecipe = async (id, recipeData) => {
       if (ingredient.ingredient_id) {
         ingredientId = ingredient.ingredient_id;
       } else if (ingredient.name) {
-        ingredientId = await getOrCreateIngredient(ingredient.name);
+        // For updates, get the original language from the existing recipe
+        const { data: existingRecipe } = await supabase
+          .from("recipes")
+          .select("original_language")
+          .eq("id", id)
+          .single();
+        ingredientId = await getOrCreateIngredient(
+          ingredient.name,
+          existingRecipe?.original_language || "en"
+        );
       } else {
         throw new Error("Ingredient must have either ingredient_id or name");
       }

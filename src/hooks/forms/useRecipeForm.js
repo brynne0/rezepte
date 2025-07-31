@@ -258,7 +258,8 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
       // Only set original_language when creating a new recipe
       if (!initialRecipe) {
-        recipeData.original_language = i18n.language;
+        // Normalise language code (remove region codes like 'de-DE' -> 'de')
+        recipeData.original_language = i18n.language.split('-')[0];
       }
 
       let result;
