@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { getUserPreferredLanguage } from "../../services/userService";
 import AutoResizeTextArea from "../../components/AutoResizeTextArea";
-import AutoResizeInput from "../../components/AutoResizeInput";
 
 const GroceryList = ({
   isEditing: propIsEditing,
@@ -23,20 +22,9 @@ const GroceryList = ({
   const setIsEditing = propSetIsEditing || (() => {});
 
   const [editedList, setEditedList] = useState([]);
+  const [checkedItems, setCheckedItems] = useState(new Set());
 
   const currentList = isEditing ? editedList : groceryList;
-
-  // Calculate the maximum width needed for quantity fields
-  const calculateQuantityWidth = () => {
-    if (currentList.length === 0) return 40;
-    const testValues = currentList.map((item) => String(item.quantity || "0"));
-    const longestValue = testValues.reduce((a, b) =>
-      a.length > b.length ? a : b
-    );
-    return Math.min(Math.max(longestValue.length * 10 + 30, 40), 100);
-  };
-
-  const quantityWidth = calculateQuantityWidth();
 
   // Sync editedList with groceryList when language changes during edit mode
   useEffect(() => {
@@ -110,6 +98,16 @@ const GroceryList = ({
     }
   };
 
+  const toggleItemChecked = (itemId) => {
+    const newCheckedItems = new Set(checkedItems);
+    if (newCheckedItems.has(itemId)) {
+      newCheckedItems.delete(itemId);
+    } else {
+      newCheckedItems.add(itemId);
+    }
+    setCheckedItems(newCheckedItems);
+  };
+
   if (loading) {
     return (
       <div className="loading-acorn">
@@ -121,11 +119,15 @@ const GroceryList = ({
   return (
     <div className="card card-padded">
       <header className="page-header flex-between">
-        <ArrowBigLeft
-          className="back-arrow"
-          size={30}
-          onClick={() => navigate(-1)}
-        />
+        {!isEditing ? (
+          <ArrowBigLeft
+            className="back-arrow"
+            size={30}
+            onClick={() => navigate(-1)}
+          />
+        ) : (
+          <div style={{ width: 30, height: 30 }}></div>
+        )}
         <h1>{t("grocery_list")}</h1>
         {!isEditing ? (
           <Pencil onClick={startEditing} />
@@ -134,7 +136,7 @@ const GroceryList = ({
         )}
       </header>
 
-      <div className="list-items">
+      <div className={`grocery-list-wrapper${isEditing ? " flex-center" : ""}`}>
         {currentList.length === 0 && !isEditing ? (
           <div>
             <button
@@ -145,79 +147,101 @@ const GroceryList = ({
             </button>
           </div>
         ) : (
-          currentList.map((item, index) => {
-            // Generate a unique key using id or tempId or index as fallback
-            const itemKey = item.id || item.tempId || `item-${index}`;
-            const itemId = item.id || item.tempId || index;
+          <ul className={` ${isEditing ? "edit-list-items" : "list-items"}`}>
+            {currentList.map((item, index) => {
+              // Generate a unique key using id or tempId or index as fallback
+              const itemKey = item.id || item.tempId || `item-${index}`;
+              const itemId = item.id || item.tempId || index;
+              const isChecked = checkedItems.has(itemId);
 
-            return (
-              <div className="list-item" key={itemKey}>
-                <AutoResizeTextArea
-                  value={item.name || ""}
-                  className="input input--borderless input--full-width input--textarea"
-                  readOnly={!isEditing}
-                  placeholder={t("item_name")}
-                  onChange={(e) =>
-                    handleInputChange(index, "name", e.target.value)
-                  }
-                />
-                <AutoResizeInput
-                  id={`item-quantity-${itemId}`}
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={item.quantity || ""}
-                  className="input input--borderless"
-                  readOnly={!isEditing}
-                  placeholder={t("quantity")}
-                  minWidth={20}
-                  maxWidth={80}
-                  syncWidth={quantityWidth}
-                  onChange={(e) =>
-                    handleInputChange(
-                      index,
-                      "quantity",
-                      parseFloat(e.target.value) || 0
-                    )
-                  }
-                />
-                <select
-                  id={`item-unit-${itemId}`}
-                  value={item.unit || ""}
-                  className="input input--borderless input--full-width input--select"
-                  disabled={!isEditing}
-                  onChange={(e) =>
-                    handleInputChange(index, "unit", e.target.value)
-                  }
-                >
-                  {units &&
-                    Array.isArray(units) &&
-                    units.map((unit) => (
-                      <option key={unit.value} value={unit.value}>
-                        {unit.label}
-                      </option>
-                    ))}
-                </select>
-
-                {isEditing ? (
-                  <button
-                    className="btn btn-icon btn-icon-remove"
-                    onClick={() => removeItemFromEdit(index)}
-                    title={t("remove_item")}
-                    aria-label={t("remove_item")}
+              return isEditing ? (
+                // Edit mode
+                <li className="list-item" key={itemKey}>
+                  <AutoResizeTextArea
+                    value={item.name || ""}
+                    className="input input--borderless input--full-width input--textarea"
+                    readOnly={!isEditing}
+                    placeholder={t("item_name")}
+                    onChange={(e) =>
+                      handleInputChange(index, "name", e.target.value)
+                    }
+                  />
+                  <input
+                    id={`item-quantity-${itemId}`}
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={item.quantity || ""}
+                    className="input input--borderless input--full-width"
+                    readOnly={!isEditing}
+                    placeholder={t("quantity")}
+                    onChange={(e) =>
+                      handleInputChange(
+                        index,
+                        "quantity",
+                        parseFloat(e.target.value) || 0
+                      )
+                    }
+                  />
+                  <select
+                    id={`item-unit-${itemId}`}
+                    value={item.unit || ""}
+                    className="input input--borderless input--full-width input--select"
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      handleInputChange(index, "unit", e.target.value)
+                    }
                   >
-                    <Trash2 size={16} />
-                  </button>
-                ) : (
-                  <div
-                    className="spacer"
-                    style={{ width: 16, height: 16 }}
-                  ></div>
-                )}
-              </div>
-            );
-          })
+                    {units &&
+                      Array.isArray(units) &&
+                      units.map((unit) => (
+                        <option key={unit.value} value={unit.value}>
+                          {unit.label}
+                        </option>
+                      ))}
+                  </select>
+
+                  {isEditing ? (
+                    <button
+                      className="btn btn-icon btn-icon-remove"
+                      onClick={() => removeItemFromEdit(index)}
+                      title={t("remove_item")}
+                      aria-label={t("remove_item")}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  ) : (
+                    <div
+                      className="spacer"
+                      style={{ width: 16, height: 16 }}
+                    ></div>
+                  )}
+                </li>
+              ) : (
+                // View mode - simple layout with checkboxes
+                <li
+                  className={`list-view-item ${isChecked ? "checked" : ""}`}
+                  key={itemKey}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => toggleItemChecked(itemId)}
+                    id={`grocery-item-${itemId}`}
+                  />
+
+                  <span className="item-name">{item.name}</span>
+                  {item.quantity && item.unit && (
+                    <span className="item-details">
+                      {item.quantity} {t(`units.${item.unit}`, item.unit)}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         )}
+
         {isEditing && (
           <button
             className="btn btn-icon btn-icon-success"
