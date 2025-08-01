@@ -73,7 +73,7 @@
 .btn-icon-success-wrapper {
   display: flex;
   justify-content: center;
-  padding-top: 1rem;
+  padding-top: 0.5rem;
 }
 
 .input-wrapper {
@@ -96,7 +96,7 @@
 .form-header-wrapper {
   display: flex;
   justify-content: flex-start;
-  margin: 1rem 0 0.5rem 0;
+  margin: 0.75rem 0 0.25rem 0.25rem;
 }
 
 /* Recipe-specific components */

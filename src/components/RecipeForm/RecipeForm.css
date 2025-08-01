@@ -120,7 +120,7 @@
   .ingredient-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding-bottom: 0.5rem;
   }
   .ingredient-row:not(:only-child) {
     grid-template-columns: 1fr;
