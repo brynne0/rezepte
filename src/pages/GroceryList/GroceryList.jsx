@@ -18,6 +18,23 @@ const GroceryList = ({
   const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
 
+  // Helper function to get unit display with translation and smart fallback
+  const getUnitDisplay = (unit, quantity) => {
+    if (!unit) return "";
+    
+    // Find the unit object in the units array
+    const unitObj = units?.find(u => u.value === unit);
+    const translated = unitObj?.label || unit;
+    
+    // Simple fallback for singular/plural
+    if (translated.includes('/')) {
+      const [singular, pluralSuffix] = translated.split('/');
+      return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
+    }
+    
+    return translated;
+  };
+
   // Use prop-based editing state, fallback to local state if props not provided
   const isEditing = propIsEditing !== undefined ? propIsEditing : false;
   const setIsEditing = propSetIsEditing || (() => {});
@@ -297,9 +314,21 @@ const GroceryList = ({
                           id={`grocery-item-${item.itemId}`}
                         />
                         <span className="item-name">{item.name}</span>
-                        {item.quantity && item.unit && (
+                        {(item.quantity || item.unit) && (
                           <span className="item-details">
-                            {item.quantity} {t(`units.${item.unit}`, item.unit)}
+                            {(() => {
+                              let qty = item.quantity || "";
+                              let unit = item.unit || "";
+                              
+                              // Smart conversion for large quantities
+                              if (qty >= 1000) {
+                                if (unit === "ml") { qty = qty / 1000; unit = "l"; }
+                                else if (unit === "g") { qty = qty / 1000; unit = "kg"; }
+                              }
+                              
+                              const displayUnit = unit ? getUnitDisplay(unit, qty) : "";
+                              return `${qty}${qty && displayUnit ? " " : ""}${displayUnit}`;
+                            })()}
                           </span>
                         )}
                       </li>
@@ -307,11 +336,20 @@ const GroceryList = ({
                   } else {
                     // Multiple items - show grouped
                     const measurements = group.items
-                      .map((item) =>
-                        `${item.quantity || ""} ${
-                          t(`units.${item.unit}`, item.unit) || ""
-                        }`.trim()
-                      )
+                      .map((item) => {
+                        let qty = item.quantity || "";
+                        let unit = item.unit || "";
+                        
+                        // Smart conversion for large quantities
+                        if (qty >= 1000) {
+                          if (unit === "ml") { qty = qty / 1000; unit = "l"; }
+                          else if (unit === "g") { qty = qty / 1000; unit = "kg"; }
+                        }
+                        
+                        const displayUnit = unit ? getUnitDisplay(unit, qty) : "";
+                        const measurement = `${qty}${qty && displayUnit ? " " : ""}${displayUnit}`.trim();
+                        return measurement || null;
+                      })
                       .filter(Boolean)
                       .join(" + ");
 

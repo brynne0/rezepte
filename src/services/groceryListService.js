@@ -32,41 +32,23 @@ export const normaliseIngredientName = (name) => {
   return pluralize.singular(name.toLowerCase().trim());
 };
 
-// Helper function to convert units and combine quantities
+// Helper function to combine quantities - only handles g/kg and ml/l
 const combineQuantities = (
   existingQuantity,
   existingUnit,
   newQuantity,
   newUnit
 ) => {
-  // Unit conversion table (convert everything to ml for volumes, g for weights)
-  const conversions = {
-    // Volume conversions to ml
-    ml: 1,
-    millilitre: 1,
-    millilitres: 1,
-    l: 1000,
-    litre: 1000,
-    litres: 1000,
-    cup: 250,
-    cups: 250,
-    tbsp: 15,
-    tablespoon: 15,
-    tablespoons: 15,
-    tsp: 5,
-    teaspoon: 5,
-    teaspoons: 5,
-
-    // Weight conversions to g
-    g: 1,
-    gram: 1,
-    grams: 1,
-    kg: 1000,
-    kilogram: 1000,
-    kilograms: 1000,
+  const normaliseUnit = (unit) => {
+    if (!unit) return "";
+    const normalized = unit.toLowerCase().trim();
+    // Handle singular/plural forms - convert "cup/s" to "cup" for matching
+    if (normalized.includes("/")) {
+      return normalized.split("/")[0];
+    }
+    return normalized;
   };
 
-  const normaliseUnit = (unit) => unit.toLowerCase().trim();
   const existingUnitNorm = normaliseUnit(existingUnit);
   const newUnitNorm = normaliseUnit(newUnit);
 
@@ -74,28 +56,53 @@ const combineQuantities = (
   if (existingUnitNorm === newUnitNorm) {
     return {
       quantity: existingQuantity + newQuantity,
-      unit: existingUnit, // Keep original unit format
-    };
-  }
-
-  // Check if units are convertible
-  const existingConversion = conversions[existingUnitNorm];
-  const newConversion = conversions[newUnitNorm];
-
-  if (existingConversion && newConversion) {
-    // Convert both to base units, add, then convert back to existing unit
-    const existingInBase = existingQuantity * existingConversion;
-    const newInBase = newQuantity * newConversion;
-    const totalInBase = existingInBase + newInBase;
-    const totalInExistingUnit = totalInBase / existingConversion;
-
-    return {
-      quantity: totalInExistingUnit,
       unit: existingUnit,
     };
   }
 
-  // Units not convertible - return null to indicate separate items needed
+  // Only combine g/kg and ml/l - nothing else
+  let canCombine = false;
+  let existingInBase = existingQuantity;
+  let newInBase = newQuantity;
+
+  // Handle ml/l conversion
+  if (
+    (existingUnitNorm === "ml" && newUnitNorm === "l") ||
+    (existingUnitNorm === "l" && newUnitNorm === "ml")
+  ) {
+    canCombine = true;
+    if (existingUnitNorm === "ml") {
+      // Keep as ml: existing stays same, convert l to ml
+      newInBase = newQuantity * 1000;
+    } else {
+      // Keep as l: convert ml to l, existing stays same
+      existingInBase = existingQuantity / 1000;
+    }
+  }
+
+  // Handle g/kg conversion
+  else if (
+    (existingUnitNorm === "g" && newUnitNorm === "kg") ||
+    (existingUnitNorm === "kg" && newUnitNorm === "g")
+  ) {
+    canCombine = true;
+    if (existingUnitNorm === "g") {
+      // Keep as g: existing stays same, convert kg to g
+      newInBase = newQuantity * 1000;
+    } else {
+      // Keep as kg: convert g to kg, existing stays same
+      existingInBase = existingQuantity / 1000;
+    }
+  }
+
+  if (canCombine) {
+    return {
+      quantity: existingInBase + newInBase,
+      unit: existingUnit, // Keep original unit
+    };
+  }
+
+  // Units not convertible - return null
   return null;
 };
 
@@ -155,7 +162,7 @@ const getIngredientNameInPreferredLanguage = async (
     if (!ingredients || ingredients.length === 0) return ingredientName;
 
     const normalizedInput = normaliseIngredientName(ingredientName);
-    const shouldUsePlural = quantity && parseFloat(quantity) !== 1;
+    const shouldUsePlural = quantity && parseFloat(quantity) > 1;
 
     // Find matching ingredient
     const ingredient = ingredients.find((ing) => {
@@ -394,7 +401,7 @@ export const updateGroceryList = async (updatedList) => {
   );
 
   // Items to insert (new items without id or with tempId)
-  const itemsToInsert = updatedList
+  let itemsToInsert = updatedList
     .filter(
       (item) => !item.id || (item.tempId && item.tempId.startsWith("temp-"))
     )
@@ -403,6 +410,118 @@ export const updateGroceryList = async (updatedList) => {
         // Only insert items that have a name (avoid empty items)
         item.name && item.name.trim() !== ""
     );
+
+  // Combine new items with existing ones and among themselves
+  const finalItemsToInsert = [];
+  const combinedUpdates = new Map();
+
+  for (const newItem of itemsToInsert) {
+    const preferredLanguageName = await getIngredientNameInPreferredLanguage(
+      newItem.name.trim(),
+      newItem.quantity,
+      userPreferredLang
+    );
+
+    // First check if this item can be combined with existing items
+    const existingItem = await findEquivalentGroceryItem(
+      preferredLanguageName,
+      newItem.unit,
+      currentItems
+    );
+
+    if (existingItem && newItem.quantity && existingItem.quantity) {
+      const combinedResult = combineQuantities(
+        existingItem.quantity,
+        existingItem.unit,
+        parseFloat(newItem.quantity),
+        newItem.unit
+      );
+
+      if (combinedResult) {
+        // Can combine with existing - update existing item
+        const updatedRecipes = [
+          ...new Set(
+            [
+              ...(existingItem.source_recipes || []),
+              ...(newItem.source_recipes || []),
+            ].filter(Boolean)
+          ),
+        ];
+        combinedUpdates.set(existingItem.id, {
+          id: existingItem.id,
+          quantity: combinedResult.quantity,
+          unit: combinedResult.unit,
+          source_recipes: updatedRecipes,
+        });
+        continue;
+      }
+    }
+
+    // Check if this item can be combined with other new items already processed
+    const existingNewItem = finalItemsToInsert.find((item) => {
+      const itemNormalized = normaliseIngredientName(item.name);
+      const newItemNormalized = normaliseIngredientName(preferredLanguageName);
+      return itemNormalized === newItemNormalized && item.unit === newItem.unit;
+    });
+
+    if (existingNewItem && newItem.quantity && existingNewItem.quantity) {
+      const combinedResult = combineQuantities(
+        existingNewItem.quantity,
+        existingNewItem.unit,
+        parseFloat(newItem.quantity),
+        newItem.unit
+      );
+
+      if (combinedResult) {
+        // Can combine with existing new item
+        existingNewItem.quantity = combinedResult.quantity;
+        existingNewItem.unit = combinedResult.unit;
+        existingNewItem.source_recipes = [
+          ...new Set(
+            [
+              ...(existingNewItem.source_recipes || []),
+              ...(newItem.source_recipes || []),
+            ].filter(Boolean)
+          ),
+        ];
+        continue;
+      }
+    }
+
+    // Cannot combine - add as new item
+    finalItemsToInsert.push({
+      user_id: user.id,
+      name: preferredLanguageName,
+      quantity: parseFloat(newItem.quantity) || 0,
+      unit: newItem.unit || "",
+      source_recipes: newItem.source_recipes || [],
+    });
+  }
+
+  // Add combined updates to itemsToUpdate
+  for (const combinedUpdate of combinedUpdates.values()) {
+    // Remove any existing update for this item and replace with combined
+    const existingUpdateIndex = itemsToUpdate.findIndex(
+      (item) => item.id === combinedUpdate.id
+    );
+    if (existingUpdateIndex >= 0) {
+      itemsToUpdate[existingUpdateIndex] = {
+        ...itemsToUpdate[existingUpdateIndex],
+        quantity: combinedUpdate.quantity,
+        unit: combinedUpdate.unit,
+        source_recipes: [
+          ...new Set(
+            [
+              ...(itemsToUpdate[existingUpdateIndex].source_recipes || []),
+              ...combinedUpdate.source_recipes,
+            ].filter(Boolean)
+          ),
+        ],
+      };
+    } else {
+      itemsToUpdate.push(combinedUpdate);
+    }
+  }
 
   // Delete removed items
   if (itemsToDelete.length > 0) {
@@ -419,51 +538,35 @@ export const updateGroceryList = async (updatedList) => {
 
   // Update existing items
   for (const item of itemsToUpdate) {
-    // Translate item name to user's preferred language
-    const preferredLanguageName = await getIngredientNameInPreferredLanguage(
-      item.name,
-      item.quantity,
-      userPreferredLang
-    );
+    // Translate item name to user's preferred language if it's not a combined update
+    const updateData = {
+      quantity: parseFloat(item.quantity) || 0,
+      unit: item.unit,
+      source_recipes: item.source_recipes || [],
+    };
+
+    if (item.name) {
+      const preferredLanguageName = await getIngredientNameInPreferredLanguage(
+        item.name,
+        item.quantity,
+        userPreferredLang
+      );
+      updateData.name = preferredLanguageName;
+    }
 
     const { error: updateError } = await supabase
       .from("grocery_items")
-      .update({
-        name: preferredLanguageName,
-        quantity: parseFloat(item.quantity) || 0,
-        unit: item.unit,
-        source_recipes: item.source_recipes || [],
-      })
+      .update(updateData)
       .eq("id", item.id);
 
     if (updateError) throw updateError;
   }
 
   // Insert new items
-  if (itemsToInsert.length > 0) {
-    const itemsWithUserId = await Promise.all(
-      itemsToInsert.map(async (item) => {
-        // Translate item name to user's preferred language
-        const preferredLanguageName =
-          await getIngredientNameInPreferredLanguage(
-            item.name.trim(),
-            item.quantity,
-            userPreferredLang
-          );
-
-        return {
-          user_id: user.id,
-          name: preferredLanguageName,
-          quantity: parseFloat(item.quantity) || 0,
-          unit: item.unit || "",
-          source_recipes: item.source_recipes || [],
-        };
-      })
-    );
-
+  if (finalItemsToInsert.length > 0) {
     const { error: insertError } = await supabase
       .from("grocery_items")
-      .insert(itemsWithUserId);
+      .insert(finalItemsToInsert);
 
     if (insertError) throw insertError;
   }
