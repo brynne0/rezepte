@@ -7,23 +7,7 @@
 
 .list-item {
   display: flex;
-  gap: 0.5rem;
   align-items: flex-start;
-}
-
-/* First input - name field (now textarea) */
-.list-item .input--borderless:nth-child(1) {
-  flex: 2;
-}
-
-/* Second input - quantity field */
-.list-item .input--borderless:nth-child(2) {
-  flex: 0 0 70px;
-}
-
-/* Third input - unit select */
-.list-item .input--borderless:nth-child(3) {
-  flex: 0 0 100px;
 }
 
 .spacer {

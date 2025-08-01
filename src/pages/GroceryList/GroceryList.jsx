@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { getUserPreferredLanguage } from "../../services/userService";
 import AutoResizeTextArea from "../../components/AutoResizeTextArea";
+import AutoResizeInput from "../../components/AutoResizeInput";
 
 const GroceryList = ({
   isEditing: propIsEditing,
@@ -22,6 +23,20 @@ const GroceryList = ({
   const setIsEditing = propSetIsEditing || (() => {});
 
   const [editedList, setEditedList] = useState([]);
+
+  const currentList = isEditing ? editedList : groceryList;
+
+  // Calculate the maximum width needed for quantity fields
+  const calculateQuantityWidth = () => {
+    if (currentList.length === 0) return 40;
+    const testValues = currentList.map((item) => String(item.quantity || "0"));
+    const longestValue = testValues.reduce((a, b) =>
+      a.length > b.length ? a : b
+    );
+    return Math.min(Math.max(longestValue.length * 10 + 30, 40), 100);
+  };
+
+  const quantityWidth = calculateQuantityWidth();
 
   // Sync editedList with groceryList when language changes during edit mode
   useEffect(() => {
@@ -95,8 +110,6 @@ const GroceryList = ({
     }
   };
 
-  const currentList = isEditing ? editedList : groceryList;
-
   if (loading) {
     return (
       <div className="loading-acorn">
@@ -148,15 +161,18 @@ const GroceryList = ({
                     handleInputChange(index, "name", e.target.value)
                   }
                 />
-                <input
+                <AutoResizeInput
                   id={`item-quantity-${itemId}`}
                   type="number"
                   min="0"
                   step="0.1"
                   value={item.quantity || ""}
-                  className="input input--borderless input--full-width"
+                  className="input input--borderless"
                   readOnly={!isEditing}
                   placeholder={t("quantity")}
+                  minWidth={20}
+                  maxWidth={80}
+                  syncWidth={quantityWidth}
                   onChange={(e) =>
                     handleInputChange(
                       index,
