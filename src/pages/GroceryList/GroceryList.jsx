@@ -184,7 +184,7 @@ const GroceryList = ({
         )}
         <h1>{t("grocery_list")}</h1>
         {!isEditing ? (
-          <Pencil onClick={startEditing} />
+          <Pencil onClick={startEditing} className="btn btn-icon" />
         ) : (
           <div style={{ width: 24, height: 24 }}></div>
         )}
@@ -192,7 +192,7 @@ const GroceryList = ({
 
       <div className={`grocery-list-wrapper${isEditing ? " flex-center" : ""}`}>
         {currentList.length === 0 && !isEditing ? (
-          <div>
+          <div className="flex-center">
             <button
               className="btn btn-icon btn-icon-success"
               onClick={addNewItem}
@@ -348,7 +348,6 @@ const GroceryList = ({
       </div>
 
       {isEditing && (
-        // TODO
         <div className="btn-wrapper">
           <button
             className="btn btn-action btn-secondary"
