@@ -41,7 +41,6 @@
 }
 
 .input--textarea {
-  line-height: 1.5;
   resize: none;
   height: auto;
   overflow-y: hidden;

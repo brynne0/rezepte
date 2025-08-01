@@ -6,8 +6,12 @@ import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { getUserPreferredLanguage } from "../../services/userService";
+import AutoResizeTextArea from "../../components/AutoResizeTextArea";
 
-const GroceryList = ({ isEditing: propIsEditing, setIsEditing: propSetIsEditing }) => {
+const GroceryList = ({
+  isEditing: propIsEditing,
+  setIsEditing: propSetIsEditing,
+}) => {
   const { groceryList, updateGroceryList, loading } = useGroceryList();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -16,7 +20,7 @@ const GroceryList = ({ isEditing: propIsEditing, setIsEditing: propSetIsEditing 
   // Use prop-based editing state, fallback to local state if props not provided
   const isEditing = propIsEditing !== undefined ? propIsEditing : false;
   const setIsEditing = propSetIsEditing || (() => {});
-  
+
   const [editedList, setEditedList] = useState([]);
 
   // Sync editedList with groceryList when language changes during edit mode
@@ -26,8 +30,6 @@ const GroceryList = ({ isEditing: propIsEditing, setIsEditing: propSetIsEditing 
     }
   }, [groceryList, isEditing]);
 
-
-
   const startEditing = async () => {
     try {
       // Get user's preferred language and switch to it
@@ -35,11 +37,11 @@ const GroceryList = ({ isEditing: propIsEditing, setIsEditing: propSetIsEditing 
       if (i18n.language !== preferredLanguage) {
         i18n.changeLanguage(preferredLanguage);
       }
-      
+
       setIsEditing(true);
       setEditedList([...groceryList]); // Create a copy to edit
     } catch (error) {
-      console.error('Error switching to preferred language:', error);
+      console.error("Error switching to preferred language:", error);
       setIsEditing(true);
       setEditedList([...groceryList]);
     }
@@ -137,11 +139,9 @@ const GroceryList = ({ isEditing: propIsEditing, setIsEditing: propSetIsEditing 
 
             return (
               <div className="list-item" key={itemKey}>
-                <input
-                  id={`item-name-${itemId}`}
-                  type="text"
+                <AutoResizeTextArea
                   value={item.name || ""}
-                  className="input input--borderless input--full-width"
+                  className="input input--borderless input--full-width input--textarea"
                   readOnly={!isEditing}
                   placeholder={t("item_name")}
                   onChange={(e) =>

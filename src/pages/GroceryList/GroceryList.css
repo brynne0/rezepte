@@ -3,16 +3,15 @@
   align-items: center;
   flex-direction: column;
   width: 100%;
-  gap: 0.5rem;
 }
 
 .list-item {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
+  align-items: flex-start;
 }
 
-/* First input - name field */
+/* First input - name field (now textarea) */
 .list-item .input--borderless:nth-child(1) {
   flex: 2;
 }
