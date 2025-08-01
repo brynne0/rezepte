@@ -21,19 +21,20 @@ const GroceryList = ({
   // Helper function to get unit display with translation and smart fallback
   const getUnitDisplay = (unit, quantity) => {
     if (!unit) return "";
-    
+
     // Find the unit object in the units array
-    const unitObj = units?.find(u => u.value === unit);
+    const unitObj = units?.find((u) => u.value === unit);
     const translated = unitObj?.label || unit;
-    
+
     // Simple fallback for singular/plural
-    if (translated.includes('/')) {
-      const [singular, pluralSuffix] = translated.split('/');
+    if (translated.includes("/")) {
+      const [singular, pluralSuffix] = translated.split("/");
       return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
     }
-    
+
     return translated;
   };
+
 
   // Use prop-based editing state, fallback to local state if props not provided
   const isEditing = propIsEditing !== undefined ? propIsEditing : false;
@@ -123,8 +124,9 @@ const GroceryList = ({
       await startEditing();
     }
 
+    const newTempId = `temp-${Date.now()}`;
     const newItem = {
-      tempId: `temp-${Date.now()}`,
+      tempId: newTempId,
       name: "",
       quantity: "",
       unit: "",
@@ -139,6 +141,14 @@ const GroceryList = ({
     if (!isEditing) {
       setIsEditing(true);
     }
+
+    // Focus on the new item's name input
+    setTimeout(() => {
+      const newItemNameInput = document.getElementById(`item-name-${newTempId}`);
+      if (newItemNameInput) {
+        newItemNameInput.focus();
+      }
+    }, 10);
   };
 
   const toggleItemChecked = (itemId) => {
@@ -229,6 +239,7 @@ const GroceryList = ({
                   return (
                     <li className="list-item" key={itemKey}>
                       <AutoResizeTextArea
+                        id={`item-name-${itemId}`}
                         value={item.name || ""}
                         className="input input--borderless input--full-width input--textarea"
                         readOnly={!isEditing}
@@ -319,15 +330,24 @@ const GroceryList = ({
                             {(() => {
                               let qty = item.quantity || "";
                               let unit = item.unit || "";
-                              
+
                               // Smart conversion for large quantities
                               if (qty >= 1000) {
-                                if (unit === "ml") { qty = qty / 1000; unit = "l"; }
-                                else if (unit === "g") { qty = qty / 1000; unit = "kg"; }
+                                if (unit === "ml") {
+                                  qty = qty / 1000;
+                                  unit = "l";
+                                } else if (unit === "g") {
+                                  qty = qty / 1000;
+                                  unit = "kg";
+                                }
                               }
-                              
-                              const displayUnit = unit ? getUnitDisplay(unit, qty) : "";
-                              return `${qty}${qty && displayUnit ? " " : ""}${displayUnit}`;
+
+                              const displayUnit = unit
+                                ? getUnitDisplay(unit, qty)
+                                : "";
+                              return `${qty}${
+                                qty && displayUnit ? " " : ""
+                              }${displayUnit}`;
                             })()}
                           </span>
                         )}
@@ -339,15 +359,24 @@ const GroceryList = ({
                       .map((item) => {
                         let qty = item.quantity || "";
                         let unit = item.unit || "";
-                        
+
                         // Smart conversion for large quantities
                         if (qty >= 1000) {
-                          if (unit === "ml") { qty = qty / 1000; unit = "l"; }
-                          else if (unit === "g") { qty = qty / 1000; unit = "kg"; }
+                          if (unit === "ml") {
+                            qty = qty / 1000;
+                            unit = "l";
+                          } else if (unit === "g") {
+                            qty = qty / 1000;
+                            unit = "kg";
+                          }
                         }
-                        
-                        const displayUnit = unit ? getUnitDisplay(unit, qty) : "";
-                        const measurement = `${qty}${qty && displayUnit ? " " : ""}${displayUnit}`.trim();
+
+                        const displayUnit = unit
+                          ? getUnitDisplay(unit, qty)
+                          : "";
+                        const measurement = `${qty}${
+                          qty && displayUnit ? " " : ""
+                        }${displayUnit}`.trim();
                         return measurement || null;
                       })
                       .filter(Boolean)

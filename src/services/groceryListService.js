@@ -32,6 +32,37 @@ export const normaliseIngredientName = (name) => {
   return pluralize.singular(name.toLowerCase().trim());
 };
 
+// Helper function to check if two units can be converted/combined
+const canUnitsBeConverted = (unit1, unit2) => {
+  const normaliseUnit = (unit) => {
+    if (!unit) return "";
+    const normalized = unit.toLowerCase().trim();
+    // Handle singular/plural forms - convert "cup/s" to "cup" for matching
+    if (normalized.includes("/")) {
+      return normalized.split("/")[0];
+    }
+    return normalized;
+  };
+
+  const unit1Norm = normaliseUnit(unit1);
+  const unit2Norm = normaliseUnit(unit2);
+
+  // Same units can always be combined
+  if (unit1Norm === unit2Norm) return true;
+
+  // Check specific convertible pairs
+  const convertiblePairs = [
+    ["ml", "l"],
+    ["g", "kg"],
+  ];
+
+  return convertiblePairs.some(
+    ([a, b]) =>
+      (unit1Norm === a && unit2Norm === b) ||
+      (unit1Norm === b && unit2Norm === a)
+  );
+};
+
 // Helper function to combine quantities - only handles g/kg and ml/l
 const combineQuantities = (
   existingQuantity,
@@ -193,7 +224,33 @@ const getIngredientNameInPreferredLanguage = async (
       return false;
     });
 
-    if (!ingredient) return ingredientName;
+    if (!ingredient) {
+      // Ingredient not found in database - use translation API for pluralization
+      if (!shouldUsePlural) {
+        return ingredientName;
+      }
+
+      try {
+        // Get the plural form using pluralize library, then translate it
+        const pluralForm = pluralize.plural(ingredientName);
+
+        // If target language is English, return the pluralized form
+        if (targetLanguage === "en") {
+          return pluralForm;
+        }
+
+        // For other languages, translate the plural form
+        const translatedPlural = await translateText(
+          pluralForm,
+          targetLanguage,
+          "en"
+        );
+        return translatedPlural || pluralForm;
+      } catch (error) {
+        console.error("Error translating plural form:", error);
+        return ingredientName; // Return original on error
+      }
+    }
 
     // Return name in target language with correct singular/plural
     if (targetLanguage === "en") {
@@ -264,11 +321,24 @@ const findEquivalentGroceryItem = async (ingredientName, unit, currentList) => {
       return false;
     });
 
-    if (!ingredient) return null;
+    if (!ingredient) {
+      // Ingredient not in database - use simple name normalisation as fallback
+      return currentList.find((item) => {
+        // Check for exact unit match OR convertible units (g/kg, ml/l)
+        if (!canUnitsBeConverted(item.unit, unit)) return false;
+
+        // Simple name comparison using normalszation
+        const itemNormalized = normaliseIngredientName(item.name);
+        const inputNormalized = normaliseIngredientName(ingredientName);
+
+        return itemNormalized === inputNormalized;
+      });
+    }
 
     // Check if any current list item matches this ingredient
     return currentList.find((item) => {
-      if (item.unit !== unit) return false;
+      // Check for exact unit match OR convertible units (g/kg, ml/l)
+      if (!canUnitsBeConverted(item.unit, unit)) return false;
 
       const itemName = normaliseIngredientName(item.name);
 
@@ -447,8 +517,18 @@ export const updateGroceryList = async (updatedList) => {
             ].filter(Boolean)
           ),
         ];
+
+        // Get the correct ingredient name for the combined quantity
+        const updatedIngredientName =
+          await getIngredientNameInPreferredLanguage(
+            existingItem.name,
+            combinedResult.quantity,
+            userPreferredLang
+          );
+
         combinedUpdates.set(existingItem.id, {
           id: existingItem.id,
+          name: updatedIngredientName,
           quantity: combinedResult.quantity,
           unit: combinedResult.unit,
           source_recipes: updatedRecipes,
@@ -461,7 +541,14 @@ export const updateGroceryList = async (updatedList) => {
     const existingNewItem = finalItemsToInsert.find((item) => {
       const itemNormalized = normaliseIngredientName(item.name);
       const newItemNormalized = normaliseIngredientName(preferredLanguageName);
-      return itemNormalized === newItemNormalized && item.unit === newItem.unit;
+      const namesMatch = itemNormalized === newItemNormalized;
+
+      // Check if units can be combined (exact match OR convertible units)
+      const exactUnitMatch = item.unit === newItem.unit;
+      const convertibleUnits = canUnitsBeConverted(item.unit, newItem.unit);
+      const unitsCanCombine = exactUnitMatch || convertibleUnits;
+
+      return namesMatch && unitsCanCombine;
     });
 
     if (existingNewItem && newItem.quantity && existingNewItem.quantity) {
@@ -484,6 +571,14 @@ export const updateGroceryList = async (updatedList) => {
             ].filter(Boolean)
           ),
         ];
+
+        // Update ingredient name to correct singular/plural form based on new quantity
+        existingNewItem.name = await getIngredientNameInPreferredLanguage(
+          existingNewItem.name,
+          combinedResult.quantity,
+          userPreferredLang
+        );
+
         continue;
       }
     }
@@ -507,6 +602,7 @@ export const updateGroceryList = async (updatedList) => {
     if (existingUpdateIndex >= 0) {
       itemsToUpdate[existingUpdateIndex] = {
         ...itemsToUpdate[existingUpdateIndex],
+        name: combinedUpdate.name, // Include the updated name
         quantity: combinedUpdate.quantity,
         unit: combinedUpdate.unit,
         source_recipes: [
