@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { getUserPreferredLanguage } from "../../services/userService";
+import { normaliseIngredientName } from "../../services/groceryListService";
 import AutoResizeTextArea from "../../components/AutoResizeTextArea";
 
 const GroceryList = ({
@@ -25,6 +26,31 @@ const GroceryList = ({
   const [checkedItems, setCheckedItems] = useState(new Set());
 
   const currentList = isEditing ? editedList : groceryList;
+
+  // Group ingredients by normalised name for display
+  const groupIngredients = (items) => {
+    const groups = {};
+
+    items.forEach((item, index) => {
+      const normalisedName = normaliseIngredientName(item.name);
+      const itemId = item.id || item.tempId || index;
+
+      if (!groups[normalisedName]) {
+        groups[normalisedName] = {
+          displayName: item.name, // Use first occurrence for display
+          items: [],
+        };
+      }
+
+      groups[normalisedName].items.push({
+        ...item,
+        itemId,
+        originalIndex: index,
+      });
+    });
+
+    return Object.values(groups);
+  };
 
   // Sync editedList with groceryList when language changes during edit mode
   useEffect(() => {
@@ -100,11 +126,39 @@ const GroceryList = ({
 
   const toggleItemChecked = (itemId) => {
     const newCheckedItems = new Set(checkedItems);
-    if (newCheckedItems.has(itemId)) {
-      newCheckedItems.delete(itemId);
-    } else {
-      newCheckedItems.add(itemId);
+    const clickedItem = currentList.find(
+      (item) => (item.id || item.tempId || currentList.indexOf(item)) === itemId
+    );
+
+    if (!clickedItem) {
+      return;
     }
+
+    const normalisedClickedName = normaliseIngredientName(clickedItem.name);
+
+    // Find all items with the same normalised ingredient name
+    const relatedItems = currentList.filter(
+      (item) => normaliseIngredientName(item.name) === normalisedClickedName
+    );
+
+    const isCurrentlyChecked = newCheckedItems.has(itemId);
+
+    if (isCurrentlyChecked) {
+      // Unchecking - remove all related items
+      relatedItems.forEach((item) => {
+        const relatedItemId =
+          item.id || item.tempId || currentList.indexOf(item);
+        newCheckedItems.delete(relatedItemId);
+      });
+    } else {
+      // Checking - add all related items
+      relatedItems.forEach((item) => {
+        const relatedItemId =
+          item.id || item.tempId || currentList.indexOf(item);
+        newCheckedItems.add(relatedItemId);
+      });
+    }
+
     setCheckedItems(newCheckedItems);
   };
 
@@ -148,97 +202,138 @@ const GroceryList = ({
           </div>
         ) : (
           <ul className={` ${isEditing ? "edit-list-items" : "list-items"}`}>
-            {currentList.map((item, index) => {
-              // Generate a unique key using id or tempId or index as fallback
-              const itemKey = item.id || item.tempId || `item-${index}`;
-              const itemId = item.id || item.tempId || index;
-              const isChecked = checkedItems.has(itemId);
+            {isEditing
+              ? // Edit mode - show individual items
+                currentList.map((item, index) => {
+                  // Generate a unique key using id or tempId or index as fallback
+                  const itemKey = item.id || item.tempId || `item-${index}`;
+                  const itemId = item.id || item.tempId || index;
 
-              return isEditing ? (
-                // Edit mode
-                <li className="list-item" key={itemKey}>
-                  <AutoResizeTextArea
-                    value={item.name || ""}
-                    className="input input--borderless input--full-width input--textarea"
-                    readOnly={!isEditing}
-                    placeholder={t("item_name")}
-                    onChange={(e) =>
-                      handleInputChange(index, "name", e.target.value)
-                    }
-                  />
-                  <input
-                    id={`item-quantity-${itemId}`}
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={item.quantity || ""}
-                    className="input input--borderless input--full-width"
-                    readOnly={!isEditing}
-                    placeholder={t("quantity")}
-                    onChange={(e) =>
-                      handleInputChange(
-                        index,
-                        "quantity",
-                        parseFloat(e.target.value) || 0
+                  return (
+                    <li className="list-item" key={itemKey}>
+                      <AutoResizeTextArea
+                        value={item.name || ""}
+                        className="input input--borderless input--full-width input--textarea"
+                        readOnly={!isEditing}
+                        placeholder={t("item_name")}
+                        onChange={(e) =>
+                          handleInputChange(index, "name", e.target.value)
+                        }
+                      />
+                      <input
+                        id={`item-quantity-${itemId}`}
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        value={item.quantity || ""}
+                        className="input input--borderless input--full-width"
+                        readOnly={!isEditing}
+                        placeholder={t("quantity")}
+                        onChange={(e) =>
+                          handleInputChange(
+                            index,
+                            "quantity",
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
+                      />
+                      <select
+                        id={`item-unit-${itemId}`}
+                        value={item.unit || ""}
+                        className="input input--borderless input--full-width input--select"
+                        disabled={!isEditing}
+                        onChange={(e) =>
+                          handleInputChange(index, "unit", e.target.value)
+                        }
+                      >
+                        {units &&
+                          Array.isArray(units) &&
+                          units.map((unit) => (
+                            <option key={unit.value} value={unit.value}>
+                              {unit.label}
+                            </option>
+                          ))}
+                      </select>
+
+                      {isEditing ? (
+                        <button
+                          className="btn btn-icon btn-icon-remove"
+                          onClick={() => removeItemFromEdit(index)}
+                          title={t("remove_item")}
+                          aria-label={t("remove_item")}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      ) : (
+                        <div
+                          className="spacer"
+                          style={{ width: 16, height: 16 }}
+                        ></div>
+                      )}
+                    </li>
+                  );
+                })
+              : // View mode - show grouped ingredients
+                groupIngredients(currentList).map((group, groupIndex) => {
+                  const groupKey = `group-${groupIndex}`;
+                  const firstItem = group.items[0];
+                  const firstItemId = firstItem.itemId;
+                  const isGroupChecked = checkedItems.has(firstItemId);
+
+                  if (group.items.length === 1) {
+                    // Single item - display normally
+                    const item = group.items[0];
+                    return (
+                      <li
+                        className={`list-view-item ${
+                          isGroupChecked ? "checked" : ""
+                        }`}
+                        key={groupKey}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isGroupChecked}
+                          onChange={() => toggleItemChecked(item.itemId)}
+                          id={`grocery-item-${item.itemId}`}
+                        />
+                        <span className="item-name">{item.name}</span>
+                        {item.quantity && item.unit && (
+                          <span className="item-details">
+                            {item.quantity} {t(`units.${item.unit}`, item.unit)}
+                          </span>
+                        )}
+                      </li>
+                    );
+                  } else {
+                    // Multiple items - show grouped
+                    const measurements = group.items
+                      .map((item) =>
+                        `${item.quantity || ""} ${
+                          t(`units.${item.unit}`, item.unit) || ""
+                        }`.trim()
                       )
-                    }
-                  />
-                  <select
-                    id={`item-unit-${itemId}`}
-                    value={item.unit || ""}
-                    className="input input--borderless input--full-width input--select"
-                    disabled={!isEditing}
-                    onChange={(e) =>
-                      handleInputChange(index, "unit", e.target.value)
-                    }
-                  >
-                    {units &&
-                      Array.isArray(units) &&
-                      units.map((unit) => (
-                        <option key={unit.value} value={unit.value}>
-                          {unit.label}
-                        </option>
-                      ))}
-                  </select>
+                      .filter(Boolean)
+                      .join(" + ");
 
-                  {isEditing ? (
-                    <button
-                      className="btn btn-icon btn-icon-remove"
-                      onClick={() => removeItemFromEdit(index)}
-                      title={t("remove_item")}
-                      aria-label={t("remove_item")}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  ) : (
-                    <div
-                      className="spacer"
-                      style={{ width: 16, height: 16 }}
-                    ></div>
-                  )}
-                </li>
-              ) : (
-                // View mode - simple layout with checkboxes
-                <li
-                  className={`list-view-item ${isChecked ? "checked" : ""}`}
-                  key={itemKey}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => toggleItemChecked(itemId)}
-                    id={`grocery-item-${itemId}`}
-                  />
-
-                  <span className="item-name">{item.name}</span>
-                  {item.quantity && item.unit && (
-                    <span className="item-details">
-                      {item.quantity} {t(`units.${item.unit}`, item.unit)}
-                    </span>
-                  )}
-                </li>
-              );
-            })}
+                    return (
+                      <li
+                        className={`list-view-item ${
+                          isGroupChecked ? "checked" : ""
+                        }`}
+                        key={groupKey}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isGroupChecked}
+                          onChange={() => toggleItemChecked(firstItemId)}
+                          id={`grocery-item-${firstItemId}`}
+                        />
+                        <span className="item-name">{group.displayName}</span>
+                        <span className="item-details">{measurements} </span>
+                      </li>
+                    );
+                  }
+                })}
           </ul>
         )}
 

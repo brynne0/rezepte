@@ -28,7 +28,7 @@ const translateText = async (text, targetLanguage, sourceLanguage = null) => {
 };
 
 // Helper function to normalise ingredient names for comparison
-const normaliseIngredientName = (name) => {
+export const normaliseIngredientName = (name) => {
   return pluralize.singular(name.toLowerCase().trim());
 };
 
