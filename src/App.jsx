@@ -27,6 +27,7 @@ function App() {
   const { recipes, loading, refreshRecipes } = useRecipes();
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("en");
+  const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const { t } = useTranslation();
 
   // Categories
@@ -71,6 +72,8 @@ function App() {
           recipes={recipes}
           searchTerm={searchTerm}
           loading={loading}
+          isGroceryListEditing={isGroceryListEditing}
+          setIsGroceryListEditing={setIsGroceryListEditing}
         />
       </Router>
     </div>
@@ -84,6 +87,14 @@ function AppRoutes(props) {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const isEditRecipePage = location.pathname.startsWith("/edit-recipe/");
+  const isGroceryListPage = location.pathname === "/grocery-list";
+
+  // Reset grocery list editing state when leaving the grocery list page
+  useEffect(() => {
+    if (!isGroceryListPage && props.isGroceryListEditing) {
+      props.setIsGroceryListEditing(false);
+    }
+  }, [isGroceryListPage, props.isGroceryListEditing, props.setIsGroceryListEditing]);
 
   // Refresh recipes when navigating to home page
   useEffect(() => {
@@ -118,7 +129,7 @@ function AppRoutes(props) {
         loginMessage={props.loginMessage}
         refreshRecipes={props.refreshRecipes}
         t={props.t}
-        disableLanguageSwitch={isEditRecipePage}
+        disableLanguageSwitch={isEditRecipePage || props.isGroceryListEditing}
       />
       <Routes>
         <Route
@@ -148,7 +159,15 @@ function AppRoutes(props) {
           path="/edit-recipe/:id/:slug"
           element={<EditRecipePage categories={props.categories} />}
         />
-        <Route path="/grocery-list" element={<GroceryList />} />
+        <Route 
+          path="/grocery-list" 
+          element={
+            <GroceryList 
+              isEditing={props.isGroceryListEditing}
+              setIsEditing={props.setIsGroceryListEditing}
+            />
+          } 
+        />
         <Route
           path="/auth-page"
           element={<AuthPage setLoginMessage={props.setLoginMessage} />}

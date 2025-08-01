@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import {
   fetchGroceryList,
+  fetchGroceryListForDisplay,
   updateGroceryList,
   addIngredientsToGroceryList,
   clearGroceryList,
   removeFromGroceryList,
 } from "../../services/groceryListService";
+import { useTranslation } from "react-i18next";
 
 export const useGroceryList = () => {
   const [groceryList, setGroceryList] = useState([]);
@@ -13,6 +15,7 @@ export const useGroceryList = () => {
   const [checkedIngredients, setCheckedIngredients] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { i18n } = useTranslation();
 
   // Handle checkbox change
   const handleCheckboxChange = (ingredientId) => {
@@ -27,7 +30,8 @@ export const useGroceryList = () => {
     const loadGroceryList = async () => {
       try {
         setLoading(true);
-        const data = await fetchGroceryList();
+        const currentLanguage = i18n.language.split('-')[0]; // Normalize language code
+        const data = await fetchGroceryListForDisplay(currentLanguage);
         setGroceryList(data);
         setError(null);
       } catch (err) {
@@ -39,7 +43,7 @@ export const useGroceryList = () => {
     };
 
     loadGroceryList();
-  }, []);
+  }, [i18n.language]);
 
   // Update grocery list
   const handleUpdateGroceryList = async (updatedList) => {
@@ -58,7 +62,7 @@ export const useGroceryList = () => {
   };
 
   // Add selected ingredients to grocery list
-  const addToGroceryList = async (recipeIngredients, recipeTitle = "") => {
+  const addToGroceryList = async (recipeIngredients, recipeTitle = "", recipeId = null) => {
     const selectedIngredients = recipeIngredients.filter(
       (ingredient) => checkedIngredients[ingredient.id]
     );
@@ -69,11 +73,16 @@ export const useGroceryList = () => {
 
     try {
       setLoading(true);
-      const data = await addIngredientsToGroceryList(
+      await addIngredientsToGroceryList(
         recipeIngredients,
         checkedIngredients,
-        recipeTitle
+        recipeTitle,
+        recipeId
       );
+      
+      // Reload grocery list with current language
+      const currentLanguage = i18n.language.split('-')[0];
+      const data = await fetchGroceryListForDisplay(currentLanguage);
       setGroceryList(data);
 
       // Show success message

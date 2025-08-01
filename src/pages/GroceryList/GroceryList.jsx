@@ -3,22 +3,46 @@ import { useGroceryList } from "../../hooks/data/useGroceryList";
 import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import { getUserPreferredLanguage } from "../../services/userService";
 
-const GroceryList = () => {
+const GroceryList = ({ isEditing: propIsEditing, setIsEditing: propSetIsEditing }) => {
   const { groceryList, updateGroceryList, loading } = useGroceryList();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
 
-  // Overall edit mode state
-  const [isEditing, setIsEditing] = useState(false);
+  // Use prop-based editing state, fallback to local state if props not provided
+  const isEditing = propIsEditing !== undefined ? propIsEditing : false;
+  const setIsEditing = propSetIsEditing || (() => {});
+  
   const [editedList, setEditedList] = useState([]);
 
-  const startEditing = () => {
-    setIsEditing(true);
-    setEditedList([...groceryList]); // Create a copy to edit
+  // Sync editedList with groceryList when language changes during edit mode
+  useEffect(() => {
+    if (isEditing && groceryList.length > 0) {
+      setEditedList([...groceryList]);
+    }
+  }, [groceryList, isEditing]);
+
+
+
+  const startEditing = async () => {
+    try {
+      // Get user's preferred language and switch to it
+      const preferredLanguage = await getUserPreferredLanguage();
+      if (i18n.language !== preferredLanguage) {
+        i18n.changeLanguage(preferredLanguage);
+      }
+      
+      setIsEditing(true);
+      setEditedList([...groceryList]); // Create a copy to edit
+    } catch (error) {
+      console.error('Error switching to preferred language:', error);
+      setIsEditing(true);
+      setEditedList([...groceryList]);
+    }
   };
 
   const cancelEditing = () => {
@@ -46,9 +70,9 @@ const GroceryList = () => {
     setEditedList(updatedList);
   };
 
-  const addNewItem = () => {
+  const addNewItem = async () => {
     if (!isEditing) {
-      startEditing();
+      await startEditing();
     }
 
     const newItem = {

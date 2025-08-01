@@ -440,8 +440,6 @@ const saveRecipeTitleTranslation = async (
     if (updateError) {
       throw updateError;
     }
-
-    console.log(`Recipe title stored for recipe ${recipeId} in ${language}`);
   } catch (error) {
     console.error("Failed to store recipe title:", error);
     // Don't throw error - translation worked, just storage failed
