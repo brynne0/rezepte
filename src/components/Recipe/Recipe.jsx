@@ -14,6 +14,17 @@ const Recipe = () => {
   const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
 
+  // Helper function to get the correct ingredient name (singular vs plural)
+  const getIngredientDisplayName = (ingredient) => {
+    const shouldUsePlural = ingredient.quantity && parseFloat(ingredient.quantity) !== 1;
+    
+    if (shouldUsePlural && ingredient.plural_name) {
+      return ingredient.plural_name;
+    }
+    
+    return ingredient.singular_name || ingredient.name || 'Unknown ingredient';
+  };
+
   // Use the grocery list hook
   const {
     checkedIngredients,
@@ -56,7 +67,9 @@ const Recipe = () => {
       )}
 
       {/* Ingredients */}
-      {recipe.ingredients && recipe.ingredients.length > 0 && (
+      {((recipe.ungroupedIngredients && recipe.ungroupedIngredients.length > 0) ||
+        (recipe.ingredientSections && recipe.ingredientSections.length > 0) ||
+        (recipe.ingredients && recipe.ingredients.length > 0)) && (
         <>
           <div className="recipe-subheading flex-row">
             <h2>{t("ingredients")}:</h2>
@@ -80,26 +93,79 @@ const Recipe = () => {
             )}
             {showSuccess && t("added_to_groceries")}
           </div>
-          <ul className="ingredient-list">
-            {recipe.ingredients.map((ingredient) => (
-              <li key={ingredient.id} className="ingredient">
-                <input
-                  type="checkbox"
-                  checked={checkedIngredients[ingredient.id] || false}
-                  onChange={() => handleCheckboxChange(ingredient.id)}
-                  id={`ingredient-${ingredient.id}`}
-                />
-                <label htmlFor={`ingredient-${ingredient.id}`}>
-                  {/* <strong> */}
-                  {ingredient.quantity && `${ingredient.quantity} `}
-                  {ingredient.unit && `${ingredient.unit} `}
-                  {/* </strong> */}
-                  {`${ingredient.name} `}
-                  {ingredient.notes && `${ingredient.notes} `}
-                </label>
-              </li>
-            ))}
-          </ul>
+
+          {/* Ungrouped Ingredients */}
+          {recipe.ungroupedIngredients && recipe.ungroupedIngredients.length > 0 && (
+            <ul className="ingredient-list">
+              {recipe.ungroupedIngredients.map((ingredient) => (
+                <li key={ingredient.id} className="ingredient">
+                  <input
+                    type="checkbox"
+                    checked={checkedIngredients[ingredient.id] || false}
+                    onChange={() => handleCheckboxChange(ingredient.id)}
+                    id={`ingredient-${ingredient.id}`}
+                  />
+                  <label htmlFor={`ingredient-${ingredient.id}`}>
+                    {ingredient.quantity && `${ingredient.quantity} `}
+                    {ingredient.unit && `${ingredient.unit} `}
+                    {`${getIngredientDisplayName(ingredient)} `}
+                    {ingredient.notes && `${ingredient.notes} `}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Ingredient Sections */}
+          {recipe.ingredientSections && recipe.ingredientSections.length > 0 && (
+            <div className="ingredient-sections">
+              {recipe.ingredientSections.map((section, sectionIndex) => (
+                <div key={sectionIndex} className="ingredient-section">
+                  <h3 className="section-subheading">{section.subheading}</h3>
+                  <ul className="ingredient-list">
+                    {section.ingredients.map((ingredient) => (
+                      <li key={ingredient.id} className="ingredient">
+                        <input
+                          type="checkbox"
+                          checked={checkedIngredients[ingredient.id] || false}
+                          onChange={() => handleCheckboxChange(ingredient.id)}
+                          id={`ingredient-${ingredient.id}`}
+                        />
+                        <label htmlFor={`ingredient-${ingredient.id}`}>
+                          {ingredient.quantity && `${ingredient.quantity} `}
+                          {ingredient.unit && `${ingredient.unit} `}
+                          {`${getIngredientDisplayName(ingredient)} `}
+                          {ingredient.notes && `${ingredient.notes} `}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Fallback for old flat ingredient structure */}
+          {!recipe.ungroupedIngredients && !recipe.ingredientSections && recipe.ingredients && recipe.ingredients.length > 0 && (
+            <ul className="ingredient-list">
+              {recipe.ingredients.map((ingredient) => (
+                <li key={ingredient.id} className="ingredient">
+                  <input
+                    type="checkbox"
+                    checked={checkedIngredients[ingredient.id] || false}
+                    onChange={() => handleCheckboxChange(ingredient.id)}
+                    id={`ingredient-${ingredient.id}`}
+                  />
+                  <label htmlFor={`ingredient-${ingredient.id}`}>
+                    {ingredient.quantity && `${ingredient.quantity} `}
+                    {ingredient.unit && `${ingredient.unit} `}
+                    {`${getIngredientDisplayName(ingredient)} `}
+                    {ingredient.notes && `${ingredient.notes} `}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       )}
 

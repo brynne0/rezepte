@@ -83,6 +83,10 @@
   "ingredient_name": "Ingredient name",
   "quantity": "Qty",
   "notes": "Notes",
+  "subheading": "Subheading",
+  "ingredient_subheading": "Ingredient subheading (optional)",
+  "add_section": "Add Section",
+  "section_title_placeholder": "Section title",
 
   "add_new_recipe": "Add New Recipe",
   "edit_recipe": "Edit Recipe",

@@ -1,9 +1,10 @@
-import { Trash2, Plus, ArrowBigLeft } from "lucide-react";
+import { Trash2, Plus, ArrowBigLeft, GripHorizontal } from "lucide-react";
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import "./RecipeForm.css";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import AutoResizeTextArea from "../AutoResizeTextArea";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const { t, i18n } = useTranslation();
@@ -17,11 +18,15 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     handleInputChange,
     handleTitleBlur,
     handleIngredientChange,
+    handleSectionChange,
     handleInstructionChange,
     addInstruction,
     removeInstruction,
     addIngredient,
+    addSection,
+    removeSection,
     removeIngredient,
+    handleDragEnd,
     handleEnter,
     handleSubmit,
     handleCancel,
@@ -143,7 +148,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             className={`input--full-width input--shadow input--select input ${
               validationErrors.category ? "input--error" : ""
             }`}
-            required
           >
             <option value="" disabled>
               {t("select_category")}
@@ -185,119 +189,442 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
             {/* Ingredients */}
             <div className="form-group">
-              <label className="form-header-wrapper">
+              <div className="form-header-wrapper">
                 <h3>{t("ingredients")}</h3>
-              </label>
-
-              <div className="ingredients-list">
-                {formData.ingredients.map((ingredient) => (
-                  <div key={ingredient.tempId} className="ingredient-row">
-                    {/* Ingredient Name */}
-                    <input
-                      id={`ingredient-name-${ingredient.tempId}`}
-                      type="text"
-                      value={ingredient.name || ""}
-                      onChange={(e) => {
-                        // Apply language-specific capitalisation
-                        const value =
-                          i18n.language === "de"
-                            ? e.target.value.charAt(0).toUpperCase() +
-                              e.target.value.slice(1).toLowerCase()
-                            : e.target.value.toLowerCase();
-
-                        handleIngredientChange(
-                          ingredient.tempId,
-                          "name",
-                          value,
-                          validationErrors.ingredients ? "ingredients" : null
-                        );
-                      }}
-                      className={`input input--full-width input--shadow ${
-                        validationErrors.ingredients ? "input--error" : ""
-                      }`}
-                      placeholder={t("ingredient_name")}
-                    />
-                    {/* Ingredient Quantity */}
-                    <div className="ingredient-details">
-                      <input
-                        id={`ingredient-quantity-${ingredient.tempId}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={ingredient.quantity || ""}
-                        onChange={(e) =>
-                          handleIngredientChange(
-                            ingredient.tempId,
-                            "quantity",
-                            e.target.value
-                          )
-                        }
-                        className="input input--full-width input--shadow "
-                        placeholder={t("quantity")}
-                        onWheel={(e) => {
-                          e.target.blur();
-                        }}
-                      />
-                      {/* Ingredient Unit */}
-                      <select
-                        id={`ingredient-unit-${ingredient.tempId}`}
-                        value={ingredient.unit || ""}
-                        onChange={(e) =>
-                          handleIngredientChange(
-                            ingredient.tempId,
-                            "unit",
-                            e.target.value
-                          )
-                        }
-                        className={
-                          "input input--full-width input--select input--shadow "
-                        }
-                      >
-                        {units.map((unit) => (
-                          <option key={unit.value} value={unit.value}>
-                            {unit.label}
-                          </option>
-                        ))}
-                      </select>
-
-                      {/* Ingredient Notes */}
-                      <input
-                        id={`ingredient-notes-${ingredient.tempId}`}
-                        type="text"
-                        value={ingredient.notes}
-                        onChange={(e) =>
-                          handleIngredientChange(
-                            ingredient.tempId,
-                            "notes",
-                            e.target.value.toLowerCase()
-                          )
-                        }
-                        className="input input--full-width input--shadow "
-                        placeholder={t("notes")}
-                      />
-                      {formData.ingredients.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeIngredient(ingredient.tempId)}
-                          className="btn btn-icon btn-icon-remove"
-                          aria-label="Remove ingredient"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="btn-icon-success-wrapper">
                 <button
                   type="button"
-                  onClick={addIngredient}
-                  className="btn btn-icon btn-icon-success"
+                  onClick={addSection}
+                  // TODO - change button style
+                  className="btn btn-standard"
                 >
-                  <Plus size={16} />
+                  {t("add_section")}
                 </button>
               </div>
+
+              <DragDropContext onDragEnd={handleDragEnd}>
+                {/* Ungrouped Ingredients First */}
+                {formData.ungroupedIngredients.length > 0 && (
+                  <Droppable droppableId="ungrouped" type="ingredient">
+                    {(provided, snapshot) => (
+                      <div
+                        className={`ingredient-list ${
+                          snapshot.isDraggingOver ? "drag-over" : ""
+                        }`}
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        {formData.ungroupedIngredients.map(
+                          (ingredient, index) => (
+                            <Draggable
+                              key={ingredient.tempId}
+                              draggableId={ingredient.tempId.toString()}
+                              index={index}
+                              type="ingredient"
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={`ingredient-row ${
+                                    snapshot.isDragging ? "dragging" : ""
+                                  }`}
+                                >
+                                  {/* Ingredient Drag Handle */}
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="drag-handle"
+                                  >
+                                    <GripHorizontal size={16} />
+                                  </div>
+
+                                  <div className="ingredient-content">
+                                    {/* Ingredient Name */}
+                                    <input
+                                      id={`ingredient-name-${ingredient.tempId}`}
+                                      type="text"
+                                      value={ingredient.name || ""}
+                                      onChange={(e) => {
+                                        const value =
+                                          i18n.language === "de"
+                                            ? e.target.value
+                                                .charAt(0)
+                                                .toUpperCase() +
+                                              e.target.value
+                                                .slice(1)
+                                                .toLowerCase()
+                                            : e.target.value.toLowerCase();
+
+                                        handleIngredientChange(
+                                          "ungrouped",
+                                          ingredient.tempId,
+                                          "name",
+                                          value,
+                                          validationErrors.ingredients
+                                            ? "ingredients"
+                                            : null
+                                        );
+                                      }}
+                                      className={`input input--full-width input--shadow ${
+                                        validationErrors.ingredients
+                                          ? "input--error"
+                                          : ""
+                                      }`}
+                                      placeholder={t("ingredient_name")}
+                                    />
+
+                                    {/* Ingredient Details */}
+                                    <div className="ingredient-details">
+                                      <input
+                                        id={`ingredient-quantity-${ingredient.tempId}`}
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={ingredient.quantity || ""}
+                                        onChange={(e) =>
+                                          handleIngredientChange(
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            "quantity",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="input input--full-width input--shadow"
+                                        placeholder={t("quantity")}
+                                        onWheel={(e) => e.target.blur()}
+                                      />
+
+                                      <select
+                                        id={`ingredient-unit-${ingredient.tempId}`}
+                                        value={ingredient.unit || ""}
+                                        onChange={(e) =>
+                                          handleIngredientChange(
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            "unit",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="input input--full-width input--select input--shadow"
+                                      >
+                                        {units.map((unit) => (
+                                          <option
+                                            key={unit.value}
+                                            value={unit.value}
+                                          >
+                                            {unit.label}
+                                          </option>
+                                        ))}
+                                      </select>
+
+                                      <input
+                                        id={`ingredient-notes-${ingredient.tempId}`}
+                                        type="text"
+                                        value={ingredient.notes || ""}
+                                        onChange={(e) =>
+                                          handleIngredientChange(
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            "notes",
+                                            e.target.value.toLowerCase()
+                                          )
+                                        }
+                                        className="input input--full-width input--shadow"
+                                        placeholder={t("notes")}
+                                      />
+
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          removeIngredient(
+                                            "ungrouped",
+                                            ingredient.tempId
+                                          )
+                                        }
+                                        className="btn btn-icon btn-icon-remove"
+                                        aria-label="Remove ingredient"
+                                      >
+                                        <Trash2 size={16} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          )
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                )}
+
+                {/* Add Ingredient Button for Ungrouped */}
+                <div className="ungrouped-add-ingredient">
+                  <button
+                    type="button"
+                    onClick={() => addIngredient("ungrouped")}
+                    className="btn btn-icon btn-icon-success"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+
+                {/* Ingredient Sections */}
+                {formData.ingredientSections.length > 0 && (
+                  <Droppable droppableId="sections" type="section">
+                    {(provided) => (
+                      <div
+                        className="ingredient-sections"
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        {formData.ingredientSections.map(
+                          (section, sectionIndex) => (
+                            <Draggable
+                              key={section.id}
+                              draggableId={section.id}
+                              index={sectionIndex}
+                              type="section"
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={`ingredient-section ${
+                                    snapshot.isDragging ? "dragging" : ""
+                                  }`}
+                                >
+                                  {/* Section Header */}
+                                  <div className="section-header">
+                                    <div
+                                      {...provided.dragHandleProps}
+                                      className="drag-handle"
+                                    >
+                                      <GripHorizontal size={16} />
+                                    </div>
+                                    <input
+                                      type="text"
+                                      value={section.subheading}
+                                      onChange={(e) =>
+                                        handleSectionChange(
+                                          section.id,
+                                          "subheading",
+                                          e.target.value
+                                        )
+                                      }
+                                      className="section-title-input"
+                                      placeholder={t(
+                                        "section_title_placeholder"
+                                      )}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => removeSection(section.id)}
+                                      className="btn btn-icon btn-icon-remove"
+                                      aria-label="Remove section"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </div>
+
+                                  {/* Section Ingredients */}
+                                  <Droppable
+                                    droppableId={section.id}
+                                    type="ingredient"
+                                  >
+                                    {(provided, snapshot) => (
+                                      <div
+                                        className={`ingredient-list ${
+                                          snapshot.isDraggingOver
+                                            ? "drag-over"
+                                            : ""
+                                        }`}
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                      >
+                                        {section.ingredients.map(
+                                          (ingredient, ingredientIndex) => (
+                                            <Draggable
+                                              key={ingredient.tempId}
+                                              draggableId={ingredient.tempId.toString()}
+                                              index={ingredientIndex}
+                                              type="ingredient"
+                                            >
+                                              {(provided, snapshot) => (
+                                                <div
+                                                  ref={provided.innerRef}
+                                                  {...provided.draggableProps}
+                                                  className={`ingredient-row ${
+                                                    snapshot.isDragging
+                                                      ? "dragging"
+                                                      : ""
+                                                  }`}
+                                                >
+                                                  {/* Ingredient Drag Handle */}
+                                                  <div
+                                                    {...provided.dragHandleProps}
+                                                    className="drag-handle"
+                                                  >
+                                                    <GripHorizontal size={16} />
+                                                  </div>
+
+                                                  <div className="ingredient-content">
+                                                    {/* Ingredient Name */}
+                                                    <input
+                                                      id={`ingredient-name-${ingredient.tempId}`}
+                                                      type="text"
+                                                      value={
+                                                        ingredient.name || ""
+                                                      }
+                                                      onChange={(e) => {
+                                                        const value =
+                                                          i18n.language === "de"
+                                                            ? e.target.value
+                                                                .charAt(0)
+                                                                .toUpperCase() +
+                                                              e.target.value
+                                                                .slice(1)
+                                                                .toLowerCase()
+                                                            : e.target.value.toLowerCase();
+
+                                                        handleIngredientChange(
+                                                          section.id,
+                                                          ingredient.tempId,
+                                                          "name",
+                                                          value,
+                                                          validationErrors.ingredients
+                                                            ? "ingredients"
+                                                            : null
+                                                        );
+                                                      }}
+                                                      className={`input input--full-width input--shadow ${
+                                                        validationErrors.ingredients
+                                                          ? "input--error"
+                                                          : ""
+                                                      }`}
+                                                      placeholder={t(
+                                                        "ingredient_name"
+                                                      )}
+                                                    />
+
+                                                    {/* Ingredient Details */}
+                                                    <div className="ingredient-details">
+                                                      <input
+                                                        id={`ingredient-quantity-${ingredient.tempId}`}
+                                                        type="number"
+                                                        min="0"
+                                                        step="0.01"
+                                                        value={
+                                                          ingredient.quantity ||
+                                                          ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleIngredientChange(
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            "quantity",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        className="input input--full-width input--shadow"
+                                                        placeholder={t(
+                                                          "quantity"
+                                                        )}
+                                                        onWheel={(e) =>
+                                                          e.target.blur()
+                                                        }
+                                                      />
+
+                                                      <select
+                                                        id={`ingredient-unit-${ingredient.tempId}`}
+                                                        value={
+                                                          ingredient.unit || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleIngredientChange(
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            "unit",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        className="input input--full-width input--select input--shadow"
+                                                      >
+                                                        {units.map((unit) => (
+                                                          <option
+                                                            key={unit.value}
+                                                            value={unit.value}
+                                                          >
+                                                            {unit.label}
+                                                          </option>
+                                                        ))}
+                                                      </select>
+
+                                                      <input
+                                                        id={`ingredient-notes-${ingredient.tempId}`}
+                                                        type="text"
+                                                        value={
+                                                          ingredient.notes || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleIngredientChange(
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            "notes",
+                                                            e.target.value.toLowerCase()
+                                                          )
+                                                        }
+                                                        className="input input--full-width input--shadow"
+                                                        placeholder={t("notes")}
+                                                      />
+
+                                                      <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                          removeIngredient(
+                                                            section.id,
+                                                            ingredient.tempId
+                                                          )
+                                                        }
+                                                        className="btn btn-icon btn-icon-remove"
+                                                        aria-label="Remove ingredient"
+                                                      >
+                                                        <Trash2 size={16} />
+                                                      </button>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              )}
+                                            </Draggable>
+                                          )
+                                        )}
+                                        {provided.placeholder}
+                                      </div>
+                                    )}
+                                  </Droppable>
+
+                                  {/* Add Ingredient Button */}
+                                  <div className="section-add-ingredient">
+                                    <button
+                                      type="button"
+                                      onClick={() => addIngredient(section.id)}
+                                      className="btn btn-icon btn-icon-success"
+                                    >
+                                      <Plus size={16} />
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          )
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                )}
+              </DragDropContext>
+
               {validationErrors.ingredients && (
                 <span className="error-message-small">
                   {validationErrors.ingredients}

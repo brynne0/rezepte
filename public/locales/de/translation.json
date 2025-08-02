@@ -81,6 +81,10 @@
   "ingredient_name": "Name der Zutat",
   "quantity": "Menge",
   "notes": "Notizen",
+  "subheading": "Zwischenüberschrift",
+  "ingredient_subheading": "Zutaten-Zwischenüberschrift (optional)",
+  "add_section": "Bereich Hinzufügen",
+  "section_title_placeholder": "Bereichstitel",
 
   "add_new_recipe": "Neues Rezept Hinzufügen",
   "edit_recipe": "Rezept bearbeiten",

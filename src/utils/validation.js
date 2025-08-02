@@ -108,9 +108,22 @@ export const validateRecipeCategory = (category, t) => {
   return null;
 };
 
-export const validateRecipeIngredients = (ingredients, isLinkOnly, t) => {
-  if (!isLinkOnly && ingredients.every((ing) => !ing.name || !ing.name.trim())) {
-    return t("ingredient_required");
+export const validateRecipeIngredients = (formData, isLinkOnly, t) => {
+  if (!isLinkOnly) {
+    // Check ungrouped ingredients first
+    const hasUngroupedIngredients = formData.ungroupedIngredients?.some((ing) => ing.name && ing.name.trim());
+    
+    // Check ingredient sections
+    const hasSectionIngredients = formData.ingredientSections?.some((section) =>
+      section.ingredients?.some((ing) => ing.name && ing.name.trim())
+    );
+    
+    // Check flat ingredients (backward compatibility)
+    const hasFlatIngredients = formData.ingredients?.some((ing) => ing.name && ing.name.trim());
+    
+    if (!hasUngroupedIngredients && !hasSectionIngredients && !hasFlatIngredients) {
+      return t("ingredient_required");
+    }
   }
   return null;
 };
@@ -118,7 +131,7 @@ export const validateRecipeIngredients = (ingredients, isLinkOnly, t) => {
 // Composite recipe validation function
 export const validateRecipeForm = (formData, t) => {
   const errors = {};
-  const { title, category, ingredients, link_only } = formData;
+  const { title, category, link_only } = formData;
 
   // Title validation
   const titleError = validateRecipeTitle(title, t);
@@ -128,8 +141,8 @@ export const validateRecipeForm = (formData, t) => {
   const categoryError = validateRecipeCategory(category, t);
   if (categoryError) errors.category = categoryError;
 
-  // Ingredients validation (only for non-link recipes)
-  const ingredientsError = validateRecipeIngredients(ingredients, link_only, t);
+  // Ingredients validation (pass entire formData for new structure)
+  const ingredientsError = validateRecipeIngredients(formData, link_only, t);
   if (ingredientsError) errors.ingredients = ingredientsError;
 
   return errors;

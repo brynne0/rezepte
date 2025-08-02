@@ -12,6 +12,75 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
   const getInitialFormData = useCallback(() => {
     if (initialRecipe) {
+      // Handle ungrouped ingredients and sections separately
+      let ungroupedIngredients = [];
+      let ingredientSections = [];
+      
+      if (initialRecipe.ungroupedIngredients || initialRecipe.ingredientSections) {
+        // New structure with separated ungrouped and grouped ingredients
+        ungroupedIngredients = (initialRecipe.ungroupedIngredients || []).map((ing) => ({
+          tempId: ing.id || Date.now() + Math.random(),
+          ingredient_id: ing.ingredient_id || "",
+          name: ing.name || ing.singular_name || "",
+          quantity: ing.quantity || "",
+          unit: ing.unit || "",
+          notes: ing.notes || "",
+        }));
+        
+        ingredientSections = (initialRecipe.ingredientSections || []).map((section, index) => ({
+          id: section.id || `section-${index}`,
+          subheading: section.subheading || "",
+          ingredients: section.ingredients.map((ing) => ({
+            tempId: ing.id || Date.now() + Math.random(),
+            ingredient_id: ing.ingredient_id || "",
+            name: ing.name || ing.singular_name || "",
+            quantity: ing.quantity || "",
+            unit: ing.unit || "",
+            notes: ing.notes || "",
+          }))
+        }));
+      } else if (initialRecipe.ingredients?.length > 0) {
+        // Convert flat ingredient list: separate ungrouped from grouped
+        initialRecipe.ingredients.forEach((ing) => {
+          const ingredient = {
+            tempId: ing.id || Date.now() + Math.random(),
+            ingredient_id: ing.ingredient_id || "",
+            name: ing.name || ing.singular_name || "",
+            quantity: ing.quantity || "",
+            unit: ing.unit || "",
+            notes: ing.notes || "",
+          };
+          
+          if (!ing.subheading || ing.subheading.trim() === "") {
+            ungroupedIngredients.push(ingredient);
+          } else {
+            // Find or create section
+            let section = ingredientSections.find(s => s.subheading === ing.subheading);
+            if (!section) {
+              section = {
+                id: `section-${ingredientSections.length}`,
+                subheading: ing.subheading,
+                ingredients: []
+              };
+              ingredientSections.push(section);
+            }
+            section.ingredients.push(ingredient);
+          }
+        });
+      }
+      
+      // Ensure at least one ungrouped ingredient exists if nothing else
+      if (ungroupedIngredients.length === 0 && ingredientSections.length === 0) {
+        ungroupedIngredients = [{
+          tempId: Date.now() + Math.random(),
+          ingredient_id: "",
+          name: "",
+          quantity: "",
+          unit: "",
+          notes: "",
+        }];
+      }
+
       return {
         title: initialRecipe.title || "",
         category: initialRecipe.category || "",
@@ -21,26 +90,8 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
             ? initialRecipe.instructions
             : [""],
         source: initialRecipe.source || "",
-        ingredients:
-          initialRecipe.ingredients?.length > 0
-            ? initialRecipe.ingredients.map((ing) => ({
-                tempId: ing.id || Date.now() + Math.random(),
-                ingredient_id: ing.ingredient_id || "",
-                name: ing.name || "",
-                quantity: ing.quantity || "",
-                unit: ing.unit || "",
-                notes: ing.notes || "",
-              }))
-            : [
-                {
-                  tempId: Date.now() + Math.random(),
-                  ingredient_id: "",
-                  name: "",
-                  quantity: "",
-                  unit: "",
-                  notes: "",
-                },
-              ],
+        ungroupedIngredients: ungroupedIngredients,
+        ingredientSections: ingredientSections,
         link_only: initialRecipe.link_only,
         notes: initialRecipe.notes,
       };
@@ -52,7 +103,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       servings: "",
       instructions: [""],
       source: "",
-      ingredients: [
+      ungroupedIngredients: [
         {
           tempId: Date.now() + Math.random(),
           ingredient_id: "",
@@ -62,6 +113,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
           notes: "",
         },
       ],
+      ingredientSections: [],
       link_only: false,
       notes: "",
     };
@@ -104,20 +156,51 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     }
   };
 
-  const handleIngredientChange = (tempId, field, value, clearError) => {
-    setFormData((prev) => ({
-      ...prev,
-      ingredients: prev.ingredients.map((ingredient) =>
-        ingredient.tempId === tempId
-          ? { ...ingredient, [field]: value }
-          : ingredient
-      ),
-    }));
+  const handleIngredientChange = (sectionId, tempId, field, value, clearError) => {
+    if (sectionId === "ungrouped") {
+      // Handle ungrouped ingredients
+      setFormData((prev) => ({
+        ...prev,
+        ungroupedIngredients: prev.ungroupedIngredients.map((ingredient) =>
+          ingredient.tempId === tempId
+            ? { ...ingredient, [field]: value }
+            : ingredient
+        ),
+      }));
+    } else {
+      // Handle grouped ingredients
+      setFormData((prev) => ({
+        ...prev,
+        ingredientSections: prev.ingredientSections.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                ingredients: section.ingredients.map((ingredient) =>
+                  ingredient.tempId === tempId
+                    ? { ...ingredient, [field]: value }
+                    : ingredient
+                ),
+              }
+            : section
+        ),
+      }));
+    }
 
     // Clear validation error for ingredients when user types
     if (clearError || validationErrors[clearError]) {
       setValidationErrors((prev) => ({ ...prev, [clearError]: "" }));
     }
+  };
+
+  const handleSectionChange = (sectionId, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      ingredientSections: prev.ingredientSections.map((section) =>
+        section.id === sectionId
+          ? { ...section, [field]: value }
+          : section
+      ),
+    }));
   };
 
   const handleInstructionChange = (index, value) => {
@@ -155,23 +238,49 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     }
   };
 
-  const addIngredient = () => {
+  const addIngredient = (sectionId) => {
     const newTempId = Date.now() + Math.random();
 
-    setFormData((prev) => ({
-      ...prev,
-      ingredients: [
-        ...prev.ingredients,
-        {
-          tempId: newTempId,
-          ingredient_id: "",
-          name: "",
-          quantity: "",
-          unit: "",
-          notes: "",
-        },
-      ],
-    }));
+    if (sectionId === "ungrouped") {
+      // Add to ungrouped ingredients
+      setFormData((prev) => ({
+        ...prev,
+        ungroupedIngredients: [
+          ...prev.ungroupedIngredients,
+          {
+            tempId: newTempId,
+            ingredient_id: "",
+            name: "",
+            quantity: "",
+            unit: "",
+            notes: "",
+          },
+        ],
+      }));
+    } else {
+      // Add to specific section
+      setFormData((prev) => ({
+        ...prev,
+        ingredientSections: prev.ingredientSections.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                ingredients: [
+                  ...section.ingredients,
+                  {
+                    tempId: newTempId,
+                    ingredient_id: "",
+                    name: "",
+                    quantity: "",
+                    unit: "",
+                    notes: "",
+                  },
+                ],
+              }
+            : section
+        ),
+      }));
+    }
 
     // Focus on the new ingredient name input
     setTimeout(() => {
@@ -184,13 +293,192 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     }, 10);
   };
 
-  const removeIngredient = (tempId) => {
+  const addSection = () => {
+    const newSectionId = `section-${Date.now()}`;
+    const newTempId = Date.now() + Math.random();
+
     setFormData((prev) => ({
       ...prev,
-      ingredients: prev.ingredients.filter(
-        (ingredient) => ingredient.tempId !== tempId
+      ingredientSections: [
+        ...prev.ingredientSections,
+        {
+          id: newSectionId,
+          subheading: "",
+          ingredients: [
+            {
+              tempId: newTempId,
+              ingredient_id: "",
+              name: "",
+              quantity: "",
+              unit: "",
+              notes: "",
+            },
+          ],
+        },
+      ],
+    }));
+  };
+
+  const removeSection = (sectionId) => {
+    setFormData((prev) => ({
+      ...prev,
+      ingredientSections: prev.ingredientSections.filter(
+        (section) => section.id !== sectionId
       ),
     }));
+  };
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const { source, destination, type } = result;
+
+    if (type === "section") {
+      // Reorder sections
+      const reorderedSections = Array.from(formData.ingredientSections);
+      const [reorderedSection] = reorderedSections.splice(source.index, 1);
+      reorderedSections.splice(destination.index, 0, reorderedSection);
+
+      setFormData((prev) => ({
+        ...prev,
+        ingredientSections: reorderedSections,
+      }));
+    } else if (type === "ingredient") {
+      // Handle drag between ungrouped, sections, and within same container
+      const sourceId = source.droppableId;
+      const destId = destination.droppableId;
+
+      if (sourceId === destId) {
+        // Reorder within same container (ungrouped or same section)
+        if (sourceId === "ungrouped") {
+          // Reorder within ungrouped ingredients
+          const reorderedIngredients = Array.from(formData.ungroupedIngredients);
+          const [reorderedIngredient] = reorderedIngredients.splice(source.index, 1);
+          reorderedIngredients.splice(destination.index, 0, reorderedIngredient);
+
+          setFormData((prev) => ({
+            ...prev,
+            ungroupedIngredients: reorderedIngredients,
+          }));
+        } else {
+          // Reorder within same section
+          const sectionIndex = formData.ingredientSections.findIndex(
+            (section) => section.id === sourceId
+          );
+          const section = formData.ingredientSections[sectionIndex];
+          const reorderedIngredients = Array.from(section.ingredients);
+          const [reorderedIngredient] = reorderedIngredients.splice(source.index, 1);
+          reorderedIngredients.splice(destination.index, 0, reorderedIngredient);
+
+          const newSections = [...formData.ingredientSections];
+          newSections[sectionIndex] = {
+            ...section,
+            ingredients: reorderedIngredients,
+          };
+
+          setFormData((prev) => ({
+            ...prev,
+            ingredientSections: newSections,
+          }));
+        }
+      } else {
+        // Move between containers (ungrouped <-> sections or section <-> section)
+        let sourceIngredients, destIngredients;
+        let movedIngredient;
+
+        // Get source ingredients
+        if (sourceId === "ungrouped") {
+          sourceIngredients = Array.from(formData.ungroupedIngredients);
+          [movedIngredient] = sourceIngredients.splice(source.index, 1);
+        } else {
+          const sourceSectionIndex = formData.ingredientSections.findIndex(
+            (section) => section.id === sourceId
+          );
+          const sourceSection = formData.ingredientSections[sourceSectionIndex];
+          sourceIngredients = Array.from(sourceSection.ingredients);
+          [movedIngredient] = sourceIngredients.splice(source.index, 1);
+        }
+
+        // Get destination ingredients and insert
+        if (destId === "ungrouped") {
+          destIngredients = Array.from(formData.ungroupedIngredients);
+          destIngredients.splice(destination.index, 0, movedIngredient);
+        } else {
+          const destSectionIndex = formData.ingredientSections.findIndex(
+            (section) => section.id === destId
+          );
+          const destSection = formData.ingredientSections[destSectionIndex];
+          destIngredients = Array.from(destSection.ingredients);
+          destIngredients.splice(destination.index, 0, movedIngredient);
+        }
+
+        // Update form data
+        setFormData((prev) => {
+          const newData = { ...prev };
+
+          // Update source
+          if (sourceId === "ungrouped") {
+            newData.ungroupedIngredients = sourceIngredients;
+          } else {
+            const sourceSectionIndex = prev.ingredientSections.findIndex(
+              (section) => section.id === sourceId
+            );
+            newData.ingredientSections = [...prev.ingredientSections];
+            newData.ingredientSections[sourceSectionIndex] = {
+              ...prev.ingredientSections[sourceSectionIndex],
+              ingredients: sourceIngredients,
+            };
+          }
+
+          // Update destination
+          if (destId === "ungrouped") {
+            newData.ungroupedIngredients = destIngredients;
+          } else {
+            const destSectionIndex = prev.ingredientSections.findIndex(
+              (section) => section.id === destId
+            );
+            if (!newData.ingredientSections) {
+              newData.ingredientSections = [...prev.ingredientSections];
+            }
+            newData.ingredientSections[destSectionIndex] = {
+              ...prev.ingredientSections[destSectionIndex],
+              ingredients: destIngredients,
+            };
+          }
+
+          return newData;
+        });
+      }
+    }
+  };
+
+  const removeIngredient = (sectionId, tempId) => {
+    if (sectionId === "ungrouped") {
+      // Remove from ungrouped ingredients
+      setFormData((prev) => ({
+        ...prev,
+        ungroupedIngredients: prev.ungroupedIngredients.filter(
+          (ingredient) => ingredient.tempId !== tempId
+        ),
+      }));
+    } else {
+      // Remove from specific section
+      setFormData((prev) => ({
+        ...prev,
+        ingredientSections: prev.ingredientSections.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                ingredients: section.ingredients.filter(
+                  (ingredient) => ingredient.tempId !== tempId
+                ),
+              }
+            : section
+        ),
+      }));
+    }
   };
 
   const handleEnter = (event) => {
@@ -238,9 +526,20 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     }
 
     try {
-      const validIngredients = formData.ingredients.filter(
+      // Filter out empty ungrouped ingredients
+      const validUngroupedIngredients = formData.ungroupedIngredients.filter(
         (ingredient) => ingredient.name && ingredient.name.trim()
       );
+
+      // Filter out empty sections and ingredients
+      const validSections = formData.ingredientSections
+        .map((section) => ({
+          ...section,
+          ingredients: section.ingredients.filter(
+            (ingredient) => ingredient.name && ingredient.name.trim()
+          ),
+        }))
+        .filter((section) => section.ingredients.length > 0);
 
       const validInstructions = formData.instructions.filter((instruction) =>
         instruction.trim()
@@ -252,11 +551,20 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         servings: formData.servings ? parseInt(formData.servings) : null,
         instructions: validInstructions,
         source: formData.source.trim() || null,
-        ingredients: validIngredients.map((ing) => ({
+        ungroupedIngredients: validUngroupedIngredients.map((ing) => ({
           name: ing.name.trim(),
           quantity: ing.quantity ? parseFloat(ing.quantity) : null,
           unit: ing.unit.trim() || null,
           notes: ing.notes.trim() || null,
+        })),
+        ingredientSections: validSections.map((section) => ({
+          ...section,
+          ingredients: section.ingredients.map((ing) => ({
+            name: ing.name.trim(),
+            quantity: ing.quantity ? parseFloat(ing.quantity) : null,
+            unit: ing.unit.trim() || null,
+            notes: ing.notes.trim() || null,
+          })),
         })),
         link_only: formData.link_only,
         notes: formData.notes,
@@ -310,11 +618,15 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     handleInputChange,
     handleTitleBlur,
     handleIngredientChange,
+    handleSectionChange,
     handleInstructionChange,
     addInstruction,
     removeInstruction,
     addIngredient,
+    addSection,
+    removeSection,
     removeIngredient,
+    handleDragEnd,
     handleEnter,
     handleSubmit,
     handleCancel,

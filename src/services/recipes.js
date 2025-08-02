@@ -341,7 +341,7 @@ export const fetchRecipe = async (id) => {
   const { data, error } = await supabase
     .from("recipes")
     .select(
-      "*, recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes)"
+      "*, recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index)"
     )
     .eq("id", id)
     .single();
@@ -350,20 +350,58 @@ export const fetchRecipe = async (id) => {
     throw error;
   }
 
-  // Transform ingredients to flatter structure
+  // Transform ingredients to hierarchical structure grouped by subheading
+  const ingredientsList = data.recipe_ingredients
+    ?.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+    .map((item) => ({
+      id: item.ingredients.id,
+      recipe_ingredient_id: item.id,
+      singular_name: item.ingredients.singular_name,
+      plural_name: item.ingredients.plural_name,
+      translated_names: item.ingredients.translated_names,
+      quantity: item.quantity,
+      unit: item.unit,
+      notes: item.notes,
+      subheading: item.subheading,
+      order_index: item.order_index,
+    })) || [];
+
+  // Separate ungrouped ingredients from grouped ones
+  const ungroupedIngredients = [];
+  const groupedIngredients = [];
+  
+  ingredientsList.forEach((ingredient) => {
+    if (!ingredient.subheading || ingredient.subheading.trim() === "") {
+      ungroupedIngredients.push(ingredient);
+    } else {
+      groupedIngredients.push(ingredient);
+    }
+  });
+
+  // Group the grouped ingredients by subheading
+  const sectionsMap = new Map();
+  let sectionOrder = 0;
+  
+  groupedIngredients.forEach((ingredient) => {
+    const subheading = ingredient.subheading;
+    
+    if (!sectionsMap.has(subheading)) {
+      sectionsMap.set(subheading, {
+        id: `section-${sectionOrder++}`,
+        subheading: subheading,
+        ingredients: []
+      });
+    }
+    
+    sectionsMap.get(subheading).ingredients.push(ingredient);
+  });
+
   const transformedData = {
     ...data,
-    ingredients:
-      data.recipe_ingredients?.map((item) => ({
-        id: item.ingredients.id,
-        recipe_ingredient_id: item.id,
-        singular_name: item.ingredients.singular_name,
-        plural_name: item.ingredients.plural_name,
-        translated_names: item.ingredients.translated_names,
-        quantity: item.quantity,
-        unit: item.unit,
-        notes: item.notes,
-      })) || [],
+    ungroupedIngredients: ungroupedIngredients,
+    ingredientSections: Array.from(sectionsMap.values()),
+    // Keep flat list for backward compatibility
+    ingredients: ingredientsList,
   };
 
   // Remove the nested recipe_ingredients since it's flattened
@@ -407,14 +445,15 @@ export const createRecipe = async (recipeData) => {
     throw new Error(recipeError.message);
   }
 
-  // If there are ingredients, process and insert them
-  if (recipeData.ingredients && recipeData.ingredients.length > 0) {
-    const recipeIngredientsToInsert = [];
-
-    for (const ingredient of recipeData.ingredients) {
+  // Process ingredients in order: ungrouped first, then sections
+  let recipeIngredientsToInsert = [];
+  let globalOrderIndex = 0;
+  
+  // Handle ungrouped ingredients first
+  if (recipeData.ungroupedIngredients && recipeData.ungroupedIngredients.length > 0) {
+    for (const ingredient of recipeData.ungroupedIngredients) {
       let ingredientId;
 
-      // Handle both cases: ingredient_id provided OR name provided
       if (ingredient.ingredient_id) {
         ingredientId = ingredient.ingredient_id;
       } else if (ingredient.name) {
@@ -432,8 +471,73 @@ export const createRecipe = async (recipeData) => {
         quantity: ingredient.quantity,
         unit: ingredient.unit,
         notes: ingredient.notes,
+        subheading: null, // Ungrouped ingredients have no subheading
+        order_index: globalOrderIndex++,
       });
     }
+  }
+  
+  // Handle ingredient sections
+  if (recipeData.ingredientSections && recipeData.ingredientSections.length > 0) {
+    for (const section of recipeData.ingredientSections) {
+      for (const ingredient of section.ingredients) {
+        let ingredientId;
+
+        if (ingredient.ingredient_id) {
+          ingredientId = ingredient.ingredient_id;
+        } else if (ingredient.name) {
+          ingredientId = await getOrCreateIngredient(
+            ingredient.name,
+            recipeData.original_language
+          );
+        } else {
+          throw new Error("Ingredient must have either ingredient_id or name");
+        }
+
+        recipeIngredientsToInsert.push({
+          recipe_id: recipe.id,
+          ingredient_id: ingredientId,
+          quantity: ingredient.quantity,
+          unit: ingredient.unit,
+          notes: ingredient.notes,
+          subheading: section.subheading || null,
+          order_index: globalOrderIndex++,
+        });
+      }
+    }
+  }
+  
+  // Fallback for backward compatibility
+  if (recipeIngredientsToInsert.length === 0 && recipeData.ingredients && recipeData.ingredients.length > 0) {
+    // Fallback for backward compatibility with flat ingredient list
+    for (let i = 0; i < recipeData.ingredients.length; i++) {
+      const ingredient = recipeData.ingredients[i];
+      let ingredientId;
+
+      if (ingredient.ingredient_id) {
+        ingredientId = ingredient.ingredient_id;
+      } else if (ingredient.name) {
+        ingredientId = await getOrCreateIngredient(
+          ingredient.name,
+          recipeData.original_language
+        );
+      } else {
+        throw new Error("Ingredient must have either ingredient_id or name");
+      }
+
+      recipeIngredientsToInsert.push({
+        recipe_id: recipe.id,
+        ingredient_id: ingredientId,
+        quantity: ingredient.quantity,
+        unit: ingredient.unit,
+        notes: ingredient.notes,
+        subheading: ingredient.subheading || null,
+        order_index: i,
+      });
+    }
+  }
+
+  if (recipeIngredientsToInsert.length > 0) {
 
     const { error: ingredientsError } = await supabase
       .from("recipe_ingredients")
@@ -500,11 +604,86 @@ export const updateRecipe = async (id, recipeData) => {
     );
   }
 
-  // Insert new ingredients
-  if (recipeData.ingredients && recipeData.ingredients.length > 0) {
-    const recipeIngredientsToInsert = [];
+  // Insert new ingredients (ungrouped + sections or flat)
+  let recipeIngredientsToInsert = [];
+  let globalOrderIndex = 0;
+  
+  // Handle ungrouped ingredients first
+  if (recipeData.ungroupedIngredients && recipeData.ungroupedIngredients.length > 0) {
+    for (const ingredient of recipeData.ungroupedIngredients) {
+      let ingredientId;
 
-    for (const ingredient of recipeData.ingredients) {
+      if (ingredient.ingredient_id) {
+        ingredientId = ingredient.ingredient_id;
+      } else if (ingredient.name) {
+        // For updates, get the original language from the existing recipe
+        const { data: existingRecipe } = await supabase
+          .from("recipes")
+          .select("original_language")
+          .eq("id", id)
+          .single();
+        ingredientId = await getOrCreateIngredient(
+          ingredient.name,
+          existingRecipe?.original_language || "en"
+        );
+      } else {
+        throw new Error("Ingredient must have either ingredient_id or name");
+      }
+
+      recipeIngredientsToInsert.push({
+        recipe_id: id,
+        ingredient_id: ingredientId,
+        quantity: ingredient.quantity,
+        unit: ingredient.unit,
+        notes: ingredient.notes,
+        subheading: null, // Ungrouped ingredients have no subheading
+        order_index: globalOrderIndex++,
+      });
+    }
+  }
+  
+  // Handle ingredient sections
+  if (recipeData.ingredientSections && recipeData.ingredientSections.length > 0) {
+    for (const section of recipeData.ingredientSections) {
+      for (const ingredient of section.ingredients) {
+        let ingredientId;
+
+        // Handle both cases: ingredient_id provided OR name provided
+        if (ingredient.ingredient_id) {
+          ingredientId = ingredient.ingredient_id;
+        } else if (ingredient.name) {
+          // For updates, get the original language from the existing recipe
+          const { data: existingRecipe } = await supabase
+            .from("recipes")
+            .select("original_language")
+            .eq("id", id)
+            .single();
+          ingredientId = await getOrCreateIngredient(
+            ingredient.name,
+            existingRecipe?.original_language || "en"
+          );
+        } else {
+          throw new Error("Ingredient must have either ingredient_id or name");
+        }
+
+        recipeIngredientsToInsert.push({
+          recipe_id: id,
+          ingredient_id: ingredientId,
+          quantity: ingredient.quantity,
+          unit: ingredient.unit,
+          notes: ingredient.notes,
+          subheading: section.subheading || null,
+          order_index: globalOrderIndex++,
+        });
+      }
+    }
+  }
+  
+  // Fallback for backward compatibility with flat ingredient list
+  if (recipeIngredientsToInsert.length === 0 && recipeData.ingredients && recipeData.ingredients.length > 0) {
+    // Fallback for backward compatibility with flat ingredient list
+    for (let i = 0; i < recipeData.ingredients.length; i++) {
+      const ingredient = recipeData.ingredients[i];
       let ingredientId;
 
       // Handle both cases: ingredient_id provided OR name provided
@@ -531,8 +710,13 @@ export const updateRecipe = async (id, recipeData) => {
         quantity: ingredient.quantity,
         unit: ingredient.unit,
         notes: ingredient.notes,
+        subheading: ingredient.subheading || null,
+        order_index: i,
       });
     }
+  }
+
+  if (recipeIngredientsToInsert.length > 0) {
 
     const { error: ingredientsError } = await supabase
       .from("recipe_ingredients")
