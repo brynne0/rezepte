@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "../data/useRecipeActions";
 import { useTranslation } from "react-i18next";
+import { validateRecipeForm, validateRecipeTitleUnique } from "../../utils/validation";
 
 export const useRecipeForm = ({ initialRecipe = null }) => {
   const { t, i18n } = useTranslation();
@@ -87,8 +88,19 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   const handleInputChange = (field, value, clearError = false) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
-    if (clearError) {
-      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
+    // Clear validation error for this field when user types (like auth form)
+    if (clearError || validationErrors[field]) {
+      setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleTitleBlur = async () => {
+    if (formData.title.trim()) {
+      const excludeId = initialRecipe ? initialRecipe.id : null;
+      const titleError = await validateRecipeTitleUnique(formData.title, t, excludeId);
+      if (titleError) {
+        setValidationErrors((prev) => ({ ...prev, title: titleError }));
+      }
     }
   };
 
@@ -102,8 +114,9 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       ),
     }));
 
-    if (clearError) {
-      setValidationErrors((prev) => ({ ...prev, [clearError]: undefined }));
+    // Clear validation error for ingredients when user types
+    if (clearError || validationErrors[clearError]) {
+      setValidationErrors((prev) => ({ ...prev, [clearError]: "" }));
     }
   };
 
@@ -201,25 +214,18 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     }
   };
 
-  const validateForm = () => {
-    const errors = {};
-
-    if (!formData.title.trim()) {
-      errors.title = t("title_required");
+  const handleValidation = async () => {
+    const errors = validateRecipeForm(formData, t);
+    
+    // Check for duplicate title (only for new recipes or when title changed)
+    if (!errors.title && formData.title.trim()) {
+      const excludeId = initialRecipe ? initialRecipe.id : null;
+      const titleError = await validateRecipeTitleUnique(formData.title, t, excludeId);
+      if (titleError) {
+        errors.title = titleError;
+      }
     }
-
-    if (!formData.category.trim()) {
-      errors.category = t("category_required");
-    }
-
-    // Only require an ingredient if it isn't a link only recipe
-    if (
-      !formData.link_only &&
-      formData.ingredients.every((ing) => !ing.name || !ing.name.trim())
-    ) {
-      errors.ingredients = t("ingredient_required");
-    }
-
+    
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -227,7 +233,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    if (!(await handleValidation())) {
       return;
     }
 
@@ -302,6 +308,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     error,
     isEditMode: !!initialRecipe,
     handleInputChange,
+    handleTitleBlur,
     handleIngredientChange,
     handleInstructionChange,
     addInstruction,

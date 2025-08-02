@@ -302,6 +302,36 @@ export const fetchRecipes = async () => {
   return data || [];
 };
 
+// Check if a recipe title already exists for the current user
+export const checkRecipeTitleExists = async (title, excludeId = null) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  let query = supabase
+    .from("recipes")
+    .select("id")
+    .eq("user_id", user.id)
+    .ilike("title", title.trim());
+
+  // Exclude current recipe when updating
+  if (excludeId) {
+    query = query.neq("id", excludeId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`Error checking recipe title: ${error.message}`);
+  }
+
+  return data && data.length > 0;
+};
+
 // Fetch a single recipe with all associated data
 export const fetchRecipe = async (id) => {
   if (!id) {

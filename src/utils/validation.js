@@ -78,3 +78,59 @@ export const validateChangePasswordForm = (formData, t) => {
 
   return errors;
 };
+
+// Recipe validation functions
+export const validateRecipeTitle = (title, t) => {
+  if (!title.trim()) {
+    return t("title_required");
+  }
+  return null;
+};
+
+export const validateRecipeTitleUnique = async (title, t, excludeId = null) => {
+  try {
+    const { checkRecipeTitleExists } = await import("../services/recipes");
+    const exists = await checkRecipeTitleExists(title, excludeId);
+    if (exists) {
+      return t("title_already_exists");
+    }
+    return null;
+  } catch (error) {
+    console.error("Error checking title uniqueness:", error);
+    return null; // Don't block submission if check fails
+  }
+};
+
+export const validateRecipeCategory = (category, t) => {
+  if (!category.trim()) {
+    return t("category_required");
+  }
+  return null;
+};
+
+export const validateRecipeIngredients = (ingredients, isLinkOnly, t) => {
+  if (!isLinkOnly && ingredients.every((ing) => !ing.name || !ing.name.trim())) {
+    return t("ingredient_required");
+  }
+  return null;
+};
+
+// Composite recipe validation function
+export const validateRecipeForm = (formData, t) => {
+  const errors = {};
+  const { title, category, ingredients, link_only } = formData;
+
+  // Title validation
+  const titleError = validateRecipeTitle(title, t);
+  if (titleError) errors.title = titleError;
+
+  // Category validation
+  const categoryError = validateRecipeCategory(category, t);
+  if (categoryError) errors.category = categoryError;
+
+  // Ingredients validation (only for non-link recipes)
+  const ingredientsError = validateRecipeIngredients(ingredients, link_only, t);
+  if (ingredientsError) errors.ingredients = ingredientsError;
+
+  return errors;
+};

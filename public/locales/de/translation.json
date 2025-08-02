@@ -86,6 +86,7 @@
   "edit_recipe": "Rezept bearbeiten",
 
   "title_required": "Rezepttitel ist erforderlich",
+  "title_already_exists": "Ein Rezept mit diesem Titel existiert bereits",
   "category_required": "Kategorie ist erforderlich",
   "ingredient_required": "Mindestens eine Zutat ist erforderlich",
 

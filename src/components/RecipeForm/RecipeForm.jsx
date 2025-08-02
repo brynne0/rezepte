@@ -15,6 +15,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     error,
     isEditMode,
     handleInputChange,
+    handleTitleBlur,
     handleIngredientChange,
     handleInstructionChange,
     addInstruction,
@@ -100,9 +101,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <label htmlFor="title" className="form-header-wrapper">
             <h3>{t("recipe_title")}</h3>
           </label>
-          {validationErrors.title && (
-            <span className="field-error">{validationErrors.title}</span>
-          )}
           <input
             id="title"
             type="text"
@@ -114,10 +112,16 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 !!validationErrors.title
               )
             }
-            className={`input--full-width input--shadow input${
+            onBlur={handleTitleBlur}
+            className={`input--full-width input--shadow input ${
               validationErrors.title ? "input--error" : ""
             }`}
           />
+          {validationErrors.title && (
+            <span className="error-message-small">
+              {validationErrors.title}
+            </span>
+          )}
         </div>
 
         {/* Category */}
@@ -126,9 +130,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             <h3>{t("category")}</h3>
           </label>
 
-          {validationErrors.category && (
-            <span className="field-error">{validationErrors.category}</span>
-          )}
           <select
             id="category"
             value={formData.category}
@@ -155,6 +156,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 </option>
               ))}
           </select>
+          {validationErrors.category && (
+            <span className="error-message-small">
+              {validationErrors.category}
+            </span>
+          )}
         </div>
 
         {!IsLinkRecipe && (
@@ -183,12 +189,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 <h3>{t("ingredients")}</h3>
               </label>
 
-              {validationErrors.ingredients && (
-                <span className="field-error">
-                  {validationErrors.ingredients}
-                </span>
-              )}
-
               <div className="ingredients-list">
                 {formData.ingredients.map((ingredient) => (
                   <div key={ingredient.tempId} className="ingredient-row">
@@ -199,10 +199,12 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       value={ingredient.name || ""}
                       onChange={(e) => {
                         // Apply language-specific capitalisation
-                        const value = i18n.language === 'de' ? 
-                          e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1).toLowerCase() :
-                          e.target.value.toLowerCase();
-                        
+                        const value =
+                          i18n.language === "de"
+                            ? e.target.value.charAt(0).toUpperCase() +
+                              e.target.value.slice(1).toLowerCase()
+                            : e.target.value.toLowerCase();
+
                         handleIngredientChange(
                           ingredient.tempId,
                           "name",
@@ -210,7 +212,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                           validationErrors.ingredients ? "ingredients" : null
                         );
                       }}
-                      className="input input--full-width input--shadow "
+                      className={`input input--full-width input--shadow ${
+                        validationErrors.ingredients ? "input--error" : ""
+                      }`}
                       placeholder={t("ingredient_name")}
                     />
                     {/* Ingredient Quantity */}
@@ -294,6 +298,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   <Plus size={16} />
                 </button>
               </div>
+              {validationErrors.ingredients && (
+                <span className="error-message-small">
+                  {validationErrors.ingredients}
+                </span>
+              )}
             </div>
 
             {/* Instructions */}
@@ -397,8 +406,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             className="btn btn-action btn-primary"
           >
             {loading
-            // TODODODO
-              ? isEditMode
+              ? // TODODODO
+                isEditMode
                 ? "Updating..."
                 : "Creating..."
               : isEditMode

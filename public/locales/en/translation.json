@@ -88,6 +88,7 @@
   "edit_recipe": "Edit Recipe",
 
   "title_required": "Recipe title is required",
+  "title_already_exists": "A recipe with this title already exists",
   "category_required": "Category is required",
   "ingredient_required": "At least one ingredient is required",
 
