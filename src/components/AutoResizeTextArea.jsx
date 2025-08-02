@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 
-const AutoResizeTextArea = ({ value, onChange, onKeyDown, className }) => {
+const AutoResizeTextArea = ({ value, onChange, onKeyDown, className, placeholder, readOnly, id }) => {
   const textareaRef = useRef(null);
 
   const resizeTextarea = () => {
@@ -27,6 +27,9 @@ const AutoResizeTextArea = ({ value, onChange, onKeyDown, className }) => {
       onChange={handleChange}
       onKeyDown={onKeyDown}
       className={className}
+      placeholder={placeholder}
+      readOnly={readOnly}
+      id={id}
     />
   );
 };

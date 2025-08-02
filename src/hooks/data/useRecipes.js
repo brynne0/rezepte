@@ -22,7 +22,7 @@ export const useRecipes = () => {
       );
       setRecipes(translatedRecipes);
     } catch (err) {
-      console.log("Error: ", err);
+      console.error("Error: ", err);
       setRecipes([]);
     } finally {
       setLoading(false);
@@ -44,7 +44,7 @@ export const useRecipes = () => {
         );
         setRecipes(translatedRecipes);
       } catch (err) {
-        console.log("Error refreshing: ", err);
+        console.error("Error refreshing: ", err);
         setRecipes([]);
       } finally {
         if (showLoading) setLoading(false);

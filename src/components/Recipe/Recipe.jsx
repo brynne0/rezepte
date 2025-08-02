@@ -64,7 +64,7 @@ const Recipe = () => {
             {isLoggedIn && (
               <div className="cart-container">
                 <button
-                  onClick={() => addToGroceryList(recipe.ingredients)}
+                  onClick={() => addToGroceryList(recipe.ingredients, recipe.title, recipe.id)}
                   className="btn btn-icon btn-icon-danger"
                 >
                   <ShoppingBasket />

@@ -55,16 +55,13 @@
     { "value": "", "label": "Einheit" },
     { "value": "tsp", "label": "TL" },
     { "value": "tbsp", "label": "EL" },
-    { "value": "cup", "label": "Tasse" },
-    { "value": "cups", "label": "Tassen" },
+    { "value": "cup/s", "label": "Tasse/n" },
     { "value": "ml", "label": "ml" },
     { "value": "l", "label": "l" },
     { "value": "g", "label": "g" },
     { "value": "kg", "label": "kg" },
-    { "value": "can", "label": "Dose" },
-    { "value": "cans", "label": "Dosen" },
-    { "value": "piece", "label": "Stück" },
-    { "value": "pieces", "label": "Stücke" }
+    { "value": "can/s", "label": "Dose/n" },
+    { "value": "piece/s", "label": "Stück/e" }
   ],
 
   "recipe_delete_confirmation": "Möchten Sie dieses Rezept wirklich löschen?",

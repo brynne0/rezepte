@@ -94,6 +94,16 @@
   color: var(--light_brown);
 }
 
+/* Keep selected language red even when disabled */
+.language.selected.disabled {
+  color: var(--dark_red);
+  opacity: 0.7;
+}
+
+.language.selected.disabled:hover {
+  color: var(--dark_red);
+}
+
 /* Navigation */
 .header-nav {
   display: flex;
