@@ -98,5 +98,7 @@
 
   "added_to_groceries": "Added to grocery list",
   "grocery_list": "Grocery List",
-  "item_name": "Item name"
+  "item_name": "Item name",
+  "clear_list": "Clear List",
+  "grocery_list_clear_confirmation": "Are you sure you want to clear the grocery list?"
 }

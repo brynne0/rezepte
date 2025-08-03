@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import AutoResizeTextArea from "../AutoResizeTextArea";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const { t, i18n } = useTranslation();
@@ -39,28 +40,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const IsLinkRecipe = formData.link_only;
 
-  // Delete Recipe Modal Component
-  const DeleteRecipeModal = ({ isOpen, onClose, onConfirm }) => {
-    if (!isOpen) return null;
-
-    return (
-      <div className="delete-modal-overlay" onClick={onClose}>
-        <div className="delete-modal-content">
-          <p className="delete-modal-message">
-            {t("recipe_delete_confirmation")}
-          </p>
-          <div className="delete-modal-actions">
-            <button onClick={onClose} className="btn btn-action btn-secondary">
-              {t("cancel")}
-            </button>
-            <button onClick={onConfirm} className="btn btn-action btn-danger">
-              {t("delete")}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="card card-form">
@@ -747,11 +726,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
       </form>
 
       {/* Delete Modal */}
-      <DeleteRecipeModal
+      <ConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
-        recipeName={formData.title}
+        message={t("recipe_delete_confirmation")}
+        confirmText={t("delete")}
+        cancelText={t("cancel")}
+        confirmButtonType="danger"
       />
     </div>
   );

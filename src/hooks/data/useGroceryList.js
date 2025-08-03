@@ -30,7 +30,7 @@ export const useGroceryList = () => {
     const loadGroceryList = async () => {
       try {
         setLoading(true);
-        const currentLanguage = i18n.language.split('-')[0]; // Normalize language code
+        const currentLanguage = i18n.language.split("-")[0]; // Normalize language code
         const data = await fetchGroceryListForDisplay(currentLanguage);
         setGroceryList(data);
         setError(null);
@@ -62,7 +62,11 @@ export const useGroceryList = () => {
   };
 
   // Add selected ingredients to grocery list
-  const addToGroceryList = async (recipeIngredients, recipeTitle = "", recipeId = null) => {
+  const addToGroceryList = async (
+    recipeIngredients,
+    recipeTitle = "",
+    recipeId = null
+  ) => {
     const selectedIngredients = recipeIngredients.filter(
       (ingredient) => checkedIngredients[ingredient.recipe_ingredient_id]
     );
@@ -79,9 +83,9 @@ export const useGroceryList = () => {
         recipeTitle,
         recipeId
       );
-      
+
       // Reload grocery list with current language
-      const currentLanguage = i18n.language.split('-')[0];
+      const currentLanguage = i18n.language.split("-")[0];
       const data = await fetchGroceryListForDisplay(currentLanguage);
       setGroceryList(data);
 

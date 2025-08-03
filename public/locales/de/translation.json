@@ -96,5 +96,7 @@
 
   "added_to_groceries": "Zur Einkaufsliste hinzugefügt",
   "grocery_list": "Einkaufsliste",
-  "item_name": "Name"
+  "item_name": "Name",
+  "clear_list": "Liste löschen",
+  "grocery_list_clear_confirmation": "Möchten Sie die Einkaufsliste wirklich löschen?"
 }
