@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { forgotPassword } from "../../services/auth";
 import { validateForgotPasswordForm } from "../../utils/validation";
+import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
 
   const handleForgotPassword = async (e) => {
@@ -18,6 +20,7 @@ const ForgotPasswordPage = () => {
 
     if (Object.keys(errors).length === 0) {
       try {
+        setLoading(true);
         const { error } = await forgotPassword(email);
 
         if (error) {
@@ -30,6 +33,8 @@ const ForgotPasswordPage = () => {
       } catch (err) {
         setErrorMessage(t("password_reset_failed"));
         console.error(err);
+      } finally {
+        setLoading(false);
       }
 
       setTimeout(() => {
@@ -37,6 +42,10 @@ const ForgotPasswordPage = () => {
       }, 3000);
     }
   };
+
+  if (loading) {
+    return <LoadingAcorn />;
+  }
 
   return (
     <div className="page-centered">
@@ -74,7 +83,7 @@ const ForgotPasswordPage = () => {
           )}
 
           {/* Submit button */}
-          <button className={"btn btn-standard"} type="submit">
+          <button className={"btn btn-standard"} type="submit" disabled={loading}>
             {t("send_reset_email")}
           </button>
         </form>

@@ -1,5 +1,7 @@
 .grocery-list-wrapper {
   flex-direction: column;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .list-items {
@@ -20,6 +22,8 @@
 .list-item {
   display: flex;
   align-items: flex-start;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .list-view-item {
@@ -27,6 +31,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.25rem;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .list-view-item.checked {
@@ -37,10 +43,16 @@
 .item-name {
   font-weight: 500;
   color: var(--dark_brown);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .item-details {
   color: var(--brown);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .spacer {

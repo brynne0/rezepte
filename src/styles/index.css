@@ -4,6 +4,7 @@
 /* Components */
 @import "./components/buttons.css";
 @import "./components/inputs.css";
+@import "./components/modal.css";
 
 /* Globals */
 @import "./globals/typography.css";

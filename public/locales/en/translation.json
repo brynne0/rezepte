@@ -83,15 +83,22 @@
   "ingredient_name": "Ingredient name",
   "quantity": "Qty",
   "notes": "Notes",
+  "subheading": "Subheading",
+  "ingredient_subheading": "Ingredient subheading (optional)",
+  "add_section": "Add Section",
+  "section_title_placeholder": "Section title",
 
   "add_new_recipe": "Add New Recipe",
   "edit_recipe": "Edit Recipe",
 
   "title_required": "Recipe title is required",
+  "title_already_exists": "A recipe with this title already exists",
   "category_required": "Category is required",
   "ingredient_required": "At least one ingredient is required",
 
   "added_to_groceries": "Added to grocery list",
   "grocery_list": "Grocery List",
-  "item_name": "Item name"
+  "item_name": "Item name",
+  "clear_list": "Clear List",
+  "grocery_list_clear_confirmation": "Are you sure you want to clear the grocery list?"
 }

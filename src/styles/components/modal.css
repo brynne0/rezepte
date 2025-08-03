@@ -1,0 +1,51 @@
+/* Confirmation Modal */
+.confirmation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #00000080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+}
+
+.confirmation-modal-content {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1rem 3rem var(--shadow_black);
+  max-width: 90vw;
+  max-height: 90vh;
+  min-width: 20rem;
+}
+
+.confirmation-modal-title {
+  color: var(--dark_brown);
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.confirmation-modal-message {
+  color: var(--dark_brown);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.confirmation-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .confirmation-modal-content {
+    padding: 1rem;
+    min-width: 16rem;
+  }
+}

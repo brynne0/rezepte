@@ -8,12 +8,15 @@ import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
 import AutoResizeTextArea from "../../components/AutoResizeTextArea";
+import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 
 const GroceryList = ({
   isEditing: propIsEditing,
   setIsEditing: propSetIsEditing,
 }) => {
-  const { groceryList, updateGroceryList, loading } = useGroceryList();
+  const { groceryList, updateGroceryList, clearGroceryList, loading } =
+    useGroceryList();
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
@@ -35,7 +38,6 @@ const GroceryList = ({
     return translated;
   };
 
-
   // Use prop-based editing state, fallback to local state if props not provided
   const isEditing = propIsEditing !== undefined ? propIsEditing : false;
   const setIsEditing = propSetIsEditing || (() => {});
@@ -44,6 +46,7 @@ const GroceryList = ({
   const [checkedItems, setCheckedItems] = useState(new Set());
 
   const currentList = isEditing ? editedList : groceryList;
+
 
   // Group ingredients by normalised name for display
   const groupIngredients = (items) => {
@@ -144,7 +147,9 @@ const GroceryList = ({
 
     // Focus on the new item's name input
     setTimeout(() => {
-      const newItemNameInput = document.getElementById(`item-name-${newTempId}`);
+      const newItemNameInput = document.getElementById(
+        `item-name-${newTempId}`
+      );
       if (newItemNameInput) {
         newItemNameInput.focus();
       }
@@ -190,11 +195,7 @@ const GroceryList = ({
   };
 
   if (loading) {
-    return (
-      <div className="loading-acorn">
-        <LoadingAcorn />
-      </div>
-    );
+    return <LoadingAcorn />;
   }
 
   return (
@@ -415,18 +416,43 @@ const GroceryList = ({
       </div>
 
       {isEditing && (
-        <div className="btn-wrapper">
+        <div className="form-actions edit">
+          {/* Clear Button */}
+          <button
+            type="button"
+            onClick={() => setIsClearModalOpen(true)}
+            className="btn btn-action btn-danger"
+          >
+            {t("clear_list")}
+          </button>
+          {/* Cancel Button */}
           <button
             className="btn btn-action btn-secondary"
             onClick={cancelEditing}
           >
             {t("cancel")}
           </button>
+          {/* Save Button */}
           <button className="btn btn-action btn-primary" onClick={saveChanges}>
             {t("save")}
           </button>
         </div>
       )}
+
+      {/* Clear List Modal */}
+      <ConfirmationModal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        onConfirm={() => {
+          clearGroceryList();
+          setEditedList([]);
+          setIsClearModalOpen(false);
+        }}
+        message={t("grocery_list_clear_confirmation")}
+        confirmText={t("clear_list")}
+        cancelText={t("cancel")}
+        confirmButtonType="danger"
+      />
     </div>
   );
 };

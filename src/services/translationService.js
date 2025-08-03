@@ -189,7 +189,7 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
 const shouldUsePlural = (quantity) => {
   if (!quantity || quantity === null) return false;
   const num = parseFloat(quantity);
-  return num !== 1;
+  return num > 1;
 };
 
 // Helper function to get the correct ingredient name for display
