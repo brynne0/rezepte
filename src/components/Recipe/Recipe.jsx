@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useRecipe } from "../../hooks/data/useRecipe";
 import "./Recipe.css";
-import { Pencil, ShoppingBasket } from "lucide-react";
+import { Pencil, ShoppingBasket, Loader2 } from "lucide-react";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
@@ -120,13 +120,18 @@ const Recipe = () => {
                   disabled={addingToGroceryList}
                 >
                   <ShoppingBasket />
-                  {/* Selected ingredients counter */}
-                  {Object.values(checkedIngredients).filter(Boolean).length >
-                    0 && (
+                  {/* Selected ingredients counter or loading spinner */}
+                  {addingToGroceryList ? (
                     <span className="cart-counter">
-                      {Object.values(checkedIngredients).filter(Boolean).length}
+                      <Loader2 size={12} className="animate-spin" />
                     </span>
-                    // ADD LOADING SYMBOL TO REPLACE NUMBER WHEN adding to grocery list
+                  ) : (
+                    Object.values(checkedIngredients).filter(Boolean).length >
+                      0 && (
+                      <span className="cart-counter">
+                        {Object.values(checkedIngredients).filter(Boolean).length}
+                      </span>
+                    )
                   )}
                 </button>
               </div>
