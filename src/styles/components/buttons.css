@@ -125,7 +125,7 @@
 }
 
 /* Add section buttons */
-.btn-add-section {
+.btn-add-section-dottes {
   padding: 0.375rem 0.75rem;
   background: transparent;
   color: var(--brown);
@@ -135,12 +135,12 @@
   gap: 0.375rem;
 }
 
-.btn-add-section:hover {
+.btn-add-section-dotted:hover {
   background: var(--cream_opaque);
   border-style: solid;
 }
 
-.btn-add-section-subtle {
+.btn-add-section {
   background: rgba(var(--brown-rgb), 0.1);
   color: var(--brown);
   border: none;
@@ -148,7 +148,7 @@
   font-size: 0.9rem;
 }
 
-.btn-add-section-subtle:hover {
+.btn-add-section:hover {
   background: rgba(var(--brown-rgb), 0.2);
   color: var(--dark_brown);
 }
@@ -165,7 +165,7 @@
   }
 
   .btn-add-section,
-  .btn-add-section-subtle {
+  .btn-add-section {
     padding: 0.375rem 0.625rem;
   }
 }

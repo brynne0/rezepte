@@ -40,7 +40,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const IsLinkRecipe = formData.link_only;
 
-
   return (
     <div className="card card-form">
       <header className="page-header flex-center">
@@ -173,7 +172,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   type="button"
                   onClick={addSection}
                   // TODO - change button style
-                  className="btn btn-add-section-subtle"
+                  className="btn btn-add-section"
                 >
                   {t("add_section")}
                 </button>
