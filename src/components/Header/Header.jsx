@@ -5,7 +5,7 @@ import { signOut, getDisplayName } from "../../services/auth";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
-// import useClickOutside from "../../hooks/ui/useClickOutside";
+import useClickOutside from "../../hooks/ui/useClickOutside";
 
 const Header = ({
   setSelectedCategory,
@@ -20,6 +20,9 @@ const Header = ({
   // Temporary solution to hide nav bar for mobiles on all screens except home screen
   const isSmallScreen = window.matchMedia("(max-width: 768px)").matches;
   const hideNavBar = location.pathname !== "/" && isSmallScreen;
+
+  // Hide search bar on all pages except home
+  const isHomePage = location.pathname === "/";
 
   const { isLoggedIn, isMe, isGuest } = useAuth();
 
@@ -52,14 +55,22 @@ const Header = ({
     }
   }, [isLoggedIn, setDisplayName]);
 
-  // Refs for click outside detection
-  // const searchBarRef = useClickOutside(() => {
-  //   setShowSearchBar(false);
-  // });
+  // Hide search bar when leaving home page (but keep search term)
+  useEffect(() => {
+    if (!isHomePage) {
+      setShowSearchBar(false);
+    }
+  }, [location.pathname, isHomePage]);
 
-  // const loginFormRef = useClickOutside(() => {
-  //   setAuthState('closed');
-  // });
+  // Refs for click outside detection
+  const loginFormRef = useClickOutside(() => {
+    setShowLogOut(false);
+    setShowLogIn(false);
+  });
+
+  const searchBarRef = useClickOutside(() => {
+    setShowSearchBar(false);
+  });
 
   const handleLogout = async () => {
     await signOut();
@@ -80,7 +91,7 @@ const Header = ({
       <header className="header">
         <div className="header-container">
           {/* Login and Logout */}
-          <div className="login-wrapper">
+          <div className="login-wrapper" ref={loginFormRef}>
             <div
               onClick={() => {
                 // Don't do anything if there's a message or already on auth page
@@ -125,7 +136,9 @@ const Header = ({
                 className={`language${
                   i18n.language === "en" ? " selected" : ""
                 }${disableLanguageSwitch ? " disabled" : ""}`}
-                onClick={() => !disableLanguageSwitch && i18n.changeLanguage("en")}
+                onClick={() =>
+                  !disableLanguageSwitch && i18n.changeLanguage("en")
+                }
               >
                 EN
               </p>{" "}
@@ -134,7 +147,9 @@ const Header = ({
                 className={`language${
                   i18n.language === "de" ? " selected" : ""
                 }${disableLanguageSwitch ? " disabled" : ""}`}
-                onClick={() => !disableLanguageSwitch && i18n.changeLanguage("de")}
+                onClick={() =>
+                  !disableLanguageSwitch && i18n.changeLanguage("de")
+                }
               >
                 DE
               </p>
@@ -161,6 +176,23 @@ const Header = ({
               <nav className="header-nav">
                 <button
                   onClick={() => {
+                    // If not on home page, navigate to home first and open search
+                    if (!isHomePage) {
+                      setSelectedCategory("all");
+                      setSearchTerm("");
+                      setShowSearchBar(true);
+                      navigate("/");
+                      // Focus on search bar after navigation
+                      setTimeout(() => {
+                        const searchInput = document.getElementById("search");
+                        if (searchInput) {
+                          searchInput.focus();
+                        }
+                      }, 100);
+                      return;
+                    }
+
+                    // If on home page, toggle search bar
                     setShowSearchBar((prev) => !prev);
                     // Clear search when closing search bar
                     if (showSearchBar) {
@@ -205,8 +237,8 @@ const Header = ({
         </div>
 
         {/*  Search Recipe  */}
-        <div className="search-bar-wrapper">
-          {showSearchBar && (
+        <div className="search-bar-wrapper" ref={searchBarRef}>
+          {showSearchBar && isHomePage && (
             <form
               className="search-bar"
               onSubmit={(e) => {
