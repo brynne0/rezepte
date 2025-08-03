@@ -1,0 +1,33 @@
+/* Delete Modal */
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #00000080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+}
+
+.delete-modal-content {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1rem 3rem var(--shadow_black);
+}
+
+.delete-modal-message {
+  color: var(--dark-brown);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}

@@ -1,7 +1,32 @@
+/* Recipe Form Container */
 .recipe-form {
   padding: 0 3rem 3rem;
 }
 
+.form-group {
+  margin-bottom: 1rem;
+}
+
+/* Form Header */
+.form-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+}
+
+.edit button:first-child {
+  margin-right: auto;
+}
+
+/* Ingredient Lists */
 .ingredient-list {
   display: flex;
   flex-direction: column;
@@ -10,11 +35,11 @@
   margin-bottom: 0.5rem;
 }
 
-.ingredient-list.drag-over {
+/* .ingredient-list.drag-over {
   background: var(--light-brown);
   padding: 0.5rem;
   border-radius: 0.5rem;
-}
+} */
 
 .ungrouped-add-ingredient {
   display: flex;
@@ -33,31 +58,19 @@
 }
 
 .ingredient-section.dragging {
-  /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); */
-  background: white;
+  /* background: white; */
   padding: 0.5rem;
 }
 
-/* Section Header */
+/* Section Headers */
 .section-header {
   display: flex;
   align-items: center;
 }
 
-/* REplace this with the same one as grocery list  */
 .section-title-input {
   flex: 1;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  background: transparent;
-  color: var(--dark_brown);
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-}
-
-.section-title-input::placeholder {
-  color: var(--light_brown);
+  font-weight: 500;
 }
 
 .section-add-ingredient {
@@ -77,18 +90,13 @@
   overflow: hidden;
 }
 
-.ingredient-row.dragging {
-  /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); */
-  background: white;
-}
-
 .drag-handle {
   display: flex;
   align-items: center;
   cursor: grab;
   color: var(--brown);
   padding: 0.25rem;
-  min-height: 2.5rem;
+  min-height: 2rem;
 }
 
 .drag-handle:active {
@@ -101,13 +109,6 @@
 
 .ingredient-details {
   display: contents;
-}
-
-/* Form Header Updates */
-.form-header-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 /* Instructions */
@@ -129,56 +130,6 @@
   color: var(--brown);
   font-size: 1rem;
   margin-top: 0.25rem;
-}
-
-/* Buttons wrapers */
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  padding-top: 1rem;
-}
-
-.edit button:first-child {
-  margin-right: auto;
-}
-
-/* Delete Modal */
-.delete-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #00000080;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: var(--z-modal);
-}
-
-.delete-modal-content {
-  background: white;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  box-shadow: 0 1rem 3rem var(--shadow_black);
-}
-
-.delete-modal-message {
-  color: var(--dark-brown);
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-  font-weight: 600;
-}
-
-.delete-modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
 }
 
 /* Responsive Design */

@@ -1,6 +1,7 @@
 import { Trash2, Plus, ArrowBigLeft, GripHorizontal } from "lucide-react";
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import "./RecipeForm.css";
+import "../../styles/components/modal.css";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import AutoResizeTextArea from "../AutoResizeTextArea";
@@ -116,7 +117,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               )
             }
             onBlur={handleTitleBlur}
-            className={`input--full-width input--shadow input ${
+            className={`input--full-width input--edit input ${
               validationErrors.title ? "input--error" : ""
             }`}
           />
@@ -143,7 +144,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 !!validationErrors.category
               )
             }
-            className={`input--full-width input--shadow input--select input ${
+            className={`input--full-width input--edit input--select input ${
               validationErrors.category ? "input--error" : ""
             }`}
           >
@@ -178,7 +179,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 min="1"
                 value={formData.servings || ""}
                 onChange={(e) => handleInputChange("servings", e.target.value)}
-                className="input input--full-width input--shadow "
+                className="input input--full-width input--edit "
                 onWheel={(e) => {
                   e.target.blur();
                 }}
@@ -193,7 +194,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   type="button"
                   onClick={addSection}
                   // TODO - change button style
-                  className="btn btn-standard"
+                  className="btn btn-add-section-subtle"
                 >
                   {t("add_section")}
                 </button>
@@ -262,7 +263,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                             : null
                                         );
                                       }}
-                                      className={`input input--full-width input--shadow ${
+                                      className={`input input--full-width input--edit ${
                                         validationErrors.ingredients
                                           ? "input--error"
                                           : ""
@@ -286,7 +287,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                             e.target.value
                                           )
                                         }
-                                        className="input input--full-width input--shadow"
+                                        className="input input--full-width input--edit"
                                         placeholder={t("quantity")}
                                         onWheel={(e) => e.target.blur()}
                                       />
@@ -302,7 +303,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                             e.target.value
                                           )
                                         }
-                                        className="input input--full-width input--select input--shadow"
+                                        className="input input--full-width input--select input--edit"
                                       >
                                         {units.map((unit) => (
                                           <option
@@ -326,7 +327,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                             e.target.value.toLowerCase()
                                           )
                                         }
-                                        className="input input--full-width input--shadow"
+                                        className="input input--full-width input--edit"
                                         placeholder={t("notes")}
                                       />
 
@@ -410,7 +411,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                           e.target.value
                                         )
                                       }
-                                      className="section-title-input"
+                                      className="input input--borderless section-title-input"
                                       placeholder={t(
                                         "section_title_placeholder"
                                       )}
@@ -495,7 +496,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                             : null
                                                         );
                                                       }}
-                                                      className={`input input--full-width input--shadow ${
+                                                      className={`input input--full-width input--edit ${
                                                         validationErrors.ingredients
                                                           ? "input--error"
                                                           : ""
@@ -524,7 +525,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                             e.target.value
                                                           )
                                                         }
-                                                        className="input input--full-width input--shadow"
+                                                        className="input input--full-width input--edit"
                                                         placeholder={t(
                                                           "quantity"
                                                         )}
@@ -546,7 +547,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                             e.target.value
                                                           )
                                                         }
-                                                        className="input input--full-width input--select input--shadow"
+                                                        className="input input--full-width input--select input--edit"
                                                       >
                                                         {units.map((unit) => (
                                                           <option
@@ -572,7 +573,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                             e.target.value.toLowerCase()
                                                           )
                                                         }
-                                                        className="input input--full-width input--shadow"
+                                                        className="input input--full-width input--edit"
                                                         placeholder={t("notes")}
                                                       />
 
@@ -646,7 +647,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                         handleInstructionChange(index, e.target.value)
                       }
                       onKeyDown={handleEnter}
-                      className="input input--full-width input--textarea input--shadow "
+                      className="input input--full-width input--textarea input--edit "
                     />
                     <button
                       type="button"
@@ -681,7 +682,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             type="text"
             value={formData.source || ""}
             onChange={(e) => handleInputChange("source", e.target.value)}
-            className="input input--full-width input--shadow "
+            className="input input--full-width input--edit "
             placeholder={
               IsLinkRecipe ? t("source_link") : t("source_link_or_note")
             }
@@ -698,7 +699,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             type="text"
             value={formData.notes || ""}
             onChange={(e) => handleInputChange("notes", e.target.value)}
-            className="input input--full-width input--shadow "
+            className="input input--full-width input--edit "
             placeholder={t("notes")}
           />
         </div>

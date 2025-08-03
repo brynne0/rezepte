@@ -17,7 +17,7 @@ const Recipe = () => {
   // Helper function to get the correct ingredient name (singular vs plural)
   const getIngredientDisplayName = (ingredient) => {
     const shouldUsePlural =
-      ingredient.quantity && parseFloat(ingredient.quantity) !== 1;
+      ingredient.quantity && parseFloat(ingredient.quantity) > 1;
 
     if (shouldUsePlural && ingredient.plural_name) {
       return ingredient.plural_name;
@@ -129,7 +129,10 @@ const Recipe = () => {
                     Object.values(checkedIngredients).filter(Boolean).length >
                       0 && (
                       <span className="cart-counter">
-                        {Object.values(checkedIngredients).filter(Boolean).length}
+                        {
+                          Object.values(checkedIngredients).filter(Boolean)
+                            .length
+                        }
                       </span>
                     )
                   )}
@@ -142,7 +145,7 @@ const Recipe = () => {
           {/* Ungrouped Ingredients */}
           {recipe.ungroupedIngredients &&
             recipe.ungroupedIngredients.length > 0 && (
-              <ul className="ingredient-list">
+              <ul className="ingredient-list-display">
                 {recipe.ungroupedIngredients.map((ingredient, index) => (
                   <li
                     key={`ungrouped-${index}-${ingredient.id}`}
@@ -179,7 +182,7 @@ const Recipe = () => {
                 {recipe.ingredientSections.map((section, sectionIndex) => (
                   <div key={sectionIndex} className="ingredient-section">
                     <h3 className="section-subheading">{section.subheading}</h3>
-                    <ul className="ingredient-list">
+                    <ul className="ingredient-list-display">
                       {section.ingredients.map(
                         (ingredient, ingredientIndex) => (
                           <li
@@ -222,7 +225,7 @@ const Recipe = () => {
             !recipe.ingredientSections &&
             recipe.ingredients &&
             recipe.ingredients.length > 0 && (
-              <ul className="ingredient-list">
+              <ul className="ingredient-list-display">
                 {recipe.ingredients.map((ingredient, index) => (
                   <li
                     key={`flat-${index}-${ingredient.id}`}

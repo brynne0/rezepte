@@ -6,7 +6,7 @@
   font-family: inherit;
   color: var(--dark_brown);
   background: white;
-  border: 0.0625rem solid var(--cream);
+  border: 0.0625rem solid var(--dark_brown);
   transition: all 0.2s ease;
   box-sizing: border-box;
   min-width: 0;
@@ -26,12 +26,16 @@
 /* Variations */
 .input--cream {
   background: var(--cream_opaque);
-  border-color: var(--brown);
   padding: 0.5rem;
 }
 
-.input--shadow {
+.input--cream:focus {
+  border-color: var(--dark_brown);
+}
+
+.input--edit {
   box-shadow: 0 0.0625rem 0.1rem var(--shadow_black);
+  border: 0.0625rem dashed var(--cream);
 }
 
 .input--full-width {

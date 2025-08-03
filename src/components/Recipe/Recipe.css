@@ -11,7 +11,7 @@
   gap: 0.5rem;
 }
 
-.ingredient-list {
+.ingredient-list-display {
   padding: 0;
   list-style: none;
 }
@@ -59,25 +59,10 @@
 }
 
 /* Ingredient Sections */
-.ingredient-sections {
-  display: flex;
-  flex-direction: column;
-  /* gap: 1.5rem;
-  margin-top: 1rem; */
-}
-
-.ingredient-section {
-  margin-bottom: 1rem;
-}
-
 .section-subheading {
-  color: var(--brown);
   font-weight: 600;
-  margin-bottom: 0.75rem;
   margin-top: 0;
-  font-size: 1.1rem;
-  border-bottom: 1px solid var(--cream);
-  padding-bottom: 0.25rem;
+  font-size: 1rem;
   word-break: break-word;
   overflow-wrap: break-word;
 }
