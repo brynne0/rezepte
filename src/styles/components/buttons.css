@@ -92,7 +92,10 @@
   color: var(--green);
 }
 
-.btn-icon-danger {
+.btn-icon-red {
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
   color: var(--dark_red);
 }
 
@@ -110,7 +113,7 @@
 
 .btn-icon-success:hover,
 .btn-icon-remove:hover,
-.btn-icon-danger:hover {
+.btn-icon-red:hover {
   transform: translateY(-1px);
 }
 

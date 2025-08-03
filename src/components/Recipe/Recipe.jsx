@@ -79,7 +79,7 @@ const Recipe = () => {
         {/* Show edit button only when logged in  */}
         {isLoggedIn && !isGuest && (
           <button
-            className="btn btn-icon btn-icon-danger"
+            className="btn btn-icon-red"
             onClick={() => {
               navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
             }}
@@ -116,7 +116,7 @@ const Recipe = () => {
                       recipe.id
                     )
                   }
-                  className="btn btn-icon btn-icon-danger"
+                  className="btn btn-icon-red"
                   disabled={addingToGroceryList}
                 >
                   <ShoppingBasket />
