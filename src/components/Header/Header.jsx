@@ -68,10 +68,6 @@ const Header = ({
     setShowLogIn(false);
   });
 
-  const searchBarRef = useClickOutside(() => {
-    setShowSearchBar(false);
-  });
-
   const handleLogout = async () => {
     await signOut();
 
@@ -237,7 +233,7 @@ const Header = ({
         </div>
 
         {/*  Search Recipe  */}
-        <div className="search-bar-wrapper" ref={searchBarRef}>
+        <div className="search-bar-wrapper">
           {showSearchBar && isHomePage && (
             <form
               className="search-bar"

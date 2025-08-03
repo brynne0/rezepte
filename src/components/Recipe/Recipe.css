@@ -27,6 +27,12 @@
   overflow-wrap: break-word;
   flex: 1;
   min-width: 0;
+  transition: text-decoration 0.2s ease;
+}
+
+.ingredient input[type="checkbox"]:checked + label {
+  text-decoration: line-through;
+  opacity: 0.6;
 }
 
 .cart-counter {
