@@ -19,7 +19,6 @@
 .ungrouped-add-ingredient {
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
 }
 
 /* Ingredient Sections */
@@ -45,26 +44,25 @@
   align-items: center;
 }
 
+/* REplace this with the same one as grocery list  */
 .section-title-input {
   flex: 1;
   font-size: 1rem;
   font-weight: 600;
   border: none;
   background: transparent;
-  color: var(--dark-brown);
+  color: var(--dark_brown);
   padding: 0.5rem;
   border-radius: 0.25rem;
 }
 
 .section-title-input::placeholder {
-  color: var(--light-brown);
-  font-weight: 400;
+  color: var(--light_brown);
 }
 
 .section-add-ingredient {
   display: flex;
   justify-content: center;
-  margin-top: 0.5rem;
 }
 
 /* Ingredient Rows */
@@ -75,6 +73,8 @@
   align-items: center;
   border-radius: 0.5rem;
   transition: all 0.2s ease;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .ingredient-row.dragging {

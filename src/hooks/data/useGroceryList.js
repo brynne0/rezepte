@@ -12,7 +12,8 @@ export const useGroceryList = () => {
   const [groceryList, setGroceryList] = useState([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [checkedIngredients, setCheckedIngredients] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [addingToGroceryList, setAddingToGroceryList] = useState(false);
   const [error, setError] = useState(null);
   const { i18n } = useTranslation();
 
@@ -63,7 +64,7 @@ export const useGroceryList = () => {
   // Add selected ingredients to grocery list
   const addToGroceryList = async (recipeIngredients, recipeTitle = "", recipeId = null) => {
     const selectedIngredients = recipeIngredients.filter(
-      (ingredient) => checkedIngredients[ingredient.id]
+      (ingredient) => checkedIngredients[ingredient.recipe_ingredient_id]
     );
 
     if (selectedIngredients.length === 0) {
@@ -71,7 +72,7 @@ export const useGroceryList = () => {
     }
 
     try {
-      setLoading(true);
+      setAddingToGroceryList(true);
       await addIngredientsToGroceryList(
         recipeIngredients,
         checkedIngredients,
@@ -95,7 +96,7 @@ export const useGroceryList = () => {
       console.error("Error adding to grocery list:", err);
       setError(err.message);
     } finally {
-      setLoading(false);
+      setAddingToGroceryList(false);
     }
   };
 
@@ -131,6 +132,7 @@ export const useGroceryList = () => {
     groceryList,
     showSuccess,
     loading,
+    addingToGroceryList,
     error,
     handleCheckboxChange,
     addToGroceryList,

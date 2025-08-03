@@ -35,7 +35,6 @@ const GroceryList = ({
     return translated;
   };
 
-
   // Use prop-based editing state, fallback to local state if props not provided
   const isEditing = propIsEditing !== undefined ? propIsEditing : false;
   const setIsEditing = propSetIsEditing || (() => {});
@@ -144,7 +143,9 @@ const GroceryList = ({
 
     // Focus on the new item's name input
     setTimeout(() => {
-      const newItemNameInput = document.getElementById(`item-name-${newTempId}`);
+      const newItemNameInput = document.getElementById(
+        `item-name-${newTempId}`
+      );
       if (newItemNameInput) {
         newItemNameInput.focus();
       }
@@ -190,11 +191,7 @@ const GroceryList = ({
   };
 
   if (loading) {
-    return (
-      <div className="loading-acorn">
-        <LoadingAcorn />
-      </div>
-    );
+    return <LoadingAcorn />;
   }
 
   return (

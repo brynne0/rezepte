@@ -13,7 +13,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     formData,
     validationErrors,
     loading,
-    error,
+    // error,
     isEditMode,
     handleInputChange,
     handleTitleBlur,
@@ -99,8 +99,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="recipe-form">
-        {error && <div className="error-message">{error}</div>}
-
         {/* Recipe Title */}
         <div className="form-group">
           <label htmlFor="title" className="form-header-wrapper">
@@ -216,8 +214,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                         {formData.ungroupedIngredients.map(
                           (ingredient, index) => (
                             <Draggable
-                              key={ingredient.tempId}
-                              draggableId={ingredient.tempId.toString()}
+                              key={`ungrouped-${index}-${ingredient.tempId}`}
+                              draggableId={`ungrouped-${index}-${ingredient.tempId}`}
                               index={index}
                               type="ingredient"
                             >
@@ -240,7 +238,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                   <div className="ingredient-content">
                                     {/* Ingredient Name */}
                                     <input
-                                      id={`ingredient-name-${ingredient.tempId}`}
+                                      id={`ingredient-name-ungrouped-${index}-${ingredient.tempId}`}
                                       type="text"
                                       value={ingredient.name || ""}
                                       onChange={(e) => {
@@ -275,7 +273,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                     {/* Ingredient Details */}
                                     <div className="ingredient-details">
                                       <input
-                                        id={`ingredient-quantity-${ingredient.tempId}`}
+                                        id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
                                         type="number"
                                         min="0"
                                         step="0.01"
@@ -294,7 +292,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                       />
 
                                       <select
-                                        id={`ingredient-unit-${ingredient.tempId}`}
+                                        id={`ingredient-unit-ungrouped-${index}-${ingredient.tempId}`}
                                         value={ingredient.unit || ""}
                                         onChange={(e) =>
                                           handleIngredientChange(
@@ -317,7 +315,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                       </select>
 
                                       <input
-                                        id={`ingredient-notes-${ingredient.tempId}`}
+                                        id={`ingredient-notes-ungrouped-${index}-${ingredient.tempId}`}
                                         type="text"
                                         value={ingredient.notes || ""}
                                         onChange={(e) =>
@@ -445,8 +443,8 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                         {section.ingredients.map(
                                           (ingredient, ingredientIndex) => (
                                             <Draggable
-                                              key={ingredient.tempId}
-                                              draggableId={ingredient.tempId.toString()}
+                                              key={`${section.id}-${ingredientIndex}-${ingredient.tempId}`}
+                                              draggableId={`${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                               index={ingredientIndex}
                                               type="ingredient"
                                             >
@@ -471,7 +469,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                   <div className="ingredient-content">
                                                     {/* Ingredient Name */}
                                                     <input
-                                                      id={`ingredient-name-${ingredient.tempId}`}
+                                                      id={`ingredient-name-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                                       type="text"
                                                       value={
                                                         ingredient.name || ""
@@ -510,7 +508,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                     {/* Ingredient Details */}
                                                     <div className="ingredient-details">
                                                       <input
-                                                        id={`ingredient-quantity-${ingredient.tempId}`}
+                                                        id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                                         type="number"
                                                         min="0"
                                                         step="0.01"
@@ -536,7 +534,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                       />
 
                                                       <select
-                                                        id={`ingredient-unit-${ingredient.tempId}`}
+                                                        id={`ingredient-unit-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                                         value={
                                                           ingredient.unit || ""
                                                         }
@@ -561,7 +559,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                       </select>
 
                                                       <input
-                                                        id={`ingredient-notes-${ingredient.tempId}`}
+                                                        id={`ingredient-notes-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                                         type="text"
                                                         value={
                                                           ingredient.notes || ""
@@ -704,6 +702,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             placeholder={t("notes")}
           />
         </div>
+
+        {/* TODO - add overall form submition error here adn handle common errors */}
+        {/* {error && <div className="error-message">{error}</div>} */}
 
         <div className={`form-actions ${isEditMode ? "edit" : ""}`}>
           {/* Delete Button */}

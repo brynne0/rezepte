@@ -29,6 +29,9 @@ const translateText = async (text, targetLanguage, sourceLanguage = null) => {
 
 // Helper function to normalise ingredient names for comparison
 export const normaliseIngredientName = (name) => {
+  if (!name || typeof name !== 'string') {
+    return '';
+  }
   return pluralize.singular(name.toLowerCase().trim());
 };
 
@@ -71,8 +74,8 @@ const combineQuantities = (
   newUnit
 ) => {
   const normaliseUnit = (unit) => {
-    if (!unit) return "";
-    const normalized = unit.toLowerCase().trim();
+    if (!unit || unit === null || unit === undefined) return "";
+    const normalized = unit.toString().toLowerCase().trim();
     // Handle singular/plural forms - convert "cup/s" to "cup" for matching
     if (normalized.includes("/")) {
       return normalized.split("/")[0];
@@ -85,10 +88,11 @@ const combineQuantities = (
 
   // Direct unit match - simple addition
   if (existingUnitNorm === newUnitNorm) {
-    return {
-      quantity: existingQuantity + newQuantity,
-      unit: existingUnit,
+    const result = {
+      quantity: parseFloat(existingQuantity) + parseFloat(newQuantity),
+      unit: existingUnit || newUnit || null,
     };
+    return result;
   }
 
   // Only combine g/kg and ml/l - nothing else
@@ -679,7 +683,7 @@ export const addIngredientsToGroceryList = async (
   recipeId = null
 ) => {
   const selectedIngredients = recipeIngredients.filter(
-    (ingredient) => checkedIngredients[ingredient.id]
+    (ingredient) => checkedIngredients[ingredient.recipe_ingredient_id]
   );
 
   if (selectedIngredients.length === 0) {
@@ -713,9 +717,12 @@ export const addIngredientsToGroceryList = async (
     : "";
 
   for (const ingredient of selectedIngredients) {
+    // Get ingredient name - handle different property names
+    const ingredientName = ingredient.name || ingredient.singular_name || ingredient.plural_name || 'Unknown ingredient';
+    
     // Get ingredient name in user's preferred language
     const preferredLanguageName = await getIngredientNameInPreferredLanguage(
-      ingredient.name,
+      ingredientName,
       ingredient.quantity,
       userPreferredLang
     );
@@ -729,15 +736,18 @@ export const addIngredientsToGroceryList = async (
 
     if (existingItem) {
       // Try to combine quantities with unit conversion
-      if (existingItem.quantity && ingredient.quantity) {
-        const combinedResult = combineQuantities(
-          existingItem.quantity,
-          existingItem.unit,
-          ingredient.quantity,
-          ingredient.unit
-        );
+      // Handle null quantities by treating them as 0
+      const existingQty = parseFloat(existingItem.quantity) || 0;
+      const newQty = parseFloat(ingredient.quantity) || 0;
+      
+      const combinedResult = combineQuantities(
+        existingQty,
+        existingItem.unit,
+        newQty,
+        ingredient.unit
+      );
 
-        if (combinedResult) {
+      if (combinedResult) {
           // Units are convertible - combine them
           const updatedRecipes = [
             ...new Set(
@@ -753,18 +763,17 @@ export const addIngredientsToGroceryList = async (
             unit: combinedResult.unit,
             source_recipes: updatedRecipes,
           });
-        } else {
-          // Units not convertible - add as separate item
-          itemsToInsert.push({
-            user_id: user.id,
-            name: preferredLanguageName,
-            quantity: ingredient.quantity,
-            unit: ingredient.unit,
-            source_recipes: translatedRecipeTitle
-              ? [translatedRecipeTitle]
-              : [],
-          });
-        }
+      } else {
+        // Units not convertible - add as separate item
+        itemsToInsert.push({
+          user_id: user.id,
+          name: preferredLanguageName,
+          quantity: newQty,
+          unit: ingredient.unit,
+          source_recipes: translatedRecipeTitle
+            ? [translatedRecipeTitle]
+            : [],
+        });
       }
     } else {
       // Add new ingredient

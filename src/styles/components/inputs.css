@@ -9,6 +9,9 @@
   border: 0.0625rem solid var(--cream);
   transition: all 0.2s ease;
   box-sizing: border-box;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .input:focus {
