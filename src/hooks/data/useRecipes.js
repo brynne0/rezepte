@@ -1,9 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import supabase from "../../lib/supabase";
 import { fetchRecipes } from "../../services/recipes";
 import { getTranslatedRecipeTitle } from "../../services/translationService";
-
-import supabase from "../../lib/supabase";
 
 // Fetch all recipes with translation
 export const useRecipes = () => {

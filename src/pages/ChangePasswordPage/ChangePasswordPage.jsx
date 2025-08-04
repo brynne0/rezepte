@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import supabase from "../lib/supabase";
-import { changePassword } from "../services/auth";
-import { validateChangePasswordForm } from "../utils/validation";
-import PasswordInput from "../components/PasswordInput";
+import { changePassword } from "../../services/auth";
+import { useNavigate } from "react-router-dom";
+import { validateChangePasswordForm } from "../../utils/validation";
+import supabase from "../../lib/supabase";
+import PasswordInput from "../../components/PasswordInput";
 
 const ChangePasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");

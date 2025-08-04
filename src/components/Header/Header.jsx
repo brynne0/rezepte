@@ -1,11 +1,11 @@
-import "./Header.css";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
 import { signOut, getDisplayName } from "../../services/auth";
-import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import useClickOutside from "../../hooks/ui/useClickOutside";
+import "./Header.css";
 
 const Header = ({
   setSelectedCategory,
@@ -85,7 +85,7 @@ const Header = ({
   return (
     <>
       <header className="header">
-        <div className="header-container">
+        <div className="header-container flex-between">
           {/* Login and Logout */}
           <div className="login-wrapper" ref={loginFormRef}>
             <div

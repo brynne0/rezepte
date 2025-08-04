@@ -1,8 +1,8 @@
-import { useParams } from "react-router-dom";
-import RecipeForm from "../components/RecipeForm/RecipeForm";
-import { useRecipe } from "../hooks/data/useRecipe";
-import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useRecipe } from "../hooks/data/useRecipe";
+import RecipeForm from "../components/RecipeForm/RecipeForm";
 import LoadingAcorn from "../components/LoadingAcorn/LoadingAcorn";
 
 const EditRecipePage = ({ categories }) => {
@@ -12,7 +12,11 @@ const EditRecipePage = ({ categories }) => {
 
   // Switch to recipe's original language when recipe loads
   useEffect(() => {
-    if (recipe && recipe.original_language && recipe.original_language !== i18n.language) {
+    if (
+      recipe &&
+      recipe.original_language &&
+      recipe.original_language !== i18n.language
+    ) {
       i18n.changeLanguage(recipe.original_language);
     }
   }, [recipe, i18n]);

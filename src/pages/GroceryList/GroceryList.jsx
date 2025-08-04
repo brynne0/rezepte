@@ -1,14 +1,15 @@
-import "./GroceryList.css";
-import { useGroceryList } from "../../hooks/data/useGroceryList";
-import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
+import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
+
+import "./GroceryList.css";
+import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import { getUserPreferredLanguage } from "../../services/userService";
-import { normaliseIngredientName } from "../../services/groceryListService";
 import AutoResizeTextArea from "../../components/AutoResizeTextArea";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
+import { getUserPreferredLanguage } from "../../services/userService";
+import { normaliseIngredientName } from "../../services/groceryListService";
 
 const GroceryList = ({
   isEditing: propIsEditing,

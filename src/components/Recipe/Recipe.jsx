@@ -1,9 +1,10 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useRecipe } from "../../hooks/data/useRecipe";
 import "./Recipe.css";
-import { Pencil, ShoppingBasket, Loader2 } from "lucide-react";
-import { useAuth } from "../../hooks/data/useAuth";
+import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Pencil, ShoppingBasket, Loader2 } from "lucide-react";
+
+import { useRecipe } from "../../hooks/data/useRecipe";
+import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 

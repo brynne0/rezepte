@@ -1,8 +1,8 @@
-import { signUp, signIn } from "../services/auth";
-import { validateAuthForm } from "../utils/validation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { signUp, signIn } from "../services/auth";
+import { validateAuthForm } from "../utils/validation";
 import PasswordInput from "../components/PasswordInput";
 
 const AuthPage = ({ setLoginMessage }) => {

@@ -1,11 +1,12 @@
-import { Trash2, Plus, ArrowBigLeft, GripHorizontal } from "lucide-react";
-import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
-import "./RecipeForm.css";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import AutoResizeTextArea from "../AutoResizeTextArea";
+import { Trash2, Plus, ArrowBigLeft, GripHorizontal } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
+import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
+import AutoResizeTextArea from "../AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
+import "./RecipeForm.css";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const { t, i18n } = useTranslation();

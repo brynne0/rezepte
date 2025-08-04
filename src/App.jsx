@@ -1,25 +1,37 @@
 import "../src/styles/App.css";
+
+// React & hooks
 import { useState, useEffect } from "react";
+
+// Data hooks
+import { useRecipes } from "./hooks/data/useRecipes";
+import { useAuth } from "./hooks/data/useAuth";
+
+// Routing
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
 } from "react-router-dom";
+
+// i18n
+import { useTranslation } from "react-i18next";
+
+// Components
 import Header from "./components/Header/Header";
+import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Recipe from "./components/Recipe/Recipe";
-import { useRecipes } from "./hooks/data/useRecipes";
-import AddRecipePage from "./pages/AddRecipe";
-import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { Squirrel } from "lucide-react";
+
+// Pages
+import AddRecipePage from "./pages/AddRecipe";
 import EditRecipePage from "./pages/EditRecipe";
-import { useTranslation } from "react-i18next";
 import GroceryList from "./pages/GroceryList/GroceryList";
 import AuthPage from "./pages/AuthPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
-import { useAuth } from "./hooks/data/useAuth";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -82,7 +94,8 @@ function App() {
 
 function AppRoutes(props) {
   const location = useLocation();
-  const { refreshRecipes, isGroceryListEditing, setIsGroceryListEditing } = props;
+  const { refreshRecipes, isGroceryListEditing, setIsGroceryListEditing } =
+    props;
   const { isLoggedIn } = useAuth();
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
