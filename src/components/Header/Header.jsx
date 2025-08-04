@@ -102,14 +102,23 @@ const Header = ({
                 }
               }}
             >
-              <Squirrel className="header-logo" />
-              {isMe && <Squirrel className="header-logo-2" />}
+              <Squirrel data-testid="lucide-squirrel" className="header-logo" />
+              {isMe && (
+                <Squirrel
+                  data-testid="lucide-squirrel"
+                  className="header-logo-2"
+                />
+              )}
             </div>
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
             {isLoggedIn && showLogOut && (
               <div>
-                <button className={"btn btn-standard"} onClick={handleLogout}>
+                <button
+                  className={"btn btn-standard"}
+                  onClick={handleLogout}
+                  data-testid="header-logout-btn"
+                >
                   {t("logout")}
                 </button>
               </div>
@@ -122,6 +131,7 @@ const Header = ({
                   setSearchTerm("");
                   navigate("/auth-page");
                 }}
+                data-testid="header-login-btn"
               >
                 {t("login")}
               </button>
@@ -171,6 +181,7 @@ const Header = ({
             <>
               <nav className="header-nav">
                 <button
+                  data-testid="lucide-search"
                   onClick={() => {
                     // If not on home page, navigate to home first and open search
                     if (!isHomePage) {
@@ -213,6 +224,7 @@ const Header = ({
                 {isLoggedIn && !isGuest && (
                   <>
                     <button
+                      data-testid="lucide-plus"
                       className="btn btn-icon btn-icon-neutral"
                       onClick={() => navigate("/add-recipe")}
                     >
@@ -220,6 +232,7 @@ const Header = ({
                     </button>
                     {/* Grocery List */}
                     <button
+                      data-testid="lucide-shopping-basket"
                       className="btn btn-icon btn-icon-neutral"
                       onClick={() => navigate("/grocery-list")}
                     >
