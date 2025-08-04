@@ -1,11 +1,9 @@
-import { signUp, signIn } from "../../services/auth";
-import { validateAuthForm } from "../../utils/validation";
+import { signUp, signIn } from "../services/auth";
+import { validateAuthForm } from "../utils/validation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import PasswordInput from "../../components/PasswordInput";
-
-import "./AuthPage.css";
+import PasswordInput from "../components/PasswordInput";
 
 const AuthPage = ({ setLoginMessage }) => {
   // Form input states
@@ -140,7 +138,7 @@ const AuthPage = ({ setLoginMessage }) => {
         onSubmit={isSignUpMode ? handleSignUp : handleLogin}
         className="auth-form"
       >
-        <div className="input-wrapper input-wrapper-sm">
+        <div className="input-wrapper">
           {isSignUpMode && (
             <>
               {/* Email */}

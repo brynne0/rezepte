@@ -1,55 +1,23 @@
-/* Recipe Form Container */
+/* Container */
 .recipe-form {
   padding: 0 3rem 3rem;
 }
 
-.form-group {
-  margin-bottom: 1rem;
-}
-
-/* Form Header */
-.form-header-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Form Actions */
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  padding-top: 1rem;
-}
-
+/* Form elements */
 .edit button:first-child {
   margin-right: auto;
 }
 
-/* Ingredient Lists */
+.section-title-input {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* Ingredient lists */
 .ingredient-list {
-  display: flex;
-  flex-direction: column;
   gap: 0.5rem;
   transition: background-color 0.2s ease;
   margin-bottom: 0.5rem;
-}
-
-/* .ingredient-list.drag-over {
-  background: var(--light-brown);
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-} */
-
-.ungrouped-add-ingredient {
-  display: flex;
-  justify-content: center;
-}
-
-/* Ingredient Sections */
-.ingredient-sections {
-  display: flex;
-  flex-direction: column;
 }
 
 .ingredient-section {
@@ -58,27 +26,10 @@
 }
 
 .ingredient-section.dragging {
-  /* background: white; */
   padding: 0.5rem;
 }
 
-/* Section Headers */
-.section-header {
-  display: flex;
-  align-items: center;
-}
-
-.section-title-input {
-  flex: 1;
-  font-weight: 500;
-}
-
-.section-add-ingredient {
-  display: flex;
-  justify-content: center;
-}
-
-/* Ingredient Rows */
+/* Ingredient rows */
 .ingredient-row {
   display: grid;
   grid-template-columns: auto 2fr 1fr 1fr 2fr auto;
@@ -90,6 +41,15 @@
   overflow: hidden;
 }
 
+.ingredient-content {
+  display: contents;
+}
+
+.ingredient-details {
+  display: contents;
+}
+
+/* Drag and drop */
 .drag-handle {
   display: flex;
   align-items: center;
@@ -103,18 +63,8 @@
   cursor: grabbing;
 }
 
-.ingredient-content {
-  display: contents;
-}
-
-.ingredient-details {
-  display: contents;
-}
-
 /* Instructions */
 .instructions-list {
-  display: flex;
-  flex-direction: column;
   gap: 0.75rem;
 }
 
@@ -132,19 +82,13 @@
   margin-top: 0.25rem;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
   .recipe-form {
     padding: 1.25rem;
     padding-top: 0;
   }
 
-  /* Form spacing */
-  .form-group {
-    margin-bottom: 0.5rem;
-  }
-
-  /* Ingredient rows and fields */
   .ingredient-row {
     display: flex;
     align-items: flex-start;

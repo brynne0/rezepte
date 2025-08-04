@@ -1,18 +1,19 @@
-.recipe-container ul,
-.recipe-container ol {
+/* Container */
+.recipe-container {
+  text-align: left;
+  margin: 0.5rem;
+}
+
+.recipe-subheading {
   margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.servings {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
+/* Ingredients */
 .ingredient-list-display {
   padding: 0;
+  margin: 0;
   list-style: none;
 }
 
@@ -35,30 +36,22 @@
   opacity: 0.6;
 }
 
+/* Shopping cart */
+.cart-container {
+  position: relative;
+  gap: 0.5rem;
+}
+
 .cart-counter {
   position: absolute;
   top: -2px;
   right: -2px;
   color: var(--dark_red);
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 12px;
   font-weight: bold;
-  min-width: 20px;
 }
 
-.cart-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Ingredient Sections */
+/* Sections */
 .section-subheading {
   font-weight: 600;
   margin-top: 0;

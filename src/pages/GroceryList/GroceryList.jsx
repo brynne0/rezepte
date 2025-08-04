@@ -47,7 +47,6 @@ const GroceryList = ({
 
   const currentList = isEditing ? editedList : groceryList;
 
-
   // Group ingredients by normalised name for display
   const groupIngredients = (items) => {
     const groups = {};
@@ -199,7 +198,7 @@ const GroceryList = ({
   }
 
   return (
-    <div className="card card-padded">
+    <div className="card card-page">
       <header className="page-header flex-between">
         {!isEditing ? (
           <ArrowBigLeft
@@ -218,7 +217,7 @@ const GroceryList = ({
         )}
       </header>
 
-      <div className={`grocery-list-wrapper${isEditing ? " flex-center" : ""}`}>
+      <div className={`flex-column${isEditing ? " flex-center" : ""}`}>
         {currentList.length === 0 && !isEditing ? (
           <div className="flex-center">
             <button
@@ -229,7 +228,7 @@ const GroceryList = ({
             </button>
           </div>
         ) : (
-          <ul className={` ${isEditing ? "edit-list-items" : "list-items"}`}>
+          <ul>
             {isEditing
               ? // Edit mode - show individual items
                 currentList.map((item, index) => {
@@ -314,7 +313,7 @@ const GroceryList = ({
                     const item = group.items[0];
                     return (
                       <li
-                        className={`list-view-item ${
+                        className={`flex-row grocery-item ${
                           isGroupChecked ? "checked" : ""
                         }`}
                         key={groupKey}
@@ -385,7 +384,7 @@ const GroceryList = ({
 
                     return (
                       <li
-                        className={`list-view-item ${
+                        className={`flex-row grocery-item ${
                           isGroupChecked ? "checked" : ""
                         }`}
                         key={groupKey}
@@ -416,7 +415,7 @@ const GroceryList = ({
       </div>
 
       {isEditing && (
-        <div className="form-actions edit">
+        <div className="btn-wrapper edit">
           {/* Clear Button */}
           <button
             type="button"

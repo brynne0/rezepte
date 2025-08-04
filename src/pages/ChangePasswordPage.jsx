@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { changePassword } from "../../services/auth";
+import { changePassword } from "../services/auth";
 import { useNavigate } from "react-router-dom";
-import { validateChangePasswordForm } from "../../utils/validation";
-import supabase from "../../lib/supabase";
-import PasswordInput from "../../components/PasswordInput";
+import { validateChangePasswordForm } from "../utils/validation";
+import supabase from "../lib/supabase";
+import PasswordInput from "../components/PasswordInput";
 
 const ChangePasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");
@@ -228,7 +228,7 @@ const ChangePasswordPage = () => {
           {errorMessage && (
             <span className="error-message">{errorMessage}</span>
           )}
-          <div className="input-wrapper input-wrapper-sm">
+          <div className="input-wrapper">
             <PasswordInput
               id="new-password"
               type="password"

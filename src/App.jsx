@@ -16,9 +16,9 @@ import { Squirrel } from "lucide-react";
 import EditRecipePage from "./pages/EditRecipe";
 import { useTranslation } from "react-i18next";
 import GroceryList from "./pages/GroceryList/GroceryList";
-import AuthPage from "./pages/AuthPage/AuthPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
-import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
+import AuthPage from "./pages/AuthPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
 import { useAuth } from "./hooks/data/useAuth";
 
 function App() {

@@ -1,7 +1,6 @@
 import { Trash2, Plus, ArrowBigLeft, GripHorizontal } from "lucide-react";
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import "./RecipeForm.css";
-import "../../styles/components/modal.css";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import AutoResizeTextArea from "../AutoResizeTextArea";
@@ -80,7 +79,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
       <form onSubmit={handleSubmit} className="recipe-form">
         {/* Recipe Title */}
         <div className="form-group">
-          <label htmlFor="title" className="form-header-wrapper">
+          <label htmlFor="title" className="form-header">
             <h3>{t("recipe_title")}</h3>
           </label>
           <input
@@ -108,7 +107,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Category */}
         <div className="form-group">
-          <label htmlFor="category" className="form-header-wrapper">
+          <label htmlFor="category" className="form-header">
             <h3>{t("category")}</h3>
           </label>
 
@@ -148,7 +147,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <>
             {/* Servings */}
             <div className="form-group">
-              <label htmlFor="servings" className="form-header-wrapper">
+              <label htmlFor="servings" className="form-header ">
                 <h3> {t("servings")}</h3>
               </label>
               <input
@@ -166,7 +165,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
             {/* Ingredients */}
             <div className="form-group">
-              <div className="form-header-wrapper">
+              <div className="form-header flex-between">
                 <h3>{t("ingredients")}</h3>
                 <button
                   type="button"
@@ -184,7 +183,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   <Droppable droppableId="ungrouped" type="ingredient">
                     {(provided, snapshot) => (
                       <div
-                        className={`ingredient-list ${
+                        className={`flex-column ingredient-list ${
                           snapshot.isDraggingOver ? "drag-over" : ""
                         }`}
                         {...provided.droppableProps}
@@ -336,7 +335,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 )}
 
                 {/* Add Ingredient Button for Ungrouped */}
-                <div className="ungrouped-add-ingredient">
+                <div className="flex-center">
                   <button
                     type="button"
                     onClick={() => addIngredient("ungrouped")}
@@ -351,7 +350,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   <Droppable droppableId="sections" type="section">
                     {(provided) => (
                       <div
-                        className="ingredient-sections"
+                        className="flex-column"
                         {...provided.droppableProps}
                         ref={provided.innerRef}
                       >
@@ -372,7 +371,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                   }`}
                                 >
                                   {/* Section Header */}
-                                  <div className="section-header">
+                                  <div className="flex-row">
                                     <div
                                       {...provided.dragHandleProps}
                                       className="drag-handle"
@@ -411,7 +410,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                   >
                                     {(provided, snapshot) => (
                                       <div
-                                        className={`ingredient-list ${
+                                        className={`flex-column ingredient-list ${
                                           snapshot.isDraggingOver
                                             ? "drag-over"
                                             : ""
@@ -581,7 +580,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                   </Droppable>
 
                                   {/* Add Ingredient Button */}
-                                  <div className="section-add-ingredient">
+                                  <div className="flex-center">
                                     <button
                                       type="button"
                                       onClick={() => addIngredient(section.id)}
@@ -611,11 +610,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
             {/* Instructions */}
             <div className="form-group">
-              <label className="form-header-wrapper">
+              <label className="form-header ">
                 <h3>{t("instructions")}</h3>
               </label>
 
-              <div className="instructions-list">
+              <div className="flex-column instructions-list">
                 {formData.instructions.map((instruction, index) => (
                   <div key={index} className="instruction-row">
                     <span className="step-number">{index + 1}.</span>
@@ -652,7 +651,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Source */}
         <div className="form-group">
-          <label htmlFor="source" className="form-header-wrapper">
+          <label htmlFor="source" className="form-header">
             <h3>{t("source")}</h3>
           </label>
           <input
@@ -669,7 +668,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {/* Extra Notes */}
         <div className="form-group">
-          <label htmlFor="extra-notes" className="form-header-wrapper">
+          <label htmlFor="extra-notes" className="form-header flex-between">
             <h3> {t("notes")}</h3>
           </label>
           <input
@@ -685,7 +684,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         {/* TODO - add overall form submition error here adn handle common errors */}
         {/* {error && <div className="error-message">{error}</div>} */}
 
-        <div className={`form-actions ${isEditMode ? "edit" : ""}`}>
+        <div className={`btn-wrapper ${isEditMode ? "edit" : ""}`}>
           {/* Delete Button */}
           {isEditMode && (
             <>
