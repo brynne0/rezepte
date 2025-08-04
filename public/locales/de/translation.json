@@ -1,10 +1,12 @@
 {
   "all": "Alle Rezepte",
-  "baking": "Backen",
-  "dessert": "Nachtisch",
   "brunch": "Brunch",
   "dinner": "Abendessen",
+  "sides": "Beilagen",
+  "sauces": "Soßen",
   "snacks": "Snacks",
+  "baking": "Backen",
+  "bread": "Brot",
   "staples": "Grundrezepte",
 
   "login_failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
