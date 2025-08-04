@@ -6,7 +6,7 @@ import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 import "./GroceryList.css";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import AutoResizeTextArea from "../../components/AutoResizeTextArea";
+import AutoResizeTextArea from "../../components/AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";

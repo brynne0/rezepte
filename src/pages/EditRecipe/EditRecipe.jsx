@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useRecipe } from "../hooks/data/useRecipe";
-import RecipeForm from "../components/RecipeForm/RecipeForm";
-import LoadingAcorn from "../components/LoadingAcorn/LoadingAcorn";
+import { useRecipe } from "../../hooks/data/useRecipe";
+import RecipeForm from "../../components/RecipeForm/RecipeForm";
+import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const EditRecipePage = ({ categories }) => {
   const { id } = useParams();

@@ -4,7 +4,7 @@ import { Trash2, Plus, ArrowBigLeft, GripHorizontal } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
-import AutoResizeTextArea from "../AutoResizeTextArea";
+import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import "./RecipeForm.css";
 
