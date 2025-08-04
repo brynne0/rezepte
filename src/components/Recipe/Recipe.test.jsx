@@ -420,7 +420,7 @@ describe("Recipe Component", () => {
       mockGroceryListHook.addingToGroceryList = true;
       renderRecipe();
 
-      expect(screen.getByTestId("lucide-loader-2")).toBeInTheDocument();
+      expect(screen.getByTestId("cart-loader")).toBeInTheDocument();
     });
 
     test("shows counter when ingredients are selected", () => {

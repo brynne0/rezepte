@@ -129,7 +129,7 @@ const Recipe = () => {
                       <Loader2
                         size={12}
                         className="animate-spin"
-                        data-testid="lucide-loader-2"
+                        data-testid="cart-loader"
                       />
                     </span>
                   ) : (

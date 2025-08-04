@@ -49,6 +49,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           onClick={() => {
             handleCancel();
           }}
+          data-testid="back-arrow"
         />
         <h1>{title}</h1>
       </header>
@@ -77,7 +78,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="recipe-form">
+      <form onSubmit={handleSubmit} className="recipe-form" role="form">
         {/* Recipe Title */}
         <div className="form-group">
           <label htmlFor="title" className="form-header">
@@ -320,7 +321,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                         className="btn btn-icon btn-icon-remove"
                                         aria-label="Remove ingredient"
                                       >
-                                        <Trash2 size={16} />
+                                        <Trash2
+                                          size={16}
+                                          data-testid="remove-ingredient-btn"
+                                        />
                                       </button>
                                     </div>
                                   </div>
@@ -342,7 +346,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                     onClick={() => addIngredient("ungrouped")}
                     className="btn btn-icon btn-icon-success"
                   >
-                    <Plus size={16} />
+                    <Plus size={16} data-testid="add-ingredient-btn" />
                   </button>
                 </div>
 
@@ -400,7 +404,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                       className="btn btn-icon btn-icon-remove"
                                       aria-label="Remove section"
                                     >
-                                      <Trash2 size={16} />
+                                      <Trash2
+                                        size={16}
+                                        data-testid="remove-section-btn"
+                                      />
                                     </button>
                                   </div>
 
@@ -565,6 +572,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                         }
                                                         className="btn btn-icon btn-icon-remove"
                                                         aria-label="Remove ingredient"
+                                                        data-testid={`remove-section-ingredient-btn-${section.id}-${ingredient.tempId}`} // Updated data-testid
                                                       >
                                                         <Trash2 size={16} />
                                                       </button>
@@ -587,7 +595,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                       onClick={() => addIngredient(section.id)}
                                       className="btn btn-icon btn-icon-success"
                                     >
-                                      <Plus size={16} />
+                                      <Plus
+                                        size={16}
+                                        data-testid="add-section-ingredient-btn"
+                                      />
                                     </button>
                                   </div>
                                 </div>
@@ -631,8 +642,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                       type="button"
                       onClick={() => removeInstruction(index)}
                       className="btn btn-icon btn-icon-remove"
+                      aria-label="Remove Instruction"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} data-testid="remove-instruction-btn" />
                     </button>
                   </div>
                 ))}
@@ -643,7 +655,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   onClick={addInstruction}
                   className="btn btn-icon btn-icon-success"
                 >
-                  <Plus size={16} />
+                  <Plus size={16} data-testid="add-instruction-btn" />
                 </button>
               </div>
             </div>
