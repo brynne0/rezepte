@@ -84,6 +84,7 @@ const Recipe = () => {
             onClick={() => {
               navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
             }}
+            data-testid="lucide-pencil"
           >
             <Pencil />
           </button>
@@ -119,12 +120,17 @@ const Recipe = () => {
                   }
                   className="btn btn-icon-red"
                   disabled={addingToGroceryList}
+                  data-testid="lucide-shopping-basket"
                 >
                   <ShoppingBasket />
                   {/* Selected ingredients counter or loading spinner */}
                   {addingToGroceryList ? (
                     <span className="cart-counter flex-center">
-                      <Loader2 size={12} className="animate-spin" />
+                      <Loader2
+                        size={12}
+                        className="animate-spin"
+                        data-testid="lucide-loader-2"
+                      />
                     </span>
                   ) : (
                     Object.values(checkedIngredients).filter(Boolean).length >
