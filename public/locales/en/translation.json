@@ -1,10 +1,12 @@
 {
   "all": "All Recipes",
-  "baking": "Baking",
-  "dessert": "Dessert",
   "brunch": "Brunch",
   "dinner": "Dinner",
+  "sides": "Sides",
+  "sauces": "Sauces",
   "snacks": "Snacks",
+  "baking": "Baking",
+  "bread": "Bread",
   "staples": "Staples",
 
   "login_failed": "Login failed. Please try again.",

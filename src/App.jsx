@@ -45,11 +45,13 @@ function App() {
   // Categories
   const categoryKeys = [
     "all",
-    "baking",
-    "dessert",
     "brunch",
     "dinner",
+    "sides",
+    "sauces",
     "snacks",
+    "baking",
+    "bread",
     "staples",
   ];
 
