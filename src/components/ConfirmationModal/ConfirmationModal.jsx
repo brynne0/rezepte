@@ -1,12 +1,12 @@
-const ConfirmationModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title, 
-  message, 
-  confirmText = "Confirm", 
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = "Confirm",
   cancelText = "Cancel",
-  confirmButtonType = "danger" // "danger" | "primary" | "secondary"
+  confirmButtonType = "danger", // "danger" | "primary" | "secondary"
 }) => {
   if (!isOpen) return null;
 
@@ -25,8 +25,8 @@ const ConfirmationModal = ({
           <button onClick={onClose} className="btn btn-action btn-secondary">
             {cancelText}
           </button>
-          <button 
-            onClick={onConfirm} 
+          <button
+            onClick={onConfirm}
             className={`btn btn-action btn-${confirmButtonType}`}
           >
             {confirmText}
