@@ -24,6 +24,17 @@ body {
   padding: 0;
 }
 
+ol,
+ul {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
 h1,
 h2,
 h3,

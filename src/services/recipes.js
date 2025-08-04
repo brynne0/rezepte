@@ -1,6 +1,6 @@
 import supabase from "../lib/supabase";
-import { updateRecipeTranslations } from "./translationService";
 import pluralize from "pluralize";
+import { updateRecipeTranslations } from "./translationService";
 
 // Import translateText from translation.js (the DeepL service)
 const translateText = async (text, targetLanguage, sourceLanguage = null) => {
@@ -351,25 +351,26 @@ export const fetchRecipe = async (id) => {
   }
 
   // Transform ingredients to hierarchical structure grouped by subheading
-  const ingredientsList = data.recipe_ingredients
-    ?.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
-    .map((item) => ({
-      id: item.ingredients.id,
-      recipe_ingredient_id: item.id,
-      singular_name: item.ingredients.singular_name,
-      plural_name: item.ingredients.plural_name,
-      translated_names: item.ingredients.translated_names,
-      quantity: item.quantity,
-      unit: item.unit,
-      notes: item.notes,
-      subheading: item.subheading,
-      order_index: item.order_index,
-    })) || [];
+  const ingredientsList =
+    data.recipe_ingredients
+      ?.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+      .map((item) => ({
+        id: item.ingredients.id,
+        recipe_ingredient_id: item.id,
+        singular_name: item.ingredients.singular_name,
+        plural_name: item.ingredients.plural_name,
+        translated_names: item.ingredients.translated_names,
+        quantity: item.quantity,
+        unit: item.unit,
+        notes: item.notes,
+        subheading: item.subheading,
+        order_index: item.order_index,
+      })) || [];
 
   // Separate ungrouped ingredients from grouped ones
   const ungroupedIngredients = [];
   const groupedIngredients = [];
-  
+
   ingredientsList.forEach((ingredient) => {
     if (!ingredient.subheading || ingredient.subheading.trim() === "") {
       ungroupedIngredients.push(ingredient);
@@ -381,18 +382,18 @@ export const fetchRecipe = async (id) => {
   // Group the grouped ingredients by subheading
   const sectionsMap = new Map();
   let sectionOrder = 0;
-  
+
   groupedIngredients.forEach((ingredient) => {
     const subheading = ingredient.subheading;
-    
+
     if (!sectionsMap.has(subheading)) {
       sectionsMap.set(subheading, {
         id: `section-${sectionOrder++}`,
         subheading: subheading,
-        ingredients: []
+        ingredients: [],
       });
     }
-    
+
     sectionsMap.get(subheading).ingredients.push(ingredient);
   });
 
@@ -448,9 +449,12 @@ export const createRecipe = async (recipeData) => {
   // Process ingredients in order: ungrouped first, then sections
   let recipeIngredientsToInsert = [];
   let globalOrderIndex = 0;
-  
+
   // Handle ungrouped ingredients first
-  if (recipeData.ungroupedIngredients && recipeData.ungroupedIngredients.length > 0) {
+  if (
+    recipeData.ungroupedIngredients &&
+    recipeData.ungroupedIngredients.length > 0
+  ) {
     for (const ingredient of recipeData.ungroupedIngredients) {
       let ingredientId;
 
@@ -476,9 +480,12 @@ export const createRecipe = async (recipeData) => {
       });
     }
   }
-  
+
   // Handle ingredient sections
-  if (recipeData.ingredientSections && recipeData.ingredientSections.length > 0) {
+  if (
+    recipeData.ingredientSections &&
+    recipeData.ingredientSections.length > 0
+  ) {
     for (const section of recipeData.ingredientSections) {
       for (const ingredient of section.ingredients) {
         let ingredientId;
@@ -506,9 +513,13 @@ export const createRecipe = async (recipeData) => {
       }
     }
   }
-  
+
   // Fallback for backward compatibility
-  if (recipeIngredientsToInsert.length === 0 && recipeData.ingredients && recipeData.ingredients.length > 0) {
+  if (
+    recipeIngredientsToInsert.length === 0 &&
+    recipeData.ingredients &&
+    recipeData.ingredients.length > 0
+  ) {
     // Fallback for backward compatibility with flat ingredient list
     for (let i = 0; i < recipeData.ingredients.length; i++) {
       const ingredient = recipeData.ingredients[i];
@@ -538,7 +549,6 @@ export const createRecipe = async (recipeData) => {
   }
 
   if (recipeIngredientsToInsert.length > 0) {
-
     const { error: ingredientsError } = await supabase
       .from("recipe_ingredients")
       .insert(recipeIngredientsToInsert);
@@ -607,9 +617,12 @@ export const updateRecipe = async (id, recipeData) => {
   // Insert new ingredients (ungrouped + sections or flat)
   let recipeIngredientsToInsert = [];
   let globalOrderIndex = 0;
-  
+
   // Handle ungrouped ingredients first
-  if (recipeData.ungroupedIngredients && recipeData.ungroupedIngredients.length > 0) {
+  if (
+    recipeData.ungroupedIngredients &&
+    recipeData.ungroupedIngredients.length > 0
+  ) {
     for (const ingredient of recipeData.ungroupedIngredients) {
       let ingredientId;
 
@@ -641,9 +654,12 @@ export const updateRecipe = async (id, recipeData) => {
       });
     }
   }
-  
+
   // Handle ingredient sections
-  if (recipeData.ingredientSections && recipeData.ingredientSections.length > 0) {
+  if (
+    recipeData.ingredientSections &&
+    recipeData.ingredientSections.length > 0
+  ) {
     for (const section of recipeData.ingredientSections) {
       for (const ingredient of section.ingredients) {
         let ingredientId;
@@ -678,9 +694,13 @@ export const updateRecipe = async (id, recipeData) => {
       }
     }
   }
-  
+
   // Fallback for backward compatibility with flat ingredient list
-  if (recipeIngredientsToInsert.length === 0 && recipeData.ingredients && recipeData.ingredients.length > 0) {
+  if (
+    recipeIngredientsToInsert.length === 0 &&
+    recipeData.ingredients &&
+    recipeData.ingredients.length > 0
+  ) {
     // Fallback for backward compatibility with flat ingredient list
     for (let i = 0; i < recipeData.ingredients.length; i++) {
       const ingredient = recipeData.ingredients[i];
@@ -717,7 +737,6 @@ export const updateRecipe = async (id, recipeData) => {
   }
 
   if (recipeIngredientsToInsert.length > 0) {
-
     const { error: ingredientsError } = await supabase
       .from("recipe_ingredients")
       .insert(recipeIngredientsToInsert);

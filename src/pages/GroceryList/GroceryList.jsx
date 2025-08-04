@@ -1,14 +1,15 @@
-import "./GroceryList.css";
-import { useGroceryList } from "../../hooks/data/useGroceryList";
-import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
+import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
+
+import "./GroceryList.css";
+import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import { getUserPreferredLanguage } from "../../services/userService";
-import { normaliseIngredientName } from "../../services/groceryListService";
 import AutoResizeTextArea from "../../components/AutoResizeTextArea";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
+import { getUserPreferredLanguage } from "../../services/userService";
+import { normaliseIngredientName } from "../../services/groceryListService";
 
 const GroceryList = ({
   isEditing: propIsEditing,
@@ -46,7 +47,6 @@ const GroceryList = ({
   const [checkedItems, setCheckedItems] = useState(new Set());
 
   const currentList = isEditing ? editedList : groceryList;
-
 
   // Group ingredients by normalised name for display
   const groupIngredients = (items) => {
@@ -199,7 +199,7 @@ const GroceryList = ({
   }
 
   return (
-    <div className="card card-padded">
+    <div className="card card-page">
       <header className="page-header flex-between">
         {!isEditing ? (
           <ArrowBigLeft
@@ -218,7 +218,7 @@ const GroceryList = ({
         )}
       </header>
 
-      <div className={`grocery-list-wrapper${isEditing ? " flex-center" : ""}`}>
+      <div className={`flex-column${isEditing ? " flex-center" : ""}`}>
         {currentList.length === 0 && !isEditing ? (
           <div className="flex-center">
             <button
@@ -229,7 +229,7 @@ const GroceryList = ({
             </button>
           </div>
         ) : (
-          <ul className={` ${isEditing ? "edit-list-items" : "list-items"}`}>
+          <ul>
             {isEditing
               ? // Edit mode - show individual items
                 currentList.map((item, index) => {
@@ -314,7 +314,7 @@ const GroceryList = ({
                     const item = group.items[0];
                     return (
                       <li
-                        className={`list-view-item ${
+                        className={`flex-row grocery-item ${
                           isGroupChecked ? "checked" : ""
                         }`}
                         key={groupKey}
@@ -385,7 +385,7 @@ const GroceryList = ({
 
                     return (
                       <li
-                        className={`list-view-item ${
+                        className={`flex-row grocery-item ${
                           isGroupChecked ? "checked" : ""
                         }`}
                         key={groupKey}
@@ -416,7 +416,7 @@ const GroceryList = ({
       </div>
 
       {isEditing && (
-        <div className="form-actions edit">
+        <div className="btn-wrapper edit">
           {/* Clear Button */}
           <button
             type="button"

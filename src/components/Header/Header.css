@@ -1,16 +1,13 @@
 /* Header Layout */
 .header {
   margin: 0;
-  position: sticky;
   top: 0;
+  position: sticky;
   background-color: var(--cream);
   z-index: var(--z-header);
 }
 
 .header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   height: 5rem;
   position: relative;
 }

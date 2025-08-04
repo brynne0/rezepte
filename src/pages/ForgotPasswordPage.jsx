@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { forgotPassword } from "../../services/auth";
-import { validateForgotPasswordForm } from "../../utils/validation";
-import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import { forgotPassword } from "../services/auth";
+import { validateForgotPasswordForm } from "../utils/validation";
+import LoadingAcorn from "../components/LoadingAcorn/LoadingAcorn";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -60,7 +60,7 @@ const ForgotPasswordPage = () => {
           )}
 
           {/* Email input */}
-          <div className="input-wrapper input-wrapper-sm">
+          <div className="input-wrapper">
             <input
               className={`input input--cream ${
                 validationErrors.email ? "input--error" : ""
@@ -83,7 +83,11 @@ const ForgotPasswordPage = () => {
           )}
 
           {/* Submit button */}
-          <button className={"btn btn-standard"} type="submit" disabled={loading}>
+          <button
+            className={"btn btn-standard"}
+            type="submit"
+            disabled={loading}
+          >
             {t("send_reset_email")}
           </button>
         </form>

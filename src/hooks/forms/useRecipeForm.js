@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "../data/useRecipeActions";
-import { useTranslation } from "react-i18next";
-import { validateRecipeForm, validateRecipeTitleUnique } from "../../utils/validation";
+import {
+  validateRecipeForm,
+  validateRecipeTitleUnique,
+} from "../../utils/validation";
 
 export const useRecipeForm = ({ initialRecipe = null }) => {
   const { t, i18n } = useTranslation();
@@ -15,30 +18,37 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       // Handle ungrouped ingredients and sections separately
       let ungroupedIngredients = [];
       let ingredientSections = [];
-      
-      if (initialRecipe.ungroupedIngredients || initialRecipe.ingredientSections) {
+
+      if (
+        initialRecipe.ungroupedIngredients ||
+        initialRecipe.ingredientSections
+      ) {
         // New structure with separated ungrouped and grouped ingredients
-        ungroupedIngredients = (initialRecipe.ungroupedIngredients || []).map((ing) => ({
-          tempId: ing.id || Date.now() + Math.random(),
-          ingredient_id: ing.ingredient_id || "",
-          name: ing.name || ing.singular_name || "",
-          quantity: ing.quantity || "",
-          unit: ing.unit || "",
-          notes: ing.notes || "",
-        }));
-        
-        ingredientSections = (initialRecipe.ingredientSections || []).map((section, index) => ({
-          id: section.id || `section-${index}`,
-          subheading: section.subheading || "",
-          ingredients: section.ingredients.map((ing) => ({
+        ungroupedIngredients = (initialRecipe.ungroupedIngredients || []).map(
+          (ing) => ({
             tempId: ing.id || Date.now() + Math.random(),
             ingredient_id: ing.ingredient_id || "",
             name: ing.name || ing.singular_name || "",
             quantity: ing.quantity || "",
             unit: ing.unit || "",
             notes: ing.notes || "",
-          }))
-        }));
+          })
+        );
+
+        ingredientSections = (initialRecipe.ingredientSections || []).map(
+          (section, index) => ({
+            id: section.id || `section-${index}`,
+            subheading: section.subheading || "",
+            ingredients: section.ingredients.map((ing) => ({
+              tempId: ing.id || Date.now() + Math.random(),
+              ingredient_id: ing.ingredient_id || "",
+              name: ing.name || ing.singular_name || "",
+              quantity: ing.quantity || "",
+              unit: ing.unit || "",
+              notes: ing.notes || "",
+            })),
+          })
+        );
       } else if (initialRecipe.ingredients?.length > 0) {
         // Convert flat ingredient list: separate ungrouped from grouped
         initialRecipe.ingredients.forEach((ing) => {
@@ -50,17 +60,19 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
             unit: ing.unit || "",
             notes: ing.notes || "",
           };
-          
+
           if (!ing.subheading || ing.subheading.trim() === "") {
             ungroupedIngredients.push(ingredient);
           } else {
             // Find or create section
-            let section = ingredientSections.find(s => s.subheading === ing.subheading);
+            let section = ingredientSections.find(
+              (s) => s.subheading === ing.subheading
+            );
             if (!section) {
               section = {
                 id: `section-${ingredientSections.length}`,
                 subheading: ing.subheading,
-                ingredients: []
+                ingredients: [],
               };
               ingredientSections.push(section);
             }
@@ -68,17 +80,22 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
           }
         });
       }
-      
+
       // Ensure at least one ungrouped ingredient exists if nothing else
-      if (ungroupedIngredients.length === 0 && ingredientSections.length === 0) {
-        ungroupedIngredients = [{
-          tempId: Date.now() + Math.random(),
-          ingredient_id: "",
-          name: "",
-          quantity: "",
-          unit: "",
-          notes: "",
-        }];
+      if (
+        ungroupedIngredients.length === 0 &&
+        ingredientSections.length === 0
+      ) {
+        ungroupedIngredients = [
+          {
+            tempId: Date.now() + Math.random(),
+            ingredient_id: "",
+            name: "",
+            quantity: "",
+            unit: "",
+            notes: "",
+          },
+        ];
       }
 
       return {
@@ -149,14 +166,24 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   const handleTitleBlur = async () => {
     if (formData.title.trim()) {
       const excludeId = initialRecipe ? initialRecipe.id : null;
-      const titleError = await validateRecipeTitleUnique(formData.title, t, excludeId);
+      const titleError = await validateRecipeTitleUnique(
+        formData.title,
+        t,
+        excludeId
+      );
       if (titleError) {
         setValidationErrors((prev) => ({ ...prev, title: titleError }));
       }
     }
   };
 
-  const handleIngredientChange = (sectionId, tempId, field, value, clearError) => {
+  const handleIngredientChange = (
+    sectionId,
+    tempId,
+    field,
+    value,
+    clearError
+  ) => {
     if (sectionId === "ungrouped") {
       // Handle ungrouped ingredients
       setFormData((prev) => ({
@@ -196,9 +223,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     setFormData((prev) => ({
       ...prev,
       ingredientSections: prev.ingredientSections.map((section) =>
-        section.id === sectionId
-          ? { ...section, [field]: value }
-          : section
+        section.id === sectionId ? { ...section, [field]: value } : section
       ),
     }));
   };
@@ -354,9 +379,18 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         // Reorder within same container (ungrouped or same section)
         if (sourceId === "ungrouped") {
           // Reorder within ungrouped ingredients
-          const reorderedIngredients = Array.from(formData.ungroupedIngredients);
-          const [reorderedIngredient] = reorderedIngredients.splice(source.index, 1);
-          reorderedIngredients.splice(destination.index, 0, reorderedIngredient);
+          const reorderedIngredients = Array.from(
+            formData.ungroupedIngredients
+          );
+          const [reorderedIngredient] = reorderedIngredients.splice(
+            source.index,
+            1
+          );
+          reorderedIngredients.splice(
+            destination.index,
+            0,
+            reorderedIngredient
+          );
 
           setFormData((prev) => ({
             ...prev,
@@ -369,8 +403,15 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
           );
           const section = formData.ingredientSections[sectionIndex];
           const reorderedIngredients = Array.from(section.ingredients);
-          const [reorderedIngredient] = reorderedIngredients.splice(source.index, 1);
-          reorderedIngredients.splice(destination.index, 0, reorderedIngredient);
+          const [reorderedIngredient] = reorderedIngredients.splice(
+            source.index,
+            1
+          );
+          reorderedIngredients.splice(
+            destination.index,
+            0,
+            reorderedIngredient
+          );
 
           const newSections = [...formData.ingredientSections];
           newSections[sectionIndex] = {
@@ -504,16 +545,20 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
   const handleValidation = async () => {
     const errors = validateRecipeForm(formData, t);
-    
+
     // Check for duplicate title (only for new recipes or when title changed)
     if (!errors.title && formData.title.trim()) {
       const excludeId = initialRecipe ? initialRecipe.id : null;
-      const titleError = await validateRecipeTitleUnique(formData.title, t, excludeId);
+      const titleError = await validateRecipeTitleUnique(
+        formData.title,
+        t,
+        excludeId
+      );
       if (titleError) {
         errors.title = titleError;
       }
     }
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -573,7 +618,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       // Only set original_language when creating a new recipe
       if (!initialRecipe) {
         // Normalise language code (remove region codes like 'de-DE' -> 'de')
-        recipeData.original_language = i18n.language.split('-')[0];
+        recipeData.original_language = i18n.language.split("-")[0];
       }
 
       let result;
