@@ -6,7 +6,7 @@ import { Pencil, ShoppingBasket, Loader2 } from "lucide-react";
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
-import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
+import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const Recipe = () => {
   const { id } = useParams();
