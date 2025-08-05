@@ -47,7 +47,7 @@ describe("PasswordInput", () => {
     render(<PasswordInput {...defaultProps} />);
 
     const input = screen.getByPlaceholderText("Enter password");
-    const toggleButton = screen.getByRole("button", { name: /show password/i });
+    const toggleButton = screen.getByRole("button", { name: "show_password" });
 
     // Initially, the input type should be "password"
     expect(input).toHaveAttribute("type", "password");

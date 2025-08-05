@@ -102,7 +102,11 @@ const Header = ({
                 }
               }}
             >
-              <Squirrel data-testid="lucide-squirrel" className="header-logo" />
+              <Squirrel
+                data-testid="lucide-squirrel"
+                className="header-logo"
+                aria-label={t("login")}
+              />
               {isMe && (
                 <Squirrel
                   data-testid="lucide-squirrel"
@@ -182,6 +186,7 @@ const Header = ({
               <nav className="header-nav">
                 <button
                   data-testid="lucide-search"
+                  aria-label={t("search")}
                   onClick={() => {
                     // If not on home page, navigate to home first and open search
                     if (!isHomePage) {
@@ -227,6 +232,7 @@ const Header = ({
                       data-testid="lucide-plus"
                       className="btn btn-icon btn-icon-neutral"
                       onClick={() => navigate("/add-recipe")}
+                      aria-label={t("add_new_recipe")}
                     >
                       <Plus size={28} />
                     </button>
@@ -235,6 +241,7 @@ const Header = ({
                       data-testid="lucide-shopping-basket"
                       className="btn btn-icon btn-icon-neutral"
                       onClick={() => navigate("/grocery-list")}
+                      aria-label={t("grocery_list")}
                     >
                       <ShoppingBasket size={28} />
                     </button>

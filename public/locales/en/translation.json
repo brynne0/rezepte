@@ -15,17 +15,19 @@
   "signup_success": "Account created! Please confirm your email.",
   "logged_out": "Logged Out",
   "login": "Login",
-  "sign_up": "Sign Up",
+  "signup": "Sign Up",
   "logout": "Logout",
   "email": "Email",
   "first_name": "First Name",
   "username": "Username",
   "password": "Password",
 
+  "hide_password": "Hide password",
+  "show_password": "Show password",
+
   "forgot_password": "Forgot password?",
   "reset_password": "Reset Password",
   "send_reset_email": "Send Reset Email",
-
   "password_reset_sent": "Password reset email sent! Please check your inbox.",
   "password_reset_failed": "Failed to send password reset email. Please try again.",
 
@@ -87,8 +89,13 @@
   "notes": "Notes",
   "subheading": "Subheading",
   "ingredient_subheading": "Ingredient subheading (optional)",
+  "add_ingredient": "Add ingredient",
+  "remove_ingredient": "Remove ingredient",
   "add_section": "Add Section",
-  "section_title_placeholder": "Section title",
+  "remove_section": "Remove Section",
+  "section_title": "Section title",
+  "add_instruction": "Add instruction",
+  "remove_instruction": "Remove instruction",
 
   "add_new_recipe": "Add New Recipe",
   "edit_recipe": "Edit Recipe",
@@ -98,9 +105,12 @@
   "category_required": "Category is required",
   "ingredient_required": "At least one ingredient is required",
 
+  "add_to_grocery_list": "Add to grocery list",
   "added_to_groceries": "Added to grocery list",
   "grocery_list": "Grocery List",
   "item_name": "Item name",
+  "add_item": "Add item",
+  "remove_item": "Remove item",
   "clear_list": "Clear List",
   "grocery_list_clear_confirmation": "Are you sure you want to clear the grocery list?"
 }

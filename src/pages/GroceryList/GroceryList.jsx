@@ -224,6 +224,7 @@ const GroceryList = ({
             <button
               className="btn btn-icon btn-icon-success"
               onClick={addNewItem}
+              aria-label={t("add_item")}
             >
               <Plus size={20} />
             </button>

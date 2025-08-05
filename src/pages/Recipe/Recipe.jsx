@@ -85,6 +85,7 @@ const Recipe = () => {
               navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
             }}
             data-testid="lucide-pencil"
+            aria-label={t("edit_recipe")}
           >
             <Pencil />
           </button>
@@ -121,6 +122,7 @@ const Recipe = () => {
                   className="btn btn-icon-red"
                   disabled={addingToGroceryList}
                   data-testid="lucide-shopping-basket"
+                  aria-label={t("add_to_grocery_list")}
                 >
                   <ShoppingBasket />
                   {/* Selected ingredients counter or loading spinner */}

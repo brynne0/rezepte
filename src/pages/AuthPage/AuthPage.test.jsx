@@ -91,14 +91,14 @@ describe("AuthPage", () => {
 
       // Check login header is selected
       const loginHeaderButton = screen.getByRole("button", {
-        name: "switch-to-login",
+        name: "login",
       });
       expect(loginHeaderButton).toBeInTheDocument();
       expect(loginHeaderButton.className).toContain("selected");
 
       // Check signup header is not selected
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       expect(signUpHeaderButton).toBeInTheDocument();
       expect(signUpHeaderButton.className).not.toContain("selected");
@@ -132,10 +132,10 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       const loginHeaderButton = screen.getByRole("button", {
-        name: "switch-to-login",
+        name: "login",
       });
 
       fireEvent.click(signUpHeaderButton);
@@ -151,17 +151,17 @@ describe("AuthPage", () => {
       const submitButton = screen.getByRole("button", {
         name: "submit-button",
       });
-      expect(submitButton).toHaveTextContent("sign_up");
+      expect(submitButton).toHaveTextContent("signup");
     });
 
     it("switches back to login mode when login button is clicked", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       const loginHeaderButton = screen.getByRole("button", {
-        name: "switch-to-login",
+        name: "login",
       });
 
       // Switch to sign up first
@@ -190,7 +190,7 @@ describe("AuthPage", () => {
 
       // Switch to sign up mode
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       fireEvent.click(signUpHeaderButton);
 
@@ -219,7 +219,7 @@ describe("AuthPage", () => {
 
       // Switch to sign up mode
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       fireEvent.click(signUpHeaderButton);
 
@@ -263,7 +263,7 @@ describe("AuthPage", () => {
 
       // Switch to sign up mode
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       fireEvent.click(signUpHeaderButton);
 
@@ -402,7 +402,7 @@ describe("AuthPage", () => {
 
       // Switch to sign up mode
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       fireEvent.click(signUpHeaderButton);
 
@@ -437,7 +437,7 @@ describe("AuthPage", () => {
 
       // Switch to sign up mode
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       fireEvent.click(signUpHeaderButton);
 
@@ -458,7 +458,7 @@ describe("AuthPage", () => {
 
       // Switch to sign up mode
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       fireEvent.click(signUpHeaderButton);
 
@@ -478,7 +478,7 @@ describe("AuthPage", () => {
 
       // Switch to sign up mode
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
       fireEvent.click(signUpHeaderButton);
 
@@ -536,10 +536,10 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       const loginHeaderButton = screen.getByRole("button", {
-        name: "switch-to-login",
+        name: "login",
       });
       const signUpHeaderButton = screen.getByRole("button", {
-        name: "switch-to-signup",
+        name: "signup",
       });
 
       expect(loginHeaderButton.className).toContain("selected");

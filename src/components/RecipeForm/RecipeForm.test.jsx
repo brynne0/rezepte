@@ -557,7 +557,7 @@ describe("RecipeForm", () => {
     it("has aria-labels for icon buttons", () => {
       renderComponent();
 
-      const removeButtons = screen.getAllByLabelText("Remove ingredient");
+      const removeButtons = screen.getAllByLabelText("remove_ingredient");
       expect(removeButtons.length).toBeGreaterThan(0);
     });
   });
