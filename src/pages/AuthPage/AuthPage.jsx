@@ -120,6 +120,7 @@ const AuthPage = ({ setLoginMessage }) => {
           className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToLogin}
+          aria-label="switch-to-login"
         >
           <h2 className="forta"> {t("login")}</h2>
         </button>
@@ -127,6 +128,7 @@ const AuthPage = ({ setLoginMessage }) => {
           className={`subheading-wrapper ${isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToSignUp}
+          aria-label="switch-to-signup"
         >
           <h2 className="forta"> {t("sign_up")}</h2>
         </button>
@@ -137,12 +139,12 @@ const AuthPage = ({ setLoginMessage }) => {
       <form
         onSubmit={isSignUpMode ? handleSignUp : handleLogin}
         className="auth-form"
+        data-testid="auth-form"
       >
         <div className="input-wrapper">
           {isSignUpMode && (
             <>
               {/* Email */}
-
               <input
                 id="email"
                 type="text"
@@ -230,7 +232,11 @@ const AuthPage = ({ setLoginMessage }) => {
         )}
 
         {/* Submit button */}
-        <button type="submit" className={"btn btn-standard"}>
+        <button
+          type="submit"
+          aria-label="submit-button"
+          className={"btn btn-standard"}
+        >
           {isSignUpMode ? t("sign_up") : t("login")}
         </button>
       </form>
