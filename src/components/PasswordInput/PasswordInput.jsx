@@ -25,6 +25,7 @@ const PasswordInput = ({
         placeholder={placeholder}
         className={`input--password ${className}`}
         {...props}
+        data-testid="password-input"
       />
       <button
         type="button"
