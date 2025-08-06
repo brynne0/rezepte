@@ -8,10 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test": "NODE_NO_WARNINGS=1 vitest",
+    "test:ui": "NODE_NO_WARNINGS=1 vitest --ui",
+    "test:run": "NODE_NO_WARNINGS=1 vitest run",
+    "test:coverage": "NODE_NO_WARNINGS=1 vitest run --coverage",
     "prepare": "husky"
   },
   "dependencies": {
