@@ -52,17 +52,11 @@ export const forgotPassword = async (email) => {
 
 export const changePassword = async (new_password) => {
   try {
-    console.log("=== CHANGE PASSWORD SERVICE DEBUG ===");
-    console.log("New password provided:", !!new_password);
-    console.log("Password length:", new_password?.length);
-
     // Check if user is authenticated
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
-    console.log("Current user:", user);
-    console.log("User error:", userError);
 
     if (userError || !user) {
       console.error("No authenticated user found");
@@ -72,8 +66,6 @@ export const changePassword = async (new_password) => {
     const { data, error } = await supabase.auth.updateUser({
       password: new_password,
     });
-
-    console.log("Update user response:", { data, error });
 
     if (error) {
       console.error("Supabase updateUser error:", error);

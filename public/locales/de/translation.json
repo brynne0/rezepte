@@ -38,6 +38,9 @@
   "passwords_do_not_match": "Passwörter stimmen nicht überein",
   "password_changed": "Passwort wurde geändert!",
   "password_change_failed": "Passwort konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
+  "invalid_reset_link": "ungültiger Reset-Link",
+  "invalid_session": "ungültige Sitzung",
+  "session_expired": "Sitzung abgelaufen",
 
   "firstname_required": "Vorname ist erforderlich",
   "username_required": "Benutzername ist erforderlich",

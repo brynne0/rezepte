@@ -63,7 +63,7 @@ function App() {
   // Show loading screen
   if (loading) {
     return (
-      <div className={"loading-squirrel"}>
+      <div className="loading-squirrel">
         <Squirrel />
       </div>
     );

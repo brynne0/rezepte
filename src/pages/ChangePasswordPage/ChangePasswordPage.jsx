@@ -19,17 +19,9 @@ const ChangePasswordPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("=== CHANGE PASSWORD PAGE DEBUG ===");
-    console.log("Current URL:", window.location.href);
-    console.log("URL Hash:", window.location.hash);
-    console.log("URL Search:", window.location.search);
-
     // Check if user came from password reset
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const searchParams = new URLSearchParams(window.location.search);
-
-    console.log("Hash params:", Object.fromEntries(hashParams));
-    console.log("Search params:", Object.fromEntries(searchParams));
 
     const accessToken =
       hashParams.get("access_token") || searchParams.get("access_token");
@@ -37,46 +29,29 @@ const ChangePasswordPage = () => {
     const refreshToken =
       hashParams.get("refresh_token") || searchParams.get("refresh_token");
 
-    console.log("Access token:", accessToken);
-    console.log("Refresh token:", refreshToken);
-    console.log("Type:", type);
-
     // Initialize session handling
     initializePasswordReset(accessToken, refreshToken, type);
   }, []);
 
   const initializePasswordReset = async (accessToken, refreshToken, type) => {
     try {
-      console.log("=== INITIALIZE PASSWORD RESET DEBUG ===");
-      console.log("Access token exists:", !!accessToken);
-      console.log("Refresh token exists:", !!refreshToken);
-      console.log("Type:", type);
-
       // If we have tokens from URL, set the session FIRST
       if (accessToken && refreshToken) {
-        console.log("Setting session from URL tokens...");
         const { data, error } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken,
         });
 
-        console.log("Set session result:", data);
-        console.log("Set session error:", error);
-
         if (!error && data.session) {
           setIsValidSession(true);
-          console.log("Password reset session established successfully");
 
           // Verify the session is working
           const {
             data: { user },
             error: userError,
           } = await supabase.auth.getUser();
-          console.log("User after setting session:", user);
-          console.log("User error after setting session:", userError);
         } else {
-          console.error("Failed to establish session:", error);
-          setErrorMessage(t("invalid_reset_link") || "Invalid reset link");
+          setErrorMessage(t("invalid_reset_link"));
         }
       } else {
         // Check if there's already a valid session
@@ -84,23 +59,17 @@ const ChangePasswordPage = () => {
           data: { session },
           error: sessionError,
         } = await supabase.auth.getSession();
-        console.log("Existing session:", session);
-        console.log("Session error:", sessionError);
 
         if (session) {
           setIsValidSession(true);
-          console.log("Using existing authenticated session");
 
           // Verify the session is working
           const {
             data: { user },
             error: userError,
           } = await supabase.auth.getUser();
-          console.log("User from existing session:", user);
-          console.log("User error from existing session:", userError);
         } else {
-          console.log("No valid session found for password reset");
-          setErrorMessage(t("invalid_reset_link") || "Invalid reset link");
+          setErrorMessage(t("invalid_reset_link"));
           // Redirect to login after 3 seconds
           setTimeout(() => {
             navigate("/auth-page");
@@ -109,7 +78,7 @@ const ChangePasswordPage = () => {
       }
     } catch (error) {
       console.error("Error initializing password reset:", error);
-      setErrorMessage(t("invalid_reset_link") || "Invalid reset link");
+      setErrorMessage(t("invalid_reset_link"));
     } finally {
       setLoading(false);
     }
@@ -131,23 +100,14 @@ const ChangePasswordPage = () => {
 
     if (Object.keys(errors).length === 0) {
       try {
-        console.log("=== PASSWORD CHANGE DEBUG ===");
-        console.log("Attempting to change password...");
-        console.log("New password length:", newPassword.length);
-
         // Double-check session right before password change
         const {
           data: { session },
           error: sessionError,
         } = await supabase.auth.getSession();
-        console.log("Current session before password change:", session);
-        console.log("Session error:", sessionError);
 
         if (!session) {
-          console.error("No session available for password change");
-          setErrorMessage(
-            t("session_expired") || "Session expired, please try again"
-          );
+          setErrorMessage(t("session_expired"));
           return;
         }
 
@@ -165,7 +125,6 @@ const ChangePasswordPage = () => {
           });
           setErrorMessage(`${t("password_change_failed")}: ${error.message}`);
         } else {
-          console.log("Password changed successfully");
           setShowSuccessMessage(true);
           setNewPassword("");
           setNewPasswordRepeat("");
@@ -213,7 +172,7 @@ const ChangePasswordPage = () => {
   return (
     <div className="page-centered">
       {showSuccessMessage ? (
-        <div>
+        <div className="flex-center">
           <p>{t("password_changed")}</p>
           <button
             className={"btn btn-standard"}
@@ -230,6 +189,7 @@ const ChangePasswordPage = () => {
             <span className="error-message">{errorMessage}</span>
           )}
           <div className="input-wrapper">
+            <label htmlFor="new-password">{t("new_password")}</label>
             <PasswordInput
               id="new-password"
               type="password"
@@ -249,6 +209,7 @@ const ChangePasswordPage = () => {
                 {validationErrors.newPassword}
               </span>
             )}
+            <label htmlFor="new-password-repeat">{t("new_password_repeat")}</label>
             <PasswordInput
               id="new-password-repeat"
               type="password"
