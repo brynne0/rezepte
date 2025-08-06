@@ -166,15 +166,33 @@ describe("GroceryList", () => {
     expect(mockSetIsEditing).toHaveBeenCalledWith(false);
   });
 
-  it("adds a new item when add button is clicked", () => {
+  it("adds a new item, fills it out, and saves", () => {
     setup({ isEditing: true });
     const addButton = screen.getByRole("button", { name: "add_item" });
     fireEvent.click(addButton);
 
-    const newItemInputs = screen.getAllByPlaceholderText("item_name");
-    const newItemNameInput = newItemInputs[newItemInputs.length - 1];
-    expect(newItemNameInput).toBeInTheDocument();
-    expect(newItemNameInput.value).toBe("");
+    const nameInputs = screen.getAllByPlaceholderText("item_name");
+    const quantityInputs = screen.getAllByPlaceholderText("quantity");
+    const unitSelects = screen.getAllByRole("combobox");
+
+    fireEvent.change(nameInputs[2], { target: { value: "Coconuts" } });
+    fireEvent.change(quantityInputs[2], { target: { value: "3" } });
+    fireEvent.change(unitSelects[2], { target: { value: "piece/s" } });
+
+    const saveButton = screen.getByRole("button", { name: "save" });
+    fireEvent.click(saveButton);
+
+    expect(mockUpdateGroceryList).toHaveBeenCalledWith([
+      initialGroceryList[0],
+      initialGroceryList[1],
+      expect.objectContaining({
+        name: "Coconuts",
+        quantity: 3,
+        unit: "piece/s",
+        source_recipes: [],
+        tempId: expect.stringMatching(/^temp-\d+$/),
+      }),
+    ]);
   });
 
   it("removes an item when remove button is clicked", () => {
