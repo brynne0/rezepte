@@ -45,25 +45,56 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
   // If target language is the same as original, still need to process ingredients for display
   if (recipe.original_language === targetLanguage) {
     // Process ingredients to add the 'name' field even for English
-    const processedIngredients = await Promise.all(
-      recipe.ingredients?.map(async (ingredient) => {
-        const displayName = await getIngredientDisplayName(
-          ingredient,
-          targetLanguage,
-          ingredient.quantity
-        );
+    const processedResult = { ...recipe };
+    
+    // Handle ungrouped ingredients
+    if (recipe.ungroupedIngredients) {
+      processedResult.ungroupedIngredients = await Promise.all(
+        recipe.ungroupedIngredients.map(async (ingredient) => {
+          const displayName = await getIngredientDisplayName(
+            ingredient,
+            targetLanguage,
+            ingredient.quantity
+          );
+          return { ...ingredient, name: displayName };
+        })
+      );
+    }
+    
+    // Handle ingredient sections
+    if (recipe.ingredientSections) {
+      processedResult.ingredientSections = await Promise.all(
+        recipe.ingredientSections.map(async (section) => {
+          const translatedIngredients = await Promise.all(
+            section.ingredients.map(async (ingredient) => {
+              const displayName = await getIngredientDisplayName(
+                ingredient,
+                targetLanguage,
+                ingredient.quantity
+              );
+              return { ...ingredient, name: displayName };
+            })
+          );
+          return { ...section, ingredients: translatedIngredients };
+        })
+      );
+    }
+    
+    // Handle legacy flat ingredients structure
+    if (recipe.ingredients) {
+      processedResult.ingredients = await Promise.all(
+        recipe.ingredients.map(async (ingredient) => {
+          const displayName = await getIngredientDisplayName(
+            ingredient,
+            targetLanguage,
+            ingredient.quantity
+          );
+          return { ...ingredient, name: displayName };
+        })
+      );
+    }
 
-        return {
-          ...ingredient,
-          name: displayName,
-        };
-      }) || []
-    );
-
-    return {
-      ...recipe,
-      ingredients: processedIngredients,
-    };
+    return processedResult;
   }
 
   // Get translated recipe data
@@ -72,19 +103,43 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
     targetLanguage
   );
 
-  // Get translated ingredients
-  const translatedIngredients = await getTranslatedIngredients(
-    recipe.ingredients,
-    targetLanguage
-  );
-
-  return {
+  const translatedResult = {
     ...recipe,
     ...translatedRecipeData,
-    ingredients: translatedIngredients,
     isTranslated: true,
     translatedFrom: recipe.original_language,
   };
+  
+  // Handle ungrouped ingredients
+  if (recipe.ungroupedIngredients) {
+    translatedResult.ungroupedIngredients = await getTranslatedIngredients(
+      recipe.ungroupedIngredients,
+      targetLanguage
+    );
+  }
+  
+  // Handle ingredient sections
+  if (recipe.ingredientSections) {
+    translatedResult.ingredientSections = await Promise.all(
+      recipe.ingredientSections.map(async (section) => {
+        const translatedIngredients = await getTranslatedIngredients(
+          section.ingredients,
+          targetLanguage
+        );
+        return { ...section, ingredients: translatedIngredients };
+      })
+    );
+  }
+  
+  // Handle legacy flat ingredients structure
+  if (recipe.ingredients) {
+    translatedResult.ingredients = await getTranslatedIngredients(
+      recipe.ingredients,
+      targetLanguage
+    );
+  }
+
+  return translatedResult;
 };
 
 // Get translated recipe title only (for recipe lists)

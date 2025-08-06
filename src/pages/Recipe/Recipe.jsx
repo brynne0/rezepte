@@ -17,6 +17,12 @@ const Recipe = () => {
 
   // Helper function to get the correct ingredient name (singular vs plural)
   const getIngredientDisplayName = (ingredient) => {
+    // If we have a translated name from the translation service, use that
+    if (ingredient.name) {
+      return ingredient.name;
+    }
+
+    // Fallback to database fields for untranslated recipes
     const shouldUsePlural =
       ingredient.quantity && parseFloat(ingredient.quantity) > 1;
 
@@ -24,7 +30,7 @@ const Recipe = () => {
       return ingredient.plural_name;
     }
 
-    return ingredient.singular_name || ingredient.name || "Unknown ingredient";
+    return ingredient.singular_name || "?";
   };
 
   // Use the grocery list hook
