@@ -5,6 +5,7 @@ import supabase from "../../lib/supabase";
 import { changePassword } from "../../services/auth";
 import { validateChangePasswordForm } from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
+import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const ChangePasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");
