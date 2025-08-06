@@ -36,9 +36,11 @@
   "new_password_repeat": "Repeat new password",
   "confirm": "Confirm",
   "passwords_do_not_match": "Passwords do not match",
-
   "password_changed": "Password has been changed!",
   "password_change_failed": "Failed to change password. Please try again.",
+  "invalid_reset_link": "Invalid rest link",
+  "invalid_session": "Invalid session",
+  "session_expired": "Session expired",
 
   "firstname_required": "First name is required",
   "username_required": "Username is required",
