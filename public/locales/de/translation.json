@@ -15,12 +15,15 @@
   "signup_success": "Konto erstellt! Bitte bestätigen Sie Ihre E-Mail.",
   "logged_out": "Abgemeldet",
   "login": "Anmelden",
-  "sign_up": "Melden Sie sich an",
+  "signup": "Melden Sie sich an",
   "logout": "Ausloggen",
   "email": "E-Mail",
   "first_name": "Vorname",
   "username": "Benutzername",
   "password": "Passwort",
+
+  "hide_password": "Passwort verbergen",
+  "show_password": "Passwort anzeigen",
 
   "forgot_password": "Passwort vergessen?",
   "reset_password": "Passwort Zürucksetzen",
@@ -41,7 +44,7 @@
   "email_required": "E-Mail ist erforderlich",
   "email_invalid": "E-Mail ist ungültig",
   "password_required": "Passwort ist erforderlich",
-  " password_repeat_required": "Neues Passwort wiederholen ist erforderlich",
+  "password_repeat_required": "Neues Passwort wiederholen ist erforderlich",
 
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",
@@ -85,8 +88,13 @@
   "notes": "Notizen",
   "subheading": "Zwischenüberschrift",
   "ingredient_subheading": "Zutaten-Zwischenüberschrift (optional)",
+  "add_ingredient": "Zutat hinzufügen",
+  "remove_ingredient": "Zutat entfernen",
   "add_section": "Bereich Hinzufügen",
-  "section_title_placeholder": "Bereichstitel",
+  "remove_section": "Bereich entfernen",
+  "section_title": "Bereichstitel",
+  "add_instruction": "Anweisung hinzufügen",
+  "remove_instruction": "Anweisung entfernen",
 
   "add_new_recipe": "Neues Rezept Hinzufügen",
   "edit_recipe": "Rezept bearbeiten",
@@ -96,9 +104,12 @@
   "category_required": "Kategorie ist erforderlich",
   "ingredient_required": "Mindestens eine Zutat ist erforderlich",
 
+  "add_to_grocery_list": "zur Einkaufsliste hinzufügen",
   "added_to_groceries": "Zur Einkaufsliste hinzugefügt",
   "grocery_list": "Einkaufsliste",
   "item_name": "Name",
+  "add_item": "Artikel hinzufügen",
+  "remove_item": "Artikel entfernen",
   "clear_list": "Liste löschen",
   "grocery_list_clear_confirmation": "Möchten Sie die Einkaufsliste wirklich löschen?"
 }

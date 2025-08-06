@@ -22,16 +22,16 @@ import { useTranslation } from "react-i18next";
 import Header from "./components/Header/Header";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import RecipeList from "./components/RecipeList/RecipeList";
-import Recipe from "./components/Recipe/Recipe";
 import { Squirrel } from "lucide-react";
 
 // Pages
-import AddRecipePage from "./pages/AddRecipe";
-import EditRecipePage from "./pages/EditRecipe";
+import AddRecipePage from "./pages/AddRecipe/AddRecipe";
+import EditRecipePage from "./pages/EditRecipe/EditRecipe";
 import GroceryList from "./pages/GroceryList/GroceryList";
-import AuthPage from "./pages/AuthPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ChangePasswordPage from "./pages/ChangePasswordPage";
+import AuthPage from "./pages/AuthPage/AuthPage";
+import Recipe from "./pages/Recipe/Recipe";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");

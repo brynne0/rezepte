@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { changePassword } from "../../services/auth";
 import { useNavigate } from "react-router-dom";
-import { validateChangePasswordForm } from "../../utils/validation";
+import { useTranslation } from "react-i18next";
 import supabase from "../../lib/supabase";
-import PasswordInput from "../../components/PasswordInput";
+import { changePassword } from "../../services/auth";
+import { validateChangePasswordForm } from "../../utils/validation";
+import PasswordInput from "../../components/PasswordInput/PasswordInput";
+import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const ChangePasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");

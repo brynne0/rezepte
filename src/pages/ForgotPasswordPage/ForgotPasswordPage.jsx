@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { forgotPassword } from "../services/auth";
-import { validateForgotPasswordForm } from "../utils/validation";
-import LoadingAcorn from "../components/LoadingAcorn/LoadingAcorn";
+import { forgotPassword } from "../../services/auth";
+import { validateForgotPasswordForm } from "../../utils/validation";
+import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");

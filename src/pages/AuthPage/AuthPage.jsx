@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { signUp, signIn } from "../services/auth";
-import { validateAuthForm } from "../utils/validation";
-import PasswordInput from "../components/PasswordInput";
+import { signUp, signIn } from "../../services/auth";
+import { validateAuthForm } from "../../utils/validation";
+import PasswordInput from "../../components/PasswordInput/PasswordInput";
 
 const AuthPage = ({ setLoginMessage }) => {
   // Form input states
@@ -120,6 +120,7 @@ const AuthPage = ({ setLoginMessage }) => {
           className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToLogin}
+          aria-label={t("login")}
         >
           <h2 className="forta"> {t("login")}</h2>
         </button>
@@ -127,8 +128,9 @@ const AuthPage = ({ setLoginMessage }) => {
           className={`subheading-wrapper ${isSignUpMode ? "selected" : ""}`}
           type="button"
           onClick={switchToSignUp}
+          aria-label={t("signup")}
         >
-          <h2 className="forta"> {t("sign_up")}</h2>
+          <h2 className="forta"> {t("signup")}</h2>
         </button>
       </header>
 
@@ -137,12 +139,12 @@ const AuthPage = ({ setLoginMessage }) => {
       <form
         onSubmit={isSignUpMode ? handleSignUp : handleLogin}
         className="auth-form"
+        data-testid="auth-form"
       >
         <div className="input-wrapper">
           {isSignUpMode && (
             <>
               {/* Email */}
-
               <input
                 id="email"
                 type="text"
@@ -230,8 +232,12 @@ const AuthPage = ({ setLoginMessage }) => {
         )}
 
         {/* Submit button */}
-        <button type="submit" className={"btn btn-standard"}>
-          {isSignUpMode ? t("sign_up") : t("login")}
+        <button
+          type="submit"
+          aria-label="submit-button"
+          className={"btn btn-standard"}
+        >
+          {isSignUpMode ? t("signup") : t("login")}
         </button>
       </form>
     </div>
