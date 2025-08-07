@@ -11,10 +11,10 @@ vi.mock("react-i18next", () => ({
         return [
           { value: "", label: "" },
           { value: "cup", label: "cup" },
-          { value: "tbsp", label: "tablespoon" },
-          { value: "tsp", label: "teaspoon" },
-          { value: "g", label: "grams" },
-          { value: "kg", label: "kilograms" },
+          { value: "tbsp", label: "tbsp" },
+          { value: "tsp", label: "tsp" },
+          { value: "g", label: "g" },
+          { value: "kg", label: "kg" },
         ];
       }
       return key;

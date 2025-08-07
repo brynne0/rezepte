@@ -15,6 +15,19 @@ const Recipe = () => {
   const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
 
+  // Helper function to pluralize units
+  const getUnitDisplay = (unit, quantity) => {
+    if (!unit) return "";
+    
+    // Handle singular/plural forms - convert "piece/s" to "piece" or "pieces"
+    if (unit.includes("/")) {
+      const [singular, pluralSuffix] = unit.split("/");
+      return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
+    }
+    
+    return unit;
+  };
+
   // Helper function to get the correct ingredient name (singular vs plural)
   const getIngredientDisplayName = (ingredient) => {
     // If we have a translated name from the translation service, use that
@@ -23,8 +36,12 @@ const Recipe = () => {
     }
 
     // Fallback to database fields for untranslated recipes
-    const shouldUsePlural =
-      ingredient.quantity && parseFloat(ingredient.quantity) > 1;
+    const countableUnits = ["piece/s"];
+    const isCountableUnit = countableUnits.includes(ingredient.unit);
+    
+    const shouldUsePlural = isCountableUnit
+      ? (ingredient.quantity && parseFloat(ingredient.quantity) !== 1) // Countable units: match quantity
+      : ingredient.unit || (ingredient.quantity && parseFloat(ingredient.quantity) !== 1); // Measurement units: always plural, no unit: quantity logic
 
     if (shouldUsePlural && ingredient.plural_name) {
       return ingredient.plural_name;
@@ -181,7 +198,7 @@ const Recipe = () => {
                       htmlFor={`ingredient-ungrouped-${index}-${ingredient.id}`}
                     >
                       {ingredient.quantity && `${ingredient.quantity} `}
-                      {ingredient.unit && `${ingredient.unit} `}
+                      {ingredient.unit && `${getUnitDisplay(ingredient.unit, ingredient.quantity)} `}
                       {`${getIngredientDisplayName(ingredient)} `}
                       {ingredient.notes && `${ingredient.notes} `}
                     </label>
@@ -261,7 +278,7 @@ const Recipe = () => {
                       htmlFor={`ingredient-flat-${index}-${ingredient.id}`}
                     >
                       {ingredient.quantity && `${ingredient.quantity} `}
-                      {ingredient.unit && `${ingredient.unit} `}
+                      {ingredient.unit && `${getUnitDisplay(ingredient.unit, ingredient.quantity)} `}
                       {`${getIngredientDisplayName(ingredient)} `}
                       {ingredient.notes && `${ingredient.notes} `}
                     </label>
