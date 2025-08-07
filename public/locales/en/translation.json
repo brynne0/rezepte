@@ -60,7 +60,7 @@
   "source_link_or_note": "Source link or note",
 
   "units": [
-    { "value": "", "label": "Unit", "pluralize": true },
+    { "value": "", "label": "-", "pluralize": true },
     { "value": "tsp", "label": "tsp", "pluralize": true },
     { "value": "tbsp", "label": "tbsp", "pluralize": true },
     { "value": "cup/s", "label": "cup/s", "pluralize": true },

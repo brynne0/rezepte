@@ -60,7 +60,7 @@
   "source_link_or_note": "Quellenlink oder Hinweis",
 
   "units": [
-    { "value": "", "label": "Einheit", "pluralize": true },
+    { "value": "", "label": "-", "pluralize": true },
     { "value": "tsp", "label": "TL", "pluralize": true },
     { "value": "tbsp", "label": "EL", "pluralize": true },
     { "value": "cup/s", "label": "Tasse/n", "pluralize": true },

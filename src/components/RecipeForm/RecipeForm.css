@@ -106,12 +106,4 @@
     gap: 0.5rem;
     align-items: center;
   }
-
-  .ingredient-details input[type="number"] {
-    flex: 0 0 70px;
-  }
-
-  .ingredient-details select {
-    flex: 0 0 90px;
-  }
 }

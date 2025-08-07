@@ -37,7 +37,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     toTitleCase,
   } = useRecipeForm({ initialRecipe });
 
-  const units = t("units", { returnObjects: true });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const IsLinkRecipe = formData.link_only;
 
@@ -281,6 +280,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                             value
                                           )
                                         }
+                                        className="input--full-width"
                                       />
 
                                       <input
@@ -510,30 +510,21 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                         }
                                                       />
 
-                                                      <select
+                                                      <UnitSelector
                                                         id={`ingredient-unit-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                                         value={
                                                           ingredient.unit || ""
                                                         }
-                                                        onChange={(e) =>
+                                                        onChange={(unitValue) =>
                                                           handleIngredientChange(
                                                             section.id,
                                                             ingredient.tempId,
                                                             "unit",
-                                                            e.target.value
+                                                            unitValue
                                                           )
                                                         }
-                                                        className="input input--full-width input--select input--edit"
-                                                      >
-                                                        {units.map((unit) => (
-                                                          <option
-                                                            key={unit.value}
-                                                            value={unit.value}
-                                                          >
-                                                            {unit.label}
-                                                          </option>
-                                                        ))}
-                                                      </select>
+                                                        className="input--full-width"
+                                                      />
 
                                                       <input
                                                         id={`ingredient-notes-${section.id}-${ingredientIndex}-${ingredient.tempId}`}

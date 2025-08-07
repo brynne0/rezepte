@@ -173,11 +173,15 @@ describe("GroceryList", () => {
 
     const nameInputs = screen.getAllByPlaceholderText("item_name");
     const quantityInputs = screen.getAllByPlaceholderText("quantity");
-    const unitSelects = screen.getAllByRole("combobox");
+    const unitInputs = screen.getAllByPlaceholderText("unit");
 
     fireEvent.change(nameInputs[2], { target: { value: "Coconuts" } });
     fireEvent.change(quantityInputs[2], { target: { value: "3" } });
-    fireEvent.change(unitSelects[2], { target: { value: "piece/s" } });
+    
+    // Interact with UnitSelector component
+    fireEvent.focus(unitInputs[2]); // Open the dropdown
+    const pieceOption = screen.getByText("piece/s");
+    fireEvent.click(pieceOption); // Select the unit
 
     const saveButton = screen.getByRole("button", { name: "save" });
     fireEvent.click(saveButton);

@@ -10,6 +10,7 @@ import AutoResizeTextArea from "../../components/AutoResizeTextArea/AutoResizeTe
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
+import UnitSelector from "../../components/UnitSelector/UnitSelector";
 
 const GroceryList = ({
   isEditing: propIsEditing,
@@ -243,7 +244,7 @@ const GroceryList = ({
                       <AutoResizeTextArea
                         id={`item-name-${itemId}`}
                         value={item.name || ""}
-                        className="input input--borderless input--full-width input--textarea"
+                        className="input input--edit input--full-width input--textarea"
                         readOnly={!isEditing}
                         placeholder={t("item_name")}
                         onChange={(e) =>
@@ -256,7 +257,7 @@ const GroceryList = ({
                         min="0"
                         step="0.1"
                         value={item.quantity || ""}
-                        className="input input--borderless input--full-width"
+                        className="input input--edit input--full-width"
                         readOnly={!isEditing}
                         placeholder={t("quantity")}
                         onChange={(e) =>
@@ -267,23 +268,14 @@ const GroceryList = ({
                           )
                         }
                       />
-                      <select
+                      <UnitSelector
                         id={`item-unit-${itemId}`}
                         value={item.unit || ""}
-                        className="input input--borderless input--full-width input--select"
-                        disabled={!isEditing}
-                        onChange={(e) =>
-                          handleInputChange(index, "unit", e.target.value)
+                        onChange={(unitValue) =>
+                          handleInputChange(index, "unit", unitValue)
                         }
-                      >
-                        {units &&
-                          Array.isArray(units) &&
-                          units.map((unit) => (
-                            <option key={unit.value} value={unit.value}>
-                              {unit.label}
-                            </option>
-                          ))}
-                      </select>
+                        className="input--full-width"
+                      />
 
                       {isEditing ? (
                         <button

@@ -3,7 +3,7 @@
   display: flex;
   align-items: flex-start;
   max-width: 100%;
-  overflow: hidden;
+  gap: 0.5rem;
 }
 
 .grocery-item {
