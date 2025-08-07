@@ -11,6 +11,7 @@ import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationMo
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
 import { formatQuantity, parseFraction } from "../../utils/fractionUtils";
+import { formatQuantityForUnit, formatUnitDisplay } from "../../utils/ingredientFormatting";
 import Selector from "../../components/Selector/Selector";
 
 const GroceryList = ({
@@ -24,42 +25,6 @@ const GroceryList = ({
   const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
 
-  // Helper function to format quantity based on unit type
-  const formatQuantityDisplay = (quantity, unit) => {
-    if (!quantity) return "";
-    
-    // Parse the quantity string (handles fractions like "1 1/2" or "3/4")
-    const parsedQuantity = parseFraction(quantity);
-    
-    // Find the unit object to check if it uses fractions
-    const unitObj = units?.find((u) => u.value === unit);
-    
-    // Use fractions for cooking units, decimals for metric units
-    if (!unit || unitObj?.useFractions) {
-      return formatQuantity(parsedQuantity);
-    } else {
-      // For metric units, keep as decimal
-      const num = parseFloat(parsedQuantity);
-      return Number.isInteger(num) ? num.toString() : parsedQuantity.toString();
-    }
-  };
-
-  // Helper function to get unit display with translation and smart fallback
-  const getUnitDisplay = (unit, quantity) => {
-    if (!unit) return "";
-
-    // Find the unit object in the units array
-    const unitObj = units?.find((u) => u.value === unit);
-    const translated = unitObj?.label || unit;
-
-    // Handle pluralization for units that support it
-    if (unitObj?.pluralize && translated.includes("/")) {
-      const [singular, pluralSuffix] = translated.split("/");
-      return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
-    }
-
-    return translated;
-  };
 
   // Use prop-based editing state, fallback to local state if props not provided
   const isEditing = propIsEditing !== undefined ? propIsEditing : false;
@@ -360,9 +325,9 @@ const GroceryList = ({
                                 }
                               }
 
-                              const displayQuantity = formatQuantityDisplay(qty, unit);
+                              const displayQuantity = formatQuantityForUnit(qty, unit, units);
                               const displayUnit = unit
-                                ? getUnitDisplay(unit, qty)
+                                ? formatUnitDisplay(unit, qty, units)
                                 : "";
                               return `${displayQuantity}${
                                 displayQuantity && displayUnit ? " " : ""
@@ -390,9 +355,9 @@ const GroceryList = ({
                           }
                         }
 
-                        const displayQuantity = formatQuantityDisplay(qty, unit);
+                        const displayQuantity = formatQuantityForUnit(qty, unit, units);
                         const displayUnit = unit
-                          ? getUnitDisplay(unit, qty)
+                          ? formatUnitDisplay(unit, qty, units)
                           : "";
                         const measurement = `${displayQuantity}${
                           displayQuantity && displayUnit ? " " : ""

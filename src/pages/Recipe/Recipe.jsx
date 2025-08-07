@@ -7,7 +7,7 @@ import { useRecipe } from "../../hooks/data/useRecipe";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import { formatQuantity } from "../../utils/fractionUtils";
+import { formatCompleteIngredient } from "../../utils/ingredientFormatting";
 
 const Recipe = () => {
   const { id } = useParams();
@@ -16,86 +16,6 @@ const Recipe = () => {
   const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
 
-  // Single helper function to format ingredient quantity and unit
-  const formatIngredientMeasurement = (quantity, unit) => {
-    if (!quantity && !unit) return "";
-
-    // Get units array
-    const units = t("units", { returnObjects: true });
-
-    // Find the unit object - try exact match first, then with common suffixes
-    let unitObj = units?.find((u) => u.value === unit);
-    if (!unitObj && unit) {
-      unitObj =
-        units?.find((u) => u.value === unit + "/s") ||
-        units?.find((u) => u.value === unit + "/es");
-    }
-
-    let displayQuantity = "";
-    let displayUnit = "";
-
-    // Format quantity based on unit type
-    if (quantity) {
-      // Default to fractions if no unit (cooking context) or if unit uses fractions
-      if (!unit || unitObj?.useFractions) {
-        displayQuantity = formatQuantity(quantity);
-      } else {
-        const num = parseFloat(quantity);
-        displayQuantity = Number.isInteger(num)
-          ? num.toString()
-          : quantity.toString();
-      }
-    }
-
-    // Format unit with translation and pluralization
-    if (unit && unitObj) {
-      const translated = unitObj.label || unit;
-
-      if (unitObj.pluralize && translated.includes("/")) {
-        const [singular, pluralSuffix] = translated.split("/");
-        displayUnit =
-          parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
-      } else {
-        displayUnit = translated;
-      }
-    } else if (unit) {
-      displayUnit = unit; // fallback to original unit if not found
-    }
-
-    // Combine quantity and unit with proper spacing
-    if (displayQuantity && displayUnit) {
-      return `${displayQuantity} ${displayUnit}`;
-    } else if (displayQuantity) {
-      return displayQuantity;
-    } else if (displayUnit) {
-      return displayUnit;
-    }
-
-    return "";
-  };
-
-  // Helper function to get the correct ingredient name (singular vs plural)
-  const getIngredientDisplayName = (ingredient) => {
-    // If we have a translated name from the translation service, use that
-    if (ingredient.name) {
-      return ingredient.name;
-    }
-
-    // Fallback to database fields for untranslated recipes
-    const countableUnits = ["piece/s"];
-    const isCountableUnit = countableUnits.includes(ingredient.unit);
-
-    const shouldUsePlural = isCountableUnit
-      ? ingredient.quantity && parseFloat(ingredient.quantity) !== 1 // Countable units: match quantity
-      : ingredient.unit ||
-        (ingredient.quantity && parseFloat(ingredient.quantity) !== 1); // Measurement units: always plural, no unit: quantity logic
-
-    if (shouldUsePlural && ingredient.plural_name) {
-      return ingredient.plural_name;
-    }
-
-    return ingredient.singular_name || "?";
-  };
 
   // Use the grocery list hook
   const {
@@ -244,15 +164,7 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-ungrouped-${index}-${ingredient.id}`}
                     >
-                      {(() => {
-                        const measurement = formatIngredientMeasurement(
-                          ingredient.quantity,
-                          ingredient.unit
-                        );
-                        return measurement ? `${measurement} ` : "";
-                      })()}
-                      {`${getIngredientDisplayName(ingredient)} `}
-                      {ingredient.notes && `${ingredient.notes} `}
+                      {formatCompleteIngredient(ingredient, t("units", { returnObjects: true }))}
                     </label>
                   </li>
                 ))}
@@ -290,15 +202,7 @@ const Recipe = () => {
                             <label
                               htmlFor={`ingredient-section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
                             >
-                              {(() => {
-                                const measurement = formatIngredientMeasurement(
-                                  ingredient.quantity,
-                                  ingredient.unit
-                                );
-                                return measurement ? `${measurement} ` : "";
-                              })()}
-                              {`${getIngredientDisplayName(ingredient)} `}
-                              {ingredient.notes && `${ingredient.notes} `}
+                              {formatCompleteIngredient(ingredient, t("units", { returnObjects: true }))}
                             </label>
                           </li>
                         )
@@ -334,15 +238,7 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-flat-${index}-${ingredient.id}`}
                     >
-                      {(() => {
-                        const measurement = formatIngredientMeasurement(
-                          ingredient.quantity,
-                          ingredient.unit
-                        );
-                        return measurement ? `${measurement} ` : "";
-                      })()}
-                      {`${getIngredientDisplayName(ingredient)} `}
-                      {ingredient.notes && `${ingredient.notes} `}
+                      {formatCompleteIngredient(ingredient, t("units", { returnObjects: true }))}
                     </label>
                   </li>
                 ))}

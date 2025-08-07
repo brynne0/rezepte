@@ -68,79 +68,79 @@ const canUnitsBeConverted = (unit1, unit2) => {
 };
 
 // Helper function to combine quantities - only handles g/kg and ml/l
-const combineQuantities = (
-  existingQuantity,
-  existingUnit,
-  newQuantity,
-  newUnit
-) => {
-  const normaliseUnit = (unit) => {
-    if (!unit || unit === null || unit === undefined) return "";
-    const normalized = unit.toString().toLowerCase().trim();
-    // Handle singular/plural forms - convert "cup/s" to "cup" for matching
-    if (normalized.includes("/")) {
-      return normalized.split("/")[0];
-    }
-    return normalized;
-  };
+// const combineQuantities = (
+//   existingQuantity,
+//   existingUnit,
+//   newQuantity,
+//   newUnit
+// ) => {
+//   const normaliseUnit = (unit) => {
+//     if (!unit || unit === null || unit === undefined) return "";
+//     const normalized = unit.toString().toLowerCase().trim();
+//     // Handle singular/plural forms - convert "cup/s" to "cup" for matching
+//     if (normalized.includes("/")) {
+//       return normalized.split("/")[0];
+//     }
+//     return normalized;
+//   };
 
-  const existingUnitNorm = normaliseUnit(existingUnit);
-  const newUnitNorm = normaliseUnit(newUnit);
+//   const existingUnitNorm = normaliseUnit(existingUnit);
+//   const newUnitNorm = normaliseUnit(newUnit);
 
-  // Direct unit match - simple addition
-  if (existingUnitNorm === newUnitNorm) {
-    const result = {
-      quantity: parseFraction(existingQuantity) + parseFraction(newQuantity),
-      unit: existingUnit || newUnit || null,
-    };
-    return result;
-  }
+//   // Direct unit match - simple addition
+//   if (existingUnitNorm === newUnitNorm) {
+//     const result = {
+//       quantity: parseFraction(existingQuantity) + parseFraction(newQuantity),
+//       unit: existingUnit || newUnit || null,
+//     };
+//     return result;
+//   }
 
-  // Only combine g/kg and ml/l - nothing else
-  let canCombine = false;
-  let existingInBase = existingQuantity;
-  let newInBase = newQuantity;
+//   // Only combine g/kg and ml/l - nothing else
+//   let canCombine = false;
+//   let existingInBase = existingQuantity;
+//   let newInBase = newQuantity;
 
-  // Handle ml/l conversion
-  if (
-    (existingUnitNorm === "ml" && newUnitNorm === "l") ||
-    (existingUnitNorm === "l" && newUnitNorm === "ml")
-  ) {
-    canCombine = true;
-    if (existingUnitNorm === "ml") {
-      // Keep as ml: existing stays same, convert l to ml
-      newInBase = newQuantity * 1000;
-    } else {
-      // Keep as l: convert ml to l, existing stays same
-      existingInBase = existingQuantity / 1000;
-    }
-  }
+//   // Handle ml/l conversion
+//   if (
+//     (existingUnitNorm === "ml" && newUnitNorm === "l") ||
+//     (existingUnitNorm === "l" && newUnitNorm === "ml")
+//   ) {
+//     canCombine = true;
+//     if (existingUnitNorm === "ml") {
+//       // Keep as ml: existing stays same, convert l to ml
+//       newInBase = newQuantity * 1000;
+//     } else {
+//       // Keep as l: convert ml to l, existing stays same
+//       existingInBase = existingQuantity / 1000;
+//     }
+//   }
 
-  // Handle g/kg conversion
-  else if (
-    (existingUnitNorm === "g" && newUnitNorm === "kg") ||
-    (existingUnitNorm === "kg" && newUnitNorm === "g")
-  ) {
-    canCombine = true;
-    if (existingUnitNorm === "g") {
-      // Keep as g: existing stays same, convert kg to g
-      newInBase = newQuantity * 1000;
-    } else {
-      // Keep as kg: convert g to kg, existing stays same
-      existingInBase = existingQuantity / 1000;
-    }
-  }
+//   // Handle g/kg conversion
+//   else if (
+//     (existingUnitNorm === "g" && newUnitNorm === "kg") ||
+//     (existingUnitNorm === "kg" && newUnitNorm === "g")
+//   ) {
+//     canCombine = true;
+//     if (existingUnitNorm === "g") {
+//       // Keep as g: existing stays same, convert kg to g
+//       newInBase = newQuantity * 1000;
+//     } else {
+//       // Keep as kg: convert g to kg, existing stays same
+//       existingInBase = existingQuantity / 1000;
+//     }
+//   }
 
-  if (canCombine) {
-    return {
-      quantity: existingInBase + newInBase,
-      unit: existingUnit, // Keep original unit
-    };
-  }
+//   if (canCombine) {
+//     return {
+//       quantity: existingInBase + newInBase,
+//       unit: existingUnit, // Keep original unit
+//     };
+//   }
 
-  // Units not convertible - return null
-  return null;
-};
+//   // Units not convertible - return null
+//   return null;
+// };
 
 // Helper function to get recipe title in user's preferred language
 const getRecipeTitleInPreferredLanguage = async (
@@ -497,96 +497,97 @@ export const updateGroceryList = async (updatedList) => {
       userPreferredLang
     );
 
+    // Skip quantity combination - add items separately instead
     // First check if this item can be combined with existing items
-    const existingItem = await findEquivalentGroceryItem(
-      preferredLanguageName,
-      newItem.unit,
-      currentItems
-    );
+    // const existingItem = await findEquivalentGroceryItem(
+    //   preferredLanguageName,
+    //   newItem.unit,
+    //   currentItems
+    // );
 
-    if (existingItem && newItem.quantity && existingItem.quantity) {
-      const combinedResult = combineQuantities(
-        existingItem.quantity,
-        existingItem.unit,
-        parseFraction(newItem.quantity),
-        newItem.unit
-      );
+    // if (existingItem && newItem.quantity && existingItem.quantity) {
+    //   const combinedResult = combineQuantities(
+    //     existingItem.quantity,
+    //     existingItem.unit,
+    //     parseFraction(newItem.quantity),
+    //     newItem.unit
+    //   );
 
-      if (combinedResult) {
-        // Can combine with existing - update existing item
-        const updatedRecipes = [
-          ...new Set(
-            [
-              ...(existingItem.source_recipes || []),
-              ...(newItem.source_recipes || []),
-            ].filter(Boolean)
-          ),
-        ];
+    //   if (combinedResult) {
+    //     // Can combine with existing - update existing item
+    //     const updatedRecipes = [
+    //       ...new Set(
+    //         [
+    //           ...(existingItem.source_recipes || []),
+    //           ...(newItem.source_recipes || []),
+    //         ].filter(Boolean)
+    //       ),
+    //     ];
 
-        // Get the correct ingredient name for the combined quantity
-        const updatedIngredientName =
-          await getIngredientNameInPreferredLanguage(
-            existingItem.name,
-            combinedResult.quantity,
-            userPreferredLang
-          );
+    //     // Get the correct ingredient name for the combined quantity
+    //     const updatedIngredientName =
+    //       await getIngredientNameInPreferredLanguage(
+    //         existingItem.name,
+    //         combinedResult.quantity,
+    //         userPreferredLang
+    //       );
 
-        combinedUpdates.set(existingItem.id, {
-          id: existingItem.id,
-          name: updatedIngredientName,
-          quantity: combinedResult.quantity,
-          unit: combinedResult.unit,
-          source_recipes: updatedRecipes,
-        });
-        continue;
-      }
-    }
+    //     combinedUpdates.set(existingItem.id, {
+    //       id: existingItem.id,
+    //       name: updatedIngredientName,
+    //       quantity: combinedResult.quantity,
+    //       unit: combinedResult.unit,
+    //       source_recipes: updatedRecipes,
+    //     });
+    //     continue;
+    //   }
+    // }
 
-    // Check if this item can be combined with other new items already processed
-    const existingNewItem = finalItemsToInsert.find((item) => {
-      const itemNormalized = normaliseIngredientName(item.name);
-      const newItemNormalized = normaliseIngredientName(preferredLanguageName);
-      const namesMatch = itemNormalized === newItemNormalized;
+    // // Check if this item can be combined with other new items already processed
+    // const existingNewItem = finalItemsToInsert.find((item) => {
+    //   const itemNormalized = normaliseIngredientName(item.name);
+    //   const newItemNormalized = normaliseIngredientName(preferredLanguageName);
+    //   const namesMatch = itemNormalized === newItemNormalized;
 
-      // Check if units can be combined (exact match OR convertible units)
-      const exactUnitMatch = item.unit === newItem.unit;
-      const convertibleUnits = canUnitsBeConverted(item.unit, newItem.unit);
-      const unitsCanCombine = exactUnitMatch || convertibleUnits;
+    //   // Check if units can be combined (exact match OR convertible units)
+    //   const exactUnitMatch = item.unit === newItem.unit;
+    //   const convertibleUnits = canUnitsBeConverted(item.unit, newItem.unit);
+    //   const unitsCanCombine = exactUnitMatch || convertibleUnits;
 
-      return namesMatch && unitsCanCombine;
-    });
+    //   return namesMatch && unitsCanCombine;
+    // });
 
-    if (existingNewItem && newItem.quantity && existingNewItem.quantity) {
-      const combinedResult = combineQuantities(
-        existingNewItem.quantity,
-        existingNewItem.unit,
-        parseFraction(newItem.quantity),
-        newItem.unit
-      );
+    // if (existingNewItem && newItem.quantity && existingNewItem.quantity) {
+    //   const combinedResult = combineQuantities(
+    //     existingNewItem.quantity,
+    //     existingNewItem.unit,
+    //     parseFraction(newItem.quantity),
+    //     newItem.unit
+    //   );
 
-      if (combinedResult) {
-        // Can combine with existing new item
-        existingNewItem.quantity = combinedResult.quantity;
-        existingNewItem.unit = combinedResult.unit;
-        existingNewItem.source_recipes = [
-          ...new Set(
-            [
-              ...(existingNewItem.source_recipes || []),
-              ...(newItem.source_recipes || []),
-            ].filter(Boolean)
-          ),
-        ];
+    //   if (combinedResult) {
+    //     // Can combine with existing new item
+    //     existingNewItem.quantity = combinedResult.quantity;
+    //     existingNewItem.unit = combinedResult.unit;
+    //     existingNewItem.source_recipes = [
+    //       ...new Set(
+    //         [
+    //           ...(existingNewItem.source_recipes || []),
+    //           ...(newItem.source_recipes || []),
+    //         ].filter(Boolean)
+    //       ),
+    //     ];
 
-        // Update ingredient name to correct singular/plural form based on new quantity
-        existingNewItem.name = await getIngredientNameInPreferredLanguage(
-          existingNewItem.name,
-          combinedResult.quantity,
-          userPreferredLang
-        );
+    //     // Update ingredient name to correct singular/plural form based on new quantity
+    //     existingNewItem.name = await getIngredientNameInPreferredLanguage(
+    //       existingNewItem.name,
+    //       combinedResult.quantity,
+    //       userPreferredLang
+    //     );
 
-        continue;
-      }
-    }
+    //     continue;
+    //   }
+    // }
 
     // Cannot combine - add as new item
     finalItemsToInsert.push({
@@ -599,30 +600,30 @@ export const updateGroceryList = async (updatedList) => {
   }
 
   // Add combined updates to itemsToUpdate
-  for (const combinedUpdate of combinedUpdates.values()) {
-    // Remove any existing update for this item and replace with combined
-    const existingUpdateIndex = itemsToUpdate.findIndex(
-      (item) => item.id === combinedUpdate.id
-    );
-    if (existingUpdateIndex >= 0) {
-      itemsToUpdate[existingUpdateIndex] = {
-        ...itemsToUpdate[existingUpdateIndex],
-        name: combinedUpdate.name, // Include the updated name
-        quantity: combinedUpdate.quantity,
-        unit: combinedUpdate.unit,
-        source_recipes: [
-          ...new Set(
-            [
-              ...(itemsToUpdate[existingUpdateIndex].source_recipes || []),
-              ...combinedUpdate.source_recipes,
-            ].filter(Boolean)
-          ),
-        ],
-      };
-    } else {
-      itemsToUpdate.push(combinedUpdate);
-    }
-  }
+  // for (const combinedUpdate of combinedUpdates.values()) {
+  //   // Remove any existing update for this item and replace with combined
+  //   const existingUpdateIndex = itemsToUpdate.findIndex(
+  //     (item) => item.id === combinedUpdate.id
+  //   );
+  //   if (existingUpdateIndex >= 0) {
+  //     itemsToUpdate[existingUpdateIndex] = {
+  //       ...itemsToUpdate[existingUpdateIndex],
+  //       name: combinedUpdate.name, // Include the updated name
+  //       quantity: combinedUpdate.quantity,
+  //       unit: combinedUpdate.unit,
+  //       source_recipes: [
+  //         ...new Set(
+  //           [
+  //             ...(itemsToUpdate[existingUpdateIndex].source_recipes || []),
+  //             ...combinedUpdate.source_recipes,
+  //           ].filter(Boolean)
+  //         ),
+  //       ],
+  //     };
+  //   } else {
+  //     itemsToUpdate.push(combinedUpdate);
+  //   }
+  // }
 
   // Delete removed items
   if (itemsToDelete.length > 0) {
@@ -732,62 +733,71 @@ export const addIngredientsToGroceryList = async (
       userPreferredLang
     );
 
+    // Add new ingredient
+    itemsToInsert.push({
+      user_id: user.id,
+      name: preferredLanguageName,
+      quantity: ingredient.quantity,
+      unit: ingredient.unit,
+      source_recipes: translatedRecipeTitle ? [translatedRecipeTitle] : [],
+    });
+
+    // Below is the previous quantity combination logic
     // Check if ingredient already exists in the list (including translations)
-    const existingItem = await findEquivalentGroceryItem(
-      preferredLanguageName,
-      ingredient.unit,
-      currentList
-    );
+    // const existingItem = await findEquivalentGroceryItem(
+    //   preferredLanguageName,
+    //   ingredient.unit,
+    //   currentList
+    // );
 
-    if (existingItem) {
-      // Try to combine quantities with unit conversion
-      // Handle null quantities by treating them as 0
-      const existingQty = parseFraction(existingItem.quantity) || 0;
-      const newQty = parseFraction(ingredient.quantity) || 0;
+    // if (existingItem) {
+    // Try to combine quantities with unit conversion
+    // Handle null quantities by treating them as 0
+    // const existingQty = parseFraction(existingItem.quantity) || 0;
+    // const newQty = parseFraction(ingredient.quantity) || 0;
 
-      const combinedResult = combineQuantities(
-        existingQty,
-        existingItem.unit,
-        newQty,
-        ingredient.unit
-      );
+    // const combinedResult = combineQuantities(
+    //   existingQty,
+    //   existingItem.unit,
+    //   newQty,
+    //   ingredient.unit
+    // );
 
-      if (combinedResult) {
-        // Units are convertible - combine them
-        const updatedRecipes = [
-          ...new Set(
-            [
-              ...(existingItem.source_recipes || []),
-              translatedRecipeTitle,
-            ].filter(Boolean)
-          ),
-        ];
-        itemsToUpdate.push({
-          id: existingItem.id,
-          quantity: combinedResult.quantity,
-          unit: combinedResult.unit,
-          source_recipes: updatedRecipes,
-        });
-      } else {
-        // Units not convertible - add as separate item
-        itemsToInsert.push({
-          user_id: user.id,
-          name: preferredLanguageName,
-          quantity: newQty,
-          unit: ingredient.unit,
-          source_recipes: translatedRecipeTitle ? [translatedRecipeTitle] : [],
-        });
-      }
-    } else {
-      // Add new ingredient
-      itemsToInsert.push({
-        user_id: user.id,
-        name: preferredLanguageName,
-        quantity: ingredient.quantity,
-        unit: ingredient.unit,
-        source_recipes: translatedRecipeTitle ? [translatedRecipeTitle] : [],
-      });
-    }
+    //   if (combinedResult) {
+    //     // Units are convertible - combine them
+    //     const updatedRecipes = [
+    //       ...new Set(
+    //         [
+    //           ...(existingItem.source_recipes || []),
+    //           translatedRecipeTitle,
+    //         ].filter(Boolean)
+    //       ),
+    //     ];
+    //     itemsToUpdate.push({
+    //       id: existingItem.id,
+    //       quantity: combinedResult.quantity,
+    //       unit: combinedResult.unit,
+    //       source_recipes: updatedRecipes,
+    //     });
+    //   } else {
+    //     // Units not convertible - add as separate item
+    //     itemsToInsert.push({
+    //       user_id: user.id,
+    //       name: preferredLanguageName,
+    //       quantity: newQty,
+    //       unit: ingredient.unit,
+    //       source_recipes: translatedRecipeTitle ? [translatedRecipeTitle] : [],
+    //     });
+    //   }
+    // } else {
+    //   // Add new ingredient
+    //   itemsToInsert.push({
+    //     user_id: user.id,
+    //     name: preferredLanguageName,
+    //     quantity: ingredient.quantity,
+    //     unit: ingredient.unit,
+    //     source_recipes: translatedRecipeTitle ? [translatedRecipeTitle] : [],
+    //   });
   }
 
   // Insert new grocery items into database
