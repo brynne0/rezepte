@@ -259,12 +259,10 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   };
 
   const removeInstruction = (index) => {
-    if (formData.instructions.length > 1) {
-      setFormData((prev) => ({
-        ...prev,
-        instructions: prev.instructions.filter((_, i) => i !== index),
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      instructions: prev.instructions.filter((_, i) => i !== index),
+    }));
   };
 
   const addIngredient = (sectionId) => {

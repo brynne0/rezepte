@@ -62,6 +62,11 @@ h2.forta {
   font-size: 1rem;
 }
 
+h3.forta {
+  font-family: var(--font-forta);
+  font-size: 0.9rem;
+}
+
 .link {
   cursor: pointer;
   margin: 0;

@@ -8,6 +8,27 @@
   margin-right: auto;
 }
 
+/* Title and Servings Layout */
+.title-servings-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.title-field {
+  flex: 1;
+}
+
+.servings-field {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+/* Category styling */
+.recipe-form .categories-wrapper {
+  padding-bottom: 0;
+}
+
 .section-title-input {
   flex: 1;
   font-weight: 500;
@@ -86,6 +107,17 @@
   .recipe-form {
     padding: 1.25rem;
     padding-top: 0;
+  }
+
+  /* Title and servings stack on mobile */
+  .title-servings-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .servings-field,
+  .title-field {
+    width: 100%;
   }
 
   .ingredient-row {

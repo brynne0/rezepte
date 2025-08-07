@@ -79,56 +79,94 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="recipe-form" role="form">
-        {/* Recipe Title */}
+        {/* Recipe Title and Servings */}
         <div className="form-group">
-          <label htmlFor="title" className="form-header">
-            <h3>{t("recipe_title")}</h3>
-          </label>
-          <input
-            id="title"
-            type="text"
-            value={formData.title}
-            onChange={(e) =>
-              handleInputChange(
-                "title",
-                toTitleCase(e.target.value),
-                !!validationErrors.title
-              )
-            }
-            onBlur={handleTitleBlur}
-            className={`input--full-width input--edit input ${
-              validationErrors.title ? "input--error" : ""
-            }`}
-          />
-          {validationErrors.title && (
-            <span className="error-message-small">
-              {validationErrors.title}
-            </span>
-          )}
+          <div className="title-servings-row">
+            <div className="title-field">
+              <span className="form-header">
+                <h3>{t("recipe_title")}</h3>
+              </span>
+              <input
+                id="title"
+                type="text"
+                value={formData.title}
+                onChange={(e) =>
+                  handleInputChange(
+                    "title",
+                    toTitleCase(e.target.value),
+                    !!validationErrors.title
+                  )
+                }
+                onBlur={handleTitleBlur}
+                className={`input--full-width input--edit input ${
+                  validationErrors.title ? "input--error" : ""
+                }`}
+              />
+              {validationErrors.title && (
+                <span className="error-message-small">
+                  {validationErrors.title}
+                </span>
+              )}
+            </div>
+            {!IsLinkRecipe && (
+              <div className="servings-field">
+                <span className="form-header">
+                  <h3 id="servings-label">{t("servings")}</h3>
+                </span>
+                <input
+                  id="servings"
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  value={formData.servings || ""}
+                  onChange={(e) =>
+                    handleInputChange("servings", e.target.value)
+                  }
+                  className="input input--full-width input--edit"
+                  aria-labelledby="servings-label"
+                  onWheel={(e) => {
+                    e.target.blur();
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Category */}
         <div className="form-group">
-          <label htmlFor="category" className="form-header">
-            <h3>{t("category")}</h3>
-          </label>
+          <div className="form-header">
+            <h3 id="category-label">{t("category")}</h3>
+          </div>
 
-          <Selector
-            id="category"
-            value={formData.category}
-            onChange={(categoryValue) =>
-              handleInputChange(
-                "category",
-                categoryValue,
-                !!validationErrors.category
-              )
-            }
-            options={categories}
-            type="category"
-            className={`selector--fit-content ${
+          <div
+            className={`categories-wrapper ${
               validationErrors.category ? "input--error" : ""
             }`}
-          />
+            role="group"
+            aria-labelledby="category-label"
+          >
+            {categories
+              ?.filter((category) => category.value !== "all")
+              .map((category) => (
+                <button
+                  key={category.value}
+                  type="button"
+                  className={`subheading-wrapper${
+                    category.value === formData.category ? " selected" : ""
+                  }`}
+                  onClick={() =>
+                    handleInputChange(
+                      "category",
+                      category.value,
+                      !!validationErrors.category
+                    )
+                  }
+                >
+                  <h3 className="forta">{category.label}</h3>
+                </button>
+              ))}
+          </div>
           {validationErrors.category && (
             <span className="error-message-small">
               {validationErrors.category}
@@ -138,24 +176,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
         {!IsLinkRecipe && (
           <>
-            {/* Servings */}
-            <div className="form-group">
-              <label htmlFor="servings" className="form-header ">
-                <h3> {t("servings")}</h3>
-              </label>
-              <input
-                id="servings"
-                type="number"
-                min="1"
-                value={formData.servings || ""}
-                onChange={(e) => handleInputChange("servings", e.target.value)}
-                className="input input--full-width input--edit "
-                onWheel={(e) => {
-                  e.target.blur();
-                }}
-              />
-            </div>
-
             {/* Ingredients */}
             <div className="form-group">
               <div className="form-header flex-between">

@@ -175,37 +175,56 @@ describe("RecipeForm", () => {
   });
 
   describe("Form Fields", () => {
-    // Temporarily remove category unit tests - new layout in progress
-    // it("renders all basic form fields", () => {
-    //   renderComponent();
+    it("renders all basic form fields", () => {
+      renderComponent();
 
-    //   expect(screen.getByDisplayValue("Test Recipe")).toBeInTheDocument();
-    //   const categorySelector = screen.getByPlaceholderText("Select category");
-    //   expect(categorySelector).toBeInTheDocument();
-    //   expect(categorySelector.value).toBe("Desserts");
-    //   expect(screen.getByDisplayValue("4")).toBeInTheDocument();
-    //   expect(
-    //     screen.getByDisplayValue("https://example.com")
-    //   ).toBeInTheDocument();
-    // });
+      expect(screen.getByDisplayValue("Test Recipe")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("4")).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue("https://example.com")
+      ).toBeInTheDocument();
+    });
 
-    // it("renders category options correctly", () => {
-    //   renderComponent();
+    it("renders title and servings on the same row", () => {
+      renderComponent();
 
-    //   const categorySelector = screen.getByPlaceholderText("Select category");
-    //   expect(categorySelector).toBeInTheDocument();
+      // Check that both title and servings headers are present
+      expect(screen.getByText("recipe_title")).toBeInTheDocument();
+      expect(screen.getByText("servings")).toBeInTheDocument();
+      
+      // Check that the inputs are rendered
+      expect(screen.getByDisplayValue("Test Recipe")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("4")).toBeInTheDocument();
+    });
 
-    //   // Focus on the selector to open the dropdown
-    //   fireEvent.focus(categorySelector);
+    it("renders category buttons correctly", () => {
+      renderComponent();
 
-    //   // Check that "all" category is filtered out and other options are available
-    //   expect(screen.queryByText("All Recipes")).not.toBeInTheDocument();
-    //   expect(screen.getByText("Desserts")).toBeInTheDocument();
-    //   expect(screen.getByText("Main Dishes")).toBeInTheDocument();
+      // Check that category buttons are rendered (excluding "all")
+      expect(screen.queryByText("All Recipes")).not.toBeInTheDocument();
+      expect(screen.getByText("Desserts")).toBeInTheDocument();
+      expect(screen.getByText("Main Dishes")).toBeInTheDocument();
 
-    //   // Ensure the selected value matches formData.category
-    //   expect(categorySelector.value).toBe("Desserts");
-    // });
+      // Check that the selected category has the correct class
+      const dessertsButton = screen.getByText("Desserts").closest("button");
+      const mainDishesButton = screen.getByText("Main Dishes").closest("button");
+      
+      expect(dessertsButton).toHaveClass("selected");
+      expect(mainDishesButton).not.toHaveClass("selected");
+    });
+
+    it("calls handleInputChange when category button is clicked", () => {
+      renderComponent();
+
+      const mainDishesButton = screen.getByText("Main Dishes").closest("button");
+      fireEvent.click(mainDishesButton);
+
+      expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
+        "category",
+        "main-dishes",
+        false
+      );
+    });
 
     it("shows validation errors when present", () => {
       useRecipeForm.mockReturnValue({
@@ -218,6 +237,19 @@ describe("RecipeForm", () => {
       const titleInput = screen.getByDisplayValue("Test Recipe");
       expect(titleInput).toHaveClass("input--error");
       expect(screen.getByText("Title is required")).toBeInTheDocument();
+    });
+
+    it("shows validation error styling on category buttons", () => {
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        validationErrors: { category: "Category is required" },
+      });
+
+      renderComponent();
+
+      const categoriesWrapper = screen.getByText("Desserts").closest(".categories-wrapper");
+      expect(categoriesWrapper).toHaveClass("input--error");
+      expect(screen.getByText("Category is required")).toBeInTheDocument();
     });
   });
 
@@ -551,8 +583,8 @@ describe("RecipeForm", () => {
     it("has proper form labels", () => {
       renderComponent();
 
-      expect(screen.getByLabelText("recipe_title")).toBeInTheDocument();
-      expect(screen.getByLabelText("category")).toBeInTheDocument();
+      expect(screen.getByText("recipe_title")).toBeInTheDocument();
+      expect(screen.getByText("category")).toBeInTheDocument();
       expect(screen.getByLabelText("servings")).toBeInTheDocument();
     });
 
