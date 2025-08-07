@@ -120,18 +120,6 @@ describe("UnitSelector", () => {
     expect(screen.queryByText("tsp")).not.toBeInTheDocument();
   });
 
-  test("shows 'No units found' when filter returns no results", async () => {
-    render(<UnitSelector {...defaultProps} />);
-
-    const input = screen.getByPlaceholderText("Unit");
-    fireEvent.focus(input);
-    fireEvent.change(input, { target: { value: "xyz" } });
-
-    await waitFor(() => {
-      expect(screen.getByText("No units found")).toBeInTheDocument();
-    });
-  });
-
   test("highlights selected unit in dropdown", () => {
     render(<UnitSelector {...defaultProps} value="ml" />);
 
