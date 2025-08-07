@@ -14,9 +14,27 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+const mockUnits = [
+  { "value": "", "label": "Unit", "pluralize": true },
+  { "value": "tsp", "label": "tsp", "pluralize": true },
+  { "value": "tbsp", "label": "tbsp", "pluralize": true },
+  { "value": "cup/s", "label": "cup/s", "pluralize": true },
+  { "value": "cup", "label": "cup", "pluralize": true },
+  { "value": "cups", "label": "cups", "pluralize": true },
+  { "value": "ml", "label": "ml", "pluralize": false },
+  { "value": "g", "label": "g", "pluralize": false },
+  { "value": "can/s", "label": "can/s", "pluralize": true },
+  { "value": "piece/s", "label": "piece/s", "pluralize": true },
+];
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key) => key,
+    t: (key, options) => {
+      if (key === "units" && options?.returnObjects) {
+        return mockUnits;
+      }
+      return key;
+    },
   }),
 }));
 

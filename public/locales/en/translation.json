@@ -60,16 +60,17 @@
   "source_link_or_note": "Source link or note",
 
   "units": [
-    { "value": "", "label": "Unit" },
-    { "value": "tsp", "label": "tsp" },
-    { "value": "tbsp", "label": "tbsp" },
-    { "value": "cup/s", "label": "cup/s" },
-    { "value": "ml", "label": "ml" },
-    { "value": "l", "label": "l" },
-    { "value": "g", "label": "g" },
-    { "value": "kg", "label": "kg" },
-    { "value": "can/s", "label": "can/s" },
-    { "value": "piece/s", "label": "piece/s" }
+    { "value": "", "label": "Unit", "pluralize": true },
+    { "value": "tsp", "label": "tsp", "pluralize": true },
+    { "value": "tbsp", "label": "tbsp", "pluralize": true },
+    { "value": "cup/s", "label": "cup/s", "pluralize": true },
+    { "value": "ml", "label": "ml", "pluralize": false },
+    { "value": "l", "label": "l", "pluralize": false },
+    { "value": "g", "label": "g", "pluralize": false },
+    { "value": "kg", "label": "kg", "pluralize": false },
+    { "value": "can/s", "label": "can/s", "pluralize": true },
+    { "value": "piece/s", "label": "piece/s", "pluralize": true },
+    { "value": "pinch/es", "label": "pinch/es", "pluralize": true }
   ],
 
   "recipe_delete_confirmation": "Are you sure you want to delete this recipe?",
@@ -88,6 +89,7 @@
 
   "ingredient_name": "Ingredient name",
   "quantity": "Qty",
+  "unit": "Unit",
   "notes": "Notes",
   "subheading": "Subheading",
   "ingredient_subheading": "Ingredient subheading (optional)",

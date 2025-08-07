@@ -22,6 +22,10 @@
   --z-header: 100;
   --z-modal: 1000;
 
+  --border-radius: 0.5rem;
+  --border-width: 0.0625rem;
+  --border-width-thick: 0.1rem;
+
   /* --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;

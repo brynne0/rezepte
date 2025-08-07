@@ -18,7 +18,7 @@ const PasswordInput = ({
   };
 
   return (
-    <div className="password-input-wrapper">
+    <div className="relative-center">
       <input
         id={id}
         type={showPassword ? "text" : "password"}

@@ -20,6 +20,15 @@ const Recipe = () => {
   const getUnitDisplay = (unit, quantity) => {
     if (!unit) return "";
     
+    // Get units array to check pluralize flag
+    const units = t("units", { returnObjects: true });
+    const unitData = units.find(u => u.value === unit);
+    
+    // If unit has pluralize: false, don't pluralize
+    if (unitData && !unitData.pluralize) {
+      return unit;
+    }
+    
     // Handle singular/plural forms - convert "piece/s" to "piece" or "pieces"
     if (unit.includes("/")) {
       const [singular, pluralSuffix] = unit.split("/");

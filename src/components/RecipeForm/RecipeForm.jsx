@@ -6,6 +6,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
+import UnitSelector from "../UnitSelector/UnitSelector";
 import "./RecipeForm.css";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
@@ -269,28 +270,18 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                         onWheel={(e) => e.target.blur()}
                                       />
 
-                                      <select
+                                      <UnitSelector
                                         id={`ingredient-unit-ungrouped-${index}-${ingredient.tempId}`}
                                         value={ingredient.unit || ""}
-                                        onChange={(e) =>
+                                        onChange={(value) =>
                                           handleIngredientChange(
                                             "ungrouped",
                                             ingredient.tempId,
                                             "unit",
-                                            e.target.value
+                                            value
                                           )
                                         }
-                                        className="input input--full-width input--select input--edit"
-                                      >
-                                        {units.map((unit) => (
-                                          <option
-                                            key={unit.value}
-                                            value={unit.value}
-                                          >
-                                            {unit.label}
-                                          </option>
-                                        ))}
-                                      </select>
+                                      />
 
                                       <input
                                         id={`ingredient-notes-ungrouped-${index}-${ingredient.tempId}`}

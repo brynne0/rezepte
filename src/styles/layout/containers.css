@@ -62,6 +62,12 @@
   align-items: center;
 }
 
+.relative-center {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 /* Form wrappers */
 .form-group {
   margin-bottom: 1rem;
@@ -105,12 +111,6 @@
   flex-direction: column;
   gap: 0.25rem;
   min-width: 15rem;
-}
-
-.password-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
 }
 
 /* Subheading wrappers */

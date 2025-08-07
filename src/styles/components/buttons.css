@@ -4,7 +4,7 @@
   font-family: inherit;
   cursor: pointer;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -16,7 +16,7 @@
   padding: 0.5rem;
   background: var(--cream_opaque);
   color: var(--dark_brown);
-  border: 0.0625rem solid var(--brown);
+  border: var(--border-width) solid var(--brown);
   box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
 }
 
@@ -47,7 +47,7 @@
 
 .btn-secondary {
   color: var(--brown);
-  border: 0.1rem dotted var(--brown);
+  border: var(--border-width-thick) dotted var(--brown);
   padding: 0.5rem;
   background: var(--cream_opaque);
 }
@@ -61,7 +61,7 @@
 .btn-danger {
   background: white;
   color: var(--red);
-  border: 0.1rem solid var(--red);
+  border: var(--border-width-thick) solid var(--red);
 }
 
 .btn-danger:hover {
@@ -75,7 +75,7 @@
   padding: 0.5rem;
   background: none;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
 }
 
 .btn-icon-neutral {
@@ -84,7 +84,7 @@
 
 .btn-icon-neutral:hover {
   background: var(--cream_opaque);
-  border-radius: 50%;
+  border-radius: var(--border-radius);
 }
 
 .btn-icon-success {
@@ -94,7 +94,7 @@
 .btn-icon-red {
   background: none;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   color: var(--dark_red);
 }
 
@@ -127,11 +127,11 @@
 }
 
 /* Add section buttons */
-.btn-add-section-dottes {
+.btn-add-section-dotted {
   padding: 0.375rem 0.75rem;
   background: transparent;
   color: var(--brown);
-  border: 0.0625rem dashed var(--brown);
+  border: var(--border-width) dashed var(--brown);
   font-size: 0.9rem;
   font-weight: 500;
   gap: 0.375rem;

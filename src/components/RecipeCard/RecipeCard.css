@@ -1,8 +1,8 @@
 .recipe-card {
-  border: 0.0625rem solid var(--brown);
+  border: var(--border-width) solid var(--brown);
   display: flex;
   flex-direction: column;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   background-color: var(--cream_opaque);
   box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
   overflow: hidden;

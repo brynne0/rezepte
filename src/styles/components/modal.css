@@ -14,7 +14,7 @@
 
 .confirmation-modal-content {
   background: white;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   padding: 1.5rem;
   box-shadow: 0 1rem 3rem var(--shadow_black);
   max-width: 90vw;

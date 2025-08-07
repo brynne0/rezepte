@@ -1,12 +1,12 @@
 /* Base input styles - all inputs inherit from this */
 .input {
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   font-size: 1rem;
   font-family: inherit;
   color: var(--dark_brown);
   background: white;
-  border: 0.0625rem solid var(--dark_brown);
+  border: var(--border-width) solid var(--dark_brown);
   transition: all 0.2s ease;
   box-sizing: border-box;
   min-width: 0;
@@ -35,7 +35,7 @@
 
 .input--edit {
   box-shadow: 0 0.0625rem 0.1rem var(--shadow_black);
-  border: 0.0625rem dashed var(--cream);
+  border: var(--border-width) dashed var(--cream);
 }
 
 .input--full-width {
@@ -54,6 +54,7 @@
 }
 
 /* Select dropdown styling */
+/* TODO - remove this style once unitselector is implemented */
 .input--select {
   appearance: none;
   -webkit-appearance: none;

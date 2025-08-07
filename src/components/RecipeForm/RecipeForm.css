@@ -21,7 +21,7 @@
 }
 
 .ingredient-section {
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   transition: all 0.2s ease;
 }
 
@@ -35,10 +35,9 @@
   grid-template-columns: auto 2fr 1fr 1fr 2fr auto;
   gap: 0.5rem;
   align-items: center;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   transition: all 0.2s ease;
   max-width: 100%;
-  overflow: hidden;
 }
 
 .ingredient-content {

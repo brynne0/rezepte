@@ -60,16 +60,17 @@
   "source_link_or_note": "Quellenlink oder Hinweis",
 
   "units": [
-    { "value": "", "label": "Einheit" },
-    { "value": "tsp", "label": "TL" },
-    { "value": "tbsp", "label": "EL" },
-    { "value": "cup/s", "label": "Tasse/n" },
-    { "value": "ml", "label": "ml" },
-    { "value": "l", "label": "l" },
-    { "value": "g", "label": "g" },
-    { "value": "kg", "label": "kg" },
-    { "value": "can/s", "label": "Dose/n" },
-    { "value": "piece/s", "label": "Stück/e" }
+    { "value": "", "label": "Einheit", "pluralize": true },
+    { "value": "tsp", "label": "TL", "pluralize": true },
+    { "value": "tbsp", "label": "EL", "pluralize": true },
+    { "value": "cup/s", "label": "Tasse/n", "pluralize": true },
+    { "value": "ml", "label": "ml", "pluralize": false },
+    { "value": "l", "label": "l", "pluralize": false },
+    { "value": "g", "label": "g", "pluralize": false },
+    { "value": "kg", "label": "kg", "pluralize": false },
+    { "value": "can/s", "label": "Dose/n", "pluralize": true },
+    { "value": "piece/s", "label": "Stück/e", "pluralize": true },
+    { "value": "pinch/es", "label": "Prise/n", "pluralize": true }
   ],
 
   "recipe_delete_confirmation": "Möchten Sie dieses Rezept wirklich löschen?",
@@ -88,6 +89,7 @@
 
   "ingredient_name": "Name der Zutat",
   "quantity": "Menge",
+  "unit": "Einheit",
   "notes": "Notizen",
   "subheading": "Zwischenüberschrift",
   "ingredient_subheading": "Zutaten-Zwischenüberschrift (optional)",

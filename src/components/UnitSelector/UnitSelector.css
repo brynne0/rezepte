@@ -1,0 +1,58 @@
+.unit-selector {
+  position: relative;
+  width: 100%;
+}
+
+.unit-selector-input {
+  padding-right: 1rem !important; /* Make room for chevron */
+}
+
+.unit-selector-chevron {
+  position: absolute;
+  right: 0.5rem;
+  color: var(--dark_brown);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.unit-selector-chevron {
+  pointer-events: auto;
+}
+
+.unit-selector-chevron.open {
+  transform: rotate(180deg);
+}
+
+.unit-selector-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: var(--border-width) dashed var(--red);
+  border-top: none;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: var(--z-dropdown);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.unit-selector-option {
+  padding: 0.1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.unit-selector-option:hover,
+.unit-selector-option.selected {
+  color: var(--red);
+  font-weight: 500;
+}
+
+/* Remove input box bottom radius when selected */
+.unit-selector-input:focus {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
