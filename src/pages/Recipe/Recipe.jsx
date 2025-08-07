@@ -16,26 +16,31 @@ const Recipe = () => {
   const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
 
-  // Helper function to pluralize units
+  // Helper function to get unit display with translation and smart fallback
   const getUnitDisplay = (unit, quantity) => {
     if (!unit) return "";
 
-    // Get units array to check pluralize flag
+    // Get units array to check translation and pluralize flag
     const units = t("units", { returnObjects: true });
-    const unitData = units.find((u) => u.value === unit);
 
-    // If unit has pluralize: false, don't pluralize
-    if (unitData && !unitData.pluralize) {
-      return unit;
+    // Find the unit object in the units array - try exact match first
+    let unitObj = units?.find((u) => u.value === unit);
+    
+    // If no exact match, try common pluralized forms
+    if (!unitObj) {
+      unitObj = units?.find((u) => u.value === unit + "/s") ||
+               units?.find((u) => u.value === unit + "/es");
     }
+    
+    const translated = unitObj?.label || unit;
 
-    // Handle singular/plural forms - convert "piece/s" to "piece" or "pieces"
-    if (unit.includes("/")) {
-      const [singular, pluralSuffix] = unit.split("/");
+    // Simple fallback for singular/plural
+    if (translated.includes("/")) {
+      const [singular, pluralSuffix] = translated.split("/");
       return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
     }
 
-    return unit;
+    return translated;
   };
 
   // Helper function to get the correct ingredient name (singular vs plural)
