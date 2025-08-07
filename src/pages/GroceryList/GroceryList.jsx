@@ -10,7 +10,7 @@ import AutoResizeTextArea from "../../components/AutoResizeTextArea/AutoResizeTe
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
-import UnitSelector from "../../components/UnitSelector/UnitSelector";
+import Selector from "../../components/Selector/Selector";
 
 const GroceryList = ({
   isEditing: propIsEditing,
@@ -268,12 +268,13 @@ const GroceryList = ({
                           )
                         }
                       />
-                      <UnitSelector
+                      <Selector
                         id={`item-unit-${itemId}`}
                         value={item.unit || ""}
                         onChange={(unitValue) =>
                           handleInputChange(index, "unit", unitValue)
                         }
+                        type="unit"
                         className="input--full-width"
                       />
 

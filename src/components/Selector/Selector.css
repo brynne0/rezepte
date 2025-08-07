@@ -1,13 +1,13 @@
-.unit-selector {
+.selector {
   position: relative;
   width: 100%;
 }
 
-.unit-selector-input {
+.selector-input {
   padding-right: 1rem !important; /* Make room for chevron */
 }
 
-.unit-selector-chevron {
+.selector-chevron {
   position: absolute;
   right: 0.5rem;
   color: var(--dark_brown);
@@ -16,15 +16,15 @@
   pointer-events: none;
 }
 
-.unit-selector-chevron {
+.selector-chevron {
   pointer-events: auto;
 }
 
-.unit-selector-chevron.open {
+.selector-chevron.open {
   transform: rotate(180deg);
 }
 
-.unit-selector-dropdown {
+.selector-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -39,20 +39,20 @@
   overflow-y: auto;
 }
 
-.unit-selector-option {
+.selector-option {
   padding: 0.1rem;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
-.unit-selector-option:hover,
-.unit-selector-option.selected {
+.selector-option:hover,
+.selector-option.selected {
   color: var(--red);
   font-weight: 500;
 }
 
 /* Remove input box bottom radius when selected */
-.unit-selector-input:focus {
+.selector-input:focus {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }

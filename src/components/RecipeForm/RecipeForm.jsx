@@ -6,7 +6,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
-import UnitSelector from "../UnitSelector/UnitSelector";
+import Selector from "../Selector/Selector";
 import "./RecipeForm.css";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
@@ -113,31 +113,22 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             <h3>{t("category")}</h3>
           </label>
 
-          <select
+          <Selector
             id="category"
             value={formData.category}
-            onChange={(e) =>
+            onChange={(categoryValue) =>
               handleInputChange(
                 "category",
-                e.target.value,
+                categoryValue,
                 !!validationErrors.category
               )
             }
-            className={`input--full-width input--edit input--select input ${
+            options={categories}
+            type="category"
+            className={`selector--fit-content ${
               validationErrors.category ? "input--error" : ""
             }`}
-          >
-            <option value="" disabled>
-              {t("select_category")}
-            </option>
-            {categories
-              ?.filter((cat) => cat.value.toLowerCase() !== "all")
-              .map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label || cat.value}
-                </option>
-              ))}
-          </select>
+          />
           {validationErrors.category && (
             <span className="error-message-small">
               {validationErrors.category}
@@ -269,7 +260,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                         onWheel={(e) => e.target.blur()}
                                       />
 
-                                      <UnitSelector
+                                      <Selector
                                         id={`ingredient-unit-ungrouped-${index}-${ingredient.tempId}`}
                                         value={ingredient.unit || ""}
                                         onChange={(value) =>
@@ -280,6 +271,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                             value
                                           )
                                         }
+                                        type="unit"
                                         className="input--full-width"
                                       />
 
@@ -510,7 +502,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                         }
                                                       />
 
-                                                      <UnitSelector
+                                                      <Selector
                                                         id={`ingredient-unit-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                                         value={
                                                           ingredient.unit || ""
@@ -523,6 +515,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                             unitValue
                                                           )
                                                         }
+                                                        type="unit"
                                                         className="input--full-width"
                                                       />
 
