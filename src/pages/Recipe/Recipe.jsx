@@ -7,6 +7,7 @@ import { useRecipe } from "../../hooks/data/useRecipe";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import { formatQuantity } from "../../utils/fractionUtils";
 
 const Recipe = () => {
   const { id } = useParams();
@@ -197,7 +198,7 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-ungrouped-${index}-${ingredient.id}`}
                     >
-                      {ingredient.quantity && `${ingredient.quantity} `}
+                      {ingredient.quantity && `${formatQuantity(ingredient.quantity)} `}
                       {ingredient.unit && `${getUnitDisplay(ingredient.unit, ingredient.quantity)} `}
                       {`${getIngredientDisplayName(ingredient)} `}
                       {ingredient.notes && `${ingredient.notes} `}
@@ -238,7 +239,7 @@ const Recipe = () => {
                             <label
                               htmlFor={`ingredient-section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
                             >
-                              {ingredient.quantity && `${ingredient.quantity} `}
+                              {ingredient.quantity && `${formatQuantity(ingredient.quantity)} `}
                               {ingredient.unit && `${ingredient.unit} `}
                               {`${getIngredientDisplayName(ingredient)} `}
                               {ingredient.notes && `${ingredient.notes} `}
@@ -277,7 +278,7 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-flat-${index}-${ingredient.id}`}
                     >
-                      {ingredient.quantity && `${ingredient.quantity} `}
+                      {ingredient.quantity && `${formatQuantity(ingredient.quantity)} `}
                       {ingredient.unit && `${getUnitDisplay(ingredient.unit, ingredient.quantity)} `}
                       {`${getIngredientDisplayName(ingredient)} `}
                       {ingredient.notes && `${ingredient.notes} `}

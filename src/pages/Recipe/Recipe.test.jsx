@@ -358,7 +358,7 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText("For the base")).toBeInTheDocument();
       expect(screen.getByText("For the filling")).toBeInTheDocument();
-      expect(screen.getByText(/1.5 cup almonds/)).toBeInTheDocument();
+      expect(screen.getByText(/1 1\/2 cup almonds/)).toBeInTheDocument();
       expect(screen.getByText(/1 lime/)).toBeInTheDocument();
     });
 
@@ -752,6 +752,89 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText(/2 Mehl gesiebt/)).toBeInTheDocument();
+    });
+  });
+
+  describe("Fraction Display", () => {
+    test("displays common fractions instead of decimals", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "0.25",
+            unit: "cup",
+            singular_name: "flour",
+            plural_name: "flours",
+          },
+          {
+            id: "ing-2",
+            recipe_ingredient_id: "ri-2",
+            quantity: "1.5",
+            unit: "tsp",
+            singular_name: "salt",
+            plural_name: "salts",
+          },
+          {
+            id: "ing-3",
+            recipe_ingredient_id: "ri-3",
+            quantity: "0.75",
+            unit: "cup",
+            singular_name: "sugar",
+            plural_name: "sugars",
+          },
+        ],
+      };
+      renderRecipe();
+
+      // Should display as fractions, not decimals
+      expect(screen.getByText(/1\/4 cup flours/)).toBeInTheDocument();
+      expect(screen.getByText(/1 1\/2 tsp salts/)).toBeInTheDocument();
+      expect(screen.getByText(/3\/4 cup sugars/)).toBeInTheDocument();
+
+      // Should NOT display decimals
+      expect(screen.queryByText(/0\.25/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/1\.5/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/0\.75/)).not.toBeInTheDocument();
+    });
+
+    test("displays whole numbers without fractions", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "2",
+            unit: "cups",
+            singular_name: "flour",
+            plural_name: "flours",
+          },
+        ],
+      };
+      renderRecipe();
+
+      expect(screen.getByText(/2 cups flours/)).toBeInTheDocument();
+    });
+
+    test("displays uncommon decimals as decimals", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "1.23",
+            unit: "cup",
+            singular_name: "flour",
+            plural_name: "flours",
+          },
+        ],
+      };
+      renderRecipe();
+
+      expect(screen.getByText(/1\.23 cup flours/)).toBeInTheDocument();
     });
   });
 

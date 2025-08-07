@@ -6,6 +6,7 @@ import {
   validateRecipeForm,
   validateRecipeTitleUnique,
 } from "../../utils/validation";
+import { parseFraction } from "../../utils/fractionUtils";
 
 export const useRecipeForm = ({ initialRecipe = null }) => {
   const { t, i18n } = useTranslation();
@@ -184,13 +185,16 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     value,
     clearError
   ) => {
+    // Parse fractions to decimals for quantity field
+    const processedValue = field === "quantity" ? parseFraction(value) : value;
+
     if (sectionId === "ungrouped") {
       // Handle ungrouped ingredients
       setFormData((prev) => ({
         ...prev,
         ungroupedIngredients: prev.ungroupedIngredients.map((ingredient) =>
           ingredient.tempId === tempId
-            ? { ...ingredient, [field]: value }
+            ? { ...ingredient, [field]: processedValue }
             : ingredient
         ),
       }));
@@ -204,7 +208,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
                 ...section,
                 ingredients: section.ingredients.map((ingredient) =>
                   ingredient.tempId === tempId
-                    ? { ...ingredient, [field]: value }
+                    ? { ...ingredient, [field]: processedValue }
                     : ingredient
                 ),
               }

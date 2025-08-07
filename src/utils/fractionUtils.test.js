@@ -1,0 +1,129 @@
+import { describe, test, expect } from "vitest";
+import { parseFraction, formatQuantity } from "./fractionUtils";
+
+describe("fractionUtils", () => {
+  describe("parseFraction", () => {
+    test("handles empty/null values", () => {
+      expect(parseFraction("")).toBe("");
+      expect(parseFraction(null)).toBe("");
+      expect(parseFraction(undefined)).toBe("");
+      expect(parseFraction(0)).toBe(0);
+    });
+
+    test("parses decimal numbers", () => {
+      expect(parseFraction("0.25")).toBe(0.25);
+      expect(parseFraction("1.5")).toBe(1.5);
+      expect(parseFraction("2")).toBe(2);
+      expect(parseFraction(3.14)).toBe(3.14);
+    });
+
+    test("parses simple fractions", () => {
+      expect(parseFraction("1/4")).toBe(0.25);
+      expect(parseFraction("1/2")).toBe(0.5);
+      expect(parseFraction("3/4")).toBe(0.75);
+      expect(parseFraction("1/3")).toBeCloseTo(0.333, 2);
+      expect(parseFraction("2/3")).toBeCloseTo(0.667, 2);
+    });
+
+    test("parses mixed fractions", () => {
+      expect(parseFraction("1 1/4")).toBe(1.25);
+      expect(parseFraction("2 1/2")).toBe(2.5);
+      expect(parseFraction("3 3/4")).toBe(3.75);
+      expect(parseFraction("1 1/3")).toBeCloseTo(1.333, 2);
+    });
+
+    test("handles invalid input gracefully", () => {
+      expect(parseFraction("invalid")).toBe("invalid");
+      expect(parseFraction("1/")).toBe("1/");
+      expect(parseFraction("/4")).toBe("/4");
+      expect(parseFraction("a/b")).toBe("a/b");
+    });
+
+    test("handles whitespace", () => {
+      expect(parseFraction("  1/4  ")).toBe(0.25);
+      expect(parseFraction(" 1 1/2 ")).toBe(1.5);
+    });
+  });
+
+  describe("formatQuantity", () => {
+    test("handles empty/null values", () => {
+      expect(formatQuantity("")).toBe("");
+      expect(formatQuantity(null)).toBe("");
+      expect(formatQuantity(undefined)).toBe("");
+      expect(formatQuantity(0)).toBe("0");
+    });
+
+    test("formats common fractions", () => {
+      expect(formatQuantity(0.25)).toBe("1/4");
+      expect(formatQuantity(0.5)).toBe("1/2");
+      expect(formatQuantity(0.75)).toBe("3/4");
+      expect(formatQuantity(0.33)).toBe("1/3");
+      expect(formatQuantity(0.333)).toBe("1/3");
+      expect(formatQuantity(0.67)).toBe("2/3");
+      expect(formatQuantity(0.667)).toBe("2/3");
+    });
+
+    test("formats mixed fractions", () => {
+      expect(formatQuantity(1.25)).toBe("1 1/4");
+      expect(formatQuantity(1.5)).toBe("1 1/2");
+      expect(formatQuantity(2.75)).toBe("2 3/4");
+      expect(formatQuantity(3.33)).toBe("3 1/3");
+      expect(formatQuantity(3.333)).toBe("3 1/3");
+    });
+
+    test("handles whole numbers", () => {
+      expect(formatQuantity(1)).toBe("1");
+      expect(formatQuantity(2)).toBe("2");
+      expect(formatQuantity(10)).toBe("10");
+    });
+
+    test("handles uncommon decimals", () => {
+      expect(formatQuantity(0.1)).toBe("0.1");
+      expect(formatQuantity(0.7)).toBe("0.7");
+      expect(formatQuantity(1.23)).toBe("1.23");
+      expect(formatQuantity(3.14159)).toBe("3.14159");
+    });
+
+    test("handles floating point precision", () => {
+      // Test values that are close to common fractions due to floating point precision
+      expect(formatQuantity(0.2499999)).toBe("1/4");
+      expect(formatQuantity(0.5000001)).toBe("1/2");
+      expect(formatQuantity(1.2499999)).toBe("1 1/4");
+    });
+
+    test("handles string input", () => {
+      expect(formatQuantity("0.25")).toBe("1/4");
+      expect(formatQuantity("1.5")).toBe("1 1/2");
+      expect(formatQuantity("2")).toBe("2");
+    });
+  });
+
+  describe("integration tests", () => {
+    test("parse then format returns readable fractions", () => {
+      // Test the full cycle: user types fraction → parsed to decimal → formatted back to fraction
+      const testCases = [
+        { input: "1/4", expected: "1/4" },
+        { input: "1/2", expected: "1/2" },
+        { input: "3/4", expected: "3/4" },
+        { input: "1 1/4", expected: "1 1/4" },
+        { input: "2 1/2", expected: "2 1/2" },
+        { input: "0.25", expected: "1/4" },
+        { input: "1.5", expected: "1 1/2" },
+        { input: "2", expected: "2" }
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        const parsed = parseFraction(input);
+        const formatted = formatQuantity(parsed);
+        expect(formatted).toBe(expected);
+      });
+    });
+
+    test("handles uncommon fractions gracefully", () => {
+      // Test fractions that don't have common equivalents
+      const parsed = parseFraction("1/7"); // ≈ 0.143
+      const formatted = formatQuantity(parsed);
+      expect(formatted).toBe(parsed.toString()); // Should show the decimal
+    });
+  });
+});

@@ -254,9 +254,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                     <div className="ingredient-details">
                                       <input
                                         id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
+                                        type="text"
                                         value={ingredient.quantity || ""}
                                         onChange={(e) =>
                                           handleIngredientChange(
