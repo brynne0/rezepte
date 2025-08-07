@@ -110,7 +110,6 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         source: initialRecipe.source || "",
         ungroupedIngredients: ungroupedIngredients,
         ingredientSections: ingredientSections,
-        link_only: initialRecipe.link_only,
         notes: initialRecipe.notes,
       };
     }
@@ -132,7 +131,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         },
       ],
       ingredientSections: [],
-      link_only: false,
+
       notes: "",
     };
   }, [initialRecipe]);
@@ -613,7 +612,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
             notes: ing.notes.trim() || null,
           })),
         })),
-        link_only: formData.link_only,
+
         notes: formData.notes,
       };
 

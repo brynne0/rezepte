@@ -57,7 +57,9 @@
   "instructions": "Instructions",
   "source": "Source",
   "source_link": "Source link",
-  "source_link_or_note": "Source link or note",
+  "source_note": "Source note",
+  "switch_to_link": "Switch to link",
+  "switch_to_note": "Switch to note",
 
   "units": [
     { "value": "", "label": "-", "pluralize": true },
@@ -84,8 +86,6 @@
   "recipe_title": "Recipe Title",
   "category": "Category",
   "select_category": "Select a Category",
-  "full_recipe": "Full Recipe",
-  "link_only": "Link Only",
 
   "ingredient_name": "Ingredient name",
   "quantity": "Qty",

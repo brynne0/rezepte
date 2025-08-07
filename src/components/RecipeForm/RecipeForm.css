@@ -85,21 +85,36 @@
 
 /* Instructions */
 .instructions-list {
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .instruction-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-items: stretch;
 }
 
 .step-number {
   font-weight: 600;
-  color: var(--brown);
-  font-size: 1rem;
-  margin-top: 0.25rem;
+  margin: 0.25rem;
+}
+
+/* Source */
+.source-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.source-toggle {
+  flex-shrink: 0;
+  color: var(--dark-brown);
+  transition: color 0.2s ease;
+}
+
+.source-toggle:hover {
+  color: var(--red);
 }
 
 /* Responsive */
@@ -130,12 +145,12 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 
   .ingredient-details {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.25rem;
     align-items: center;
   }
 }

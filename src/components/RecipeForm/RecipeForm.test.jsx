@@ -105,7 +105,6 @@ describe("RecipeForm", () => {
     instructions: ["Mix ingredients", "Bake for 30 minutes"],
     source: "https://example.com",
     notes: "Test notes",
-    link_only: false,
   };
 
   const mockHookReturn = {
@@ -153,25 +152,6 @@ describe("RecipeForm", () => {
       expect(screen.getByText("Create Recipe")).toBeInTheDocument();
       expect(screen.getByRole("form")).toBeInTheDocument();
     });
-
-    it("renders recipe type toggle buttons", () => {
-      renderComponent();
-
-      expect(screen.getByText("full_recipe")).toBeInTheDocument();
-      expect(screen.getByText("link_only")).toBeInTheDocument();
-    });
-
-    it("shows selected state for full recipe by default", () => {
-      renderComponent();
-
-      const fullRecipeButton = screen
-        .getByText("full_recipe")
-        .closest("button");
-      const linkOnlyButton = screen.getByText("link_only").closest("button");
-
-      expect(fullRecipeButton).toHaveClass("selected");
-      expect(linkOnlyButton).not.toHaveClass("selected");
-    });
   });
 
   describe("Form Fields", () => {
@@ -191,7 +171,7 @@ describe("RecipeForm", () => {
       // Check that both title and servings headers are present
       expect(screen.getByText("recipe_title")).toBeInTheDocument();
       expect(screen.getByText("servings")).toBeInTheDocument();
-      
+
       // Check that the inputs are rendered
       expect(screen.getByDisplayValue("Test Recipe")).toBeInTheDocument();
       expect(screen.getByDisplayValue("4")).toBeInTheDocument();
@@ -207,8 +187,10 @@ describe("RecipeForm", () => {
 
       // Check that the selected category has the correct class
       const dessertsButton = screen.getByText("Desserts").closest("button");
-      const mainDishesButton = screen.getByText("Main Dishes").closest("button");
-      
+      const mainDishesButton = screen
+        .getByText("Main Dishes")
+        .closest("button");
+
       expect(dessertsButton).toHaveClass("selected");
       expect(mainDishesButton).not.toHaveClass("selected");
     });
@@ -216,7 +198,9 @@ describe("RecipeForm", () => {
     it("calls handleInputChange when category button is clicked", () => {
       renderComponent();
 
-      const mainDishesButton = screen.getByText("Main Dishes").closest("button");
+      const mainDishesButton = screen
+        .getByText("Main Dishes")
+        .closest("button");
       fireEvent.click(mainDishesButton);
 
       expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
@@ -247,36 +231,35 @@ describe("RecipeForm", () => {
 
       renderComponent();
 
-      const categoriesWrapper = screen.getByText("Desserts").closest(".categories-wrapper");
+      const categoriesWrapper = screen
+        .getByText("Desserts")
+        .closest(".categories-wrapper");
       expect(categoriesWrapper).toHaveClass("input--error");
       expect(screen.getByText("Category is required")).toBeInTheDocument();
     });
-  });
 
-  describe("Recipe Type Toggle", () => {
-    it("calls handleInputChange when switching to link only", () => {
+    it("renders source input with toggle button", () => {
       renderComponent();
 
-      const linkOnlyButton = screen.getByText("link_only").closest("button");
-      fireEvent.click(linkOnlyButton);
-
-      expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
-        "link_only",
-        true
-      );
+      expect(
+        screen.getByDisplayValue("https://example.com")
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/switch_to/)).toBeInTheDocument(); // toggle button
     });
 
-    it("hides ingredients and instructions for link-only recipes", () => {
-      useRecipeForm.mockReturnValue({
-        ...mockHookReturn,
-        formData: { ...mockFormData, link_only: true },
-      });
-
+    it("source toggle button changes placeholder", () => {
       renderComponent();
 
-      expect(screen.queryByText("ingredients")).not.toBeInTheDocument();
-      expect(screen.queryByText("instructions")).not.toBeInTheDocument();
-      expect(screen.queryByText("servings")).not.toBeInTheDocument();
+      const toggleButton = screen.getByLabelText(/switch_to/);
+      const sourceInput = screen.getByDisplayValue("https://example.com");
+
+      // Initially should be in link mode
+      expect(sourceInput).toHaveAttribute("placeholder", "source_link");
+
+      // Click toggle to switch to note mode
+      fireEvent.click(toggleButton);
+
+      expect(sourceInput).toHaveAttribute("placeholder", "source_note");
     });
   });
 
@@ -604,7 +587,6 @@ describe("RecipeForm", () => {
           ungroupedIngredients: [],
           ingredientSections: [],
           instructions: [],
-          link_only: false,
         },
       });
 
