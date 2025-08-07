@@ -14,7 +14,7 @@
 /* Standard button */
 .btn-standard {
   padding: 0.5rem;
-  background: var(--cream_opaque);
+  background: var(--cream_light);
   color: var(--dark_brown);
   border: var(--border-width) solid var(--brown);
   box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
@@ -49,7 +49,7 @@
   color: var(--brown);
   border: var(--border-width-thick) dotted var(--brown);
   padding: 0.5rem;
-  background: var(--cream_opaque);
+  background: var(--cream_light);
 }
 
 .btn-secondary:hover {
@@ -83,7 +83,7 @@
 }
 
 .btn-icon-neutral:hover {
-  background: var(--cream_opaque);
+  background: var(--cream_light);
   border-radius: var(--border-radius);
 }
 
@@ -127,7 +127,7 @@
 }
 
 /* Add section buttons */
-.btn-add-section-dotted {
+.btn-section-dotted {
   padding: 0.375rem 0.75rem;
   background: transparent;
   color: var(--brown);
@@ -137,22 +137,21 @@
   gap: 0.375rem;
 }
 
-.btn-add-section-dotted:hover {
-  background: var(--cream_opaque);
+.btn-section-dotted:hover {
+  background: var(--cream_light);
   border-style: solid;
 }
 
-.btn-add-section {
-  background: rgba(var(--brown-rgb), 0.1);
-  color: var(--brown);
+.btn-section {
+  background: none;
+  color: var(--dark_brown);
   border: none;
   font-weight: 500;
   font-size: 0.9rem;
 }
 
-.btn-add-section:hover {
-  background: rgba(var(--brown-rgb), 0.2);
-  color: var(--dark_brown);
+.btn-section:hover {
+  color: var(--brown);
 }
 
 /* Responsive design */
@@ -166,8 +165,7 @@
     left: 1.25rem;
   }
 
-  .btn-add-section,
-  .btn-add-section {
+  .btn-section {
     padding: 0.375rem 0.625rem;
   }
 }

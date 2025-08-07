@@ -26,7 +26,7 @@
 
 /* Category styling */
 .recipe-form .categories-wrapper {
-  padding-bottom: 0;
+  padding: 0.5rem;
 }
 
 .section-title-input {
@@ -46,8 +46,9 @@
   transition: all 0.2s ease;
 }
 
-.ingredient-section.dragging {
-  padding: 0.5rem;
+.ingredient-section.dragging,
+.ingredient-row.dragging {
+  background-color: var(--cream_light);
 }
 
 /* Ingredient rows */

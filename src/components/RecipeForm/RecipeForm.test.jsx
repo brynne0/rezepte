@@ -439,9 +439,9 @@ describe("RecipeForm", () => {
       // Ensure section is rendered
       expect(screen.getByDisplayValue("Sauce")).toBeInTheDocument();
 
-      // Find the section remove button using the correct data-testid
-      const removeButtons = screen.getAllByTestId("remove-section-btn"); // Updated data-testid
-      fireEvent.click(removeButtons[0]); // First remove button should be for removing the section
+      // Find the section remove button
+      const removeSectionButton = screen.getByText("remove_section");
+      fireEvent.click(removeSectionButton); // First remove button should be for removing the section
 
       expect(mockHookReturn.removeSection).toHaveBeenCalledWith("section-1");
     });

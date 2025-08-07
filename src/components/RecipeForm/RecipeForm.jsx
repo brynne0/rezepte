@@ -195,8 +195,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               <button
                 type="button"
                 onClick={addSection}
-                // TODO - change button style
-                className="btn btn-add-section"
+                className="btn btn-section"
               >
                 {t("add_section")}
               </button>
@@ -416,13 +415,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                   <button
                                     type="button"
                                     onClick={() => removeSection(section.id)}
-                                    className="btn btn-icon btn-icon-remove"
-                                    aria-label={t("remove_section")}
+                                    className="btn btn-section"
                                   >
-                                    <Trash2
-                                      size={16}
-                                      data-testid="remove-section-btn"
-                                    />
+                                    {t("remove_section")}
                                   </button>
                                 </div>
 

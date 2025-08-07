@@ -19,22 +19,22 @@ const Recipe = () => {
   // Helper function to pluralize units
   const getUnitDisplay = (unit, quantity) => {
     if (!unit) return "";
-    
+
     // Get units array to check pluralize flag
     const units = t("units", { returnObjects: true });
-    const unitData = units.find(u => u.value === unit);
-    
+    const unitData = units.find((u) => u.value === unit);
+
     // If unit has pluralize: false, don't pluralize
     if (unitData && !unitData.pluralize) {
       return unit;
     }
-    
+
     // Handle singular/plural forms - convert "piece/s" to "piece" or "pieces"
     if (unit.includes("/")) {
       const [singular, pluralSuffix] = unit.split("/");
       return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
     }
-    
+
     return unit;
   };
 
@@ -48,10 +48,11 @@ const Recipe = () => {
     // Fallback to database fields for untranslated recipes
     const countableUnits = ["piece/s"];
     const isCountableUnit = countableUnits.includes(ingredient.unit);
-    
+
     const shouldUsePlural = isCountableUnit
-      ? (ingredient.quantity && parseFloat(ingredient.quantity) !== 1) // Countable units: match quantity
-      : ingredient.unit || (ingredient.quantity && parseFloat(ingredient.quantity) !== 1); // Measurement units: always plural, no unit: quantity logic
+      ? ingredient.quantity && parseFloat(ingredient.quantity) !== 1 // Countable units: match quantity
+      : ingredient.unit ||
+        (ingredient.quantity && parseFloat(ingredient.quantity) !== 1); // Measurement units: always plural, no unit: quantity logic
 
     if (shouldUsePlural && ingredient.plural_name) {
       return ingredient.plural_name;
@@ -207,8 +208,13 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-ungrouped-${index}-${ingredient.id}`}
                     >
-                      {ingredient.quantity && `${formatQuantity(ingredient.quantity)} `}
-                      {ingredient.unit && `${getUnitDisplay(ingredient.unit, ingredient.quantity)} `}
+                      {ingredient.quantity &&
+                        `${formatQuantity(ingredient.quantity)} `}
+                      {ingredient.unit &&
+                        `${getUnitDisplay(
+                          ingredient.unit,
+                          ingredient.quantity
+                        )} `}
                       {`${getIngredientDisplayName(ingredient)} `}
                       {ingredient.notes && `${ingredient.notes} `}
                     </label>
@@ -248,8 +254,13 @@ const Recipe = () => {
                             <label
                               htmlFor={`ingredient-section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
                             >
-                              {ingredient.quantity && `${formatQuantity(ingredient.quantity)} `}
-                              {ingredient.unit && `${ingredient.unit} `}
+                              {ingredient.quantity &&
+                                `${formatQuantity(ingredient.quantity)} `}
+                              {ingredient.unit &&
+                                `${getUnitDisplay(
+                                  ingredient.unit,
+                                  ingredient.quantity
+                                )} `}
                               {`${getIngredientDisplayName(ingredient)} `}
                               {ingredient.notes && `${ingredient.notes} `}
                             </label>
@@ -287,8 +298,13 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-flat-${index}-${ingredient.id}`}
                     >
-                      {ingredient.quantity && `${formatQuantity(ingredient.quantity)} `}
-                      {ingredient.unit && `${getUnitDisplay(ingredient.unit, ingredient.quantity)} `}
+                      {ingredient.quantity &&
+                        `${formatQuantity(ingredient.quantity)} `}
+                      {ingredient.unit &&
+                        `${getUnitDisplay(
+                          ingredient.unit,
+                          ingredient.quantity
+                        )} `}
                       {`${getIngredientDisplayName(ingredient)} `}
                       {ingredient.notes && `${ingredient.notes} `}
                     </label>

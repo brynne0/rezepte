@@ -25,7 +25,7 @@
 
 /* Variations */
 .input--cream {
-  background: var(--cream_opaque);
+  background: var(--cream_light);
   padding: 0.5rem;
 }
 
