@@ -6,7 +6,7 @@ import {
   ArrowBigLeft,
   GripHorizontal,
   Link,
-  FileText,
+  NotepadText,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
@@ -723,7 +723,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               {sourceMode === "link" ? (
                 <Link size={16} />
               ) : (
-                <FileText size={16} />
+                <NotepadText size={16} />
               )}
             </button>
           </div>
