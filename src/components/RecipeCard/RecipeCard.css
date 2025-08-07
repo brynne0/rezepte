@@ -8,10 +8,28 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
-  padding: 0.2rem;
+  position: relative;
 }
 
-.recipe-card:hover {
+/* Title turns red when hovering anywhere on the card */
+.recipe-card:hover .recipe-card-title {
+  color: var(--red);
+}
+
+.recipe-card-title {
+  margin: 0.3rem;
+}
+
+.recipe-card-link {
+  position: absolute;
+  right: 0.3rem;
+  top: 0.3rem;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+/* Link icon only turns red when hovering directly on the icon */
+.recipe-card-link:hover {
   color: var(--red);
 }
 
