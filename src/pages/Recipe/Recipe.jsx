@@ -16,31 +16,62 @@ const Recipe = () => {
   const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
 
-  // Helper function to get unit display with translation and smart fallback
-  const getUnitDisplay = (unit, quantity) => {
-    if (!unit) return "";
+  // Single helper function to format ingredient quantity and unit
+  const formatIngredientMeasurement = (quantity, unit) => {
+    if (!quantity && !unit) return "";
 
-    // Get units array to check translation and pluralize flag
+    // Get units array
     const units = t("units", { returnObjects: true });
 
-    // Find the unit object in the units array - try exact match first
+    // Find the unit object - try exact match first, then with common suffixes
     let unitObj = units?.find((u) => u.value === unit);
-    
-    // If no exact match, try common pluralized forms
-    if (!unitObj) {
-      unitObj = units?.find((u) => u.value === unit + "/s") ||
-               units?.find((u) => u.value === unit + "/es");
-    }
-    
-    const translated = unitObj?.label || unit;
-
-    // Simple fallback for singular/plural
-    if (translated.includes("/")) {
-      const [singular, pluralSuffix] = translated.split("/");
-      return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
+    if (!unitObj && unit) {
+      unitObj =
+        units?.find((u) => u.value === unit + "/s") ||
+        units?.find((u) => u.value === unit + "/es");
     }
 
-    return translated;
+    let displayQuantity = "";
+    let displayUnit = "";
+
+    // Format quantity based on unit type
+    if (quantity) {
+      // Default to fractions if no unit (cooking context) or if unit uses fractions
+      if (!unit || unitObj?.useFractions) {
+        displayQuantity = formatQuantity(quantity);
+      } else {
+        const num = parseFloat(quantity);
+        displayQuantity = Number.isInteger(num)
+          ? num.toString()
+          : quantity.toString();
+      }
+    }
+
+    // Format unit with translation and pluralization
+    if (unit && unitObj) {
+      const translated = unitObj.label || unit;
+
+      if (unitObj.pluralize && translated.includes("/")) {
+        const [singular, pluralSuffix] = translated.split("/");
+        displayUnit =
+          parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
+      } else {
+        displayUnit = translated;
+      }
+    } else if (unit) {
+      displayUnit = unit; // fallback to original unit if not found
+    }
+
+    // Combine quantity and unit with proper spacing
+    if (displayQuantity && displayUnit) {
+      return `${displayQuantity} ${displayUnit}`;
+    } else if (displayQuantity) {
+      return displayQuantity;
+    } else if (displayUnit) {
+      return displayUnit;
+    }
+
+    return "";
   };
 
   // Helper function to get the correct ingredient name (singular vs plural)
@@ -213,13 +244,13 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-ungrouped-${index}-${ingredient.id}`}
                     >
-                      {ingredient.quantity &&
-                        `${formatQuantity(ingredient.quantity)} `}
-                      {ingredient.unit &&
-                        `${getUnitDisplay(
-                          ingredient.unit,
-                          ingredient.quantity
-                        )} `}
+                      {(() => {
+                        const measurement = formatIngredientMeasurement(
+                          ingredient.quantity,
+                          ingredient.unit
+                        );
+                        return measurement ? `${measurement} ` : "";
+                      })()}
                       {`${getIngredientDisplayName(ingredient)} `}
                       {ingredient.notes && `${ingredient.notes} `}
                     </label>
@@ -259,13 +290,13 @@ const Recipe = () => {
                             <label
                               htmlFor={`ingredient-section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
                             >
-                              {ingredient.quantity &&
-                                `${formatQuantity(ingredient.quantity)} `}
-                              {ingredient.unit &&
-                                `${getUnitDisplay(
-                                  ingredient.unit,
-                                  ingredient.quantity
-                                )} `}
+                              {(() => {
+                                const measurement = formatIngredientMeasurement(
+                                  ingredient.quantity,
+                                  ingredient.unit
+                                );
+                                return measurement ? `${measurement} ` : "";
+                              })()}
                               {`${getIngredientDisplayName(ingredient)} `}
                               {ingredient.notes && `${ingredient.notes} `}
                             </label>
@@ -303,13 +334,13 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-flat-${index}-${ingredient.id}`}
                     >
-                      {ingredient.quantity &&
-                        `${formatQuantity(ingredient.quantity)} `}
-                      {ingredient.unit &&
-                        `${getUnitDisplay(
-                          ingredient.unit,
-                          ingredient.quantity
-                        )} `}
+                      {(() => {
+                        const measurement = formatIngredientMeasurement(
+                          ingredient.quantity,
+                          ingredient.unit
+                        );
+                        return measurement ? `${measurement} ` : "";
+                      })()}
                       {`${getIngredientDisplayName(ingredient)} `}
                       {ingredient.notes && `${ingredient.notes} `}
                     </label>

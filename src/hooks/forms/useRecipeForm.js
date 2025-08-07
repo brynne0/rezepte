@@ -184,8 +184,8 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     value,
     clearError
   ) => {
-    // Parse fractions to decimals for quantity field
-    const processedValue = field === "quantity" ? parseFraction(value) : value;
+    // Store raw value - parsing happens during display
+    const processedValue = value;
 
     if (sectionId === "ungrouped") {
       // Handle ungrouped ingredients
@@ -599,7 +599,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         source: formData.source.trim() || null,
         ungroupedIngredients: validUngroupedIngredients.map((ing) => ({
           name: ing.name.trim(),
-          quantity: ing.quantity ? parseFloat(ing.quantity) : null,
+          quantity: ing.quantity ? parseFraction(ing.quantity) : null,
           unit: ing.unit.trim() || null,
           notes: ing.notes.trim() || null,
         })),
@@ -607,7 +607,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
           ...section,
           ingredients: section.ingredients.map((ing) => ({
             name: ing.name.trim(),
-            quantity: ing.quantity ? parseFloat(ing.quantity) : null,
+            quantity: ing.quantity ? parseFraction(ing.quantity) : null,
             unit: ing.unit.trim() || null,
             notes: ing.notes.trim() || null,
           })),

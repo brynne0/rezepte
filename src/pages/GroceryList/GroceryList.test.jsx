@@ -26,16 +26,16 @@ vi.mock("react-i18next", () => ({
     t: (key) => {
       if (key === "units") {
         return [
-          { value: "", label: "unit" },
-          { value: "tsp", label: "tsp" },
-          { value: "tbsp", label: "tbsp" },
-          { value: "cup/s", label: "cup/s" },
-          { value: "ml", label: "ml" },
-          { value: "l", label: "l" },
-          { value: "g", label: "g" },
-          { value: "kg", label: "kg" },
-          { value: "can/s", label: "can/s" },
-          { value: "piece/s", label: "piece/s" },
+          { value: "", label: "unit", pluralize: true, useFractions: true },
+          { value: "tsp", label: "tsp", pluralize: true, useFractions: true },
+          { value: "tbsp", label: "tbsp", pluralize: true, useFractions: true },
+          { value: "cup/s", label: "cup/s", pluralize: true, useFractions: true },
+          { value: "ml", label: "ml", pluralize: false, useFractions: false },
+          { value: "l", label: "l", pluralize: false, useFractions: false },
+          { value: "g", label: "g", pluralize: false, useFractions: false },
+          { value: "kg", label: "kg", pluralize: false, useFractions: false },
+          { value: "can/s", label: "can/s", pluralize: true, useFractions: true },
+          { value: "piece/s", label: "piece/s", pluralize: true, useFractions: true },
         ];
       }
       return key;
@@ -191,7 +191,7 @@ describe("GroceryList", () => {
       initialGroceryList[1],
       expect.objectContaining({
         name: "Coconuts",
-        quantity: 3,
+        quantity: "3",
         unit: "piece/s",
         source_recipes: [],
         tempId: expect.stringMatching(/^temp-\d+$/),

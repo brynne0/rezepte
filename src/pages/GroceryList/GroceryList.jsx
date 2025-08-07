@@ -10,6 +10,7 @@ import AutoResizeTextArea from "../../components/AutoResizeTextArea/AutoResizeTe
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
+import { formatQuantity, parseFraction } from "../../utils/fractionUtils";
 import Selector from "../../components/Selector/Selector";
 
 const GroceryList = ({
@@ -23,6 +24,26 @@ const GroceryList = ({
   const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
 
+  // Helper function to format quantity based on unit type
+  const formatQuantityDisplay = (quantity, unit) => {
+    if (!quantity) return "";
+    
+    // Parse the quantity string (handles fractions like "1 1/2" or "3/4")
+    const parsedQuantity = parseFraction(quantity);
+    
+    // Find the unit object to check if it uses fractions
+    const unitObj = units?.find((u) => u.value === unit);
+    
+    // Use fractions for cooking units, decimals for metric units
+    if (!unit || unitObj?.useFractions) {
+      return formatQuantity(parsedQuantity);
+    } else {
+      // For metric units, keep as decimal
+      const num = parseFloat(parsedQuantity);
+      return Number.isInteger(num) ? num.toString() : parsedQuantity.toString();
+    }
+  };
+
   // Helper function to get unit display with translation and smart fallback
   const getUnitDisplay = (unit, quantity) => {
     if (!unit) return "";
@@ -31,8 +52,8 @@ const GroceryList = ({
     const unitObj = units?.find((u) => u.value === unit);
     const translated = unitObj?.label || unit;
 
-    // Simple fallback for singular/plural
-    if (translated.includes("/")) {
+    // Handle pluralization for units that support it
+    if (unitObj?.pluralize && translated.includes("/")) {
       const [singular, pluralSuffix] = translated.split("/");
       return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
     }
@@ -253,10 +274,12 @@ const GroceryList = ({
                       />
                       <input
                         id={`item-quantity-${itemId}`}
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={item.quantity || ""}
+                        type="text"
+                        value={(() => {
+                          // Format the value as fraction for display in edit mode
+                          if (!item.quantity) return "";
+                          return typeof item.quantity === 'number' ? formatQuantity(item.quantity) : item.quantity;
+                        })()}
                         className="input input--edit input--full-width"
                         readOnly={!isEditing}
                         placeholder={t("quantity")}
@@ -264,7 +287,7 @@ const GroceryList = ({
                           handleInputChange(
                             index,
                             "quantity",
-                            parseFloat(e.target.value) || 0
+                            e.target.value
                           )
                         }
                       />
@@ -337,11 +360,12 @@ const GroceryList = ({
                                 }
                               }
 
+                              const displayQuantity = formatQuantityDisplay(qty, unit);
                               const displayUnit = unit
                                 ? getUnitDisplay(unit, qty)
                                 : "";
-                              return `${qty}${
-                                qty && displayUnit ? " " : ""
+                              return `${displayQuantity}${
+                                displayQuantity && displayUnit ? " " : ""
                               }${displayUnit}`;
                             })()}
                           </span>
@@ -366,11 +390,12 @@ const GroceryList = ({
                           }
                         }
 
+                        const displayQuantity = formatQuantityDisplay(qty, unit);
                         const displayUnit = unit
                           ? getUnitDisplay(unit, qty)
                           : "";
-                        const measurement = `${qty}${
-                          qty && displayUnit ? " " : ""
+                        const measurement = `${displayQuantity}${
+                          displayQuantity && displayUnit ? " " : ""
                         }${displayUnit}`.trim();
                         return measurement || null;
                       })

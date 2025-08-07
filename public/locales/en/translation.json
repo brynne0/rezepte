@@ -62,17 +62,17 @@
   "switch_to_note": "Switch to note",
 
   "units": [
-    { "value": "", "label": "-", "pluralize": true },
-    { "value": "tsp", "label": "tsp", "pluralize": true },
-    { "value": "tbsp", "label": "tbsp", "pluralize": true },
-    { "value": "cup/s", "label": "cup/s", "pluralize": true },
-    { "value": "ml", "label": "ml", "pluralize": false },
-    { "value": "l", "label": "l", "pluralize": false },
-    { "value": "g", "label": "g", "pluralize": false },
-    { "value": "kg", "label": "kg", "pluralize": false },
-    { "value": "can/s", "label": "can/s", "pluralize": true },
-    { "value": "piece/s", "label": "piece/s", "pluralize": true },
-    { "value": "pinch/es", "label": "pinch/es", "pluralize": true }
+    { "value": "", "label": "-", "pluralize": true, "useFractions": true },
+    { "value": "tsp", "label": "tsp", "pluralize": true, "useFractions": true },
+    { "value": "tbsp", "label": "tbsp", "pluralize": true, "useFractions": true },
+    { "value": "cup/s", "label": "cup/s", "pluralize": true, "useFractions": true },
+    { "value": "ml", "label": "ml", "pluralize": false, "useFractions": false },
+    { "value": "l", "label": "l", "pluralize": false, "useFractions": false },
+    { "value": "g", "label": "g", "pluralize": false, "useFractions": false },
+    { "value": "kg", "label": "kg", "pluralize": false, "useFractions": false },
+    { "value": "can/s", "label": "can/s", "pluralize": true, "useFractions": true },
+    { "value": "piece/s", "label": "piece/s", "pluralize": true, "useFractions": true },
+    { "value": "pinch/es", "label": "pinch/es", "pluralize": true, "useFractions": true }
   ],
 
   "recipe_delete_confirmation": "Are you sure you want to delete this recipe?",

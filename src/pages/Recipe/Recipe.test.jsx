@@ -15,16 +15,16 @@ vi.mock("react-router-dom", async () => {
 });
 
 const mockUnits = [
-  { value: "", label: "Unit", pluralize: true },
-  { value: "tsp", label: "tsp", pluralize: true },
-  { value: "tbsp", label: "tbsp", pluralize: true },
-  { value: "cup/s", label: "cup/s", pluralize: true },
-  { value: "cup", label: "cup", pluralize: true },
-  { value: "cups", label: "cups", pluralize: true },
-  { value: "ml", label: "ml", pluralize: false },
-  { value: "g", label: "g", pluralize: false },
-  { value: "can/s", label: "can/s", pluralize: true },
-  { value: "piece/s", label: "piece/s", pluralize: true },
+  { value: "", label: "Unit", pluralize: true, useFractions: true },
+  { value: "tsp", label: "tsp", pluralize: true, useFractions: true },
+  { value: "tbsp", label: "tbsp", pluralize: true, useFractions: true },
+  { value: "cup/s", label: "cup/s", pluralize: true, useFractions: true },
+  { value: "cup", label: "cup", pluralize: true, useFractions: true },
+  { value: "cups", label: "cups", pluralize: true, useFractions: true },
+  { value: "ml", label: "ml", pluralize: false, useFractions: false },
+  { value: "g", label: "g", pluralize: false, useFractions: false },
+  { value: "can/s", label: "can/s", pluralize: true, useFractions: true },
+  { value: "piece/s", label: "piece/s", pluralize: true, useFractions: true },
 ];
 
 vi.mock("react-i18next", () => ({

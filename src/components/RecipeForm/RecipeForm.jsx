@@ -11,6 +11,7 @@ import {
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
+import { formatQuantity } from "../../utils/fractionUtils";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
@@ -277,7 +278,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                     <input
                                       id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
                                       type="text"
-                                      value={ingredient.quantity || ""}
+                                      value={(() => {
+                                        // Format decimal values as fractions for display
+                                        if (!ingredient.quantity) return "";
+                                        return typeof ingredient.quantity ===
+                                          "number"
+                                          ? formatQuantity(ingredient.quantity)
+                                          : ingredient.quantity;
+                                      })()}
                                       onChange={(e) =>
                                         handleIngredientChange(
                                           "ungrouped",
@@ -505,13 +513,20 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                   <div className="ingredient-details">
                                                     <input
                                                       id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                      type="number"
-                                                      min="0"
-                                                      step="0.01"
-                                                      value={
-                                                        ingredient.quantity ||
-                                                        ""
-                                                      }
+                                                      type="text"
+                                                      value={(() => {
+                                                        // Format decimal values as fractions for display
+                                                        if (
+                                                          !ingredient.quantity
+                                                        )
+                                                          return "";
+                                                        return typeof ingredient.quantity ===
+                                                          "number"
+                                                          ? formatQuantity(
+                                                              ingredient.quantity
+                                                            )
+                                                          : ingredient.quantity;
+                                                      })()}
                                                       onChange={(e) =>
                                                         handleIngredientChange(
                                                           section.id,

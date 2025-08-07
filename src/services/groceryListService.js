@@ -1,6 +1,7 @@
 import supabase from "../lib/supabase";
 import pluralize from "pluralize";
 import { getUserPreferredLanguage } from "./userService";
+import { parseFraction } from "../utils/fractionUtils";
 
 // Import translateText function for recipe title translation
 const translateText = async (text, targetLanguage, sourceLanguage = null) => {
@@ -89,7 +90,7 @@ const combineQuantities = (
   // Direct unit match - simple addition
   if (existingUnitNorm === newUnitNorm) {
     const result = {
-      quantity: parseFloat(existingQuantity) + parseFloat(newQuantity),
+      quantity: parseFraction(existingQuantity) + parseFraction(newQuantity),
       unit: existingUnit || newUnit || null,
     };
     return result;
@@ -197,7 +198,7 @@ const getIngredientNameInPreferredLanguage = async (
     if (!ingredients || ingredients.length === 0) return ingredientName;
 
     const normalizedInput = normaliseIngredientName(ingredientName);
-    const shouldUsePlural = quantity && parseFloat(quantity) > 1;
+    const shouldUsePlural = quantity && parseFraction(quantity) > 1;
 
     // Find matching ingredient
     const ingredient = ingredients.find((ing) => {
@@ -507,7 +508,7 @@ export const updateGroceryList = async (updatedList) => {
       const combinedResult = combineQuantities(
         existingItem.quantity,
         existingItem.unit,
-        parseFloat(newItem.quantity),
+        parseFraction(newItem.quantity),
         newItem.unit
       );
 
@@ -559,7 +560,7 @@ export const updateGroceryList = async (updatedList) => {
       const combinedResult = combineQuantities(
         existingNewItem.quantity,
         existingNewItem.unit,
-        parseFloat(newItem.quantity),
+        parseFraction(newItem.quantity),
         newItem.unit
       );
 
@@ -591,7 +592,7 @@ export const updateGroceryList = async (updatedList) => {
     finalItemsToInsert.push({
       user_id: user.id,
       name: preferredLanguageName,
-      quantity: parseFloat(newItem.quantity) || 0,
+      quantity: parseFraction(newItem.quantity) || 0,
       unit: newItem.unit || "",
       source_recipes: newItem.source_recipes || [],
     });
@@ -640,7 +641,7 @@ export const updateGroceryList = async (updatedList) => {
   for (const item of itemsToUpdate) {
     // Translate item name to user's preferred language if it's not a combined update
     const updateData = {
-      quantity: parseFloat(item.quantity) || 0,
+      quantity: parseFraction(item.quantity) || 0,
       unit: item.unit,
       source_recipes: item.source_recipes || [],
     };
@@ -741,8 +742,8 @@ export const addIngredientsToGroceryList = async (
     if (existingItem) {
       // Try to combine quantities with unit conversion
       // Handle null quantities by treating them as 0
-      const existingQty = parseFloat(existingItem.quantity) || 0;
-      const newQty = parseFloat(ingredient.quantity) || 0;
+      const existingQty = parseFraction(existingItem.quantity) || 0;
+      const newQty = parseFraction(ingredient.quantity) || 0;
 
       const combinedResult = combineQuantities(
         existingQty,
