@@ -744,7 +744,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           />
         </div>
 
-        {/* TODO - add overall form submition error here adn handle common errors */}
+        {/* TODO - add overall form submition error here and handle common errors */}
         {/* {error && <div className="error-message">{error}</div>} */}
 
         <div className={`btn-wrapper ${isEditMode ? "edit" : ""}`}>
@@ -775,8 +775,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             className="btn btn-action btn-primary"
           >
             {loading
-              ? // TODODODO
-                isEditMode
+              ? isEditMode
                 ? "Updating..."
                 : "Creating..."
               : isEditMode
