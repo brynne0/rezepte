@@ -49,7 +49,7 @@
   color: var(--brown);
   border: var(--border-width-thick) dotted var(--brown);
   padding: 0.5rem;
-  background: var(--cream-light);
+  background: white;
 }
 
 .btn-secondary:hover {
@@ -164,8 +164,8 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .btn-action {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.8rem;
+    padding: 0.75rem 0.6rem;
+    font-size: 0.9rem;
   }
 
   .back-arrow {

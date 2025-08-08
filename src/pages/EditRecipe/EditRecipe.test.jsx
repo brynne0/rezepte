@@ -96,4 +96,43 @@ describe("EditRecipePage", () => {
 
     expect(mockChangeLanguage).toHaveBeenCalledWith("en");
   });
+
+  describe("Language Preservation", () => {
+    it("preserves language restoration functionality when component unmounts", () => {
+      // Test that the component has the language restoration logic without breaking
+      vi.mocked(useRecipe).mockReturnValueOnce({
+        recipe: {
+          id: "123",
+          title: "Test Recipe",
+          original_language: "de", // Different language to trigger switching
+        },
+        loading: false,
+      });
+
+      const { unmount } = render(<EditRecipePage categories={mockCategories} />);
+      
+      // Component should render without errors
+      expect(screen.getByTestId("recipe-form-mock")).toBeInTheDocument();
+      
+      // Unmount should not cause errors (cleanup effect should work)
+      expect(() => unmount()).not.toThrow();
+    });
+
+    it("renders correctly with language preservation code when languages match", () => {
+      vi.mocked(useRecipe).mockReturnValueOnce({
+        recipe: {
+          id: "123", 
+          title: "Test Recipe",
+          original_language: "en", // Same as current mock language
+        },
+        loading: false,
+      });
+
+      render(<EditRecipePage categories={mockCategories} />);
+
+      // Component should render edit form correctly
+      expect(screen.getByTestId("recipe-form-mock")).toBeInTheDocument();
+      expect(screen.getByText("edit_recipe")).toBeInTheDocument();
+    });
+  });
 });

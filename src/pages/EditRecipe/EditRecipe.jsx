@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useRecipe } from "../../hooks/data/useRecipe";
@@ -9,17 +9,29 @@ const EditRecipePage = ({ categories }) => {
   const { id } = useParams();
   const { recipe, loading } = useRecipe(id);
   const { t, i18n } = useTranslation();
+  const originalUserLanguage = useRef(null);
 
-  // Switch to recipe's original language when recipe loads
+  // Switch to recipe's original language when recipe loads and preserve user's language
   useEffect(() => {
     if (
       recipe &&
       recipe.original_language &&
       recipe.original_language !== i18n.language
     ) {
+      // Store the user's current language before switching
+      originalUserLanguage.current = i18n.language;
       i18n.changeLanguage(recipe.original_language);
     }
   }, [recipe, i18n]);
+
+  // Restore user's original language when component unmounts
+  useEffect(() => {
+    return () => {
+      if (originalUserLanguage.current && originalUserLanguage.current !== i18n.language) {
+        i18n.changeLanguage(originalUserLanguage.current);
+      }
+    };
+  }, [i18n]);
 
   if (loading) {
     return <LoadingAcorn />;
