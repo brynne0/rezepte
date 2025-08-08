@@ -62,7 +62,7 @@ const Recipe = () => {
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
   return (
-    <div className="recipe-container card card-content">
+    <div className="recipe-container card card-recipe">
       <div className="flex-row">
         <h1 className="forta">{recipe.title}</h1>
 

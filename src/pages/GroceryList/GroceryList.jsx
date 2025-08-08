@@ -6,7 +6,6 @@ import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 import "./GroceryList.css";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import AutoResizeTextArea from "../../components/AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
@@ -188,8 +187,8 @@ const GroceryList = ({
   }
 
   return (
-    <div className="card card-page">
-      <header className="page-header flex-between">
+    <div className="card card-grocery">
+      <header className={`page-header ${!isEditing ? "flex-between" : ""}`}>
         {!isEditing ? (
           <ArrowBigLeft
             className="back-arrow"
@@ -197,13 +196,15 @@ const GroceryList = ({
             onClick={() => navigate(-1)}
           />
         ) : (
-          <div style={{ width: 30, height: 30 }}></div>
+          <ArrowBigLeft
+            className="back-arrow-left"
+            size={30}
+            onClick={() => navigate(-1)}
+          />
         )}
         <h1>{t("grocery_list")}</h1>
-        {!isEditing ? (
+        {!isEditing && (
           <Pencil onClick={startEditing} className="btn btn-icon" />
-        ) : (
-          <div style={{ width: 24, height: 24 }}></div>
         )}
       </header>
 
@@ -247,7 +248,11 @@ const GroceryList = ({
                             value={(() => {
                               // Format the value respecting unit's fraction setting
                               if (!item.quantity) return "";
-                              return formatQuantityForUnit(item.quantity, item.unit, units);
+                              return formatQuantityForUnit(
+                                item.quantity,
+                                item.unit,
+                                units
+                              );
                             })()}
                             className="input input--edit input--full-width"
                             readOnly={!isEditing}
@@ -403,13 +408,15 @@ const GroceryList = ({
                     );
                   }
                 })}
-            <button
-              className="btn btn-icon btn-icon-success"
-              onClick={addNewItem}
-              aria-label={t("add_item")}
-            >
-              <Plus size={20} />
-            </button>
+            {isEditing && (
+              <button
+                className="btn btn-icon btn-icon-success"
+                onClick={addNewItem}
+                aria-label={t("add_item")}
+              >
+                <Plus size={20} />
+              </button>
+            )}
           </ul>
         )}
       </div>

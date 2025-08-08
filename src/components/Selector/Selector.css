@@ -10,7 +10,7 @@
 .selector-chevron {
   position: absolute;
   right: 0.5rem;
-  color: var(--dark_brown);
+  color: var(--dark-brown);
   cursor: pointer;
   transition: transform 0.2s ease;
   pointer-events: none;
@@ -30,7 +30,7 @@
   left: 0;
   right: 0;
   background: white;
-  border: var(--border-width) dashed var(--red);
+  border: var(--border-width) dashed var(--dark-red);
   border-top: none;
   border-radius: 0 0 var(--border-radius) var(--border-radius);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -47,7 +47,7 @@
 
 .selector-option:hover,
 .selector-option.selected {
-  color: var(--red);
+  color: var(--dark-red);
   font-weight: 500;
 }
 

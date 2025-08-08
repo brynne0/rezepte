@@ -14,10 +14,10 @@
 /* Standard button */
 .btn-standard {
   padding: 0.5rem;
-  background: var(--cream_light);
-  color: var(--dark_brown);
+  background: var(--cream-light);
+  color: var(--dark-brown);
   border: var(--border-width) solid var(--brown);
-  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
+  box-shadow: 0 0.125rem 0.5rem var(--shadow-black);
 }
 
 /* Action buttons (primary, secondary, danger) */
@@ -30,16 +30,16 @@
 .btn-primary {
   background: var(--brown);
   color: white;
-  box-shadow: 0 0.125rem 0.25rem var(--shadow_black);
+  box-shadow: 0 0.125rem 0.25rem var(--shadow-black);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--light_brown);
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+  background: var(--light-brown);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow-black);
 }
 
 .btn-primary:disabled {
-  background: var(--light_brown);
+  background: var(--light-brown);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -49,13 +49,13 @@
   color: var(--brown);
   border: var(--border-width-thick) dotted var(--brown);
   padding: 0.5rem;
-  background: var(--cream_light);
+  background: var(--cream-light);
 }
 
 .btn-secondary:hover {
-  color: var(--light_brown);
-  border-color: var(--light_brown);
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+  color: var(--light-brown);
+  border-color: var(--light-brown);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow-black);
 }
 
 .btn-danger {
@@ -67,7 +67,7 @@
 .btn-danger:hover {
   background: var(--red);
   color: white;
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow-black);
 }
 
 /* Icon buttons */
@@ -83,7 +83,7 @@
 }
 
 .btn-icon-neutral:hover {
-  /* background: var(--cream_light); */
+  /* background: var(--cream-light); */
   /* border-radius: 2rem; */
   transform: translateY(-1px);
   color: var(--red);
@@ -101,7 +101,7 @@
 }
 
 .btn-icon-remove {
-  color: var(--error_red);
+  color: var(--error-red);
   flex-shrink: 0;
 }
 
@@ -119,12 +119,12 @@
 }
 
 .btn-icon-password:hover {
-  color: var(--dark_red);
+  color: var(--dark-red);
 }
 
 /* Navigation buttons */
 .back-arrow-left {
-  left: 3rem;
+  left: 0;
   position: absolute;
   cursor: pointer;
 }
@@ -145,13 +145,13 @@
 }
 
 .btn-section-dotted:hover {
-  background: var(--cream_light);
+  background: var(--cream-light);
   border-style: solid;
 }
 
 .btn-section {
   background: none;
-  color: var(--dark_brown);
+  color: var(--dark-brown);
   border: none;
   font-weight: 500;
   font-size: 0.9rem;

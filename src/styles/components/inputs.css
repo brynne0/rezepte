@@ -4,9 +4,9 @@
   border-radius: var(--border-radius);
   font-size: 1rem;
   font-family: inherit;
-  color: var(--dark_brown);
+  color: var(--dark-brown);
   background: white;
-  border: var(--border-width) solid var(--dark_brown);
+  border: var(--border-width) solid var(--dark-brown);
   transition: all 0.2s ease;
   box-sizing: border-box;
   min-width: 0;
@@ -16,7 +16,7 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--dark_red);
+  border-color: var(--dark-red);
 }
 
 .input:invalid {
@@ -25,16 +25,16 @@
 
 /* Variations */
 .input--cream {
-  background: var(--cream_light);
+  background: var(--cream-light);
   padding: 0.5rem;
 }
 
 .input--cream:focus {
-  border-color: var(--dark_brown);
+  border-color: var(--dark-brown);
 }
 
 .input--edit {
-  box-shadow: 0 0.0625rem 0.1rem var(--shadow_black);
+  box-shadow: 0 0.0625rem 0.1rem var(--shadow-black);
   border: var(--border-width) dashed var(--cream);
 }
 
@@ -73,13 +73,13 @@
 
 /* Error state */
 .input--error {
-  border-color: var(--error_red);
+  border-color: var(--error-red);
   border-width: 0.1rem;
 }
 
 .input--error:focus {
-  border-color: var(--error_red);
-  box-shadow: 0 0 0 0.2rem var(--error_shadow);
+  border-color: var(--error-red);
+  box-shadow: 0 0 0 0.2rem var(--error-shadow);
 }
 
 /* Disabled state cleanup */

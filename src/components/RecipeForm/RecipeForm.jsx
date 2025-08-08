@@ -154,7 +154,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           </div>
 
           <div
-            className={`categories-wrapper ${
+            className={`form-categories-wrapper ${
               validationErrors.category ? "input--error" : ""
             }`}
             role="group"

@@ -27,7 +27,7 @@
 
 .item-name {
   font-weight: 500;
-  color: var(--dark_brown);
+  color: var(--dark-brown);
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;

@@ -233,7 +233,7 @@ describe("RecipeForm", () => {
 
       const categoriesWrapper = screen
         .getByText("Desserts")
-        .closest(".categories-wrapper");
+        .closest(".form-categories-wrapper");
       expect(categoriesWrapper).toHaveClass("input--error");
       expect(screen.getByText("Category is required")).toBeInTheDocument();
     });
