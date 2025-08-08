@@ -11,7 +11,7 @@ import {
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
-import { formatQuantity } from "../../utils/fractionUtils";
+import { formatQuantityForUnit } from "../../utils/ingredientFormatting";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
@@ -19,6 +19,7 @@ import "./RecipeForm.css";
 
 const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const { t, i18n } = useTranslation();
+  const units = t("units", { returnObjects: true });
 
   const {
     formData,
@@ -279,12 +280,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                       id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
                                       type="text"
                                       value={(() => {
-                                        // Format decimal values as fractions for display
+                                        // Format values respecting unit's fraction setting
                                         if (!ingredient.quantity) return "";
-                                        return typeof ingredient.quantity ===
-                                          "number"
-                                          ? formatQuantity(ingredient.quantity)
-                                          : ingredient.quantity;
+                                        return formatQuantityForUnit(ingredient.quantity, ingredient.unit, units);
                                       })()}
                                       onChange={(e) =>
                                         handleIngredientChange(
@@ -515,17 +513,9 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                       id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                                       type="text"
                                                       value={(() => {
-                                                        // Format decimal values as fractions for display
-                                                        if (
-                                                          !ingredient.quantity
-                                                        )
-                                                          return "";
-                                                        return typeof ingredient.quantity ===
-                                                          "number"
-                                                          ? formatQuantity(
-                                                              ingredient.quantity
-                                                            )
-                                                          : ingredient.quantity;
+                                                        // Format values respecting unit's fraction setting
+                                                        if (!ingredient.quantity) return "";
+                                                        return formatQuantityForUnit(ingredient.quantity, ingredient.unit, units);
                                                       })()}
                                                       onChange={(e) =>
                                                         handleIngredientChange(

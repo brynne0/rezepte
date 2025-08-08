@@ -14,7 +14,7 @@ const Recipe = () => {
   const { recipe, loading, error } = useRecipe(id);
   const navigate = useNavigate();
   const { isLoggedIn, isGuest } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Use the grocery list hook
   const {
@@ -165,7 +165,8 @@ const Recipe = () => {
                     >
                       {formatCompleteIngredient(
                         ingredient,
-                        t("units", { returnObjects: true })
+                        t("units", { returnObjects: true }),
+                        i18n.language
                       )}
                     </label>
                   </li>
@@ -245,7 +246,8 @@ const Recipe = () => {
                     >
                       {formatCompleteIngredient(
                         ingredient,
-                        t("units", { returnObjects: true })
+                        t("units", { returnObjects: true }),
+                        i18n.language
                       )}
                     </label>
                   </li>

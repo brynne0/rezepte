@@ -17,6 +17,14 @@ describe("fractionUtils", () => {
       expect(parseFraction(3.14)).toBe(3.14);
     });
 
+    test("handles ranges", () => {
+      expect(parseFraction("1/2 - 1")).toBe("1/2 - 1");
+      expect(parseFraction("1-2")).toBe("1-2");
+      expect(parseFraction("1/4-1/2")).toBe("1/4-1/2");
+      expect(parseFraction("0.5 – 1.5")).toBe("0.5 – 1.5");
+      expect(parseFraction("2—3")).toBe("2—3");
+    });
+
     test("parses simple fractions", () => {
       expect(parseFraction("1/4")).toBe(0.25);
       expect(parseFraction("1/2")).toBe(0.5);
@@ -61,6 +69,12 @@ describe("fractionUtils", () => {
       expect(formatQuantity(0.333)).toBe("1/3");
       expect(formatQuantity(0.67)).toBe("2/3");
       expect(formatQuantity(0.667)).toBe("2/3");
+    });
+
+    test("handles ranges", () => {
+      expect(formatQuantity("1/2 - 1")).toBe("1/2 - 1");
+      expect(formatQuantity("1-2")).toBe("1-2");
+      expect(formatQuantity("0.5 – 1.5")).toBe("0.5 – 1.5");
     });
 
     test("formats mixed fractions", () => {

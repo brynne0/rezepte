@@ -1,7 +1,7 @@
 import supabase from "../lib/supabase";
 import pluralize from "pluralize";
 import { getUserPreferredLanguage } from "./userService";
-import { parseFraction } from "../utils/fractionUtils";
+import { parseFraction, shouldUsePlural } from "../utils/fractionUtils";
 
 // Import translateText function for recipe title translation
 const translateText = async (text, targetLanguage, sourceLanguage = null) => {
@@ -198,7 +198,7 @@ const getIngredientNameInPreferredLanguage = async (
     if (!ingredients || ingredients.length === 0) return ingredientName;
 
     const normalizedInput = normaliseIngredientName(ingredientName);
-    const shouldUsePlural = quantity && parseFraction(quantity) > 1;
+    const shouldUseIngredientPlural = shouldUsePlural(quantity);
 
     // Find matching ingredient
     const ingredient = ingredients.find((ing) => {
@@ -231,7 +231,7 @@ const getIngredientNameInPreferredLanguage = async (
 
     if (!ingredient) {
       // Ingredient not found in database - use translation API for pluralization
-      if (!shouldUsePlural) {
+      if (!shouldUseIngredientPlural) {
         return ingredientName;
       }
 
@@ -259,7 +259,7 @@ const getIngredientNameInPreferredLanguage = async (
 
     // Return name in target language with correct singular/plural
     if (targetLanguage === "en") {
-      return shouldUsePlural && ingredient.plural_name
+      return shouldUseIngredientPlural && ingredient.plural_name
         ? ingredient.plural_name
         : ingredient.singular_name;
     }
@@ -267,13 +267,13 @@ const getIngredientNameInPreferredLanguage = async (
     // Check if translation exists for target language
     const translation = ingredient.translated_names?.[targetLanguage];
     if (translation && typeof translation === "object") {
-      return shouldUsePlural && translation.plural_name
+      return shouldUseIngredientPlural && translation.plural_name
         ? translation.plural_name
         : translation.singular_name;
     }
 
     // No translation found, return English name
-    return shouldUsePlural && ingredient.plural_name
+    return shouldUseIngredientPlural && ingredient.plural_name
       ? ingredient.plural_name
       : ingredient.singular_name;
   } catch (error) {
