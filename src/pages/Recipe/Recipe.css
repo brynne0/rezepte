@@ -46,7 +46,7 @@
   position: absolute;
   top: -2px;
   right: -2px;
-  color: var(--dark_red);
+  color: var(--dark-red);
   font-size: 12px;
   font-weight: bold;
 }

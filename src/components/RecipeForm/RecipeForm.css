@@ -1,11 +1,27 @@
-/* Container */
-.recipe-form {
-  padding: 0 3rem 3rem;
-}
-
 /* Form elements */
 .edit button:first-child {
   margin-right: auto;
+}
+
+/* Title and Servings Layout */
+.title-servings-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.title-field {
+  flex: 1;
+}
+
+.servings-field {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+/* Category styling */
+.form-categories-wrapper {
+  padding: 0.5rem;
 }
 
 .section-title-input {
@@ -21,12 +37,13 @@
 }
 
 .ingredient-section {
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   transition: all 0.2s ease;
 }
 
-.ingredient-section.dragging {
-  padding: 0.5rem;
+.ingredient-section.dragging,
+.ingredient-row.dragging {
+  background-color: var(--cream-light);
 }
 
 /* Ingredient rows */
@@ -35,10 +52,9 @@
   grid-template-columns: auto 2fr 1fr 1fr 2fr auto;
   gap: 0.5rem;
   align-items: center;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   transition: all 0.2s ease;
   max-width: 100%;
-  overflow: hidden;
 }
 
 .ingredient-content {
@@ -65,28 +81,49 @@
 
 /* Instructions */
 .instructions-list {
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .instruction-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-items: stretch;
 }
 
 .step-number {
   font-weight: 600;
-  color: var(--brown);
-  font-size: 1rem;
-  margin-top: 0.25rem;
+  margin: 0.25rem;
+}
+
+/* Source */
+.source-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.source-toggle {
+  flex-shrink: 0;
+  color: var(--dark-brown);
+  transition: color 0.2s ease;
+}
+
+.source-toggle:hover {
+  color: var(--dark-red);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .recipe-form {
-    padding: 1.25rem;
-    padding-top: 0;
+  /* Title and servings stack on mobile */
+  .title-servings-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .servings-field,
+  .title-field {
+    width: 100%;
   }
 
   .ingredient-row {
@@ -99,20 +136,12 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 
   .ingredient-details {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.25rem;
     align-items: center;
-  }
-
-  .ingredient-details input[type="number"] {
-    flex: 0 0 70px;
-  }
-
-  .ingredient-details select {
-    flex: 0 0 90px;
   }
 }

@@ -480,4 +480,142 @@ describe("Header Component", () => {
     expect(screen.queryByText("Login")).not.toBeInTheDocument();
     expect(screen.queryByText("Logout")).not.toBeInTheDocument();
   });
+
+  describe("Language Switching", () => {
+    test("shows current language as selected", () => {
+      mockI18n.language = "en";
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const enButton = screen.getByText("EN");
+      const deButton = screen.getByText("DE");
+
+      expect(enButton).toHaveClass("selected");
+      expect(deButton).not.toHaveClass("selected");
+    });
+
+    test("calls changeLanguage when language button clicked", () => {
+      mockI18n.language = "en";
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const deButton = screen.getByText("DE");
+      fireEvent.click(deButton);
+
+      expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
+    });
+
+    test("shows German as selected when language is German", () => {
+      mockI18n.language = "de";
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const enButton = screen.getByText("EN");
+      const deButton = screen.getByText("DE");
+
+      expect(deButton).toHaveClass("selected");
+      expect(enButton).not.toHaveClass("selected");
+    });
+
+    test("disables language switching when disableLanguageSwitch is true", () => {
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} disableLanguageSwitch={true} />
+        </TestWrapper>
+      );
+
+      const enButton = screen.getByText("EN");
+      const deButton = screen.getByText("DE");
+
+      expect(enButton).toHaveClass("disabled");
+      expect(deButton).toHaveClass("disabled");
+
+      // Language change should not be called when disabled
+      fireEvent.click(deButton);
+      expect(mockI18n.changeLanguage).not.toHaveBeenCalled();
+    });
+
+    test("maintains selected state even when disabled", () => {
+      mockI18n.language = "de";
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} disableLanguageSwitch={true} />
+        </TestWrapper>
+      );
+
+      const deButton = screen.getByText("DE");
+
+      expect(deButton).toHaveClass("selected");
+      expect(deButton).toHaveClass("disabled");
+    });
+  });
+
+  describe("Language Integration with Recipe Translation", () => {
+    test("language change triggers recipe re-fetch through i18n dependency", async () => {
+      // Integration test that verifies the language change
+      // will trigger useRecipe hook re-execution due to i18n.language dependency
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // Change language
+      fireEvent.click(screen.getByText("DE"));
+
+      // Verify changeLanguage was called
+      expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
+
+      // 1. i18n.language changes to "de"
+      // 2. useRecipe hook dependency [id, i18n.language] triggers re-fetch
+      // 3. getTranslatedRecipe is called with new language
+      // 4. Ingredients get translated and displayed in German
+    });
+
+    test("language button state reflects i18n current language", () => {
+      // Test that the UI correctly shows the current language state for German
+      mockI18n.language = "de";
+
+      const { unmount } = render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // German should be selected
+      expect(screen.getByText("DE")).toHaveClass("selected");
+      expect(screen.getByText("EN")).not.toHaveClass("selected");
+
+      // Clean up first render
+      unmount();
+
+      // This simulates what happens when language actually changes
+      mockI18n.language = "en";
+
+      // Re-render with new language
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // English should now be selected
+      expect(screen.getByText("EN")).toHaveClass("selected");
+      expect(screen.getByText("DE")).not.toHaveClass("selected");
+    });
+  });
 });

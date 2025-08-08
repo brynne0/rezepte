@@ -6,10 +6,14 @@ import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 import "./GroceryList.css";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import AutoResizeTextArea from "../../components/AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
+import {
+  formatQuantityForUnit,
+  formatUnitDisplay,
+} from "../../utils/ingredientFormatting";
+import Selector from "../../components/Selector/Selector";
 
 const GroceryList = ({
   isEditing: propIsEditing,
@@ -21,23 +25,6 @@ const GroceryList = ({
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
-
-  // Helper function to get unit display with translation and smart fallback
-  const getUnitDisplay = (unit, quantity) => {
-    if (!unit) return "";
-
-    // Find the unit object in the units array
-    const unitObj = units?.find((u) => u.value === unit);
-    const translated = unitObj?.label || unit;
-
-    // Simple fallback for singular/plural
-    if (translated.includes("/")) {
-      const [singular, pluralSuffix] = translated.split("/");
-      return parseFloat(quantity) > 1 ? singular + pluralSuffix : singular;
-    }
-
-    return translated;
-  };
 
   // Use prop-based editing state, fallback to local state if props not provided
   const isEditing = propIsEditing !== undefined ? propIsEditing : false;
@@ -133,6 +120,7 @@ const GroceryList = ({
       name: "",
       quantity: "",
       unit: "",
+      notes: "",
       source_recipes: [],
     };
 
@@ -199,8 +187,8 @@ const GroceryList = ({
   }
 
   return (
-    <div className="card card-page">
-      <header className="page-header flex-between">
+    <div className="card card-grocery">
+      <header className={`page-header ${!isEditing ? "flex-between" : ""}`}>
         {!isEditing ? (
           <ArrowBigLeft
             className="back-arrow"
@@ -208,13 +196,15 @@ const GroceryList = ({
             onClick={() => navigate(-1)}
           />
         ) : (
-          <div style={{ width: 30, height: 30 }}></div>
+          <ArrowBigLeft
+            className="back-arrow-left"
+            size={30}
+            onClick={() => navigate(-1)}
+          />
         )}
         <h1>{t("grocery_list")}</h1>
-        {!isEditing ? (
+        {!isEditing && (
           <Pencil onClick={startEditing} className="btn btn-icon" />
-        ) : (
-          <div style={{ width: 24, height: 24 }}></div>
         )}
       </header>
 
@@ -230,7 +220,7 @@ const GroceryList = ({
             </button>
           </div>
         ) : (
-          <ul>
+          <ul className="grocery-list">
             {isEditing
               ? // Edit mode - show individual items
                 currentList.map((item, index) => {
@@ -239,67 +229,72 @@ const GroceryList = ({
                   const itemId = item.id || item.tempId || index;
 
                   return (
-                    <li className="list-item" key={itemKey}>
-                      <AutoResizeTextArea
-                        id={`item-name-${itemId}`}
-                        value={item.name || ""}
-                        className="input input--borderless input--full-width input--textarea"
-                        readOnly={!isEditing}
-                        placeholder={t("item_name")}
-                        onChange={(e) =>
-                          handleInputChange(index, "name", e.target.value)
-                        }
-                      />
-                      <input
-                        id={`item-quantity-${itemId}`}
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={item.quantity || ""}
-                        className="input input--borderless input--full-width"
-                        readOnly={!isEditing}
-                        placeholder={t("quantity")}
-                        onChange={(e) =>
-                          handleInputChange(
-                            index,
-                            "quantity",
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                      />
-                      <select
-                        id={`item-unit-${itemId}`}
-                        value={item.unit || ""}
-                        className="input input--borderless input--full-width input--select"
-                        disabled={!isEditing}
-                        onChange={(e) =>
-                          handleInputChange(index, "unit", e.target.value)
-                        }
-                      >
-                        {units &&
-                          Array.isArray(units) &&
-                          units.map((unit) => (
-                            <option key={unit.value} value={unit.value}>
-                              {unit.label}
-                            </option>
-                          ))}
-                      </select>
+                    <li className="grocery-edit-item" key={itemKey}>
+                      <div className="item-content">
+                        <input
+                          id={`item-name-${itemId}`}
+                          value={item.name || ""}
+                          className="input input--edit input--full-width"
+                          readOnly={!isEditing}
+                          placeholder={t("item_name")}
+                          onChange={(e) =>
+                            handleInputChange(index, "name", e.target.value)
+                          }
+                        />
+                        <div className="item-details">
+                          <input
+                            id={`item-quantity-${itemId}`}
+                            type="text"
+                            value={(() => {
+                              // Format the value respecting unit's fraction setting
+                              if (!item.quantity) return "";
+                              return formatQuantityForUnit(
+                                item.quantity,
+                                item.unit,
+                                units
+                              );
+                            })()}
+                            className="input input--edit input--full-width"
+                            readOnly={!isEditing}
+                            placeholder={t("quantity")}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "quantity",
+                                e.target.value
+                              )
+                            }
+                          />
+                          <Selector
+                            id={`item-unit-${itemId}`}
+                            value={item.unit || ""}
+                            onChange={(unitValue) =>
+                              handleInputChange(index, "unit", unitValue)
+                            }
+                            type="unit"
+                            className="input--full-width"
+                          />
 
-                      {isEditing ? (
-                        <button
-                          className="btn btn-icon btn-icon-remove"
-                          onClick={() => removeItemFromEdit(index)}
-                          title={t("remove_item")}
-                          aria-label={t("remove_item")}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      ) : (
-                        <div
-                          className="spacer"
-                          style={{ width: 16, height: 16 }}
-                        ></div>
-                      )}
+                          <input
+                            id={`item-notes-${itemId}`}
+                            value={item.notes || ""}
+                            className="input input--edit input--full-width input--textarea"
+                            readOnly={!isEditing}
+                            placeholder={t("notes")}
+                            onChange={(e) =>
+                              handleInputChange(index, "notes", e.target.value)
+                            }
+                          />
+                          <button
+                            className="btn btn-icon btn-icon-remove"
+                            onClick={() => removeItemFromEdit(index)}
+                            title={t("remove_item")}
+                            aria-label={t("remove_item")}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
                     </li>
                   );
                 })
@@ -315,7 +310,7 @@ const GroceryList = ({
                     const item = group.items[0];
                     return (
                       <li
-                        className={`flex-row grocery-item ${
+                        className={`flex-row grocery-view-item ${
                           isGroupChecked ? "checked" : ""
                         }`}
                         key={groupKey}
@@ -324,7 +319,7 @@ const GroceryList = ({
                           type="checkbox"
                           checked={isGroupChecked}
                           onChange={() => toggleItemChecked(item.itemId)}
-                          id={`grocery-item-${item.itemId}`}
+                          id={`grocery-view-item-${item.itemId}`}
                         />
                         <span className="item-name">{item.name}</span>
                         {(item.quantity || item.unit) && (
@@ -344,11 +339,16 @@ const GroceryList = ({
                                 }
                               }
 
+                              const displayQuantity = formatQuantityForUnit(
+                                qty,
+                                unit,
+                                units
+                              );
                               const displayUnit = unit
-                                ? getUnitDisplay(unit, qty)
+                                ? formatUnitDisplay(unit, qty, units)
                                 : "";
-                              return `${qty}${
-                                qty && displayUnit ? " " : ""
+                              return `${displayQuantity}${
+                                displayQuantity && displayUnit ? " " : ""
                               }${displayUnit}`;
                             })()}
                           </span>
@@ -373,11 +373,16 @@ const GroceryList = ({
                           }
                         }
 
+                        const displayQuantity = formatQuantityForUnit(
+                          qty,
+                          unit,
+                          units
+                        );
                         const displayUnit = unit
-                          ? getUnitDisplay(unit, qty)
+                          ? formatUnitDisplay(unit, qty, units)
                           : "";
-                        const measurement = `${qty}${
-                          qty && displayUnit ? " " : ""
+                        const measurement = `${displayQuantity}${
+                          displayQuantity && displayUnit ? " " : ""
                         }${displayUnit}`.trim();
                         return measurement || null;
                       })
@@ -386,7 +391,7 @@ const GroceryList = ({
 
                     return (
                       <li
-                        className={`flex-row grocery-item ${
+                        className={`flex-row grocery-view-item ${
                           isGroupChecked ? "checked" : ""
                         }`}
                         key={groupKey}
@@ -395,7 +400,7 @@ const GroceryList = ({
                           type="checkbox"
                           checked={isGroupChecked}
                           onChange={() => toggleItemChecked(firstItemId)}
-                          id={`grocery-item-${firstItemId}`}
+                          id={`grocery-view-item-${firstItemId}`}
                         />
                         <span className="item-name">{group.displayName}</span>
                         <span className="item-details">{measurements} </span>
@@ -403,17 +408,16 @@ const GroceryList = ({
                     );
                   }
                 })}
+            {isEditing && (
+              <button
+                className="btn btn-icon btn-icon-success"
+                onClick={addNewItem}
+                aria-label={t("add_item")}
+              >
+                <Plus size={20} />
+              </button>
+            )}
           </ul>
-        )}
-
-        {isEditing && (
-          <button
-            className="btn btn-icon btn-icon-success"
-            onClick={addNewItem}
-            aria-label={t("add_item")}
-          >
-            <Plus size={20} />
-          </button>
         )}
       </div>
 

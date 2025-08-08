@@ -64,4 +64,136 @@ describe("RecipeCard", () => {
 
     expect(screen.getByText("Pasta")).toBeInTheDocument();
   });
+
+  describe("Source Link Functionality", () => {
+    const mockWindowOpen = vi.fn();
+    
+    beforeEach(() => {
+      // Mock window.open
+      vi.stubGlobal('window', {
+        ...window,
+        open: mockWindowOpen
+      });
+      mockWindowOpen.mockClear();
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it("shows link icon when recipe has http source", () => {
+      const recipeWithHttpLink = {
+        id: 1,
+        title: "Test Recipe",
+        source: "http://example.com"
+      };
+
+      render(<RecipeCard recipe={recipeWithHttpLink} onClick={mockOnClick} />);
+
+      expect(screen.getByRole("link-icon")).toBeInTheDocument();
+    });
+
+    it("shows link icon when recipe has https source", () => {
+      const recipeWithHttpsLink = {
+        id: 1,
+        title: "Test Recipe", 
+        source: "https://example.com"
+      };
+
+      render(<RecipeCard recipe={recipeWithHttpsLink} onClick={mockOnClick} />);
+      
+      expect(screen.getByRole("link-icon")).toBeInTheDocument();
+    });
+
+    it("shows link icon when recipe has www source", () => {
+      const recipeWithWwwLink = {
+        id: 1,
+        title: "Test Recipe",
+        source: "www.example.com"
+      };
+
+      render(<RecipeCard recipe={recipeWithWwwLink} onClick={mockOnClick} />);
+      
+      expect(screen.getByRole("link-icon")).toBeInTheDocument();
+    });
+
+    it("does not show link icon when recipe has text source", () => {
+      const recipeWithTextSource = {
+        id: 1,
+        title: "Test Recipe",
+        source: "My grandmother's recipe"
+      };
+
+      render(<RecipeCard recipe={recipeWithTextSource} onClick={mockOnClick} />);
+      
+      expect(screen.queryByRole("link-icon")).not.toBeInTheDocument();
+    });
+
+    it("does not show link icon when recipe has no source", () => {
+      const recipeWithoutSource = {
+        id: 1,
+        title: "Test Recipe"
+      };
+
+      render(<RecipeCard recipe={recipeWithoutSource} onClick={mockOnClick} />);
+      
+      expect(screen.queryByRole("link-icon")).not.toBeInTheDocument();
+    });
+
+    it("opens source link in new tab when link icon is clicked", () => {
+      const recipeWithLink = {
+        id: 1,
+        title: "Test Recipe",
+        source: "https://example.com"
+      };
+
+      render(<RecipeCard recipe={recipeWithLink} onClick={mockOnClick} />);
+      
+      const linkIcon = screen.getByRole("link-icon");
+      fireEvent.click(linkIcon);
+
+      expect(mockWindowOpen).toHaveBeenCalledTimes(1);
+      expect(mockWindowOpen).toHaveBeenCalledWith(
+        "https://example.com", 
+        "_blank", 
+        "noopener,noreferrer"
+      );
+    });
+
+    it("prevents card click when link icon is clicked", () => {
+      const recipeWithLink = {
+        id: 1,
+        title: "Test Recipe",
+        source: "https://example.com"
+      };
+
+      render(<RecipeCard recipe={recipeWithLink} onClick={mockOnClick} />);
+      
+      const linkIcon = screen.getByRole("link-icon");
+      fireEvent.click(linkIcon);
+
+      // Card onClick should not be called
+      expect(mockOnClick).not.toHaveBeenCalled();
+      // But window.open should be called
+      expect(mockWindowOpen).toHaveBeenCalledTimes(1);
+    });
+
+    it("still calls card onClick when clicking elsewhere on card", () => {
+      const recipeWithLink = {
+        id: 1,
+        title: "Test Recipe",
+        source: "https://example.com"
+      };
+
+      render(<RecipeCard recipe={recipeWithLink} onClick={mockOnClick} />);
+      
+      // Click on the title instead of the link icon
+      const title = screen.getByText("Test Recipe");
+      fireEvent.click(title);
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(mockOnClick).toHaveBeenCalledWith(recipeWithLink);
+      expect(mockWindowOpen).not.toHaveBeenCalled();
+    });
+  });
 });

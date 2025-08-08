@@ -6,6 +6,7 @@ import {
   validateRecipeForm,
   validateRecipeTitleUnique,
 } from "../../utils/validation";
+import { parseFraction } from "../../utils/fractionUtils";
 
 export const useRecipeForm = ({ initialRecipe = null }) => {
   const { t, i18n } = useTranslation();
@@ -109,7 +110,6 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         source: initialRecipe.source || "",
         ungroupedIngredients: ungroupedIngredients,
         ingredientSections: ingredientSections,
-        link_only: initialRecipe.link_only,
         notes: initialRecipe.notes,
       };
     }
@@ -131,7 +131,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         },
       ],
       ingredientSections: [],
-      link_only: false,
+
       notes: "",
     };
   }, [initialRecipe]);
@@ -184,13 +184,16 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     value,
     clearError
   ) => {
+    // Store raw value - parsing happens during display
+    const processedValue = value;
+
     if (sectionId === "ungrouped") {
       // Handle ungrouped ingredients
       setFormData((prev) => ({
         ...prev,
         ungroupedIngredients: prev.ungroupedIngredients.map((ingredient) =>
           ingredient.tempId === tempId
-            ? { ...ingredient, [field]: value }
+            ? { ...ingredient, [field]: processedValue }
             : ingredient
         ),
       }));
@@ -204,7 +207,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
                 ...section,
                 ingredients: section.ingredients.map((ingredient) =>
                   ingredient.tempId === tempId
-                    ? { ...ingredient, [field]: value }
+                    ? { ...ingredient, [field]: processedValue }
                     : ingredient
                 ),
               }
@@ -255,12 +258,10 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   };
 
   const removeInstruction = (index) => {
-    if (formData.instructions.length > 1) {
-      setFormData((prev) => ({
-        ...prev,
-        instructions: prev.instructions.filter((_, i) => i !== index),
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      instructions: prev.instructions.filter((_, i) => i !== index),
+    }));
   };
 
   const addIngredient = (sectionId) => {
@@ -598,7 +599,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         source: formData.source.trim() || null,
         ungroupedIngredients: validUngroupedIngredients.map((ing) => ({
           name: ing.name.trim(),
-          quantity: ing.quantity ? parseFloat(ing.quantity) : null,
+          quantity: ing.quantity ? parseFraction(ing.quantity) : null,
           unit: ing.unit.trim() || null,
           notes: ing.notes.trim() || null,
         })),
@@ -606,12 +607,12 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
           ...section,
           ingredients: section.ingredients.map((ing) => ({
             name: ing.name.trim(),
-            quantity: ing.quantity ? parseFloat(ing.quantity) : null,
+            quantity: ing.quantity ? parseFraction(ing.quantity) : null,
             unit: ing.unit.trim() || null,
             notes: ing.notes.trim() || null,
           })),
         })),
-        link_only: formData.link_only,
+
         notes: formData.notes,
       };
 

@@ -7,6 +7,7 @@ import { useRecipe } from "../../hooks/data/useRecipe";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import { formatCompleteIngredient } from "../../utils/ingredientFormatting";
 
 const Recipe = () => {
   const { id } = useParams();
@@ -14,18 +15,6 @@ const Recipe = () => {
   const navigate = useNavigate();
   const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
-
-  // Helper function to get the correct ingredient name (singular vs plural)
-  const getIngredientDisplayName = (ingredient) => {
-    const shouldUsePlural =
-      ingredient.quantity && parseFloat(ingredient.quantity) > 1;
-
-    if (shouldUsePlural && ingredient.plural_name) {
-      return ingredient.plural_name;
-    }
-
-    return ingredient.singular_name || ingredient.name || "Unknown ingredient";
-  };
 
   // Use the grocery list hook
   const {
@@ -73,7 +62,7 @@ const Recipe = () => {
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
   return (
-    <div className="recipe-container card card-content">
+    <div className="recipe-container card card-recipe">
       <div className="flex-row">
         <h1 className="forta">{recipe.title}</h1>
 
@@ -174,10 +163,10 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-ungrouped-${index}-${ingredient.id}`}
                     >
-                      {ingredient.quantity && `${ingredient.quantity} `}
-                      {ingredient.unit && `${ingredient.unit} `}
-                      {`${getIngredientDisplayName(ingredient)} `}
-                      {ingredient.notes && `${ingredient.notes} `}
+                      {formatCompleteIngredient(
+                        ingredient,
+                        t("units", { returnObjects: true })
+                      )}
                     </label>
                   </li>
                 ))}
@@ -215,10 +204,10 @@ const Recipe = () => {
                             <label
                               htmlFor={`ingredient-section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
                             >
-                              {ingredient.quantity && `${ingredient.quantity} `}
-                              {ingredient.unit && `${ingredient.unit} `}
-                              {`${getIngredientDisplayName(ingredient)} `}
-                              {ingredient.notes && `${ingredient.notes} `}
+                              {formatCompleteIngredient(
+                                ingredient,
+                                t("units", { returnObjects: true })
+                              )}
                             </label>
                           </li>
                         )
@@ -254,10 +243,10 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-flat-${index}-${ingredient.id}`}
                     >
-                      {ingredient.quantity && `${ingredient.quantity} `}
-                      {ingredient.unit && `${ingredient.unit} `}
-                      {`${getIngredientDisplayName(ingredient)} `}
-                      {ingredient.notes && `${ingredient.notes} `}
+                      {formatCompleteIngredient(
+                        ingredient,
+                        t("units", { returnObjects: true })
+                      )}
                     </label>
                   </li>
                 ))}
@@ -285,9 +274,11 @@ const Recipe = () => {
         <div className="recipe-subheading flex-row">
           <h2>{t("source")}:</h2>
 
-          {/^https?:\/\/[^\s]+/.test(recipe.source) ? (
+          {recipe.source.startsWith("http://") ||
+          recipe.source.startsWith("https://") ||
+          recipe.source.startsWith("www.") ? (
             <a
-              href={recipe.source.match(/^https?:\/\/[^\s]+/)[0]}
+              href={recipe.source}
               target="_blank"
               rel="noopener noreferrer"
               className="link-red"

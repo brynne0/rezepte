@@ -26,16 +26,16 @@ vi.mock("react-i18next", () => ({
     t: (key) => {
       if (key === "units") {
         return [
-          { value: "", label: "unit" },
-          { value: "tsp", label: "tsp" },
-          { value: "tbsp", label: "tbsp" },
-          { value: "cup/s", label: "cup/s" },
-          { value: "ml", label: "ml" },
-          { value: "l", label: "l" },
-          { value: "g", label: "g" },
-          { value: "kg", label: "kg" },
-          { value: "can/s", label: "can/s" },
-          { value: "piece/s", label: "piece/s" },
+          { value: "", label: "unit", pluralize: true, useFractions: true },
+          { value: "tsp", label: "tsp", pluralize: true, useFractions: true },
+          { value: "tbsp", label: "tbsp", pluralize: true, useFractions: true },
+          { value: "cup/s", label: "cup/s", pluralize: true, useFractions: true },
+          { value: "ml", label: "ml", pluralize: false, useFractions: false },
+          { value: "l", label: "l", pluralize: false, useFractions: false },
+          { value: "g", label: "g", pluralize: false, useFractions: false },
+          { value: "kg", label: "kg", pluralize: false, useFractions: false },
+          { value: "can/s", label: "can/s", pluralize: true, useFractions: true },
+          { value: "piece/s", label: "piece/s", pluralize: true, useFractions: true },
         ];
       }
       return key;
@@ -173,11 +173,15 @@ describe("GroceryList", () => {
 
     const nameInputs = screen.getAllByPlaceholderText("item_name");
     const quantityInputs = screen.getAllByPlaceholderText("quantity");
-    const unitSelects = screen.getAllByRole("combobox");
+    const unitInputs = screen.getAllByPlaceholderText("unit");
 
     fireEvent.change(nameInputs[2], { target: { value: "Coconuts" } });
     fireEvent.change(quantityInputs[2], { target: { value: "3" } });
-    fireEvent.change(unitSelects[2], { target: { value: "piece/s" } });
+    
+    // Interact with UnitSelector component
+    fireEvent.focus(unitInputs[2]); // Open the dropdown
+    const pieceOption = screen.getByText("piece/s");
+    fireEvent.click(pieceOption); // Select the unit
 
     const saveButton = screen.getByRole("button", { name: "save" });
     fireEvent.click(saveButton);
@@ -187,7 +191,7 @@ describe("GroceryList", () => {
       initialGroceryList[1],
       expect.objectContaining({
         name: "Coconuts",
-        quantity: 3,
+        quantity: "3",
         unit: "piece/s",
         source_recipes: [],
         tempId: expect.stringMatching(/^temp-\d+$/),

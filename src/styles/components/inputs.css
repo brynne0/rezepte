@@ -1,12 +1,12 @@
 /* Base input styles - all inputs inherit from this */
 .input {
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   font-size: 1rem;
   font-family: inherit;
-  color: var(--dark_brown);
+  color: var(--dark-brown);
   background: white;
-  border: 0.0625rem solid var(--dark_brown);
+  border: var(--border-width) solid var(--dark-brown);
   transition: all 0.2s ease;
   box-sizing: border-box;
   min-width: 0;
@@ -16,7 +16,7 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--dark_red);
+  border-color: var(--dark-red);
 }
 
 .input:invalid {
@@ -25,17 +25,17 @@
 
 /* Variations */
 .input--cream {
-  background: var(--cream_opaque);
+  background: var(--cream-light);
   padding: 0.5rem;
 }
 
 .input--cream:focus {
-  border-color: var(--dark_brown);
+  border-color: var(--dark-brown);
 }
 
 .input--edit {
-  box-shadow: 0 0.0625rem 0.1rem var(--shadow_black);
-  border: 0.0625rem dashed var(--cream);
+  box-shadow: 0 0.0625rem 0.1rem var(--shadow-black);
+  border: var(--border-width) dashed var(--cream);
 }
 
 .input--full-width {
@@ -53,18 +53,6 @@
   overflow-y: hidden;
 }
 
-/* Select dropdown styling */
-.input--select {
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==);
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 1rem;
-  padding-right: 2rem;
-  cursor: pointer;
-}
-
 .input--password {
   width: 100%;
   padding-right: 2.5rem; /* Make room for the eye icon */
@@ -72,13 +60,13 @@
 
 /* Error state */
 .input--error {
-  border-color: var(--error_red);
+  border-color: var(--error-red);
   border-width: 0.1rem;
 }
 
 .input--error:focus {
-  border-color: var(--error_red);
-  box-shadow: 0 0 0 0.2rem var(--error_shadow);
+  border-color: var(--error-red);
+  box-shadow: 0 0 0 0.2rem var(--error-shadow);
 }
 
 /* Disabled state cleanup */

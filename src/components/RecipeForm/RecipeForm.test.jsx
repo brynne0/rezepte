@@ -11,10 +11,10 @@ vi.mock("react-i18next", () => ({
         return [
           { value: "", label: "" },
           { value: "cup", label: "cup" },
-          { value: "tbsp", label: "tablespoon" },
-          { value: "tsp", label: "teaspoon" },
-          { value: "g", label: "grams" },
-          { value: "kg", label: "kilograms" },
+          { value: "tbsp", label: "tbsp" },
+          { value: "tsp", label: "tsp" },
+          { value: "g", label: "g" },
+          { value: "kg", label: "kg" },
         ];
       }
       return key;
@@ -105,7 +105,6 @@ describe("RecipeForm", () => {
     instructions: ["Mix ingredients", "Bake for 30 minutes"],
     source: "https://example.com",
     notes: "Test notes",
-    link_only: false,
   };
 
   const mockHookReturn = {
@@ -153,25 +152,6 @@ describe("RecipeForm", () => {
       expect(screen.getByText("Create Recipe")).toBeInTheDocument();
       expect(screen.getByRole("form")).toBeInTheDocument();
     });
-
-    it("renders recipe type toggle buttons", () => {
-      renderComponent();
-
-      expect(screen.getByText("full_recipe")).toBeInTheDocument();
-      expect(screen.getByText("link_only")).toBeInTheDocument();
-    });
-
-    it("shows selected state for full recipe by default", () => {
-      renderComponent();
-
-      const fullRecipeButton = screen
-        .getByText("full_recipe")
-        .closest("button");
-      const linkOnlyButton = screen.getByText("link_only").closest("button");
-
-      expect(fullRecipeButton).toHaveClass("selected");
-      expect(linkOnlyButton).not.toHaveClass("selected");
-    });
   });
 
   describe("Form Fields", () => {
@@ -179,30 +159,55 @@ describe("RecipeForm", () => {
       renderComponent();
 
       expect(screen.getByDisplayValue("Test Recipe")).toBeInTheDocument();
-      const categorySelect = screen.getByRole("combobox", { name: "category" });
-      expect(categorySelect).toBeInTheDocument();
-      expect(categorySelect.value).toBe("desserts");
       expect(screen.getByDisplayValue("4")).toBeInTheDocument();
       expect(
         screen.getByDisplayValue("https://example.com")
       ).toBeInTheDocument();
     });
 
-    it("renders category options correctly", () => {
+    it("renders title and servings on the same row", () => {
       renderComponent();
 
-      const categorySelect = screen.getByLabelText("category");
-      expect(categorySelect).toBeInTheDocument();
+      // Check that both title and servings headers are present
+      expect(screen.getByText("recipe_title")).toBeInTheDocument();
+      expect(screen.getByText("servings")).toBeInTheDocument();
 
-      // Check that "all" category is filtered out
-      const options = categorySelect.querySelectorAll("option");
-      const optionValues = Array.from(options).map((option) => option.value);
-      expect(optionValues).toContain("desserts");
-      expect(optionValues).toContain("main-dishes");
-      expect(optionValues).not.toContain("all");
+      // Check that the inputs are rendered
+      expect(screen.getByDisplayValue("Test Recipe")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("4")).toBeInTheDocument();
+    });
 
-      // Ensure the selected value matches formData.category
-      expect(categorySelect.value).toBe(mockFormData.category);
+    it("renders category buttons correctly", () => {
+      renderComponent();
+
+      // Check that category buttons are rendered (excluding "all")
+      expect(screen.queryByText("All Recipes")).not.toBeInTheDocument();
+      expect(screen.getByText("Desserts")).toBeInTheDocument();
+      expect(screen.getByText("Main Dishes")).toBeInTheDocument();
+
+      // Check that the selected category has the correct class
+      const dessertsButton = screen.getByText("Desserts").closest("button");
+      const mainDishesButton = screen
+        .getByText("Main Dishes")
+        .closest("button");
+
+      expect(dessertsButton).toHaveClass("selected");
+      expect(mainDishesButton).not.toHaveClass("selected");
+    });
+
+    it("calls handleInputChange when category button is clicked", () => {
+      renderComponent();
+
+      const mainDishesButton = screen
+        .getByText("Main Dishes")
+        .closest("button");
+      fireEvent.click(mainDishesButton);
+
+      expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
+        "category",
+        "main-dishes",
+        false
+      );
     });
 
     it("shows validation errors when present", () => {
@@ -217,32 +222,44 @@ describe("RecipeForm", () => {
       expect(titleInput).toHaveClass("input--error");
       expect(screen.getByText("Title is required")).toBeInTheDocument();
     });
-  });
 
-  describe("Recipe Type Toggle", () => {
-    it("calls handleInputChange when switching to link only", () => {
-      renderComponent();
-
-      const linkOnlyButton = screen.getByText("link_only").closest("button");
-      fireEvent.click(linkOnlyButton);
-
-      expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
-        "link_only",
-        true
-      );
-    });
-
-    it("hides ingredients and instructions for link-only recipes", () => {
+    it("shows validation error styling on category buttons", () => {
       useRecipeForm.mockReturnValue({
         ...mockHookReturn,
-        formData: { ...mockFormData, link_only: true },
+        validationErrors: { category: "Category is required" },
       });
 
       renderComponent();
 
-      expect(screen.queryByText("ingredients")).not.toBeInTheDocument();
-      expect(screen.queryByText("instructions")).not.toBeInTheDocument();
-      expect(screen.queryByText("servings")).not.toBeInTheDocument();
+      const categoriesWrapper = screen
+        .getByText("Desserts")
+        .closest(".form-categories-wrapper");
+      expect(categoriesWrapper).toHaveClass("input--error");
+      expect(screen.getByText("Category is required")).toBeInTheDocument();
+    });
+
+    it("renders source input with toggle button", () => {
+      renderComponent();
+
+      expect(
+        screen.getByDisplayValue("https://example.com")
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/switch_to/)).toBeInTheDocument(); // toggle button
+    });
+
+    it("source toggle button changes placeholder", () => {
+      renderComponent();
+
+      const toggleButton = screen.getByLabelText(/switch_to/);
+      const sourceInput = screen.getByDisplayValue("https://example.com");
+
+      // Initially should be in link mode
+      expect(sourceInput).toHaveAttribute("placeholder", "source_link");
+
+      // Click toggle to switch to note mode
+      fireEvent.click(toggleButton);
+
+      expect(sourceInput).toHaveAttribute("placeholder", "source_note");
     });
   });
 
@@ -422,9 +439,9 @@ describe("RecipeForm", () => {
       // Ensure section is rendered
       expect(screen.getByDisplayValue("Sauce")).toBeInTheDocument();
 
-      // Find the section remove button using the correct data-testid
-      const removeButtons = screen.getAllByTestId("remove-section-btn"); // Updated data-testid
-      fireEvent.click(removeButtons[0]); // First remove button should be for removing the section
+      // Find the section remove button
+      const removeSectionButton = screen.getByText("remove_section");
+      fireEvent.click(removeSectionButton); // First remove button should be for removing the section
 
       expect(mockHookReturn.removeSection).toHaveBeenCalledWith("section-1");
     });
@@ -549,8 +566,8 @@ describe("RecipeForm", () => {
     it("has proper form labels", () => {
       renderComponent();
 
-      expect(screen.getByLabelText("recipe_title")).toBeInTheDocument();
-      expect(screen.getByLabelText("category")).toBeInTheDocument();
+      expect(screen.getByText("recipe_title")).toBeInTheDocument();
+      expect(screen.getByText("category")).toBeInTheDocument();
       expect(screen.getByLabelText("servings")).toBeInTheDocument();
     });
 
@@ -570,7 +587,6 @@ describe("RecipeForm", () => {
           ungroupedIngredients: [],
           ingredientSections: [],
           instructions: [],
-          link_only: false,
         },
       });
 

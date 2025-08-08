@@ -29,11 +29,6 @@ const RecipeList = ({ selectedCategory, recipes, searchTerm }) => {
             recipe={r}
             onClick={() => {
               navigate(`/${r.id}/${r.slug}`);
-
-              // Link to external link for link_only recipes
-              // r.link_only
-              //   ? (window.location.href = r.source)
-              //   : navigate(`/${r.slug}`);
             }}
           />
         ))}

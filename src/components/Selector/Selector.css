@@ -1,0 +1,58 @@
+.selector {
+  position: relative;
+  width: 100%;
+}
+
+.selector-input {
+  padding-right: 1.5rem !important; /* Make room for chevron */
+}
+
+.selector-chevron {
+  position: absolute;
+  right: 0.5rem;
+  color: var(--dark-brown);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.selector-chevron {
+  pointer-events: auto;
+}
+
+.selector-chevron.open {
+  transform: rotate(180deg);
+}
+
+.selector-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: var(--border-width) dashed var(--dark-red);
+  border-top: none;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: var(--z-dropdown);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.selector-option {
+  padding: 0.1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.selector-option:hover,
+.selector-option.selected {
+  color: var(--dark-red);
+  font-weight: 500;
+}
+
+/* Remove input box bottom radius when selected */
+.selector-input:focus {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}

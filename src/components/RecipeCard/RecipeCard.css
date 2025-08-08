@@ -1,17 +1,35 @@
 .recipe-card {
-  border: 0.0625rem solid var(--brown);
+  border: var(--border-width) solid var(--brown);
   display: flex;
   flex-direction: column;
-  border-radius: 0.5rem;
-  background-color: var(--cream_opaque);
-  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
+  border-radius: var(--border-radius);
+  background-color: var(--cream-light);
+  box-shadow: 0 0.125rem 0.5rem var(--shadow-black);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
-  padding: 0.2rem;
+  position: relative;
 }
 
-.recipe-card:hover {
+/* Title turns red when hovering anywhere on the card */
+.recipe-card:hover .recipe-card-title {
+  color: var(--red);
+}
+
+.recipe-card-title {
+  margin: 0.2rem 1.5rem;
+}
+
+.recipe-card-link {
+  position: absolute;
+  right: 0.3rem;
+  top: 0.3rem;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+/* Link icon only turns red when hovering directly on the icon */
+.recipe-card-link:hover {
   color: var(--red);
 }
 

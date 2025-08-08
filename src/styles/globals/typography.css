@@ -9,7 +9,7 @@
   font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
   line-height: 1.5;
-  color: var(--dark_brown);
+  color: var(--dark-brown);
 
   /* Font rendering */
   font-synthesis: none;
@@ -54,12 +54,17 @@ h3 {
 
 h1.forta {
   font-family: var(--font-forta);
-  color: var(--dark_red);
+  color: var(--dark-red);
 }
 
 h2.forta {
   font-family: var(--font-forta);
   font-size: 1rem;
+}
+
+h3.forta {
+  font-family: var(--font-forta);
+  font-size: 0.9rem;
 }
 
 .link {
@@ -72,16 +77,16 @@ h2.forta {
 }
 
 .link-red {
-  color: var(--dark_red);
+  color: var(--dark-red);
 }
 
 .error-message-small {
-  color: var(--error_red);
+  color: var(--error-red);
   font-size: 0.8rem;
 }
 
 .error-message {
-  color: var(--error_red);
+  color: var(--error-red);
   font-size: 1rem;
 }
 

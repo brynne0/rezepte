@@ -14,23 +14,23 @@
 
 .confirmation-modal-content {
   background: white;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   padding: 1.5rem;
-  box-shadow: 0 1rem 3rem var(--shadow_black);
+  box-shadow: 0 1rem 3rem var(--shadow-black);
   max-width: 90vw;
   max-height: 90vh;
   min-width: 20rem;
 }
 
 .confirmation-modal-title {
-  color: var(--dark_brown);
+  color: var(--dark-brown);
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
 }
 
 .confirmation-modal-message {
-  color: var(--dark_brown);
+  color: var(--dark-brown);
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
   font-weight: 500;

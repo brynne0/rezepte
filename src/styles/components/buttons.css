@@ -4,7 +4,7 @@
   font-family: inherit;
   cursor: pointer;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -14,10 +14,10 @@
 /* Standard button */
 .btn-standard {
   padding: 0.5rem;
-  background: var(--cream_opaque);
-  color: var(--dark_brown);
-  border: 0.0625rem solid var(--brown);
-  box-shadow: 0 0.125rem 0.5rem var(--shadow_black);
+  background: var(--cream-light);
+  color: var(--dark-brown);
+  border: var(--border-width) solid var(--brown);
+  box-shadow: 0 0.125rem 0.5rem var(--shadow-black);
 }
 
 /* Action buttons (primary, secondary, danger) */
@@ -30,16 +30,16 @@
 .btn-primary {
   background: var(--brown);
   color: white;
-  box-shadow: 0 0.125rem 0.25rem var(--shadow_black);
+  box-shadow: 0 0.125rem 0.25rem var(--shadow-black);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--light_brown);
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+  background: var(--light-brown);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow-black);
 }
 
 .btn-primary:disabled {
-  background: var(--light_brown);
+  background: var(--light-brown);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -47,27 +47,27 @@
 
 .btn-secondary {
   color: var(--brown);
-  border: 0.1rem dotted var(--brown);
+  border: var(--border-width-thick) dotted var(--brown);
   padding: 0.5rem;
-  background: var(--cream_opaque);
+  background: var(--cream-light);
 }
 
 .btn-secondary:hover {
-  color: var(--light_brown);
-  border-color: var(--light_brown);
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+  color: var(--light-brown);
+  border-color: var(--light-brown);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow-black);
 }
 
 .btn-danger {
   background: white;
   color: var(--red);
-  border: 0.1rem solid var(--red);
+  border: var(--border-width-thick) solid var(--red);
 }
 
 .btn-danger:hover {
   background: var(--red);
   color: white;
-  box-shadow: 0 0.25rem 0.5rem var(--shadow_black);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow-black);
 }
 
 /* Icon buttons */
@@ -75,7 +75,7 @@
   padding: 0.5rem;
   background: none;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
 }
 
 .btn-icon-neutral {
@@ -83,8 +83,10 @@
 }
 
 .btn-icon-neutral:hover {
-  background: var(--cream_opaque);
-  border-radius: 50%;
+  /* background: var(--cream-light); */
+  /* border-radius: 2rem; */
+  transform: translateY(-1px);
+  color: var(--red);
 }
 
 .btn-icon-success {
@@ -94,12 +96,12 @@
 .btn-icon-red {
   background: none;
   border: none;
-  border-radius: 0.5rem;
-  color: var(--dark_red);
+  border-radius: var(--border-radius);
+  color: var(--red);
 }
 
 .btn-icon-remove {
-  color: var(--error_red);
+  color: var(--error-red);
   flex-shrink: 0;
 }
 
@@ -117,42 +119,46 @@
 }
 
 .btn-icon-password:hover {
-  color: var(--dark_red);
+  color: var(--dark-red);
 }
 
 /* Navigation buttons */
+.back-arrow-left {
+  left: 0;
+  position: absolute;
+  cursor: pointer;
+}
+
 .back-arrow {
-  left: 3rem;
   cursor: pointer;
 }
 
 /* Add section buttons */
-.btn-add-section-dottes {
+.btn-section-dotted {
   padding: 0.375rem 0.75rem;
   background: transparent;
   color: var(--brown);
-  border: 0.0625rem dashed var(--brown);
+  border: var(--border-width) dashed var(--brown);
   font-size: 0.9rem;
   font-weight: 500;
   gap: 0.375rem;
 }
 
-.btn-add-section-dotted:hover {
-  background: var(--cream_opaque);
+.btn-section-dotted:hover {
+  background: var(--cream-light);
   border-style: solid;
 }
 
-.btn-add-section {
-  background: rgba(var(--brown-rgb), 0.1);
-  color: var(--brown);
+.btn-section {
+  background: none;
+  color: var(--dark-brown);
   border: none;
   font-weight: 500;
   font-size: 0.9rem;
 }
 
-.btn-add-section:hover {
-  background: rgba(var(--brown-rgb), 0.2);
-  color: var(--dark_brown);
+.btn-section:hover {
+  color: var(--brown);
 }
 
 /* Responsive design */
@@ -166,8 +172,7 @@
     left: 1.25rem;
   }
 
-  .btn-add-section,
-  .btn-add-section {
+  .btn-section {
     padding: 0.375rem 0.625rem;
   }
 }

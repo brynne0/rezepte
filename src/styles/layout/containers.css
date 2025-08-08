@@ -1,24 +1,25 @@
 /* Cards */
 .card {
-  background: var(--cream_opaque);
-  border-radius: 0.75rem;
-  box-shadow: 0 0.25rem 0.375rem var(--shadow_black);
+  background: var(--cream-light);
+  border-radius: var(--border-radius);
+  box-shadow: 0 0.25rem 0.375rem var(--shadow-black);
   overflow: hidden;
   margin: 0.5rem auto;
 }
 
-.card-page {
-  padding: 0 1.25rem 1.25rem;
-  min-width: calc(0.25 * 100vw);
-  max-width: -webkit-fill-available;
-}
-
-.card-content {
-  padding: 1.25rem;
+.card-recipe {
+  padding: 1.5rem;
   width: -webkit-fill-available;
 }
 
+.card-grocery {
+  padding: 2rem 3rem;
+  min-width: calc(0.3 * 100vw);
+  max-width: -webkit-fill-available;
+}
+
 .card-form {
+  padding: 2rem 3rem;
   max-width: 50rem;
   width: -webkit-fill-available;
 }
@@ -36,7 +37,10 @@
 .page-header {
   display: flex;
   gap: 0.5rem;
-  margin: 1rem;
+  padding-bottom: 1rem;
+  position: relative;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Flex utilities */
@@ -58,6 +62,12 @@
 }
 
 .flex-row {
+  display: flex;
+  align-items: center;
+}
+
+.relative-center {
+  position: relative;
   display: flex;
   align-items: center;
 }
@@ -107,12 +117,6 @@
   min-width: 15rem;
 }
 
-.password-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
 /* Subheading wrappers */
 .subheading-wrapper {
   padding: 0.5rem 1rem;
@@ -125,7 +129,7 @@
 
 .subheading-wrapper:hover,
 .subheading-wrapper.selected {
-  color: var(--red);
+  color: var(--dark-red);
 }
 
 /* Responsive */
@@ -140,5 +144,11 @@
 
   .btn-wrapper.edit {
     justify-content: center;
+  }
+
+  .card-grocery,
+  .card-form {
+    min-width: -webkit-fill-available;
+    padding: 1.25rem;
   }
 }
