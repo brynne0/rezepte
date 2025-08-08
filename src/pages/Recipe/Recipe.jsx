@@ -16,7 +16,6 @@ const Recipe = () => {
   const { isLoggedIn, isGuest } = useAuth();
   const { t } = useTranslation();
 
-
   // Use the grocery list hook
   const {
     checkedIngredients,
@@ -164,7 +163,10 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-ungrouped-${index}-${ingredient.id}`}
                     >
-                      {formatCompleteIngredient(ingredient, t("units", { returnObjects: true }))}
+                      {formatCompleteIngredient(
+                        ingredient,
+                        t("units", { returnObjects: true })
+                      )}
                     </label>
                   </li>
                 ))}
@@ -202,7 +204,10 @@ const Recipe = () => {
                             <label
                               htmlFor={`ingredient-section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
                             >
-                              {formatCompleteIngredient(ingredient, t("units", { returnObjects: true }))}
+                              {formatCompleteIngredient(
+                                ingredient,
+                                t("units", { returnObjects: true })
+                              )}
                             </label>
                           </li>
                         )
@@ -238,7 +243,10 @@ const Recipe = () => {
                     <label
                       htmlFor={`ingredient-flat-${index}-${ingredient.id}`}
                     >
-                      {formatCompleteIngredient(ingredient, t("units", { returnObjects: true }))}
+                      {formatCompleteIngredient(
+                        ingredient,
+                        t("units", { returnObjects: true })
+                      )}
                     </label>
                   </li>
                 ))}
@@ -266,9 +274,11 @@ const Recipe = () => {
         <div className="recipe-subheading flex-row">
           <h2>{t("source")}:</h2>
 
-          {/^https?:\/\/[^\s]+/.test(recipe.source) ? (
+          {recipe.source.startsWith("http://") ||
+          recipe.source.startsWith("https://") ||
+          recipe.source.startsWith("www.") ? (
             <a
-              href={recipe.source.match(/^https?:\/\/[^\s]+/)[0]}
+              href={recipe.source}
               target="_blank"
               rel="noopener noreferrer"
               className="link-red"
