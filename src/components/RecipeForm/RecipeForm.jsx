@@ -85,7 +85,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     <div className="card card-form">
       <header className="page-header flex-center">
         <ArrowBigLeft
-          className="back-arrow"
+          className="back-arrow-left"
           size={30}
           onClick={() => {
             handleCancel();

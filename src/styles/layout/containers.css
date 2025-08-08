@@ -9,7 +9,7 @@
 
 .card-page {
   padding: 0 1.25rem 1.25rem;
-  min-width: calc(0.25 * 100vw);
+  min-width: calc(0.3 * 100vw);
   max-width: -webkit-fill-available;
 }
 
@@ -36,7 +36,8 @@
 .page-header {
   display: flex;
   gap: 0.5rem;
-  margin: 1rem;
+  margin: 1rem 0;
+  position: relative;
 }
 
 /* Flex utilities */
@@ -140,5 +141,9 @@
 
   .btn-wrapper.edit {
     justify-content: center;
+  }
+
+  .card-page {
+    min-width: -webkit-fill-available;
   }
 }

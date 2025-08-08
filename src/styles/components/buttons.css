@@ -83,8 +83,10 @@
 }
 
 .btn-icon-neutral:hover {
-  background: var(--cream_light);
-  border-radius: var(--border-radius);
+  /* background: var(--cream_light); */
+  /* border-radius: 2rem; */
+  transform: translateY(-1px);
+  color: var(--red);
 }
 
 .btn-icon-success {
@@ -95,7 +97,7 @@
   background: none;
   border: none;
   border-radius: var(--border-radius);
-  color: var(--dark_red);
+  color: var(--red);
 }
 
 .btn-icon-remove {
@@ -121,8 +123,13 @@
 }
 
 /* Navigation buttons */
-.back-arrow {
+.back-arrow-left {
   left: 3rem;
+  position: absolute;
+  cursor: pointer;
+}
+
+.back-arrow {
   cursor: pointer;
 }
 
