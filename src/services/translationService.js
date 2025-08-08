@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { shouldUsePlural } from "../utils/fractionUtils";
 
 // DeepL translation function using Supabase Edge Function
 const translateText = async (text, targetLanguage) => {
@@ -46,7 +47,7 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
   if (recipe.original_language === targetLanguage) {
     // Process ingredients to add the 'name' field even for English
     const processedResult = { ...recipe };
-    
+
     // Handle ungrouped ingredients
     if (recipe.ungroupedIngredients) {
       processedResult.ungroupedIngredients = await Promise.all(
@@ -60,7 +61,7 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
         })
       );
     }
-    
+
     // Handle ingredient sections
     if (recipe.ingredientSections) {
       processedResult.ingredientSections = await Promise.all(
@@ -79,7 +80,7 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
         })
       );
     }
-    
+
     // Handle legacy flat ingredients structure
     if (recipe.ingredients) {
       processedResult.ingredients = await Promise.all(
@@ -109,7 +110,7 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
     isTranslated: true,
     translatedFrom: recipe.original_language,
   };
-  
+
   // Handle ungrouped ingredients
   if (recipe.ungroupedIngredients) {
     translatedResult.ungroupedIngredients = await getTranslatedIngredients(
@@ -117,7 +118,7 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
       targetLanguage
     );
   }
-  
+
   // Handle ingredient sections
   if (recipe.ingredientSections) {
     translatedResult.ingredientSections = await Promise.all(
@@ -130,7 +131,7 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
       })
     );
   }
-  
+
   // Handle legacy flat ingredients structure
   if (recipe.ingredients) {
     translatedResult.ingredients = await getTranslatedIngredients(
@@ -238,13 +239,6 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
       notes: recipe.notes,
     };
   }
-};
-
-// Helper function to determine if quantity should use plural form
-const shouldUsePlural = (quantity) => {
-  if (!quantity || quantity === null) return false;
-  const num = parseFloat(quantity);
-  return num > 1;
 };
 
 // Helper function to get the correct ingredient name for display

@@ -19,13 +19,13 @@ const mockUnits = [
   { value: "tsp", label: "tsp", pluralize: true, useFractions: true },
   { value: "tbsp", label: "tbsp", pluralize: true, useFractions: true },
   { value: "cup/s", label: "cup/s", pluralize: true, useFractions: true },
-  { value: "cup", label: "cup", pluralize: true, useFractions: true },
-  { value: "cups", label: "cups", pluralize: true, useFractions: true },
   { value: "ml", label: "ml", pluralize: false, useFractions: false },
   { value: "g", label: "g", pluralize: false, useFractions: false },
   { value: "can/s", label: "can/s", pluralize: true, useFractions: true },
   { value: "piece/s", label: "piece/s", pluralize: true, useFractions: true },
 ];
+
+let mockLanguage = "en";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -34,6 +34,9 @@ vi.mock("react-i18next", () => ({
         return mockUnits;
       }
       return key;
+    },
+    i18n: {
+      language: mockLanguage,
     },
   }),
 }));
@@ -108,7 +111,7 @@ describe("Recipe Component", () => {
         id: "ing-1",
         recipe_ingredient_id: "ri-1",
         quantity: "2",
-        unit: "cups",
+        unit: "cup/s",
         singular_name: "flour",
         plural_name: "flours",
         notes: "sifted",
@@ -275,7 +278,7 @@ describe("Recipe Component", () => {
             id: "ing-1",
             recipe_ingredient_id: "ri-1",
             quantity: "1",
-            unit: "cup",
+            unit: "cup/s",
             singular_name: "flour",
             plural_name: "flours",
           },
@@ -348,7 +351,7 @@ describe("Recipe Component", () => {
                 id: "ing-3",
                 recipe_ingredient_id: "ri-3",
                 quantity: "1.5",
-                unit: "cup",
+                unit: "cup/s",
                 singular_name: "almond",
                 plural_name: "almonds",
               },
@@ -376,7 +379,7 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText("For the base")).toBeInTheDocument();
       expect(screen.getByText("For the filling")).toBeInTheDocument();
-      expect(screen.getByText(/1 1\/2 cup almonds/)).toBeInTheDocument();
+      expect(screen.getByText(/1 1\/2 cups almonds/)).toBeInTheDocument();
       expect(screen.getByText(/1 lime/)).toBeInTheDocument();
     });
 
@@ -399,7 +402,7 @@ describe("Recipe Component", () => {
             id: "ing-5",
             recipe_ingredient_id: "ri-5",
             quantity: "1",
-            unit: "cup",
+            unit: "cup/s",
             singular_name: "sugar",
             plural_name: "sugars",
           },
@@ -532,7 +535,7 @@ describe("Recipe Component", () => {
       expect(screen.getByText(/3 rice/)).toBeInTheDocument();
     });
 
-    test("prioritises translated name over database fields", () => {
+    test("uses database fields for English pluralization", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [
@@ -542,17 +545,17 @@ describe("Recipe Component", () => {
             quantity: "2",
             singular_name: "flour",
             plural_name: "flours",
-            name: "Mehl", // Translated name should be used
+            name: "Mehl", // Translated name exists but English prioritizes database
           },
         ],
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 Mehl/)).toBeInTheDocument();
-      expect(screen.queryByText(/flours/)).not.toBeInTheDocument();
+      expect(screen.getByText(/2 flours/)).toBeInTheDocument();
+      expect(screen.queryByText(/2 Mehl/)).not.toBeInTheDocument();
     });
 
-    test("uses translated name for sectioned ingredients", () => {
+    test("uses database pluralization for sectioned ingredients in English", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [],
@@ -567,7 +570,7 @@ describe("Recipe Component", () => {
                 unit: "tbsp",
                 singular_name: "banana",
                 plural_name: "bananas",
-                name: "banana", // Translated name
+                name: "banana", // Has translated name but English uses database
               },
             ],
           },
@@ -575,8 +578,8 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 tbsp banana/)).toBeInTheDocument();
-      expect(screen.queryByText(/bananas/)).not.toBeInTheDocument();
+      // With unit "tbsp" (measurement unit), plural form is used
+      expect(screen.getByText(/2 tbsp bananas/)).toBeInTheDocument();
     });
 
     test("shows fallback message for missing ingredient names", () => {
@@ -633,7 +636,7 @@ describe("Recipe Component", () => {
             id: "ing-1",
             recipe_ingredient_id: "ri-1",
             quantity: "1",
-            unit: "cup",
+            unit: "cup/s",
             singular_name: "almond",
             plural_name: "almonds",
           },
@@ -657,6 +660,9 @@ describe("Recipe Component", () => {
 
   describe("Translation Scenarios", () => {
     test("displays German ingredient names when recipe is translated", () => {
+      // Set language to German for this test
+      mockLanguage = "de";
+
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         isTranslated: true,
@@ -688,9 +694,15 @@ describe("Recipe Component", () => {
       expect(screen.getByText(/1 tsp Salz/)).toBeInTheDocument();
       expect(screen.queryByText(/flour/)).not.toBeInTheDocument();
       expect(screen.queryByText(/salt/)).not.toBeInTheDocument();
+
+      // Reset language to English
+      mockLanguage = "en";
     });
 
     test("displays mixed translated and untranslated ingredients", () => {
+      // Set language to German for this test
+      mockLanguage = "de";
+
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [
@@ -708,7 +720,7 @@ describe("Recipe Component", () => {
             quantity: "2",
             singular_name: "apple",
             plural_name: "apples",
-            // No translated name - should fall back
+            // No translated name - should fall back to English plural
           },
         ],
       };
@@ -716,9 +728,12 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText(/1 Banane/)).toBeInTheDocument();
       expect(screen.getByText(/2 apples/)).toBeInTheDocument();
+
+      // Reset language to English
+      mockLanguage = "en";
     });
 
-    test("handles translated ingredient sections correctly", () => {
+    test("handles ingredient sections with database fallback", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [],
@@ -732,7 +747,8 @@ describe("Recipe Component", () => {
                 quantity: "400",
                 unit: "ml",
                 singular_name: "water",
-                name: "Wasser",
+                plural_name: "water",
+                name: "Wasser", // Has translated name but English uses database fields
               },
               {
                 id: "ing-4",
@@ -740,7 +756,8 @@ describe("Recipe Component", () => {
                 quantity: "500",
                 unit: "g",
                 singular_name: "flour",
-                name: "Mehl",
+                plural_name: "flour",
+                name: "Mehl", // Has translated name but English uses database fields
               },
             ],
           },
@@ -749,11 +766,15 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText("Für den Teig")).toBeInTheDocument();
-      expect(screen.getByText(/400 ml Wasser/)).toBeInTheDocument();
-      expect(screen.getByText(/500 g Mehl/)).toBeInTheDocument();
+      // English language uses database fields (singular_name/plural_name) for proper pluralization
+      expect(screen.getByText(/400 ml water/)).toBeInTheDocument();
+      expect(screen.getByText(/500 g flour/)).toBeInTheDocument();
     });
 
     test("handles ingredients with translated notes", () => {
+      // Set language to German for this test
+      mockLanguage = "de";
+
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [
@@ -770,6 +791,9 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText(/2 Mehl gesiebt/)).toBeInTheDocument();
+
+      // Reset language to English
+      mockLanguage = "en";
     });
   });
 
@@ -782,7 +806,7 @@ describe("Recipe Component", () => {
             id: "ing-1",
             recipe_ingredient_id: "ri-1",
             quantity: "0.25",
-            unit: "cup",
+            unit: "cup/s",
             singular_name: "flour",
             plural_name: "flours",
           },
@@ -798,7 +822,7 @@ describe("Recipe Component", () => {
             id: "ing-3",
             recipe_ingredient_id: "ri-3",
             quantity: "0.75",
-            unit: "cup",
+            unit: "cup/s",
             singular_name: "sugar",
             plural_name: "sugars",
           },
@@ -844,7 +868,7 @@ describe("Recipe Component", () => {
             id: "ing-1",
             recipe_ingredient_id: "ri-1",
             quantity: "1.23",
-            unit: "cup",
+            unit: "cup/s",
             singular_name: "flour",
             plural_name: "flours",
           },
@@ -852,7 +876,7 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/1\.23 cup flours/)).toBeInTheDocument();
+      expect(screen.getByText(/1\.23 cups flours/)).toBeInTheDocument();
     });
   });
 

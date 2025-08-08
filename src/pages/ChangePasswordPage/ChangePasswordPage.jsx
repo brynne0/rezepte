@@ -25,15 +25,14 @@ const ChangePasswordPage = () => {
 
     const accessToken =
       hashParams.get("access_token") || searchParams.get("access_token");
-    const type = hashParams.get("type") || searchParams.get("type");
     const refreshToken =
       hashParams.get("refresh_token") || searchParams.get("refresh_token");
 
     // Initialize session handling
-    initializePasswordReset(accessToken, refreshToken, type);
+    initializePasswordReset(accessToken, refreshToken);
   }, []);
 
-  const initializePasswordReset = async (accessToken, refreshToken, type) => {
+  const initializePasswordReset = async (accessToken, refreshToken) => {
     try {
       // If we have tokens from URL, set the session FIRST
       if (accessToken && refreshToken) {
@@ -46,10 +45,7 @@ const ChangePasswordPage = () => {
           setIsValidSession(true);
 
           // Verify the session is working
-          const {
-            data: { user },
-            error: userError,
-          } = await supabase.auth.getUser();
+          await supabase.auth.getUser();
         } else {
           setErrorMessage(t("invalid_reset_link"));
         }
@@ -57,17 +53,13 @@ const ChangePasswordPage = () => {
         // Check if there's already a valid session
         const {
           data: { session },
-          error: sessionError,
         } = await supabase.auth.getSession();
 
         if (session) {
           setIsValidSession(true);
 
           // Verify the session is working
-          const {
-            data: { user },
-            error: userError,
-          } = await supabase.auth.getUser();
+          await supabase.auth.getUser();
         } else {
           setErrorMessage(t("invalid_reset_link"));
           // Redirect to login after 3 seconds
@@ -103,7 +95,6 @@ const ChangePasswordPage = () => {
         // Double-check session right before password change
         const {
           data: { session },
-          error: sessionError,
         } = await supabase.auth.getSession();
 
         if (!session) {
@@ -113,7 +104,7 @@ const ChangePasswordPage = () => {
 
         const { error } = await changePassword(newPassword);
 
-        console.log("Password change response error:", error);
+        console.error("Password change response error:", error);
 
         if (error) {
           console.error("Password change error details:", {
@@ -209,7 +200,9 @@ const ChangePasswordPage = () => {
                 {validationErrors.newPassword}
               </span>
             )}
-            <label htmlFor="new-password-repeat">{t("new_password_repeat")}</label>
+            <label htmlFor="new-password-repeat">
+              {t("new_password_repeat")}
+            </label>
             <PasswordInput
               id="new-password-repeat"
               type="password"

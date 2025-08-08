@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
@@ -25,6 +25,7 @@ const GroceryList = ({
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
+  const originalUserLanguage = useRef(null);
 
   // Use prop-based editing state, fallback to local state if props not provided
   const isEditing = propIsEditing !== undefined ? propIsEditing : false;
@@ -67,11 +68,22 @@ const GroceryList = ({
     }
   }, [groceryList, isEditing]);
 
+  // Restore user's original language when component unmounts while editing
+  useEffect(() => {
+    return () => {
+      if (originalUserLanguage.current && originalUserLanguage.current !== i18n.language) {
+        i18n.changeLanguage(originalUserLanguage.current);
+      }
+    };
+  }, [i18n]);
+
   const startEditing = async () => {
     try {
       // Get user's preferred language and switch to it
       const preferredLanguage = await getUserPreferredLanguage();
       if (i18n.language !== preferredLanguage) {
+        // Store the user's current language before switching
+        originalUserLanguage.current = i18n.language;
         i18n.changeLanguage(preferredLanguage);
       }
 
@@ -84,15 +96,25 @@ const GroceryList = ({
     }
   };
 
+  // Helper function to restore user's original language
+  const restoreOriginalLanguage = () => {
+    if (originalUserLanguage.current && originalUserLanguage.current !== i18n.language) {
+      i18n.changeLanguage(originalUserLanguage.current);
+      originalUserLanguage.current = null; // Clear the stored language
+    }
+  };
+
   const cancelEditing = () => {
     setIsEditing(false);
     setEditedList([]);
+    restoreOriginalLanguage();
   };
 
   const saveChanges = () => {
     updateGroceryList(editedList);
     setIsEditing(false);
     setEditedList([]);
+    restoreOriginalLanguage();
   };
 
   const handleInputChange = (index, field, value) => {

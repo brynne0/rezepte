@@ -9,6 +9,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import GroceryList from "./GroceryList";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
+import { getUserPreferredLanguage } from "../../services/userService";
 
 // Mock dependencies
 vi.mock("../../hooks/data/useGroceryList");
@@ -29,16 +30,35 @@ vi.mock("react-i18next", () => ({
           { value: "", label: "unit", pluralize: true, useFractions: true },
           { value: "tsp", label: "tsp", pluralize: true, useFractions: true },
           { value: "tbsp", label: "tbsp", pluralize: true, useFractions: true },
-          { value: "cup/s", label: "cup/s", pluralize: true, useFractions: true },
+          {
+            value: "cup/s",
+            label: "cup/s",
+            pluralize: true,
+            useFractions: true,
+          },
           { value: "ml", label: "ml", pluralize: false, useFractions: false },
           { value: "l", label: "l", pluralize: false, useFractions: false },
           { value: "g", label: "g", pluralize: false, useFractions: false },
           { value: "kg", label: "kg", pluralize: false, useFractions: false },
-          { value: "can/s", label: "can/s", pluralize: true, useFractions: true },
-          { value: "piece/s", label: "piece/s", pluralize: true, useFractions: true },
+          {
+            value: "can/s",
+            label: "can/s",
+            pluralize: true,
+            useFractions: true,
+          },
+          {
+            value: "piece/s",
+            label: "piece/s",
+            pluralize: true,
+            useFractions: true,
+          },
         ];
       }
       return key;
+    },
+    i18n: {
+      language: "en",
+      changeLanguage: vi.fn(),
     },
   }),
 }));
@@ -177,7 +197,7 @@ describe("GroceryList", () => {
 
     fireEvent.change(nameInputs[2], { target: { value: "Coconuts" } });
     fireEvent.change(quantityInputs[2], { target: { value: "3" } });
-    
+
     // Interact with UnitSelector component
     fireEvent.focus(unitInputs[2]); // Open the dropdown
     const pieceOption = screen.getByText("piece/s");
@@ -249,5 +269,23 @@ describe("GroceryList", () => {
     expect(checkbox).toBeChecked();
     fireEvent.click(checkbox);
     expect(checkbox).not.toBeChecked();
+  });
+
+  describe("Language Preservation", () => {
+    it("imports getUserPreferredLanguage function correctly", () => {
+      // Simple test to ensure the function is available and mocked
+      expect(getUserPreferredLanguage).toBeDefined();
+      expect(vi.isMockFunction(getUserPreferredLanguage)).toBe(true);
+    });
+
+    it("language preservation functionality exists in component", () => {
+      // Test that the component renders correctly with language preservation code
+      // This indirectly tests that the language preservation logic doesn't break the component
+      setup({ isEditing: true });
+
+      // Component should render edit mode without errors
+      expect(screen.getByDisplayValue("Apples")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
+    });
   });
 });
