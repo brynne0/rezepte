@@ -10,7 +10,6 @@ import AutoResizeTextArea from "../../components/AutoResizeTextArea/AutoResizeTe
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
-import { formatQuantity } from "../../utils/fractionUtils";
 import {
   formatQuantityForUnit,
   formatUnitDisplay,
@@ -246,11 +245,9 @@ const GroceryList = ({
                             id={`item-quantity-${itemId}`}
                             type="text"
                             value={(() => {
-                              // Format the value as fraction for display in edit mode
+                              // Format the value respecting unit's fraction setting
                               if (!item.quantity) return "";
-                              return typeof item.quantity === "number"
-                                ? formatQuantity(item.quantity)
-                                : item.quantity;
+                              return formatQuantityForUnit(item.quantity, item.unit, units);
                             })()}
                             className="input input--edit input--full-width"
                             readOnly={!isEditing}
