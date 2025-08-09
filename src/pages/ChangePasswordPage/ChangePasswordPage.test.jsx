@@ -563,12 +563,12 @@ describe("ChangePasswordPage", () => {
 
     it("shows error when session expires during password change", async () => {
       // Mock URL with access and refresh tokens to avoid the undefined getSession call
-      Object.defineProperty(window, 'location', {
+      Object.defineProperty(window, "location", {
         value: {
-          hash: '#access_token=test-token&refresh_token=test-refresh',
-          search: ''
+          hash: "#access_token=test-token&refresh_token=test-refresh",
+          search: "",
         },
-        writable: true
+        writable: true,
       });
 
       // Set up initial valid session, then expired session during submission
