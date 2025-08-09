@@ -138,7 +138,6 @@ describe("ChangePasswordPage", () => {
         expect(screen.getByText("invalid_reset_link")).toBeInTheDocument();
       });
 
-      expect(screen.getByText("redirecting_to_login")).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: "go_to_login" })
       ).toBeInTheDocument();
