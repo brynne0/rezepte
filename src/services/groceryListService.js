@@ -90,7 +90,7 @@ const getIngredientNameInPreferredLanguage = async (
 
     if (!ingredients || ingredients.length === 0) return ingredientName;
 
-    const normalizedInput = normaliseIngredientName(ingredientName);
+    const normalisedInput = normaliseIngredientName(ingredientName);
     // For grocery list, determine plural from the user's input name since we don't have recipe context
     const shouldUseIngredientPlural = pluralize.isPlural(
       ingredientName.trim().toLowerCase()
@@ -100,8 +100,8 @@ const getIngredientNameInPreferredLanguage = async (
     const ingredient = ingredients.find((ing) => {
       // Check English names
       if (
-        normaliseIngredientName(ing.singular_name) === normalizedInput ||
-        normaliseIngredientName(ing.plural_name) === normalizedInput
+        normaliseIngredientName(ing.singular_name) === normalisedInput ||
+        normaliseIngredientName(ing.plural_name) === normalisedInput
       ) {
         return true;
       }
@@ -113,9 +113,9 @@ const getIngredientNameInPreferredLanguage = async (
           if (translation && typeof translation === "object") {
             if (
               normaliseIngredientName(translation.singular_name) ===
-                normalizedInput ||
+                normalisedInput ||
               normaliseIngredientName(translation.plural_name) ===
-                normalizedInput
+                normalisedInput
             ) {
               return true;
             }

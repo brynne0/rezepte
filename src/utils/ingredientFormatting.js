@@ -33,11 +33,11 @@ export const formatQuantityForUnit = (quantity, unit, units) => {
 
   // Find the unit object to check if it uses fractions
   // Handle null/undefined unit as empty string
-  const normalizedUnit = unit || "";
-  const unitObj = units?.find((u) => u.value === normalizedUnit);
+  const normalisedUnit = unit || "";
+  const unitObj = units?.find((u) => u.value === normalisedUnit);
 
   // Default to fractions if no unit (cooking context) or if unit uses fractions
-  if (!normalizedUnit || unitObj?.useFractions) {
+  if (!normalisedUnit || unitObj?.useFractions) {
     return formatQuantity(parsedQuantity);
   } else {
     // For metric units, keep as decimal

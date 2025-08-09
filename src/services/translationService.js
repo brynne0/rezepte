@@ -1,5 +1,17 @@
 import supabase from "../lib/supabase";
 
+// Normalise instruction text to always end with exactly one full stop
+const normaliseInstruction = (instruction) => {
+  if (!instruction || typeof instruction !== "string") {
+    return instruction;
+  }
+  const trimmed = instruction.trim();
+  if (/[.!?]$/.test(trimmed)) {
+    return trimmed;
+  }
+  return trimmed + ".";
+};
+
 // DeepL translation function using Supabase Edge Function
 const translateText = async (text, targetLanguage) => {
   if (!text || text.trim() === "") return text;
@@ -46,6 +58,11 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
   if (recipe.original_language === targetLanguage) {
     // Process ingredients to add the 'name' field even for English
     const processedResult = { ...recipe };
+
+    // Normalise original instructions to ensure they end with full stops
+    if (recipe.instructions && Array.isArray(recipe.instructions)) {
+      processedResult.instructions = recipe.instructions.map(normaliseInstruction);
+    }
 
     // Handle ungrouped ingredients
     if (recipe.ungroupedIngredients) {
@@ -120,9 +137,14 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
 
 // Get translated recipe title only (for recipe lists)
 export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
-  // If target language is the same as original, return original recipe
+  // If target language is the same as original, normalise instructions and return
   if (recipe.original_language === targetLanguage) {
-    return recipe;
+    const processedResult = { ...recipe };
+    // Normalise original instructions to ensure they end with full stop
+    if (recipe.instructions && Array.isArray(recipe.instructions)) {
+      processedResult.instructions = recipe.instructions.map(normaliseInstruction);
+    }
+    return processedResult;
   }
 
   // Check if title translation exists in storage
@@ -193,7 +215,7 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
       category: translatedTexts[1],
       notes: translatedTexts[2] || null,
       source: translatedTexts[3] || null,
-      instructions: translatedTexts.slice(4),
+      instructions: translatedTexts.slice(4).map(normaliseInstruction),
     };
 
     // Save translation to database
@@ -612,10 +634,11 @@ export const updateRecipeTranslations = async (
         JSON.stringify(oldRecipeData.instructions) !==
         JSON.stringify(newRecipeData.instructions)
       ) {
-        fieldsToUpdate.instructions = await translateTexts(
+        const translatedInstructions = await translateTexts(
           newRecipeData.instructions,
           language
         );
+        fieldsToUpdate.instructions = translatedInstructions.map(normaliseInstruction);
         needsUpdate = true;
       } else {
         fieldsToUpdate.instructions = translation.instructions;
@@ -652,4 +675,12 @@ export const clearRecipeTranslations = async (recipeId) => {
   } catch (error) {
     console.error("Failed to clear recipe translations:", error);
   }
+};
+
+// Normalise instructions to always end with full stops (for use with original/existing instructions)
+export const normaliseInstructions = (instructions) => {
+  if (!Array.isArray(instructions)) {
+    return instructions;
+  }
+  return instructions.map(normaliseInstruction);
 };

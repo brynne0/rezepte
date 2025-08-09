@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
-import { getTranslatedRecipe } from "./translationService";
+import { getTranslatedRecipe, normaliseInstructions } from "./translationService";
 
 // Mock Supabase
 vi.mock("../lib/supabase", () => ({
@@ -432,6 +432,71 @@ describe("Translation Service", () => {
       // Should still return a result without crashing
       expect(result).toHaveProperty("ungroupedIngredients");
       expect(result.ungroupedIngredients).toHaveLength(1);
+    });
+  });
+
+  describe("Instruction Normalisation", () => {
+    test("normaliseInstructions adds full stops to instructions without punctuation", () => {
+      const instructions = [
+        "Mix the ingredients",
+        "Bake for 30 minutes",
+        "Let cool"
+      ];
+
+      const result = normaliseInstructions(instructions);
+
+      expect(result).toEqual([
+        "Mix the ingredients.",
+        "Bake for 30 minutes.",
+        "Let cool."
+      ]);
+    });
+
+
+    test("normaliseInstructions preserves existing punctuation", () => {
+      const instructions = [
+        "Preheat oven to 350°F  ",
+        "Mix dry ingredients!  ",
+        "  Add wet ingredients?  ",
+        "Bake for 25-30 minutes.",
+        "  Cool completely  "
+      ];
+
+      const result = normaliseInstructions(instructions);
+
+      expect(result).toEqual([
+        "Preheat oven to 350°F.",
+        "Mix dry ingredients!",
+        "Add wet ingredients?",
+        "Bake for 25-30 minutes.",
+        "Cool completely."
+      ]);
+    });
+
+    test("normaliseInstructions handles empty and invalid inputs", () => {
+      expect(normaliseInstructions([])).toEqual([]);
+      expect(normaliseInstructions(null)).toBe(null);
+      expect(normaliseInstructions(undefined)).toBe(undefined);
+      expect(normaliseInstructions("not an array")).toBe("not an array");
+    });
+
+    test("getTranslatedRecipe normalises translated instructions", async () => {
+      // Mock the supabase translation function
+      const mockSupabase = await import("../lib/supabase");
+      mockSupabase.default.functions.invoke.mockResolvedValue({
+        data: { translatedText: "Mischen Sie die Zutaten" },
+        error: null
+      });
+
+      const recipe = {
+        title: "Test Recipe",
+        instructions: ["Mix the ingredients"],
+        original_language: "en"
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      expect(result.instructions[0]).toBe("Mischen Sie die Zutaten.");
     });
   });
 });

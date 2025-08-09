@@ -30,7 +30,7 @@ export const useGroceryList = () => {
     const loadGroceryList = async () => {
       try {
         setLoading(true);
-        const currentLanguage = i18n.language.split("-")[0]; // Normalize language code
+        const currentLanguage = i18n.language.split("-")[0]; // Normalise language code
         const data = await fetchGroceryListForDisplay(currentLanguage);
         setGroceryList(data);
         setError(null);
