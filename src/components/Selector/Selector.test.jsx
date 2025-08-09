@@ -188,13 +188,13 @@ describe("Selector", () => {
       const input = screen.getByPlaceholderText("Unit");
       fireEvent.focus(input);
 
-      // Arrow down should highlight first option
+      // Arrow down should move to second option
       fireEvent.keyDown(input, { key: "ArrowDown" });
 
-      // Enter should select selected option
+      // Enter should select selected option (second option)
       fireEvent.keyDown(input, { key: "Enter" });
 
-      expect(defaultProps.onChange).toHaveBeenCalledWith("");
+      expect(defaultProps.onChange).toHaveBeenCalledWith("tsp");
     });
 
     test("closes dropdown on escape", () => {

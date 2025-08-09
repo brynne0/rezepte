@@ -562,16 +562,24 @@ describe("ChangePasswordPage", () => {
     });
 
     it("shows error when session expires during password change", async () => {
+      // Mock URL with access and refresh tokens to avoid the undefined getSession call
+      Object.defineProperty(window, 'location', {
+        value: {
+          hash: '#access_token=test-token&refresh_token=test-refresh',
+          search: ''
+        },
+        writable: true
+      });
+
       // Set up initial valid session, then expired session during submission
-      mockSupabase.auth.getSession
-        .mockResolvedValueOnce({
-          data: { session: { access_token: "test-token" } },
-          error: null,
-        })
-        .mockResolvedValueOnce({
-          data: { session: null },
-          error: null,
-        });
+      mockSupabase.auth.setSession.mockResolvedValue({
+        data: { session: { access_token: "test-token" } },
+        error: null,
+      });
+      mockSupabase.auth.getSession.mockResolvedValue({
+        data: { session: null },
+        error: null,
+      });
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: "test-user" } },
         error: null,
