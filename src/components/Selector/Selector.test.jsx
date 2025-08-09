@@ -5,12 +5,12 @@ import Selector from "./Selector";
 
 // Mock i18next
 const mockUnits = [
-  { value: "", label: "Unit", pluralize: true },
-  { value: "tsp", label: "tsp", pluralize: true },
-  { value: "tbsp", label: "tbsp", pluralize: true },
-  { value: "cup/s", label: "cup/s", pluralize: true },
-  { value: "ml", label: "ml", pluralize: false },
-  { value: "g", label: "g", pluralize: false },
+  { value: "", label: "Unit" },
+  { value: "tsp", label: "tsp" },
+  { value: "tbsp", label: "tbsp" },
+  { value: "cup/s", label: "cup/s" },
+  { value: "ml", label: "ml" },
+  { value: "g", label: "g" },
 ];
 
 const mockCategories = [
@@ -34,7 +34,7 @@ vi.mock("react-i18next", () => ({
 
 // Mock useClickOutside hook
 vi.mock("../../hooks/ui/useClickOutside", () => ({
-  default: (callback) => {
+  default: () => {
     return { current: null };
   },
 }));
@@ -63,7 +63,7 @@ describe("Selector", () => {
 
     test("opens dropdown with unit options when focused", () => {
       render(<Selector {...defaultProps} type="unit" />);
-      
+
       const input = screen.getByPlaceholderText("Unit");
       fireEvent.focus(input);
 
@@ -75,7 +75,9 @@ describe("Selector", () => {
 
     test("calls onChange when unit is selected", () => {
       const mockOnChange = vi.fn();
-      render(<Selector {...defaultProps} onChange={mockOnChange} type="unit" />);
+      render(
+        <Selector {...defaultProps} onChange={mockOnChange} type="unit" />
+      );
 
       const input = screen.getByPlaceholderText("Unit");
       fireEvent.focus(input);
@@ -89,13 +91,19 @@ describe("Selector", () => {
 
   describe("Category Selector", () => {
     test("renders with category placeholder", () => {
-      render(<Selector {...defaultProps} type="category" options={mockCategories} />);
-      expect(screen.getByPlaceholderText("Select category")).toBeInTheDocument();
+      render(
+        <Selector {...defaultProps} type="category" options={mockCategories} />
+      );
+      expect(
+        screen.getByPlaceholderText("Select category")
+      ).toBeInTheDocument();
     });
 
     test("filters out 'all' category", () => {
-      render(<Selector {...defaultProps} type="category" options={mockCategories} />);
-      
+      render(
+        <Selector {...defaultProps} type="category" options={mockCategories} />
+      );
+
       const input = screen.getByPlaceholderText("Select category");
       fireEvent.focus(input);
 
@@ -106,13 +114,27 @@ describe("Selector", () => {
     });
 
     test("displays current category value", () => {
-      render(<Selector {...defaultProps} value="desserts" type="category" options={mockCategories} />);
+      render(
+        <Selector
+          {...defaultProps}
+          value="desserts"
+          type="category"
+          options={mockCategories}
+        />
+      );
       expect(screen.getByDisplayValue("Desserts")).toBeInTheDocument();
     });
 
     test("calls onChange when category is selected", () => {
       const mockOnChange = vi.fn();
-      render(<Selector {...defaultProps} onChange={mockOnChange} type="category" options={mockCategories} />);
+      render(
+        <Selector
+          {...defaultProps}
+          onChange={mockOnChange}
+          type="category"
+          options={mockCategories}
+        />
+      );
 
       const input = screen.getByPlaceholderText("Select category");
       fireEvent.focus(input);
@@ -131,8 +153,14 @@ describe("Selector", () => {
     ];
 
     test("works with custom options", () => {
-      render(<Selector {...defaultProps} options={customOptions} placeholder="Choose option" />);
-      
+      render(
+        <Selector
+          {...defaultProps}
+          options={customOptions}
+          placeholder="Choose option"
+        />
+      );
+
       const input = screen.getByPlaceholderText("Choose option");
       fireEvent.focus(input);
 

@@ -1,5 +1,4 @@
 import supabase from "../lib/supabase";
-import { shouldUsePlural } from "../utils/fractionUtils";
 
 // DeepL translation function using Supabase Edge Function
 const translateText = async (text, targetLanguage) => {
@@ -54,8 +53,7 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
         recipe.ungroupedIngredients.map(async (ingredient) => {
           const displayName = await getIngredientDisplayName(
             ingredient,
-            targetLanguage,
-            ingredient.quantity
+            targetLanguage
           );
           return { ...ingredient, name: displayName };
         })
@@ -70,27 +68,12 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
             section.ingredients.map(async (ingredient) => {
               const displayName = await getIngredientDisplayName(
                 ingredient,
-                targetLanguage,
-                ingredient.quantity
+                targetLanguage
               );
               return { ...ingredient, name: displayName };
             })
           );
           return { ...section, ingredients: translatedIngredients };
-        })
-      );
-    }
-
-    // Handle legacy flat ingredients structure
-    if (recipe.ingredients) {
-      processedResult.ingredients = await Promise.all(
-        recipe.ingredients.map(async (ingredient) => {
-          const displayName = await getIngredientDisplayName(
-            ingredient,
-            targetLanguage,
-            ingredient.quantity
-          );
-          return { ...ingredient, name: displayName };
         })
       );
     }
@@ -129,14 +112,6 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
         );
         return { ...section, ingredients: translatedIngredients };
       })
-    );
-  }
-
-  // Handle legacy flat ingredients structure
-  if (recipe.ingredients) {
-    translatedResult.ingredients = await getTranslatedIngredients(
-      recipe.ingredients,
-      targetLanguage
     );
   }
 
@@ -242,12 +217,8 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
 };
 
 // Helper function to get the correct ingredient name for display
-const getIngredientDisplayName = async (
-  ingredient,
-  targetLanguage,
-  quantity
-) => {
-  const usePlural = shouldUsePlural(quantity);
+const getIngredientDisplayName = async (ingredient, targetLanguage) => {
+  const usePlural = ingredient.is_plural || false;
 
   // If target language is English, use database columns
   if (targetLanguage === "en") {
@@ -278,17 +249,14 @@ const getIngredientDisplayName = async (
       ? await translateText(ingredient.plural_name, targetLanguage)
       : translatedSingular;
 
-    // Apply language-specific capitalization rules
+    // Only lowercase if not German
     const finalSingular =
       targetLanguage === "de"
-        ? translatedSingular.charAt(0).toUpperCase() +
-          translatedSingular.slice(1).toLowerCase()
+        ? translatedSingular
         : translatedSingular.toLowerCase();
-
     const finalPlural =
       targetLanguage === "de"
-        ? translatedPlural.charAt(0).toUpperCase() +
-          translatedPlural.slice(1).toLowerCase()
+        ? translatedPlural
         : translatedPlural.toLowerCase();
 
     // Save translation to database
@@ -311,7 +279,7 @@ const getIngredientDisplayName = async (
       // Continue anyway - translation will work for this session
     }
 
-    // Return the appropriate form based on quantity
+    // Return the appropriate form
     const result = usePlural ? finalPlural : finalSingular;
     return result;
   } catch (error) {
@@ -339,8 +307,7 @@ const getTranslatedIngredients = async (ingredients, targetLanguage) => {
         // Get translated ingredient name (with plural consideration)
         const translatedName = await getIngredientDisplayName(
           ingredient,
-          targetLanguage,
-          ingredient.quantity
+          targetLanguage
         );
 
         // Get translated ingredient notes (cached in recipe_ingredients table)

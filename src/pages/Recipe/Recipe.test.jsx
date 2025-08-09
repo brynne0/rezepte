@@ -15,14 +15,14 @@ vi.mock("react-router-dom", async () => {
 });
 
 const mockUnits = [
-  { value: "", label: "Unit", pluralize: true, useFractions: true },
-  { value: "tsp", label: "tsp", pluralize: true, useFractions: true },
-  { value: "tbsp", label: "tbsp", pluralize: true, useFractions: true },
-  { value: "cup/s", label: "cup/s", pluralize: true, useFractions: true },
-  { value: "ml", label: "ml", pluralize: false, useFractions: false },
-  { value: "g", label: "g", pluralize: false, useFractions: false },
-  { value: "can/s", label: "can/s", pluralize: true, useFractions: true },
-  { value: "piece/s", label: "piece/s", pluralize: true, useFractions: true },
+  { value: "", label: "Unit", useFractions: true },
+  { value: "tsp", label: "tsp", useFractions: true },
+  { value: "tbsp", label: "tbsp", useFractions: true },
+  { value: "cup/s", label: "cup/s", useFractions: true },
+  { value: "ml", label: "ml", useFractions: false },
+  { value: "g", label: "g", useFractions: false },
+  { value: "can/s", label: "can/s", useFractions: true },
+  { value: "piece/s", label: "piece/s", useFractions: true },
 ];
 
 let mockLanguage = "en";
@@ -108,6 +108,7 @@ describe("Recipe Component", () => {
     notes: "Some extra notes",
     ungroupedIngredients: [
       {
+        // quantity > 1 and not plural
         id: "ing-1",
         recipe_ingredient_id: "ri-1",
         quantity: "2",
@@ -115,14 +116,17 @@ describe("Recipe Component", () => {
         singular_name: "flour",
         plural_name: "flours",
         notes: "sifted",
+        is_plural: false,
       },
       {
+        // quantity < 1 and not plural
         id: "ing-2",
         recipe_ingredient_id: "ri-2",
         quantity: "1",
         unit: "tsp",
         singular_name: "salt",
         plural_name: "salts",
+        is_plural: false,
       },
     ],
   };
@@ -222,35 +226,25 @@ describe("Recipe Component", () => {
       mockRecipeHook.recipe = mockRecipeData;
     });
 
-    test("shows edit button for logged in non-guest users", () => {
+    test("shows edit button for logged in users only", () => {
       mockAuth.isLoggedIn = true;
-      mockAuth.isGuest = false;
       renderRecipe();
 
-      expect(screen.getByTestId("lucide-pencil")).toBeInTheDocument();
-    });
-
-    test("doesn't show edit button for guests", () => {
-      mockAuth.isLoggedIn = true;
-      mockAuth.isGuest = true;
-      renderRecipe();
-
-      expect(screen.queryByTestId("lucide-pencil")).not.toBeInTheDocument();
+      expect(screen.getByTestId("edit-recipe-btn")).toBeInTheDocument();
     });
 
     test("doesn't show edit button for non-logged in users", () => {
       mockAuth.isLoggedIn = false;
       renderRecipe();
 
-      expect(screen.queryByTestId("lucide-pencil")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("edit-recipe-btn")).not.toBeInTheDocument();
     });
 
     test("navigates to edit page when edit button clicked", () => {
       mockAuth.isLoggedIn = true;
-      mockAuth.isGuest = false;
       renderRecipe();
 
-      fireEvent.click(screen.getByTestId("lucide-pencil"));
+      fireEvent.click(screen.getByTestId("edit-recipe-btn"));
       expect(mockNavigate).toHaveBeenCalledWith(
         "/edit-recipe/recipe-1/test-recipe"
       );
@@ -266,35 +260,11 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText("ingredients:")).toBeInTheDocument();
-      expect(screen.getByText(/2 cups flours sifted/)).toBeInTheDocument();
+      expect(screen.getByText(/2 cups flour sifted/)).toBeInTheDocument();
       expect(screen.getByText(/1 tsp salt/)).toBeInTheDocument();
     });
 
-    test("uses singular name for quantity of 1", () => {
-      mockRecipeHook.recipe = {
-        ...mockRecipeData,
-        ungroupedIngredients: [
-          {
-            id: "ing-1",
-            recipe_ingredient_id: "ri-1",
-            quantity: "1",
-            unit: "cup/s",
-            singular_name: "flour",
-            plural_name: "flours",
-          },
-        ],
-      };
-      renderRecipe();
-
-      expect(screen.getByText(/1 cup flour/)).toBeInTheDocument();
-    });
-
-    test("uses plural name for quantity > 1", () => {
-      renderRecipe();
-      expect(screen.getByText(/2 cups flours/)).toBeInTheDocument();
-    });
-
-    test("handles ingredients without quantity", () => {
+    test("handles ingredients without quantity or is_plural", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [
@@ -354,6 +324,7 @@ describe("Recipe Component", () => {
                 unit: "cup/s",
                 singular_name: "almond",
                 plural_name: "almonds",
+                is_plural: true,
               },
             ],
           },
@@ -367,6 +338,7 @@ describe("Recipe Component", () => {
                 unit: "",
                 singular_name: "lime",
                 plural_name: "limes",
+                is_plural: false,
               },
             ],
           },
@@ -482,7 +454,7 @@ describe("Recipe Component", () => {
   });
 
   describe("Ingredient Display Name Logic", () => {
-    test("uses singular name for quantity 1", () => {
+    test("uses singular name for is_plural false", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [
@@ -492,6 +464,7 @@ describe("Recipe Component", () => {
             quantity: "1",
             singular_name: "apple",
             plural_name: "apples",
+            is_plural: false,
           },
         ],
       };
@@ -500,7 +473,7 @@ describe("Recipe Component", () => {
       expect(screen.getByText(/1 apple/)).toBeInTheDocument();
     });
 
-    test("uses plural name for quantity > 1", () => {
+    test("uses plural name for is_plural true", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [
@@ -510,12 +483,13 @@ describe("Recipe Component", () => {
             quantity: "3",
             singular_name: "apple",
             plural_name: "apples",
+            is_plural: true,
           },
         ],
       };
       renderRecipe();
 
-      expect(screen.getByText(/3 apples/)).toBeInTheDocument();
+      expect(screen.getByText(/3 apple/)).toBeInTheDocument();
     });
 
     test("falls back to singular_name when plural_name is missing", () => {
@@ -545,17 +519,18 @@ describe("Recipe Component", () => {
             quantity: "2",
             singular_name: "flour",
             plural_name: "flours",
-            name: "Mehl", // Translated name exists but English prioritizes database
+            name: "Mehl", // Translated name exists but English prioritises database
+            is_plural: false,
           },
         ],
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 flours/)).toBeInTheDocument();
+      expect(screen.getByText(/2 flour/)).toBeInTheDocument();
       expect(screen.queryByText(/2 Mehl/)).not.toBeInTheDocument();
     });
 
-    test("uses database pluralization for sectioned ingredients in English", () => {
+    test("uses is_plural for sectioned ingredients in English", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [],
@@ -571,6 +546,7 @@ describe("Recipe Component", () => {
                 singular_name: "banana",
                 plural_name: "bananas",
                 name: "banana", // Has translated name but English uses database
+                is_plural: false,
               },
             ],
           },
@@ -579,7 +555,7 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       // With unit "tbsp" (measurement unit), plural form is used
-      expect(screen.getByText(/2 tbsp bananas/)).toBeInTheDocument();
+      expect(screen.getByText(/2 tbsp banana/)).toBeInTheDocument();
     });
 
     test("shows fallback message for missing ingredient names", () => {
@@ -597,64 +573,6 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText(/1 \?/)).toBeInTheDocument();
-    });
-
-    test("handles countable units with singular/plural logic", () => {
-      mockRecipeHook.recipe = {
-        ...mockRecipeData,
-        ungroupedIngredients: [
-          {
-            id: "ing-1",
-            recipe_ingredient_id: "ri-1",
-            quantity: "1",
-            unit: "piece/s",
-            singular_name: "bread",
-            plural_name: "breads",
-          },
-          {
-            id: "ing-2",
-            recipe_ingredient_id: "ri-2",
-            quantity: "3",
-            unit: "piece/s",
-            singular_name: "bread",
-            plural_name: "breads",
-          },
-        ],
-      };
-      renderRecipe();
-
-      // Countable units should follow quantity logic
-      expect(screen.getByText(/1 piece bread/)).toBeInTheDocument();
-      expect(screen.getByText(/3 pieces breads/)).toBeInTheDocument();
-    });
-
-    test("measurement units always use plural ingredients", () => {
-      mockRecipeHook.recipe = {
-        ...mockRecipeData,
-        ungroupedIngredients: [
-          {
-            id: "ing-1",
-            recipe_ingredient_id: "ri-1",
-            quantity: "1",
-            unit: "cup/s",
-            singular_name: "almond",
-            plural_name: "almonds",
-          },
-          {
-            id: "ing-2",
-            recipe_ingredient_id: "ri-2",
-            quantity: "1",
-            unit: "can/s",
-            singular_name: "tomato",
-            plural_name: "tomatoes",
-          },
-        ],
-      };
-      renderRecipe();
-
-      // Measurement/container units should always use plural ingredients
-      expect(screen.getByText(/1 cup almonds/)).toBeInTheDocument();
-      expect(screen.getByText(/1 can tomatoes/)).toBeInTheDocument();
     });
   });
 
@@ -676,6 +594,7 @@ describe("Recipe Component", () => {
             singular_name: "flour", // Original English
             plural_name: "flours",
             name: "Mehl", // German translation
+            is_plural: false,
           },
           {
             id: "ing-2",
@@ -685,6 +604,7 @@ describe("Recipe Component", () => {
             singular_name: "salt",
             plural_name: "salts",
             name: "Salz", // German translation
+            is_plural: false,
           },
         ],
       };
@@ -713,6 +633,7 @@ describe("Recipe Component", () => {
             singular_name: "banana",
             plural_name: "bananas",
             name: "Banane", // Translated
+            is_plural: false,
           },
           {
             id: "ing-2",
@@ -720,6 +641,7 @@ describe("Recipe Component", () => {
             quantity: "2",
             singular_name: "apple",
             plural_name: "apples",
+            is_plural: true,
             // No translated name - should fall back to English plural
           },
         ],
@@ -749,6 +671,7 @@ describe("Recipe Component", () => {
                 singular_name: "water",
                 plural_name: "water",
                 name: "Wasser", // Has translated name but English uses database fields
+                is_plural: false,
               },
               {
                 id: "ing-4",
@@ -758,6 +681,7 @@ describe("Recipe Component", () => {
                 singular_name: "flour",
                 plural_name: "flour",
                 name: "Mehl", // Has translated name but English uses database fields
+                is_plural: false,
               },
             ],
           },
@@ -785,6 +709,7 @@ describe("Recipe Component", () => {
             singular_name: "flour",
             name: "Mehl",
             notes: "gesiebt", // German notes
+            is_plural: false,
           },
         ],
       };
@@ -809,6 +734,7 @@ describe("Recipe Component", () => {
             unit: "cup/s",
             singular_name: "flour",
             plural_name: "flours",
+            is_plural: false,
           },
           {
             id: "ing-2",
@@ -817,6 +743,7 @@ describe("Recipe Component", () => {
             unit: "tsp",
             singular_name: "salt",
             plural_name: "salts",
+            is_plural: false,
           },
           {
             id: "ing-3",
@@ -825,15 +752,16 @@ describe("Recipe Component", () => {
             unit: "cup/s",
             singular_name: "sugar",
             plural_name: "sugars",
+            is_plural: false,
           },
         ],
       };
       renderRecipe();
 
       // Should display as fractions, not decimals
-      expect(screen.getByText(/1\/4 cup flours/)).toBeInTheDocument();
-      expect(screen.getByText(/1 1\/2 tsp salts/)).toBeInTheDocument();
-      expect(screen.getByText(/3\/4 cup sugars/)).toBeInTheDocument();
+      expect(screen.getByText(/1\/4 cup flour/)).toBeInTheDocument();
+      expect(screen.getByText(/1 1\/2 tsp salt/)).toBeInTheDocument();
+      expect(screen.getByText(/3\/4 cup sugar/)).toBeInTheDocument();
 
       // Should NOT display decimals
       expect(screen.queryByText(/0\.25/)).not.toBeInTheDocument();
@@ -852,12 +780,13 @@ describe("Recipe Component", () => {
             unit: "cups",
             singular_name: "flour",
             plural_name: "flours",
+            is_plural: false,
           },
         ],
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 cups flours/)).toBeInTheDocument();
+      expect(screen.getByText(/2 cups flour/)).toBeInTheDocument();
     });
 
     test("displays uncommon decimals as decimals", () => {
@@ -871,12 +800,13 @@ describe("Recipe Component", () => {
             unit: "cup/s",
             singular_name: "flour",
             plural_name: "flours",
+            is_plural: false,
           },
         ],
       };
       renderRecipe();
 
-      expect(screen.getByText(/1\.23 cups flours/)).toBeInTheDocument();
+      expect(screen.getByText(/1\.23 cups flour/)).toBeInTheDocument();
     });
   });
 

@@ -73,7 +73,7 @@ const Recipe = () => {
             onClick={() => {
               navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
             }}
-            data-testid="lucide-pencil"
+            data-testid="edit-recipe-btn"
             aria-label={t("edit_recipe")}
           >
             <Pencil />
@@ -207,7 +207,8 @@ const Recipe = () => {
                             >
                               {formatCompleteIngredient(
                                 ingredient,
-                                t("units", { returnObjects: true })
+                                t("units", { returnObjects: true }),
+                                i18n.language
                               )}
                             </label>
                           </li>

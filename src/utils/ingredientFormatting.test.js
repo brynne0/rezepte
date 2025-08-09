@@ -32,20 +32,19 @@ describe("ingredientFormatting", () => {
 
   // Mock units array similar to what's in translation.json
   const mockUnits = [
-    { value: "", label: "-", pluralize: true, useFractions: true },
-    { value: "tsp", label: "tsp", pluralize: true, useFractions: true },
-    { value: "tbsp", label: "tbsp", pluralize: true, useFractions: true },
-    { value: "cup/s", label: "cup/s", pluralize: true, useFractions: true },
-    { value: "ml", label: "ml", pluralize: false, useFractions: false },
-    { value: "l", label: "l", pluralize: false, useFractions: false },
-    { value: "g", label: "g", pluralize: false, useFractions: false },
-    { value: "kg", label: "kg", pluralize: false, useFractions: false },
-    { value: "can/s", label: "can/s", pluralize: true, useFractions: true },
-    { value: "piece/s", label: "piece/s", pluralize: true, useFractions: true },
+    { value: "", label: "-", useFractions: true },
+    { value: "tsp", label: "tsp", useFractions: true },
+    { value: "tbsp", label: "tbsp", useFractions: true },
+    { value: "cup/s", label: "cup/s", useFractions: true },
+    { value: "ml", label: "ml", useFractions: false },
+    { value: "l", label: "l", useFractions: false },
+    { value: "g", label: "g", useFractions: false },
+    { value: "kg", label: "kg", useFractions: false },
+    { value: "can/s", label: "can/s", useFractions: true },
+    { value: "piece/s", label: "piece/s", useFractions: true },
     {
       value: "pinch/es",
       label: "pinch/es",
-      pluralize: true,
       useFractions: true,
     },
   ];
@@ -112,66 +111,100 @@ describe("ingredientFormatting", () => {
     });
   });
 
-  describe("getIngredientDisplayName - pluralization with ranges", () => {
-    test("pluralizes ingredient names based on range end value", () => {
+  describe("getIngredientDisplayName - with is_plural flag", () => {
+    test("uses is_plural flag when available", () => {
       const ingredient1 = {
         quantity: "1/2 - 1",
         unit: "cup/s",
         singular_name: "apple",
         plural_name: "apples",
+        is_plural: false, // Stored as singular
       };
-      // Range ends at 1 -> should be singular (based on end value of range)
-      expect(getIngredientDisplayName(ingredient1, mockUnits)).toBe("apple");
+      // Should use stored is_plural value (false) -> singular
+      expect(getIngredientDisplayName(ingredient1)).toBe("apple");
 
       const ingredient2 = {
         quantity: "1 - 3",
-        unit: "piece/s", // countable unit
+        unit: "piece/s",
         singular_name: "apple",
         plural_name: "apples",
+        is_plural: true, // Stored as plural
       };
-      // Range ends at 3 with countable unit -> should be plural
-      expect(getIngredientDisplayName(ingredient2, mockUnits)).toBe("apples");
+      // Should use stored is_plural value (true) -> plural
+      expect(getIngredientDisplayName(ingredient2)).toBe("apples");
 
       const ingredient3 = {
-        quantity: "1/4 - 1",
-        unit: "piece/s", // countable unit
+        quantity: "5",
+        unit: "piece/s",
         singular_name: "apple",
         plural_name: "apples",
+        is_plural: false, // User typed singular form despite quantity > 1
       };
-      // Range ends at 1 with countable unit -> should be singular
-      expect(getIngredientDisplayName(ingredient3, mockUnits)).toBe("apple");
+      // Should respect stored is_plural value (false) -> singular
+      expect(getIngredientDisplayName(ingredient3)).toBe("apple");
     });
 
-    test("handles no unit with ranges", () => {
+    test("defaults to singular when is_plural is missing", () => {
       const ingredient1 = {
         quantity: "1/2 - 1",
         unit: "",
         singular_name: "apple",
         plural_name: "apples",
+        // No is_plural property
       };
-      // Range ends at 1, no unit -> should be singular (quantity logic applies)
-      expect(getIngredientDisplayName(ingredient1, mockUnits)).toBe("apple");
+      // Should default to singular (is_plural || false = false)
+      expect(getIngredientDisplayName(ingredient1)).toBe("apple");
 
       const ingredient2 = {
         quantity: "1 - 3",
         unit: "",
         singular_name: "apple",
         plural_name: "apples",
+        // No is_plural property
       };
-      // Range ends at 3, no unit -> should be plural
-      expect(getIngredientDisplayName(ingredient2, mockUnits)).toBe("apples");
+      // Should default to singular (is_plural || false = false)
+      expect(getIngredientDisplayName(ingredient2)).toBe("apple");
     });
 
     test("uses translated names when language is not English", () => {
       const ingredient = {
-        name: "translated apple name",
-        quantity: "1 - 5",
-        unit: "piece/s",
+        translated_names: {
+          de: {
+            singular_name: "Apfel",
+            plural_name: "Äpfel",
+          },
+        },
         singular_name: "apple",
         plural_name: "apples",
+        is_plural: true,
       };
-      // For non-English, should return the translated name
-      expect(getIngredientDisplayName(ingredient, mockUnits, "de")).toBe(
+      // For German, should use translated plural name when is_plural is true
+      expect(getIngredientDisplayName(ingredient, "de")).toBe("Äpfel");
+
+      // Test singular case
+      const ingredientSingular = {
+        translated_names: {
+          de: {
+            singular_name: "Apfel",
+            plural_name: "Äpfel",
+          },
+        },
+        singular_name: "apple",
+        plural_name: "apples",
+        is_plural: false,
+      };
+      expect(getIngredientDisplayName(ingredientSingular, "de")).toBe("Apfel");
+    });
+
+    test("falls back to name property when no structured translations exist", () => {
+      const ingredient = {
+        name: "translated apple name",
+        singular_name: "apple",
+        plural_name: "apples",
+        is_plural: true,
+      };
+      // Should fall back to name property when no translated_names structure exists
+      expect(getIngredientDisplayName(ingredient, "de")).toBe(
         "translated apple name"
       );
     });
@@ -180,12 +213,25 @@ describe("ingredientFormatting", () => {
       const ingredient = {
         name: "translated apple name",
         quantity: "1 - 5",
-        unit: "piece/s", // countable unit with quantity > 1
+        unit: "piece/s",
         singular_name: "apple",
         plural_name: "apples",
+        is_plural: true, // Stored as plural
       };
-      // For English, should use database fields (plural because quantity ends > 1)
-      expect(getIngredientDisplayName(ingredient, mockUnits, "en")).toBe("apples");
+
+      // For English, should use database fields based on is_plural flag
+      expect(getIngredientDisplayName(ingredient, "en")).toBe("apples");
+
+      const ingredientSingular = {
+        name: "translated apple name",
+        quantity: "5", // High quantity but stored as singular
+        unit: "piece/s",
+        singular_name: "apple",
+        plural_name: "apples",
+        is_plural: false, // User typed singular form
+      };
+      // Should respect stored is_plural flag over quantity
+      expect(getIngredientDisplayName(ingredientSingular, "en")).toBe("apple");
     });
   });
 
@@ -204,13 +250,14 @@ describe("ingredientFormatting", () => {
   });
 
   describe("formatCompleteIngredient - full integration", () => {
-    test("formats complete ingredient with range", () => {
+    test("formats complete ingredient with range and is_plural flag", () => {
       const ingredient = {
         quantity: "1/2 - 2",
         unit: "cup/s",
         singular_name: "flour",
-        plural_name: "flour",
+        plural_name: "flours",
         notes: "sifted",
+        is_plural: false, // User typed singular despite range > 1
       };
 
       expect(formatCompleteIngredient(ingredient, mockUnits)).toBe(
@@ -218,28 +265,51 @@ describe("ingredientFormatting", () => {
       );
     });
 
-    test("formats ingredient with range and database fields", () => {
+    test("formats ingredient respecting is_plural flag over quantity", () => {
       const ingredient = {
-        quantity: "1 - 3",
+        quantity: "1",
         unit: "cup/s",
         singular_name: "flour",
-        plural_name: "flour",
+        plural_name: "flours",
         notes: "sifted",
+        is_plural: true, // User typed plural despite quantity = 1
       };
 
       expect(formatCompleteIngredient(ingredient, mockUnits)).toBe(
-        "1 - 3 cups flour sifted"
+        "1 cup flours sifted"
       );
     });
 
     test("formats ingredient with translated name for non-English", () => {
       const ingredient = {
+        translated_names: {
+          de: {
+            singular_name: "Mehl",
+            plural_name: "Mehle",
+          },
+        },
+        quantity: "1 - 3",
+        unit: "cup/s",
+        singular_name: "flour",
+        plural_name: "flours",
+        notes: "sifted",
+        is_plural: true, // Use plural form
+      };
+
+      expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
+        "1 - 3 cups Mehle sifted"
+      );
+    });
+
+    test("falls back to name property when no structured translations", () => {
+      const ingredient = {
         name: "all-purpose flour",
         quantity: "1 - 3",
         unit: "cup/s",
-        singular_name: "flour", 
-        plural_name: "flour",
+        singular_name: "flour",
+        plural_name: "flours",
         notes: "sifted",
+        is_plural: true, // This will be ignored since using fallback name
       };
 
       expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
