@@ -60,8 +60,9 @@
 
 /* Error state */
 .input--error {
-  border-color: var(--error-red);
   border-width: 0.1rem;
+  border: 0.1rem dashed var(--error-red);
+  border-radius: var(--border-radius);
 }
 
 .input--error:focus {

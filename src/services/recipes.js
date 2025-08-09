@@ -2,6 +2,34 @@ import supabase from "../lib/supabase";
 import pluralize from "pluralize";
 import { updateRecipeTranslations } from "./translationService";
 
+// Helper function to determine if an ingredient name was entered as plural
+const determineIngredientPlurality = async (inputName, language = "en") => {
+  if (!inputName) {
+    return false; // Default to singular if no input name
+  }
+
+  const trimmedName = inputName.trim().toLowerCase();
+
+  // If it's English, test directly
+  if (language === "en") {
+    return pluralize.isPlural(trimmedName);
+  }
+
+  // For other languages, translate to English first then test plurality
+  try {
+    const translatedToEnglish = await translateText(
+      trimmedName,
+      "en",
+      language
+    );
+    return pluralize.isPlural(translatedToEnglish.toLowerCase());
+  } catch (error) {
+    console.error("Failed to translate for plurality check:", error);
+    // Fallback: assume singular if translation fails
+    return false;
+  }
+};
+
 // Import translateText from translation.js (the DeepL service)
 const translateText = async (text, targetLanguage, sourceLanguage = null) => {
   if (!text || text.trim() === "") {
@@ -39,7 +67,7 @@ const getEnglishForms = (ingredientName) => {
   };
 };
 
-// Helper function to find ingredient by English name or translation
+// Helper function to find ingredient by English name or translation and determine if plural
 const findIngredientByNameOrTranslation = async (
   ingredientName,
   currentLanguage
@@ -59,12 +87,16 @@ const findIngredientByNameOrTranslation = async (
   // If current language is English, search English names directly
   if (currentLanguage === "en") {
     for (const ingredient of ingredients) {
+      // Check singular first
+      if (ingredient.singular_name.toLowerCase() === searchName) {
+        return { id: ingredient.id, isPlural: false };
+      }
+      // Check plural
       if (
-        ingredient.singular_name.toLowerCase() === searchName ||
-        (ingredient.plural_name &&
-          ingredient.plural_name.toLowerCase() === searchName)
+        ingredient.plural_name &&
+        ingredient.plural_name.toLowerCase() === searchName
       ) {
-        return ingredient.id;
+        return { id: ingredient.id, isPlural: true };
       }
     }
   } else {
@@ -73,23 +105,40 @@ const findIngredientByNameOrTranslation = async (
       // Check translations for current language
       const translation = ingredient.translated_names?.[currentLanguage];
       if (translation && typeof translation === "object") {
+        // Check singular first
         if (
-          (translation.singular_name &&
-            translation.singular_name.toLowerCase() === searchName) ||
-          (translation.plural_name &&
-            translation.plural_name.toLowerCase() === searchName)
+          translation.singular_name &&
+          translation.singular_name.toLowerCase() === searchName
         ) {
-          return ingredient.id;
+          return { id: ingredient.id, isPlural: false };
+        }
+        // Check plural
+        if (
+          translation.plural_name &&
+          translation.plural_name.toLowerCase() === searchName
+        ) {
+          return { id: ingredient.id, isPlural: true };
         }
       }
     }
 
+    // TODO - simplify these two fallbacks
     // Fallback 1: try to find English ingredient that matches (user might have typed English name)
     for (const ingredient of ingredients) {
+      // Check singular first
+      if (ingredient.singular_name.toLowerCase() === searchName) {
+        // Found English match, need to add translation for current language
+        await addTranslationToIngredient(
+          ingredient.id,
+          trimmedName,
+          currentLanguage
+        );
+        return { id: ingredient.id, isPlural: false };
+      }
+      // Check plural
       if (
-        ingredient.singular_name.toLowerCase() === searchName ||
-        (ingredient.plural_name &&
-          ingredient.plural_name.toLowerCase() === searchName)
+        ingredient.plural_name &&
+        ingredient.plural_name.toLowerCase() === searchName
       ) {
         // Found English match, need to add translation for current language
         await addTranslationToIngredient(
@@ -97,7 +146,7 @@ const findIngredientByNameOrTranslation = async (
           trimmedName,
           currentLanguage
         );
-        return ingredient.id;
+        return { id: ingredient.id, isPlural: true };
       }
     }
 
@@ -107,10 +156,20 @@ const findIngredientByNameOrTranslation = async (
       const englishSearchName = translatedToEnglish.toLowerCase();
 
       for (const ingredient of ingredients) {
+        // Check singular first
+        if (ingredient.singular_name.toLowerCase() === englishSearchName) {
+          // Found English ingredient that matches the translation, add current language translation
+          await addTranslationToIngredient(
+            ingredient.id,
+            trimmedName,
+            currentLanguage
+          );
+          return { id: ingredient.id, isPlural: false };
+        }
+        // Check plural
         if (
-          ingredient.singular_name.toLowerCase() === englishSearchName ||
-          (ingredient.plural_name &&
-            ingredient.plural_name.toLowerCase() === englishSearchName)
+          ingredient.plural_name &&
+          ingredient.plural_name.toLowerCase() === englishSearchName
         ) {
           // Found English ingredient that matches the translation, add current language translation
           await addTranslationToIngredient(
@@ -118,7 +177,7 @@ const findIngredientByNameOrTranslation = async (
             trimmedName,
             currentLanguage
           );
-          return ingredient.id;
+          return { id: ingredient.id, isPlural: true };
         }
       }
     } catch {
@@ -156,17 +215,9 @@ const addTranslationToIngredient = async (
       targetLanguage
     );
 
-    // Use proper pluralization as fallback if translation fails
-    const fallbackPlural =
-      targetLanguage === "de"
-        ? singularTranslation.endsWith("e")
-          ? singularTranslation + "n"
-          : singularTranslation + "e"
-        : pluralize.plural(singularTranslation);
-
     const newTranslation = {
       singular_name: singularTranslation || originalInput.toLowerCase(),
-      plural_name: pluralTranslation || fallbackPlural,
+      plural_name: pluralTranslation,
     };
 
     const updatedTranslations = {
@@ -199,13 +250,13 @@ const getOrCreateIngredient = async (
   const trimmedName = ingredientName.trim();
 
   // First, try to find existing ingredient
-  const existingIngredientId = await findIngredientByNameOrTranslation(
+  const existingIngredient = await findIngredientByNameOrTranslation(
     trimmedName,
     currentLanguage
   );
 
-  if (existingIngredientId) {
-    return existingIngredientId;
+  if (existingIngredient) {
+    return existingIngredient;
   }
 
   // No existing ingredient found - create new English ingredient
@@ -290,7 +341,15 @@ const getOrCreateIngredient = async (
     throw new Error(`Error creating ingredient: ${createError.message}`);
   }
 
-  return newIngredient.id;
+  // Determine if the input was plural by checking if it matches the plural form
+  const inputWasPlural =
+    currentLanguage === "en"
+      ? trimmedName.toLowerCase() === englishPlural
+      : translations[currentLanguage] &&
+        trimmedName.toLowerCase() ===
+          translations[currentLanguage].plural_name.toLowerCase();
+
+  return { id: newIngredient.id, isPlural: inputWasPlural };
 };
 
 // Fetch all recipes
@@ -341,7 +400,7 @@ export const fetchRecipe = async (id) => {
   const { data, error } = await supabase
     .from("recipes")
     .select(
-      "*, recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index)"
+      "*, recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural)"
     )
     .eq("id", id)
     .single();
@@ -365,6 +424,7 @@ export const fetchRecipe = async (id) => {
         notes: item.notes,
         subheading: item.subheading,
         order_index: item.order_index,
+        is_plural: item.is_plural,
       })) || [];
 
   // Separate ungrouped ingredients from grouped ones
@@ -458,13 +518,20 @@ export const createRecipe = async (recipeData) => {
     for (const ingredient of recipeData.ungroupedIngredients) {
       let ingredientId;
 
+      // Determine if the input was plural based on the entered text
+      const isPlural = await determineIngredientPlurality(
+        ingredient.name,
+        recipeData.original_language
+      );
+
       if (ingredient.ingredient_id) {
         ingredientId = ingredient.ingredient_id;
       } else if (ingredient.name) {
-        ingredientId = await getOrCreateIngredient(
+        const ingredientResult = await getOrCreateIngredient(
           ingredient.name,
           recipeData.original_language
         );
+        ingredientId = ingredientResult.id;
       } else {
         throw new Error("Ingredient must have either ingredient_id or name");
       }
@@ -477,6 +544,7 @@ export const createRecipe = async (recipeData) => {
         notes: ingredient.notes,
         subheading: null, // Ungrouped ingredients have no subheading
         order_index: globalOrderIndex++,
+        is_plural: isPlural,
       });
     }
   }
@@ -490,13 +558,20 @@ export const createRecipe = async (recipeData) => {
       for (const ingredient of section.ingredients) {
         let ingredientId;
 
+        // Determine if the input was plural based on the entered text
+        const isPlural = await determineIngredientPlurality(
+          ingredient.name,
+          recipeData.original_language
+        );
+
         if (ingredient.ingredient_id) {
           ingredientId = ingredient.ingredient_id;
         } else if (ingredient.name) {
-          ingredientId = await getOrCreateIngredient(
+          const ingredientResult = await getOrCreateIngredient(
             ingredient.name,
             recipeData.original_language
           );
+          ingredientId = ingredientResult.id;
         } else {
           throw new Error("Ingredient must have either ingredient_id or name");
         }
@@ -509,6 +584,7 @@ export const createRecipe = async (recipeData) => {
           notes: ingredient.notes,
           subheading: section.subheading || null,
           order_index: globalOrderIndex++,
+          is_plural: isPlural,
         });
       }
     }
@@ -525,13 +601,22 @@ export const createRecipe = async (recipeData) => {
       const ingredient = recipeData.ingredients[i];
       let ingredientId;
 
+      // Determine if the input was plural based on the entered text
+      const isPlural = await determineIngredientPlurality(
+        ingredient.name,
+        recipeData.original_language
+      );
+
       if (ingredient.ingredient_id) {
         ingredientId = ingredient.ingredient_id;
       } else if (ingredient.name) {
-        ingredientId = await getOrCreateIngredient(
+        const ingredientResult = await getOrCreateIngredient(
           ingredient.name,
           recipeData.original_language
         );
+        ingredientId = ingredientResult.id;
+        // Note: we use our own determination rather than the one from getOrCreateIngredient
+        // because we want to respect what the user actually typed
       } else {
         throw new Error("Ingredient must have either ingredient_id or name");
       }
@@ -544,6 +629,7 @@ export const createRecipe = async (recipeData) => {
         notes: ingredient.notes,
         subheading: ingredient.subheading || null,
         order_index: i,
+        is_plural: isPlural,
       });
     }
   }
@@ -624,23 +710,39 @@ export const updateRecipe = async (id, recipeData) => {
   ) {
     for (const ingredient of recipeData.ungroupedIngredients) {
       let ingredientId;
+      let existingRecipe = null;
 
       if (ingredient.ingredient_id) {
         ingredientId = ingredient.ingredient_id;
-      } else if (ingredient.name) {
-        // For updates, get the original language from the existing recipe
-        const { data: existingRecipe } = await supabase
+        // Still need to get the recipe language for plurality determination
+        const { data: recipe } = await supabase
           .from("recipes")
           .select("original_language")
           .eq("id", id)
           .single();
-        ingredientId = await getOrCreateIngredient(
+        existingRecipe = recipe;
+      } else if (ingredient.name) {
+        // For updates, get the original language from the existing recipe
+        const { data: recipe } = await supabase
+          .from("recipes")
+          .select("original_language")
+          .eq("id", id)
+          .single();
+        existingRecipe = recipe;
+        const ingredientResult = await getOrCreateIngredient(
           ingredient.name,
           existingRecipe?.original_language || "en"
         );
+        ingredientId = ingredientResult.id;
       } else {
         throw new Error("Ingredient must have either ingredient_id or name");
       }
+
+      // Determine if the input was plural based on the entered text
+      const isPlural = await determineIngredientPlurality(
+        ingredient.name,
+        existingRecipe?.original_language || "en"
+      );
 
       recipeIngredientsToInsert.push({
         recipe_id: id,
@@ -650,6 +752,7 @@ export const updateRecipe = async (id, recipeData) => {
         notes: ingredient.notes,
         subheading: null, // Ungrouped ingredients have no subheading
         order_index: globalOrderIndex++,
+        is_plural: isPlural,
       });
     }
   }
@@ -662,24 +765,40 @@ export const updateRecipe = async (id, recipeData) => {
     for (const section of recipeData.ingredientSections) {
       for (const ingredient of section.ingredients) {
         let ingredientId;
+        let existingRecipe = null;
 
         // Handle both cases: ingredient_id provided OR name provided
         if (ingredient.ingredient_id) {
           ingredientId = ingredient.ingredient_id;
-        } else if (ingredient.name) {
-          // For updates, get the original language from the existing recipe
-          const { data: existingRecipe } = await supabase
+          // Still need to get the recipe language for plurality determination
+          const { data: recipe } = await supabase
             .from("recipes")
             .select("original_language")
             .eq("id", id)
             .single();
-          ingredientId = await getOrCreateIngredient(
+          existingRecipe = recipe;
+        } else if (ingredient.name) {
+          // For updates, get the original language from the existing recipe
+          const { data: recipe } = await supabase
+            .from("recipes")
+            .select("original_language")
+            .eq("id", id)
+            .single();
+          existingRecipe = recipe;
+          const ingredientResult = await getOrCreateIngredient(
             ingredient.name,
             existingRecipe?.original_language || "en"
           );
+          ingredientId = ingredientResult.id;
         } else {
           throw new Error("Ingredient must have either ingredient_id or name");
         }
+
+        // Determine if the input was plural based on the entered text
+        const isPlural = await determineIngredientPlurality(
+          ingredient.name,
+          existingRecipe?.original_language || "en"
+        );
 
         recipeIngredientsToInsert.push({
           recipe_id: id,
@@ -689,11 +808,13 @@ export const updateRecipe = async (id, recipeData) => {
           notes: ingredient.notes,
           subheading: section.subheading || null,
           order_index: globalOrderIndex++,
+          is_plural: isPlural,
         });
       }
     }
   }
 
+  // TODO - remove this fallback?
   // Fallback for backward compatibility with flat ingredient list
   if (
     recipeIngredientsToInsert.length === 0 &&
@@ -704,24 +825,40 @@ export const updateRecipe = async (id, recipeData) => {
     for (let i = 0; i < recipeData.ingredients.length; i++) {
       const ingredient = recipeData.ingredients[i];
       let ingredientId;
+      let existingRecipe = null;
 
       // Handle both cases: ingredient_id provided OR name provided
       if (ingredient.ingredient_id) {
         ingredientId = ingredient.ingredient_id;
-      } else if (ingredient.name) {
-        // For updates, get the original language from the existing recipe
-        const { data: existingRecipe } = await supabase
+        // Still need to get the recipe language for plurality determination
+        const { data: recipe } = await supabase
           .from("recipes")
           .select("original_language")
           .eq("id", id)
           .single();
-        ingredientId = await getOrCreateIngredient(
+        existingRecipe = recipe;
+      } else if (ingredient.name) {
+        // For updates, get the original language from the existing recipe
+        const { data: recipe } = await supabase
+          .from("recipes")
+          .select("original_language")
+          .eq("id", id)
+          .single();
+        existingRecipe = recipe;
+        const ingredientResult = await getOrCreateIngredient(
           ingredient.name,
           existingRecipe?.original_language || "en"
         );
+        ingredientId = ingredientResult.id;
       } else {
         throw new Error("Ingredient must have either ingredient_id or name");
       }
+
+      // Determine if the input was plural based on the entered text
+      const isPlural = await determineIngredientPlurality(
+        ingredient.name,
+        existingRecipe?.original_language || "en"
+      );
 
       recipeIngredientsToInsert.push({
         recipe_id: id,
@@ -731,6 +868,7 @@ export const updateRecipe = async (id, recipeData) => {
         notes: ingredient.notes,
         subheading: ingredient.subheading || null,
         order_index: i,
+        is_plural: isPlural,
       });
     }
   }

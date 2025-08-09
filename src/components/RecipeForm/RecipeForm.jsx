@@ -282,7 +282,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                       value={(() => {
                                         // Format values respecting unit's fraction setting
                                         if (!ingredient.quantity) return "";
-                                        return formatQuantityForUnit(ingredient.quantity, ingredient.unit, units);
+                                        return formatQuantityForUnit(
+                                          ingredient.quantity,
+                                          ingredient.unit,
+                                          units
+                                        );
                                       })()}
                                       onChange={(e) =>
                                         handleIngredientChange(
@@ -514,8 +518,15 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                       type="text"
                                                       value={(() => {
                                                         // Format values respecting unit's fraction setting
-                                                        if (!ingredient.quantity) return "";
-                                                        return formatQuantityForUnit(ingredient.quantity, ingredient.unit, units);
+                                                        if (
+                                                          !ingredient.quantity
+                                                        )
+                                                          return "";
+                                                        return formatQuantityForUnit(
+                                                          ingredient.quantity,
+                                                          ingredient.unit,
+                                                          units
+                                                        );
                                                       })()}
                                                       onChange={(e) =>
                                                         handleIngredientChange(
@@ -733,9 +744,6 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
             placeholder={t("notes")}
           />
         </div>
-
-        {/* TODO - add overall form submition error here and handle common errors */}
-        {/* {error && <div className="error-message">{error}</div>} */}
 
         <div className={`btn-wrapper ${isEditMode ? "edit" : ""}`}>
           {/* Delete Button */}

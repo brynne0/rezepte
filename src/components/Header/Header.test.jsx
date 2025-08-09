@@ -466,21 +466,6 @@ describe("Header Component", () => {
     expect(screen.queryByTestId("header-logout-btn")).not.toBeInTheDocument();
   });
 
-  test("does not show login/logout when there is a login message", () => {
-    render(
-      <TestWrapper>
-        <Header {...defaultProps} loginMessage="Processing..." />
-      </TestWrapper>
-    );
-
-    // Click on logo - should not show login/logout
-    const logos = screen.getAllByTestId("lucide-squirrel");
-    fireEvent.click(logos[0]);
-
-    expect(screen.queryByText("Login")).not.toBeInTheDocument();
-    expect(screen.queryByText("Logout")).not.toBeInTheDocument();
-  });
-
   describe("Language Switching", () => {
     test("shows current language as selected", () => {
       mockI18n.language = "en";

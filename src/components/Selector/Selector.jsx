@@ -4,14 +4,14 @@ import { ChevronDown } from "lucide-react";
 import useClickOutside from "../../hooks/ui/useClickOutside";
 import "./Selector.css";
 
-const Selector = ({ 
-  value, 
-  onChange, 
-  id, 
-  className, 
+const Selector = ({
+  value,
+  onChange,
+  id,
+  className,
   options = [],
   placeholder,
-  type = "generic" // "unit", "category", or "generic"
+  type = "generic", // "unit", "category", or "generic"
 }) => {
   const { t } = useTranslation();
 
@@ -28,7 +28,9 @@ const Selector = ({
         return t("units", { returnObjects: true }) || [];
       case "category":
         // Filter out "all" category for category selector
-        return options?.filter((cat) => cat.value.toLowerCase() !== "all") || [];
+        return (
+          options?.filter((cat) => cat.value.toLowerCase() !== "all") || []
+        );
       default:
         return options || [];
     }
@@ -45,7 +47,9 @@ const Selector = ({
 
   // Get current option display
   const currentOption = allOptions.find((option) => option.value === value);
-  const displayValue = currentOption ? (currentOption.label || currentOption.value) : value || "";
+  const displayValue = currentOption
+    ? currentOption.label || currentOption.value
+    : value || "";
 
   // Get placeholder text based on type
   const getPlaceholder = () => {
@@ -71,6 +75,8 @@ const Selector = ({
   const handleFocus = () => {
     setIsOpen(true);
     setSearchTerm("");
+    // When search term is empty, all options are shown
+    setSelectedIndex(allOptions.length > 0 ? 0 : -1);
   };
 
   // Handle input change
@@ -78,10 +84,16 @@ const Selector = ({
     const newSearchTerm = e.target.value;
     setSearchTerm(newSearchTerm);
     setIsOpen(true);
-    setSelectedIndex(-1);
+    // Don't reset selectedIndex to -1, keep current selection or set to 0 if valid options exist
+    const newFilteredOptions = allOptions.filter(
+      (option) =>
+        option.label.toLowerCase().includes(newSearchTerm.toLowerCase()) ||
+        option.value.toLowerCase().includes(newSearchTerm.toLowerCase())
+    );
+    setSelectedIndex(newFilteredOptions.length > 0 ? 0 : -1);
 
     // If user types exact match, select it immediately
-    const exactMatch = filteredOptions.find(
+    const exactMatch = newFilteredOptions.find(
       (option) =>
         option.label.toLowerCase() === newSearchTerm.toLowerCase() ||
         option.value.toLowerCase() === newSearchTerm.toLowerCase()
@@ -146,7 +158,7 @@ const Selector = ({
     if (isOpen && !searchTerm) {
       setSearchTerm("");
     }
-  }, [isOpen]);
+  }, [isOpen, searchTerm]);
 
   return (
     <div className={`selector ${className || ""}`} ref={dropdownRef}>
@@ -187,7 +199,6 @@ const Selector = ({
                 option.value === value ? "selected" : ""
               } ${index === selectedIndex ? "selected" : ""}`}
               onClick={() => handleOptionSelect(option)}
-              onMouseEnter={() => setSelectedIndex(index)}
             >
               {option.label || option.value}
             </div>

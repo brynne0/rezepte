@@ -90,8 +90,8 @@ const Header = ({
           <div className="login-wrapper" ref={loginFormRef}>
             <div
               onClick={() => {
-                // Don't do anything if there's a message or already on auth page
-                if (loginMessage || location.pathname === "/auth-page") return;
+                // Don't show login/logout button if on auth page
+                if (location.pathname === "/auth-page") return;
 
                 if (isLoggedIn) {
                   // Logout form
@@ -142,7 +142,7 @@ const Header = ({
             )}
             {/* Language Selection */}
             <div className="language-wrapper">
-              <p
+              <span
                 className={`language${
                   i18n.language === "en" ? " selected" : ""
                 }${disableLanguageSwitch ? " disabled" : ""}`}
@@ -151,9 +151,9 @@ const Header = ({
                 }
               >
                 EN
-              </p>{" "}
-              |{" "}
-              <p
+              </span>
+              |
+              <span
                 className={`language${
                   i18n.language === "de" ? " selected" : ""
                 }${disableLanguageSwitch ? " disabled" : ""}`}
@@ -162,7 +162,7 @@ const Header = ({
                 }
               >
                 DE
-              </p>
+              </span>
             </div>
           </div>
 

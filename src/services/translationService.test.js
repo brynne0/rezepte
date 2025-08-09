@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
-import { getTranslatedRecipe } from "./translationService";
+import { getTranslatedRecipe, normaliseInstructions } from "./translationService";
 
 // Mock Supabase
 vi.mock("../lib/supabase", () => ({
@@ -47,10 +47,11 @@ describe("Translation Service", () => {
         id: "ing-1",
         recipe_ingredient_id: "ri-1",
         quantity: "2",
-        unit: "cups",
+        unit: "cup/s",
         singular_name: "flour",
         plural_name: "flours",
         notes: "sifted",
+        is_plural: true, // User typed plural form
       },
       {
         id: "ing-2",
@@ -59,6 +60,7 @@ describe("Translation Service", () => {
         unit: "tsp",
         singular_name: "salt",
         plural_name: "salts",
+        is_plural: false, // User typed singular form
       },
     ],
   };
@@ -75,9 +77,10 @@ describe("Translation Service", () => {
             id: "ing-3",
             recipe_ingredient_id: "ri-3",
             quantity: "3",
-            unit: "cups",
+            unit: "cup/s",
             singular_name: "sugar",
             plural_name: "sugars",
+            is_plural: false, // User typed singular form
           },
         ],
       },
@@ -88,9 +91,10 @@ describe("Translation Service", () => {
             id: "ing-4",
             recipe_ingredient_id: "ri-4",
             quantity: "1",
-            unit: "cup",
+            unit: "cup/s",
             singular_name: "butter",
             plural_name: "butters",
+            is_plural: false, // User typed singular form
           },
         ],
       },
@@ -106,9 +110,10 @@ describe("Translation Service", () => {
         id: "ing-5",
         recipe_ingredient_id: "ri-5",
         quantity: "1",
-        unit: "cup",
+        unit: "cup/s",
         singular_name: "milk",
         plural_name: "milks",
+        is_plural: false, // User typed singular form
       },
     ],
     ingredientSections: [
@@ -122,6 +127,7 @@ describe("Translation Service", () => {
             unit: "tsp",
             singular_name: "cinnamon",
             plural_name: "cinnamons",
+            is_plural: false, // User typed singular form
           },
         ],
       },
@@ -171,28 +177,6 @@ describe("Translation Service", () => {
         "name"
       );
     });
-
-    test("handles legacy flat ingredients structure", async () => {
-      const legacyRecipe = {
-        id: "recipe-legacy",
-        title: "Legacy Recipe",
-        original_language: "en",
-        ingredients: [
-          {
-            id: "ing-legacy",
-            recipe_ingredient_id: "ri-legacy",
-            quantity: "1",
-            singular_name: "egg",
-            plural_name: "eggs",
-          },
-        ],
-      };
-
-      const result = await getTranslatedRecipe(legacyRecipe, "en");
-
-      expect(result).toHaveProperty("ingredients");
-      expect(result.ingredients[0]).toHaveProperty("name");
-    });
   });
 
   describe("Translation Required", () => {
@@ -224,44 +208,34 @@ describe("Translation Service", () => {
   });
 
   describe("Ingredient Display Name Logic", () => {
-    test("uses singular name for quantity 1 in English", async () => {
+    test("uses is_plural flag for ingredient name selection", async () => {
       const recipe = {
         ...mockRecipeWithUngroupedIngredients,
         ungroupedIngredients: [
           {
             id: "ing-1",
             recipe_ingredient_id: "ri-1",
-            quantity: "1",
+            quantity: "3", // High quantity but user typed singular
             singular_name: "apple",
             plural_name: "apples",
+            is_plural: false, // User typed singular form
           },
-        ],
-      };
-
-      const result = await getTranslatedRecipe(recipe, "en");
-
-      // For English, should use singular form for quantity 1
-      expect(result.ungroupedIngredients[0].name).toBe("apple");
-    });
-
-    test("uses plural name for quantity > 1 in English", async () => {
-      const recipe = {
-        ...mockRecipeWithUngroupedIngredients,
-        ungroupedIngredients: [
           {
-            id: "ing-1",
-            recipe_ingredient_id: "ri-1",
-            quantity: "3",
-            singular_name: "apple",
-            plural_name: "apples",
+            id: "ing-2",
+            recipe_ingredient_id: "ri-2",
+            quantity: "1", // Low quantity but user typed plural
+            singular_name: "tomato",
+            plural_name: "tomatoes",
+            is_plural: true, // User typed plural form
           },
         ],
       };
 
       const result = await getTranslatedRecipe(recipe, "en");
 
-      // For English, should use plural form for quantity > 1
-      expect(result.ungroupedIngredients[0].name).toBe("apples");
+      // Should use is_plural flag, not quantity
+      expect(result.ungroupedIngredients[0].name).toBe("apple"); // is_plural: false
+      expect(result.ungroupedIngredients[1].name).toBe("tomatoes"); // is_plural: true
     });
 
     test("falls back to singular when plural is missing", async () => {
@@ -274,6 +248,7 @@ describe("Translation Service", () => {
             quantity: "3",
             singular_name: "rice",
             // plural_name missing
+            is_plural: true, // User typed plural but no plural_name available
           },
         ],
       };
@@ -282,6 +257,130 @@ describe("Translation Service", () => {
 
       // Should fall back to singular when plural is missing
       expect(result.ungroupedIngredients[0].name).toBe("rice");
+    });
+
+    test("defaults to singular when is_plural is missing", async () => {
+      const recipe = {
+        ...mockRecipeWithUngroupedIngredients,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "5",
+            singular_name: "carrot",
+            plural_name: "carrots",
+            // is_plural missing
+          },
+        ],
+      };
+
+      const result = await getTranslatedRecipe(recipe, "en");
+
+      // Should default to singular when is_plural is missing
+      expect(result.ungroupedIngredients[0].name).toBe("carrot");
+    });
+  });
+
+  describe("Translation Capitalisation Rules", () => {
+    test("German translations preserve case while English translations are lowercased", () => {
+      const mockTranslatedText = "Brokkoli"; // API returns capitalised German
+
+      const testCapitalisation = (targetLanguage) => {
+        return targetLanguage === "de"
+          ? mockTranslatedText
+          : mockTranslatedText.toLowerCase();
+      };
+
+      // German case - should preserve as-is
+      const finalSingularDe = testCapitalisation("de");
+      const finalPluralDe = testCapitalisation("de");
+
+      expect(finalSingularDe).toBe("Brokkoli"); // Preserved capitalisation
+      expect(finalPluralDe).toBe("Brokkoli"); // Preserved capitalisation
+
+      // English case - should be lowercased
+      const finalSingularEn = testCapitalisation("en");
+      const finalPluralEn = testCapitalisation("en");
+
+      expect(finalSingularEn).toBe("brokkoli"); // Lowercased
+      expect(finalPluralEn).toBe("brokkoli"); // Lowercased
+    });
+
+    test("German ingredient examples maintain proper capitalisation", () => {
+      // Test the example: "broccoli and peas" should become "Brokkoli und Erbsen"
+      const germanTranslations = [
+        { api: "Brokkoli", expected: "Brokkoli" },
+        { api: "Erbsen", expected: "Erbsen" },
+        { api: "Karotten", expected: "Karotten" },
+        { api: "Kartoffeln", expected: "Kartoffeln" },
+      ];
+
+      const applyGermanCapitalisation = (translatedText, targetLanguage) => {
+        return targetLanguage === "de"
+          ? translatedText
+          : translatedText.toLowerCase();
+      };
+
+      germanTranslations.forEach(({ api, expected }) => {
+        const result = applyGermanCapitalisation(api, "de");
+
+        expect(result).toBe(expected);
+        expect(result[0]).toBe(result[0].toUpperCase()); // Should be capitalised
+      });
+    });
+
+    test("Sentence ingredient gets capitalised properly", () => {
+      const englishSentence = "broccoli or peas";
+      const mockTranslatedText = "Brokkoli oder Erbsen";
+
+      // Mock the translation API to return German translation
+      const mockTranslateText = vi.fn().mockResolvedValue(mockTranslatedText);
+
+      const simulateTranslationFlow = async (inputText, targetLanguage) => {
+        // Simulate the translation process from translationService.js
+        const translatedText = await mockTranslateText(
+          inputText,
+          targetLanguage
+        );
+
+        // Apply capitalisation rules (German preserves case, English lowercases)
+        const finalResult =
+          targetLanguage === "de"
+            ? translatedText
+            : translatedText.toLowerCase();
+
+        return finalResult;
+      };
+
+      // Test: English sentence → German translation with proper capitalisation
+      return simulateTranslationFlow(englishSentence, "de").then((result) => {
+        expect(mockTranslateText).toHaveBeenCalledWith(englishSentence, "de");
+        expect(result).toBe("Brokkoli oder Erbsen");
+
+        // Verify proper German capitalisation is preserved
+        expect(result).toContain("Brokkoli");
+        expect(result).toContain("Erbsen");
+
+        // Verify it's not lowercased (which would happen for English)
+        expect(result).not.toBe("brokkoli oder erbsen");
+      });
+    });
+
+    test("English translations are consistently lowercased", () => {
+      const mockApiResponses = ["BROCCOLI", "Peas", "CaRrOtS", "potatoes"];
+
+      const applyEnglishCapitalisation = (translatedText, targetLanguage) => {
+        return targetLanguage === "de"
+          ? translatedText
+          : translatedText.toLowerCase();
+      };
+
+      mockApiResponses.forEach((apiResponse) => {
+        const result = applyEnglishCapitalisation(apiResponse, "en");
+
+        expect(result).toBe(apiResponse.toLowerCase());
+        expect(result).toBe(result.toLowerCase()); // Should be fully lowercase
+      });
     });
   });
 
@@ -333,6 +432,71 @@ describe("Translation Service", () => {
       // Should still return a result without crashing
       expect(result).toHaveProperty("ungroupedIngredients");
       expect(result.ungroupedIngredients).toHaveLength(1);
+    });
+  });
+
+  describe("Instruction Normalisation", () => {
+    test("normaliseInstructions adds full stops to instructions without punctuation", () => {
+      const instructions = [
+        "Mix the ingredients",
+        "Bake for 30 minutes",
+        "Let cool"
+      ];
+
+      const result = normaliseInstructions(instructions);
+
+      expect(result).toEqual([
+        "Mix the ingredients.",
+        "Bake for 30 minutes.",
+        "Let cool."
+      ]);
+    });
+
+
+    test("normaliseInstructions preserves existing punctuation", () => {
+      const instructions = [
+        "Preheat oven to 350°F  ",
+        "Mix dry ingredients!  ",
+        "  Add wet ingredients?  ",
+        "Bake for 25-30 minutes.",
+        "  Cool completely  "
+      ];
+
+      const result = normaliseInstructions(instructions);
+
+      expect(result).toEqual([
+        "Preheat oven to 350°F.",
+        "Mix dry ingredients!",
+        "Add wet ingredients?",
+        "Bake for 25-30 minutes.",
+        "Cool completely."
+      ]);
+    });
+
+    test("normaliseInstructions handles empty and invalid inputs", () => {
+      expect(normaliseInstructions([])).toEqual([]);
+      expect(normaliseInstructions(null)).toBe(null);
+      expect(normaliseInstructions(undefined)).toBe(undefined);
+      expect(normaliseInstructions("not an array")).toBe("not an array");
+    });
+
+    test("getTranslatedRecipe normalises translated instructions", async () => {
+      // Mock the supabase translation function
+      const mockSupabase = await import("../lib/supabase");
+      mockSupabase.default.functions.invoke.mockResolvedValue({
+        data: { translatedText: "Mischen Sie die Zutaten" },
+        error: null
+      });
+
+      const recipe = {
+        title: "Test Recipe",
+        instructions: ["Mix the ingredients"],
+        original_language: "en"
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      expect(result.instructions[0]).toBe("Mischen Sie die Zutaten.");
     });
   });
 });

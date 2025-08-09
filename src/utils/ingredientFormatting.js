@@ -1,4 +1,8 @@
-import { formatQuantity, parseFraction, shouldUsePlural } from "./fractionUtils";
+import {
+  formatQuantity,
+  parseFraction,
+  shouldUsePlural,
+} from "./fractionUtils";
 
 /**
  * Comprehensive ingredient formatting utility
@@ -10,6 +14,7 @@ export const formatQuantityForUnit = (quantity, unit, units) => {
   if (!quantity) return "";
 
   // Check if it's a range first (before parsing)
+
   if (typeof quantity === "string") {
     const rangeMatch = quantity.match(/^(.+?)\s*[-–—]\s*(.+)$/);
     if (rangeMatch) {
@@ -28,11 +33,11 @@ export const formatQuantityForUnit = (quantity, unit, units) => {
 
   // Find the unit object to check if it uses fractions
   // Handle null/undefined unit as empty string
-  const normalizedUnit = unit || "";
-  const unitObj = units?.find((u) => u.value === normalizedUnit);
+  const normalisedUnit = unit || "";
+  const unitObj = units?.find((u) => u.value === normalisedUnit);
 
   // Default to fractions if no unit (cooking context) or if unit uses fractions
-  if (!normalizedUnit || unitObj?.useFractions) {
+  if (!normalisedUnit || unitObj?.useFractions) {
     return formatQuantity(parsedQuantity);
   } else {
     // For metric units, keep as decimal
@@ -51,51 +56,23 @@ export const formatUnitDisplay = (unit, quantity, units) => {
   const translated = unitObj?.label || unit;
 
   // Handle pluralization for units that support it
-  if (unitObj?.pluralize && translated.includes("/")) {
+  if (translated.includes("/")) {
     const [singular, pluralSuffix] = translated.split("/");
-    return shouldUsePlural(quantity)
-      ? singular + pluralSuffix
-      : singular;
+    return shouldUsePlural(quantity) ? singular + pluralSuffix : singular;
   }
   return translated;
 };
 
-// Get the correct ingredient name (singular vs plural)
-export const getIngredientDisplayName = (ingredient, units, currentLanguage = "en") => {
+// Get the correct ingredient name (singular vs plural) based on stored is_plural flag
+export const getIngredientDisplayName = (
+  ingredient,
+  currentLanguage = "en"
+) => {
   // Handle nested ingredient structure from API
   const ingredientData = ingredient.ingredients || ingredient;
 
-  // Simple pluralization logic based on units
-  const unitObj = units?.find((u) => u.value === ingredient.unit);
-  
-  let shouldUseIngredientPlural;
-  
-  // For ranges, always use quantity logic regardless of unit type
-  const isRange = ingredient.quantity && typeof ingredient.quantity === 'string' && 
-    ingredient.quantity.match(/^(.+?)\s*[-–—]\s*(.+)$/);
-  
-  if (!ingredient.unit || ingredient.unit === "") {
-    // No unit or empty unit: use standard quantity logic
-    shouldUseIngredientPlural = shouldUsePlural(ingredient.quantity);
-  } else if (unitObj?.pluralize === false) {
-    // Units like ml, g, kg never pluralize ingredients
-    shouldUseIngredientPlural = false;
-  } else if (isRange) {
-    // Ranges always follow quantity logic regardless of unit type
-    shouldUseIngredientPlural = shouldUsePlural(ingredient.quantity);
-  } else if (unitObj?.pluralize === true) {
-    // Check if it's a countable unit vs measurement/container unit
-    if (unitObj.value === 'piece/s') {
-      // Countable units like "piece/s" follow standard quantity logic
-      shouldUseIngredientPlural = shouldUsePlural(ingredient.quantity);
-    } else {
-      // Measurement/container units like "tbsp", "tsp", "cup/s", "can/s" always pluralize ingredients when quantity > 0
-      shouldUseIngredientPlural = ingredient.quantity && parseFloat(ingredient.quantity) > 0;
-    }
-  } else {
-    // Default: use standard quantity logic
-    shouldUseIngredientPlural = shouldUsePlural(ingredient.quantity);
-  }
+  // All ingredients should now have is_plural flag
+  const shouldUseIngredientPlural = ingredient.is_plural || false;
 
   // For English: use database fields
   if (currentLanguage === "en") {
@@ -104,11 +81,20 @@ export const getIngredientDisplayName = (ingredient, units, currentLanguage = "e
       : ingredientData.singular_name || "?";
   }
 
-  // For other languages: return translated name if available, otherwise fallback to English
+  // For other languages: check for translated names in the ingredients data structure
+  const translation = ingredientData.translated_names?.[currentLanguage];
+  if (translation && typeof translation === "object") {
+    return shouldUseIngredientPlural && translation.plural_name
+      ? translation.plural_name
+      : translation.singular_name;
+  }
+
+  // Fallback to translated name if available (without plural/singular consideration)
   if (ingredient.name) {
     return ingredient.name;
   }
 
+  // Final fallback to English names
   return shouldUseIngredientPlural && ingredientData.plural_name
     ? ingredientData.plural_name
     : ingredientData.singular_name || "?";
@@ -140,7 +126,11 @@ export const formatIngredientMeasurement = (quantity, unit, units) => {
  * Format complete ingredient display (quantity + unit + name + notes)
  * For recipe display components
  */
-export const formatCompleteIngredient = (ingredient, units, currentLanguage = "en") => {
+export const formatCompleteIngredient = (
+  ingredient,
+  units,
+  currentLanguage = "en"
+) => {
   const parts = [];
 
   // Add measurement (quantity + unit)
@@ -154,7 +144,7 @@ export const formatCompleteIngredient = (ingredient, units, currentLanguage = "e
   }
 
   // Add ingredient name
-  const ingredientName = getIngredientDisplayName(ingredient, units, currentLanguage);
+  const ingredientName = getIngredientDisplayName(ingredient, currentLanguage);
   if (ingredientName) {
     parts.push(ingredientName);
   }
