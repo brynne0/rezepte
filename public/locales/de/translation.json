@@ -41,6 +41,7 @@
   "invalid_reset_link": "ungültiger Reset-Link",
   "invalid_session": "ungültige Sitzung",
   "session_expired": "Sitzung abgelaufen",
+  "go_to_login": "zum Login",
 
   "firstname_required": "Vorname ist erforderlich",
   "username_required": "Benutzername ist erforderlich",

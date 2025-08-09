@@ -41,6 +41,7 @@
   "invalid_reset_link": "Invalid rest link",
   "invalid_session": "Invalid session",
   "session_expired": "Session expired",
+  "go_to_login": "Go to login",
 
   "firstname_required": "First name is required",
   "username_required": "Username is required",

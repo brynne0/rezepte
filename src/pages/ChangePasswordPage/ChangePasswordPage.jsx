@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import supabase from "../../lib/supabase";
@@ -18,7 +18,21 @@ const ChangePasswordPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const initializePasswordReset = useCallback(async (accessToken, refreshToken) => {
+  useEffect(() => {
+    // Check if user came from password reset
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const searchParams = new URLSearchParams(window.location.search);
+
+    const accessToken =
+      hashParams.get("access_token") || searchParams.get("access_token");
+    const refreshToken =
+      hashParams.get("refresh_token") || searchParams.get("refresh_token");
+
+    // Initialize session handling
+    initializePasswordReset(accessToken, refreshToken);
+  }, []);
+
+  const initializePasswordReset = async (accessToken, refreshToken) => {
     try {
       // If we have tokens from URL, set the session FIRST
       if (accessToken && refreshToken) {
@@ -48,10 +62,6 @@ const ChangePasswordPage = () => {
           await supabase.auth.getUser();
         } else {
           setErrorMessage(t("invalid_reset_link"));
-          // Redirect to login after 3 seconds
-          setTimeout(() => {
-            navigate("/auth-page");
-          }, 3000);
         }
       }
     } catch (error) {
@@ -60,21 +70,7 @@ const ChangePasswordPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [t, navigate]);
-
-  useEffect(() => {
-    // Check if user came from password reset
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const searchParams = new URLSearchParams(window.location.search);
-
-    const accessToken =
-      hashParams.get("access_token") || searchParams.get("access_token");
-    const refreshToken =
-      hashParams.get("refresh_token") || searchParams.get("refresh_token");
-
-    // Initialize session handling
-    initializePasswordReset(accessToken, refreshToken);
-  }, [initializePasswordReset]);
+  };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -146,16 +142,13 @@ const ChangePasswordPage = () => {
   if (!isValidSession && !showSuccessMessage) {
     return (
       <div className="page-centered">
-        <div>
-          <h3>{t("invalid_reset_link")}</h3>
-          <p>{t("redirecting_to_login")}</p>
-          <button
-            className="btn btn-standard"
-            onClick={() => navigate("/auth-page")}
-          >
-            {t("go_to_login")}
-          </button>
-        </div>
+        <h3>{t("invalid_reset_link")}</h3>
+        <button
+          className="btn btn-standard"
+          onClick={() => navigate("/auth-page")}
+        >
+          {t("go_to_login")}
+        </button>
       </div>
     );
   }
