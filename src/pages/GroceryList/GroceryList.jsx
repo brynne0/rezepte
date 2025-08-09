@@ -71,7 +71,10 @@ const GroceryList = ({
   // Restore user's original language when component unmounts while editing
   useEffect(() => {
     return () => {
-      if (originalUserLanguage.current && originalUserLanguage.current !== i18n.language) {
+      if (
+        originalUserLanguage.current &&
+        originalUserLanguage.current !== i18n.language
+      ) {
         i18n.changeLanguage(originalUserLanguage.current);
       }
     };
@@ -98,7 +101,10 @@ const GroceryList = ({
 
   // Helper function to restore user's original language
   const restoreOriginalLanguage = () => {
-    if (originalUserLanguage.current && originalUserLanguage.current !== i18n.language) {
+    if (
+      originalUserLanguage.current &&
+      originalUserLanguage.current !== i18n.language
+    ) {
       i18n.changeLanguage(originalUserLanguage.current);
       originalUserLanguage.current = null; // Clear the stored language
     }

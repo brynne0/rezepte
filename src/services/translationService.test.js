@@ -47,7 +47,7 @@ describe("Translation Service", () => {
         id: "ing-1",
         recipe_ingredient_id: "ri-1",
         quantity: "2",
-        unit: "cups",
+        unit: "cup/s",
         singular_name: "flour",
         plural_name: "flours",
         notes: "sifted",
@@ -77,7 +77,7 @@ describe("Translation Service", () => {
             id: "ing-3",
             recipe_ingredient_id: "ri-3",
             quantity: "3",
-            unit: "cups",
+            unit: "cup/s",
             singular_name: "sugar",
             plural_name: "sugars",
             is_plural: false, // User typed singular form
@@ -91,7 +91,7 @@ describe("Translation Service", () => {
             id: "ing-4",
             recipe_ingredient_id: "ri-4",
             quantity: "1",
-            unit: "cup",
+            unit: "cup/s",
             singular_name: "butter",
             plural_name: "butters",
             is_plural: false, // User typed singular form
@@ -110,7 +110,7 @@ describe("Translation Service", () => {
         id: "ing-5",
         recipe_ingredient_id: "ri-5",
         quantity: "1",
-        unit: "cup",
+        unit: "cup/s",
         singular_name: "milk",
         plural_name: "milks",
         is_plural: false, // User typed singular form
