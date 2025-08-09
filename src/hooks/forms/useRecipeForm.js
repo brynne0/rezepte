@@ -568,6 +568,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
     e.preventDefault();
 
     if (!(await handleValidation())) {
+      window.scrollTo(0, 0);
       return;
     }
 
