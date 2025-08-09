@@ -6,6 +6,7 @@ import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
+  const [sentToEmail, setSentToEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -27,6 +28,7 @@ const ForgotPasswordPage = () => {
           setErrorMessage(t("password_reset_failed"));
         } else {
           setErrorMessage("");
+          setSentToEmail(email);
           setShowSuccessMessage(true);
           setEmail("");
         }
@@ -50,7 +52,10 @@ const ForgotPasswordPage = () => {
   return (
     <div className="page-centered">
       {showSuccessMessage ? (
-        <p>{t("password_reset_sent")}</p>
+        <div className="flex-column">
+          <span>{t("password_reset_sent")}</span>
+          <strong>{sentToEmail}</strong>
+        </div>
       ) : (
         <form onSubmit={handleForgotPassword} className="auth-form">
           <h2 className="forta">{t("reset_password")}</h2>

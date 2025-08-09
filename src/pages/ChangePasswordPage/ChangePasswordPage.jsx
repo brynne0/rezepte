@@ -18,49 +18,52 @@ const ChangePasswordPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const initializePasswordReset = useCallback(async (accessToken, refreshToken) => {
-    try {
-      // If we have tokens from URL, set the session FIRST
-      if (accessToken && refreshToken) {
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
+  const initializePasswordReset = useCallback(
+    async (accessToken, refreshToken) => {
+      try {
+        // If we have tokens from URL, set the session FIRST
+        if (accessToken && refreshToken) {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
 
-        if (!error && data.session) {
-          setIsValidSession(true);
+          if (!error && data.session) {
+            setIsValidSession(true);
 
-          // Verify the session is working
-          await supabase.auth.getUser();
+            // Verify the session is working
+            await supabase.auth.getUser();
+          } else {
+            setErrorMessage(t("invalid_reset_link"));
+          }
         } else {
-          setErrorMessage(t("invalid_reset_link"));
-        }
-      } else {
-        // Check if there's already a valid session
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+          // Check if there's already a valid session
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
 
-        if (session) {
-          setIsValidSession(true);
+          if (session) {
+            setIsValidSession(true);
 
-          // Verify the session is working
-          await supabase.auth.getUser();
-        } else {
-          setErrorMessage(t("invalid_reset_link"));
-          // Redirect to login after 3 seconds
-          setTimeout(() => {
-            navigate("/auth-page");
-          }, 3000);
+            // Verify the session is working
+            await supabase.auth.getUser();
+          } else {
+            setErrorMessage(t("invalid_reset_link"));
+            // Redirect to login after 3 seconds
+            setTimeout(() => {
+              navigate("/auth-page");
+            }, 3000);
+          }
         }
+      } catch (error) {
+        console.error("Error initializing password reset:", error);
+        setErrorMessage(t("invalid_reset_link"));
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error initializing password reset:", error);
-      setErrorMessage(t("invalid_reset_link"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t, navigate]);
+    },
+    [t, navigate]
+  );
 
   useEffect(() => {
     // Check if user came from password reset
