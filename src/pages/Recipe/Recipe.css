@@ -36,6 +36,10 @@
   opacity: 0.6;
 }
 
+.ingredient-notes {
+  color: grey;
+}
+
 /* Shopping cart */
 .cart-container {
   position: relative;
