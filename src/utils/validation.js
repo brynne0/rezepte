@@ -108,33 +108,6 @@ export const validateRecipeCategory = (category, t) => {
   return null;
 };
 
-export const validateRecipeIngredients = (formData, t) => {
-  // Check ungrouped ingredients first
-  const hasUngroupedIngredients = formData.ungroupedIngredients?.some(
-    (ing) => ing.name && ing.name.trim()
-  );
-
-  // Check ingredient sections
-  const hasSectionIngredients = formData.ingredientSections?.some((section) =>
-    section.ingredients?.some((ing) => ing.name && ing.name.trim())
-  );
-
-  // Check flat ingredients (backward compatibility)
-  const hasFlatIngredients = formData.ingredients?.some(
-    (ing) => ing.name && ing.name.trim()
-  );
-
-  if (
-    !hasUngroupedIngredients &&
-    !hasSectionIngredients &&
-    !hasFlatIngredients
-  ) {
-    return t("ingredient_required");
-  }
-
-  return null;
-};
-
 // Composite recipe validation function
 export const validateRecipeForm = (formData, t) => {
   const errors = {};
@@ -147,10 +120,6 @@ export const validateRecipeForm = (formData, t) => {
   // Category validation
   const categoryError = validateRecipeCategory(category, t);
   if (categoryError) errors.category = categoryError;
-
-  // Ingredients validation (pass entire formData for new structure)
-  const ingredientsError = validateRecipeIngredients(formData, t);
-  if (ingredientsError) errors.ingredients = ingredientsError;
 
   return errors;
 };

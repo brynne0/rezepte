@@ -128,7 +128,6 @@
   "title_required": "Recipe title is required",
   "title_already_exists": "A recipe with this title already exists",
   "category_required": "Category is required",
-  "ingredient_required": "At least one ingredient is required",
 
   "add_to_grocery_list": "Add to grocery list",
   "added_to_groceries": "Added to grocery list",

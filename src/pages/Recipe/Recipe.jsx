@@ -168,6 +168,9 @@ const Recipe = () => {
                         t("units", { returnObjects: true }),
                         i18n.language
                       )}
+                      {ingredient.notes && (
+                        <span className="ingredient-notes"> ({ingredient.notes})</span>
+                      )}
                     </label>
                   </li>
                 ))}
@@ -210,6 +213,9 @@ const Recipe = () => {
                                 t("units", { returnObjects: true }),
                                 i18n.language
                               )}
+                              {ingredient.notes && (
+                                <span className="ingredient-notes"> ({ingredient.notes})</span>
+                              )}
                             </label>
                           </li>
                         )
@@ -249,6 +255,9 @@ const Recipe = () => {
                         ingredient,
                         t("units", { returnObjects: true }),
                         i18n.language
+                      )}
+                      {ingredient.notes && (
+                        <span className="ingredient-notes"> ({ingredient.notes})</span>
                       )}
                     </label>
                   </li>

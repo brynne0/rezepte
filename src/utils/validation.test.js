@@ -10,7 +10,6 @@ import {
   validateRecipeTitle,
   validateRecipeTitleUnique,
   validateRecipeCategory,
-  validateRecipeIngredients,
   validateRecipeForm,
 } from "./validation";
 
@@ -176,7 +175,6 @@ describe("Validation Utilities", () => {
         firstName: "",
       };
       const errors = validateAuthForm(formData, true, mockT);
-      
       expect(errors.username).toBe("username_required");
       expect(errors.password).toBe("password_required");
       expect(errors.email).toBe("email_invalid");
@@ -280,36 +278,51 @@ describe("Validation Utilities", () => {
 
     test("returns null when title is unique", async () => {
       mockCheckRecipeTitleExists.mockResolvedValue(false);
-      
+
       const result = await validateRecipeTitleUnique("Unique Title", mockT);
       expect(result).toBeNull();
-      expect(mockCheckRecipeTitleExists).toHaveBeenCalledWith("Unique Title", null);
+      expect(mockCheckRecipeTitleExists).toHaveBeenCalledWith(
+        "Unique Title",
+        null
+      );
     });
 
     test("returns error when title already exists", async () => {
       mockCheckRecipeTitleExists.mockResolvedValue(true);
-      
+
       const result = await validateRecipeTitleUnique("Existing Title", mockT);
       expect(result).toBe("title_already_exists");
     });
 
     test("excludes specific recipe ID when checking uniqueness", async () => {
       mockCheckRecipeTitleExists.mockResolvedValue(false);
-      
-      const result = await validateRecipeTitleUnique("Title", mockT, "recipe-123");
+
+      const result = await validateRecipeTitleUnique(
+        "Title",
+        mockT,
+        "recipe-123"
+      );
       expect(result).toBeNull();
-      expect(mockCheckRecipeTitleExists).toHaveBeenCalledWith("Title", "recipe-123");
+      expect(mockCheckRecipeTitleExists).toHaveBeenCalledWith(
+        "Title",
+        "recipe-123"
+      );
     });
 
     test("returns null when check fails due to error", async () => {
       mockCheckRecipeTitleExists.mockRejectedValue(new Error("Database error"));
-      
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-      
+
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
       const result = await validateRecipeTitleUnique("Title", mockT);
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith("Error checking title uniqueness:", expect.any(Error));
-      
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error checking title uniqueness:",
+        expect.any(Error)
+      );
+
       consoleSpy.mockRestore();
     });
   });
@@ -323,96 +336,6 @@ describe("Validation Utilities", () => {
     test("returns null for valid category", () => {
       expect(validateRecipeCategory("Desserts", mockT)).toBeNull();
       expect(validateRecipeCategory("  Main Course  ", mockT)).toBeNull();
-    });
-  });
-
-  describe("validateRecipeIngredients", () => {
-    test("returns null when ungrouped ingredients are present", () => {
-      const formData = {
-        ungroupedIngredients: [
-          { name: "flour" },
-          { name: "sugar" },
-        ],
-      };
-      expect(validateRecipeIngredients(formData, mockT)).toBeNull();
-    });
-
-    test("returns null when ingredient sections are present", () => {
-      const formData = {
-        ingredientSections: [
-          {
-            subheading: "For the cake",
-            ingredients: [{ name: "flour" }, { name: "eggs" }],
-          },
-        ],
-      };
-      expect(validateRecipeIngredients(formData, mockT)).toBeNull();
-    });
-
-    test("returns null when flat ingredients are present (backward compatibility)", () => {
-      const formData = {
-        ingredients: [
-          { name: "flour" },
-          { name: "sugar" },
-        ],
-      };
-      expect(validateRecipeIngredients(formData, mockT)).toBeNull();
-    });
-
-    test("returns null when multiple ingredient structures are present", () => {
-      const formData = {
-        ungroupedIngredients: [{ name: "salt" }],
-        ingredientSections: [
-          {
-            ingredients: [{ name: "flour" }],
-          },
-        ],
-        ingredients: [{ name: "pepper" }],
-      };
-      expect(validateRecipeIngredients(formData, mockT)).toBeNull();
-    });
-
-    test("returns error when no ingredients are present", () => {
-      const formData = {};
-      expect(validateRecipeIngredients(formData, mockT)).toBe("ingredient_required");
-    });
-
-    test("returns error when all ingredient arrays are empty", () => {
-      const formData = {
-        ungroupedIngredients: [],
-        ingredientSections: [],
-        ingredients: [],
-      };
-      expect(validateRecipeIngredients(formData, mockT)).toBe("ingredient_required");
-    });
-
-    test("returns error when ingredients have empty names", () => {
-      const formData = {
-        ungroupedIngredients: [
-          { name: "" },
-          { name: "   " },
-        ],
-        ingredientSections: [
-          {
-            ingredients: [{ name: "" }, { name: null }],
-          },
-        ],
-        ingredients: [
-          { name: undefined },
-          { name: "   " },
-        ],
-      };
-      expect(validateRecipeIngredients(formData, mockT)).toBe("ingredient_required");
-    });
-
-    test("ignores ingredients with empty names but accepts valid ones", () => {
-      const formData = {
-        ungroupedIngredients: [
-          { name: "" },
-          { name: "flour" }, // This one is valid
-        ],
-      };
-      expect(validateRecipeIngredients(formData, mockT)).toBeNull();
     });
   });
 
@@ -440,27 +363,15 @@ describe("Validation Utilities", () => {
       expect(errors.category).toBe("category_required");
     });
 
-    test("returns ingredients error when no ingredients are present", () => {
-      const formData = {
-        title: "Recipe Title",
-        category: "Category",
-        ungroupedIngredients: [],
-      };
-      const errors = validateRecipeForm(formData, mockT);
-      expect(errors.ingredients).toBe("ingredient_required");
-    });
-
     test("returns multiple errors when multiple fields are invalid", () => {
       const formData = {
         title: "",
         category: "",
-        ungroupedIngredients: [],
       };
       const errors = validateRecipeForm(formData, mockT);
-      
+
       expect(errors.title).toBe("title_required");
       expect(errors.category).toBe("category_required");
-      expect(errors.ingredients).toBe("ingredient_required");
     });
 
     test("validates with ingredient sections structure", () => {

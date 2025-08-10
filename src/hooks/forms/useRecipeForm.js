@@ -246,13 +246,13 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       instructions: [...prev.instructions, ""],
     }));
 
-    // Focus on the new ingredient text box
+    // Focus on the new instruction text box
     setTimeout(() => {
-      const ingredientTextareas = document.querySelectorAll(
-        ".instruction-row .input--textarea"
+      const instructionTextareas = document.querySelectorAll(
+        ".instruction-row .input"
       );
-      if (ingredientTextareas.length > 0) {
-        ingredientTextareas[ingredientTextareas.length - 1].focus();
+      if (instructionTextareas.length > 0) {
+        instructionTextareas[instructionTextareas.length - 1].focus();
       }
     }, 10);
   };
@@ -310,11 +310,11 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
     // Focus on the new ingredient name input
     setTimeout(() => {
-      const newIngredientNameInput = document.getElementById(
-        `ingredient-name-${newTempId}`
+      const ingredientNameInputs = document.querySelectorAll(
+        '[id^="ingredient-name-"]'
       );
-      if (newIngredientNameInput) {
-        newIngredientNameInput.focus();
+      if (ingredientNameInputs.length > 0) {
+        ingredientNameInputs[ingredientNameInputs.length - 1].focus();
       }
     }, 10);
   };

@@ -100,10 +100,7 @@ export const getIngredientDisplayName = (
     : ingredientData.singular_name || "?";
 };
 
-/**
- * Format complete ingredient measurement (quantity + unit)
- * This is the main function that combines quantity and unit formatting
- */
+// Format complete ingredient measurement (quantity + unit)
 export const formatIngredientMeasurement = (quantity, unit, units) => {
   if (!quantity && !unit) return "";
 
@@ -122,10 +119,7 @@ export const formatIngredientMeasurement = (quantity, unit, units) => {
   return "";
 };
 
-/**
- * Format complete ingredient display (quantity + unit + name + notes)
- * For recipe display components
- */
+// Format ingredient display without notes (quantity + unit + name)
 export const formatCompleteIngredient = (
   ingredient,
   units,
@@ -147,11 +141,6 @@ export const formatCompleteIngredient = (
   const ingredientName = getIngredientDisplayName(ingredient, currentLanguage);
   if (ingredientName) {
     parts.push(ingredientName);
-  }
-
-  // Add notes
-  if (ingredient.notes) {
-    parts.push(ingredient.notes);
   }
 
   return parts.join(" ");

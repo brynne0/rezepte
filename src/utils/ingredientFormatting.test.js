@@ -261,7 +261,7 @@ describe("ingredientFormatting", () => {
       };
 
       expect(formatCompleteIngredient(ingredient, mockUnits)).toBe(
-        "1/2 - 2 cups flour sifted"
+        "1/2 - 2 cups flour"
       );
     });
 
@@ -276,7 +276,7 @@ describe("ingredientFormatting", () => {
       };
 
       expect(formatCompleteIngredient(ingredient, mockUnits)).toBe(
-        "1 cup flours sifted"
+        "1 cup flours"
       );
     });
 
@@ -297,7 +297,7 @@ describe("ingredientFormatting", () => {
       };
 
       expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
-        "1 - 3 cups Mehle sifted"
+        "1 - 3 cups Mehle"
       );
     });
 
@@ -313,7 +313,7 @@ describe("ingredientFormatting", () => {
       };
 
       expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
-        "1 - 3 cups all-purpose flour sifted"
+        "1 - 3 cups all-purpose flour"
       );
     });
   });
