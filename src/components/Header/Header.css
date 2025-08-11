@@ -137,7 +137,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: var(--z-dropdown);
   overflow-y: auto;
-  min-width: 100px;
 }
 
 .user-icon-wrapper .dropdown {
