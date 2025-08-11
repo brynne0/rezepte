@@ -176,6 +176,11 @@
   font-weight: 500;
 }
 
+.dropdown-item.selected {
+  color: var(--dark-red);
+  font-weight: 500;
+}
+
 .dropdown-header {
   padding: 0.5rem 0.75rem;
   font-weight: 500;

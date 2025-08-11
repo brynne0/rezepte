@@ -223,7 +223,9 @@ const Header = ({
               <>
                 <button
                   data-testid="lucide-plus"
-                  className="btn btn-icon btn-icon-neutral"
+                  className={`btn btn-icon btn-icon-neutral ${
+                    location.pathname === "/add-recipe" ? "selected" : ""
+                  }`}
                   onClick={() => navigate("/add-recipe")}
                   aria-label={t("add_new_recipe")}
                 >
@@ -232,7 +234,9 @@ const Header = ({
                 {/* Grocery List */}
                 <button
                   data-testid="lucide-shopping-basket"
-                  className="btn btn-icon btn-icon-neutral"
+                  className={`btn btn-icon btn-icon-neutral ${
+                    location.pathname === "/grocery-list" ? "selected" : ""
+                  }`}
                   onClick={() => navigate("/grocery-list")}
                   aria-label={t("grocery_list")}
                 >
@@ -267,7 +271,9 @@ const Header = ({
                     {isLoggedIn && (
                       <>
                         <button
-                          className="dropdown-item"
+                          className={`dropdown-item ${
+                            location.pathname === "/add-recipe" ? "selected" : ""
+                          }`}
                           onClick={() => {
                             navigate("/add-recipe");
                             setShowNavMenu(false);
@@ -277,7 +283,9 @@ const Header = ({
                           {/* {t("add_new_recipe")} */}
                         </button>
                         <button
-                          className="dropdown-item"
+                          className={`dropdown-item ${
+                            location.pathname === "/grocery-list" ? "selected" : ""
+                          }`}
                           onClick={() => {
                             navigate("/grocery-list");
                             setShowNavMenu(false);

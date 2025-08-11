@@ -896,4 +896,96 @@ describe("Header Component", () => {
       expect(mockUseClickOutside).toHaveBeenCalled();
     });
   });
+
+  describe("Navigation Button Selected States", () => {
+    test("add recipe button has selected class when on add-recipe page", () => {
+      mockUseAuth.mockReturnValue({
+        isLoggedIn: true,
+        isMe: false,
+        isGuest: false,
+      });
+
+      useLocation.mockReturnValue({
+        pathname: "/add-recipe",
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const addButton = screen.getByTestId("lucide-plus");
+      expect(addButton.className).toContain("selected");
+    });
+
+    test("grocery list button has selected class when on grocery-list page", () => {
+      mockUseAuth.mockReturnValue({
+        isLoggedIn: true,
+        isMe: false,
+        isGuest: false,
+      });
+
+      useLocation.mockReturnValue({
+        pathname: "/grocery-list",
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const groceryButton = screen.getByTestId("lucide-shopping-basket");
+      expect(groceryButton.className).toContain("selected");
+    });
+
+    test("navigation buttons do not have selected class on other pages", () => {
+      mockUseAuth.mockReturnValue({
+        isLoggedIn: true,
+        isMe: false,
+        isGuest: false,
+      });
+
+      useLocation.mockReturnValue({
+        pathname: "/",
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const addButton = screen.getByTestId("lucide-plus");
+      const groceryButton = screen.getByTestId("lucide-shopping-basket");
+      
+      expect(addButton.className).not.toContain("selected");
+      expect(groceryButton.className).not.toContain("selected");
+    });
+
+    test("mobile navigation items have selected class on corresponding pages", () => {
+      mockUseAuth.mockReturnValue({
+        isLoggedIn: true,
+        isMe: false,
+        isGuest: false,
+      });
+
+      useLocation.mockReturnValue({
+        pathname: "/add-recipe",
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const menuButton = screen.getByLabelText("Menu");
+      fireEvent.click(menuButton);
+
+      const addButton = document.querySelector('.dropdown .lucide-plus').closest('button');
+      expect(addButton.className).toContain("selected");
+    });
+  });
 });
