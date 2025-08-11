@@ -89,6 +89,10 @@
   color: var(--red);
 }
 
+.btn-icon-neutral.selected {
+  color: var(--dark-red);
+}
+
 .btn-icon-success {
   color: var(--green);
 }

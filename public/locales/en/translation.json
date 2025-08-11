@@ -50,6 +50,8 @@
   "password_required": "Password is required",
   "password_repeat_required": "Password repeat is required",
 
+  "edit_profile": "Edit Profile",
+
   "search": "Search",
   "recipe_not_found": "Recipe not found.",
 

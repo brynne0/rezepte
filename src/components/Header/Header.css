@@ -58,9 +58,9 @@
 }
 
 /* Login Section */
-.login-wrapper {
+.logo-language-wrapper {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   align-items: center;
 }
 
@@ -108,45 +108,169 @@
   gap: 0.5rem;
 }
 
+/* Mobile Navigation */
+.mobile-nav {
+  display: none;
+  align-items: center;
+}
+
+.nav-menu-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* User Icon */
+.user-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Shared Dropdown Styles */
+.dropdown {
+  top: 120%;
+  position: absolute;
+  background: white;
+  border: var(--border-width) dashed var(--dark-brown);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: var(--z-dropdown);
+  overflow-y: auto;
+  min-width: 100px;
+}
+
+.user-icon-wrapper .dropdown {
+  left: 0;
+}
+
+.nav-menu-wrapper .dropdown {
+  right: 0;
+}
+
+.dropdown-content {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: center;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--dark-brown);
+  border-radius: var(--border-radius);
+  transition: all 0.15s ease;
+  text-align: center;
+  font-family: inherit;
+}
+
+.dropdown-item:hover {
+  color: var(--dark-red);
+  font-weight: 500;
+}
+
+.dropdown-header {
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+  color: var(--brown);
+  border-bottom: var(--border-width) solid var(--dark-brown);
+  margin-bottom: 0.25rem;
+}
+
 /* Search Bar */
 .search-bar-wrapper {
   display: flex;
   justify-content: center;
-  margin: 0.25rem;
+  margin: 0.5rem 1rem;
+  padding: 0.5rem;
+  margin: 0;
+  border-radius: var(--border-radius);
 }
 
 .search-bar {
   display: flex;
-  gap: 0.25rem;
+  width: 100%;
+  max-width: 500px;
+  justify-content: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+}
+
+.search-input-with-icon {
+  padding-right: 3rem !important;
+  flex: 1;
+}
+
+.btn-search {
+  position: absolute;
+  right: 0;
 }
 
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
   .header-container {
-    flex-direction: column;
+    flex-direction: row;
     height: auto;
-    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    align-items: center;
+    justify-content: space-between;
   }
 
+  /* Hide desktop navigation on mobile */
+  .desktop-nav,
+  .language-wrapper {
+    display: none;
+  }
+
+  /* Show language-wrapper when inside dropdown */
+  .dropdown .language-wrapper {
+    display: flex;
+  }
+
+  /* Show mobile navigation on mobile */
+  .mobile-nav {
+    display: flex;
+  }
+
+  /* Logo styling for mobile */
   .header-logo,
   .header-logo-2 {
-    order: 1;
     width: 2rem;
     height: 2rem;
   }
 
-  .title-wrapper {
-    order: 2;
-    position: static;
-  }
-
-  .header-nav {
-    order: 3;
-  }
-
+  /* Show login wrapper on mobile but only logo */
   .login-wrapper {
-    flex-direction: column-reverse;
-    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Hide language and login/logout buttons on mobile (moved to hamburger) */
+  .login-wrapper .language-wrapper,
+  .login-wrapper button {
+    display: none;
+  }
+
+  /* Keep only the logo visible */
+  .login-wrapper > div:first-child {
+    display: flex;
+  }
+
+  /* Search bar adjustments for mobile */
+  .search-bar-wrapper {
+    margin: 0;
+    padding: 0.25rem;
   }
 
   /* Mobile typography */

@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search, ShoppingBasket, Plus, Squirrel } from "lucide-react";
-import { signOut, getDisplayName } from "../../services/auth";
+import {
+  Search,
+  ShoppingBasket,
+  Plus,
+  Squirrel,
+  Menu,
+  ChefHat,
+} from "lucide-react";
+import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import useClickOutside from "../../hooks/ui/useClickOutside";
@@ -17,63 +24,53 @@ const Header = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Temporary solution to hide nav bar for mobiles on all screens except home screen
-  const isSmallScreen = window.matchMedia("(max-width: 768px)").matches;
-  const hideNavBar = location.pathname !== "/" && isSmallScreen;
+  const { isLoggedIn } = useAuth();
 
   // Hide search bar on all pages except home
   const isHomePage = location.pathname === "/";
 
-  const { isLoggedIn, isMe, isGuest } = useAuth();
-
-  // Search state
-  const [showSearchBar, setShowSearchBar] = useState(false);
-
-  // Log in and out
-  const [showLogOut, setShowLogOut] = useState(false);
-  const [showLogIn, setShowLogIn] = useState(false);
+  const [showNavMenu, setShowNavMenu] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   // Language
   const { t, i18n } = useTranslation();
 
   // Display name
-  const [displayName, setDisplayName] = useState("");
+  const [firstName, setFirstName] = useState("");
 
   // Load display name on app startup
   useEffect(() => {
-    const loadDisplayName = async () => {
-      const name = await getDisplayName();
+    const loadfirstName = async () => {
+      const name = await getFirstName();
       if (name) {
-        setDisplayName(name);
+        setFirstName(name);
       }
     };
 
     if (isLoggedIn) {
-      loadDisplayName();
+      loadfirstName();
     } else {
-      setDisplayName("");
+      setFirstName("");
     }
-  }, [isLoggedIn, setDisplayName]);
-
-  // Hide search bar when leaving home page (but keep search term)
-  useEffect(() => {
-    if (!isHomePage) {
-      setShowSearchBar(false);
-    }
-  }, [location.pathname, isHomePage]);
+  }, [isLoggedIn, setFirstName]);
 
   // Refs for click outside detection
-  const loginFormRef = useClickOutside(() => {
-    setShowLogOut(false);
-    setShowLogIn(false);
+
+  const userDropdownRef = useClickOutside(() => {
+    setShowUserDropdown(false);
   });
+
+  const navMenuRef = useClickOutside(() => {
+    setShowNavMenu(false);
+  });
+
+  // ADD REF for menu hamburger
 
   const handleLogout = async () => {
     await signOut();
 
     setLoginMessage(t("logged_out"));
-    setShowLogOut(false);
-    setDisplayName("");
+    setFirstName("");
     setSearchTerm("");
     navigate("/");
 
@@ -82,94 +79,129 @@ const Header = ({
     }, 3000);
   };
 
+  // Reusable Language Selector Component
+  const LanguageSelector = ({ className = "", onLanguageChange = null }) => (
+    <div className={`language-wrapper ${className}`}>
+      <span
+        className={`language${i18n.language === "en" ? " selected" : ""}${
+          disableLanguageSwitch ? " disabled" : ""
+        }`}
+        onClick={() => {
+          if (!disableLanguageSwitch) {
+            i18n.changeLanguage("en");
+            if (onLanguageChange) onLanguageChange();
+          }
+        }}
+      >
+        EN
+      </span>
+      |
+      <span
+        className={`language${i18n.language === "de" ? " selected" : ""}${
+          disableLanguageSwitch ? " disabled" : ""
+        }`}
+        onClick={() => {
+          if (!disableLanguageSwitch) {
+            i18n.changeLanguage("de");
+            if (onLanguageChange) onLanguageChange();
+          }
+        }}
+      >
+        DE
+      </span>
+    </div>
+  );
+
+  // Reusable User Dropdown Component
+  const UserDropdown = () => (
+    <div className={"user-icon-wrapper"} ref={userDropdownRef}>
+      <button
+        className={`btn btn-icon btn-icon-neutral ${
+          showUserDropdown ? "selected" : ""
+        }`}
+        onClick={() => {
+          if (location.pathname === "/auth-page") return;
+          setShowUserDropdown((prev) => !prev);
+        }}
+        aria-label={isLoggedIn ? t("user_menu") : t("login")}
+      >
+        <ChefHat size={28} />
+      </button>
+
+      {/* User Dropdown */}
+      {showUserDropdown && (
+        <div className="dropdown user-menu">
+          <div className="dropdown-content">
+            {isLoggedIn ? (
+              <>
+                {/* <div className="dropdown-header">
+                  <span>{firstName}</span>
+                </div> */}
+                <button
+                  className="dropdown-item"
+                  onClick={() => {
+                    setShowUserDropdown(false);
+                    // TODO - implement profile page
+                    navigate("/profile");
+                  }}
+                >
+                  {/* <User size={20} /> */}
+                  {t("edit_profile")}
+                </button>
+                <button
+                  className="dropdown-item"
+                  onClick={() => {
+                    handleLogout();
+                    setShowUserDropdown(false);
+                  }}
+                >
+                  {t("logout")}
+                </button>
+              </>
+            ) : (
+              <button
+                className="dropdown-item"
+                onClick={() => {
+                  setShowUserDropdown(false);
+                  navigate("/auth-page");
+                }}
+              >
+                {t("login")}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <>
       <header className="header">
         <div className="header-container flex-between">
           {/* Login and Logout */}
-          <div className="login-wrapper" ref={loginFormRef}>
-            <div
-              onClick={() => {
-                // Don't show login/logout button if on auth page
-                if (location.pathname === "/auth-page") return;
-
-                if (isLoggedIn) {
-                  // Logout form
-                  setShowLogOut((prev) => !prev);
-                } else {
-                  // Sign in/up form
-                  setShowLogIn((prev) => !prev);
-                }
-              }}
-            >
-              <Squirrel
-                data-testid="lucide-squirrel"
-                className="header-logo"
-                aria-label={t("login")}
-              />
-              {isMe && (
+          <div className="logo-language-wrapper">
+            <Squirrel className="header-logo" />
+            {/* {isMe && (
                 <Squirrel
                   data-testid="lucide-squirrel"
                   className="header-logo-2"
                 />
-              )}
-            </div>
+              )} */}
+
+            {/* TODO - move the login message? 
+            maybe show on the screen for a moment after logging in or out? */}
             {/* Login message */}
             {loginMessage && <div>{loginMessage}</div>}
-            {isLoggedIn && showLogOut && (
-              <div>
-                <button
-                  className={"btn btn-standard"}
-                  onClick={handleLogout}
-                  data-testid="header-logout-btn"
-                >
-                  {t("logout")}
-                </button>
-              </div>
-            )}
-            {showLogIn && (
-              <button
-                className={"btn btn-standard"}
-                onClick={() => {
-                  setShowLogIn(false);
-                  setSearchTerm("");
-                  navigate("/auth-page");
-                }}
-                data-testid="header-login-btn"
-              >
-                {t("login")}
-              </button>
-            )}
+
             {/* Language Selection */}
-            <div className="language-wrapper">
-              <span
-                className={`language${
-                  i18n.language === "en" ? " selected" : ""
-                }${disableLanguageSwitch ? " disabled" : ""}`}
-                onClick={() =>
-                  !disableLanguageSwitch && i18n.changeLanguage("en")
-                }
-              >
-                EN
-              </span>
-              |
-              <span
-                className={`language${
-                  i18n.language === "de" ? " selected" : ""
-                }${disableLanguageSwitch ? " disabled" : ""}`}
-                onClick={() =>
-                  !disableLanguageSwitch && i18n.changeLanguage("de")
-                }
-              >
-                DE
-              </span>
-            </div>
+            <LanguageSelector />
           </div>
 
           {/* Title */}
           <div className="title-wrapper">
             {/* Display user's first name above header */}
-            {displayName && <h3> {displayName}</h3>}
+            {firstName && <h3> {`${firstName}'s`}</h3>}
             <h1
               onClick={() => {
                 setSelectedCategory("all");
@@ -181,80 +213,97 @@ const Header = ({
             </h1>
           </div>
 
-          {!hideNavBar && (
-            <>
-              <nav className="header-nav">
+          {/* Desktop Navigation */}
+          <nav className="header-nav desktop-nav">
+            {/* Desktop User Icon */}
+            <UserDropdown />
+
+            {/* Only display if user logged in */}
+            {isLoggedIn && (
+              <>
                 <button
-                  data-testid="lucide-search"
-                  aria-label={t("search")}
-                  onClick={() => {
-                    // If not on home page, navigate to home first and open search
-                    if (!isHomePage) {
-                      setSelectedCategory("all");
-                      setSearchTerm("");
-                      setShowSearchBar(true);
-                      navigate("/");
-                      // Focus on search bar after navigation
-                      setTimeout(() => {
-                        const searchInput = document.getElementById("search");
-                        if (searchInput) {
-                          searchInput.focus();
-                        }
-                      }, 100);
-                      return;
-                    }
-
-                    // If on home page, toggle search bar
-                    setShowSearchBar((prev) => !prev);
-                    // Clear search when closing search bar
-                    if (showSearchBar) {
-                      setSearchTerm("");
-                    }
-                    // Focus on search bar
-                    if (!showSearchBar) {
-                      setTimeout(() => {
-                        const searchInput = document.getElementById("search");
-                        if (searchInput) {
-                          searchInput.focus();
-                        }
-                      }, 0);
-                    }
-                  }}
+                  data-testid="lucide-plus"
                   className="btn btn-icon btn-icon-neutral"
+                  onClick={() => navigate("/add-recipe")}
+                  aria-label={t("add_new_recipe")}
                 >
-                  <Search size={28} />
+                  <Plus size={28} />
                 </button>
+                {/* Grocery List */}
+                <button
+                  data-testid="lucide-shopping-basket"
+                  className="btn btn-icon btn-icon-neutral"
+                  onClick={() => navigate("/grocery-list")}
+                  aria-label={t("grocery_list")}
+                >
+                  <ShoppingBasket size={28} />
+                </button>
+              </>
+            )}
+          </nav>
 
-                {/* Only display if user logged in and isn't guest */}
-                {isLoggedIn && !isGuest && (
-                  <>
-                    <button
-                      data-testid="lucide-plus"
-                      className="btn btn-icon btn-icon-neutral"
-                      onClick={() => navigate("/add-recipe")}
-                      aria-label={t("add_new_recipe")}
-                    >
-                      <Plus size={28} />
-                    </button>
-                    {/* Grocery List */}
-                    <button
-                      data-testid="lucide-shopping-basket"
-                      className="btn btn-icon btn-icon-neutral"
-                      onClick={() => navigate("/grocery-list")}
-                      aria-label={t("grocery_list")}
-                    >
-                      <ShoppingBasket size={28} />
-                    </button>
-                  </>
-                )}
-              </nav>
-            </>
-          )}
+          {/* Mobile User and Menu Icons */}
+          <div className="mobile-nav">
+            {/* Mobile User Icon */}
+            <UserDropdown className="mobile-user" />
+
+            {/* Hamburger Menu */}
+            <div className="nav-menu-wrapper" ref={navMenuRef}>
+              <button
+                className={`btn btn-icon btn-icon-neutral ${
+                  showNavMenu ? "selected" : ""
+                }`}
+                onClick={() => setShowNavMenu((prev) => !prev)}
+                aria-label="Menu"
+              >
+                <Menu size={28} />
+              </button>
+
+              {/* Mobile Menu Dropdown */}
+              {showNavMenu && (
+                <div className="dropdown">
+                  <div className="dropdown-content">
+                    {/* Navigation options for logged in users */}
+                    {isLoggedIn && (
+                      <>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => {
+                            navigate("/add-recipe");
+                            setShowNavMenu(false);
+                          }}
+                        >
+                          <Plus size={20} />
+                          {/* {t("add_new_recipe")} */}
+                        </button>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => {
+                            navigate("/grocery-list");
+                            setShowNavMenu(false);
+                          }}
+                        >
+                          <ShoppingBasket size={20} />
+                          {/* {t("grocery_list")} */}
+                        </button>
+                      </>
+                    )}
+
+                    {/* Language selection in mobile menu */}
+                    <LanguageSelector
+                      className="dropdown-item"
+                      onLanguageChange={() => setShowNavMenu(false)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/*  Search Recipe  */}
-        <div className="search-bar-wrapper">
-          {showSearchBar && isHomePage && (
+        {/*  Search Recipe - Always visible on home page  */}
+        {isHomePage && (
+          <div className="search-bar-wrapper">
             <form
               className="search-bar"
               onSubmit={(e) => {
@@ -263,13 +312,24 @@ const Header = ({
                 navigate("/");
               }}
             >
-              <input id="search" type="text" className="input input--cream" />
-              <button className={"btn btn-standard"} type="submit">
-                {t("search")}
-              </button>
+              <div className="search-input-wrapper">
+                <input
+                  id="search"
+                  type="text"
+                  className="input input--cream search-input-with-icon"
+                  placeholder={t("search")}
+                />
+                <button
+                  className="btn btn-icon btn-icon-neutral btn-search"
+                  type="submit"
+                  aria-label={t("search")}
+                >
+                  <Search size={20} />
+                </button>
+              </div>
             </form>
-          )}
-        </div>
+          </div>
+        )}
       </header>
     </>
   );

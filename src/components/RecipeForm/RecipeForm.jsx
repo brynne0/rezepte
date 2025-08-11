@@ -133,9 +133,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               </span>
               <input
                 id="servings"
-                type="number"
-                min="0.5"
-                step="0.5"
+                type="text"
                 value={formData.servings || ""}
                 onChange={(e) => handleInputChange("servings", e.target.value)}
                 className="input input--full-width input--edit"

@@ -24,7 +24,7 @@ import {
   signOut,
   forgotPassword,
   changePassword,
-  getDisplayName,
+  getFirstName,
 } from "./auth";
 import supabase from "../lib/supabase";
 
@@ -341,7 +341,7 @@ describe("Auth Service", () => {
     });
   });
 
-  describe("getDisplayName", () => {
+  describe("getFirstName", () => {
     test("returns formatted display name for authenticated user", async () => {
       const mockUser = { id: "123", email: "test@example.com" };
       const mockUserData = { first_name: "John" };
@@ -356,7 +356,7 @@ describe("Auth Service", () => {
         error: null,
       });
 
-      const result = await getDisplayName();
+      const result = await getFirstName();
 
       expect(supabase.auth.getUser).toHaveBeenCalled();
       expect(supabase.from).toHaveBeenCalledWith("users");
@@ -364,7 +364,7 @@ describe("Auth Service", () => {
       expect(supabase.eq).toHaveBeenCalledWith("id", "123");
       expect(supabase.single).toHaveBeenCalled();
 
-      expect(result).toBe("John's");
+      expect(result).toBe("John");
     });
 
     test("returns null for non-authenticated users", async () => {
@@ -373,7 +373,7 @@ describe("Auth Service", () => {
         error: null,
       });
 
-      const result = await getDisplayName();
+      const result = await getFirstName();
 
       expect(result).toBeNull();
       expect(supabase.from).not.toHaveBeenCalled();
@@ -386,7 +386,7 @@ describe("Auth Service", () => {
         error: mockError,
       });
 
-      const result = await getDisplayName();
+      const result = await getFirstName();
 
       expect(result).toBeNull();
     });
@@ -405,7 +405,7 @@ describe("Auth Service", () => {
         error: mockError,
       });
 
-      const result = await getDisplayName();
+      const result = await getFirstName();
 
       expect(result).toBeNull();
     });
@@ -424,7 +424,7 @@ describe("Auth Service", () => {
         error: null,
       });
 
-      const result = await getDisplayName();
+      const result = await getFirstName();
 
       expect(result).toBeNull();
     });
@@ -443,7 +443,7 @@ describe("Auth Service", () => {
         error: null,
       });
 
-      const result = await getDisplayName();
+      const result = await getFirstName();
 
       expect(result).toBeNull();
     });
@@ -451,7 +451,7 @@ describe("Auth Service", () => {
     test("handles exceptions gracefully", async () => {
       supabase.auth.getUser.mockRejectedValue(new Error("Network error"));
 
-      const result = await getDisplayName();
+      const result = await getFirstName();
 
       expect(result).toBeNull();
     });
