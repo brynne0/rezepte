@@ -219,7 +219,7 @@ const Recipe = () => {
                               {ingredient.notes && (
                                 <span className="ingredient-notes">
                                   {" "}
-                                  ({ingredient.notes})
+                                  {ingredient.notes}
                                 </span>
                               )}
                             </label>
@@ -265,7 +265,7 @@ const Recipe = () => {
                       {ingredient.notes && (
                         <span className="ingredient-notes">
                           {" "}
-                          ({ingredient.notes})
+                          {ingredient.notes}
                         </span>
                       )}
                     </label>

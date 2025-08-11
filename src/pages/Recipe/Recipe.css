@@ -12,6 +12,10 @@
   align-items: baseline;
 }
 
+.flex-row.recipe-subheading {
+  align-items: center;
+}
+
 /* Ingredients */
 .ingredient-list-display {
   padding: 0;
