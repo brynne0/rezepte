@@ -207,7 +207,9 @@ const Header = ({
               Rezepte
             </h1>
             {/* Login message - centered below title */}
-            {loginMessage && <div className="login-message">{loginMessage}</div>}
+            {loginMessage && (
+              <div className="login-message">{loginMessage}</div>
+            )}
           </div>
 
           {/* Desktop Navigation */}
