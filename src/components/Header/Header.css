@@ -140,7 +140,7 @@
 .dropdown {
   top: 120%;
   position: absolute;
-  background: white;
+  background: var(--cream-light);
   border: var(--border-width) dashed var(--dark-brown);
   border-radius: var(--border-radius);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

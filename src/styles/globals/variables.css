@@ -1,6 +1,7 @@
 :root {
   --cream: #f2e7d2;
-  --cream-light: #fff9f0;
+  --cream-light: #fffbf4;
+  --cream-background: rgba(255, 249, 240, 0.8);
   --light-brown: #523f19bf;
   --brown: #55443c;
   --dark-brown: #342a24;
