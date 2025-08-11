@@ -595,7 +595,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       const recipeData = {
         title: formData.title.trim(),
         category: formData.category.trim(),
-        servings: formData.servings ? parseInt(formData.servings) : null,
+        servings: formData.servings.trim() || null,
         instructions: validInstructions,
         source: formData.source.trim() || null,
         ungroupedIngredients: validUngroupedIngredients.map((ing) => ({

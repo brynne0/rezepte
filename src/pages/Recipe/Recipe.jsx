@@ -83,7 +83,7 @@ const Recipe = () => {
 
       {/* Servings */}
       {recipe.servings && (
-        <div className="recipe-subheading flex-row">
+        <div className="recipe-subheading">
           <h2>{t("servings")}:</h2>
           {recipe.servings}
         </div>
@@ -95,7 +95,7 @@ const Recipe = () => {
         (recipe.ingredientSections && recipe.ingredientSections.length > 0) ||
         (recipe.ingredients && recipe.ingredients.length > 0)) && (
         <>
-          <div className="recipe-subheading flex-row">
+          <div className="flex-row recipe-subheading">
             <h2>{t("ingredients")}:</h2>
             {/* Grocery Cart */}
             {isLoggedIn && (
@@ -169,7 +169,10 @@ const Recipe = () => {
                         i18n.language
                       )}
                       {ingredient.notes && (
-                        <span className="ingredient-notes"> ({ingredient.notes})</span>
+                        <span className="ingredient-notes">
+                          {" "}
+                          {ingredient.notes}
+                        </span>
                       )}
                     </label>
                   </li>
@@ -214,7 +217,10 @@ const Recipe = () => {
                                 i18n.language
                               )}
                               {ingredient.notes && (
-                                <span className="ingredient-notes"> ({ingredient.notes})</span>
+                                <span className="ingredient-notes">
+                                  {" "}
+                                  ({ingredient.notes})
+                                </span>
                               )}
                             </label>
                           </li>
@@ -257,7 +263,10 @@ const Recipe = () => {
                         i18n.language
                       )}
                       {ingredient.notes && (
-                        <span className="ingredient-notes"> ({ingredient.notes})</span>
+                        <span className="ingredient-notes">
+                          {" "}
+                          ({ingredient.notes})
+                        </span>
                       )}
                     </label>
                   </li>
@@ -270,7 +279,7 @@ const Recipe = () => {
       {/* Instructions */}
       {recipe.instructions && recipe.instructions.length > 0 && (
         <>
-          <div className="recipe-subheading flex-row">
+          <div className="recipe-subheading">
             <h2>{t("instructions")}:</h2>
           </div>
           <ol>
@@ -283,7 +292,7 @@ const Recipe = () => {
 
       {/* Source */}
       {recipe.source && (
-        <div className="recipe-subheading flex-row">
+        <div className="recipe-subheading">
           <h2>{t("source")}:</h2>
 
           {recipe.source.startsWith("http://") ||
@@ -305,7 +314,7 @@ const Recipe = () => {
 
       {/* Extra Notes */}
       {recipe.notes && recipe.notes.length > 0 && (
-        <div className="recipe-subheading flex-row">
+        <div className="recipe-subheading">
           <h2>{t("notes")}:</h2>
           {recipe.notes}
         </div>

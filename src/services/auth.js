@@ -78,7 +78,7 @@ export const changePassword = async (new_password) => {
   }
 };
 
-export const getDisplayName = async () => {
+export const getFirstName = async () => {
   try {
     const {
       data: { user },
@@ -101,7 +101,7 @@ export const getDisplayName = async () => {
       return null;
     }
 
-    return `${data.first_name}'s`;
+    return data.first_name;
   } catch {
     return null;
   }

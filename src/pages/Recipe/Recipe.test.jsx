@@ -261,7 +261,7 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText("ingredients:")).toBeInTheDocument();
       expect(screen.getByText(/2 cups flour/)).toBeInTheDocument();
-      expect(screen.getByText(/\(sifted\)/)).toBeInTheDocument();
+      expect(screen.getByText(/sifted/)).toBeInTheDocument();
       expect(screen.getByText(/1 tsp salt/)).toBeInTheDocument();
     });
 
@@ -280,7 +280,7 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText(/salt/)).toBeInTheDocument();
-      expect(screen.getByText(/\(to taste\)/)).toBeInTheDocument();
+      expect(screen.getByText(/to taste/)).toBeInTheDocument();
     });
 
     test("renders ingredient checkboxes", () => {
@@ -718,7 +718,7 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText(/2 Mehl/)).toBeInTheDocument();
-      expect(screen.getByText(/\(gesiebt\)/)).toBeInTheDocument();
+      expect(screen.getByText(/gesiebt/)).toBeInTheDocument();
 
       // Reset language to English
       mockLanguage = "en";
