@@ -13,12 +13,14 @@
 }
 
 .card-grocery {
+  background: var(--cream-background);
   padding: 2rem 3rem;
   min-width: calc(0.3 * 100vw);
   max-width: -webkit-fill-available;
 }
 
 .card-form {
+  background: var(--cream-background);
   padding: 2rem 3rem;
   max-width: 50rem;
   width: -webkit-fill-available;
