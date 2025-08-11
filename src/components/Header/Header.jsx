@@ -189,11 +189,6 @@ const Header = ({
                 />
               )} */}
 
-            {/* TODO - move the login message? 
-            maybe show on the screen for a moment after logging in or out? */}
-            {/* Login message */}
-            {loginMessage && <div>{loginMessage}</div>}
-
             {/* Language Selection */}
             <LanguageSelector />
           </div>
@@ -211,6 +206,8 @@ const Header = ({
             >
               Rezepte
             </h1>
+            {/* Login message - centered below title */}
+            {loginMessage && <div className="login-message">{loginMessage}</div>}
           </div>
 
           {/* Desktop Navigation */}

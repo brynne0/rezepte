@@ -43,6 +43,15 @@
   align-items: center;
 }
 
+/* Login Message */
+.login-message {
+  font-size: 0.9rem;
+  color: var(--dark-red);
+  font-weight: 500;
+  margin-top: 0.25rem;
+  text-align: center;
+}
+
 /* Logo Icons */
 .header-logo,
 .header-logo-2 {
