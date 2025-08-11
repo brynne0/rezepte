@@ -272,7 +272,9 @@ const Header = ({
                       <>
                         <button
                           className={`dropdown-item ${
-                            location.pathname === "/add-recipe" ? "selected" : ""
+                            location.pathname === "/add-recipe"
+                              ? "selected"
+                              : ""
                           }`}
                           onClick={() => {
                             navigate("/add-recipe");
@@ -284,7 +286,9 @@ const Header = ({
                         </button>
                         <button
                           className={`dropdown-item ${
-                            location.pathname === "/grocery-list" ? "selected" : ""
+                            location.pathname === "/grocery-list"
+                              ? "selected"
+                              : ""
                           }`}
                           onClick={() => {
                             navigate("/grocery-list");

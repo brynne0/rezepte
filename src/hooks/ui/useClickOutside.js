@@ -7,6 +7,11 @@ const useClickOutside = (callback) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
+        // Check if the clicked element is a dropdown item
+        const isDropdownItem = event.target.closest(".dropdown-item");
+        if (isDropdownItem) {
+          return; // Don't close if clicking a dropdown item
+        }
         callback();
       }
     };
