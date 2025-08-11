@@ -189,11 +189,6 @@ const Header = ({
                 />
               )} */}
 
-            {/* TODO - move the login message? 
-            maybe show on the screen for a moment after logging in or out? */}
-            {/* Login message */}
-            {loginMessage && <div>{loginMessage}</div>}
-
             {/* Language Selection */}
             <LanguageSelector />
           </div>
@@ -211,6 +206,8 @@ const Header = ({
             >
               Rezepte
             </h1>
+            {/* Login message - centered below title */}
+            {loginMessage && <div className="login-message">{loginMessage}</div>}
           </div>
 
           {/* Desktop Navigation */}
@@ -272,7 +269,9 @@ const Header = ({
                       <>
                         <button
                           className={`dropdown-item ${
-                            location.pathname === "/add-recipe" ? "selected" : ""
+                            location.pathname === "/add-recipe"
+                              ? "selected"
+                              : ""
                           }`}
                           onClick={() => {
                             navigate("/add-recipe");
@@ -284,7 +283,9 @@ const Header = ({
                         </button>
                         <button
                           className={`dropdown-item ${
-                            location.pathname === "/grocery-list" ? "selected" : ""
+                            location.pathname === "/grocery-list"
+                              ? "selected"
+                              : ""
                           }`}
                           onClick={() => {
                             navigate("/grocery-list");
