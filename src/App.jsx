@@ -32,6 +32,7 @@ import AuthPage from "./pages/AuthPage/AuthPage";
 import Recipe from "./pages/Recipe/Recipe";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
+import AccountSettings from "./pages/AccountSettings/AccountSettings";
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -189,6 +190,7 @@ function AppRoutes(props) {
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/change-password" element={<ChangePasswordPage />} />
+        <Route path="/account-settings" element={<AccountSettings />} />
       </Routes>
     </>
   );

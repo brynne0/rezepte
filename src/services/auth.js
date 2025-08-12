@@ -50,6 +50,46 @@ export const forgotPassword = async (email) => {
   }
 };
 
+export const verifyCurrentPassword = async (currentPassword) => {
+  try {
+    // Get current user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { error: { message: "No authenticated user" } };
+    }
+
+    // Get user's email from database
+    const { data: userData, error: emailError } = await supabase
+      .from("users")
+      .select("email")
+      .eq("id", user.id)
+      .single();
+
+    if (emailError || !userData?.email) {
+      return { error: { message: "Could not retrieve user email" } };
+    }
+
+    // Try to sign in with current credentials to verify password
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: userData.email,
+      password: currentPassword,
+    });
+
+    if (error) {
+      return { error: { message: "Current password is incorrect" } };
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error("Verify password service exception:", err);
+    return { error: err };
+  }
+};
+
 export const changePassword = async (new_password) => {
   try {
     // Check if user is authenticated

@@ -93,7 +93,7 @@
   color: var(--dark-red);
 }
 
-.btn-icon-success {
+.btn-icon-green {
   color: var(--green);
 }
 
@@ -116,7 +116,7 @@
   right: 0.5rem;
 }
 
-.btn-icon-success:hover,
+.btn-icon-green:hover,
 .btn-icon-remove:hover,
 .btn-icon-red:hover {
   transform: translateY(-1px);

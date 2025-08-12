@@ -61,6 +61,12 @@
   flex-direction: column;
 }
 
+.flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .flex-row {
   display: flex;
   align-items: center;
@@ -103,7 +109,7 @@
   padding-top: 1rem;
 }
 
-.btn-icon-success-wrapper {
+.btn-icon-green-wrapper {
   display: flex;
   justify-content: center;
   padding-top: 0.5rem;

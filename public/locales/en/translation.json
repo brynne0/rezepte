@@ -32,6 +32,7 @@
   "password_reset_failed": "Failed to send password reset email. Please try again.",
 
   "set_new_password": "Set New Password",
+  "current_password": "Current Password",
   "new_password": "New password",
   "new_password_repeat": "Repeat new password",
   "confirm": "Confirm",
@@ -49,8 +50,10 @@
   "email_invalid": "Email is invalid",
   "password_required": "Password is required",
   "password_repeat_required": "Password repeat is required",
+  "current_password_incorrect": "Current password is incorrect",
 
-  "edit_profile": "Edit Profile",
+  "account_settings": "Account settings",
+  "preferred_language": "Preferred Language",
 
   "search": "Search",
   "recipe_not_found": "Recipe not found.",

@@ -240,7 +240,7 @@ const GroceryList = ({
         {currentList.length === 0 && !isEditing ? (
           <div className="flex-center">
             <button
-              className="btn btn-icon btn-icon-success"
+              className="btn btn-icon btn-icon-green"
               onClick={addNewItem}
               aria-label={t("add_item")}
             >
@@ -438,7 +438,7 @@ const GroceryList = ({
                 })}
             {isEditing && (
               <button
-                className="btn btn-icon btn-icon-success"
+                className="btn btn-icon btn-icon-green"
                 onClick={addNewItem}
                 aria-label={t("add_item")}
               >

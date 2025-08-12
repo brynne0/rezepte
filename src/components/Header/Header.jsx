@@ -64,8 +64,6 @@ const Header = ({
     setShowNavMenu(false);
   });
 
-  // ADD REF for menu hamburger
-
   const handleLogout = async () => {
     await signOut();
 
@@ -142,11 +140,11 @@ const Header = ({
                   onClick={() => {
                     setShowUserDropdown(false);
                     // TODO - implement profile page
-                    navigate("/profile");
+                    navigate("/account-settings");
                   }}
                 >
                   {/* <User size={20} /> */}
-                  {t("edit_profile")}
+                  {t("account_settings")}
                 </button>
                 <button
                   className="dropdown-item"

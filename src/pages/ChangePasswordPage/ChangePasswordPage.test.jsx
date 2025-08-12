@@ -6,12 +6,16 @@ import ChangePasswordPage from "./ChangePasswordPage";
 // Create mock functions
 const mockNavigate = vi.fn();
 
+// Create mock location state
+const mockLocation = { state: null };
+
 // Mock dependencies
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+    useLocation: () => mockLocation,
   };
 });
 
@@ -27,6 +31,7 @@ vi.mock("../../lib/supabase", () => ({
 
 vi.mock("../../services/auth", () => ({
   changePassword: vi.fn(),
+  verifyCurrentPassword: vi.fn(),
 }));
 
 vi.mock("../../utils/validation", () => ({
@@ -66,22 +71,29 @@ const ChangePasswordPageWrapper = () => (
 describe("ChangePasswordPage", () => {
   let mockSupabase;
   let mockChangePassword;
+  let mockVerifyCurrentPassword;
   let mockValidateChangePasswordForm;
 
   beforeEach(async () => {
     // Import the mocked modules
     const supabase = await import("../../lib/supabase");
-    const { changePassword } = await import("../../services/auth");
+    const { changePassword, verifyCurrentPassword } = await import(
+      "../../services/auth"
+    );
     const { validateChangePasswordForm } = await import(
       "../../utils/validation"
     );
 
     mockSupabase = supabase.default;
     mockChangePassword = changePassword;
+    mockVerifyCurrentPassword = verifyCurrentPassword;
     mockValidateChangePasswordForm = validateChangePasswordForm;
 
     // Reset all mocks
     vi.clearAllMocks();
+
+    // Reset location state
+    mockLocation.state = null;
 
     // Mock window.location
     delete window.location;
@@ -321,8 +333,13 @@ describe("ChangePasswordPage", () => {
       fireEvent.submit(form);
 
       expect(mockValidateChangePasswordForm).toHaveBeenCalledWith(
-        { newPassword: "newpass", newPasswordRepeat: "newpass" },
-        expect.any(Function)
+        {
+          oldPassword: "",
+          newPassword: "newpass",
+          newPasswordRepeat: "newpass",
+        },
+        expect.any(Function),
+        false
       );
     });
 
@@ -653,6 +670,166 @@ describe("ChangePasswordPage", () => {
       fireEvent.change(newPasswordInput, { target: { value: "newpass" } });
 
       expect(newPasswordInput.value).toBe("newpass");
+    });
+  });
+
+  describe("Account Settings Flow", () => {
+    beforeEach(() => {
+      // Set up location state to simulate coming from account settings
+      mockLocation.state = { fromAccountSettings: true };
+
+      // Set up mocks for valid session
+      mockSupabase.auth.getSession.mockResolvedValue({
+        data: { session: { access_token: "test-token" } },
+        error: null,
+      });
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: "test-user" } },
+        error: null,
+      });
+    });
+
+    it("renders old password field when coming from account settings", async () => {
+      render(<ChangePasswordPageWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText("current_password")).toBeInTheDocument();
+      });
+
+      expect(screen.getByText("set_new_password")).toBeInTheDocument();
+      expect(screen.getByLabelText("new_password")).toBeInTheDocument();
+      expect(screen.getByLabelText("new_password_repeat")).toBeInTheDocument();
+    });
+
+    it("includes old password in validation when coming from account settings", async () => {
+      mockValidateChangePasswordForm.mockReturnValue({});
+      mockVerifyCurrentPassword.mockResolvedValue({ error: null });
+
+      render(<ChangePasswordPageWrapper />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "confirm" })
+        ).toBeInTheDocument();
+      });
+
+      const oldPasswordInput = screen.getByLabelText("current_password");
+      const newPasswordInput = screen.getByLabelText("new_password");
+      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+
+      fireEvent.change(oldPasswordInput, { target: { value: "oldpass" } });
+      fireEvent.change(newPasswordInput, { target: { value: "newpass" } });
+      fireEvent.change(repeatPasswordInput, { target: { value: "newpass" } });
+
+      const form = screen
+        .getByRole("button", { name: "confirm" })
+        .closest("form");
+      fireEvent.submit(form);
+
+      expect(mockValidateChangePasswordForm).toHaveBeenCalledWith(
+        {
+          oldPassword: "oldpass",
+          newPassword: "newpass",
+          newPasswordRepeat: "newpass",
+        },
+        expect.any(Function),
+        true
+      );
+    });
+
+    it("verifies old password before changing password", async () => {
+      mockValidateChangePasswordForm.mockReturnValue({});
+      mockVerifyCurrentPassword.mockResolvedValue({ error: null });
+      mockChangePassword.mockResolvedValue({ error: null });
+
+      render(<ChangePasswordPageWrapper />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "confirm" })
+        ).toBeInTheDocument();
+      });
+
+      const oldPasswordInput = screen.getByLabelText("current_password");
+      const newPasswordInput = screen.getByLabelText("new_password");
+      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+
+      fireEvent.change(oldPasswordInput, { target: { value: "oldpass" } });
+      fireEvent.change(newPasswordInput, { target: { value: "newpass" } });
+      fireEvent.change(repeatPasswordInput, { target: { value: "newpass" } });
+
+      const form = screen
+        .getByRole("button", { name: "confirm" })
+        .closest("form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockVerifyCurrentPassword).toHaveBeenCalledWith("oldpass");
+      });
+
+      expect(mockChangePassword).toHaveBeenCalledWith("newpass");
+    });
+
+    it("shows error when old password verification fails", async () => {
+      mockValidateChangePasswordForm.mockReturnValue({});
+      mockVerifyCurrentPassword.mockResolvedValue({
+        error: { message: "Current password is incorrect" },
+      });
+
+      render(<ChangePasswordPageWrapper />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "confirm" })
+        ).toBeInTheDocument();
+      });
+
+      const oldPasswordInput = screen.getByLabelText("current_password");
+      const newPasswordInput = screen.getByLabelText("new_password");
+      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+
+      fireEvent.change(oldPasswordInput, { target: { value: "wrongpass" } });
+      fireEvent.change(newPasswordInput, { target: { value: "newpass" } });
+      fireEvent.change(repeatPasswordInput, { target: { value: "newpass" } });
+
+      const form = screen
+        .getByRole("button", { name: "confirm" })
+        .closest("form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("current_password_incorrect")
+        ).toBeInTheDocument();
+      });
+
+      expect(mockChangePassword).not.toHaveBeenCalled();
+    });
+
+    it("shows validation error for empty old password", async () => {
+      mockValidateChangePasswordForm.mockReturnValue({
+        oldPassword: "password_required",
+      });
+
+      render(<ChangePasswordPageWrapper />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "confirm" })
+        ).toBeInTheDocument();
+      });
+
+      const form = screen
+        .getByRole("button", { name: "confirm" })
+        .closest("form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(screen.getByText("password_required")).toBeInTheDocument();
+      });
+
+      expect(mockVerifyCurrentPassword).not.toHaveBeenCalled();
+      expect(mockChangePassword).not.toHaveBeenCalled();
     });
   });
 

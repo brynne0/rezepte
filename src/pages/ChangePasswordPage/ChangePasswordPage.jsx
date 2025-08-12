@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import supabase from "../../lib/supabase";
-import { changePassword } from "../../services/auth";
+import { changePassword, verifyCurrentPassword } from "../../services/auth";
 import { validateChangePasswordForm } from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 
 const ChangePasswordPage = () => {
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -17,6 +18,8 @@ const ChangePasswordPage = () => {
   const [isValidSession, setIsValidSession] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromAccountSettings = location.state?.fromAccountSettings || false;
 
   useEffect(() => {
     // Check if user came from password reset
@@ -60,8 +63,10 @@ const ChangePasswordPage = () => {
 
           // Verify the session is working
           await supabase.auth.getUser();
-        } else {
+        } else if (!fromAccountSettings) {
           setErrorMessage(t("invalid_reset_link"));
+        } else {
+          setErrorMessage(t("session_expired"));
         }
       }
     } catch (error) {
@@ -81,8 +86,9 @@ const ChangePasswordPage = () => {
     }
 
     const errors = validateChangePasswordForm(
-      { newPassword, newPasswordRepeat },
-      t
+      { oldPassword, newPassword, newPasswordRepeat },
+      t,
+      fromAccountSettings // requireOldPassword when coming from account settings
     );
     setValidationErrors(errors);
 
@@ -96,6 +102,18 @@ const ChangePasswordPage = () => {
         if (!session) {
           setErrorMessage(t("session_expired"));
           return;
+        }
+
+        // Verify old password if coming from account settings
+        if (fromAccountSettings && oldPassword) {
+          const { error: verifyError } = await verifyCurrentPassword(oldPassword);
+          if (verifyError) {
+            setValidationErrors({ 
+              ...validationErrors, 
+              oldPassword: t("current_password_incorrect") 
+            });
+            return;
+          }
         }
 
         const { error } = await changePassword(newPassword);
@@ -156,7 +174,7 @@ const ChangePasswordPage = () => {
   return (
     <div className="page-centered">
       {showSuccessMessage ? (
-        <div className="flex-center">
+        <div className="flex-column-center">
           <p>{t("password_changed")}</p>
           <button
             className={"btn btn-standard"}
@@ -173,6 +191,33 @@ const ChangePasswordPage = () => {
             <span className="error-message">{errorMessage}</span>
           )}
           <div className="input-wrapper">
+            {fromAccountSettings && (
+              <>
+                <label htmlFor="old-password">{t("current_password")}</label>
+                <PasswordInput
+                  id="old-password"
+                  type="password"
+                  value={oldPassword}
+                  onChange={(e) => {
+                    setOldPassword(e.target.value);
+                    setErrorMessage("");
+                    setValidationErrors((prev) => ({
+                      ...prev,
+                      oldPassword: "",
+                    }));
+                  }}
+                  placeholder={t("current_password")}
+                  className={`input input--cream ${
+                    validationErrors.oldPassword ? "input--error" : ""
+                  }`}
+                />
+                {validationErrors.oldPassword && (
+                  <span className="error-message-small">
+                    {validationErrors.oldPassword}
+                  </span>
+                )}
+              </>
+            )}
             <label htmlFor="new-password">{t("new_password")}</label>
             <PasswordInput
               id="new-password"
