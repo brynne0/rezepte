@@ -81,7 +81,6 @@
 }
 
 .language {
-  margin: 0;
   cursor: pointer;
   transition: color 0.2s;
 }
