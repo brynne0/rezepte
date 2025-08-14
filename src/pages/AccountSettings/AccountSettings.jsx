@@ -121,7 +121,7 @@ const AccountSettings = () => {
 
   return (
     <div className="page-centered">
-      <div>
+      <div className="auth-container">
         <div className="flex-row">
           <ArrowBigLeft
             className="back-arrow-responsive"
