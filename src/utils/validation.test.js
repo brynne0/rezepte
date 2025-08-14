@@ -254,6 +254,60 @@ describe("Validation Utilities", () => {
       const errors = validateChangePasswordForm(formData, mockT);
       expect(errors.newPasswordRepeat).toBe("password_repeat_required");
     });
+
+    describe("with old password requirement", () => {
+      test("returns oldPassword error when old password is empty and required", () => {
+        const formData = {
+          oldPassword: "",
+          newPassword: "newpassword123",
+          newPasswordRepeat: "newpassword123",
+        };
+        const errors = validateChangePasswordForm(formData, mockT, true);
+        expect(errors.oldPassword).toBe("password_required");
+      });
+
+      test("returns error when new password is same as old password", () => {
+        const formData = {
+          oldPassword: "samepassword123",
+          newPassword: "samepassword123",
+          newPasswordRepeat: "samepassword123",
+        };
+        const errors = validateChangePasswordForm(formData, mockT, true);
+        expect(errors.newPassword).toBe("new_password_same_as_old");
+        expect(mockT).toHaveBeenCalledWith("new_password_same_as_old");
+      });
+
+      test("allows new password when different from old password", () => {
+        const formData = {
+          oldPassword: "oldpassword123",
+          newPassword: "newpassword123",
+          newPasswordRepeat: "newpassword123",
+        };
+        const errors = validateChangePasswordForm(formData, mockT, true);
+        expect(errors).toEqual({});
+      });
+
+      test("does not check password similarity when requireOldPassword is false", () => {
+        const formData = {
+          oldPassword: "samepassword123",
+          newPassword: "samepassword123",
+          newPasswordRepeat: "samepassword123",
+        };
+        const errors = validateChangePasswordForm(formData, mockT, false);
+        expect(errors.newPassword).toBeUndefined();
+      });
+
+      test("does not check password similarity when old password is empty", () => {
+        const formData = {
+          oldPassword: "",
+          newPassword: "password123",
+          newPasswordRepeat: "password123",
+        };
+        const errors = validateChangePasswordForm(formData, mockT, true);
+        expect(errors.oldPassword).toBe("password_required"); // Error is on oldPassword field
+        expect(errors.newPassword).toBeUndefined(); // No similarity check when oldPassword is empty
+      });
+    });
   });
 
   describe("validateRecipeTitle", () => {
