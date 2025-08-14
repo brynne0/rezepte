@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import supabase from "../../lib/supabase";
-import { changePassword } from "../../services/auth";
+import { changePassword, verifyCurrentPassword } from "../../services/auth";
 import { validateChangePasswordForm } from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import { ArrowBigLeft } from "lucide-react";
 
 const ChangePasswordPage = () => {
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -17,6 +19,8 @@ const ChangePasswordPage = () => {
   const [isValidSession, setIsValidSession] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromAccountSettings = location.state?.fromAccountSettings || false;
 
   useEffect(() => {
     // Check if user came from password reset
@@ -60,8 +64,10 @@ const ChangePasswordPage = () => {
 
           // Verify the session is working
           await supabase.auth.getUser();
-        } else {
+        } else if (!fromAccountSettings) {
           setErrorMessage(t("invalid_reset_link"));
+        } else {
+          setErrorMessage(t("session_expired"));
         }
       }
     } catch (error) {
@@ -81,8 +87,9 @@ const ChangePasswordPage = () => {
     }
 
     const errors = validateChangePasswordForm(
-      { newPassword, newPasswordRepeat },
-      t
+      { oldPassword, newPassword, newPasswordRepeat },
+      t,
+      fromAccountSettings // requireOldPassword when coming from account settings
     );
     setValidationErrors(errors);
 
@@ -96,6 +103,20 @@ const ChangePasswordPage = () => {
         if (!session) {
           setErrorMessage(t("session_expired"));
           return;
+        }
+
+        // Verify old password if coming from account settings
+        if (fromAccountSettings && oldPassword) {
+          const { error: verifyError } = await verifyCurrentPassword(
+            oldPassword
+          );
+          if (verifyError) {
+            setValidationErrors({
+              ...validationErrors,
+              oldPassword: t("current_password_incorrect"),
+            });
+            return;
+          }
         }
 
         const { error } = await changePassword(newPassword);
@@ -156,7 +177,7 @@ const ChangePasswordPage = () => {
   return (
     <div className="page-centered">
       {showSuccessMessage ? (
-        <div className="flex-center">
+        <div className="flex-column-center">
           <p>{t("password_changed")}</p>
           <button
             className={"btn btn-standard"}
@@ -168,56 +189,92 @@ const ChangePasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleChangePassword} className="auth-form">
-          <h2 className="forta">{t("set_new_password")}</h2>
+          <div className="flex-row">
+            <ArrowBigLeft
+              className="back-arrow-left"
+              onClick={() => navigate(-1)}
+            />
+            <h1 className="forta-small">
+              {t("set_new_password").toUpperCase()}
+            </h1>
+          </div>
           {errorMessage && (
             <span className="error-message">{errorMessage}</span>
           )}
           <div className="input-wrapper">
-            <label htmlFor="new-password">{t("new_password")}</label>
-            <PasswordInput
-              id="new-password"
-              type="password"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                setErrorMessage("");
-                setValidationErrors((prev) => ({ ...prev, newPassword: "" }));
-              }}
-              placeholder={t("new_password")}
-              className={`input input--cream ${
-                validationErrors.newPassword ? "input--error" : ""
-              }`}
-            />
-            {validationErrors.newPassword && (
-              <span className="error-message-small">
-                {validationErrors.newPassword}
-              </span>
+            {fromAccountSettings && (
+              <div className="floating-label-input">
+                <PasswordInput
+                  id="old-password"
+                  value={oldPassword}
+                  onChange={(e) => {
+                    setOldPassword(e.target.value);
+                    setErrorMessage("");
+                    setValidationErrors((prev) => ({
+                      ...prev,
+                      oldPassword: "",
+                    }));
+                  }}
+                  placeholder=" "
+                  className={`input input--cream ${
+                    validationErrors.oldPassword ? "input--error" : ""
+                  }`}
+                />
+                <label htmlFor="old-password">{t("current_password")}</label>
+                {validationErrors.oldPassword && (
+                  <span className="error-message-small">
+                    {validationErrors.oldPassword}
+                  </span>
+                )}
+              </div>
             )}
-            <label htmlFor="new-password-repeat">
-              {t("new_password_repeat")}
-            </label>
-            <PasswordInput
-              id="new-password-repeat"
-              type="password"
-              value={newPasswordRepeat}
-              onChange={(e) => {
-                setNewPasswordRepeat(e.target.value);
-                setErrorMessage("");
-                setValidationErrors((prev) => ({
-                  ...prev,
-                  newPasswordRepeat: "",
-                }));
-              }}
-              placeholder={t("new_password_repeat")}
-              className={`input input--cream ${
-                validationErrors.newPasswordRepeat ? "input--error" : ""
-              }`}
-            />
-            {validationErrors.newPasswordRepeat && (
-              <span className="error-message-small">
-                {validationErrors.newPasswordRepeat}
-              </span>
-            )}
+            <div className="floating-label-input">
+              <PasswordInput
+                id="new-password"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  setErrorMessage("");
+                  setValidationErrors((prev) => ({ ...prev, newPassword: "" }));
+                }}
+                placeholder=" "
+                className={`input input--cream ${
+                  validationErrors.newPassword ? "input--error" : ""
+                }`}
+              />
+              <label htmlFor="new-password">{t("new_password")}</label>
+              {validationErrors.newPassword && (
+                <span className="error-message-small">
+                  {validationErrors.newPassword}
+                </span>
+              )}
+            </div>
+            <div className="floating-label-input">
+              <PasswordInput
+                id="new-password-repeat"
+                value={newPasswordRepeat}
+                onChange={(e) => {
+                  setNewPasswordRepeat(e.target.value);
+                  setErrorMessage("");
+                  setValidationErrors((prev) => ({
+                    ...prev,
+                    newPasswordRepeat: "",
+                  }));
+                }}
+                placeholder=" "
+                className={`input input--cream ${
+                  validationErrors.newPasswordRepeat ? "input--error" : ""
+                }`}
+              />
+              <label htmlFor="new-password-repeat">
+                {t("new_password_repeat")}
+              </label>
+              {validationErrors.newPasswordRepeat && (
+                <span className="error-message-small">
+                  {validationErrors.newPasswordRepeat}
+                </span>
+              )}
+            </div>
           </div>
           <button className={"btn btn-standard"} type="submit">
             {t("confirm")}

@@ -35,7 +35,7 @@ const mockT = vi.fn((key) => {
     add_new_recipe: "Add New Recipe",
     grocery_list: "Grocery List",
     user_menu: "User Menu",
-    edit_profile: "Edit Profile",
+    account_settings: "Account settings",
   };
   return translations[key] || key;
 });
@@ -124,7 +124,7 @@ describe("Header Component", () => {
       </TestWrapper>
     );
 
-    const logo = document.querySelector('.header-logo');
+    const logo = document.querySelector(".header-logo");
     expect(logo).toBeInTheDocument();
   });
 
@@ -218,7 +218,7 @@ describe("Header Component", () => {
     await waitFor(() => {
       expect(screen.getAllByText("Logout")).toHaveLength(2); // Desktop and mobile
     });
-    
+
     fireEvent.click(screen.getAllByText("Logout")[0]);
 
     await waitFor(() => {
@@ -400,7 +400,7 @@ describe("Header Component", () => {
     fireEvent.change(searchInput, { target: { value: "pasta" } });
 
     // Submit form by clicking search button
-    const searchForm = searchInput.closest('form');
+    const searchForm = searchInput.closest("form");
     fireEvent.submit(searchForm);
 
     expect(mockNavigate).toHaveBeenCalledWith("/");
@@ -586,21 +586,23 @@ describe("Header Component", () => {
       );
 
       const chefHatButton = screen.getAllByLabelText("Login")[0];
-      
+
       // Verify dropdown is initially closed
-      expect(document.querySelectorAll('.dropdown.user-menu')).toHaveLength(0);
-      
+      expect(document.querySelectorAll(".dropdown.user-menu")).toHaveLength(0);
+
       // Open dropdown
       fireEvent.click(chefHatButton);
       await waitFor(() => {
-        expect(document.querySelectorAll('.dropdown.user-menu')).toHaveLength(2); // Desktop and mobile
+        expect(document.querySelectorAll(".dropdown.user-menu")).toHaveLength(
+          2
+        ); // Desktop and mobile
       });
-      
+
       // The dropdown closing via toggle click is handled by the useClickOutside hook in the actual implementation
       // This test verifies the dropdown opens correctly, which is the primary functionality
     });
 
-    test("shows edit profile option when logged in", () => {
+    test("shows account settings option when logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
         isMe: false,
@@ -616,11 +618,11 @@ describe("Header Component", () => {
       const chefHatButton = screen.getAllByLabelText("User Menu")[0];
       fireEvent.click(chefHatButton);
 
-      expect(screen.getAllByText("Edit Profile")).toHaveLength(2); // Desktop and mobile
+      expect(screen.getAllByText("Account settings")).toHaveLength(2); // Desktop and mobile
       expect(screen.getAllByText("Logout")).toHaveLength(2);
     });
 
-    test("navigates to profile page when edit profile is clicked", () => {
+    test("navigates to account settings page when account settings is clicked", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
         isMe: false,
@@ -635,10 +637,10 @@ describe("Header Component", () => {
 
       const chefHatButton = screen.getAllByLabelText("User Menu")[0];
       fireEvent.click(chefHatButton);
-      
-      fireEvent.click(screen.getAllByText("Edit Profile")[0]);
 
-      expect(mockNavigate).toHaveBeenCalledWith("/profile");
+      fireEvent.click(screen.getAllByText("Account settings")[0]);
+
+      expect(mockNavigate).toHaveBeenCalledWith("/account-settings");
     });
 
     test("chef hat button has selected class when dropdown is open", async () => {
@@ -650,10 +652,10 @@ describe("Header Component", () => {
 
       const chefHatButtons = screen.getAllByLabelText("Login");
       const firstButton = chefHatButtons[0];
-      
+
       // Initially should not have selected class
       expect(firstButton.className).not.toContain("selected");
-      
+
       // After clicking should have selected class
       fireEvent.click(firstButton);
       await waitFor(() => {
@@ -689,7 +691,7 @@ describe("Header Component", () => {
 
       const chefHatButton = screen.getAllByLabelText("Login")[0];
       fireEvent.click(chefHatButton);
-      
+
       expect(screen.getAllByText("Login")).toHaveLength(2);
 
       // Simulate clicking outside (useClickOutside hook should handle this)
@@ -716,7 +718,7 @@ describe("Header Component", () => {
       fireEvent.click(menuButton);
 
       // Should show navigation options for logged in users
-      expect(document.querySelector('.dropdown')).toBeInTheDocument();
+      expect(document.querySelector(".dropdown")).toBeInTheDocument();
     });
 
     test("closes hamburger menu when menu button is clicked again", () => {
@@ -733,14 +735,14 @@ describe("Header Component", () => {
       );
 
       const menuButton = screen.getByLabelText("Menu");
-      
+
       // Open menu
       fireEvent.click(menuButton);
-      expect(document.querySelector('.dropdown')).toBeInTheDocument();
-      
+      expect(document.querySelector(".dropdown")).toBeInTheDocument();
+
       // Close menu
       fireEvent.click(menuButton);
-      expect(document.querySelector('.dropdown')).not.toBeInTheDocument();
+      expect(document.querySelector(".dropdown")).not.toBeInTheDocument();
     });
 
     test("shows plus and shopping basket icons in hamburger menu when logged in", () => {
@@ -760,9 +762,11 @@ describe("Header Component", () => {
       fireEvent.click(menuButton);
 
       // Should show plus and shopping basket icons in the dropdown
-      const dropdown = document.querySelector('.dropdown');
-      expect(dropdown.querySelector('.lucide-plus')).toBeInTheDocument();
-      expect(dropdown.querySelector('.lucide-shopping-basket')).toBeInTheDocument();
+      const dropdown = document.querySelector(".dropdown");
+      expect(dropdown.querySelector(".lucide-plus")).toBeInTheDocument();
+      expect(
+        dropdown.querySelector(".lucide-shopping-basket")
+      ).toBeInTheDocument();
     });
 
     test("shows language selector in hamburger menu", () => {
@@ -776,8 +780,8 @@ describe("Header Component", () => {
       fireEvent.click(menuButton);
 
       // Should show language options in the dropdown
-      const dropdown = document.querySelector('.dropdown');
-      expect(dropdown.querySelector('.language-wrapper')).toBeInTheDocument();
+      const dropdown = document.querySelector(".dropdown");
+      expect(dropdown.querySelector(".language-wrapper")).toBeInTheDocument();
     });
 
     test("hamburger menu button has selected class when open", () => {
@@ -788,10 +792,10 @@ describe("Header Component", () => {
       );
 
       const menuButton = screen.getByLabelText("Menu");
-      
+
       // Initially should not have selected class
       expect(menuButton).not.toHaveClass("selected");
-      
+
       // After clicking should have selected class
       fireEvent.click(menuButton);
       expect(menuButton).toHaveClass("selected");
@@ -813,7 +817,9 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      const plusButton = document.querySelector('.dropdown .lucide-plus').closest('button');
+      const plusButton = document
+        .querySelector(".dropdown .lucide-plus")
+        .closest("button");
       fireEvent.click(plusButton);
 
       expect(mockNavigate).toHaveBeenCalledWith("/add-recipe");
@@ -835,7 +841,9 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      const basketButton = document.querySelector('.dropdown .lucide-shopping-basket').closest('button');
+      const basketButton = document
+        .querySelector(".dropdown .lucide-shopping-basket")
+        .closest("button");
       fireEvent.click(basketButton);
 
       expect(mockNavigate).toHaveBeenCalledWith("/grocery-list");
@@ -851,8 +859,10 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      const dropdown = document.querySelector('.dropdown');
-      const deButton = dropdown.querySelector('.language-wrapper .language:last-child');
+      const dropdown = document.querySelector(".dropdown");
+      const deButton = dropdown.querySelector(
+        ".language-wrapper .language:last-child"
+      );
       fireEvent.click(deButton);
 
       expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
@@ -874,9 +884,11 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      const dropdown = document.querySelector('.dropdown');
-      expect(dropdown.querySelector('.lucide-plus')).not.toBeInTheDocument();
-      expect(dropdown.querySelector('.lucide-shopping-basket')).not.toBeInTheDocument();
+      const dropdown = document.querySelector(".dropdown");
+      expect(dropdown.querySelector(".lucide-plus")).not.toBeInTheDocument();
+      expect(
+        dropdown.querySelector(".lucide-shopping-basket")
+      ).not.toBeInTheDocument();
     });
 
     test("closes hamburger menu when clicking outside", () => {
@@ -888,8 +900,8 @@ describe("Header Component", () => {
 
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
-      
-      expect(document.querySelector('.dropdown')).toBeInTheDocument();
+
+      expect(document.querySelector(".dropdown")).toBeInTheDocument();
 
       // Simulate clicking outside (useClickOutside hook should handle this)
       // We'll test that the ref is set up correctly
@@ -959,7 +971,7 @@ describe("Header Component", () => {
 
       const addButton = screen.getByTestId("lucide-plus");
       const groceryButton = screen.getByTestId("lucide-shopping-basket");
-      
+
       expect(addButton.className).not.toContain("selected");
       expect(groceryButton.className).not.toContain("selected");
     });
@@ -984,7 +996,9 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      const addButton = document.querySelector('.dropdown .lucide-plus').closest('button');
+      const addButton = document
+        .querySelector(".dropdown .lucide-plus")
+        .closest("button");
       expect(addButton.className).toContain("selected");
     });
   });

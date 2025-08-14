@@ -93,7 +93,7 @@
   color: var(--dark-red);
 }
 
-.btn-icon-success {
+.btn-icon-green {
   color: var(--green);
 }
 
@@ -116,7 +116,7 @@
   right: 0.5rem;
 }
 
-.btn-icon-success:hover,
+.btn-icon-green:hover,
 .btn-icon-remove:hover,
 .btn-icon-red:hover {
   transform: translateY(-1px);
@@ -135,6 +135,11 @@
 
 .back-arrow {
   cursor: pointer;
+}
+
+.back-arrow-responsive {
+  left: 0;
+  position: absolute;
 }
 
 /* Add section buttons */
@@ -178,5 +183,11 @@
 
   .btn-section {
     padding: 0.375rem 0.625rem;
+  }
+
+  .back-arrow-responsive {
+    cursor: pointer;
+    padding-right: 0.5rem;
+    position: relative;
   }
 }

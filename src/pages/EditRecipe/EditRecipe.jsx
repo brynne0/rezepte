@@ -27,7 +27,10 @@ const EditRecipePage = ({ categories }) => {
   // Restore user's original language when component unmounts
   useEffect(() => {
     return () => {
-      if (originalUserLanguage.current && originalUserLanguage.current !== i18n.language) {
+      if (
+        originalUserLanguage.current &&
+        originalUserLanguage.current !== i18n.language
+      ) {
         i18n.changeLanguage(originalUserLanguage.current);
       }
     };

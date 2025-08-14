@@ -63,12 +63,23 @@ export const validateForgotPasswordForm = (email, t) => {
   return errors;
 };
 
-export const validateChangePasswordForm = (formData, t) => {
+export const validateChangePasswordForm = (formData, t, requireOldPassword = false) => {
   const errors = {};
-  const { newPassword, newPasswordRepeat } = formData;
+  const { oldPassword, newPassword, newPasswordRepeat } = formData;
+
+  // Validate old password if required (when coming from account settings)
+  if (requireOldPassword) {
+    const oldPasswordError = validatePassword(oldPassword, t);
+    if (oldPasswordError) errors.oldPassword = oldPasswordError;
+  }
 
   const passwordError = validatePassword(newPassword, t);
   if (passwordError) errors.newPassword = passwordError;
+
+  // Check if new password is the same as old password
+  if (requireOldPassword && oldPassword && newPassword && oldPassword === newPassword) {
+    errors.newPassword = t("new_password_same_as_old");
+  }
 
   if (!newPasswordRepeat.trim()) {
     errors.newPasswordRepeat = t("password_repeat_required");

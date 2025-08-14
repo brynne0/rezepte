@@ -28,6 +28,15 @@ vi.mock("../LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
 describe("ForgotPasswordPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -36,7 +45,7 @@ describe("ForgotPasswordPage", () => {
   it("renders the form correctly", () => {
     render(<ForgotPasswordPage />);
 
-    expect(screen.getByPlaceholderText("email")).toBeInTheDocument();
+    expect(screen.getByLabelText("email")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "send_reset_email" })
     ).toBeInTheDocument();
@@ -47,7 +56,7 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = screen.getByPlaceholderText("email");
+    const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
       name: "send_reset_email",
     });
@@ -66,7 +75,7 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = screen.getByPlaceholderText("email");
+    const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
       name: "send_reset_email",
     });
@@ -86,7 +95,7 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = screen.getByPlaceholderText("email");
+    const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
       name: "send_reset_email",
     });
@@ -104,7 +113,7 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = screen.getByPlaceholderText("email");
+    const emailInput = screen.getByLabelText("email");
 
     fireEvent.change(emailInput, { target: { value: "Invalid email" } });
     const submitButton = screen.getByRole("button", {
@@ -131,7 +140,7 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = screen.getByPlaceholderText("email");
+    const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
       name: "send_reset_email",
     });

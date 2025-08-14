@@ -104,9 +104,7 @@ describe("RecipeList", () => {
   it("shows no results message when search finds nothing", () => {
     renderComponent({ searchTerm: "pizza" });
 
-    expect(
-      screen.getByText('No recipes for "pizza" found')
-    ).toBeInTheDocument();
+    expect(screen.getByText("no_recipes_found")).toBeInTheDocument();
   });
 
   it("navigates to correct recipe URL when clicked", () => {

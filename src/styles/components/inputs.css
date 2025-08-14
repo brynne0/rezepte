@@ -7,7 +7,7 @@
   color: var(--dark-brown);
   background: white;
   border: var(--border-width) solid var(--dark-brown);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
   min-width: 0;
   word-break: break-word;
@@ -35,7 +35,7 @@
 
 .input--edit {
   box-shadow: 0 0.0625rem 0.1rem var(--shadow-black);
-  border: var(--border-width) dashed var(--cream);
+  border: var(--border-width) dashed var(--lighter-brown);
 }
 
 .input--full-width {
@@ -82,6 +82,124 @@
 .input:disabled::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* Input with Icon Styles */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-icon input,
+.input-with-icon .relative-center {
+  width: 100%;
+}
+
+.input-with-icon svg {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--dark-brown);
+  z-index: 1;
+}
+
+/* All inputs inside input-with-icon container should have left padding for icon space */
+.input-with-icon input,
+.input--with-icon {
+  padding-left: 2.5rem;
+}
+
+/* Adjust PasswordInput when used with icons - needs right padding for eye icon */
+.input-with-icon .input--password {
+  padding-right: 2.5rem;
+}
+
+/* Fix eye icon positioning - override the general svg rule */
+.input-with-icon .btn-icon-password svg {
+  position: static;
+  left: auto;
+  z-index: auto;
+}
+
+/* Floating Label Inside Input */
+.floating-label-input {
+  position: relative;
+}
+
+.floating-label-input input {
+  padding: 1.2rem 0.75rem 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.floating-label-input label {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: grey;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.floating-label-input input:focus + label {
+  top: 0.25rem;
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: var(--dark-red) !important;
+}
+
+.floating-label-input input:not(:placeholder-shown) + label {
+  top: 0.25rem;
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: var(--dark-brown);
+}
+
+/* For PasswordInput: when input inside relative-center is focused/has content, target the label after relative-center */
+.floating-label-input .relative-center:has(input:focus) + label {
+  top: 0.25rem;
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: var(--dark-red) !important;
+}
+
+.floating-label-input
+  .relative-center:has(input:not(:placeholder-shown))
+  + label {
+  top: 0.25rem;
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: var(--dark-brown);
+}
+
+/* Adjust padding for PasswordInput in floating label */
+.floating-label-input .relative-center input {
+  padding: 1.2rem 2.5rem 0.5rem 0.75rem;
+}
+
+.floating-label-input input:focus {
+  border-color: var(--dark-red);
+}
+
+/* Floating Label with Icons - just positioning adjustments */
+.input-with-icon.floating-label-input label {
+  left: 2.5rem; /* Move label to the right of the icon */
+}
+
+.input-with-icon.floating-label-input input {
+  padding-left: 2.5rem; /* Ensure typed text starts after the icon */
+}
+
+.input-with-icon.floating-label-input input:focus + label,
+.input-with-icon.floating-label-input input:not(:placeholder-shown) + label,
+.input-with-icon.floating-label-input .relative-center:has(input:focus) + label,
+.input-with-icon.floating-label-input
+  .relative-center:has(input:not(:placeholder-shown))
+  + label {
+  left: 2.5rem; /* Keep label positioned after icon when floating */
 }
 
 /* Responsive adjustments */

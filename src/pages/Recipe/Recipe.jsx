@@ -64,7 +64,7 @@ const Recipe = () => {
   return (
     <div className="recipe-container card card-recipe">
       <div className="flex-row">
-        <h1 className="forta">{recipe.title}</h1>
+        <h1 className="forta-red">{recipe.title}</h1>
 
         {/* Show edit button only when logged in  */}
         {isLoggedIn && !isGuest && (

@@ -230,7 +230,7 @@ const GroceryList = ({
             onClick={() => navigate(-1)}
           />
         )}
-        <h1>{t("grocery_list")}</h1>
+        <h1 className="forta">{t("grocery_list")}</h1>
         {!isEditing && (
           <Pencil onClick={startEditing} className="btn btn-icon" />
         )}
@@ -240,7 +240,7 @@ const GroceryList = ({
         {currentList.length === 0 && !isEditing ? (
           <div className="flex-center">
             <button
-              className="btn btn-icon btn-icon-success"
+              className="btn btn-icon btn-icon-green"
               onClick={addNewItem}
               aria-label={t("add_item")}
             >
@@ -438,7 +438,7 @@ const GroceryList = ({
                 })}
             {isEditing && (
               <button
-                className="btn btn-icon btn-icon-success"
+                className="btn btn-icon btn-icon-green"
                 onClick={addNewItem}
                 aria-label={t("add_item")}
               >

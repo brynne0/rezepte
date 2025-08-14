@@ -32,10 +32,12 @@
   "password_reset_failed": "E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden. Bitte erneut versuchen.",
 
   "set_new_password": "Neues Passwort Festlegen",
+  "current_password": "Aktuelles Passwort",
   "new_password": "Neues Passwort",
   "new_password_repeat": "Neues Passwort wiederholen",
   "confirm": "Bestätigen",
   "passwords_do_not_match": "Passwörter stimmen nicht überein",
+  "new_password_same_as_old": "Das neue Passwort muss sich vom aktuellen Passwort unterscheiden",
   "password_changed": "Passwort wurde geändert!",
   "password_change_failed": "Passwort konnte nicht geändert werden. Bitte erneut versuchen.",
   "invalid_reset_link": "ungültiger Reset-Link",
@@ -49,11 +51,14 @@
   "email_invalid": "E-Mail ist ungültig",
   "password_required": "Passwort ist erforderlich",
   "password_repeat_required": "Neues Passwort wiederholen ist erforderlich",
+  "current_password_incorrect": "Aktuelles Passwort falsch",
 
-  "edit_profile": "Profil bearbeiten",
+  "account_settings": "Kontoeinstellungen",
+  "preferred_language": "Bevorzugte Sprache",
 
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",
+  "no_recipes_found": "Keine Rezepte für \"{{searchTerm}}\" gefunden",
 
   "servings": "Portionen",
   "ingredients": "Zutaten",

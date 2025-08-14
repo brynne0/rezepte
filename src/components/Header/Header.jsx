@@ -64,8 +64,6 @@ const Header = ({
     setShowNavMenu(false);
   });
 
-  // ADD REF for menu hamburger
-
   const handleLogout = async () => {
     await signOut();
 
@@ -142,11 +140,11 @@ const Header = ({
                   onClick={() => {
                     setShowUserDropdown(false);
                     // TODO - implement profile page
-                    navigate("/profile");
+                    navigate("/account-settings");
                   }}
                 >
                   {/* <User size={20} /> */}
-                  {t("edit_profile")}
+                  {t("account_settings")}
                 </button>
                 <button
                   className="dropdown-item"
@@ -196,8 +194,11 @@ const Header = ({
           {/* Title */}
           <div className="title-wrapper">
             {/* Display user's first name above header */}
-            {firstName && <h3> {`${firstName}'s`}</h3>}
-            <h1
+            {firstName && (
+              <span className="first-name"> {`${firstName}'s`}</span>
+            )}
+            <button
+              className="site-title"
               onClick={() => {
                 setSelectedCategory("all");
                 setSearchTerm("");
@@ -205,10 +206,10 @@ const Header = ({
               }}
             >
               Rezepte
-            </h1>
+            </button>
             {/* Login message - centered below title */}
             {loginMessage && (
-              <div className="login-message">{loginMessage}</div>
+              <span className="login-message">{loginMessage}</span>
             )}
           </div>
 
