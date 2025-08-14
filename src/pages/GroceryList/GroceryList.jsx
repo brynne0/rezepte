@@ -230,7 +230,7 @@ const GroceryList = ({
             onClick={() => navigate(-1)}
           />
         )}
-        <h1>{t("grocery_list")}</h1>
+        <h1 className="forta">{t("grocery_list")}</h1>
         {!isEditing && (
           <Pencil onClick={startEditing} className="btn btn-icon" />
         )}

@@ -106,11 +106,13 @@ const ChangePasswordPage = () => {
 
         // Verify old password if coming from account settings
         if (fromAccountSettings && oldPassword) {
-          const { error: verifyError } = await verifyCurrentPassword(oldPassword);
+          const { error: verifyError } = await verifyCurrentPassword(
+            oldPassword
+          );
           if (verifyError) {
-            setValidationErrors({ 
-              ...validationErrors, 
-              oldPassword: t("current_password_incorrect") 
+            setValidationErrors({
+              ...validationErrors,
+              oldPassword: t("current_password_incorrect"),
             });
             return;
           }
@@ -186,14 +188,16 @@ const ChangePasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleChangePassword} className="auth-form">
-          <h2 className="forta">{t("set_new_password")}</h2>
+          <h1 className="forta-small">{t("set_new_password").toUpperCase()}</h1>
           {errorMessage && (
             <span className="error-message">{errorMessage}</span>
           )}
           <div className="input-wrapper">
             {fromAccountSettings && (
               <>
-                <label htmlFor="old-password">{t("current_password")}</label>
+                <label htmlFor="old-password">
+                  <h3>{t("current_password")}</h3>
+                </label>
                 <PasswordInput
                   id="old-password"
                   type="password"
@@ -218,7 +222,9 @@ const ChangePasswordPage = () => {
                 )}
               </>
             )}
-            <label htmlFor="new-password">{t("new_password")}</label>
+            <label htmlFor="new-password">
+              <h3>{t("new_password")}</h3>
+            </label>
             <PasswordInput
               id="new-password"
               type="password"
@@ -239,7 +245,7 @@ const ChangePasswordPage = () => {
               </span>
             )}
             <label htmlFor="new-password-repeat">
-              {t("new_password_repeat")}
+              <h3> {t("new_password_repeat")}</h3>
             </label>
             <PasswordInput
               id="new-password-repeat"

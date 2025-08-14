@@ -119,8 +119,20 @@
 .input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
   min-width: 15rem;
+  align-items: flex-start;
+}
+
+.input-wrapper .input,
+.input-wrapper .relative-center {
+  width: 100%;
+  align-self: stretch;
+}
+
+/* Add spacing between field groups within input wrapper - apply to inputs/components instead of labels */
+.input-wrapper .input,
+.input-wrapper .relative-center {
+  margin-bottom: 0.25rem;
 }
 
 /* Subheading wrappers */

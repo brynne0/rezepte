@@ -24,7 +24,7 @@
   line-height: 1;
 }
 
-.header h3 {
+.first-name {
   font-size: 1rem;
   color: var(--brown);
   line-height: 1;
@@ -41,6 +41,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.site-title {
+  font-family: var(--font-forta);
+  font-size: 3rem;
+  color: var(--brown);
+  cursor: pointer;
+  font-optical-sizing: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  line-height: 1;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 
 /* Login Message */
@@ -280,11 +295,11 @@
   }
 
   /* Mobile typography */
-  .header h1 {
+  .site-title {
     font-size: 2rem;
   }
 
-  .header h3 {
+  .first-name {
     font-size: 0.8rem;
   }
 }

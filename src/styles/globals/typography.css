@@ -52,9 +52,19 @@ h3 {
   font-size: 1.1rem;
 }
 
-h1.forta {
+h1.forta-red {
   font-family: var(--font-forta);
   color: var(--dark-red);
+}
+
+h1.forta {
+  font-family: var(--font-forta);
+  font-size: 1.8rem;
+}
+
+h1.forta-small {
+  font-family: var(--font-forta);
+  font-size: 1.1rem;
 }
 
 h2.forta {

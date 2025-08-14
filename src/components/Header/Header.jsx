@@ -194,8 +194,11 @@ const Header = ({
           {/* Title */}
           <div className="title-wrapper">
             {/* Display user's first name above header */}
-            {firstName && <h3> {`${firstName}'s`}</h3>}
-            <h1
+            {firstName && (
+              <span className="first-name"> {`${firstName}'s`}</span>
+            )}
+            <button
+              className="site-title"
               onClick={() => {
                 setSelectedCategory("all");
                 setSearchTerm("");
@@ -203,10 +206,10 @@ const Header = ({
               }}
             >
               Rezepte
-            </h1>
+            </button>
             {/* Login message - centered below title */}
             {loginMessage && (
-              <div className="login-message">{loginMessage}</div>
+              <span className="login-message">{loginMessage}</span>
             )}
           </div>
 

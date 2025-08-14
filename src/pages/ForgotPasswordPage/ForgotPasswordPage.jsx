@@ -58,7 +58,7 @@ const ForgotPasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleForgotPassword} className="auth-form">
-          <h2 className="forta">{t("reset_password")}</h2>
+          <h1 className="forta-small">{t("reset_password")}</h1>
           {/* Error message */}
           {errorMessage && (
             <span className="error-message">{errorMessage}</span>

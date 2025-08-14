@@ -93,7 +93,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           }}
           data-testid="back-arrow"
         />
-        <h1>{title}</h1>
+        <h1 className="forta">{title}</h1>
       </header>
 
       <form onSubmit={handleSubmit} className="recipe-form" role="form">

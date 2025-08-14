@@ -122,7 +122,7 @@ const AuthPage = ({ setLoginMessage }) => {
           onClick={switchToLogin}
           aria-label={t("login")}
         >
-          <h2 className="forta"> {t("login")}</h2>
+          <h1 className="forta-small"> {t("login")}</h1>
         </button>
         <button
           className={`subheading-wrapper ${isSignUpMode ? "selected" : ""}`}
@@ -130,7 +130,7 @@ const AuthPage = ({ setLoginMessage }) => {
           onClick={switchToSignUp}
           aria-label={t("signup")}
         >
-          <h2 className="forta"> {t("signup")}</h2>
+          <h1 className="forta-small"> {t("signup")}</h1>
         </button>
       </header>
 

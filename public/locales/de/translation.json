@@ -57,6 +57,7 @@
 
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",
+  "no_recipes_found": "Keine Rezepte für \"{{searchTerm}}\" gefunden",
 
   "servings": "Portionen",
   "ingredients": "Zutaten",

@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import RecipeCard from "../RecipeCard/RecipeCard";
+import { useTranslation } from "react-i18next";
 import "./RecipeList.css";
 
 const RecipeList = ({ selectedCategory, recipes, searchTerm }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // First filter by search term if it exists
   const searchFilteredRecipes = searchTerm
@@ -34,7 +36,7 @@ const RecipeList = ({ selectedCategory, recipes, searchTerm }) => {
         ))}
       </div>
       {filteredRecipes.length === 0 && searchTerm && (
-        <p>No recipes for "{searchTerm}" found</p>
+        <span>{t("no_recipes_found", { searchTerm })}</span>
       )}
     </>
   );

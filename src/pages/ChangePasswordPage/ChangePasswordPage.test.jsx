@@ -128,7 +128,7 @@ describe("ChangePasswordPage", () => {
       render(<ChangePasswordPageWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("set_new_password")).toBeInTheDocument();
+        expect(screen.getByText("SET_NEW_PASSWORD")).toBeInTheDocument();
       });
 
       expect(screen.getByLabelText("new_password")).toBeInTheDocument();
@@ -696,7 +696,7 @@ describe("ChangePasswordPage", () => {
         expect(screen.getByLabelText("current_password")).toBeInTheDocument();
       });
 
-      expect(screen.getByText("set_new_password")).toBeInTheDocument();
+      expect(screen.getByText("SET_NEW_PASSWORD")).toBeInTheDocument();
       expect(screen.getByLabelText("new_password")).toBeInTheDocument();
       expect(screen.getByLabelText("new_password_repeat")).toBeInTheDocument();
     });
