@@ -76,6 +76,11 @@ export const validateChangePasswordForm = (formData, t, requireOldPassword = fal
   const passwordError = validatePassword(newPassword, t);
   if (passwordError) errors.newPassword = passwordError;
 
+  // Check if new password is the same as old password
+  if (requireOldPassword && oldPassword && newPassword && oldPassword === newPassword) {
+    errors.newPassword = t("new_password_same_as_old");
+  }
+
   if (!newPasswordRepeat.trim()) {
     errors.newPasswordRepeat = t("password_repeat_required");
   } else if (newPassword !== newPasswordRepeat) {

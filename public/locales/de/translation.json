@@ -37,6 +37,7 @@
   "new_password_repeat": "Neues Passwort wiederholen",
   "confirm": "Bestätigen",
   "passwords_do_not_match": "Passwörter stimmen nicht überein",
+  "new_password_same_as_old": "Das neue Passwort muss sich vom aktuellen Passwort unterscheiden",
   "password_changed": "Passwort wurde geändert!",
   "password_change_failed": "Passwort konnte nicht geändert werden. Bitte erneut versuchen.",
   "invalid_reset_link": "ungültiger Reset-Link",
