@@ -83,12 +83,14 @@
   margin-bottom: 1rem;
 }
 
-.auth-form {
+.auth-form,
+.auth-container {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  position: relative;
 }
 
 .form-header {
@@ -119,20 +121,17 @@
 .input-wrapper {
   display: flex;
   flex-direction: column;
-  min-width: 15rem;
+  gap: 0.5rem;
   align-items: flex-start;
+  min-width: 18rem;
 }
 
-.input-wrapper .input,
-.input-wrapper .relative-center {
+.input-wrapper .input-with-icon {
   width: 100%;
-  align-self: stretch;
 }
 
-/* Add spacing between field groups within input wrapper - apply to inputs/components instead of labels */
-.input-wrapper .input,
-.input-wrapper .relative-center {
-  margin-bottom: 0.25rem;
+.input-wrapper .floating-label-input {
+  width: 100%;
 }
 
 /* Subheading wrappers */

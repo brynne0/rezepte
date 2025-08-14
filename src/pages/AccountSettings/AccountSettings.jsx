@@ -121,153 +121,167 @@ const AccountSettings = () => {
 
   return (
     <div className="page-centered">
-      <div className="acc-settings">
-        <div className="acc-settings-column">
-          <div>
-            <label htmlFor="first_name">
-              <h2 className="forta acc-settings-header">{t("first_name")}</h2>
-            </label>
-            <input
-              id="first_name"
-              type="text"
-              value={profileData.first_name}
-              className={"input"}
-              style={{ width: getMaxInputWidth() }}
-              readOnly={true}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email">
-              <h2 className="forta acc-settings-header">{t("email")}</h2>
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={profileData.email}
-              className={"input"}
-              style={{ width: getMaxInputWidth() }}
-              readOnly={true}
-            />
-          </div>
+      <div>
+        <div className="flex-row">
+          <ArrowBigLeft
+            className="back-arrow-responsive"
+            onClick={() => navigate(-1)}
+          />
+          <h1 className="forta-small">{t("account_settings").toUpperCase()}</h1>
         </div>
 
-        <div className="acc-settings-column">
-          <div>
-            <span className="flex-row acc-settings-header">
-              <label htmlFor="username">
-                <h2 className="forta">{t("username")}</h2>
+        <div className="acc-settings">
+          <div className="acc-settings-column">
+            <div>
+              <label htmlFor="first_name">
+                <h2 className="forta acc-settings-header">{t("first_name")}</h2>
               </label>
-              {!isEditingUsername ? (
-                <Pencil onClick={handleEditUsername} className="btn" />
-              ) : (
-                <div className="acc-settings-actions">
-                  <Check
-                    onClick={handleSaveUsername}
-                    className="btn btn-icon-green"
-                  />
-                  <X
-                    onClick={handleCancelUsername}
-                    className="btn btn-icon-red"
-                  />
-                </div>
-              )}
-            </span>
-            <input
-              ref={usernameInputRef}
-              id="username"
-              type="text"
-              value={isEditingUsername ? tempUsername : profileData.username}
-              onChange={
-                isEditingUsername
-                  ? (e) => setTempUsername(e.target.value)
-                  : undefined
-              }
-              className={"input"}
-              style={{ width: getMaxInputWidth() }}
-              readOnly={!isEditingUsername}
-            />
-          </div>
-
-          <div>
-            <span className="flex-row acc-settings-header">
-              <label htmlFor="password">
-                <h2 className="forta">{t("password")}</h2>
-              </label>
-              <Pencil onClick={handleChangePassword} className="btn " />
-            </span>
-            <input
-              id="password"
-              type="password"
-              value="**************"
-              className={"input "}
-              style={{ width: getMaxInputWidth() }}
-              readOnly={true}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="acc-settings-language flex-column-center">
-        <span className="flex-row acc-settings-header">
-          <label htmlFor="preferred_language">
-            <h2 className="forta">{t("preferred_language").toUpperCase()}</h2>
-          </label>
-          {!isEditingLanguage ? (
-            <Pencil
-              onClick={handleEditLanguage}
-              className="acc-settings-edit-btn"
-            />
-          ) : (
-            <div className="acc-settings-actions">
-              <Check
-                onClick={handleSaveLanguage}
-                className="btn btn-icon-green"
+              <input
+                id="first_name"
+                type="text"
+                value={profileData.first_name}
+                className={"input"}
+                style={{ width: getMaxInputWidth() }}
+                readOnly={true}
               />
-              <X onClick={handleCancelLanguage} className="btn btn-icon-red" />
+            </div>
+
+            <div>
+              <label htmlFor="email">
+                <h2 className="forta acc-settings-header">{t("email")}</h2>
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={profileData.email}
+                className={"input"}
+                style={{ width: getMaxInputWidth() }}
+                readOnly={true}
+              />
+            </div>
+          </div>
+
+          <div className="acc-settings-column">
+            <div>
+              <span className="flex-row acc-settings-header">
+                <label htmlFor="username">
+                  <h2 className="forta">{t("username")}</h2>
+                </label>
+                {!isEditingUsername ? (
+                  <Pencil onClick={handleEditUsername} className="btn" />
+                ) : (
+                  <div className="acc-settings-actions">
+                    <Check
+                      onClick={handleSaveUsername}
+                      className="btn btn-icon-green"
+                    />
+                    <X
+                      onClick={handleCancelUsername}
+                      className="btn btn-icon-red"
+                    />
+                  </div>
+                )}
+              </span>
+              <input
+                ref={usernameInputRef}
+                id="username"
+                type="text"
+                value={isEditingUsername ? tempUsername : profileData.username}
+                onChange={
+                  isEditingUsername
+                    ? (e) => setTempUsername(e.target.value)
+                    : undefined
+                }
+                className={"input"}
+                style={{ width: getMaxInputWidth() }}
+                readOnly={!isEditingUsername}
+              />
+            </div>
+
+            <div>
+              <span className="flex-row acc-settings-header">
+                <label htmlFor="password">
+                  <h2 className="forta">{t("password")}</h2>
+                </label>
+                <Pencil onClick={handleChangePassword} className="btn" />
+              </span>
+              <input
+                id="password"
+                type="password"
+                value="**************"
+                className={"input "}
+                style={{ width: getMaxInputWidth() }}
+                readOnly={true}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="acc-settings-language flex-column-center">
+          <span className="flex-row acc-settings-header">
+            <label htmlFor="preferred_language">
+              <h2 className="forta">{t("preferred_language").toUpperCase()}</h2>
+            </label>
+            {!isEditingLanguage ? (
+              <Pencil onClick={handleEditLanguage} className="btn" />
+            ) : (
+              <div className="acc-settings-actions">
+                <Check
+                  onClick={handleSaveLanguage}
+                  className="btn btn-icon-green"
+                />
+                <X
+                  onClick={handleCancelLanguage}
+                  className="btn btn-icon-red"
+                />
+              </div>
+            )}
+          </span>
+
+          {!isEditingLanguage ? (
+            <div className="language-wrapper">
+              <span
+                className={`language${
+                  (profileData.preferred_language || "en") === "en"
+                    ? " selected"
+                    : ""
+                }`}
+              >
+                EN
+              </span>
+              |
+              <span
+                className={`language${
+                  (profileData.preferred_language || "en") === "de"
+                    ? " selected"
+                    : ""
+                }`}
+              >
+                DE
+              </span>
+            </div>
+          ) : (
+            <div className="language-wrapper">
+              <span
+                className={`language${
+                  tempLanguage === "en" ? " selected" : ""
+                }`}
+                onClick={() => setTempLanguage("en")}
+              >
+                EN
+              </span>
+              |
+              <span
+                className={`language${
+                  tempLanguage === "de" ? " selected" : ""
+                }`}
+                onClick={() => setTempLanguage("de")}
+              >
+                DE
+              </span>
             </div>
           )}
-        </span>
-
-        {!isEditingLanguage ? (
-          <div className="language-wrapper">
-            <span
-              className={`language${
-                (profileData.preferred_language || "en") === "en"
-                  ? " selected"
-                  : ""
-              }`}
-            >
-              EN
-            </span>
-            |
-            <span
-              className={`language${
-                (profileData.preferred_language || "en") === "de"
-                  ? " selected"
-                  : ""
-              }`}
-            >
-              DE
-            </span>
-          </div>
-        ) : (
-          <div className="language-wrapper">
-            <span
-              className={`language${tempLanguage === "en" ? " selected" : ""}`}
-              onClick={() => setTempLanguage("en")}
-            >
-              EN
-            </span>
-            |
-            <span
-              className={`language${tempLanguage === "de" ? " selected" : ""}`}
-              onClick={() => setTempLanguage("de")}
-            >
-              DE
-            </span>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

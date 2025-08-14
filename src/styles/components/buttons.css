@@ -137,6 +137,11 @@
   cursor: pointer;
 }
 
+.back-arrow-responsive {
+  left: 0;
+  position: absolute;
+}
+
 /* Add section buttons */
 .btn-section-dotted {
   padding: 0.375rem 0.75rem;
@@ -178,5 +183,11 @@
 
   .btn-section {
     padding: 0.375rem 0.625rem;
+  }
+
+  .back-arrow-responsive {
+    cursor: pointer;
+    padding-right: 0.5rem;
+    position: relative;
   }
 }

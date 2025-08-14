@@ -6,6 +6,7 @@ import { changePassword, verifyCurrentPassword } from "../../services/auth";
 import { validateChangePasswordForm } from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import { ArrowBigLeft } from "lucide-react";
 
 const ChangePasswordPage = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -188,19 +189,23 @@ const ChangePasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleChangePassword} className="auth-form">
-          <h1 className="forta-small">{t("set_new_password").toUpperCase()}</h1>
+          <div className="flex-row">
+            <ArrowBigLeft
+              className="back-arrow-left"
+              onClick={() => navigate(-1)}
+            />
+            <h1 className="forta-small">
+              {t("set_new_password").toUpperCase()}
+            </h1>
+          </div>
           {errorMessage && (
             <span className="error-message">{errorMessage}</span>
           )}
           <div className="input-wrapper">
             {fromAccountSettings && (
-              <>
-                <label htmlFor="old-password">
-                  <h3>{t("current_password")}</h3>
-                </label>
+              <div className="floating-label-input">
                 <PasswordInput
                   id="old-password"
-                  type="password"
                   value={oldPassword}
                   onChange={(e) => {
                     setOldPassword(e.target.value);
@@ -210,65 +215,66 @@ const ChangePasswordPage = () => {
                       oldPassword: "",
                     }));
                   }}
-                  placeholder={t("current_password")}
+                  placeholder=" "
                   className={`input input--cream ${
                     validationErrors.oldPassword ? "input--error" : ""
                   }`}
                 />
+                <label htmlFor="old-password">{t("current_password")}</label>
                 {validationErrors.oldPassword && (
                   <span className="error-message-small">
                     {validationErrors.oldPassword}
                   </span>
                 )}
-              </>
+              </div>
             )}
-            <label htmlFor="new-password">
-              <h3>{t("new_password")}</h3>
-            </label>
-            <PasswordInput
-              id="new-password"
-              type="password"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                setErrorMessage("");
-                setValidationErrors((prev) => ({ ...prev, newPassword: "" }));
-              }}
-              placeholder={t("new_password")}
-              className={`input input--cream ${
-                validationErrors.newPassword ? "input--error" : ""
-              }`}
-            />
-            {validationErrors.newPassword && (
-              <span className="error-message-small">
-                {validationErrors.newPassword}
-              </span>
-            )}
-            <label htmlFor="new-password-repeat">
-              <h3> {t("new_password_repeat")}</h3>
-            </label>
-            <PasswordInput
-              id="new-password-repeat"
-              type="password"
-              value={newPasswordRepeat}
-              onChange={(e) => {
-                setNewPasswordRepeat(e.target.value);
-                setErrorMessage("");
-                setValidationErrors((prev) => ({
-                  ...prev,
-                  newPasswordRepeat: "",
-                }));
-              }}
-              placeholder={t("new_password_repeat")}
-              className={`input input--cream ${
-                validationErrors.newPasswordRepeat ? "input--error" : ""
-              }`}
-            />
-            {validationErrors.newPasswordRepeat && (
-              <span className="error-message-small">
-                {validationErrors.newPasswordRepeat}
-              </span>
-            )}
+            <div className="floating-label-input">
+              <PasswordInput
+                id="new-password"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  setErrorMessage("");
+                  setValidationErrors((prev) => ({ ...prev, newPassword: "" }));
+                }}
+                placeholder=" "
+                className={`input input--cream ${
+                  validationErrors.newPassword ? "input--error" : ""
+                }`}
+              />
+              <label htmlFor="new-password">{t("new_password")}</label>
+              {validationErrors.newPassword && (
+                <span className="error-message-small">
+                  {validationErrors.newPassword}
+                </span>
+              )}
+            </div>
+            <div className="floating-label-input">
+              <PasswordInput
+                id="new-password-repeat"
+                value={newPasswordRepeat}
+                onChange={(e) => {
+                  setNewPasswordRepeat(e.target.value);
+                  setErrorMessage("");
+                  setValidationErrors((prev) => ({
+                    ...prev,
+                    newPasswordRepeat: "",
+                  }));
+                }}
+                placeholder=" "
+                className={`input input--cream ${
+                  validationErrors.newPasswordRepeat ? "input--error" : ""
+                }`}
+              />
+              <label htmlFor="new-password-repeat">
+                {t("new_password_repeat")}
+              </label>
+              {validationErrors.newPasswordRepeat && (
+                <span className="error-message-small">
+                  {validationErrors.newPasswordRepeat}
+                </span>
+              )}
+            </div>
           </div>
           <button className={"btn btn-standard"} type="submit">
             {t("confirm")}

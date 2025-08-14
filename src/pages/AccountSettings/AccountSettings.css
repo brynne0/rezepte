@@ -17,6 +17,13 @@
   margin: 0.75rem 0 0.25rem 0.25rem;
 }
 
+.header-row {
+  flex-direction: row;
+  align-items: flex-start;
+  display: flex;
+  gap: 0.5rem;
+}
+
 /* Action buttons container */
 .acc-settings-actions {
   display: flex;
