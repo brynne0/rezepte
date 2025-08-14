@@ -4,7 +4,7 @@ import "../src/styles/App.css";
 import { useState, useEffect } from "react";
 
 // Data hooks
-import { useRecipes } from "./hooks/data/useRecipes";
+import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
 import { useAuth } from "./hooks/data/useAuth";
 
 // Routing
@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import Header from "./components/Header/Header";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import RecipeList from "./components/RecipeList/RecipeList";
+import Pagination from "./components/Pagination/Pagination";
 import { Squirrel } from "lucide-react";
 
 // Pages
@@ -35,13 +36,15 @@ import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
 import AccountSettings from "./pages/AccountSettings/AccountSettings";
 
 function App() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [loginMessage, setLoginMessage] = useState("");
-  const { recipes, loading, refreshRecipes } = useRecipes();
-  const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("en");
-  const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const { t } = useTranslation();
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loginMessage, setLoginMessage] = useState("");
+  const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const { recipes, loading, refreshRecipes, paginationInfo } =
+    useRecipesPagination(currentPage, 20, selectedCategory, searchTerm);
 
   // Categories
   const categoryKeys = [
@@ -70,17 +73,30 @@ function App() {
     );
   }
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    setCurrentPage(1); // Reset to first page when changing category
+  };
+
+  const handleSearchChange = (search) => {
+    setSearchTerm(search);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
   return (
     <div className="app">
       <Router>
         <AppRoutes
           language={language}
           setLanguage={setLanguage}
-          setSelectedCategory={setSelectedCategory}
-          setSearchTerm={setSearchTerm}
+          setSelectedCategory={handleCategoryChange}
+          setSearchTerm={handleSearchChange}
           setLoginMessage={setLoginMessage}
           loginMessage={loginMessage}
-          refreshRecipes={refreshRecipes}
           t={t}
           categories={categories}
           selectedCategory={selectedCategory}
@@ -89,6 +105,10 @@ function App() {
           loading={loading}
           isGroceryListEditing={isGroceryListEditing}
           setIsGroceryListEditing={setIsGroceryListEditing}
+          currentPage={currentPage}
+          paginationInfo={paginationInfo}
+          onPageChange={handlePageChange}
+          refreshRecipes={refreshRecipes}
         />
       </Router>
     </div>
@@ -99,9 +119,6 @@ function AppRoutes(props) {
   const location = useLocation();
   const { refreshRecipes, isGroceryListEditing, setIsGroceryListEditing } =
     props;
-  const { isLoggedIn } = useAuth();
-  const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
   const isEditRecipePage = location.pathname.startsWith("/edit-recipe/");
   const isGroceryListPage = location.pathname === "/grocery-list";
 
@@ -111,6 +128,10 @@ function AppRoutes(props) {
       setIsGroceryListEditing(false);
     }
   }, [isGroceryListPage, isGroceryListEditing, setIsGroceryListEditing]);
+
+  const { isLoggedIn } = useAuth();
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language;
 
   // Refresh recipes when navigating to home page
   useEffect(() => {
@@ -143,7 +164,6 @@ function AppRoutes(props) {
         setSearchTerm={props.setSearchTerm}
         setLoginMessage={props.setLoginMessage}
         loginMessage={props.loginMessage}
-        refreshRecipes={props.refreshRecipes}
         t={props.t}
         disableLanguageSwitch={isEditRecipePage || isGroceryListEditing}
       />
@@ -162,6 +182,14 @@ function AppRoutes(props) {
                 selectedCategory={props.selectedCategory}
                 recipes={props.recipes}
                 searchTerm={props.searchTerm}
+                isPaginated={true}
+              />
+              <Pagination
+                currentPage={props.paginationInfo.currentPage}
+                totalPages={props.paginationInfo.totalPages}
+                onPageChange={props.onPageChange}
+                hasNextPage={props.paginationInfo.hasNextPage}
+                hasPrevPage={props.paginationInfo.hasPrevPage}
               />
             </>
           }
