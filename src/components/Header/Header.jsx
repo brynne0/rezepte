@@ -6,7 +6,7 @@ import {
   Plus,
   Squirrel,
   Menu,
-  ChefHat,
+  User,
 } from "lucide-react";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -123,7 +123,7 @@ const Header = ({
         }}
         aria-label={isLoggedIn ? t("user_menu") : t("login")}
       >
-        <ChefHat size={28} />
+        <User size={28} />
       </button>
 
       {/* User Dropdown */}
