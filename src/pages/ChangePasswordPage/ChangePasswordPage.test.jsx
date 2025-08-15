@@ -36,6 +36,7 @@ vi.mock("../../services/auth", () => ({
 
 vi.mock("../../utils/validation", () => ({
   validateChangePasswordForm: vi.fn(),
+  isPasswordStrong: vi.fn(),
 }));
 
 vi.mock("react-i18next", () => ({
@@ -61,6 +62,14 @@ vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
+vi.mock("../../components/PasswordRequirements/PasswordRequirements", () => ({
+  default: ({ password }) => (
+    <div data-testid="password-requirements">
+      Password requirements for: {password}
+    </div>
+  ),
+}));
+
 // Wrapper component for router context
 const ChangePasswordPageWrapper = () => (
   <BrowserRouter>
@@ -73,6 +82,7 @@ describe("ChangePasswordPage", () => {
   let mockChangePassword;
   let mockVerifyCurrentPassword;
   let mockValidateChangePasswordForm;
+  let mockIsPasswordStrong;
 
   beforeEach(async () => {
     // Import the mocked modules
@@ -80,7 +90,7 @@ describe("ChangePasswordPage", () => {
     const { changePassword, verifyCurrentPassword } = await import(
       "../../services/auth"
     );
-    const { validateChangePasswordForm } = await import(
+    const { validateChangePasswordForm, isPasswordStrong } = await import(
       "../../utils/validation"
     );
 
@@ -88,6 +98,7 @@ describe("ChangePasswordPage", () => {
     mockChangePassword = changePassword;
     mockVerifyCurrentPassword = verifyCurrentPassword;
     mockValidateChangePasswordForm = validateChangePasswordForm;
+    mockIsPasswordStrong = isPasswordStrong;
 
     // Reset all mocks
     vi.clearAllMocks();
@@ -101,6 +112,10 @@ describe("ChangePasswordPage", () => {
       hash: "",
       search: "",
     };
+
+    // Set up default mock return values
+    mockValidateChangePasswordForm.mockReturnValue({}); // No errors by default
+    mockIsPasswordStrong.mockReturnValue(true); // Strong password by default
   });
 
   describe("Component Rendering", () => {
@@ -945,6 +960,109 @@ describe("ChangePasswordPage", () => {
 
         expect(newPasswordInput.className).toContain("input--error");
         expect(repeatPasswordInput.className).toContain("input--error");
+      });
+    });
+  });
+
+  describe("Password Validation and Requirements", () => {
+    beforeEach(async () => {
+      // Set up mocks for valid session
+      mockSupabase.auth.getSession.mockResolvedValue({
+        data: { session: { access_token: "test-token" } },
+        error: null,
+      });
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: "test-user" } },
+        error: null,
+      });
+
+      render(<ChangePasswordPageWrapper />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "confirm" })
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("shows password requirements when user types in new password field", async () => {
+      const newPasswordInput = screen.getByLabelText("new_password");
+      
+      fireEvent.change(newPasswordInput, { target: { value: "testpass" } });
+
+      expect(screen.getByTestId("password-requirements")).toBeInTheDocument();
+      expect(screen.getByText("Password requirements for: testpass")).toBeInTheDocument();
+    });
+
+    it("does not show password requirements when password is empty", () => {
+      expect(screen.queryByTestId("password-requirements")).not.toBeInTheDocument();
+    });
+
+    it("validates password strength before submission", async () => {
+      mockValidateChangePasswordForm.mockReturnValue({});
+      mockIsPasswordStrong.mockReturnValue(false);
+
+      const newPasswordInput = screen.getByLabelText("new_password");
+      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+
+      fireEvent.change(newPasswordInput, { target: { value: "weak" } });
+      fireEvent.change(repeatPasswordInput, { target: { value: "weak" } });
+
+      const form = screen
+        .getByRole("button", { name: "confirm" })
+        .closest("form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockIsPasswordStrong).toHaveBeenCalledWith("weak");
+        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(mockChangePassword).not.toHaveBeenCalled();
+      });
+    });
+
+    it("proceeds with password change when password is strong", async () => {
+      mockValidateChangePasswordForm.mockReturnValue({});
+      mockIsPasswordStrong.mockReturnValue(true);
+      mockChangePassword.mockResolvedValue({ error: null });
+
+      const newPasswordInput = screen.getByLabelText("new_password");
+      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+
+      fireEvent.change(newPasswordInput, { target: { value: "StrongPass123!" } });
+      fireEvent.change(repeatPasswordInput, { target: { value: "StrongPass123!" } });
+
+      const form = screen
+        .getByRole("button", { name: "confirm" })
+        .closest("form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockIsPasswordStrong).toHaveBeenCalledWith("StrongPass123!");
+        expect(mockChangePassword).toHaveBeenCalledWith("StrongPass123!");
+      });
+    });
+
+    it("combines validation errors and password strength errors", async () => {
+      mockValidateChangePasswordForm.mockReturnValue({
+        newPasswordRepeat: "passwords_do_not_match",
+      });
+      mockIsPasswordStrong.mockReturnValue(false);
+
+      const newPasswordInput = screen.getByLabelText("new_password");
+      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+
+      fireEvent.change(newPasswordInput, { target: { value: "weak" } });
+      fireEvent.change(repeatPasswordInput, { target: { value: "different" } });
+
+      const form = screen
+        .getByRole("button", { name: "confirm" })
+        .closest("form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(screen.getByText("passwords_do_not_match")).toBeInTheDocument();
+        expect(mockChangePassword).not.toHaveBeenCalled();
       });
     });
   });
