@@ -15,18 +15,29 @@ export const signUp = async (email, first_name, username, password) => {
   return { data, error };
 };
 
-export const signIn = async (username, password) => {
-  // Look up email by username
-  const { data: user, error: userError } = await supabase
-    .from("users")
-    .select("email")
-    .eq("username", username)
-    .single();
+export const signIn = async (usernameOrEmail, password) => {
+  // Check if input is an email
+  const isEmailInput = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usernameOrEmail.trim());
+  
+  let email;
+  
+  if (isEmailInput) {
+    // Input is an email, use it directly
+    email = usernameOrEmail;
+  } else {
+    // Input is a username, look up email
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("email")
+      .eq("username", usernameOrEmail)
+      .single();
 
-  if (userError) return { data: null, error: userError };
+    if (userError) return { data: null, error: userError };
+    email = user.email;
+  }
 
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: user.email,
+    email,
     password,
   });
   return { data, error };

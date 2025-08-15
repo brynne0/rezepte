@@ -164,3 +164,8 @@ export const validateEmailUnique = async (email, t) => {
     return null; // Don't block submission if check fails
   }
 };
+
+// Utility function to check if input is an email
+export const isEmail = (input) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
+};

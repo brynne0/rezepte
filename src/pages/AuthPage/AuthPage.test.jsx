@@ -114,7 +114,7 @@ describe("AuthPage", () => {
       expect(signUpHeaderButton).toBeInTheDocument();
       expect(signUpHeaderButton.className).not.toContain("selected");
 
-      expect(screen.getByLabelText("username")).toBeInTheDocument();
+      expect(screen.getByLabelText("username_or_email")).toBeInTheDocument();
       expect(screen.getByTestId("password-input")).toBeInTheDocument();
       expect(screen.getByText("forgot_password")).toBeInTheDocument();
 
@@ -190,7 +190,7 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Fill in username and password
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -206,7 +206,7 @@ describe("AuthPage", () => {
       fireEvent.click(signUpHeaderButton);
 
       // Fields should be cleared
-      expect(screen.getByLabelText("username").value).toBe("");
+      expect(screen.getByLabelText("username_or_email").value).toBe("");
       expect(screen.getByTestId("password-input").value).toBe("");
     });
   });
@@ -215,7 +215,7 @@ describe("AuthPage", () => {
     it("updates form fields correctly in login mode", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -236,7 +236,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -323,7 +323,7 @@ describe("AuthPage", () => {
     it("clears validation errors when user types", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
 
       // This would trigger clearing validation errors
       fireEvent.change(usernameInput, { target: { value: "newuser" } });
@@ -346,7 +346,7 @@ describe("AuthPage", () => {
       });
       fireEvent.click(signUpHeaderButton);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
       const form = screen.getByTestId("auth-form");
@@ -407,7 +407,7 @@ describe("AuthPage", () => {
       fireEvent.click(signUpHeaderButton);
 
       const emailInput = screen.getByLabelText("email");
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       fireEvent.change(emailInput, {
         target: { value: "existing@example.com" },
       });
@@ -447,7 +447,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "unique@example.com" } });
@@ -482,7 +482,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -506,7 +506,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -555,7 +555,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -567,6 +567,46 @@ describe("AuthPage", () => {
       await waitFor(() => {
         expect(usernameInput.value).toBe("");
         expect(passwordInput.value).toBe("");
+      });
+    });
+
+    it("calls signIn with username when username is provided", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ error: null });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(usernameInput, { target: { value: "testuser" } });
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith("testuser", "testpass");
+      });
+    });
+
+    it("calls signIn with email when email is provided", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ error: null });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(usernameInput, { target: { value: "test@example.com" } });
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith("test@example.com", "testpass");
       });
     });
   });
@@ -586,7 +626,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -662,7 +702,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -695,7 +735,7 @@ describe("AuthPage", () => {
     it("clears form fields when navigating to forgot password", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -738,7 +778,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const form = screen.getByTestId("auth-form");
 
       fireEvent.submit(form);

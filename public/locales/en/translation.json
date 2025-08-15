@@ -20,6 +20,7 @@
   "email": "Email",
   "first_name": "First Name",
   "username": "Username",
+  "username_or_email": "Username or Email",
   "password": "Password",
 
   "hide_password": "Hide password",

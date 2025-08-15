@@ -239,7 +239,7 @@ const AuthPage = ({ setLoginMessage }) => {
                   validationErrors.username ? "input--error" : ""
                 }`}
               />
-              <label htmlFor="username">{t("username")}</label>
+              <label htmlFor="username">{t("username_or_email")}</label>
             </div>
             {validationErrors.username && (
               <span className="error-message-small">
