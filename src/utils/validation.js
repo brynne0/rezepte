@@ -22,6 +22,42 @@ export const validatePassword = (password, t) => {
   return null;
 };
 
+// Password strength validation functions
+export const checkPasswordLength = (password) => {
+  return password.length >= 8;
+};
+
+export const checkPasswordLowercase = (password) => {
+  return /[a-z]/.test(password);
+};
+
+export const checkPasswordUppercase = (password) => {
+  return /[A-Z]/.test(password);
+};
+
+export const checkPasswordDigit = (password) => {
+  return /\d/.test(password);
+};
+
+export const checkPasswordSymbol = (password) => {
+  return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+};
+
+export const validatePasswordStrength = (password) => {
+  return {
+    length: checkPasswordLength(password),
+    lowercase: checkPasswordLowercase(password),
+    uppercase: checkPasswordUppercase(password),
+    digit: checkPasswordDigit(password),
+    symbol: checkPasswordSymbol(password),
+  };
+};
+
+export const isPasswordStrong = (password) => {
+  const requirements = validatePasswordStrength(password);
+  return Object.values(requirements).every(Boolean);
+};
+
 export const validateFirstName = (firstName, t) => {
   if (!firstName.trim()) {
     return t("firstname_required");

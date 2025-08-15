@@ -7,8 +7,10 @@ import {
   validateAuthForm,
   validateUsernameUnique,
   validateEmailUnique,
+  isPasswordStrong,
 } from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
+import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 
 const AuthPage = ({ setLoginMessage }) => {
   // Form input states
@@ -82,6 +84,15 @@ const AuthPage = ({ setLoginMessage }) => {
     e.preventDefault();
 
     if (!handleValidation()) {
+      return;
+    }
+
+    // Check password strength for signup
+    if (!isPasswordStrong(password)) {
+      setValidationErrors({
+        ...validationErrors,
+        password: t("password_requirements_not_met"),
+      });
       return;
     }
 
@@ -284,6 +295,9 @@ const AuthPage = ({ setLoginMessage }) => {
               <span className="error-message-small">
                 {validationErrors.password}
               </span>
+            )}
+            {isSignUpMode && password && (
+              <PasswordRequirements password={password} />
             )}
           </div>
 

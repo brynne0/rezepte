@@ -31,6 +31,7 @@ vi.mock("../../utils/validation", () => ({
   validateAuthForm: vi.fn(),
   validateUsernameUnique: vi.fn(),
   validateEmailUnique: vi.fn(),
+  isPasswordStrong: vi.fn(),
 }));
 
 vi.mock("../../components/PasswordInput/PasswordInput", () => ({
@@ -44,6 +45,14 @@ vi.mock("../../components/PasswordInput/PasswordInput", () => ({
       className={className}
       data-testid="password-input"
     />
+  ),
+}));
+
+vi.mock("../../components/PasswordRequirements/PasswordRequirements", () => ({
+  default: ({ password }) => (
+    <div data-testid="password-requirements">
+      Password requirements for: {password}
+    </div>
   ),
 }));
 
@@ -61,11 +70,12 @@ describe("AuthPage", () => {
   let mockValidateAuthForm;
   let mockValidateUsernameUnique;
   let mockValidateEmailUnique;
+  let mockIsPasswordStrong;
 
   beforeEach(async () => {
     // Import the mocked functions
     const { signUp, signIn } = await import("../../services/auth");
-    const { validateAuthForm, validateUsernameUnique, validateEmailUnique } =
+    const { validateAuthForm, validateUsernameUnique, validateEmailUnique, isPasswordStrong } =
       await import("../../utils/validation");
 
     mockSignUp = signUp;
@@ -73,6 +83,7 @@ describe("AuthPage", () => {
     mockValidateAuthForm = validateAuthForm;
     mockValidateUsernameUnique = validateUsernameUnique;
     mockValidateEmailUnique = validateEmailUnique;
+    mockIsPasswordStrong = isPasswordStrong;
 
     // Reset all mocks
     mockNavigate.mockClear();
@@ -82,6 +93,7 @@ describe("AuthPage", () => {
     mockValidateAuthForm.mockClear();
     mockValidateUsernameUnique.mockClear();
     mockValidateEmailUnique.mockClear();
+    mockIsPasswordStrong.mockClear();
 
     // Set up default mock return values
     mockSignUp.mockResolvedValue({ error: null });
@@ -89,6 +101,7 @@ describe("AuthPage", () => {
     mockValidateAuthForm.mockReturnValue({}); // Return empty object (no errors) by default
     mockValidateUsernameUnique.mockResolvedValue(null); // No error by default
     mockValidateEmailUnique.mockResolvedValue(null); // No error by default
+    mockIsPasswordStrong.mockReturnValue(true); // Strong password by default
   });
 
   afterEach(() => {
@@ -208,6 +221,48 @@ describe("AuthPage", () => {
       // Fields should be cleared
       expect(screen.getByLabelText("username_or_email").value).toBe("");
       expect(screen.getByTestId("password-input").value).toBe("");
+    });
+
+    it("shows password requirements in signup mode when password is entered", () => {
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      // Enter password
+      const passwordInput = screen.getByTestId("password-input");
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      // Should show password requirements
+      expect(screen.getByTestId("password-requirements")).toBeInTheDocument();
+      expect(screen.getByText("Password requirements for: testpass")).toBeInTheDocument();
+    });
+
+    it("does not show password requirements in login mode", () => {
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Enter password in login mode
+      const passwordInput = screen.getByTestId("password-input");
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      // Should not show password requirements
+      expect(screen.queryByTestId("password-requirements")).not.toBeInTheDocument();
+    });
+
+    it("does not show password requirements when password is empty", () => {
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      // Password is empty by default
+      expect(screen.queryByTestId("password-requirements")).not.toBeInTheDocument();
     });
   });
 
@@ -435,6 +490,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockValidateUsernameUnique.mockResolvedValue(null);
       mockValidateEmailUnique.mockResolvedValue(null);
+      mockIsPasswordStrong.mockReturnValue(true);
       mockSignUp.mockResolvedValue({ error: null });
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
@@ -459,6 +515,7 @@ describe("AuthPage", () => {
       fireEvent.submit(form);
 
       await waitFor(() => {
+        expect(mockIsPasswordStrong).toHaveBeenCalledWith("testpass");
         expect(mockValidateUsernameUnique).toHaveBeenCalledWith(
           "uniqueuser",
           expect.any(Function)
@@ -473,6 +530,40 @@ describe("AuthPage", () => {
           "uniqueuser",
           "testpass"
         );
+      });
+    });
+
+    it("prevents signup when password does not meet strength requirements", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockIsPasswordStrong.mockReturnValue(false);
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      const emailInput = screen.getByLabelText("email");
+      const firstNameInput = screen.getByLabelText("first_name");
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+      fireEvent.change(firstNameInput, { target: { value: "John" } });
+      fireEvent.change(usernameInput, { target: { value: "testuser" } });
+      fireEvent.change(passwordInput, { target: { value: "weak" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockIsPasswordStrong).toHaveBeenCalledWith("weak");
+        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(mockValidateUsernameUnique).not.toHaveBeenCalled();
+        expect(mockValidateEmailUnique).not.toHaveBeenCalled();
+        expect(mockSignUp).not.toHaveBeenCalled();
       });
     });
 

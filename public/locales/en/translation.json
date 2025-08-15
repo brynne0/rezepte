@@ -59,6 +59,12 @@
   "password_required": "Password is required",
   "password_repeat_required": "Password repeat is required",
   "current_password_incorrect": "Current password is incorrect",
+  "password_min_length": "At least 8 characters",
+  "password_lowercase": "Contains lowercase letter",
+  "password_uppercase": "Contains uppercase letter", 
+  "password_digit": "Contains digit",
+  "password_symbol": "Contains symbol",
+  "password_requirements_not_met": "Password must meet all requirements",
 
   "account_settings": "Account settings",
   "preferred_language": "Preferred Language",
