@@ -132,18 +132,13 @@ const Header = ({
           <div className="dropdown-content">
             {isLoggedIn ? (
               <>
-                {/* <div className="dropdown-header">
-                  <span>{firstName}</span>
-                </div> */}
                 <button
                   className="dropdown-item"
                   onClick={() => {
                     setShowUserDropdown(false);
-                    // TODO - implement profile page
                     navigate("/account-settings");
                   }}
                 >
-                  {/* <User size={20} /> */}
                   {t("account_settings")}
                 </button>
                 <button

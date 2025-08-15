@@ -362,10 +362,14 @@ export const fetchRecipes = async () => {
 };
 
 // Fetch recipes with pagination
-export const fetchRecipesPaginated = async (page = 1, limit = 12, filters = {}) => {
+export const fetchRecipesPaginated = async (
+  page = 1,
+  limit = 12,
+  filters = {}
+) => {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
-  
+
   let query = supabase
     .from("recipes")
     .select("*", { count: "exact" })
@@ -375,7 +379,7 @@ export const fetchRecipesPaginated = async (page = 1, limit = 12, filters = {}) 
   if (filters.category && filters.category !== "all") {
     query = query.eq("category", filters.category);
   }
-  
+
   if (filters.searchTerm) {
     query = query.ilike("title", `%${filters.searchTerm}%`);
   }
@@ -849,7 +853,6 @@ export const updateRecipe = async (id, recipeData) => {
     }
   }
 
-  // TODO - remove this fallback?
   // Fallback for backward compatibility with flat ingredient list
   if (
     recipeIngredientsToInsert.length === 0 &&
