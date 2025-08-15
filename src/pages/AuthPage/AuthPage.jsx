@@ -87,24 +87,30 @@ const AuthPage = ({ setLoginMessage }) => {
       return;
     }
 
+    // Collect all validation errors at once
+    const errors = {};
+
     // Check password strength for signup
     if (!isPasswordStrong(password)) {
-      setValidationErrors({
-        ...validationErrors,
-        password: t("password_requirements_not_met"),
-      });
-      return;
+      errors.password = t("password_requirements_not_met");
     }
 
     // Check for username and email uniqueness
     const usernameError = await validateUsernameUnique(username, t);
     const emailError = await validateEmailUnique(email, t);
 
-    if (usernameError || emailError) {
+    if (usernameError) {
+      errors.username = usernameError;
+    }
+    if (emailError) {
+      errors.email = emailError;
+    }
+
+    // If there are any validation errors, show them all and return
+    if (Object.keys(errors).length > 0) {
       setValidationErrors({
         ...validationErrors,
-        ...(usernameError && { username: usernameError }),
-        ...(emailError && { email: emailError }),
+        ...errors,
       });
       return;
     }

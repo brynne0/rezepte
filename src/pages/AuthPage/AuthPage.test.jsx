@@ -561,8 +561,44 @@ describe("AuthPage", () => {
       await waitFor(() => {
         expect(mockIsPasswordStrong).toHaveBeenCalledWith("weak");
         expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
-        expect(mockValidateUsernameUnique).not.toHaveBeenCalled();
-        expect(mockValidateEmailUnique).not.toHaveBeenCalled();
+        expect(mockValidateUsernameUnique).toHaveBeenCalled();
+        expect(mockValidateEmailUnique).toHaveBeenCalled();
+        expect(mockSignUp).not.toHaveBeenCalled();
+      });
+    });
+
+    it("shows all validation errors simultaneously when multiple issues exist", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockIsPasswordStrong.mockReturnValue(false);
+      mockValidateUsernameUnique.mockResolvedValue("username_already_exists");
+      mockValidateEmailUnique.mockResolvedValue("email_already_exists");
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      const emailInput = screen.getByLabelText("email");
+      const firstNameInput = screen.getByLabelText("first_name");
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(emailInput, { target: { value: "existing@example.com" } });
+      fireEvent.change(firstNameInput, { target: { value: "John" } });
+      fireEvent.change(usernameInput, { target: { value: "existinguser" } });
+      fireEvent.change(passwordInput, { target: { value: "weak" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        // All three validation errors should be displayed simultaneously
+        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(screen.getByText("username_already_exists")).toBeInTheDocument();
+        expect(screen.getByText("email_already_exists")).toBeInTheDocument();
         expect(mockSignUp).not.toHaveBeenCalled();
       });
     });
