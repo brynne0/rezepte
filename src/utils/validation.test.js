@@ -11,6 +11,13 @@ import {
   validateRecipeTitleUnique,
   validateRecipeCategory,
   validateRecipeForm,
+  checkPasswordLength,
+  checkPasswordLowercase,
+  checkPasswordUppercase,
+  checkPasswordDigit,
+  checkPasswordSymbol,
+  validatePasswordStrength,
+  isPasswordStrong,
 } from "./validation";
 
 // Mock the recipes service
@@ -451,6 +458,135 @@ describe("Validation Utilities", () => {
       };
       const errors = validateRecipeForm(formData, mockT);
       expect(errors).toEqual({});
+    });
+  });
+
+  describe("Password Strength Validation Functions", () => {
+    describe("checkPasswordLength", () => {
+      test("returns true for passwords with 8 or more characters", () => {
+        expect(checkPasswordLength("12345678")).toBe(true);
+        expect(checkPasswordLength("verylongpassword")).toBe(true);
+      });
+
+      test("returns false for passwords with less than 8 characters", () => {
+        expect(checkPasswordLength("1234567")).toBe(false);
+        expect(checkPasswordLength("short")).toBe(false);
+        expect(checkPasswordLength("")).toBe(false);
+      });
+    });
+
+    describe("checkPasswordLowercase", () => {
+      test("returns true for passwords containing lowercase letters", () => {
+        expect(checkPasswordLowercase("Password123!")).toBe(true);
+        expect(checkPasswordLowercase("abc")).toBe(true);
+        expect(checkPasswordLowercase("123a456")).toBe(true);
+      });
+
+      test("returns false for passwords without lowercase letters", () => {
+        expect(checkPasswordLowercase("PASSWORD123!")).toBe(false);
+        expect(checkPasswordLowercase("123456!")).toBe(false);
+        expect(checkPasswordLowercase("")).toBe(false);
+      });
+    });
+
+    describe("checkPasswordUppercase", () => {
+      test("returns true for passwords containing uppercase letters", () => {
+        expect(checkPasswordUppercase("Password123!")).toBe(true);
+        expect(checkPasswordUppercase("ABC")).toBe(true);
+        expect(checkPasswordUppercase("123A456")).toBe(true);
+      });
+
+      test("returns false for passwords without uppercase letters", () => {
+        expect(checkPasswordUppercase("password123!")).toBe(false);
+        expect(checkPasswordUppercase("123456!")).toBe(false);
+        expect(checkPasswordUppercase("")).toBe(false);
+      });
+    });
+
+    describe("checkPasswordDigit", () => {
+      test("returns true for passwords containing digits", () => {
+        expect(checkPasswordDigit("Password123!")).toBe(true);
+        expect(checkPasswordDigit("1")).toBe(true);
+        expect(checkPasswordDigit("abc9def")).toBe(true);
+      });
+
+      test("returns false for passwords without digits", () => {
+        expect(checkPasswordDigit("Password!")).toBe(false);
+        expect(checkPasswordDigit("abcdef")).toBe(false);
+        expect(checkPasswordDigit("")).toBe(false);
+      });
+    });
+
+    describe("checkPasswordSymbol", () => {
+      test("returns true for passwords containing symbols", () => {
+        expect(checkPasswordSymbol("Password123!")).toBe(true);
+        expect(checkPasswordSymbol("abc@def")).toBe(true);
+        expect(checkPasswordSymbol("test#")).toBe(true);
+        expect(checkPasswordSymbol("test$")).toBe(true);
+        expect(checkPasswordSymbol("test%")).toBe(true);
+        expect(checkPasswordSymbol("test^")).toBe(true);
+        expect(checkPasswordSymbol("test&")).toBe(true);
+        expect(checkPasswordSymbol("test*")).toBe(true);
+      });
+
+      test("returns false for passwords without symbols", () => {
+        expect(checkPasswordSymbol("Password123")).toBe(false);
+        expect(checkPasswordSymbol("abcdef")).toBe(false);
+        expect(checkPasswordSymbol("123456")).toBe(false);
+        expect(checkPasswordSymbol("")).toBe(false);
+      });
+    });
+
+    describe("validatePasswordStrength", () => {
+      test("returns correct validation object for strong password", () => {
+        const result = validatePasswordStrength("Password123!");
+        expect(result).toEqual({
+          length: true,
+          lowercase: true,
+          uppercase: true,
+          digit: true,
+          symbol: true,
+        });
+      });
+
+      test("returns correct validation object for weak password", () => {
+        const result = validatePasswordStrength("pass");
+        expect(result).toEqual({
+          length: false,
+          lowercase: true,
+          uppercase: false,
+          digit: false,
+          symbol: false,
+        });
+      });
+
+      test("returns all false for empty password", () => {
+        const result = validatePasswordStrength("");
+        expect(result).toEqual({
+          length: false,
+          lowercase: false,
+          uppercase: false,
+          digit: false,
+          symbol: false,
+        });
+      });
+    });
+
+    describe("isPasswordStrong", () => {
+      test("returns true for passwords meeting all requirements", () => {
+        expect(isPasswordStrong("Password123!")).toBe(true);
+        expect(isPasswordStrong("MyStr0ng#Pass")).toBe(true);
+        expect(isPasswordStrong("Test1234@")).toBe(true);
+      });
+
+      test("returns false for passwords missing requirements", () => {
+        expect(isPasswordStrong("password123!")).toBe(false); // No uppercase
+        expect(isPasswordStrong("PASSWORD123!")).toBe(false); // No lowercase
+        expect(isPasswordStrong("Password!")).toBe(false); // No digit
+        expect(isPasswordStrong("Password123")).toBe(false); // No symbol
+        expect(isPasswordStrong("Pass1!")).toBe(false); // Too short
+        expect(isPasswordStrong("")).toBe(false); // Empty
+      });
     });
   });
 });

@@ -44,7 +44,7 @@ function App() {
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const { recipes, loading, refreshRecipes, paginationInfo } =
-    useRecipesPagination(currentPage, 20, selectedCategory, searchTerm);
+    useRecipesPagination(currentPage, 40, selectedCategory, searchTerm);
 
   // Categories
   const categoryKeys = [

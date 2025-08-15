@@ -3,8 +3,14 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Mail, User, ChefHat, Lock, ArrowBigLeft } from "lucide-react";
 import { signUp, signIn } from "../../services/auth";
-import { validateAuthForm } from "../../utils/validation";
+import {
+  validateAuthForm,
+  validateUsernameUnique,
+  validateEmailUnique,
+  isPasswordStrong,
+} from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
+import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 
 const AuthPage = ({ setLoginMessage }) => {
   // Form input states
@@ -41,7 +47,21 @@ const AuthPage = ({ setLoginMessage }) => {
     const { error } = await signIn(username, password);
 
     if (error) {
-      setErrorMessage(t("login_failed"));
+      // Handle specific error types
+      switch (error.type) {
+        case 'USER_NOT_FOUND':
+          setValidationErrors({ username: t(error.translationKey) });
+          break;
+        case 'INVALID_PASSWORD':
+          setValidationErrors({ password: t(error.translationKey) });
+          break;
+        case 'EMAIL_NOT_CONFIRMED':
+        case 'TOO_MANY_REQUESTS':
+        case 'GENERAL_ERROR':
+        default:
+          setErrorMessage(t(error.translationKey));
+          break;
+      }
     } else {
       setLoginMessage(t("login_success"));
 
@@ -53,6 +73,7 @@ const AuthPage = ({ setLoginMessage }) => {
       // Reset login message
       setLoginMessage("");
       setErrorMessage("");
+      setValidationErrors({});
     }, 3000);
 
     setUsername("");
@@ -63,6 +84,34 @@ const AuthPage = ({ setLoginMessage }) => {
     e.preventDefault();
 
     if (!handleValidation()) {
+      return;
+    }
+
+    // Collect all validation errors at once
+    const errors = {};
+
+    // Check password strength for signup
+    if (!isPasswordStrong(password)) {
+      errors.password = t("password_requirements_not_met");
+    }
+
+    // Check for username and email uniqueness
+    const usernameError = await validateUsernameUnique(username, t);
+    const emailError = await validateEmailUnique(email, t);
+
+    if (usernameError) {
+      errors.username = usernameError;
+    }
+    if (emailError) {
+      errors.email = emailError;
+    }
+
+    // If there are any validation errors, show them all and return
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors({
+        ...validationErrors,
+        ...errors,
+      });
       return;
     }
 
@@ -147,10 +196,10 @@ const AuthPage = ({ setLoginMessage }) => {
           onSubmit={isSignUpMode ? handleSignUp : handleLogin}
           data-testid="auth-form"
         >
-          <div className="input-wrapper">
-            {isSignUpMode && (
-              <>
-                {/* Email */}
+          {isSignUpMode && (
+            <>
+              {/* Email */}
+              <div className="input-validation-wrapper">
                 <div className="input-with-icon floating-label-input">
                   <Mail size={20} />
                   <input
@@ -173,7 +222,9 @@ const AuthPage = ({ setLoginMessage }) => {
                     {validationErrors.email}
                   </span>
                 )}
-                {/* First Name */}
+              </div>
+              {/* First Name */}
+              <div className="input-validation-wrapper">
                 <div className="input-with-icon floating-label-input">
                   <User size={20} />
                   <input
@@ -199,10 +250,12 @@ const AuthPage = ({ setLoginMessage }) => {
                     {validationErrors.firstName}
                   </span>
                 )}
-              </>
-            )}
+              </div>
+            </>
+          )}
 
-            {/* Username */}
+          {/* Username */}
+          <div className="input-validation-wrapper">
             <div className="input-with-icon floating-label-input">
               <ChefHat size={20} />
               <input
@@ -218,14 +271,16 @@ const AuthPage = ({ setLoginMessage }) => {
                   validationErrors.username ? "input--error" : ""
                 }`}
               />
-              <label htmlFor="username">{t("username")}</label>
+              <label htmlFor="username">{t("username_or_email")}</label>
             </div>
             {validationErrors.username && (
               <span className="error-message-small">
                 {validationErrors.username}
               </span>
             )}
-            {/* Password */}
+          </div>
+          {/* Password */}
+          <div className="input-validation-wrapper">
             <div className="input-with-icon floating-label-input">
               <Lock size={20} />
               <PasswordInput
@@ -246,6 +301,9 @@ const AuthPage = ({ setLoginMessage }) => {
               <span className="error-message-small">
                 {validationErrors.password}
               </span>
+            )}
+            {isSignUpMode && password && (
+              <PasswordRequirements password={password} />
             )}
           </div>
 

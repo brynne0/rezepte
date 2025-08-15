@@ -22,6 +22,42 @@ export const validatePassword = (password, t) => {
   return null;
 };
 
+// Password strength validation functions
+export const checkPasswordLength = (password) => {
+  return password.length >= 8;
+};
+
+export const checkPasswordLowercase = (password) => {
+  return /[a-z]/.test(password);
+};
+
+export const checkPasswordUppercase = (password) => {
+  return /[A-Z]/.test(password);
+};
+
+export const checkPasswordDigit = (password) => {
+  return /\d/.test(password);
+};
+
+export const checkPasswordSymbol = (password) => {
+  return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+};
+
+export const validatePasswordStrength = (password) => {
+  return {
+    length: checkPasswordLength(password),
+    lowercase: checkPasswordLowercase(password),
+    uppercase: checkPasswordUppercase(password),
+    digit: checkPasswordDigit(password),
+    symbol: checkPasswordSymbol(password),
+  };
+};
+
+export const isPasswordStrong = (password) => {
+  const requirements = validatePasswordStrength(password);
+  return Object.values(requirements).every(Boolean);
+};
+
 export const validateFirstName = (firstName, t) => {
   if (!firstName.trim()) {
     return t("firstname_required");
@@ -133,4 +169,39 @@ export const validateRecipeForm = (formData, t) => {
   if (categoryError) errors.category = categoryError;
 
   return errors;
+};
+
+// Username uniqueness validation for signup
+export const validateUsernameUnique = async (username, t) => {
+  try {
+    const { checkUsernameExistsForSignup } = await import("../services/userService");
+    const exists = await checkUsernameExistsForSignup(username);
+    if (exists) {
+      return t("username_already_exists");
+    }
+    return null;
+  } catch (error) {
+    console.error("Error checking username uniqueness:", error);
+    return null; // Don't block submission if check fails
+  }
+};
+
+// Email uniqueness validation for signup
+export const validateEmailUnique = async (email, t) => {
+  try {
+    const { checkEmailExistsForSignup } = await import("../services/userService");
+    const exists = await checkEmailExistsForSignup(email);
+    if (exists) {
+      return t("email_already_exists");
+    }
+    return null;
+  } catch (error) {
+    console.error("Error checking email uniqueness:", error);
+    return null; // Don't block submission if check fails
+  }
+};
+
+// Utility function to check if input is an email
+export const isEmail = (input) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
 };

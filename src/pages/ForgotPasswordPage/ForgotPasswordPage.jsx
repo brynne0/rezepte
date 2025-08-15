@@ -74,7 +74,7 @@ const ForgotPasswordPage = () => {
           )}
 
           {/* Email input */}
-          <div className="input-wrapper">
+          <div className="input-validation-wrapper">
             <div className="input-with-icon floating-label-input">
               <Mail size={20} />
               <input

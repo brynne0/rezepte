@@ -125,6 +125,7 @@
 /* Floating Label Inside Input */
 .floating-label-input {
   position: relative;
+  width: 100%;
 }
 
 .floating-label-input input {

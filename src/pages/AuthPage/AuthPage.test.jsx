@@ -29,6 +29,9 @@ vi.mock("../../services/auth", () => ({
 
 vi.mock("../../utils/validation", () => ({
   validateAuthForm: vi.fn(),
+  validateUsernameUnique: vi.fn(),
+  validateEmailUnique: vi.fn(),
+  isPasswordStrong: vi.fn(),
 }));
 
 vi.mock("../../components/PasswordInput/PasswordInput", () => ({
@@ -45,6 +48,14 @@ vi.mock("../../components/PasswordInput/PasswordInput", () => ({
   ),
 }));
 
+vi.mock("../../components/PasswordRequirements/PasswordRequirements", () => ({
+  default: ({ password }) => (
+    <div data-testid="password-requirements">
+      Password requirements for: {password}
+    </div>
+  ),
+}));
+
 // Wrapper component for router context
 const AuthPageWrapper = ({ setLoginMessage }) => (
   <BrowserRouter>
@@ -57,15 +68,22 @@ describe("AuthPage", () => {
   let mockSignUp;
   let mockSignIn;
   let mockValidateAuthForm;
+  let mockValidateUsernameUnique;
+  let mockValidateEmailUnique;
+  let mockIsPasswordStrong;
 
   beforeEach(async () => {
     // Import the mocked functions
     const { signUp, signIn } = await import("../../services/auth");
-    const { validateAuthForm } = await import("../../utils/validation");
+    const { validateAuthForm, validateUsernameUnique, validateEmailUnique, isPasswordStrong } =
+      await import("../../utils/validation");
 
     mockSignUp = signUp;
     mockSignIn = signIn;
     mockValidateAuthForm = validateAuthForm;
+    mockValidateUsernameUnique = validateUsernameUnique;
+    mockValidateEmailUnique = validateEmailUnique;
+    mockIsPasswordStrong = isPasswordStrong;
 
     // Reset all mocks
     mockNavigate.mockClear();
@@ -73,11 +91,17 @@ describe("AuthPage", () => {
     mockSignUp.mockClear();
     mockSignIn.mockClear();
     mockValidateAuthForm.mockClear();
+    mockValidateUsernameUnique.mockClear();
+    mockValidateEmailUnique.mockClear();
+    mockIsPasswordStrong.mockClear();
 
     // Set up default mock return values
     mockSignUp.mockResolvedValue({ error: null });
     mockSignIn.mockResolvedValue({ error: null });
     mockValidateAuthForm.mockReturnValue({}); // Return empty object (no errors) by default
+    mockValidateUsernameUnique.mockResolvedValue(null); // No error by default
+    mockValidateEmailUnique.mockResolvedValue(null); // No error by default
+    mockIsPasswordStrong.mockReturnValue(true); // Strong password by default
   });
 
   afterEach(() => {
@@ -103,7 +127,7 @@ describe("AuthPage", () => {
       expect(signUpHeaderButton).toBeInTheDocument();
       expect(signUpHeaderButton.className).not.toContain("selected");
 
-      expect(screen.getByLabelText("username")).toBeInTheDocument();
+      expect(screen.getByLabelText("username_or_email")).toBeInTheDocument();
       expect(screen.getByTestId("password-input")).toBeInTheDocument();
       expect(screen.getByText("forgot_password")).toBeInTheDocument();
 
@@ -179,7 +203,7 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Fill in username and password
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -195,8 +219,50 @@ describe("AuthPage", () => {
       fireEvent.click(signUpHeaderButton);
 
       // Fields should be cleared
-      expect(screen.getByLabelText("username").value).toBe("");
+      expect(screen.getByLabelText("username_or_email").value).toBe("");
       expect(screen.getByTestId("password-input").value).toBe("");
+    });
+
+    it("shows password requirements in signup mode when password is entered", () => {
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      // Enter password
+      const passwordInput = screen.getByTestId("password-input");
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      // Should show password requirements
+      expect(screen.getByTestId("password-requirements")).toBeInTheDocument();
+      expect(screen.getByText("Password requirements for: testpass")).toBeInTheDocument();
+    });
+
+    it("does not show password requirements in login mode", () => {
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Enter password in login mode
+      const passwordInput = screen.getByTestId("password-input");
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      // Should not show password requirements
+      expect(screen.queryByTestId("password-requirements")).not.toBeInTheDocument();
+    });
+
+    it("does not show password requirements when password is empty", () => {
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      // Password is empty by default
+      expect(screen.queryByTestId("password-requirements")).not.toBeInTheDocument();
     });
   });
 
@@ -204,7 +270,7 @@ describe("AuthPage", () => {
     it("updates form fields correctly in login mode", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -225,7 +291,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -312,12 +378,251 @@ describe("AuthPage", () => {
     it("clears validation errors when user types", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
 
       // This would trigger clearing validation errors
       fireEvent.change(usernameInput, { target: { value: "newuser" } });
 
       expect(usernameInput.value).toBe("newuser");
+    });
+  });
+
+  describe("Username and Email Uniqueness Validation", () => {
+    it("prevents signup when username already exists", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockValidateUsernameUnique.mockResolvedValue("username_already_exists");
+      mockValidateEmailUnique.mockResolvedValue(null);
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      const usernameInput = screen.getByLabelText("username_or_email");
+      fireEvent.change(usernameInput, { target: { value: "existinguser" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockValidateUsernameUnique).toHaveBeenCalledWith(
+          "existinguser",
+          expect.any(Function)
+        );
+        expect(mockSignUp).not.toHaveBeenCalled();
+        expect(screen.getByText("username_already_exists")).toBeInTheDocument();
+      });
+    });
+
+    it("prevents signup when email already exists", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockValidateUsernameUnique.mockResolvedValue(null);
+      mockValidateEmailUnique.mockResolvedValue("email_already_exists");
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      const emailInput = screen.getByLabelText("email");
+      fireEvent.change(emailInput, {
+        target: { value: "existing@example.com" },
+      });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockValidateEmailUnique).toHaveBeenCalledWith(
+          "existing@example.com",
+          expect.any(Function)
+        );
+        expect(mockSignUp).not.toHaveBeenCalled();
+        expect(screen.getByText("email_already_exists")).toBeInTheDocument();
+      });
+    });
+
+    it("prevents signup when both username and email already exist", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockValidateUsernameUnique.mockResolvedValue("username_already_exists");
+      mockValidateEmailUnique.mockResolvedValue("email_already_exists");
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      const emailInput = screen.getByLabelText("email");
+      const usernameInput = screen.getByLabelText("username_or_email");
+      fireEvent.change(emailInput, {
+        target: { value: "existing@example.com" },
+      });
+      fireEvent.change(usernameInput, { target: { value: "existinguser" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockValidateUsernameUnique).toHaveBeenCalledWith(
+          "existinguser",
+          expect.any(Function)
+        );
+        expect(mockValidateEmailUnique).toHaveBeenCalledWith(
+          "existing@example.com",
+          expect.any(Function)
+        );
+        expect(mockSignUp).not.toHaveBeenCalled();
+        expect(screen.getByText("username_already_exists")).toBeInTheDocument();
+        expect(screen.getByText("email_already_exists")).toBeInTheDocument();
+      });
+    });
+
+    it("proceeds with signup when username and email are unique", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockValidateUsernameUnique.mockResolvedValue(null);
+      mockValidateEmailUnique.mockResolvedValue(null);
+      mockIsPasswordStrong.mockReturnValue(true);
+      mockSignUp.mockResolvedValue({ error: null });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      const emailInput = screen.getByLabelText("email");
+      const firstNameInput = screen.getByLabelText("first_name");
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(emailInput, { target: { value: "unique@example.com" } });
+      fireEvent.change(firstNameInput, { target: { value: "John" } });
+      fireEvent.change(usernameInput, { target: { value: "uniqueuser" } });
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockIsPasswordStrong).toHaveBeenCalledWith("testpass");
+        expect(mockValidateUsernameUnique).toHaveBeenCalledWith(
+          "uniqueuser",
+          expect.any(Function)
+        );
+        expect(mockValidateEmailUnique).toHaveBeenCalledWith(
+          "unique@example.com",
+          expect.any(Function)
+        );
+        expect(mockSignUp).toHaveBeenCalledWith(
+          "unique@example.com",
+          "John",
+          "uniqueuser",
+          "testpass"
+        );
+      });
+    });
+
+    it("prevents signup when password does not meet strength requirements", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockIsPasswordStrong.mockReturnValue(false);
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      const emailInput = screen.getByLabelText("email");
+      const firstNameInput = screen.getByLabelText("first_name");
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+      fireEvent.change(firstNameInput, { target: { value: "John" } });
+      fireEvent.change(usernameInput, { target: { value: "testuser" } });
+      fireEvent.change(passwordInput, { target: { value: "weak" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockIsPasswordStrong).toHaveBeenCalledWith("weak");
+        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(mockValidateUsernameUnique).toHaveBeenCalled();
+        expect(mockValidateEmailUnique).toHaveBeenCalled();
+        expect(mockSignUp).not.toHaveBeenCalled();
+      });
+    });
+
+    it("shows all validation errors simultaneously when multiple issues exist", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockIsPasswordStrong.mockReturnValue(false);
+      mockValidateUsernameUnique.mockResolvedValue("username_already_exists");
+      mockValidateEmailUnique.mockResolvedValue("email_already_exists");
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      // Switch to sign up mode
+      const signUpHeaderButton = screen.getByRole("button", {
+        name: "signup",
+      });
+      fireEvent.click(signUpHeaderButton);
+
+      const emailInput = screen.getByLabelText("email");
+      const firstNameInput = screen.getByLabelText("first_name");
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(emailInput, { target: { value: "existing@example.com" } });
+      fireEvent.change(firstNameInput, { target: { value: "John" } });
+      fireEvent.change(usernameInput, { target: { value: "existinguser" } });
+      fireEvent.change(passwordInput, { target: { value: "weak" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        // All three validation errors should be displayed simultaneously
+        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(screen.getByText("username_already_exists")).toBeInTheDocument();
+        expect(screen.getByText("email_already_exists")).toBeInTheDocument();
+        expect(mockSignUp).not.toHaveBeenCalled();
+      });
+    });
+
+    it("does not check uniqueness for login mode", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ error: null });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(usernameInput, { target: { value: "testuser" } });
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockValidateUsernameUnique).not.toHaveBeenCalled();
+        expect(mockValidateEmailUnique).not.toHaveBeenCalled();
+        expect(mockSignIn).toHaveBeenCalledWith("testuser", "testpass");
+      });
     });
   });
 
@@ -328,7 +633,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -357,9 +662,43 @@ describe("AuthPage", () => {
       });
     });
 
-    it("handles login error", async () => {
+    it("handles login error - user not found", async () => {
       mockValidateAuthForm.mockReturnValue({});
-      mockSignIn.mockResolvedValue({ error: "Invalid credentials" });
+      mockSignIn.mockResolvedValue({ 
+        error: { type: 'USER_NOT_FOUND', translationKey: 'user_not_found' } 
+      });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(screen.getByText("user_not_found")).toBeInTheDocument();
+      });
+    });
+
+    it("handles login error - invalid password", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ 
+        error: { type: 'INVALID_PASSWORD', translationKey: 'invalid_password' } 
+      });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(screen.getByText("invalid_password")).toBeInTheDocument();
+      });
+    });
+
+    it("handles login error - general error", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ 
+        error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' } 
+      });
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
@@ -377,7 +716,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -389,6 +728,46 @@ describe("AuthPage", () => {
       await waitFor(() => {
         expect(usernameInput.value).toBe("");
         expect(passwordInput.value).toBe("");
+      });
+    });
+
+    it("calls signIn with username when username is provided", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ error: null });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(usernameInput, { target: { value: "testuser" } });
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith("testuser", "testpass");
+      });
+    });
+
+    it("calls signIn with email when email is provided", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ error: null });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const usernameInput = screen.getByLabelText("username_or_email");
+      const passwordInput = screen.getByTestId("password-input");
+
+      fireEvent.change(usernameInput, { target: { value: "test@example.com" } });
+      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith("test@example.com", "testpass");
       });
     });
   });
@@ -408,7 +787,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -484,7 +863,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -517,7 +896,7 @@ describe("AuthPage", () => {
     it("clears form fields when navigating to forgot password", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(usernameInput, { target: { value: "testuser" } });
@@ -560,7 +939,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const usernameInput = screen.getByLabelText("username");
+      const usernameInput = screen.getByLabelText("username_or_email");
       const form = screen.getByTestId("auth-form");
 
       fireEvent.submit(form);

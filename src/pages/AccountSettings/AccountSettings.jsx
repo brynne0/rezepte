@@ -7,6 +7,7 @@ import {
   updateUserPreferredLanguage,
   getUserProfile,
   updateUserProfile,
+  checkUsernameExists,
 } from "../../services/userService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import "./AccountSettings.css";
@@ -15,11 +16,16 @@ const AccountSettings = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [usernameError, setUsernameError] = useState("");
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [tempUsername, setTempUsername] = useState("");
+  const [isEditingFirstName, setIsEditingFirstName] = useState(false);
+  const [tempFirstName, setTempFirstName] = useState("");
   const [isEditingLanguage, setIsEditingLanguage] = useState(false);
   const [tempLanguage, setTempLanguage] = useState("");
   const usernameInputRef = useRef(null);
+  const firstNameInputRef = useRef(null);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
@@ -54,9 +60,21 @@ const AccountSettings = () => {
 
   const handleSaveUsername = async () => {
     try {
+      // Clear any previous errors
+      setUsernameError("");
+
+      // Check if username already exists
+      const usernameExists = await checkUsernameExists(tempUsername);
+      if (usernameExists) {
+        setUsernameError(t("username_already_exists"));
+        return;
+      }
+
       await updateUserProfile({ username: tempUsername });
       setProfileData({ ...profileData, username: tempUsername });
       setIsEditingUsername(false);
+      setSuccessMessage(t("successfully_updated_username"));
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err.message);
     }
@@ -65,6 +83,30 @@ const AccountSettings = () => {
   const handleCancelUsername = () => {
     setTempUsername("");
     setIsEditingUsername(false);
+    setUsernameError("");
+  };
+
+  const handleEditFirstName = () => {
+    setTempFirstName(profileData.first_name);
+    setIsEditingFirstName(true);
+    setTimeout(() => firstNameInputRef.current?.focus(), 0);
+  };
+
+  const handleSaveFirstName = async () => {
+    try {
+      await updateUserProfile({ first_name: tempFirstName });
+      setProfileData({ ...profileData, first_name: tempFirstName });
+      setIsEditingFirstName(false);
+      setSuccessMessage(t("successfully_updated_first_name"));
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleCancelFirstName = () => {
+    setTempFirstName("");
+    setIsEditingFirstName(false);
   };
 
   const handleChangePassword = () => {
@@ -88,6 +130,8 @@ const AccountSettings = () => {
       await i18n.changeLanguage(tempLanguage);
 
       setIsEditingLanguage(false);
+      setSuccessMessage(t("successfully_updated_language"));
+      setTimeout(() => setSuccessMessage(""), 3000);
       console.log(`Language saved to ${tempLanguage}`);
     } catch (err) {
       setError(`Failed to update language: ${err.message}`);
@@ -104,7 +148,8 @@ const AccountSettings = () => {
     if (!profileData) return "200px";
 
     const widths = [
-      profileData.first_name?.length || 0,
+      (isEditingFirstName ? tempFirstName : profileData.first_name)?.length ||
+        0,
       profileData.email?.length || 0,
       (isEditingUsername ? tempUsername : profileData.username)?.length || 0,
       "**************".length,
@@ -121,168 +166,239 @@ const AccountSettings = () => {
 
   return (
     <div className="page-centered">
-      <div className="auth-container card card-settings">
-        <div className="flex-row">
-          <ArrowBigLeft
-            className="back-arrow-responsive"
-            onClick={() => navigate(-1)}
-          />
-          <h1 className="forta-small">{t("account_settings").toUpperCase()}</h1>
-        </div>
-
-        <div className="acc-settings">
-          <div className="acc-settings-column">
-            <div>
-              <label htmlFor="first_name">
-                <h2 className="forta acc-settings-header">{t("first_name")}</h2>
-              </label>
-              <input
-                id="first_name"
-                type="text"
-                value={profileData.first_name}
-                className={"input"}
-                style={{ width: getMaxInputWidth() }}
-                readOnly={true}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email">
-                <h2 className="forta acc-settings-header">{t("email")}</h2>
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={profileData.email}
-                className={"input"}
-                style={{ width: getMaxInputWidth() }}
-                readOnly={true}
-              />
-            </div>
+      <div className="card card-settings">
+        <header className="flex-column-center">
+          <div className="flex-row">
+            <ArrowBigLeft
+              className="back-arrow-responsive"
+              onClick={() => navigate(-1)}
+            />
+            <h1 className="forta-small">
+              {t("account_settings").toUpperCase()}
+            </h1>
           </div>
+          <span className="login-message">{successMessage || "\u00A0"}</span>
+        </header>
 
-          <div className="acc-settings-column">
-            <div>
-              <span className="flex-row acc-settings-header">
-                <label htmlFor="username">
-                  <h2 className="forta-small">{t("username")}</h2>
-                </label>
-                {!isEditingUsername ? (
-                  <Pencil onClick={handleEditUsername} className="btn" />
-                ) : (
-                  <div className="acc-settings-actions">
-                    <Check
-                      onClick={handleSaveUsername}
-                      className="btn btn-icon-green"
+        <div className="auth-container">
+          <div className="acc-settings">
+            <div className="acc-settings-column">
+              <div>
+                <span className="flex-row acc-settings-header">
+                  <label htmlFor="first_name">
+                    <h2 className="forta-small">{t("first_name")}</h2>
+                  </label>
+                  {!isEditingFirstName ? (
+                    <Pencil
+                      size={20}
+                      onClick={handleEditFirstName}
+                      className="btn"
                     />
-                    <X
-                      onClick={handleCancelUsername}
-                      className="btn btn-icon-red"
-                    />
-                  </div>
-                )}
-              </span>
-              <input
-                ref={usernameInputRef}
-                id="username"
-                type="text"
-                value={isEditingUsername ? tempUsername : profileData.username}
-                onChange={
-                  isEditingUsername
-                    ? (e) => setTempUsername(e.target.value)
-                    : undefined
-                }
-                className={"input"}
-                style={{ width: getMaxInputWidth() }}
-                readOnly={!isEditingUsername}
-              />
-            </div>
-
-            <div>
-              <span className="flex-row acc-settings-header">
-                <label htmlFor="password">
-                  <h2 className="forta-small">{t("password")}</h2>
-                </label>
-                <Pencil onClick={handleChangePassword} className="btn" />
-              </span>
-              <input
-                id="password"
-                type="password"
-                value="**************"
-                className={"input "}
-                style={{ width: getMaxInputWidth() }}
-                readOnly={true}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="acc-settings-language flex-column-center">
-          <span className="flex-row acc-settings-header">
-            <label htmlFor="preferred_language">
-              <h2 className="forta-small">
-                {t("preferred_language").toUpperCase()}
-              </h2>
-            </label>
-            {!isEditingLanguage ? (
-              <Pencil onClick={handleEditLanguage} className="btn" />
-            ) : (
-              <div className="acc-settings-actions">
-                <Check
-                  onClick={handleSaveLanguage}
-                  className="btn btn-icon-green"
-                />
-                <X
-                  onClick={handleCancelLanguage}
-                  className="btn btn-icon-red"
+                  ) : (
+                    <div className="acc-settings-actions">
+                      <Check
+                        onClick={handleSaveFirstName}
+                        className="btn btn-icon-green"
+                        size={20}
+                      />
+                      <X
+                        onClick={handleCancelFirstName}
+                        className="btn btn-icon-red"
+                        size={20}
+                      />
+                    </div>
+                  )}
+                </span>
+                <input
+                  ref={firstNameInputRef}
+                  id="first_name"
+                  type="text"
+                  value={
+                    isEditingFirstName ? tempFirstName : profileData.first_name
+                  }
+                  onChange={
+                    isEditingFirstName
+                      ? (e) => setTempFirstName(e.target.value)
+                      : undefined
+                  }
+                  className={isEditingFirstName ? "input input--edit" : "input"}
+                  style={{ width: getMaxInputWidth() }}
+                  readOnly={!isEditingFirstName}
                 />
               </div>
-            )}
-          </span>
 
-          {!isEditingLanguage ? (
-            <div className="language-wrapper">
-              <span
-                className={`language${
-                  (profileData.preferred_language || "en") === "en"
-                    ? " selected"
-                    : ""
-                }`}
-              >
-                EN
-              </span>
-              |
-              <span
-                className={`language${
-                  (profileData.preferred_language || "en") === "de"
-                    ? " selected"
-                    : ""
-                }`}
-              >
-                DE
-              </span>
+              <div>
+                <label htmlFor="email">
+                  <h2 className="forta-small acc-settings-header">
+                    {t("email")}
+                  </h2>
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={profileData.email}
+                  className={"input"}
+                  style={{ width: getMaxInputWidth() }}
+                  readOnly={true}
+                />
+              </div>
             </div>
-          ) : (
-            <div className="language-wrapper">
-              <span
-                className={`language${
-                  tempLanguage === "en" ? " selected" : ""
-                }`}
-                onClick={() => setTempLanguage("en")}
-              >
-                EN
-              </span>
-              |
-              <span
-                className={`language${
-                  tempLanguage === "de" ? " selected" : ""
-                }`}
-                onClick={() => setTempLanguage("de")}
-              >
-                DE
-              </span>
+
+            <div className="acc-settings-column">
+              <div style={{ position: "relative" }}>
+                <span className="flex-row acc-settings-header">
+                  <label htmlFor="username">
+                    <h2 className="forta-small">{t("username")}</h2>
+                  </label>
+                  {!isEditingUsername ? (
+                    <Pencil
+                      size={20}
+                      onClick={handleEditUsername}
+                      className="btn"
+                    />
+                  ) : (
+                    <div className="acc-settings-actions">
+                      <Check
+                        onClick={handleSaveUsername}
+                        className="btn btn-icon-green"
+                        size={20}
+                      />
+                      <X
+                        onClick={handleCancelUsername}
+                        className="btn btn-icon-red"
+                        size={20}
+                      />
+                    </div>
+                  )}
+                </span>
+                <input
+                  ref={usernameInputRef}
+                  id="username"
+                  type="text"
+                  value={
+                    isEditingUsername ? tempUsername : profileData.username
+                  }
+                  onChange={
+                    isEditingUsername
+                      ? (e) => {
+                          setTempUsername(e.target.value);
+                          setUsernameError(""); // Clear error when typing
+                        }
+                      : undefined
+                  }
+                  className={
+                    isEditingUsername
+                      ? `input input--edit ${
+                          usernameError ? "input--error" : ""
+                        }`
+                      : "input"
+                  }
+                  style={{ width: getMaxInputWidth() }}
+                  readOnly={!isEditingUsername}
+                />
+                {usernameError && (
+                  <span className="error-message-small error-message-absolute">
+                    {usernameError}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <span className="flex-row acc-settings-header">
+                  <label htmlFor="password">
+                    <h2 className="forta-small">{t("password")}</h2>
+                  </label>
+                  <Pencil
+                    size={20}
+                    onClick={handleChangePassword}
+                    className="btn"
+                  />
+                </span>
+                <input
+                  id="password"
+                  type="password"
+                  value="**************"
+                  className={"input "}
+                  style={{ width: getMaxInputWidth() }}
+                  readOnly={true}
+                />
+              </div>
             </div>
-          )}
+          </div>
+
+          <div className="acc-settings-language flex-column-center">
+            <span className="flex-row acc-settings-header">
+              <label htmlFor="preferred_language">
+                <h2 className="forta-small">
+                  {t("preferred_language").toUpperCase()}
+                </h2>
+              </label>
+              {!isEditingLanguage ? (
+                <Pencil
+                  size={20}
+                  onClick={handleEditLanguage}
+                  className="btn"
+                />
+              ) : (
+                <div className="acc-settings-actions">
+                  <Check
+                    onClick={handleSaveLanguage}
+                    className="btn btn-icon-green"
+                    size={20}
+                  />
+                  <X
+                    onClick={handleCancelLanguage}
+                    className="btn btn-icon-red"
+                    size={20}
+                  />
+                </div>
+              )}
+            </span>
+
+            {!isEditingLanguage ? (
+              <div className="language-wrapper">
+                <span
+                  className={`language${
+                    (profileData.preferred_language || "en") === "en"
+                      ? " selected"
+                      : ""
+                  }`}
+                >
+                  EN
+                </span>
+                |
+                <span
+                  className={`language${
+                    (profileData.preferred_language || "en") === "de"
+                      ? " selected"
+                      : ""
+                  }`}
+                >
+                  DE
+                </span>
+              </div>
+            ) : (
+              <div className="language-wrapper">
+                <span
+                  className={`language${
+                    tempLanguage === "en" ? " selected" : ""
+                  }`}
+                  onClick={() => setTempLanguage("en")}
+                >
+                  EN
+                </span>
+                |
+                <span
+                  className={`language${
+                    tempLanguage === "de" ? " selected" : ""
+                  }`}
+                  onClick={() => setTempLanguage("de")}
+                >
+                  DE
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

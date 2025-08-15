@@ -3,8 +3,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import supabase from "../../lib/supabase";
 import { changePassword, verifyCurrentPassword } from "../../services/auth";
-import { validateChangePasswordForm } from "../../utils/validation";
+import {
+  validateChangePasswordForm,
+  isPasswordStrong,
+} from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
+import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { ArrowBigLeft } from "lucide-react";
 
@@ -91,6 +95,12 @@ const ChangePasswordPage = () => {
       t,
       fromAccountSettings // requireOldPassword when coming from account settings
     );
+
+    // Check password strength
+    if (!isPasswordStrong(newPassword)) {
+      errors.newPassword = t("password_requirements_not_met");
+    }
+
     setValidationErrors(errors);
 
     if (Object.keys(errors).length === 0) {
@@ -201,8 +211,9 @@ const ChangePasswordPage = () => {
           {errorMessage && (
             <span className="error-message">{errorMessage}</span>
           )}
-          <div className="input-wrapper">
-            {fromAccountSettings && (
+
+          {fromAccountSettings && (
+            <div className="input-validation-wrapper">
               <div className="floating-label-input">
                 <PasswordInput
                   id="old-password"
@@ -221,13 +232,15 @@ const ChangePasswordPage = () => {
                   }`}
                 />
                 <label htmlFor="old-password">{t("current_password")}</label>
-                {validationErrors.oldPassword && (
-                  <span className="error-message-small">
-                    {validationErrors.oldPassword}
-                  </span>
-                )}
               </div>
-            )}
+              {validationErrors.oldPassword && (
+                <span className="error-message-small">
+                  {validationErrors.oldPassword}
+                </span>
+              )}
+            </div>
+          )}
+          <div className="input-validation-wrapper">
             <div className="floating-label-input">
               <PasswordInput
                 id="new-password"
@@ -243,12 +256,14 @@ const ChangePasswordPage = () => {
                 }`}
               />
               <label htmlFor="new-password">{t("new_password")}</label>
-              {validationErrors.newPassword && (
-                <span className="error-message-small">
-                  {validationErrors.newPassword}
-                </span>
-              )}
             </div>
+            {validationErrors.newPassword && (
+              <span className="error-message-small">
+                {validationErrors.newPassword}
+              </span>
+            )}
+          </div>
+          <div className="input-validation-wrapper">
             <div className="floating-label-input">
               <PasswordInput
                 id="new-password-repeat"
@@ -269,13 +284,16 @@ const ChangePasswordPage = () => {
               <label htmlFor="new-password-repeat">
                 {t("new_password_repeat")}
               </label>
-              {validationErrors.newPasswordRepeat && (
-                <span className="error-message-small">
-                  {validationErrors.newPasswordRepeat}
-                </span>
-              )}
             </div>
+            {validationErrors.newPasswordRepeat && (
+              <span className="error-message-small">
+                {validationErrors.newPasswordRepeat}
+              </span>
+            )}
           </div>
+
+          {newPassword && <PasswordRequirements password={newPassword} />}
+
           <button className={"btn btn-standard"} type="submit">
             {t("confirm")}
           </button>

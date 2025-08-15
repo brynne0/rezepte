@@ -289,10 +289,8 @@
     display: flex;
   }
 
-  /* Search bar adjustments for mobile */
   .search-bar-wrapper {
     margin: 0;
-    padding: 0.25rem;
   }
 
   /* Mobile typography */
