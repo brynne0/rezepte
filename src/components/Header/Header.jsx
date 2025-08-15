@@ -6,7 +6,7 @@ import {
   Plus,
   Squirrel,
   Menu,
-  ChefHat,
+  User,
 } from "lucide-react";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -123,7 +123,7 @@ const Header = ({
         }}
         aria-label={isLoggedIn ? t("user_menu") : t("login")}
       >
-        <ChefHat size={28} />
+        <User size={28} />
       </button>
 
       {/* User Dropdown */}
@@ -132,18 +132,13 @@ const Header = ({
           <div className="dropdown-content">
             {isLoggedIn ? (
               <>
-                {/* <div className="dropdown-header">
-                  <span>{firstName}</span>
-                </div> */}
                 <button
                   className="dropdown-item"
                   onClick={() => {
                     setShowUserDropdown(false);
-                    // TODO - implement profile page
                     navigate("/account-settings");
                   }}
                 >
-                  {/* <User size={20} /> */}
                   {t("account_settings")}
                 </button>
                 <button

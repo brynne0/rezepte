@@ -165,7 +165,7 @@
 }
 
 .dropdown-content {
-  padding: 0.5rem;
+  padding: 0.25rem;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -225,10 +225,11 @@
 .search-input-wrapper {
   position: relative;
   display: flex;
+  align-items: center;
 }
 
 .search-input-with-icon {
-  padding-right: 3rem !important;
+  padding-right: 2rem !important;
   flex: 1;
 }
 
@@ -301,5 +302,10 @@
 
   .first-name {
     font-size: 0.8rem;
+  }
+
+  /* Reduce spacing between nav icons on mobile */
+  .header .btn-icon {
+    padding: 0.3rem;
   }
 }

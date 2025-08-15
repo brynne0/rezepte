@@ -3,23 +3,29 @@ import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
 import "./RecipeList.css";
 
-const RecipeList = ({ selectedCategory, recipes, searchTerm }) => {
+const RecipeList = ({ selectedCategory, recipes, searchTerm, isPaginated = false }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  // First filter by search term if it exists
-  const searchFilteredRecipes = searchTerm
-    ? recipes.filter((recipe) =>
-        recipe.title?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : recipes;
+  // If using pagination, recipes are already filtered on the server side
+  // Otherwise, apply client-side filtering for backward compatibility
+  const filteredRecipes = isPaginated 
+    ? recipes 
+    : (() => {
+        // First filter by search term if it exists
+        const searchFilteredRecipes = searchTerm
+          ? recipes.filter((recipe) =>
+              recipe.title?.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+          : recipes;
 
-  // Then filter by category (only if not searching or if all recipes are selected)
-  const filteredRecipes = searchTerm
-    ? searchFilteredRecipes // When searching, show all search results regardless of category
-    : selectedCategory === "all"
-    ? recipes
-    : recipes.filter((r) => r.category === selectedCategory);
+        // Then filter by category (only if not searching or if all recipes are selected)
+        return searchTerm
+          ? searchFilteredRecipes // When searching, show all search results regardless of category
+          : selectedCategory === "all"
+          ? recipes
+          : recipes.filter((r) => r.category === selectedCategory);
+      })();
 
   return (
     <>

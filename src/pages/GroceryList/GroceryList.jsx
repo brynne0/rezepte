@@ -220,13 +220,13 @@ const GroceryList = ({
         {!isEditing ? (
           <ArrowBigLeft
             className="back-arrow"
-            size={30}
+            size={28}
             onClick={() => navigate(-1)}
           />
         ) : (
           <ArrowBigLeft
             className="back-arrow-left"
-            size={30}
+            size={28}
             onClick={() => navigate(-1)}
           />
         )}

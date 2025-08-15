@@ -361,6 +361,45 @@ export const fetchRecipes = async () => {
   return data || [];
 };
 
+// Fetch recipes with pagination
+export const fetchRecipesPaginated = async (
+  page = 1,
+  limit = 12,
+  filters = {}
+) => {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let query = supabase
+    .from("recipes")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false });
+
+  // Apply filters
+  if (filters.category && filters.category !== "all") {
+    query = query.eq("category", filters.category);
+  }
+
+  if (filters.searchTerm) {
+    query = query.ilike("title", `%${filters.searchTerm}%`);
+  }
+
+  const { data, error, count } = await query.range(from, to);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    recipes: data || [],
+    totalCount: count || 0,
+    totalPages: Math.ceil((count || 0) / limit),
+    currentPage: page,
+    hasNextPage: page < Math.ceil((count || 0) / limit),
+    hasPrevPage: page > 1,
+  };
+};
+
 // Check if a recipe title already exists for the current user
 export const checkRecipeTitleExists = async (title, excludeId = null) => {
   const {
@@ -814,7 +853,6 @@ export const updateRecipe = async (id, recipeData) => {
     }
   }
 
-  // TODO - remove this fallback?
   // Fallback for backward compatibility with flat ingredient list
   if (
     recipeIngredientsToInsert.length === 0 &&

@@ -9,6 +9,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Standard button */
@@ -140,6 +144,8 @@
 .back-arrow-responsive {
   left: 0;
   position: absolute;
+  padding-left: 3rem;
+  cursor: pointer;
 }
 
 /* Add section buttons */
@@ -186,8 +192,8 @@
   }
 
   .back-arrow-responsive {
-    cursor: pointer;
     padding-right: 0.5rem;
     position: relative;
+    padding-left: 0;
   }
 }
