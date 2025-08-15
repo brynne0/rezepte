@@ -59,7 +59,7 @@ h1.forta-red {
 
 h1.forta {
   font-family: var(--font-forta);
-  font-size: 1.8rem;
+  font-size: 1.5rem;
 }
 
 h1.forta-small {
@@ -70,6 +70,11 @@ h1.forta-small {
 h2.forta {
   font-family: var(--font-forta);
   font-size: 1rem;
+}
+
+h2.forta-small {
+  font-family: var(--font-forta);
+  font-size: 0.9rem;
 }
 
 h3.forta {

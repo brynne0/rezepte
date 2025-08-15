@@ -364,7 +364,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 <button
                   type="button"
                   onClick={() => addIngredient("ungrouped")}
-                  className="btn btn-icon btn-icon-success"
+                  className="btn btn-icon btn-icon-green"
                 >
                   <Plus
                     size={16}
@@ -611,7 +611,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                   <button
                                     type="button"
                                     onClick={() => addIngredient(section.id)}
-                                    className="btn btn-icon btn-icon-success"
+                                    className="btn btn-icon btn-icon-green"
                                     aria-label={t("add_ingredient")}
                                   >
                                     <Plus
@@ -668,11 +668,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 </div>
               ))}
             </div>
-            <div className="btn-icon-success-wrapper">
+            <div className="btn-icon-green-wrapper">
               <button
                 type="button"
                 onClick={addInstruction}
-                className="btn btn-icon btn-icon-success"
+                className="btn btn-icon btn-icon-green"
               >
                 <Plus
                   size={16}

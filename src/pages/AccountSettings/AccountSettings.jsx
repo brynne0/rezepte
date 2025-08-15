@@ -121,7 +121,7 @@ const AccountSettings = () => {
 
   return (
     <div className="page-centered">
-      <div className="auth-container">
+      <div className="auth-container card card-settings">
         <div className="flex-row">
           <ArrowBigLeft
             className="back-arrow-responsive"
@@ -165,7 +165,7 @@ const AccountSettings = () => {
             <div>
               <span className="flex-row acc-settings-header">
                 <label htmlFor="username">
-                  <h2 className="forta">{t("username")}</h2>
+                  <h2 className="forta-small">{t("username")}</h2>
                 </label>
                 {!isEditingUsername ? (
                   <Pencil onClick={handleEditUsername} className="btn" />
@@ -201,7 +201,7 @@ const AccountSettings = () => {
             <div>
               <span className="flex-row acc-settings-header">
                 <label htmlFor="password">
-                  <h2 className="forta">{t("password")}</h2>
+                  <h2 className="forta-small">{t("password")}</h2>
                 </label>
                 <Pencil onClick={handleChangePassword} className="btn" />
               </span>
@@ -220,7 +220,9 @@ const AccountSettings = () => {
         <div className="acc-settings-language flex-column-center">
           <span className="flex-row acc-settings-header">
             <label htmlFor="preferred_language">
-              <h2 className="forta">{t("preferred_language").toUpperCase()}</h2>
+              <h2 className="forta-small">
+                {t("preferred_language").toUpperCase()}
+              </h2>
             </label>
             {!isEditingLanguage ? (
               <Pencil onClick={handleEditLanguage} className="btn" />

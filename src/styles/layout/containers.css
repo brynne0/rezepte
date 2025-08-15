@@ -24,6 +24,13 @@
   width: -webkit-fill-available;
 }
 
+.card-settings {
+  padding: 2rem 3rem;
+  min-width: calc(0.3 * 100vw);
+  max-width: -webkit-fill-available;
+  position: relative;
+}
+
 /* Page layout */
 .page-centered {
   display: flex;
