@@ -45,7 +45,21 @@ const AuthPage = ({ setLoginMessage }) => {
     const { error } = await signIn(username, password);
 
     if (error) {
-      setErrorMessage(t("login_failed"));
+      // Handle specific error types
+      switch (error.type) {
+        case 'USER_NOT_FOUND':
+          setValidationErrors({ username: t(error.translationKey) });
+          break;
+        case 'INVALID_PASSWORD':
+          setValidationErrors({ password: t(error.translationKey) });
+          break;
+        case 'EMAIL_NOT_CONFIRMED':
+        case 'TOO_MANY_REQUESTS':
+        case 'GENERAL_ERROR':
+        default:
+          setErrorMessage(t(error.translationKey));
+          break;
+      }
     } else {
       setLoginMessage(t("login_success"));
 
@@ -57,6 +71,7 @@ const AuthPage = ({ setLoginMessage }) => {
       // Reset login message
       setLoginMessage("");
       setErrorMessage("");
+      setValidationErrors({});
     }, 3000);
 
     setUsername("");

@@ -535,9 +535,43 @@ describe("AuthPage", () => {
       });
     });
 
-    it("handles login error", async () => {
+    it("handles login error - user not found", async () => {
       mockValidateAuthForm.mockReturnValue({});
-      mockSignIn.mockResolvedValue({ error: "Invalid credentials" });
+      mockSignIn.mockResolvedValue({ 
+        error: { type: 'USER_NOT_FOUND', translationKey: 'user_not_found' } 
+      });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(screen.getByText("user_not_found")).toBeInTheDocument();
+      });
+    });
+
+    it("handles login error - invalid password", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ 
+        error: { type: 'INVALID_PASSWORD', translationKey: 'invalid_password' } 
+      });
+
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const form = screen.getByTestId("auth-form");
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(screen.getByText("invalid_password")).toBeInTheDocument();
+      });
+    });
+
+    it("handles login error - general error", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignIn.mockResolvedValue({ 
+        error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' } 
+      });
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 

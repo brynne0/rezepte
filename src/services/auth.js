@@ -16,31 +16,53 @@ export const signUp = async (email, first_name, username, password) => {
 };
 
 export const signIn = async (usernameOrEmail, password) => {
-  // Check if input is an email
-  const isEmailInput = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usernameOrEmail.trim());
-  
-  let email;
-  
-  if (isEmailInput) {
-    // Input is an email, use it directly
-    email = usernameOrEmail;
-  } else {
-    // Input is a username, look up email
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("email")
-      .eq("username", usernameOrEmail)
-      .single();
+  try {
+    // Check if input is an email
+    const isEmailInput = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usernameOrEmail.trim());
+    
+    let email;
+    
+    if (isEmailInput) {
+      // Input is an email, use it directly
+      email = usernameOrEmail;
+    } else {
+      // Input is a username, look up email
+      const { data: user, error: userError } = await supabase
+        .from("users")
+        .select("email")
+        .eq("username", usernameOrEmail)
+        .single();
 
-    if (userError) return { data: null, error: userError };
-    email = user.email;
+      if (userError) {
+        // Username not found
+        return { data: null, error: { type: 'USER_NOT_FOUND', translationKey: 'user_not_found' } };
+      }
+      email = user.email;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      // Map Supabase auth errors to specific error types with translation keys
+      switch (error.message) {
+        case 'Invalid login credentials':
+          return { data: null, error: { type: 'INVALID_PASSWORD', translationKey: 'invalid_password' } };
+        case 'Email not confirmed':
+          return { data: null, error: { type: 'EMAIL_NOT_CONFIRMED', translationKey: 'email_not_confirmed' } };
+        case 'Too many requests':
+          return { data: null, error: { type: 'TOO_MANY_REQUESTS', translationKey: 'too_many_requests' } };
+        default:
+          return { data: null, error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' } };
+      }
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' } };
   }
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  return { data, error };
 };
 
 export const signOut = async () => {
