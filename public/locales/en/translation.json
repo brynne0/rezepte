@@ -49,6 +49,8 @@
   "username_required": "Username is required",
   "email_required": "Email is required",
   "email_invalid": "Email is invalid",
+  "email_already_exists": "Email already exists",
+  "username_already_exists": "Username already exists",
   "password_required": "Password is required",
   "password_repeat_required": "Password repeat is required",
   "current_password_incorrect": "Current password is incorrect",

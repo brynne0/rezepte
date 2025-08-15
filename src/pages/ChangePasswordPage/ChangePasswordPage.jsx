@@ -201,8 +201,9 @@ const ChangePasswordPage = () => {
           {errorMessage && (
             <span className="error-message">{errorMessage}</span>
           )}
-          <div className="input-wrapper">
-            {fromAccountSettings && (
+
+          {fromAccountSettings && (
+            <div className="input-validation-wrapper">
               <div className="floating-label-input">
                 <PasswordInput
                   id="old-password"
@@ -221,13 +222,15 @@ const ChangePasswordPage = () => {
                   }`}
                 />
                 <label htmlFor="old-password">{t("current_password")}</label>
-                {validationErrors.oldPassword && (
-                  <span className="error-message-small">
-                    {validationErrors.oldPassword}
-                  </span>
-                )}
               </div>
-            )}
+              {validationErrors.oldPassword && (
+                <span className="error-message-small">
+                  {validationErrors.oldPassword}
+                </span>
+              )}
+            </div>
+          )}
+          <div className="input-validation-wrapper">
             <div className="floating-label-input">
               <PasswordInput
                 id="new-password"
@@ -243,12 +246,14 @@ const ChangePasswordPage = () => {
                 }`}
               />
               <label htmlFor="new-password">{t("new_password")}</label>
-              {validationErrors.newPassword && (
-                <span className="error-message-small">
-                  {validationErrors.newPassword}
-                </span>
-              )}
             </div>
+            {validationErrors.newPassword && (
+              <span className="error-message-small">
+                {validationErrors.newPassword}
+              </span>
+            )}
+          </div>
+          <div className="input-validation-wrapper">
             <div className="floating-label-input">
               <PasswordInput
                 id="new-password-repeat"
@@ -269,13 +274,14 @@ const ChangePasswordPage = () => {
               <label htmlFor="new-password-repeat">
                 {t("new_password_repeat")}
               </label>
-              {validationErrors.newPasswordRepeat && (
-                <span className="error-message-small">
-                  {validationErrors.newPasswordRepeat}
-                </span>
-              )}
             </div>
+            {validationErrors.newPasswordRepeat && (
+              <span className="error-message-small">
+                {validationErrors.newPasswordRepeat}
+              </span>
+            )}
           </div>
+
           <button className={"btn btn-standard"} type="submit">
             {t("confirm")}
           </button>

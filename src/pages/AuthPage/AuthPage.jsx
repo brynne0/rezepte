@@ -3,7 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Mail, User, ChefHat, Lock, ArrowBigLeft } from "lucide-react";
 import { signUp, signIn } from "../../services/auth";
-import { validateAuthForm } from "../../utils/validation";
+import {
+  validateAuthForm,
+  validateUsernameUnique,
+  validateEmailUnique,
+} from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 
 const AuthPage = ({ setLoginMessage }) => {
@@ -63,6 +67,19 @@ const AuthPage = ({ setLoginMessage }) => {
     e.preventDefault();
 
     if (!handleValidation()) {
+      return;
+    }
+
+    // Check for username and email uniqueness
+    const usernameError = await validateUsernameUnique(username, t);
+    const emailError = await validateEmailUnique(email, t);
+
+    if (usernameError || emailError) {
+      setValidationErrors({
+        ...validationErrors,
+        ...(usernameError && { username: usernameError }),
+        ...(emailError && { email: emailError }),
+      });
       return;
     }
 
@@ -147,10 +164,10 @@ const AuthPage = ({ setLoginMessage }) => {
           onSubmit={isSignUpMode ? handleSignUp : handleLogin}
           data-testid="auth-form"
         >
-          <div className="input-wrapper">
-            {isSignUpMode && (
-              <>
-                {/* Email */}
+          {isSignUpMode && (
+            <>
+              {/* Email */}
+              <div className="input-validation-wrapper">
                 <div className="input-with-icon floating-label-input">
                   <Mail size={20} />
                   <input
@@ -173,7 +190,9 @@ const AuthPage = ({ setLoginMessage }) => {
                     {validationErrors.email}
                   </span>
                 )}
-                {/* First Name */}
+              </div>
+              {/* First Name */}
+              <div className="input-validation-wrapper">
                 <div className="input-with-icon floating-label-input">
                   <User size={20} />
                   <input
@@ -199,10 +218,12 @@ const AuthPage = ({ setLoginMessage }) => {
                     {validationErrors.firstName}
                   </span>
                 )}
-              </>
-            )}
+              </div>
+            </>
+          )}
 
-            {/* Username */}
+          {/* Username */}
+          <div className="input-validation-wrapper">
             <div className="input-with-icon floating-label-input">
               <ChefHat size={20} />
               <input
@@ -225,7 +246,9 @@ const AuthPage = ({ setLoginMessage }) => {
                 {validationErrors.username}
               </span>
             )}
-            {/* Password */}
+          </div>
+          {/* Password */}
+          <div className="input-validation-wrapper">
             <div className="input-with-icon floating-label-input">
               <Lock size={20} />
               <PasswordInput

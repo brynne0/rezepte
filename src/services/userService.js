@@ -64,6 +64,86 @@ export const getUserProfile = async () => {
   }
 };
 
+// Check if username already exists (excluding current user)
+export const checkUsernameExists = async (username) => {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("id")
+      .eq("username", username)
+      .neq("id", user.id) // Exclude current user
+      .limit(1);
+
+    if (error) throw error;
+    return data && data.length > 0;
+  } catch (error) {
+    console.error("Error checking username existence:", error);
+    throw error;
+  }
+};
+
+// Check if email already exists (excluding current user)
+export const checkEmailExists = async (email) => {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", email)
+      .neq("id", user.id) // Exclude current user
+      .limit(1);
+
+    if (error) throw error;
+    return data && data.length > 0;
+  } catch (error) {
+    console.error("Error checking email existence:", error);
+    throw error;
+  }
+};
+
+// Check if username exists for signup (no user exclusion)
+export const checkUsernameExistsForSignup = async (username) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id")
+      .eq("username", username)
+      .limit(1);
+
+    if (error) throw error;
+    return data && data.length > 0;
+  } catch (error) {
+    console.error("Error checking username existence for signup:", error);
+    throw error;
+  }
+};
+
+// Check if email exists for signup (no user exclusion)
+export const checkEmailExistsForSignup = async (email) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", email)
+      .limit(1);
+
+    if (error) throw error;
+    return data && data.length > 0;
+  } catch (error) {
+    console.error("Error checking email existence for signup:", error);
+    throw error;
+  }
+};
+
 // Update user profile data
 export const updateUserProfile = async (updates) => {
   try {

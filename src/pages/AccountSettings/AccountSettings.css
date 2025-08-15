@@ -35,6 +35,19 @@
   border-color: var(--dark-brown);
 }
 
+/* Prevent layout shift by maintaining consistent border width */
+.acc-settings .input--error {
+  border-width: var(--border-width);
+}
+
+/* Absolutely positioned error message for account settings */
+.error-message-absolute {
+  position: absolute;
+  top: 100%;
+  left: 0.25rem;
+  z-index: 1;
+}
+
 /* Mobile: Stack everything vertically */
 @media (max-width: 768px) {
   .acc-settings {

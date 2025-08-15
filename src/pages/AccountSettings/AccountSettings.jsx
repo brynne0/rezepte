@@ -7,6 +7,7 @@ import {
   updateUserPreferredLanguage,
   getUserProfile,
   updateUserProfile,
+  checkUsernameExists,
 } from "../../services/userService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import "./AccountSettings.css";
@@ -16,6 +17,7 @@ const AccountSettings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [usernameError, setUsernameError] = useState("");
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [tempUsername, setTempUsername] = useState("");
   const [isEditingFirstName, setIsEditingFirstName] = useState(false);
@@ -58,6 +60,16 @@ const AccountSettings = () => {
 
   const handleSaveUsername = async () => {
     try {
+      // Clear any previous errors
+      setUsernameError("");
+
+      // Check if username already exists
+      const usernameExists = await checkUsernameExists(tempUsername);
+      if (usernameExists) {
+        setUsernameError(t("username_already_exists"));
+        return;
+      }
+
       await updateUserProfile({ username: tempUsername });
       setProfileData({ ...profileData, username: tempUsername });
       setIsEditingUsername(false);
@@ -71,6 +83,7 @@ const AccountSettings = () => {
   const handleCancelUsername = () => {
     setTempUsername("");
     setIsEditingUsername(false);
+    setUsernameError("");
   };
 
   const handleEditFirstName = () => {
@@ -232,7 +245,7 @@ const AccountSettings = () => {
             </div>
 
             <div className="acc-settings-column">
-              <div>
+              <div style={{ position: "relative" }}>
                 <span className="flex-row acc-settings-header">
                   <label htmlFor="username">
                     <h2 className="forta-small">{t("username")}</h2>
@@ -267,13 +280,27 @@ const AccountSettings = () => {
                   }
                   onChange={
                     isEditingUsername
-                      ? (e) => setTempUsername(e.target.value)
+                      ? (e) => {
+                          setTempUsername(e.target.value);
+                          setUsernameError(""); // Clear error when typing
+                        }
                       : undefined
                   }
-                  className={isEditingUsername ? "input input--edit" : "input"}
+                  className={
+                    isEditingUsername
+                      ? `input input--edit ${
+                          usernameError ? "input--error" : ""
+                        }`
+                      : "input"
+                  }
                   style={{ width: getMaxInputWidth() }}
                   readOnly={!isEditingUsername}
                 />
+                {usernameError && (
+                  <span className="error-message-small error-message-absolute">
+                    {usernameError}
+                  </span>
+                )}
               </div>
 
               <div>
