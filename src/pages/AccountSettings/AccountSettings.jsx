@@ -17,9 +17,12 @@ const AccountSettings = () => {
   const [error, setError] = useState(null);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [tempUsername, setTempUsername] = useState("");
+  const [isEditingFirstName, setIsEditingFirstName] = useState(false);
+  const [tempFirstName, setTempFirstName] = useState("");
   const [isEditingLanguage, setIsEditingLanguage] = useState(false);
   const [tempLanguage, setTempLanguage] = useState("");
   const usernameInputRef = useRef(null);
+  const firstNameInputRef = useRef(null);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
@@ -67,6 +70,27 @@ const AccountSettings = () => {
     setIsEditingUsername(false);
   };
 
+  const handleEditFirstName = () => {
+    setTempFirstName(profileData.first_name);
+    setIsEditingFirstName(true);
+    setTimeout(() => firstNameInputRef.current?.focus(), 0);
+  };
+
+  const handleSaveFirstName = async () => {
+    try {
+      await updateUserProfile({ first_name: tempFirstName });
+      setProfileData({ ...profileData, first_name: tempFirstName });
+      setIsEditingFirstName(false);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleCancelFirstName = () => {
+    setTempFirstName("");
+    setIsEditingFirstName(false);
+  };
+
   const handleChangePassword = () => {
     navigate("/change-password", { state: { fromAccountSettings: true } });
   };
@@ -104,7 +128,8 @@ const AccountSettings = () => {
     if (!profileData) return "200px";
 
     const widths = [
-      profileData.first_name?.length || 0,
+      (isEditingFirstName ? tempFirstName : profileData.first_name)?.length ||
+        0,
       profileData.email?.length || 0,
       (isEditingUsername ? tempUsername : profileData.username)?.length || 0,
       "**************".length,
@@ -133,22 +158,54 @@ const AccountSettings = () => {
         <div className="acc-settings">
           <div className="acc-settings-column">
             <div>
-              <label htmlFor="first_name">
-                <h2 className="forta acc-settings-header">{t("first_name")}</h2>
-              </label>
+              <span className="flex-row acc-settings-header">
+                <label htmlFor="first_name">
+                  <h2 className="forta-small">{t("first_name")}</h2>
+                </label>
+                {!isEditingFirstName ? (
+                  <Pencil
+                    size={20}
+                    onClick={handleEditFirstName}
+                    className="btn"
+                  />
+                ) : (
+                  <div className="acc-settings-actions">
+                    <Check
+                      onClick={handleSaveFirstName}
+                      className="btn btn-icon-green"
+                      size={20}
+                    />
+                    <X
+                      onClick={handleCancelFirstName}
+                      className="btn btn-icon-red"
+                      size={20}
+                    />
+                  </div>
+                )}
+              </span>
               <input
+                ref={firstNameInputRef}
                 id="first_name"
                 type="text"
-                value={profileData.first_name}
-                className={"input"}
+                value={
+                  isEditingFirstName ? tempFirstName : profileData.first_name
+                }
+                onChange={
+                  isEditingFirstName
+                    ? (e) => setTempFirstName(e.target.value)
+                    : undefined
+                }
+                className={isEditingFirstName ? "input input--edit" : "input"}
                 style={{ width: getMaxInputWidth() }}
-                readOnly={true}
+                readOnly={!isEditingFirstName}
               />
             </div>
 
             <div>
               <label htmlFor="email">
-                <h2 className="forta acc-settings-header">{t("email")}</h2>
+                <h2 className="forta-small acc-settings-header">
+                  {t("email")}
+                </h2>
               </label>
               <input
                 id="email"
@@ -168,16 +225,22 @@ const AccountSettings = () => {
                   <h2 className="forta-small">{t("username")}</h2>
                 </label>
                 {!isEditingUsername ? (
-                  <Pencil onClick={handleEditUsername} className="btn" />
+                  <Pencil
+                    size={20}
+                    onClick={handleEditUsername}
+                    className="btn"
+                  />
                 ) : (
                   <div className="acc-settings-actions">
                     <Check
                       onClick={handleSaveUsername}
                       className="btn btn-icon-green"
+                      size={20}
                     />
                     <X
                       onClick={handleCancelUsername}
                       className="btn btn-icon-red"
+                      size={20}
                     />
                   </div>
                 )}
@@ -192,7 +255,7 @@ const AccountSettings = () => {
                     ? (e) => setTempUsername(e.target.value)
                     : undefined
                 }
-                className={"input"}
+                className={isEditingUsername ? "input input--edit" : "input"}
                 style={{ width: getMaxInputWidth() }}
                 readOnly={!isEditingUsername}
               />
@@ -203,7 +266,11 @@ const AccountSettings = () => {
                 <label htmlFor="password">
                   <h2 className="forta-small">{t("password")}</h2>
                 </label>
-                <Pencil onClick={handleChangePassword} className="btn" />
+                <Pencil
+                  size={20}
+                  onClick={handleChangePassword}
+                  className="btn"
+                />
               </span>
               <input
                 id="password"
@@ -225,16 +292,18 @@ const AccountSettings = () => {
               </h2>
             </label>
             {!isEditingLanguage ? (
-              <Pencil onClick={handleEditLanguage} className="btn" />
+              <Pencil size={20} onClick={handleEditLanguage} className="btn" />
             ) : (
               <div className="acc-settings-actions">
                 <Check
                   onClick={handleSaveLanguage}
                   className="btn btn-icon-green"
+                  size={20}
                 />
                 <X
                   onClick={handleCancelLanguage}
                   className="btn btn-icon-red"
+                  size={20}
                 />
               </div>
             )}

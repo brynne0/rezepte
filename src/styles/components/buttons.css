@@ -4,7 +4,7 @@
   font-family: inherit;
   cursor: pointer;
   border: none;
-  border-radius: var(--border-radius);
+
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -22,6 +22,7 @@
   color: var(--dark-brown);
   border: var(--border-width) solid var(--brown);
   box-shadow: 0 0.125rem 0.5rem var(--shadow-black);
+  border-radius: var(--border-radius);
 }
 
 /* Action buttons (primary, secondary, danger) */
@@ -29,6 +30,7 @@
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   min-width: 6rem;
+  border-radius: var(--border-radius);
 }
 
 .btn-primary {
@@ -79,7 +81,6 @@
   padding: 0.5rem;
   background: none;
   border: none;
-  border-radius: var(--border-radius);
 }
 
 .btn-icon-neutral {

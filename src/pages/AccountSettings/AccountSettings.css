@@ -30,6 +30,11 @@
   gap: 0.5rem;
 }
 
+/* Override input focus border color */
+.acc-settings .input:focus {
+  border-color: var(--dark-brown);
+}
+
 /* Mobile: Stack everything vertically */
 @media (max-width: 768px) {
   .acc-settings {
