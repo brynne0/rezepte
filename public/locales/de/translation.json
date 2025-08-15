@@ -55,6 +55,9 @@
 
   "account_settings": "Kontoeinstellungen",
   "preferred_language": "Bevorzugte Sprache",
+  "successfully_updated_username": "Benutzername erfolgreich aktualisiert",
+  "successfully_updated_first_name": "Vorname erfolgreich aktualisiert",
+  "successfully_updated_language": "Bevorzugte Sprache erfolgreich aktualisiert",
 
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",

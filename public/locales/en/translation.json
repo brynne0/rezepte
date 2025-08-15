@@ -55,6 +55,9 @@
 
   "account_settings": "Account settings",
   "preferred_language": "Preferred Language",
+  "successfully_updated_username": "Successfully updated username",
+  "successfully_updated_first_name": "Successfully updated first name",
+  "successfully_updated_language": "Successfully updated preferred language",
 
   "search": "Search",
   "recipe_not_found": "Recipe not found.",
