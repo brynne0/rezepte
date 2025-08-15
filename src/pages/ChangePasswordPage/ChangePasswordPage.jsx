@@ -3,7 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import supabase from "../../lib/supabase";
 import { changePassword, verifyCurrentPassword } from "../../services/auth";
-import { validateChangePasswordForm, isPasswordStrong } from "../../utils/validation";
+import {
+  validateChangePasswordForm,
+  isPasswordStrong,
+} from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -289,9 +292,7 @@ const ChangePasswordPage = () => {
             )}
           </div>
 
-          {newPassword && (
-            <PasswordRequirements password={newPassword} />
-          )}
+          {newPassword && <PasswordRequirements password={newPassword} />}
 
           <button className={"btn btn-standard"} type="submit">
             {t("confirm")}
