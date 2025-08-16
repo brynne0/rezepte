@@ -249,13 +249,13 @@ const AccountSettings = () => {
         <>
           <div className="card card-settings">
             <header className="flex-column-center">
-              <ArrowBigLeft
-                className="back-arrow-responsive"
-                onClick={() => navigate(-1)}
-              />
-              <h1 className="forta-small">
-                {t("account_settings").toUpperCase()}
-              </h1>
+              <div className="flex-row">
+                <ArrowBigLeft
+                  className="back-arrow-responsive"
+                  onClick={() => navigate(-1)}
+                />
+                <h1 className="forta-small">{t("account_settings")}</h1>
+              </div>
               <span className="login-message">
                 {successMessage || "\u00A0"}
               </span>
@@ -264,7 +264,10 @@ const AccountSettings = () => {
             <div className="acc-settings-container">
               <div className="acc-settings">
                 <div className="acc-settings-column">
-                  <div className="input-validation-wrapper" ref={firstNameContainerRef}>
+                  <div
+                    className="input-validation-wrapper"
+                    ref={firstNameContainerRef}
+                  >
                     <div className="floating-label-input">
                       <div className="relative-center">
                         <input
@@ -418,7 +421,10 @@ const AccountSettings = () => {
                   {t("preferred_language").toUpperCase()}
                 </h2>
 
-                <div className="acc-settings-language-container" ref={languageContainerRef}>
+                <div
+                  className="acc-settings-language-container"
+                  ref={languageContainerRef}
+                >
                   {!isEditingLanguage ? (
                     <div className="language-wrapper">
                       <span

@@ -30,29 +30,29 @@ vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
 }));
 
 vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
-  default: ({ 
-    isOpen, 
-    onClose, 
-    onConfirm, 
-    title, 
-    message, 
-    confirmText, 
-    cancelText, 
-    requireConfirmation, 
-    confirmationText 
+  default: ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    message,
+    confirmText,
+    cancelText,
+    requireConfirmation,
+    confirmationText,
   }) => {
     const [isConfirmed, setIsConfirmed] = useState(false);
-    
+
     if (!isOpen) return null;
-    
+
     return (
       <div data-testid="confirmation-modal">
         <h3>{title}</h3>
         <p>{message}</p>
         {requireConfirmation && (
           <label>
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               data-testid="confirmation-checkbox"
               checked={isConfirmed}
               onChange={(e) => setIsConfirmed(e.target.checked)}
@@ -60,9 +60,11 @@ vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
             {confirmationText}
           </label>
         )}
-        <button onClick={onClose} data-testid="modal-cancel">{cancelText}</button>
-        <button 
-          onClick={onConfirm} 
+        <button onClick={onClose} data-testid="modal-cancel">
+          {cancelText}
+        </button>
+        <button
+          onClick={onConfirm}
           data-testid="modal-confirm"
           disabled={requireConfirmation && !isConfirmed}
         >
@@ -142,13 +144,13 @@ describe("AccountSettings", () => {
     mockCheckUsernameExists.mockResolvedValue(false);
 
     // Mock localStorage and sessionStorage
-    Object.defineProperty(window, 'localStorage', {
+    Object.defineProperty(window, "localStorage", {
       value: {
         clear: vi.fn(),
       },
       writable: true,
     });
-    Object.defineProperty(window, 'sessionStorage', {
+    Object.defineProperty(window, "sessionStorage", {
       value: {
         clear: vi.fn(),
       },
@@ -185,10 +187,12 @@ describe("AccountSettings", () => {
       render(<AccountSettingsWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("ACCOUNT_SETTINGS")).toBeInTheDocument();
+        expect(screen.getByText("account_settings")).toBeInTheDocument();
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
         expect(screen.getByDisplayValue("johndoe")).toBeInTheDocument();
-        expect(screen.getByDisplayValue("john@example.com")).toBeInTheDocument();
+        expect(
+          screen.getByDisplayValue("john@example.com")
+        ).toBeInTheDocument();
       });
     });
 
@@ -196,10 +200,12 @@ describe("AccountSettings", () => {
       render(<AccountSettingsWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("ACCOUNT_SETTINGS")).toBeInTheDocument();
+        expect(screen.getByText("account_settings")).toBeInTheDocument();
       });
 
-      const backArrow = screen.getByRole("banner").querySelector('.back-arrow-responsive');
+      const backArrow = screen
+        .getByRole("banner")
+        .querySelector(".back-arrow-responsive");
       fireEvent.click(backArrow);
 
       expect(mockNavigate).toHaveBeenCalledWith(-1);
@@ -218,8 +224,10 @@ describe("AccountSettings", () => {
       const firstNameInput = screen.getByDisplayValue("John");
       expect(firstNameInput).toHaveAttribute("readonly");
 
-      const firstNameContainer = firstNameInput.closest('.floating-label-input');
-      const pencilIcon = firstNameContainer.querySelector('.btn-icon-right');
+      const firstNameContainer = firstNameInput.closest(
+        ".floating-label-input"
+      );
+      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       expect(firstNameInput).not.toHaveAttribute("readonly");
@@ -228,40 +236,58 @@ describe("AccountSettings", () => {
 
     it("shows check and cancel buttons when editing", () => {
       const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest('.floating-label-input');
-      const pencilIcon = firstNameContainer.querySelector('.btn-icon-right');
+      const firstNameContainer = firstNameInput.closest(
+        ".floating-label-input"
+      );
+      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
-      expect(firstNameContainer.querySelector('.acc-settings-check')).toBeInTheDocument();
-      expect(firstNameContainer.querySelector('.acc-settings-cancel')).toBeInTheDocument();
+      expect(
+        firstNameContainer.querySelector(".acc-settings-check")
+      ).toBeInTheDocument();
+      expect(
+        firstNameContainer.querySelector(".acc-settings-cancel")
+      ).toBeInTheDocument();
     });
 
     it("updates first name successfully", async () => {
       const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest('.floating-label-input');
-      const pencilIcon = firstNameContainer.querySelector('.btn-icon-right');
+      const firstNameContainer = firstNameInput.closest(
+        ".floating-label-input"
+      );
+      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
-      const checkButton = firstNameContainer.querySelector('.acc-settings-check');
+      const checkButton = firstNameContainer.querySelector(
+        ".acc-settings-check"
+      );
       fireEvent.click(checkButton);
 
       await waitFor(() => {
-        expect(mockUpdateUserProfile).toHaveBeenCalledWith({ first_name: "Jane" });
-        expect(screen.getByText("successfully_updated_first_name")).toBeInTheDocument();
+        expect(mockUpdateUserProfile).toHaveBeenCalledWith({
+          first_name: "Jane",
+        });
+        expect(
+          screen.getByText("successfully_updated_first_name")
+        ).toBeInTheDocument();
       });
     });
 
     it("cancels editing when cancel button is clicked", () => {
       const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest('.floating-label-input');
-      const pencilIcon = firstNameContainer.querySelector('.btn-icon-right');
+      const firstNameContainer = firstNameInput.closest(
+        ".floating-label-input"
+      );
+      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
-      const cancelButton = firstNameContainer.querySelector('.acc-settings-cancel');
+      const cancelButton = firstNameContainer.querySelector(
+        ".acc-settings-cancel"
+      );
       fireEvent.click(cancelButton);
 
       expect(firstNameInput).toHaveValue("John");
@@ -281,8 +307,8 @@ describe("AccountSettings", () => {
       const usernameInput = screen.getByDisplayValue("johndoe");
       expect(usernameInput).toHaveAttribute("readonly");
 
-      const usernameContainer = usernameInput.closest('.floating-label-input');
-      const pencilIcon = usernameContainer.querySelector('.btn-icon-right');
+      const usernameContainer = usernameInput.closest(".floating-label-input");
+      const pencilIcon = usernameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       expect(usernameInput).not.toHaveAttribute("readonly");
@@ -290,19 +316,25 @@ describe("AccountSettings", () => {
 
     it("updates username successfully", async () => {
       const usernameInput = screen.getByDisplayValue("johndoe");
-      const usernameContainer = usernameInput.closest('.floating-label-input');
-      const pencilIcon = usernameContainer.querySelector('.btn-icon-right');
+      const usernameContainer = usernameInput.closest(".floating-label-input");
+      const pencilIcon = usernameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       fireEvent.change(usernameInput, { target: { value: "newusername" } });
 
-      const checkButton = usernameContainer.querySelector('.acc-settings-check');
+      const checkButton = usernameContainer.querySelector(
+        ".acc-settings-check"
+      );
       fireEvent.click(checkButton);
 
       await waitFor(() => {
         expect(mockCheckUsernameExists).toHaveBeenCalledWith("newusername");
-        expect(mockUpdateUserProfile).toHaveBeenCalledWith({ username: "newusername" });
-        expect(screen.getByText("successfully_updated_username")).toBeInTheDocument();
+        expect(mockUpdateUserProfile).toHaveBeenCalledWith({
+          username: "newusername",
+        });
+        expect(
+          screen.getByText("successfully_updated_username")
+        ).toBeInTheDocument();
       });
     });
 
@@ -310,13 +342,15 @@ describe("AccountSettings", () => {
       mockCheckUsernameExists.mockResolvedValue(true);
 
       const usernameInput = screen.getByDisplayValue("johndoe");
-      const usernameContainer = usernameInput.closest('.floating-label-input');
-      const pencilIcon = usernameContainer.querySelector('.btn-icon-right');
+      const usernameContainer = usernameInput.closest(".floating-label-input");
+      const pencilIcon = usernameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
-      const checkButton = usernameContainer.querySelector('.acc-settings-check');
+      const checkButton = usernameContainer.querySelector(
+        ".acc-settings-check"
+      );
       fireEvent.click(checkButton);
 
       await waitFor(() => {
@@ -330,13 +364,15 @@ describe("AccountSettings", () => {
       mockCheckUsernameExists.mockResolvedValue(true);
 
       const usernameInput = screen.getByDisplayValue("johndoe");
-      const usernameContainer = usernameInput.closest('.floating-label-input');
-      const pencilIcon = usernameContainer.querySelector('.btn-icon-right');
+      const usernameContainer = usernameInput.closest(".floating-label-input");
+      const pencilIcon = usernameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
-      const checkButton = usernameContainer.querySelector('.acc-settings-check');
+      const checkButton = usernameContainer.querySelector(
+        ".acc-settings-check"
+      );
       fireEvent.click(checkButton);
 
       await waitFor(() => {
@@ -346,7 +382,9 @@ describe("AccountSettings", () => {
       // Clear error by typing
       fireEvent.change(usernameInput, { target: { value: "newuser" } });
 
-      expect(screen.queryByText("username_already_exists")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("username_already_exists")
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -369,12 +407,12 @@ describe("AccountSettings", () => {
       });
 
       const passwordInput = screen.getByDisplayValue("**************");
-      const passwordContainer = passwordInput.closest('.floating-label-input');
-      const pencilIcon = passwordContainer.querySelector('.btn-icon-right');
+      const passwordContainer = passwordInput.closest(".floating-label-input");
+      const pencilIcon = passwordContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
-      expect(mockNavigate).toHaveBeenCalledWith("/change-password", { 
-        state: { fromAccountSettings: true } 
+      expect(mockNavigate).toHaveBeenCalledWith("/change-password", {
+        state: { fromAccountSettings: true },
       });
     });
   });
@@ -390,15 +428,17 @@ describe("AccountSettings", () => {
     it("displays current language selection", () => {
       expect(screen.getByText("EN")).toBeInTheDocument();
       expect(screen.getByText("DE")).toBeInTheDocument();
-      
+
       // EN should be selected by default (mocked to return "en")
       const enSpan = screen.getByText("EN");
       expect(enSpan.className).toContain("selected");
     });
 
     it("enables language editing when pencil is clicked", () => {
-      const languageContainer = screen.getByText("EN").closest('.acc-settings-language-container');
-      const pencilIcon = languageContainer.querySelector('.btn');
+      const languageContainer = screen
+        .getByText("EN")
+        .closest(".acc-settings-language-container");
+      const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
       // Language options should become clickable
@@ -409,8 +449,10 @@ describe("AccountSettings", () => {
     });
 
     it("updates language preference successfully", async () => {
-      const languageContainer = screen.getByText("EN").closest('.acc-settings-language-container');
-      const pencilIcon = languageContainer.querySelector('.btn');
+      const languageContainer = screen
+        .getByText("EN")
+        .closest(".acc-settings-language-container");
+      const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
       // Click on DE option
@@ -418,19 +460,25 @@ describe("AccountSettings", () => {
       fireEvent.click(deOption);
 
       // Click check button
-      const checkButton = languageContainer.querySelector('.acc-settings-check');
+      const checkButton = languageContainer.querySelector(
+        ".acc-settings-check"
+      );
       fireEvent.click(checkButton);
 
       await waitFor(() => {
         expect(mockUpdateUserPreferredLanguage).toHaveBeenCalledWith("de");
         expect(mockChangeLanguage).toHaveBeenCalledWith("de");
-        expect(screen.getByText("successfully_updated_language")).toBeInTheDocument();
+        expect(
+          screen.getByText("successfully_updated_language")
+        ).toBeInTheDocument();
       });
     });
 
     it("cancels language editing", () => {
-      const languageContainer = screen.getByText("EN").closest('.acc-settings-language-container');
-      const pencilIcon = languageContainer.querySelector('.btn');
+      const languageContainer = screen
+        .getByText("EN")
+        .closest(".acc-settings-language-container");
+      const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
       // Click on DE option
@@ -438,12 +486,16 @@ describe("AccountSettings", () => {
       fireEvent.click(deOption);
 
       // Click cancel button
-      const cancelButton = languageContainer.querySelector('.acc-settings-cancel');
+      const cancelButton = languageContainer.querySelector(
+        ".acc-settings-cancel"
+      );
       fireEvent.click(cancelButton);
 
       // Should return to non-editing state - pencil icon should be back
-      expect(languageContainer.querySelector('.acc-settings-cancel')).not.toBeInTheDocument();
-      expect(languageContainer.querySelector('.btn')).toBeInTheDocument();
+      expect(
+        languageContainer.querySelector(".acc-settings-cancel")
+      ).not.toBeInTheDocument();
+      expect(languageContainer.querySelector(".btn")).toBeInTheDocument();
     });
   });
 
@@ -451,12 +503,16 @@ describe("AccountSettings", () => {
     beforeEach(async () => {
       render(<AccountSettingsWrapper />);
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: "delete_account" })).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "delete_account" })
+        ).toBeInTheDocument();
       });
     });
 
     it("renders delete account button", () => {
-      expect(screen.getByRole("button", { name: "delete_account" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "delete_account" })
+      ).toBeInTheDocument();
     });
 
     it("opens confirmation modal when delete button is clicked", () => {
@@ -464,7 +520,9 @@ describe("AccountSettings", () => {
 
       expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
       expect(screen.getByText("delete_account")).toBeInTheDocument();
-      expect(screen.getByText("delete_account_confirmation")).toBeInTheDocument();
+      expect(
+        screen.getByText("delete_account_confirmation")
+      ).toBeInTheDocument();
     });
 
     it("displays confirmation checkbox with warning text", () => {
@@ -500,7 +558,9 @@ describe("AccountSettings", () => {
       fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
       fireEvent.click(screen.getByTestId("modal-cancel"));
 
-      expect(screen.queryByTestId("confirmation-modal")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("confirmation-modal")
+      ).not.toBeInTheDocument();
     });
 
     it("calls deleteUserAccount when confirmed", async () => {
@@ -523,10 +583,14 @@ describe("AccountSettings", () => {
       fireEvent.click(screen.getByTestId("modal-confirm"));
 
       await waitFor(() => {
-        expect(screen.getByText("account_deleted_goodbye_John")).toBeInTheDocument();
+        expect(
+          screen.getByText("account_deleted_goodbye_John")
+        ).toBeInTheDocument();
       });
 
-      expect(screen.queryByTestId("confirmation-modal")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("confirmation-modal")
+      ).not.toBeInTheDocument();
     });
 
     it("clears localStorage and sessionStorage after successful deletion", async () => {
@@ -554,8 +618,12 @@ describe("AccountSettings", () => {
         expect(screen.getByText(/delete_account_error/)).toBeInTheDocument();
       });
 
-      expect(screen.queryByTestId("confirmation-modal")).not.toBeInTheDocument();
-      expect(screen.queryByText("account_deleted_goodbye_John")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("confirmation-modal")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("account_deleted_goodbye_John")
+      ).not.toBeInTheDocument();
     });
 
     it("handles deletion error and keeps user on page", async () => {
@@ -570,7 +638,9 @@ describe("AccountSettings", () => {
       });
 
       // After error, the full form is no longer displayed - just the error message
-      expect(screen.queryByRole("button", { name: "delete_account" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "delete_account" })
+      ).not.toBeInTheDocument();
       expect(window.localStorage.clear).not.toHaveBeenCalled();
       expect(window.sessionStorage.clear).not.toHaveBeenCalled();
     });
@@ -586,22 +656,32 @@ describe("AccountSettings", () => {
 
       // Trigger a successful update
       const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest('.floating-label-input');
-      const pencilIcon = firstNameContainer.querySelector('.btn-icon-right');
+      const firstNameContainer = firstNameInput.closest(
+        ".floating-label-input"
+      );
+      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
-      const checkButton = firstNameContainer.querySelector('.acc-settings-check');
+      const checkButton = firstNameContainer.querySelector(
+        ".acc-settings-check"
+      );
       fireEvent.click(checkButton);
 
       await waitFor(() => {
-        expect(screen.getByText("successfully_updated_first_name")).toBeInTheDocument();
+        expect(
+          screen.getByText("successfully_updated_first_name")
+        ).toBeInTheDocument();
       });
 
       // Success message should be visible in the header
-      const header = screen.getByRole("banner") || screen.getByText("successfully_updated_first_name").closest("header");
-      expect(header).toContainElement(screen.getByText("successfully_updated_first_name"));
+      const header =
+        screen.getByRole("banner") ||
+        screen.getByText("successfully_updated_first_name").closest("header");
+      expect(header).toContainElement(
+        screen.getByText("successfully_updated_first_name")
+      );
     });
   });
 
@@ -616,13 +696,17 @@ describe("AccountSettings", () => {
       });
 
       const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest('.floating-label-input');
-      const pencilIcon = firstNameContainer.querySelector('.btn-icon-right');
+      const firstNameContainer = firstNameInput.closest(
+        ".floating-label-input"
+      );
+      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
       fireEvent.click(pencilIcon);
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
-      const checkButton = firstNameContainer.querySelector('.acc-settings-check');
+      const checkButton = firstNameContainer.querySelector(
+        ".acc-settings-check"
+      );
       fireEvent.click(checkButton);
 
       await waitFor(() => {
@@ -631,7 +715,9 @@ describe("AccountSettings", () => {
     });
 
     it("handles language update errors", async () => {
-      mockUpdateUserPreferredLanguage.mockRejectedValue(new Error("Language service error"));
+      mockUpdateUserPreferredLanguage.mockRejectedValue(
+        new Error("Language service error")
+      );
 
       render(<AccountSettingsWrapper />);
 
@@ -639,14 +725,18 @@ describe("AccountSettings", () => {
         expect(screen.getByText("PREFERRED_LANGUAGE")).toBeInTheDocument();
       });
 
-      const languageContainer = screen.getByText("EN").closest('.acc-settings-language-container');
-      const pencilIcon = languageContainer.querySelector('.btn');
+      const languageContainer = screen
+        .getByText("EN")
+        .closest(".acc-settings-language-container");
+      const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
       const deOption = screen.getByText("DE");
       fireEvent.click(deOption);
 
-      const checkButton = languageContainer.querySelector('.acc-settings-check');
+      const checkButton = languageContainer.querySelector(
+        ".acc-settings-check"
+      );
       fireEvent.click(checkButton);
 
       await waitFor(() => {

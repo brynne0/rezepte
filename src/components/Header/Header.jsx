@@ -122,7 +122,7 @@ const Header = ({
     <div className={"user-icon-wrapper"} ref={userDropdownRef}>
       <button
         className={`btn btn-icon btn-icon-neutral ${
-          showUserDropdown ? "selected" : ""
+          showUserDropdown || location.pathname === "/account-settings" ? "selected" : ""
         }`}
         onClick={() => {
           if (location.pathname === "/auth-page") return;
@@ -140,7 +140,9 @@ const Header = ({
             {isLoggedIn ? (
               <>
                 <button
-                  className="dropdown-item"
+                  className={`dropdown-item ${
+                    location.pathname === "/account-settings" ? "selected" : ""
+                  }`}
                   onClick={() => {
                     setShowUserDropdown(false);
                     navigate("/account-settings");
