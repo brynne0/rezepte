@@ -14,6 +14,11 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   const { createRecipe, updateRecipe, deleteRecipe, loading, error } =
     useRecipeActions();
 
+  // Generate unique IDs for ingredients
+  const generateUniqueId = () => {
+    return `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  };
+
   const getInitialFormData = useCallback(() => {
     if (initialRecipe) {
       // Handle ungrouped ingredients and sections separately
@@ -27,7 +32,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         // New structure with separated ungrouped and grouped ingredients
         ungroupedIngredients = (initialRecipe.ungroupedIngredients || []).map(
           (ing) => ({
-            tempId: ing.id || Date.now() + Math.random(),
+            tempId: generateUniqueId(),
             ingredient_id: ing.ingredient_id || "",
             name: ing.name || ing.singular_name || "",
             quantity: ing.quantity || "",
@@ -41,7 +46,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
             id: section.id || `section-${index}`,
             subheading: section.subheading || "",
             ingredients: section.ingredients.map((ing) => ({
-              tempId: ing.id || Date.now() + Math.random(),
+              tempId: generateUniqueId(),
               ingredient_id: ing.ingredient_id || "",
               name: ing.name || ing.singular_name || "",
               quantity: ing.quantity || "",
@@ -54,7 +59,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         // Convert flat ingredient list: separate ungrouped from grouped
         initialRecipe.ingredients.forEach((ing) => {
           const ingredient = {
-            tempId: ing.id || Date.now() + Math.random(),
+            tempId: generateUniqueId(),
             ingredient_id: ing.ingredient_id || "",
             name: ing.name || ing.singular_name || "",
             quantity: ing.quantity || "",
@@ -89,7 +94,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       ) {
         ungroupedIngredients = [
           {
-            tempId: Date.now() + Math.random(),
+            tempId: generateUniqueId(),
             ingredient_id: "",
             name: "",
             quantity: "",
@@ -122,7 +127,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       source: "",
       ungroupedIngredients: [
         {
-          tempId: Date.now() + Math.random(),
+          tempId: generateUniqueId(),
           ingredient_id: "",
           name: "",
           quantity: "",
@@ -266,7 +271,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   };
 
   const addIngredient = (sectionId) => {
-    const newTempId = Date.now() + Math.random();
+    const newTempId = generateUniqueId();
 
     if (sectionId === "ungrouped") {
       // Add to ungrouped ingredients
@@ -322,7 +327,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
   const addSection = () => {
     const newSectionId = `section-${Date.now()}`;
-    const newTempId = Date.now() + Math.random();
+    const newTempId = generateUniqueId();
 
     setFormData((prev) => ({
       ...prev,
