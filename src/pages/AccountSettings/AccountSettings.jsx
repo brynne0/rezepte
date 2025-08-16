@@ -194,8 +194,11 @@ const AccountSettings = () => {
     <div className="page-centered">
       {showDeleteSuccess ? (
         <div className="flex-column-center">
-          <span>{t("account_deleted_message")}</span>
-          <strong>{deletedAccountInfo?.firstName}</strong>
+          <span>
+            {t("account_deleted_goodbye", {
+              name: deletedAccountInfo?.firstName,
+            })}
+          </span>
         </div>
       ) : (
         <>

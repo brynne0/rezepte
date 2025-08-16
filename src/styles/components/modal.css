@@ -31,8 +31,7 @@
 
 .confirmation-modal-message {
   color: var(--dark-brown);
-  margin: 0 0 1.5rem 0;
-  line-height: 1.5;
+  margin: 0 0 1rem 0;
   font-weight: 500;
 }
 
@@ -62,7 +61,6 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .confirmation-modal-content {
-    padding: 1rem;
     min-width: 16rem;
     margin: 0.5rem;
   }

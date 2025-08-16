@@ -74,7 +74,7 @@
   "delete_account": "Konto löschen",
   "delete_account_confirmation": "Möchten Sie Ihr Konto wirklich löschen?",
   "delete_account_warning": "Ich verstehe, dass dieser Vorgang nicht rückgängig gemacht werden kann und alle meine Rezepte gelöscht werden",
-  "account_deleted_message": "Ihr Konto wurde erfolgreich gelöscht",
+  "account_deleted_goodbye": "Auf Wiedersehen, {{name}}! Ihr Konto wurde erfolgreich gelöscht.",
   "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
 
   "search": "Suchen",

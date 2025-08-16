@@ -74,7 +74,7 @@
   "delete_account": "Delete account",
   "delete_account_confirmation": "Are you sure you want to delete your account?",
   "delete_account_warning": "I understand this cannot be undone and all my recipes will be deleted",
-  "account_deleted_message": "Your account has been successfully deleted",
+  "account_deleted_goodbye": "Goodbye, {{name}}! Your account has been successfully deleted.",
   "delete_account_error": "Failed to delete account. Please try again.",
 
   "search": "Search",
