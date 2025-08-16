@@ -152,6 +152,8 @@
   "title_required": "Rezepttitel ist erforderlich",
   "title_already_exists": "Ein Rezept mit diesem Titel existiert bereits",
   "category_required": "Kategorie ist erforderlich",
+  "recipe_create_error": "Rezept konnte nicht erstellt werden. Bitte erneut versuchen.",
+  "recipe_update_error": "Rezept konnte nicht aktualisiert werden. Bitte erneut versuchen.",
 
   "add_to_grocery_list": "zur Einkaufsliste hinzufügen",
   "added_to_groceries": "Zur Einkaufsliste hinzugefügt",

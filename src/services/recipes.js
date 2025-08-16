@@ -249,14 +249,33 @@ const getOrCreateIngredient = async (
 ) => {
   const trimmedName = ingredientName.trim();
 
-  // First, try to find existing ingredient
-  const existingIngredient = await findIngredientByNameOrTranslation(
+  // First, try to find existing ingredient in current language
+  let existingIngredient = await findIngredientByNameOrTranslation(
     trimmedName,
     currentLanguage
   );
 
   if (existingIngredient) {
     return existingIngredient;
+  }
+
+  // If not found in current language and we're not in English,
+  // try searching in English too (user might have typed English name)
+  if (currentLanguage !== "en") {
+    existingIngredient = await findIngredientByNameOrTranslation(
+      trimmedName,
+      "en"
+    );
+
+    if (existingIngredient) {
+      // Found English ingredient, add translation for current language
+      await addTranslationToIngredient(
+        existingIngredient.id,
+        trimmedName,
+        currentLanguage
+      );
+      return existingIngredient;
+    }
   }
 
   // No existing ingredient found - create new English ingredient
@@ -282,18 +301,54 @@ const getOrCreateIngredient = async (
       englishPlural = plural;
 
       // Add the original language as a translation
-      const originalSingular =
-        currentLanguage === "de"
-          ? trimmedName.charAt(0).toUpperCase() +
-            trimmedName.slice(1).toLowerCase()
-          : trimmedName.toLowerCase();
+      // Use the translated English form to determine proper singular/plural
+      const isTranslatedPlural = pluralize.isPlural(
+        translatedToEnglish.toLowerCase()
+      );
 
-      const originalPlural =
-        currentLanguage === "de"
-          ? originalSingular.endsWith("e")
-            ? originalSingular + "n"
-            : originalSingular + "e"
-          : pluralize.plural(originalSingular);
+      let originalSingular, originalPlural;
+
+      if (isTranslatedPlural) {
+        // The translated English is plural, so user input was plural
+        originalPlural = trimmedName; // Keep user input as plural
+        // Derive singular from user input using pluralize on the English translation
+        const englishSingular = pluralize.singular(
+          translatedToEnglish.toLowerCase()
+        );
+        // Translate the English singular back to get proper singular form
+        try {
+          originalSingular = await translateText(
+            englishSingular,
+            currentLanguage,
+            "en"
+          );
+        } catch {
+          originalSingular = trimmedName; // Fallback to user input
+        }
+      } else {
+        // The translated English is singular, so user input was singular
+        originalSingular = trimmedName; // Keep user input as singular
+        // Derive plural from user input using pluralize on the English translation
+        const englishPlural = pluralize.plural(
+          translatedToEnglish.toLowerCase()
+        );
+        // Translate the English plural back to get proper plural form
+        try {
+          originalPlural = await translateText(
+            englishPlural,
+            currentLanguage,
+            "en"
+          );
+        } catch {
+          // Fallback to simple German pluralization rules
+          originalPlural =
+            currentLanguage === "de"
+              ? trimmedName.endsWith("e")
+                ? trimmedName + "n"
+                : trimmedName + "e"
+              : pluralize.plural(trimmedName);
+        }
+      }
 
       translations = {
         [currentLanguage]: {
@@ -309,16 +364,23 @@ const getOrCreateIngredient = async (
       englishSingular = singular;
       englishPlural = plural;
 
-      // Still add the original language
+      // Still add the original language using pluralize logic on the fallback English
+      const isFallbackPlural = pluralize.isPlural(
+        englishSingular.toLowerCase()
+      );
+
       translations = {
         [currentLanguage]: {
-          singular_name: trimmedName,
-          plural_name:
-            currentLanguage === "de"
-              ? trimmedName.endsWith("e")
-                ? trimmedName + "n"
-                : trimmedName + "e"
-              : pluralize.plural(trimmedName),
+          singular_name: isFallbackPlural
+            ? pluralize.singular(trimmedName) || trimmedName
+            : trimmedName,
+          plural_name: isFallbackPlural
+            ? trimmedName
+            : currentLanguage === "de"
+            ? trimmedName.endsWith("e")
+              ? trimmedName + "n"
+              : trimmedName + "e"
+            : pluralize.plural(trimmedName),
         },
       };
     }

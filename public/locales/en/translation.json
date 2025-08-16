@@ -156,6 +156,8 @@
   "title_required": "Recipe title is required",
   "title_already_exists": "A recipe with this title already exists",
   "category_required": "Category is required",
+  "recipe_create_error": "Failed to create recipe. Please try again.",
+  "recipe_update_error": "Failed to update recipe. Please try again.",
 
   "add_to_grocery_list": "Add to grocery list",
   "added_to_groceries": "Added to grocery list",

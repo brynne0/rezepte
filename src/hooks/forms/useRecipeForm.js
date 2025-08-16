@@ -138,6 +138,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
   const [formData, setFormData] = useState(getInitialFormData);
   const [validationErrors, setValidationErrors] = useState({});
+  const [submissionError, setSubmissionError] = useState("");
 
   // Update form data when initialRecipe changes (for edit mode)
   useEffect(() => {
@@ -567,6 +568,9 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Clear any previous submission error
+    setSubmissionError("");
+
     if (!(await handleValidation())) {
       window.scrollTo(0, 0);
       return;
@@ -638,6 +642,15 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
         `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
         err
       );
+
+      // Set user-friendly error message
+      const errorKey = initialRecipe
+        ? "recipe_update_error"
+        : "recipe_create_error";
+      setSubmissionError(t(errorKey));
+
+      // Scroll to top to show the error message
+      window.scrollTo(0, 0);
     }
   };
 
@@ -659,6 +672,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
   return {
     formData,
     validationErrors,
+    submissionError,
     loading,
     error,
     isEditMode: !!initialRecipe,
