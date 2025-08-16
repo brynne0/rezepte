@@ -40,7 +40,7 @@ export const checkPasswordDigit = (password) => {
 };
 
 export const checkPasswordSymbol = (password) => {
-  return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  return /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
 };
 
 export const validatePasswordStrength = (password) => {
