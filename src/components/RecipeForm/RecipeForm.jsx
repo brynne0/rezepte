@@ -24,6 +24,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   const {
     formData,
     validationErrors,
+    submissionError,
     loading,
     // error,
     isEditMode,
@@ -95,6 +96,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         />
         <h1 className="forta">{title}</h1>
       </header>
+
+      {/* Submission Error Message */}
+      {submissionError && (
+        <div className="error-message submission-error">{submissionError}</div>
+      )}
 
       <form onSubmit={handleSubmit} className="recipe-form" role="form">
         {/* Recipe Title and Servings */}

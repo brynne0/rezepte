@@ -8,8 +8,10 @@ import {
   getUserProfile,
   updateUserProfile,
   checkUsernameExists,
+  deleteUserAccount,
 } from "../../services/userService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import "./AccountSettings.css";
 
 const AccountSettings = () => {
@@ -24,8 +26,14 @@ const AccountSettings = () => {
   const [tempFirstName, setTempFirstName] = useState("");
   const [isEditingLanguage, setIsEditingLanguage] = useState(false);
   const [tempLanguage, setTempLanguage] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [deletedAccountInfo, setDeletedAccountInfo] = useState(null);
   const usernameInputRef = useRef(null);
   const firstNameInputRef = useRef(null);
+  const usernameContainerRef = useRef(null);
+  const firstNameContainerRef = useRef(null);
+  const languageContainerRef = useRef(null);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
@@ -51,6 +59,48 @@ const AccountSettings = () => {
 
     loadProfile();
   }, []);
+
+  // Handle click outside to cancel editing
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if click is outside username editing area
+      if (
+        isEditingUsername &&
+        usernameContainerRef.current &&
+        !usernameContainerRef.current.contains(event.target)
+      ) {
+        handleCancelUsername();
+      }
+
+      // Check if click is outside first name editing area
+      if (
+        isEditingFirstName &&
+        firstNameContainerRef.current &&
+        !firstNameContainerRef.current.contains(event.target)
+      ) {
+        handleCancelFirstName();
+      }
+
+      // Check if click is outside language editing area
+      if (
+        isEditingLanguage &&
+        languageContainerRef.current &&
+        !languageContainerRef.current.contains(event.target)
+      ) {
+        handleCancelLanguage();
+      }
+    };
+
+    // Add event listener if any editing is active
+    if (isEditingUsername || isEditingFirstName || isEditingLanguage) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditingUsername, isEditingFirstName, isEditingLanguage]);
 
   const handleEditUsername = () => {
     setTempUsername(profileData.username);
@@ -144,19 +194,40 @@ const AccountSettings = () => {
     setIsEditingLanguage(false);
   };
 
-  const getMaxInputWidth = () => {
-    if (!profileData) return "200px";
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
+  };
 
-    const widths = [
-      (isEditingFirstName ? tempFirstName : profileData.first_name)?.length ||
-        0,
-      profileData.email?.length || 0,
-      (isEditingUsername ? tempUsername : profileData.username)?.length || 0,
-      "**************".length,
-    ];
+  const handleConfirmDelete = async () => {
+    try {
+      setLoading(true);
 
-    const maxLength = Math.max(...widths);
-    return Math.max(maxLength * 8 + 20, 200) + "px";
+      // Store account info before deletion
+      const accountInfo = {
+        firstName: profileData.first_name,
+      };
+
+      await deleteUserAccount();
+
+      // Show success message with account details
+      setDeletedAccountInfo(accountInfo);
+      setShowDeleteSuccess(true);
+      setShowDeleteModal(false);
+      setLoading(false);
+
+      // Clear any local storage or session data
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (err) {
+      console.error("Failed to delete account:", err);
+      setError(t("delete_account_error"));
+      setShowDeleteModal(false);
+      setLoading(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   if (loading) {
@@ -166,241 +237,283 @@ const AccountSettings = () => {
 
   return (
     <div className="page-centered">
-      <div className="card card-settings">
-        <header className="flex-column-center">
-          <div className="flex-row">
-            <ArrowBigLeft
-              className="back-arrow-responsive"
-              onClick={() => navigate(-1)}
-            />
-            <h1 className="forta-small">
-              {t("account_settings").toUpperCase()}
-            </h1>
-          </div>
-          <span className="login-message">{successMessage || "\u00A0"}</span>
-        </header>
+      {showDeleteSuccess ? (
+        <div className="flex-column-center">
+          <span>
+            {t("account_deleted_goodbye", {
+              name: deletedAccountInfo?.firstName,
+            })}
+          </span>
+        </div>
+      ) : (
+        <>
+          <div className="card card-settings">
+            <header className="flex-column-center">
+              <div className="flex-row">
+                <ArrowBigLeft
+                  className="back-arrow-responsive"
+                  onClick={() => navigate(-1)}
+                />
+                <h1 className="forta-small">{t("account_settings")}</h1>
+              </div>
+              <span className="login-message">
+                {successMessage || "\u00A0"}
+              </span>
+            </header>
 
-        <div className="auth-container">
-          <div className="acc-settings">
-            <div className="acc-settings-column">
-              <div>
-                <span className="flex-row acc-settings-header">
-                  <label htmlFor="first_name">
-                    <h2 className="forta-small">{t("first_name")}</h2>
-                  </label>
-                  {!isEditingFirstName ? (
-                    <Pencil
-                      size={20}
-                      onClick={handleEditFirstName}
-                      className="btn"
-                    />
-                  ) : (
-                    <div className="acc-settings-actions">
-                      <Check
-                        onClick={handleSaveFirstName}
-                        className="btn btn-icon-green"
-                        size={20}
-                      />
-                      <X
-                        onClick={handleCancelFirstName}
-                        className="btn btn-icon-red"
-                        size={20}
-                      />
+            <div className="acc-settings-container">
+              <div className="acc-settings">
+                <div className="acc-settings-column">
+                  <div
+                    className="input-validation-wrapper"
+                    ref={firstNameContainerRef}
+                  >
+                    <div className="floating-label-input">
+                      <div className="relative-center">
+                        <input
+                          ref={firstNameInputRef}
+                          id="first_name"
+                          type="text"
+                          value={
+                            isEditingFirstName
+                              ? tempFirstName
+                              : profileData.first_name
+                          }
+                          onChange={
+                            isEditingFirstName
+                              ? (e) => setTempFirstName(e.target.value)
+                              : undefined
+                          }
+                          className={`input   ${
+                            isEditingFirstName ? "input--edit" : ""
+                          }`}
+                          placeholder=" "
+                          readOnly={!isEditingFirstName}
+                        />
+                        {!isEditingFirstName ? (
+                          <Pencil
+                            size={20}
+                            onClick={handleEditFirstName}
+                            className="btn btn-icon btn-icon-right"
+                          />
+                        ) : (
+                          <>
+                            <Check
+                              onClick={handleSaveFirstName}
+                              className="btn btn-icon btn-icon-green acc-settings-check"
+                              size={16}
+                            />
+                            <X
+                              onClick={handleCancelFirstName}
+                              className="btn btn-icon btn-icon-red acc-settings-cancel"
+                              size={16}
+                            />
+                          </>
+                        )}
+                      </div>
+                      <label htmlFor="first_name">{t("first_name")}</label>
                     </div>
-                  )}
-                </span>
-                <input
-                  ref={firstNameInputRef}
-                  id="first_name"
-                  type="text"
-                  value={
-                    isEditingFirstName ? tempFirstName : profileData.first_name
-                  }
-                  onChange={
-                    isEditingFirstName
-                      ? (e) => setTempFirstName(e.target.value)
-                      : undefined
-                  }
-                  className={isEditingFirstName ? "input input--edit" : "input"}
-                  style={{ width: getMaxInputWidth() }}
-                  readOnly={!isEditingFirstName}
-                />
-              </div>
+                  </div>
 
-              <div>
-                <label htmlFor="email">
-                  <h2 className="forta-small acc-settings-header">
-                    {t("email")}
-                  </h2>
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={profileData.email}
-                  className={"input"}
-                  style={{ width: getMaxInputWidth() }}
-                  readOnly={true}
-                />
-              </div>
-            </div>
-
-            <div className="acc-settings-column">
-              <div style={{ position: "relative" }}>
-                <span className="flex-row acc-settings-header">
-                  <label htmlFor="username">
-                    <h2 className="forta-small">{t("username")}</h2>
-                  </label>
-                  {!isEditingUsername ? (
-                    <Pencil
-                      size={20}
-                      onClick={handleEditUsername}
-                      className="btn"
-                    />
-                  ) : (
-                    <div className="acc-settings-actions">
-                      <Check
-                        onClick={handleSaveUsername}
-                        className="btn btn-icon-green"
-                        size={20}
-                      />
-                      <X
-                        onClick={handleCancelUsername}
-                        className="btn btn-icon-red"
-                        size={20}
-                      />
+                  <div className="input-validation-wrapper">
+                    <div className="floating-label-input">
+                      <div className="relative-center">
+                        <input
+                          id="email"
+                          type="email"
+                          value={profileData.email}
+                          className="input  "
+                          placeholder=" "
+                          readOnly={true}
+                        />
+                      </div>
+                      <label htmlFor="email">{t("email")}</label>
                     </div>
-                  )}
-                </span>
-                <input
-                  ref={usernameInputRef}
-                  id="username"
-                  type="text"
-                  value={
-                    isEditingUsername ? tempUsername : profileData.username
-                  }
-                  onChange={
-                    isEditingUsername
-                      ? (e) => {
-                          setTempUsername(e.target.value);
-                          setUsernameError(""); // Clear error when typing
-                        }
-                      : undefined
-                  }
-                  className={
-                    isEditingUsername
-                      ? `input input--edit ${
-                          usernameError ? "input--error" : ""
-                        }`
-                      : "input"
-                  }
-                  style={{ width: getMaxInputWidth() }}
-                  readOnly={!isEditingUsername}
-                />
-                {usernameError && (
-                  <span className="error-message-small error-message-absolute">
-                    {usernameError}
-                  </span>
-                )}
+                  </div>
+                </div>
+
+                <div className="acc-settings-column">
+                  <div
+                    className="input-validation-wrapper"
+                    style={{ position: "relative" }}
+                    ref={usernameContainerRef}
+                  >
+                    <div className="floating-label-input">
+                      <div className="relative-center">
+                        <input
+                          ref={usernameInputRef}
+                          id="username"
+                          type="text"
+                          value={
+                            isEditingUsername
+                              ? tempUsername
+                              : profileData.username
+                          }
+                          onChange={
+                            isEditingUsername
+                              ? (e) => {
+                                  setTempUsername(e.target.value);
+                                  setUsernameError(""); // Clear error when typing
+                                }
+                              : undefined
+                          }
+                          className={`input   ${
+                            isEditingUsername ? "input--edit" : ""
+                          } ${usernameError ? "input--error" : ""}`}
+                          placeholder=" "
+                          readOnly={!isEditingUsername}
+                        />
+                        {!isEditingUsername ? (
+                          <Pencil
+                            size={20}
+                            onClick={handleEditUsername}
+                            className="btn btn-icon btn-icon-right"
+                          />
+                        ) : (
+                          <>
+                            <Check
+                              onClick={handleSaveUsername}
+                              className="btn btn-icon btn-icon-green acc-settings-check"
+                              size={16}
+                            />
+                            <X
+                              onClick={handleCancelUsername}
+                              className="btn btn-icon btn-icon-red acc-settings-cancel"
+                              size={16}
+                            />
+                          </>
+                        )}
+                      </div>
+                      <label htmlFor="username">{t("username")}</label>
+                    </div>
+                    {usernameError && (
+                      <span className="error-message-small error-message-absolute">
+                        {usernameError}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="input-validation-wrapper">
+                    <div className="floating-label-input">
+                      <div className="relative-center">
+                        <input
+                          id="password"
+                          type="password"
+                          value="**************"
+                          className="input"
+                          placeholder=" "
+                          readOnly={true}
+                        />
+                        <Pencil
+                          size={20}
+                          onClick={handleChangePassword}
+                          className="btn btn-icon btn-icon-right"
+                        />
+                      </div>
+                      <label htmlFor="password">{t("password")}</label>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span className="flex-row acc-settings-header">
-                  <label htmlFor="password">
-                    <h2 className="forta-small">{t("password")}</h2>
-                  </label>
-                  <Pencil
-                    size={20}
-                    onClick={handleChangePassword}
-                    className="btn"
-                  />
-                </span>
-                <input
-                  id="password"
-                  type="password"
-                  value="**************"
-                  className={"input "}
-                  style={{ width: getMaxInputWidth() }}
-                  readOnly={true}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="acc-settings-language flex-column-center">
-            <span className="flex-row acc-settings-header">
-              <label htmlFor="preferred_language">
+              <div className="acc-settings-language flex-column-center">
                 <h2 className="forta-small">
                   {t("preferred_language").toUpperCase()}
                 </h2>
-              </label>
-              {!isEditingLanguage ? (
-                <Pencil
-                  size={20}
-                  onClick={handleEditLanguage}
-                  className="btn"
-                />
-              ) : (
-                <div className="acc-settings-actions">
-                  <Check
-                    onClick={handleSaveLanguage}
-                    className="btn btn-icon-green"
-                    size={20}
-                  />
-                  <X
-                    onClick={handleCancelLanguage}
-                    className="btn btn-icon-red"
-                    size={20}
-                  />
-                </div>
-              )}
-            </span>
 
-            {!isEditingLanguage ? (
-              <div className="language-wrapper">
-                <span
-                  className={`language${
-                    (profileData.preferred_language || "en") === "en"
-                      ? " selected"
-                      : ""
-                  }`}
+                <div
+                  className="acc-settings-language-container"
+                  ref={languageContainerRef}
                 >
-                  EN
-                </span>
-                |
-                <span
-                  className={`language${
-                    (profileData.preferred_language || "en") === "de"
-                      ? " selected"
-                      : ""
-                  }`}
-                >
-                  DE
-                </span>
+                  {!isEditingLanguage ? (
+                    <div className="language-wrapper">
+                      <span
+                        className={`language${
+                          (profileData.preferred_language || "en") === "en"
+                            ? " selected"
+                            : ""
+                        }`}
+                      >
+                        EN
+                      </span>
+                      |
+                      <span
+                        className={`language${
+                          (profileData.preferred_language || "en") === "de"
+                            ? " selected"
+                            : ""
+                        }`}
+                      >
+                        DE
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="language-wrapper">
+                      <span
+                        className={`language${
+                          tempLanguage === "en" ? " selected" : ""
+                        }`}
+                        onClick={() => setTempLanguage("en")}
+                      >
+                        EN
+                      </span>
+                      |
+                      <span
+                        className={`language${
+                          tempLanguage === "de" ? " selected" : ""
+                        }`}
+                        onClick={() => setTempLanguage("de")}
+                      >
+                        DE
+                      </span>
+                    </div>
+                  )}
+
+                  {!isEditingLanguage ? (
+                    <Pencil
+                      size={20}
+                      onClick={handleEditLanguage}
+                      className="btn acc-settings-check"
+                    />
+                  ) : (
+                    <>
+                      <Check
+                        onClick={handleSaveLanguage}
+                        className="btn btn-icon btn-icon-green acc-settings-check"
+                        size={16}
+                      />
+                      <X
+                        onClick={handleCancelLanguage}
+                        className="btn btn-icon btn-icon-red acc-settings-cancel"
+                        size={16}
+                      />
+                    </>
+                  )}
+                </div>
               </div>
-            ) : (
-              <div className="language-wrapper">
-                <span
-                  className={`language${
-                    tempLanguage === "en" ? " selected" : ""
-                  }`}
-                  onClick={() => setTempLanguage("en")}
-                >
-                  EN
-                </span>
-                |
-                <span
-                  className={`language${
-                    tempLanguage === "de" ? " selected" : ""
-                  }`}
-                  onClick={() => setTempLanguage("de")}
-                >
-                  DE
-                </span>
-              </div>
-            )}
+
+              <button
+                onClick={handleDeleteAccount}
+                className="btn btn-action btn-danger"
+              >
+                {t("delete_account")}
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
+
+          <ConfirmationModal
+            isOpen={showDeleteModal}
+            onClose={handleCancelDelete}
+            onConfirm={handleConfirmDelete}
+            message={t("delete_account_confirmation")}
+            confirmText={t("delete")}
+            cancelText={t("cancel")}
+            confirmButtonType="danger"
+            requireConfirmation={true}
+            confirmationText={t("delete_account_warning")}
+          />
+        </>
+      )}
     </div>
   );
 };

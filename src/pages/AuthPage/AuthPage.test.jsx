@@ -75,8 +75,12 @@ describe("AuthPage", () => {
   beforeEach(async () => {
     // Import the mocked functions
     const { signUp, signIn } = await import("../../services/auth");
-    const { validateAuthForm, validateUsernameUnique, validateEmailUnique, isPasswordStrong } =
-      await import("../../utils/validation");
+    const {
+      validateAuthForm,
+      validateUsernameUnique,
+      validateEmailUnique,
+      isPasswordStrong,
+    } = await import("../../utils/validation");
 
     mockSignUp = signUp;
     mockSignIn = signIn;
@@ -219,7 +223,7 @@ describe("AuthPage", () => {
       fireEvent.click(signUpHeaderButton);
 
       // Fields should be cleared
-      expect(screen.getByLabelText("username_or_email").value).toBe("");
+      expect(screen.getByLabelText("username").value).toBe("");
       expect(screen.getByTestId("password-input").value).toBe("");
     });
 
@@ -238,7 +242,9 @@ describe("AuthPage", () => {
 
       // Should show password requirements
       expect(screen.getByTestId("password-requirements")).toBeInTheDocument();
-      expect(screen.getByText("Password requirements for: testpass")).toBeInTheDocument();
+      expect(
+        screen.getByText("Password requirements for: testpass")
+      ).toBeInTheDocument();
     });
 
     it("does not show password requirements in login mode", () => {
@@ -249,7 +255,9 @@ describe("AuthPage", () => {
       fireEvent.change(passwordInput, { target: { value: "testpass" } });
 
       // Should not show password requirements
-      expect(screen.queryByTestId("password-requirements")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("password-requirements")
+      ).not.toBeInTheDocument();
     });
 
     it("does not show password requirements when password is empty", () => {
@@ -262,7 +270,9 @@ describe("AuthPage", () => {
       fireEvent.click(signUpHeaderButton);
 
       // Password is empty by default
-      expect(screen.queryByTestId("password-requirements")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("password-requirements")
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -291,7 +301,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username_or_email");
+      const usernameInput = screen.getByLabelText("username");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -401,7 +411,7 @@ describe("AuthPage", () => {
       });
       fireEvent.click(signUpHeaderButton);
 
-      const usernameInput = screen.getByLabelText("username_or_email");
+      const usernameInput = screen.getByLabelText("username");
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
       const form = screen.getByTestId("auth-form");
@@ -462,7 +472,7 @@ describe("AuthPage", () => {
       fireEvent.click(signUpHeaderButton);
 
       const emailInput = screen.getByLabelText("email");
-      const usernameInput = screen.getByLabelText("username_or_email");
+      const usernameInput = screen.getByLabelText("username");
       fireEvent.change(emailInput, {
         target: { value: "existing@example.com" },
       });
@@ -503,7 +513,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username_or_email");
+      const usernameInput = screen.getByLabelText("username");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "unique@example.com" } });
@@ -547,7 +557,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username_or_email");
+      const usernameInput = screen.getByLabelText("username");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -560,7 +570,9 @@ describe("AuthPage", () => {
 
       await waitFor(() => {
         expect(mockIsPasswordStrong).toHaveBeenCalledWith("weak");
-        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(
+          screen.getByText("password_requirements_not_met")
+        ).toBeInTheDocument();
         expect(mockValidateUsernameUnique).toHaveBeenCalled();
         expect(mockValidateEmailUnique).toHaveBeenCalled();
         expect(mockSignUp).not.toHaveBeenCalled();
@@ -583,10 +595,12 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username_or_email");
+      const usernameInput = screen.getByLabelText("username");
       const passwordInput = screen.getByTestId("password-input");
 
-      fireEvent.change(emailInput, { target: { value: "existing@example.com" } });
+      fireEvent.change(emailInput, {
+        target: { value: "existing@example.com" },
+      });
       fireEvent.change(firstNameInput, { target: { value: "John" } });
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
       fireEvent.change(passwordInput, { target: { value: "weak" } });
@@ -596,7 +610,9 @@ describe("AuthPage", () => {
 
       await waitFor(() => {
         // All three validation errors should be displayed simultaneously
-        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(
+          screen.getByText("password_requirements_not_met")
+        ).toBeInTheDocument();
         expect(screen.getByText("username_already_exists")).toBeInTheDocument();
         expect(screen.getByText("email_already_exists")).toBeInTheDocument();
         expect(mockSignUp).not.toHaveBeenCalled();
@@ -664,8 +680,8 @@ describe("AuthPage", () => {
 
     it("handles login error - user not found", async () => {
       mockValidateAuthForm.mockReturnValue({});
-      mockSignIn.mockResolvedValue({ 
-        error: { type: 'USER_NOT_FOUND', translationKey: 'user_not_found' } 
+      mockSignIn.mockResolvedValue({
+        error: { type: "USER_NOT_FOUND", translationKey: "user_not_found" },
       });
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
@@ -680,8 +696,8 @@ describe("AuthPage", () => {
 
     it("handles login error - invalid password", async () => {
       mockValidateAuthForm.mockReturnValue({});
-      mockSignIn.mockResolvedValue({ 
-        error: { type: 'INVALID_PASSWORD', translationKey: 'invalid_password' } 
+      mockSignIn.mockResolvedValue({
+        error: { type: "INVALID_PASSWORD", translationKey: "invalid_password" },
       });
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
@@ -696,8 +712,8 @@ describe("AuthPage", () => {
 
     it("handles login error - general error", async () => {
       mockValidateAuthForm.mockReturnValue({});
-      mockSignIn.mockResolvedValue({ 
-        error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' } 
+      mockSignIn.mockResolvedValue({
+        error: { type: "GENERAL_ERROR", translationKey: "login_failed" },
       });
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
@@ -760,7 +776,9 @@ describe("AuthPage", () => {
       const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
 
-      fireEvent.change(usernameInput, { target: { value: "test@example.com" } });
+      fireEvent.change(usernameInput, {
+        target: { value: "test@example.com" },
+      });
       fireEvent.change(passwordInput, { target: { value: "testpass" } });
 
       const form = screen.getByTestId("auth-form");
@@ -787,7 +805,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username_or_email");
+      const usernameInput = screen.getByLabelText("username");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -863,7 +881,7 @@ describe("AuthPage", () => {
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username_or_email");
+      const usernameInput = screen.getByLabelText("username");
       const passwordInput = screen.getByTestId("password-input");
 
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });

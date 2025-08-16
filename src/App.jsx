@@ -162,6 +162,7 @@ function AppRoutes(props) {
         setLanguage={props.setLanguage}
         setSelectedCategory={props.setSelectedCategory}
         setSearchTerm={props.setSearchTerm}
+        searchTerm={props.searchTerm}
         setLoginMessage={props.setLoginMessage}
         loginMessage={props.loginMessage}
         t={props.t}

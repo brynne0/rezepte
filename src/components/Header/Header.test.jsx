@@ -63,6 +63,7 @@ describe("Header Component", () => {
   const defaultProps = {
     setSelectedCategory: vi.fn(),
     setSearchTerm: vi.fn(),
+    searchTerm: "",
     setLoginMessage: vi.fn(),
     loginMessage: "",
     disableLanguageSwitch: false,
@@ -1000,6 +1001,159 @@ describe("Header Component", () => {
         .querySelector(".dropdown .lucide-plus")
         .closest("button");
       expect(addButton.className).toContain("selected");
+    });
+  });
+
+  describe("Real-time Search Functionality", () => {
+    test("updates search term in real-time as user types", () => {
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const searchInput = screen.getByRole("textbox");
+
+      // Type "pasta" character by character
+      fireEvent.change(searchInput, { target: { value: "p" } });
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("p");
+
+      fireEvent.change(searchInput, { target: { value: "pa" } });
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("pa");
+
+      fireEvent.change(searchInput, { target: { value: "pasta" } });
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("pasta");
+    });
+
+    test("resets category to 'all' when typing in search input", () => {
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const searchInput = screen.getByRole("textbox");
+
+      // Start typing - should reset category
+      fireEvent.change(searchInput, { target: { value: "tofu" } });
+
+      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith("all");
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("tofu");
+    });
+
+    test("does not reset category when search input is cleared", () => {
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const searchInput = screen.getByRole("textbox");
+
+      // First type something to establish a baseline
+      fireEvent.change(searchInput, { target: { value: "test" } });
+
+      // Verify the category was reset when typing
+      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith("all");
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("test");
+
+      // Reset the mocks to check the next behavior
+      defaultProps.setSelectedCategory.mockClear();
+      defaultProps.setSearchTerm.mockClear();
+
+      // Clear the search input (empty string)
+      fireEvent.change(searchInput, { target: { value: "" } });
+
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("");
+      expect(defaultProps.setSelectedCategory).not.toHaveBeenCalled();
+    });
+
+    test("syncs input value with external searchTerm changes", () => {
+      const { rerender } = render(
+        <TestWrapper>
+          <Header {...defaultProps} searchTerm="initial" />
+        </TestWrapper>
+      );
+
+      const searchInput = screen.getByRole("textbox");
+      expect(searchInput.value).toBe("initial");
+
+      // External searchTerm change (e.g., from category filter reset)
+      rerender(
+        <TestWrapper>
+          <Header {...defaultProps} searchTerm="" />
+        </TestWrapper>
+      );
+
+      expect(searchInput.value).toBe("");
+    });
+
+    test("form submission uses current input value", () => {
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const searchInput = screen.getByRole("textbox");
+
+      // Type in search input
+      fireEvent.change(searchInput, { target: { value: "pizza" } });
+
+      // Submit form
+      const searchForm = searchInput.closest("form");
+      fireEvent.submit(searchForm);
+
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("pizza");
+      expect(mockNavigate).toHaveBeenCalledWith("/");
+    });
+
+    test("input maintains focus during real-time updates", () => {
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const searchInput = screen.getByRole("textbox");
+      searchInput.focus();
+
+      // Type and verify focus is maintained
+      fireEvent.change(searchInput, { target: { value: "test" } });
+
+      expect(document.activeElement).toBe(searchInput);
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("test");
+    });
+
+    test("handles rapid typing correctly", () => {
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      const searchInput = screen.getByRole("textbox");
+
+      // Simulate rapid typing
+      const searchTerm = "rapidtyping";
+      for (let i = 1; i <= searchTerm.length; i++) {
+        const partialTerm = searchTerm.substring(0, i);
+        fireEvent.change(searchInput, { target: { value: partialTerm } });
+      }
+
+      // Should have been called for each character
+      expect(defaultProps.setSearchTerm).toHaveBeenCalledTimes(
+        searchTerm.length
+      );
+      expect(defaultProps.setSearchTerm).toHaveBeenLastCalledWith(
+        "rapidtyping"
+      );
+
+      // Category should only be reset once (when first character is typed)
+      expect(defaultProps.setSelectedCategory).toHaveBeenCalledTimes(
+        searchTerm.length
+      );
+      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith("all");
     });
   });
 });

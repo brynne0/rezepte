@@ -17,6 +17,7 @@ import "./Header.css";
 const Header = ({
   setSelectedCategory,
   setSearchTerm,
+  searchTerm,
   setLoginMessage,
   loginMessage,
   disableLanguageSwitch = false,
@@ -31,6 +32,7 @@ const Header = ({
 
   const [showNavMenu, setShowNavMenu] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [currentSearchInput, setCurrentSearchInput] = useState("");
 
   // Language
   const { t, i18n } = useTranslation();
@@ -53,6 +55,11 @@ const Header = ({
       setFirstName("");
     }
   }, [isLoggedIn, setFirstName]);
+
+  // Sync search input with external search term changes
+  useEffect(() => {
+    setCurrentSearchInput(searchTerm || "");
+  }, [searchTerm]);
 
   // Refs for click outside detection
 
@@ -115,7 +122,7 @@ const Header = ({
     <div className={"user-icon-wrapper"} ref={userDropdownRef}>
       <button
         className={`btn btn-icon btn-icon-neutral ${
-          showUserDropdown ? "selected" : ""
+          showUserDropdown || location.pathname === "/account-settings" ? "selected" : ""
         }`}
         onClick={() => {
           if (location.pathname === "/auth-page") return;
@@ -133,7 +140,9 @@ const Header = ({
             {isLoggedIn ? (
               <>
                 <button
-                  className="dropdown-item"
+                  className={`dropdown-item ${
+                    location.pathname === "/account-settings" ? "selected" : ""
+                  }`}
                   onClick={() => {
                     setShowUserDropdown(false);
                     navigate("/account-settings");
@@ -315,7 +324,7 @@ const Header = ({
               className="search-bar"
               onSubmit={(e) => {
                 e.preventDefault();
-                setSearchTerm(e.target.elements.search.value);
+                setSearchTerm(currentSearchInput);
                 navigate("/");
               }}
             >
@@ -323,6 +332,14 @@ const Header = ({
                 <input
                   id="search"
                   type="text"
+                  value={currentSearchInput}
+                  onChange={(e) => {
+                    setCurrentSearchInput(e.target.value);
+                    setSearchTerm(e.target.value);
+                    if (e.target.value.length > 0) {
+                      setSelectedCategory("all");
+                    }
+                  }}
                   className="input input--cream search-input-with-icon"
                   placeholder={t("search")}
                 />

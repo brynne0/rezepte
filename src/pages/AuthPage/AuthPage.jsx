@@ -49,21 +49,25 @@ const AuthPage = ({ setLoginMessage }) => {
     if (error) {
       // Handle specific error types
       switch (error.type) {
-        case 'USER_NOT_FOUND':
+        case "USER_NOT_FOUND":
           setValidationErrors({ username: t(error.translationKey) });
           break;
-        case 'INVALID_PASSWORD':
+        case "INVALID_PASSWORD":
           setValidationErrors({ password: t(error.translationKey) });
           break;
-        case 'EMAIL_NOT_CONFIRMED':
-        case 'TOO_MANY_REQUESTS':
-        case 'GENERAL_ERROR':
+        case "EMAIL_NOT_CONFIRMED":
+        case "TOO_MANY_REQUESTS":
+        case "GENERAL_ERROR":
         default:
           setErrorMessage(t(error.translationKey));
           break;
       }
     } else {
       setLoginMessage(t("login_success"));
+
+      // Clear form fields on successful login
+      setUsername("");
+      setPassword("");
 
       // Navigate on successful login
       navigate("/");
@@ -75,9 +79,6 @@ const AuthPage = ({ setLoginMessage }) => {
       setErrorMessage("");
       setValidationErrors({});
     }, 3000);
-
-    setUsername("");
-    setPassword("");
   };
 
   const handleSignUp = async (e) => {
@@ -167,10 +168,7 @@ const AuthPage = ({ setLoginMessage }) => {
       <div className="auth-container">
         {/* Headers to toggle between modes */}
         <header className="flex-row">
-          <ArrowBigLeft
-            className="back-arrow-left"
-            onClick={() => navigate(-1)}
-          />
+          <ArrowBigLeft className="back-arrow" onClick={() => navigate(-1)} />
           <button
             className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
             type="button"
@@ -271,7 +269,9 @@ const AuthPage = ({ setLoginMessage }) => {
                   validationErrors.username ? "input--error" : ""
                 }`}
               />
-              <label htmlFor="username">{t("username_or_email")}</label>
+              <label htmlFor="username">
+                {isSignUpMode ? t("username") : t("username_or_email")}
+              </label>
             </div>
             {validationErrors.username && (
               <span className="error-message-small">

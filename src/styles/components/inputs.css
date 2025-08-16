@@ -54,7 +54,6 @@
 }
 
 .input--password {
-  width: 100%;
   padding-right: 2.5rem; /* Make room for the eye icon */
 }
 
@@ -89,7 +88,6 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
 }
 
 .input-with-icon input,
@@ -101,7 +99,7 @@
   position: absolute;
   left: 0.75rem;
   color: var(--dark-brown);
-  z-index: 1;
+  z-index: var(--z-content);
 }
 
 /* All inputs inside input-with-icon container should have left padding for icon space */
@@ -116,21 +114,22 @@
 }
 
 /* Fix eye icon positioning - override the general svg rule */
-.input-with-icon .btn-icon-password svg {
+.input-with-icon .btn-icon-right svg {
   position: static;
   left: auto;
-  z-index: auto;
+  z-index: var(--z-content);
 }
 
 /* Floating Label Inside Input */
 .floating-label-input {
   position: relative;
-  width: 100%;
+  min-width: 18rem;
 }
 
 .floating-label-input input {
   padding: 1.2rem 0.75rem 0.5rem 0.75rem;
   transition: all 0.2s ease;
+  min-width: 18rem;
 }
 
 .floating-label-input label {
