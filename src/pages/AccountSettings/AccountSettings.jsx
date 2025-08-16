@@ -31,6 +31,9 @@ const AccountSettings = () => {
   const [deletedAccountInfo, setDeletedAccountInfo] = useState(null);
   const usernameInputRef = useRef(null);
   const firstNameInputRef = useRef(null);
+  const usernameContainerRef = useRef(null);
+  const firstNameContainerRef = useRef(null);
+  const languageContainerRef = useRef(null);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
@@ -56,6 +59,48 @@ const AccountSettings = () => {
 
     loadProfile();
   }, []);
+
+  // Handle click outside to cancel editing
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if click is outside username editing area
+      if (
+        isEditingUsername &&
+        usernameContainerRef.current &&
+        !usernameContainerRef.current.contains(event.target)
+      ) {
+        handleCancelUsername();
+      }
+
+      // Check if click is outside first name editing area
+      if (
+        isEditingFirstName &&
+        firstNameContainerRef.current &&
+        !firstNameContainerRef.current.contains(event.target)
+      ) {
+        handleCancelFirstName();
+      }
+
+      // Check if click is outside language editing area
+      if (
+        isEditingLanguage &&
+        languageContainerRef.current &&
+        !languageContainerRef.current.contains(event.target)
+      ) {
+        handleCancelLanguage();
+      }
+    };
+
+    // Add event listener if any editing is active
+    if (isEditingUsername || isEditingFirstName || isEditingLanguage) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditingUsername, isEditingFirstName, isEditingLanguage]);
 
   const handleEditUsername = () => {
     setTempUsername(profileData.username);
@@ -219,7 +264,7 @@ const AccountSettings = () => {
             <div className="acc-settings-container">
               <div className="acc-settings">
                 <div className="acc-settings-column">
-                  <div className="input-validation-wrapper">
+                  <div className="input-validation-wrapper" ref={firstNameContainerRef}>
                     <div className="floating-label-input">
                       <div className="relative-center">
                         <input
@@ -288,6 +333,7 @@ const AccountSettings = () => {
                   <div
                     className="input-validation-wrapper"
                     style={{ position: "relative" }}
+                    ref={usernameContainerRef}
                   >
                     <div className="floating-label-input">
                       <div className="relative-center">
@@ -372,7 +418,7 @@ const AccountSettings = () => {
                   {t("preferred_language").toUpperCase()}
                 </h2>
 
-                <div className="acc-settings-language-container">
+                <div className="acc-settings-language-container" ref={languageContainerRef}>
                   {!isEditingLanguage ? (
                     <div className="language-wrapper">
                       <span

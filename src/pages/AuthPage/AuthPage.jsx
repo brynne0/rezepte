@@ -65,6 +65,10 @@ const AuthPage = ({ setLoginMessage }) => {
     } else {
       setLoginMessage(t("login_success"));
 
+      // Clear form fields on successful login
+      setUsername("");
+      setPassword("");
+
       // Navigate on successful login
       navigate("/");
     }
@@ -75,9 +79,6 @@ const AuthPage = ({ setLoginMessage }) => {
       setErrorMessage("");
       setValidationErrors({});
     }, 3000);
-
-    setUsername("");
-    setPassword("");
   };
 
   const handleSignUp = async (e) => {
