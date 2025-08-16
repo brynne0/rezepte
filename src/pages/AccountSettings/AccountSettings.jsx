@@ -175,9 +175,7 @@ const AccountSettings = () => {
       sessionStorage.clear();
     } catch (err) {
       console.error("Failed to delete account:", err);
-      setError(
-        t("delete_account_error", "Failed to delete account. Please try again.")
-      );
+      setError(t("delete_account_error"));
       setShowDeleteModal(false);
       setLoading(false);
     }
@@ -196,7 +194,7 @@ const AccountSettings = () => {
     <div className="page-centered">
       {showDeleteSuccess ? (
         <div className="flex-column-center">
-          <h2>{t("account_deleted_message")}</h2>
+          <span>{t("account_deleted_message")}</span>
           <strong>{deletedAccountInfo?.firstName}</strong>
         </div>
       ) : (
@@ -452,11 +450,12 @@ const AccountSettings = () => {
             isOpen={showDeleteModal}
             onClose={handleCancelDelete}
             onConfirm={handleConfirmDelete}
-            title={t("delete_account")}
-            message={t("delete_account_message")}
+            message={t("delete_account_confirmation")}
             confirmText={t("delete")}
             cancelText={t("cancel")}
             confirmButtonType="danger"
+            requireConfirmation={true}
+            confirmationText={t("delete_account_warning")}
           />
         </>
       )}

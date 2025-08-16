@@ -72,8 +72,10 @@
   "successfully_updated_first_name": "Vorname erfolgreich aktualisiert",
   "successfully_updated_language": "Bevorzugte Sprache erfolgreich aktualisiert",
   "delete_account": "Konto löschen",
-  "delete_account_message": "Möchten Sie Ihr Konto wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden. Alle Ihre Daten werden dauerhaft gelöscht.",
+  "delete_account_confirmation": "Möchten Sie Ihr Konto wirklich löschen?",
+  "delete_account_warning": "Ich verstehe, dass dieser Vorgang nicht rückgängig gemacht werden kann und alle meine Rezepte gelöscht werden",
   "account_deleted_message": "Ihr Konto wurde erfolgreich gelöscht",
+  "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
 
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",

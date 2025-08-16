@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const ConfirmationModal = ({
   isOpen,
   onClose,
@@ -7,7 +9,10 @@ const ConfirmationModal = ({
   confirmText = "Confirm",
   cancelText = "Cancel",
   confirmButtonType = "danger", // "danger" | "primary" | "secondary"
+  requireConfirmation = false,
+  confirmationText = "",
 }) => {
+  const [isConfirmed, setIsConfirmed] = useState(false);
   if (!isOpen) return null;
 
   const handleOverlayClick = (e) => {
@@ -16,17 +21,43 @@ const ConfirmationModal = ({
     }
   };
 
+  const handleClose = () => {
+    setIsConfirmed(false);
+    onClose();
+  };
+
+  const handleConfirm = () => {
+    setIsConfirmed(false);
+    onConfirm();
+  };
+
   return (
     <div className="confirmation-modal-overlay" onClick={handleOverlayClick}>
       <div className="confirmation-modal-content">
         {title && <h3 className="confirmation-modal-title">{title}</h3>}
         <p className="confirmation-modal-message">{message}</p>
+        
+        {requireConfirmation && (
+          <div className="confirmation-checkbox-wrapper">
+            <label className="confirmation-checkbox-label">
+              <input
+                type="checkbox"
+                checked={isConfirmed}
+                onChange={(e) => setIsConfirmed(e.target.checked)}
+                className="confirmation-checkbox"
+              />
+              <span className="confirmation-checkbox-text">{confirmationText}</span>
+            </label>
+          </div>
+        )}
+        
         <div className="confirmation-modal-actions">
-          <button onClick={onClose} className="btn btn-action btn-secondary">
+          <button onClick={handleClose} className="btn btn-action btn-secondary">
             {cancelText}
           </button>
           <button
-            onClick={onConfirm}
+            onClick={handleConfirm}
+            disabled={requireConfirmation && !isConfirmed}
             className={`btn btn-action btn-${confirmButtonType}`}
           >
             {confirmText}
