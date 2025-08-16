@@ -71,6 +71,9 @@
   "successfully_updated_username": "Benutzername erfolgreich aktualisiert",
   "successfully_updated_first_name": "Vorname erfolgreich aktualisiert",
   "successfully_updated_language": "Bevorzugte Sprache erfolgreich aktualisiert",
+  "delete_account": "Konto löschen",
+  "delete_account_message": "Möchten Sie Ihr Konto wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden. Alle Ihre Daten werden dauerhaft gelöscht.",
+  "account_deleted_message": "Ihr Konto wurde erfolgreich gelöscht",
 
   "search": "Suchen",
   "recipe_not_found": "Rezept nicht gefunden.",

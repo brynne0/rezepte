@@ -32,7 +32,7 @@ const PasswordInput = ({
       <button
         type="button"
         onClick={togglePasswordVisibility}
-        className="btn btn-icon btn-icon-password"
+        className="btn btn-icon btn-icon-right"
         aria-label={showPassword ? t("hide_password") : t("show_password")}
       >
         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}

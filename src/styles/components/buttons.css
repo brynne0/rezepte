@@ -53,7 +53,7 @@
 
 .btn-secondary {
   color: var(--brown);
-  border: var(--border-width-thick) dotted var(--brown);
+  border: var(--border-width-thick) dashed var(--brown);
   padding: 0.5rem;
   background: white;
 }
@@ -66,12 +66,12 @@
 
 .btn-danger {
   background: white;
-  color: var(--red);
-  border: var(--border-width-thick) solid var(--red);
+  color: var(--error-red);
+  border: var(--border-width-thick) dashed var(--error-red);
 }
 
 .btn-danger:hover {
-  background: var(--red);
+  background: var(--error-red);
   color: white;
   box-shadow: 0 0.25rem 0.5rem var(--shadow-black);
 }
@@ -114,7 +114,7 @@
   flex-shrink: 0;
 }
 
-.btn-icon-password {
+.btn-icon-right {
   color: var(--brown);
   padding: 0.25rem;
   position: absolute;
@@ -127,7 +127,7 @@
   transform: translateY(-1px);
 }
 
-.btn-icon-password:hover {
+.btn-icon-right:hover {
   color: var(--dark-red);
 }
 
@@ -147,6 +147,10 @@
   position: absolute;
   padding-left: 3rem;
   cursor: pointer;
+}
+
+.auth-container .back-arrow {
+  color: var(--brown);
 }
 
 /* Add section buttons */

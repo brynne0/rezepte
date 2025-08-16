@@ -164,3 +164,33 @@ export const updateUserProfile = async (updates) => {
     throw error;
   }
 };
+
+// Delete user account
+export const deleteUserAccount = async () => {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    // Delete user data from users table (this should trigger auth user deletion via database trigger)
+    const { error: profileError } = await supabase
+      .from("users")
+      .delete()
+      .eq("id", user.id);
+
+    if (profileError) throw profileError;
+
+    // Sign out the user to clear the session
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      console.error("Error signing out:", signOutError);
+      // Don't throw here, account is already deleted
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting user account:", error);
+    throw error;
+  }
+};
