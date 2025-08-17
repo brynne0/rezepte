@@ -113,10 +113,10 @@ describe("RecipeForm", () => {
     loading: false,
     isEditMode: false,
     handleInputChange: vi.fn(),
-    // handleTitleBlur: vi.fn(),
-    // handleIngredientChange: vi.fn(),
-    // handleSectionChange: vi.fn(),
-    // handleInstructionChange: vi.fn(),
+    handleTitleBlur: vi.fn(),
+    handleIngredientChange: vi.fn(),
+    handleSectionChange: vi.fn(),
+    handleInstructionChange: vi.fn(),
     addInstruction: vi.fn(),
     removeInstruction: vi.fn(),
     addIngredient: vi.fn(),
@@ -270,8 +270,16 @@ describe("RecipeForm", () => {
       const titleInput = screen.getByDisplayValue("Test Recipe");
       fireEvent.change(titleInput, { target: { value: "New Title" } });
 
+      // On change, should call handleInputChange without title case
+      expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
+        "title",
+        "New Title",
+        false
+      );
+
+      // On blur, should call toTitleCase and handleInputChange again
+      fireEvent.blur(titleInput, { target: { value: "New Title" } });
       expect(mockHookReturn.toTitleCase).toHaveBeenCalledWith("New Title");
-      expect(mockHookReturn.handleInputChange).toHaveBeenCalled();
     });
 
     it("calls handleSubmit when form is submitted", () => {
