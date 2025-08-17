@@ -501,7 +501,9 @@ export const fetchRecipe = async (id) => {
   const { data, error } = await supabase
     .from("recipes")
     .select(
-      "*, recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural)"
+      `*, 
+       recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural),
+       recipe_categories(categoriy_id, categories(name, translated_category))`
     )
     .eq("id", id)
     .single();
@@ -558,18 +560,136 @@ export const fetchRecipe = async (id) => {
     sectionsMap.get(subheading).ingredients.push(ingredient);
   });
 
+  // Extract categories from the many-to-many relationship
+  const categories = data.recipe_categories?.map(rc => rc.categories?.name).filter(Boolean) || [];
+
   const transformedData = {
     ...data,
+    categories: categories, // Array of category names
     ungroupedIngredients: ungroupedIngredients,
     ingredientSections: Array.from(sectionsMap.values()),
     // Keep flat list for backward compatibility
     ingredients: ingredientsList,
   };
 
-  // Remove the nested recipe_ingredients since it's flattened
+  // Remove the nested recipe_ingredients and recipe_categories since they're flattened
   delete transformedData.recipe_ingredients;
+  delete transformedData.recipe_categories;
 
   return transformedData;
+};
+
+// Helper function to add recipe to category using many-to-many relationship
+const addRecipeToCategory = async (recipeId, categoryName) => {
+  if (!categoryName || categoryName === "all") return;
+
+  try {
+    // Get category by name
+    const { data: category } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("name", categoryName.toLowerCase())
+      .single();
+
+    if (category) {
+      // Try to insert directly - if it fails due to duplicate, that's fine
+      const { error } = await supabase.from("recipe_categories").insert({
+        recipe_id: recipeId,
+        categoriy_id: category.id, // Note: keeping the typo from your schema
+      });
+
+      // Ignore duplicate key errors (PGRST09 is unique constraint violation)
+      if (error && !error.message.includes('duplicate') && !error.code?.includes('23505')) {
+        console.warn("Failed to add recipe to category:", error);
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to add recipe to category:", error);
+    // Don't throw - recipe creation should still succeed
+  }
+};
+
+// Helper function to create category if it doesn't exist (with translations)
+const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
+  if (!categoryName || categoryName === "all") return null;
+
+  const normalizedName = categoryName.toLowerCase();
+
+  try {
+    // First try to find existing category
+    const { data: existingCategory } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("name", normalizedName)
+      .single();
+
+    if (existingCategory) {
+      return existingCategory;
+    }
+
+    // Category doesn't exist, create it with translations
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Create translations for the category
+    let translations = {};
+
+    if (currentLanguage !== "en") {
+      // If creating in non-English, translate to English and other languages
+      try {
+        const translatedToEnglish = await translateText(
+          categoryName,
+          "en",
+          currentLanguage
+        );
+        translations = {
+          en: translatedToEnglish,
+          [currentLanguage]: categoryName,
+        };
+      } catch (error) {
+        console.warn("Failed to translate category name:", error);
+        translations = { [currentLanguage]: categoryName };
+      }
+    } else {
+      // Creating in English, translate to German
+      try {
+        const translatedToGerman = await translateText(
+          categoryName,
+          "de",
+          "en"
+        );
+        translations = {
+          en: categoryName,
+          de: translatedToGerman,
+        };
+      } catch (error) {
+        console.warn("Failed to translate category to German:", error);
+        translations = { en: categoryName };
+      }
+    }
+
+    const { data: newCategory, error } = await supabase
+      .from("categories")
+      .insert({
+        name: normalizedName,
+        is_system: false,
+        created_by: user?.id || null,
+        translated_category: translations,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error("Failed to create category:", error);
+      return null;
+    }
+
+    return newCategory;
+  } catch (error) {
+    console.error("Error in getOrCreateCategory:", error);
+    return null;
+  }
 };
 
 // Create a new recipe
@@ -582,16 +702,14 @@ export const createRecipe = async (recipeData) => {
     throw new Error("User not authenticated");
   }
 
-  // Create the main recipe record
+  // Create the main recipe record (no category field anymore)
   const cleanRecipeData = Object.fromEntries(
     Object.entries({
       title: recipeData.title,
-      category: recipeData.category,
       servings: recipeData.servings,
       instructions: recipeData.instructions,
       source: recipeData.source,
       user_id: user.id,
-
       notes: recipeData.notes,
       original_language: recipeData.original_language,
     }).filter(([, v]) => v !== undefined)
@@ -747,6 +865,19 @@ export const createRecipe = async (recipeData) => {
     }
   }
 
+  // Handle category assignment using new many-to-many system
+  if (recipeData.categories && recipeData.categories.length > 0) {
+    for (const categoryName of recipeData.categories) {
+      if (categoryName && categoryName !== "all") {
+        // First, try to get or create the category
+        const category = await getOrCreateCategory(categoryName, recipeData.original_language || "en");
+        if (category) {
+          await addRecipeToCategory(recipe.id, categoryName);
+        }
+      }
+    }
+  }
+
   return recipe;
 };
 
@@ -755,7 +886,7 @@ export const updateRecipe = async (id, recipeData) => {
   // First fetch the original recipe for smart translation updates
   const { data: originalRecipe, error: fetchError } = await supabase
     .from("recipes")
-    .select("title, category, instructions, notes, source")
+    .select("title, instructions, notes, source")
     .eq("id", id)
     .single();
 
@@ -766,7 +897,6 @@ export const updateRecipe = async (id, recipeData) => {
   const cleanRecipeData = Object.fromEntries(
     Object.entries({
       title: recipeData.title,
-      category: recipeData.category,
       servings: recipeData.servings,
       instructions: recipeData.instructions,
       source: recipeData.source,
@@ -982,6 +1112,34 @@ export const updateRecipe = async (id, recipeData) => {
       throw new Error(
         `Failed to add updated ingredients: ${ingredientsError.message}`
       );
+    }
+  }
+
+  // Handle category updates using new many-to-many system
+  if (recipeData.categories !== undefined) {
+    // Remove all existing category relationships
+    await supabase.from("recipe_categories").delete().eq("recipe_id", id);
+
+    // Add new categories if provided
+    if (recipeData.categories && recipeData.categories.length > 0) {
+      // Get the recipe's original language for translation
+      const { data: recipeLanguage } = await supabase
+        .from("recipes")
+        .select("original_language")
+        .eq("id", id)
+        .single();
+
+      for (const categoryName of recipeData.categories) {
+        if (categoryName && categoryName !== "all") {
+          const category = await getOrCreateCategory(
+            categoryName,
+            recipeLanguage?.original_language || "en"
+          );
+          if (category) {
+            await addRecipeToCategory(id, categoryName);
+          }
+        }
+      }
     }
   }
 

@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 // Data hooks
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
 import { useAuth } from "./hooks/data/useAuth";
+import { useCategories } from "./hooks/data/useCategories";
 
 // Routing
 import {
@@ -46,27 +47,14 @@ function App() {
   const { recipes, loading, refreshRecipes, paginationInfo } =
     useRecipesPagination(currentPage, 40, selectedCategory, searchTerm);
 
-  // Categories
-  const categoryKeys = [
-    "all",
-    "brunch",
-    "dinner",
-    "sides",
-    "sauces",
-    "snacks",
-    "baking",
-    "bread",
-    "staples",
-    "drinks",
-  ];
+  // Categories from database
+  const { categories, loading: categoriesLoading } = useCategories();
 
-  const categories = categoryKeys.map((key) => ({
-    value: key,
-    label: t(key),
-  }));
+  // Show loading screen only for home page where recipes and categories are needed
+  const location = window.location;
+  const isHomePage = location.pathname === "/";
 
-  // Show loading screen
-  if (loading) {
+  if (isHomePage && (loading || categoriesLoading)) {
     return (
       <div className="loading-squirrel">
         <Squirrel />

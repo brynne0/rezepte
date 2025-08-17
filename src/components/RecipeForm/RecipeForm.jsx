@@ -179,15 +179,21 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   key={category.value}
                   type="button"
                   className={`subheading-wrapper${
-                    category.value === formData.category ? " selected" : ""
+                    formData.categories?.includes(category.value) ? " selected" : ""
                   }`}
-                  onClick={() =>
+                  onClick={() => {
+                    const currentCategories = formData.categories || [];
+                    const isSelected = currentCategories.includes(category.value);
+                    const newCategories = isSelected
+                      ? currentCategories.filter(cat => cat !== category.value)
+                      : [...currentCategories, category.value];
+                    
                     handleInputChange(
-                      "category",
-                      category.value,
+                      "categories",
+                      newCategories,
                       !!validationErrors.category
-                    )
-                  }
+                    );
+                  }}
                 >
                   <h3 className="forta">{category.label}</h3>
                 </button>

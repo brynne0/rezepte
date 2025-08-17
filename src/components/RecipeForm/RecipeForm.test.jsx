@@ -96,7 +96,7 @@ describe("RecipeForm", () => {
 
   const mockFormData = {
     title: "Test Recipe",
-    category: "desserts",
+    categories: ["desserts"],
     servings: 4,
     ungroupedIngredients: [
       { tempId: "1", name: "flour", quantity: "2", unit: "cup/s", notes: "" },
@@ -204,8 +204,8 @@ describe("RecipeForm", () => {
       fireEvent.click(mainDishesButton);
 
       expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
-        "category",
-        "main-dishes",
+        "categories",
+        ["desserts", "main-dishes"],
         false
       );
     });
