@@ -57,6 +57,7 @@ function App() {
     "baking",
     "bread",
     "staples",
+    "drinks"
   ];
 
   const categories = categoryKeys.map((key) => ({
