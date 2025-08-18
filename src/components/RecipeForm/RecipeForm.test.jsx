@@ -553,7 +553,7 @@ describe("RecipeForm", () => {
 
       renderComponent();
 
-      const submitButton = screen.getByRole("button", { name: /Creating.../ });
+      const submitButton = screen.getByRole("button", { name: /creating/ });
       expect(submitButton).toBeDisabled();
     });
 
@@ -566,7 +566,7 @@ describe("RecipeForm", () => {
 
       renderComponent();
 
-      expect(screen.getByText("Updating...")).toBeInTheDocument();
+      expect(screen.getByText("updating")).toBeInTheDocument();
     });
   });
 

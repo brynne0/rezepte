@@ -17,7 +17,12 @@ import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
 import "./RecipeForm.css";
 
-const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
+const RecipeForm = ({
+  categories,
+  initialRecipe = null,
+  title = "",
+  isEditingTranslation = false,
+}) => {
   const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
 
@@ -45,7 +50,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     handleCancel,
     handleDelete,
     toTitleCase,
-  } = useRecipeForm({ initialRecipe });
+  } = useRecipeForm({ initialRecipe, isEditingTranslation });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -96,6 +101,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
         />
         <h1 className="forta">{title}</h1>
       </header>
+
+      {/* Translation Editing Notice */}
+      {isEditingTranslation && (
+        <span className="translation-notice">
+          {t("editing_translation_notice")}
+        </span>
+      )}
 
       {/* Submission Error Message */}
       {submissionError && (
@@ -179,15 +191,21 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   key={category.value}
                   type="button"
                   className={`subheading-wrapper${
-                    formData.categories?.includes(category.value) ? " selected" : ""
+                    formData.categories?.includes(category.value)
+                      ? " selected"
+                      : ""
                   }`}
                   onClick={() => {
                     const currentCategories = formData.categories || [];
-                    const isSelected = currentCategories.includes(category.value);
+                    const isSelected = currentCategories.includes(
+                      category.value
+                    );
                     const newCategories = isSelected
-                      ? currentCategories.filter(cat => cat !== category.value)
+                      ? currentCategories.filter(
+                          (cat) => cat !== category.value
+                        )
                       : [...currentCategories, category.value];
-                    
+
                     handleInputChange(
                       "categories",
                       newCategories,
@@ -276,9 +294,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                     onBlur={(e) => {
                                       const value =
                                         i18n.language === "de"
-                                          ? e.target.value.split(' ').map(word => 
-                                              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                                            ).join(' ')
+                                          ? e.target.value
+                                              .split(" ")
+                                              .map(
+                                                (word) =>
+                                                  word.charAt(0).toUpperCase() +
+                                                  word.slice(1).toLowerCase()
+                                              )
+                                              .join(" ")
                                           : e.target.value.toLowerCase();
 
                                       handleIngredientChange(
@@ -519,9 +542,18 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                     onBlur={(e) => {
                                                       const value =
                                                         i18n.language === "de"
-                                                          ? e.target.value.split(' ').map(word => 
-                                                              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                                                            ).join(' ')
+                                                          ? e.target.value
+                                                              .split(" ")
+                                                              .map(
+                                                                (word) =>
+                                                                  word
+                                                                    .charAt(0)
+                                                                    .toUpperCase() +
+                                                                  word
+                                                                    .slice(1)
+                                                                    .toLowerCase()
+                                                              )
+                                                              .join(" ")
                                                           : e.target.value.toLowerCase();
 
                                                       handleIngredientChange(
@@ -807,10 +839,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           >
             {loading
               ? isEditMode
-                ? "Updating..."
-                : "Creating..."
+                ? isEditingTranslation
+                  ? t("updating_translation")
+                  : t("updating")
+                : t("creating")
               : isEditMode
-              ? t("update_recipe")
+              ? isEditingTranslation
+                ? t("update_translation")
+                : t("update_recipe")
               : t("create_recipe")}
           </button>
         </div>

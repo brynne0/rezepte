@@ -8,10 +8,10 @@ import {
 } from "../../utils/validation";
 import { parseFraction } from "../../utils/fractionUtils";
 
-export const useRecipeForm = ({ initialRecipe = null }) => {
+export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = false }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { createRecipe, updateRecipe, deleteRecipe, loading, error } =
+  const { createRecipe, updateRecipe, updateTranslation, deleteRecipe, loading, error } =
     useRecipeActions();
 
   // Generate unique IDs for ingredients
@@ -635,7 +635,21 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
       let result;
       if (initialRecipe) {
         // Edit mode
-        result = await updateRecipe(initialRecipe.id, recipeData);
+        if (isEditingTranslation) {
+          // Translation editing mode - only update the translation data
+          const currentLanguage = i18n.language.split("-")[0];
+          const translationData = {
+            title: recipeData.title,
+            instructions: recipeData.instructions,
+            notes: recipeData.notes,
+            source: recipeData.source,
+          };
+          await updateTranslation(initialRecipe.id, currentLanguage, translationData);
+          result = initialRecipe; // Return original recipe data
+        } else {
+          // Normal recipe editing - update the original recipe
+          result = await updateRecipe(initialRecipe.id, recipeData);
+        }
       } else {
         // Create mode
         result = await createRecipe(recipeData);

@@ -118,7 +118,12 @@
   "delete": "Löschen",
   "delete_recipe": "Rezept Löschen",
   "update_recipe": "Rezept Aktualisieren",
+  "update_translation": "Übersetzung Aktualisieren",
   "create_recipe": "Rezept Erstellen",
+  "updating_translation": "Übersetzung wird aktualisiert...",
+  "updating": "Wird aktualisiert...",
+  "creating": "Wird erstellt...",
+  "editing_translation_notice": "Nur Übersetzung wird bearbeitet - ändert das Original nicht",
 
   "recipe_title": "Rezepttitel",
   "category": "Kategorie",

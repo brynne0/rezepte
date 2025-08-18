@@ -61,7 +61,8 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
 
     // Normalise original instructions to ensure they end with full stops
     if (recipe.instructions && Array.isArray(recipe.instructions)) {
-      processedResult.instructions = recipe.instructions.map(normaliseInstruction);
+      processedResult.instructions =
+        recipe.instructions.map(normaliseInstruction);
     }
 
     // Handle ungrouped ingredients
@@ -142,7 +143,8 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
     const processedResult = { ...recipe };
     // Normalise original instructions to ensure they end with full stop
     if (recipe.instructions && Array.isArray(recipe.instructions)) {
-      processedResult.instructions = recipe.instructions.map(normaliseInstruction);
+      processedResult.instructions =
+        recipe.instructions.map(normaliseInstruction);
     }
     return processedResult;
   }
@@ -638,7 +640,8 @@ export const updateRecipeTranslations = async (
           newRecipeData.instructions,
           language
         );
-        fieldsToUpdate.instructions = translatedInstructions.map(normaliseInstruction);
+        fieldsToUpdate.instructions =
+          translatedInstructions.map(normaliseInstruction);
         needsUpdate = true;
       } else {
         fieldsToUpdate.instructions = translation.instructions;
@@ -662,6 +665,54 @@ export const updateRecipeTranslations = async (
   } catch (error) {
     console.error("Failed to update recipe translations:", error);
     // Don't throw error - recipe update should still succeed
+  }
+};
+
+// Update a specific translation for a recipe (for translation editing)
+export const updateTranslationOnly = async (
+  recipeId,
+  language,
+  translatedData
+) => {
+  try {
+    // Get current translations
+    const { data: currentRecipe, error: fetchError } = await supabase
+      .from("recipes")
+      .select("translated_recipe")
+      .eq("id", recipeId)
+      .single();
+
+    if (fetchError) {
+      throw new Error(
+        `Failed to fetch current translations: ${fetchError.message}`
+      );
+    }
+
+    const existingTranslations = currentRecipe.translated_recipe || {};
+
+    // Update only the specified language translation
+    const updatedTranslations = {
+      ...existingTranslations,
+      [language]: {
+        ...existingTranslations[language],
+        ...translatedData,
+      },
+    };
+
+    // Save updated translations back to database
+    const { error: updateError } = await supabase
+      .from("recipes")
+      .update({ translated_recipe: updatedTranslations })
+      .eq("id", recipeId);
+
+    if (updateError) {
+      throw new Error(`Failed to update translation: ${updateError.message}`);
+    }
+
+    return updatedTranslations[language];
+  } catch (error) {
+    console.error("Error updating translation:", error);
+    throw error;
   }
 };
 

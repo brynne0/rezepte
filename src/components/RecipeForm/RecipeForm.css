@@ -3,6 +3,20 @@
   margin-right: auto;
 }
 
+/* Translation notice */
+.translation-notice {
+  /* TODO - maybe make border dashed and add pink colour to variables file */
+  background-color: #f8e8e8;
+  border: 1px solid var(--red);
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1rem;
+  color: var(--dark-red);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Title and Servings Layout */
 .title-servings-row {
   display: flex;

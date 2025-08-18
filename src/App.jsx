@@ -108,7 +108,6 @@ function AppRoutes(props) {
   const location = useLocation();
   const { refreshRecipes, isGroceryListEditing, setIsGroceryListEditing } =
     props;
-  const isEditRecipePage = location.pathname.startsWith("/edit-recipe/");
   const isGroceryListPage = location.pathname === "/grocery-list";
 
   // Reset grocery list editing state when leaving the grocery list page
@@ -155,7 +154,7 @@ function AppRoutes(props) {
         setLoginMessage={props.setLoginMessage}
         loginMessage={props.loginMessage}
         t={props.t}
-        disableLanguageSwitch={isEditRecipePage || isGroceryListEditing}
+        disableLanguageSwitch={isGroceryListEditing}
       />
       <Routes>
         <Route

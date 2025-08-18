@@ -122,7 +122,12 @@
   "delete": "Delete",
   "delete_recipe": "Delete Recipe",
   "update_recipe": "Update Recipe",
+  "update_translation": "Update Translation",
   "create_recipe": "Create Recipe",
+  "updating_translation": "Updating translation...",
+  "updating": "Updating...",
+  "creating": "Creating...",
+  "editing_translation_notice": "Editing translated recipe only - will not change original",
 
   "recipe_title": "Recipe Title",
   "category": "Category",
