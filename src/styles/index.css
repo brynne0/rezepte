@@ -1,5 +1,5 @@
 /* Fonts */
-@import "../../public/fonts/fonts.css";
+@import "/fonts/fonts.css";
 
 /* Components */
 @import "./components/buttons.css";

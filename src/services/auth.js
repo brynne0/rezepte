@@ -60,7 +60,7 @@ export const signIn = async (usernameOrEmail, password) => {
     }
 
     return { data, error: null };
-  } catch (err) {
+  } catch {
     return { data: null, error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' } };
   }
 };

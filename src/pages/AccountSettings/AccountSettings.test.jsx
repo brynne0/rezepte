@@ -30,7 +30,7 @@ vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
 }));
 
 vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
-  default: ({
+  default: function ConfirmationModal({
     isOpen,
     onClose,
     onConfirm,
@@ -40,7 +40,7 @@ vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
     cancelText,
     requireConfirmation,
     confirmationText,
-  }) => {
+  }) {
     const [isConfirmed, setIsConfirmed] = useState(false);
 
     if (!isOpen) return null;

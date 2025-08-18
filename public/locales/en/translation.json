@@ -1,13 +1,5 @@
 {
   "all": "All Recipes",
-  "brunch": "Brunch",
-  "dinner": "Dinner",
-  "sides": "Sides",
-  "sauces": "Sauces",
-  "snacks": "Snacks",
-  "baking": "Baking",
-  "bread": "Bread",
-  "staples": "Staples",
 
   "login_failed": "Login failed. Please try again.",
   "login_success": "Logged in!",
@@ -155,7 +147,7 @@
 
   "title_required": "Recipe title is required",
   "title_already_exists": "A recipe with this title already exists",
-  "category_required": "Category is required",
+  "category_required": "At least one category is required",
   "recipe_create_error": "Failed to create recipe. Please try again.",
   "recipe_update_error": "Failed to update recipe. Please try again.",
 

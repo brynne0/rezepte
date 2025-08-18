@@ -117,11 +117,18 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 onChange={(e) =>
                   handleInputChange(
                     "title",
-                    toTitleCase(e.target.value),
+                    e.target.value,
                     !!validationErrors.title
                   )
                 }
-                onBlur={handleTitleBlur}
+                onBlur={(e) => {
+                  handleInputChange(
+                    "title",
+                    toTitleCase(e.target.value),
+                    !!validationErrors.title
+                  );
+                  handleTitleBlur();
+                }}
                 className={`input--full-width input--edit input ${
                   validationErrors.title ? "input--error" : ""
                 }`}
@@ -172,15 +179,21 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   key={category.value}
                   type="button"
                   className={`subheading-wrapper${
-                    category.value === formData.category ? " selected" : ""
+                    formData.categories?.includes(category.value) ? " selected" : ""
                   }`}
-                  onClick={() =>
+                  onClick={() => {
+                    const currentCategories = formData.categories || [];
+                    const isSelected = currentCategories.includes(category.value);
+                    const newCategories = isSelected
+                      ? currentCategories.filter(cat => cat !== category.value)
+                      : [...currentCategories, category.value];
+                    
                     handleInputChange(
-                      "category",
-                      category.value,
+                      "categories",
+                      newCategories,
                       !!validationErrors.category
-                    )
-                  }
+                    );
+                  }}
                 >
                   <h3 className="forta">{category.label}</h3>
                 </button>
@@ -250,14 +263,22 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                     type="text"
                                     value={ingredient.name || ""}
                                     onChange={(e) => {
+                                      handleIngredientChange(
+                                        "ungrouped",
+                                        ingredient.tempId,
+                                        "name",
+                                        e.target.value,
+                                        validationErrors.ingredients
+                                          ? "ingredients"
+                                          : null
+                                      );
+                                    }}
+                                    onBlur={(e) => {
                                       const value =
                                         i18n.language === "de"
-                                          ? e.target.value
-                                              .charAt(0)
-                                              .toUpperCase() +
-                                            e.target.value
-                                              .slice(1)
-                                              .toLowerCase()
+                                          ? e.target.value.split(' ').map(word => 
+                                              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                                            ).join(' ')
                                           : e.target.value.toLowerCase();
 
                                       handleIngredientChange(
@@ -485,14 +506,22 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                       ingredient.name || ""
                                                     }
                                                     onChange={(e) => {
+                                                      handleIngredientChange(
+                                                        section.id,
+                                                        ingredient.tempId,
+                                                        "name",
+                                                        e.target.value,
+                                                        validationErrors.ingredients
+                                                          ? "ingredients"
+                                                          : null
+                                                      );
+                                                    }}
+                                                    onBlur={(e) => {
                                                       const value =
                                                         i18n.language === "de"
-                                                          ? e.target.value
-                                                              .charAt(0)
-                                                              .toUpperCase() +
-                                                            e.target.value
-                                                              .slice(1)
-                                                              .toLowerCase()
+                                                          ? e.target.value.split(' ').map(word => 
+                                                              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                                                            ).join(' ')
                                                           : e.target.value.toLowerCase();
 
                                                       handleIngredientChange(

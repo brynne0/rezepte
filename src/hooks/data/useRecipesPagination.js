@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import supabase from "../../lib/supabase";
-import { fetchRecipes } from "../../services/recipes";
 import { getTranslatedRecipeTitle } from "../../services/translationService";
 
 // Fetch all recipes using client-side pagination and filtering
@@ -15,9 +14,43 @@ export const useRecipesPagination = (
   const [loading, setLoading] = useState(true);
   const { i18n } = useTranslation();
 
+  // Fetch recipes with category information
+  const fetchRecipesWithCategories = async () => {
+    try {
+      // Get all recipes
+      const { data: recipes, error } = await supabase
+        .from("recipes")
+        .select(
+          `
+          *,
+          recipe_categories (
+            categoriy_id,
+            categories (
+              name,
+              translated_category
+            )
+          )
+        `
+        )
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Transform the data to include category names
+      return recipes.map((recipe) => ({
+        ...recipe,
+        categories:
+          recipe.recipe_categories?.map((rc) => rc.categories?.name) || [],
+      }));
+    } catch (error) {
+      console.error("Error fetching recipes with categories:", error);
+      return [];
+    }
+  };
+
   const loadRecipes = useCallback(async () => {
     try {
-      const data = await fetchRecipes();
+      const data = await fetchRecipesWithCategories();
 
       // Translate only recipe titles for the current language
       const currentLanguage = i18n.language;
@@ -37,7 +70,7 @@ export const useRecipesPagination = (
     async (showLoading = false) => {
       if (showLoading) setLoading(true);
       try {
-        const data = await fetchRecipes();
+        const data = await fetchRecipesWithCategories();
 
         // Translate only recipe titles for the current language
         const currentLanguage = i18n.language;
@@ -89,7 +122,9 @@ export const useRecipesPagination = (
       ? searchFilteredRecipes // When searching, show all search results regardless of category
       : category === "all"
       ? allRecipes
-      : allRecipes.filter((r) => r.category === category);
+      : allRecipes.filter(
+          (r) => r.categories && r.categories.includes(category)
+        );
 
     // Then paginate the filtered results
     const startIndex = (page - 1) * limit;

@@ -390,20 +390,25 @@ describe("Validation Utilities", () => {
 
   describe("validateRecipeCategory", () => {
     test("returns error when category is empty", () => {
-      expect(validateRecipeCategory("", mockT)).toBe("category_required");
-      expect(validateRecipeCategory("   ", mockT)).toBe("category_required");
+      expect(validateRecipeCategory([], mockT)).toBe("category_required");
+      expect(validateRecipeCategory(null, mockT)).toBe("category_required");
+      expect(validateRecipeCategory(undefined, mockT)).toBe(
+        "category_required"
+      );
     });
 
     test("returns null for valid category", () => {
-      expect(validateRecipeCategory("Desserts", mockT)).toBeNull();
-      expect(validateRecipeCategory("  Main Course  ", mockT)).toBeNull();
+      expect(validateRecipeCategory(["desserts"], mockT)).toBeNull();
+      expect(
+        validateRecipeCategory(["main-course", "desserts"], mockT)
+      ).toBeNull();
     });
   });
 
   describe("validateRecipeForm", () => {
     const validFormData = {
       title: "Chocolate Cake",
-      category: "Desserts",
+      categories: ["desserts"],
       ungroupedIngredients: [{ name: "flour" }, { name: "sugar" }],
     };
 
@@ -419,7 +424,7 @@ describe("Validation Utilities", () => {
     });
 
     test("returns category error when category is missing", () => {
-      const formData = { ...validFormData, category: "" };
+      const formData = { ...validFormData, categories: [] };
       const errors = validateRecipeForm(formData, mockT);
       expect(errors.category).toBe("category_required");
     });
@@ -427,7 +432,7 @@ describe("Validation Utilities", () => {
     test("returns multiple errors when multiple fields are invalid", () => {
       const formData = {
         title: "",
-        category: "",
+        categories: [],
       };
       const errors = validateRecipeForm(formData, mockT);
 
@@ -438,7 +443,7 @@ describe("Validation Utilities", () => {
     test("validates with ingredient sections structure", () => {
       const formData = {
         title: "Complex Recipe",
-        category: "Main Course",
+        categories: ["Main Course"],
         ingredientSections: [
           {
             subheading: "For the sauce",
@@ -453,7 +458,7 @@ describe("Validation Utilities", () => {
     test("validates with backward compatible ingredients structure", () => {
       const formData = {
         title: "Old Recipe",
-        category: "Appetizers",
+        categories: ["Appetizers"],
         ingredients: [{ name: "cheese" }],
       };
       const errors = validateRecipeForm(formData, mockT);

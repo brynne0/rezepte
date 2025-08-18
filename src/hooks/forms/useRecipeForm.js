@@ -106,7 +106,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
       return {
         title: initialRecipe.title || "",
-        category: initialRecipe.category || "",
+        categories: initialRecipe.categories || [], // Array of selected categories
         servings: initialRecipe.servings || "",
         instructions:
           initialRecipe.instructions?.length > 0
@@ -121,7 +121,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
     return {
       title: "",
-      category: "",
+      categories: [], // Array of selected categories
       servings: "",
       instructions: [""],
       source: "",
@@ -603,7 +603,7 @@ export const useRecipeForm = ({ initialRecipe = null }) => {
 
       const recipeData = {
         title: formData.title.trim(),
-        category: formData.category.trim(),
+        categories: formData.categories || [],
         servings: formData.servings.trim() || null,
         instructions: validInstructions,
         source: formData.source.trim() || null,

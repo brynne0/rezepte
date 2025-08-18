@@ -1,13 +1,5 @@
 {
   "all": "Alle Rezepte",
-  "brunch": "Brunch",
-  "dinner": "Abendessen",
-  "sides": "Beilagen",
-  "sauces": "Soßen",
-  "snacks": "Snacks",
-  "baking": "Backen",
-  "bread": "Brot",
-  "staples": "Grundrezepte",
 
   "login_failed": "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
   "login_success": "Eingeloggt!",
@@ -151,7 +143,7 @@
 
   "title_required": "Rezepttitel ist erforderlich",
   "title_already_exists": "Ein Rezept mit diesem Titel existiert bereits",
-  "category_required": "Kategorie ist erforderlich",
+  "category_required": "Mindestens eine Kategorie ist erforderlich",
   "recipe_create_error": "Rezept konnte nicht erstellt werden. Bitte erneut versuchen.",
   "recipe_update_error": "Rezept konnte nicht aktualisiert werden. Bitte erneut versuchen.",
 
