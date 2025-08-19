@@ -175,9 +175,9 @@ const Selector = ({
           placeholder={getPlaceholder()}
           autoComplete="off"
         />
-        <ChevronDown
-          size={16}
-          className={`selector-chevron ${isOpen ? "open" : ""}`}
+        <button
+          type="button"
+          className="btn-unstyled selector-chevron-btn"
           onClick={() => {
             if (isOpen) {
               setIsOpen(false);
@@ -187,7 +187,13 @@ const Selector = ({
               inputRef.current?.focus();
             }
           }}
-        />
+          aria-label={isOpen ? t("close_options") : t("open_options")}
+        >
+          <ChevronDown
+            size={16}
+            className={`selector-chevron ${isOpen ? "open" : ""}`}
+          />
+        </button>
       </div>
 
       {isOpen && (

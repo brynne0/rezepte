@@ -87,33 +87,37 @@ const Header = ({
   // Reusable Language Selector Component
   const LanguageSelector = ({ className = "", onLanguageChange = null }) => (
     <div className={`language-wrapper ${className}`}>
-      <span
-        className={`language${i18n.language === "en" ? " selected" : ""}${
-          disableLanguageSwitch ? " disabled" : ""
-        }`}
+      <button
+        className={`btn-unstyled language${
+          i18n.language === "en" ? " selected" : ""
+        }${disableLanguageSwitch ? " disabled" : ""}`}
         onClick={() => {
           if (!disableLanguageSwitch) {
             i18n.changeLanguage("en");
             if (onLanguageChange) onLanguageChange();
           }
         }}
+        disabled={disableLanguageSwitch}
+        aria-label={t("switch_to_english")}
       >
         EN
-      </span>
+      </button>
       |
-      <span
-        className={`language${i18n.language === "de" ? " selected" : ""}${
-          disableLanguageSwitch ? " disabled" : ""
-        }`}
+      <button
+        className={`btn-unstyled language${
+          i18n.language === "de" ? " selected" : ""
+        }${disableLanguageSwitch ? " disabled" : ""}`}
         onClick={() => {
           if (!disableLanguageSwitch) {
             i18n.changeLanguage("de");
             if (onLanguageChange) onLanguageChange();
           }
         }}
+        disabled={disableLanguageSwitch}
+        aria-label={t("switch_to_german")}
       >
         DE
-      </span>
+      </button>
     </div>
   );
 
@@ -185,7 +189,10 @@ const Header = ({
         <div className="header-container flex-between">
           {/* Login and Logout */}
           <div className="logo-language-wrapper">
-            <Squirrel className="header-logo" />
+            <button className="btn-unstyled">
+              <Squirrel size={40} className="header-logo" />
+            </button>
+
             {/* {isMe && (
                 <Squirrel
                   data-testid="lucide-squirrel"

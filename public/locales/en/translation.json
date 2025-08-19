@@ -136,10 +136,16 @@
   "edit_language": "Edit language",
   "save_changes": "Save changes",
   "change_password": "Change password",
+  "user_menu": "User menu",
+  "switch_to_english": "Switch to English",
+  "switch_to_german": "Switch to German",
 
   "recipe_title": "Recipe Title",
   "category": "Category",
   "select_category": "Select a Category",
+  "select_option": "Select an option",
+  "open_options": "Open options",
+  "close_options": "Close options",
 
   "ingredient_name": "Ingredient name",
   "quantity": "Qty",

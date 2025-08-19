@@ -132,10 +132,16 @@
   "edit_language": "Sprache bearbeiten",
   "save_changes": "Änderungen speichern",
   "change_password": "Passwort ändern",
+  "user_menu": "Benutzermenü",
+  "switch_to_english": "Zu Englisch wechseln",
+  "switch_to_german": "Zu Deutsch wechseln",
 
   "recipe_title": "Rezepttitel",
   "category": "Kategorie",
   "select_category": "Wählen Sie eine Kategorie",
+  "select_option": "Wählen Sie eine Option",
+  "open_options": "Optionen öffnen",
+  "close_options": "Optionen schließen",
 
   "ingredient_name": "Name der Zutat",
   "quantity": "Menge",
