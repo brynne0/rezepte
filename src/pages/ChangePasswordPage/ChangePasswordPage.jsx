@@ -199,11 +199,14 @@ const ChangePasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleChangePassword} className="auth-form">
-          <div className="flex-row">
-            <ArrowBigLeft
-              className="back-arrow-left"
+          <div className="flex-row page-header">
+            <button
+              className="btn-unstyled"
               onClick={() => navigate(-1)}
-            />
+              aria-label={t("go_back")}
+            >
+              <ArrowBigLeft size={28} />
+            </button>
             <h1 className="forta-small">
               {t("set_new_password").toUpperCase()}
             </h1>

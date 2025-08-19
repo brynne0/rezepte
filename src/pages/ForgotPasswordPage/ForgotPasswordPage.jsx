@@ -61,11 +61,14 @@ const ForgotPasswordPage = () => {
         </div>
       ) : (
         <form onSubmit={handleForgotPassword} className="auth-form">
-          <header className="flex-row">
-            <ArrowBigLeft
-              className="back-arrow-left"
+          <header className="flex-row page-header">
+            <button
+              className="btn-unstyled back-arrow"
               onClick={() => navigate(-1)}
-            />
+              aria-label={t("go_back")}
+            >
+              <ArrowBigLeft size={28} />
+            </button>
             <h1 className="forta-small">{t("reset_password")}</h1>
           </header>
           {/* Error message */}

@@ -91,14 +91,16 @@ const RecipeForm = ({
   return (
     <div className="card card-form">
       <header className="page-header flex-center">
-        <ArrowBigLeft
-          className="back-arrow-left"
-          size={28}
+        <button
+          className="btn-unstyled back-arrow-left"
           onClick={() => {
             handleCancel();
           }}
           data-testid="back-arrow"
-        />
+          aria-label={t("go_back")}
+        >
+          <ArrowBigLeft size={28} />
+        </button>
         <h1 className="forta">{title}</h1>
       </header>
 

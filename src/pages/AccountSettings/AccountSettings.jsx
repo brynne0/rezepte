@@ -250,10 +250,13 @@ const AccountSettings = () => {
           <div className="card card-settings">
             <header className="flex-column-center">
               <div className="flex-row">
-                <ArrowBigLeft
-                  className="back-arrow-responsive"
+                <button
+                  className="btn-unstyled back-arrow-responsive"
                   onClick={() => navigate(-1)}
-                />
+                  aria-label={t("go_back")}
+                >
+                  <ArrowBigLeft size={28} />
+                </button>
                 <h1 className="forta-small">{t("account_settings")}</h1>
               </div>
               <span className="login-message">
@@ -291,23 +294,29 @@ const AccountSettings = () => {
                           readOnly={!isEditingFirstName}
                         />
                         {!isEditingFirstName ? (
-                          <Pencil
-                            size={20}
+                          <button
+                            className="btn-unstyled btn-icon btn-icon-right"
                             onClick={handleEditFirstName}
-                            className="btn btn-icon btn-icon-right"
-                          />
+                            aria-label={t("edit_first_name", "Edit first name")}
+                          >
+                            <Pencil size={20} />
+                          </button>
                         ) : (
                           <>
-                            <Check
+                            <button
+                              className="btn-unstyled btn-icon btn-icon-green acc-settings-check"
                               onClick={handleSaveFirstName}
-                              className="btn btn-icon btn-icon-green acc-settings-check"
-                              size={16}
-                            />
-                            <X
+                              aria-label={t("save_changes", "Save changes")}
+                            >
+                              <Check size={20} />
+                            </button>
+                            <button
+                              className="btn-unstyled btn-icon btn-icon-red acc-settings-cancel"
                               onClick={handleCancelFirstName}
-                              className="btn btn-icon btn-icon-red acc-settings-cancel"
-                              size={16}
-                            />
+                              aria-label={t("cancel", "Cancel")}
+                            >
+                              <X size={20} />
+                            </button>
                           </>
                         )}
                       </div>
@@ -364,23 +373,29 @@ const AccountSettings = () => {
                           readOnly={!isEditingUsername}
                         />
                         {!isEditingUsername ? (
-                          <Pencil
-                            size={20}
+                          <button
+                            className="btn-unstyled btn-icon btn-icon-right"
                             onClick={handleEditUsername}
-                            className="btn btn-icon btn-icon-right"
-                          />
+                            aria-label={t("edit_username", "Edit username")}
+                          >
+                            <Pencil size={20} />
+                          </button>
                         ) : (
                           <>
-                            <Check
+                            <button
+                              className="btn-unstyled btn-icon btn-icon-green acc-settings-check"
                               onClick={handleSaveUsername}
-                              className="btn btn-icon btn-icon-green acc-settings-check"
-                              size={16}
-                            />
-                            <X
+                              aria-label={t("save_changes", "Save changes")}
+                            >
+                              <Check size={20} />
+                            </button>
+                            <button
+                              className="btn-unstyled btn-icon btn-icon-red acc-settings-cancel"
                               onClick={handleCancelUsername}
-                              className="btn btn-icon btn-icon-red acc-settings-cancel"
-                              size={16}
-                            />
+                              aria-label={t("cancel", "Cancel")}
+                            >
+                              <X size={20} />
+                            </button>
                           </>
                         )}
                       </div>
@@ -404,11 +419,13 @@ const AccountSettings = () => {
                           placeholder=" "
                           readOnly={true}
                         />
-                        <Pencil
-                          size={20}
-                          onClick={handleChangePassword}
+                        <button
                           className="btn btn-icon btn-icon-right"
-                        />
+                          onClick={handleChangePassword}
+                          aria-label={t("change_password", "Change password")}
+                        >
+                          <Pencil size={20} />
+                        </button>
                       </div>
                       <label htmlFor="password">{t("password")}</label>
                     </div>
@@ -449,44 +466,50 @@ const AccountSettings = () => {
                     </div>
                   ) : (
                     <div className="language-wrapper">
-                      <span
-                        className={`language${
+                      <button
+                        className={`btn-unstyled language${
                           tempLanguage === "en" ? " selected" : ""
                         }`}
                         onClick={() => setTempLanguage("en")}
                       >
                         EN
-                      </span>
+                      </button>
                       |
-                      <span
-                        className={`language${
+                      <button
+                        className={`btn-unstyled language${
                           tempLanguage === "de" ? " selected" : ""
                         }`}
                         onClick={() => setTempLanguage("de")}
                       >
                         DE
-                      </span>
+                      </button>
                     </div>
                   )}
 
                   {!isEditingLanguage ? (
-                    <Pencil
-                      size={20}
+                    <button
+                      className="btn btn-unstyled acc-settings-check"
                       onClick={handleEditLanguage}
-                      className="btn acc-settings-check"
-                    />
+                      aria-label={t("edit_language", "Edit language")}
+                    >
+                      <Pencil size={20} />
+                    </button>
                   ) : (
                     <>
-                      <Check
-                        onClick={handleSaveLanguage}
+                      <button
                         className="btn btn-icon btn-icon-green acc-settings-check"
-                        size={16}
-                      />
-                      <X
-                        onClick={handleCancelLanguage}
+                        onClick={handleSaveLanguage}
+                        aria-label={t("save_changes", "Save changes")}
+                      >
+                        <Check size={20} />
+                      </button>
+                      <button
                         className="btn btn-icon btn-icon-red acc-settings-cancel"
-                        size={16}
-                      />
+                        onClick={handleCancelLanguage}
+                        aria-label={t("cancel", "Cancel")}
+                      >
+                        <X size={20} />
+                      </button>
                     </>
                   )}
                 </div>

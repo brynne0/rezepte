@@ -218,21 +218,31 @@ const GroceryList = ({
     <div className="card card-grocery">
       <header className={`page-header ${!isEditing ? "flex-between" : ""}`}>
         {!isEditing ? (
-          <ArrowBigLeft
-            className="back-arrow"
-            size={28}
+          <button
+            className="btn-unstyled back-arrow"
             onClick={() => navigate(-1)}
-          />
+            aria-label={t("go_back")}
+          >
+            <ArrowBigLeft size={28} />
+          </button>
         ) : (
-          <ArrowBigLeft
-            className="back-arrow-left"
-            size={28}
+          <button
+            className="btn-unstyled back-arrow-left"
             onClick={() => navigate(-1)}
-          />
+            aria-label={t("go_back")}
+          >
+            <ArrowBigLeft size={28} />
+          </button>
         )}
         <h1 className="forta">{t("grocery_list")}</h1>
         {!isEditing && (
-          <Pencil onClick={startEditing} className="btn btn-icon" />
+          <button
+            className="btn-unstyled"
+            onClick={startEditing}
+            aria-label={t("edit_list")}
+          >
+            <Pencil size={24} />
+          </button>
         )}
       </header>
 

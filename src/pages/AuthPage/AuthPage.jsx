@@ -168,7 +168,9 @@ const AuthPage = ({ setLoginMessage }) => {
       <div className="auth-container">
         {/* Headers to toggle between modes */}
         <header className="flex-row">
-          <ArrowBigLeft className="back-arrow" onClick={() => navigate(-1)} />
+          <button className="btn-unstyled back-arrow">
+            <ArrowBigLeft size={28} onClick={() => navigate(-1)} />
+          </button>
           <button
             className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
             type="button"
