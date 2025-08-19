@@ -154,27 +154,42 @@ const RecipeForm = ({
               )}
             </div>
 
-            <div className="servings-field">
+            <div
+              className={`servings-field ${
+                isEditingTranslation ? "translation-disabled" : ""
+              }`}
+            >
               <span className="form-header">
                 <h3 id="servings-label">{t("servings")}</h3>
               </span>
-              <input
-                id="servings"
-                type="text"
-                value={formData.servings || ""}
-                onChange={(e) => handleInputChange("servings", e.target.value)}
-                className="input input--full-width input--edit"
-                aria-labelledby="servings-label"
-                onWheel={(e) => {
-                  e.target.blur();
-                }}
-              />
+              <div
+                className={isEditingTranslation ? "translation-disabled" : ""}
+              >
+                <input
+                  id="servings"
+                  type="text"
+                  value={formData.servings || ""}
+                  onChange={(e) =>
+                    handleInputChange("servings", e.target.value)
+                  }
+                  className="input input--full-width input--edit"
+                  aria-labelledby="servings-label"
+                  disabled={isEditingTranslation}
+                  onWheel={(e) => {
+                    e.target.blur();
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Category */}
-        <div className="form-group">
+        <div
+          className={`form-group ${
+            isEditingTranslation ? "translation-disabled" : ""
+          }`}
+        >
           <div className="form-header">
             <h3 id="category-label">{t("category")}</h3>
           </div>
@@ -182,7 +197,7 @@ const RecipeForm = ({
           <div
             className={`form-categories-wrapper ${
               validationErrors.category ? "input--error" : ""
-            }`}
+            } ${isEditingTranslation ? "translation-disabled" : ""}`}
             role="group"
             aria-labelledby="category-label"
           >
@@ -197,6 +212,7 @@ const RecipeForm = ({
                       ? " selected"
                       : ""
                   }`}
+                  disabled={isEditingTranslation}
                   onClick={() => {
                     const currentCategories = formData.categories || [];
                     const isSelected = currentCategories.includes(
@@ -234,13 +250,18 @@ const RecipeForm = ({
               <button
                 type="button"
                 onClick={addSection}
-                className="btn btn-section"
+                className={`btn btn-section ${
+                  isEditingTranslation ? "translation-disabled" : ""
+                }`}
+                disabled={isEditingTranslation}
               >
                 {t("add_section")}
               </button>
             </div>
 
-            <DragDropContext onDragEnd={handleDragEnd}>
+            <DragDropContext
+              onDragEnd={isEditingTranslation ? () => {} : handleDragEnd}
+            >
               {/* Ungrouped Ingredients First */}
               {formData.ungroupedIngredients.length > 0 && (
                 <Droppable droppableId="ungrouped" type="ingredient">
@@ -270,8 +291,14 @@ const RecipeForm = ({
                               >
                                 {/* Ingredient Drag Handle */}
                                 <div
-                                  {...provided.dragHandleProps}
-                                  className="drag-handle"
+                                  {...(isEditingTranslation
+                                    ? {}
+                                    : provided.dragHandleProps)}
+                                  className={`drag-handle ${
+                                    isEditingTranslation
+                                      ? "translation-disabled"
+                                      : ""
+                                  }`}
                                 >
                                   <GripHorizontal size={16} />
                                 </div>
@@ -326,45 +353,63 @@ const RecipeForm = ({
 
                                   {/* Ingredient Details */}
                                   <div className="ingredient-details">
-                                    <input
-                                      id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
-                                      type="text"
-                                      value={(() => {
-                                        // Format values respecting unit's fraction setting
-                                        if (!ingredient.quantity) return "";
-                                        return formatQuantityForUnit(
-                                          ingredient.quantity,
-                                          ingredient.unit,
-                                          units
-                                        );
-                                      })()}
-                                      onChange={(e) =>
-                                        handleIngredientChange(
-                                          "ungrouped",
-                                          ingredient.tempId,
-                                          "quantity",
-                                          e.target.value
-                                        )
+                                    <div
+                                      className={
+                                        isEditingTranslation
+                                          ? "translation-disabled"
+                                          : ""
                                       }
-                                      className="input input--full-width input--edit"
-                                      placeholder={t("quantity")}
-                                      onWheel={(e) => e.target.blur()}
-                                    />
+                                    >
+                                      <input
+                                        id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
+                                        type="text"
+                                        value={(() => {
+                                          // Format values respecting unit's fraction setting
+                                          if (!ingredient.quantity) return "";
+                                          return formatQuantityForUnit(
+                                            ingredient.quantity,
+                                            ingredient.unit,
+                                            units
+                                          );
+                                        })()}
+                                        onChange={(e) =>
+                                          handleIngredientChange(
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            "quantity",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="input input--full-width input--edit"
+                                        placeholder={t("quantity")}
+                                        disabled={isEditingTranslation}
+                                        onWheel={(e) => e.target.blur()}
+                                      />
+                                    </div>
 
-                                    <Selector
-                                      id={`ingredient-unit-ungrouped-${index}-${ingredient.tempId}`}
-                                      value={ingredient.unit || ""}
-                                      onChange={(value) =>
-                                        handleIngredientChange(
-                                          "ungrouped",
-                                          ingredient.tempId,
-                                          "unit",
-                                          value
-                                        )
+                                    <div
+                                      className={
+                                        isEditingTranslation
+                                          ? "translation-disabled"
+                                          : ""
                                       }
-                                      type="unit"
-                                      className="input--full-width"
-                                    />
+                                    >
+                                      <Selector
+                                        id={`ingredient-unit-ungrouped-${index}-${ingredient.tempId}`}
+                                        value={ingredient.unit || ""}
+                                        onChange={(value) =>
+                                          handleIngredientChange(
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            "unit",
+                                            value
+                                          )
+                                        }
+                                        type="unit"
+                                        className="input--full-width"
+                                        disabled={isEditingTranslation}
+                                      />
+                                    </div>
 
                                     <input
                                       id={`ingredient-notes-ungrouped-${index}-${ingredient.tempId}`}
@@ -390,8 +435,13 @@ const RecipeForm = ({
                                           ingredient.tempId
                                         )
                                       }
-                                      className="btn btn-icon btn-icon-remove"
+                                      className={`btn btn-icon btn-icon-remove ${
+                                        isEditingTranslation
+                                          ? "translation-disabled"
+                                          : ""
+                                      }`}
                                       aria-label={t("remove_ingredient")}
+                                      disabled={isEditingTranslation}
                                     >
                                       <Trash2
                                         size={16}
@@ -416,7 +466,10 @@ const RecipeForm = ({
                 <button
                   type="button"
                   onClick={() => addIngredient("ungrouped")}
-                  className="btn btn-icon btn-icon-green"
+                  className={`btn btn-icon btn-icon-green ${
+                    isEditingTranslation ? "translation-disabled" : ""
+                  }`}
+                  disabled={isEditingTranslation}
                 >
                   <Plus
                     size={16}
@@ -454,8 +507,14 @@ const RecipeForm = ({
                                 {/* Section Header */}
                                 <div className="flex-row">
                                   <div
-                                    {...provided.dragHandleProps}
-                                    className="drag-handle"
+                                    {...(isEditingTranslation
+                                      ? {}
+                                      : provided.dragHandleProps)}
+                                    className={`drag-handle ${
+                                      isEditingTranslation
+                                        ? "translation-disabled"
+                                        : ""
+                                    }`}
                                   >
                                     <GripHorizontal size={16} />
                                   </div>
@@ -475,7 +534,12 @@ const RecipeForm = ({
                                   <button
                                     type="button"
                                     onClick={() => removeSection(section.id)}
-                                    className="btn btn-section"
+                                    className={`btn btn-section ${
+                                      isEditingTranslation
+                                        ? "translation-disabled"
+                                        : ""
+                                    }`}
+                                    disabled={isEditingTranslation}
                                   >
                                     {t("remove_section")}
                                   </button>
@@ -516,8 +580,14 @@ const RecipeForm = ({
                                               >
                                                 {/* Ingredient Drag Handle */}
                                                 <div
-                                                  {...provided.dragHandleProps}
-                                                  className="drag-handle"
+                                                  {...(isEditingTranslation
+                                                    ? {}
+                                                    : provided.dragHandleProps)}
+                                                  className={`drag-handle ${
+                                                    isEditingTranslation
+                                                      ? "translation-disabled"
+                                                      : ""
+                                                  }`}
                                                 >
                                                   <GripHorizontal size={16} />
                                                 </div>
@@ -580,54 +650,76 @@ const RecipeForm = ({
 
                                                   {/* Ingredient Details */}
                                                   <div className="ingredient-details">
-                                                    <input
-                                                      id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                      type="text"
-                                                      value={(() => {
-                                                        // Format values respecting unit's fraction setting
-                                                        if (
-                                                          !ingredient.quantity
-                                                        )
-                                                          return "";
-                                                        return formatQuantityForUnit(
-                                                          ingredient.quantity,
-                                                          ingredient.unit,
-                                                          units
-                                                        );
-                                                      })()}
-                                                      onChange={(e) =>
-                                                        handleIngredientChange(
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          "quantity",
-                                                          e.target.value
-                                                        )
+                                                    <div
+                                                      className={
+                                                        isEditingTranslation
+                                                          ? "translation-disabled"
+                                                          : ""
                                                       }
-                                                      className="input input--full-width input--edit"
-                                                      placeholder={t(
-                                                        "quantity"
-                                                      )}
-                                                      onWheel={(e) =>
-                                                        e.target.blur()
-                                                      }
-                                                    />
+                                                    >
+                                                      <input
+                                                        id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
+                                                        type="text"
+                                                        value={(() => {
+                                                          // Format values respecting unit's fraction setting
+                                                          if (
+                                                            !ingredient.quantity
+                                                          )
+                                                            return "";
+                                                          return formatQuantityForUnit(
+                                                            ingredient.quantity,
+                                                            ingredient.unit,
+                                                            units
+                                                          );
+                                                        })()}
+                                                        onChange={(e) =>
+                                                          handleIngredientChange(
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            "quantity",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        className="input input--full-width input--edit"
+                                                        placeholder={t(
+                                                          "quantity"
+                                                        )}
+                                                        disabled={
+                                                          isEditingTranslation
+                                                        }
+                                                        onWheel={(e) =>
+                                                          e.target.blur()
+                                                        }
+                                                      />
+                                                    </div>
 
-                                                    <Selector
-                                                      id={`ingredient-unit-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                      value={
-                                                        ingredient.unit || ""
+                                                    <div
+                                                      className={
+                                                        isEditingTranslation
+                                                          ? "translation-disabled"
+                                                          : ""
                                                       }
-                                                      onChange={(unitValue) =>
-                                                        handleIngredientChange(
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          "unit",
-                                                          unitValue
-                                                        )
-                                                      }
-                                                      type="unit"
-                                                      className="input--full-width"
-                                                    />
+                                                    >
+                                                      <Selector
+                                                        id={`ingredient-unit-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
+                                                        value={
+                                                          ingredient.unit || ""
+                                                        }
+                                                        onChange={(unitValue) =>
+                                                          handleIngredientChange(
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            "unit",
+                                                            unitValue
+                                                          )
+                                                        }
+                                                        type="unit"
+                                                        className="input--full-width"
+                                                        disabled={
+                                                          isEditingTranslation
+                                                        }
+                                                      />
+                                                    </div>
 
                                                     <input
                                                       id={`ingredient-notes-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
@@ -655,10 +747,17 @@ const RecipeForm = ({
                                                           ingredient.tempId
                                                         )
                                                       }
-                                                      className="btn btn-icon btn-icon-remove"
+                                                      className={`btn btn-icon btn-icon-remove ${
+                                                        isEditingTranslation
+                                                          ? "translation-disabled"
+                                                          : ""
+                                                      }`}
                                                       aria-label={t(
                                                         "remove_ingredient"
                                                       )}
+                                                      disabled={
+                                                        isEditingTranslation
+                                                      }
                                                       data-testid={`remove-section-ingredient-btn-${section.id}-${ingredient.tempId}`} // Updated data-testid
                                                     >
                                                       <Trash2 size={16} />
@@ -680,8 +779,13 @@ const RecipeForm = ({
                                   <button
                                     type="button"
                                     onClick={() => addIngredient(section.id)}
-                                    className="btn btn-icon btn-icon-green"
+                                    className={`btn btn-icon btn-icon-green ${
+                                      isEditingTranslation
+                                        ? "translation-disabled"
+                                        : ""
+                                    }`}
                                     aria-label={t("add_ingredient")}
+                                    disabled={isEditingTranslation}
                                   >
                                     <Plus
                                       size={16}
@@ -729,8 +833,11 @@ const RecipeForm = ({
                   <button
                     type="button"
                     onClick={() => removeInstruction(index)}
-                    className="btn btn-icon btn-icon-remove"
+                    className={`btn btn-icon btn-icon-remove ${
+                      isEditingTranslation ? "translation-disabled" : ""
+                    }`}
                     aria-label={t("remove_instruction")}
+                    disabled={isEditingTranslation}
                   >
                     <Trash2 size={16} data-testid="remove-instruction-btn" />
                   </button>
@@ -741,7 +848,10 @@ const RecipeForm = ({
               <button
                 type="button"
                 onClick={addInstruction}
-                className="btn btn-icon btn-icon-green"
+                className={`btn btn-icon btn-icon-green ${
+                  isEditingTranslation ? "translation-disabled" : ""
+                }`}
+                disabled={isEditingTranslation}
               >
                 <Plus
                   size={16}
