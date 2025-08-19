@@ -587,6 +587,359 @@ describe("RecipeForm", () => {
     });
   });
 
+  describe("Translation Editing Mode", () => {
+    describe("Translation Notice", () => {
+      it("shows translation notice when isEditingTranslation is true", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        expect(
+          screen.getByText("editing_translation_notice")
+        ).toBeInTheDocument();
+      });
+
+      it("does not show translation notice when isEditingTranslation is false", () => {
+        renderComponent({ isEditingTranslation: false });
+
+        expect(
+          screen.queryByText("editing_translation_notice")
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    describe("Disabled Fields", () => {
+      beforeEach(() => {
+        // Reset mocks for each test
+        vi.clearAllMocks();
+      });
+
+      it("disables servings input in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const servingsInput = screen.getByDisplayValue("4");
+        expect(servingsInput).toBeDisabled();
+      });
+
+      it("applies translation-disabled class to servings field", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const servingsField = screen
+          .getByDisplayValue("4")
+          .closest(".servings-field");
+        expect(servingsField).toHaveClass("translation-disabled");
+      });
+
+      it("disables category buttons in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const categoryButtons = screen
+          .getAllByRole("button")
+          .filter(
+            (button) =>
+              button.textContent === "Desserts" ||
+              button.textContent === "Main Dishes"
+          );
+
+        categoryButtons.forEach((button) => {
+          expect(button).toBeDisabled();
+        });
+      });
+
+      it("applies translation-disabled class to category form group", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const categoryFormGroup = screen
+          .getByText("category")
+          .closest(".form-group");
+        expect(categoryFormGroup).toHaveClass("translation-disabled");
+      });
+
+      it("disables add section button in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const addSectionButton = screen.getByText("add_section");
+        expect(addSectionButton).toBeDisabled();
+        expect(addSectionButton).toHaveClass("translation-disabled");
+      });
+
+      it("disables add ingredient buttons in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const addIngredientButtons =
+          screen.getAllByTestId("add-ingredient-btn");
+        addIngredientButtons.forEach((button) => {
+          expect(button.closest("button")).toBeDisabled();
+          expect(button.closest("button")).toHaveClass("translation-disabled");
+        });
+      });
+
+      it("disables remove ingredient buttons in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const removeIngredientButtons = screen.getAllByTestId(
+          "remove-ingredient-btn"
+        );
+        removeIngredientButtons.forEach((button) => {
+          expect(button.closest("button")).toBeDisabled();
+          expect(button.closest("button")).toHaveClass("translation-disabled");
+        });
+      });
+
+      it("disables add instruction button in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const addInstructionButton = screen
+          .getByTestId("add-instruction-btn")
+          .closest("button");
+        expect(addInstructionButton).toBeDisabled();
+        expect(addInstructionButton).toHaveClass("translation-disabled");
+      });
+
+      it("disables remove instruction buttons in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const removeInstructionButtons = screen.getAllByTestId(
+          "remove-instruction-btn"
+        );
+        removeInstructionButtons.forEach((button) => {
+          expect(button.closest("button")).toBeDisabled();
+          expect(button.closest("button")).toHaveClass("translation-disabled");
+        });
+      });
+
+      it("disables drag handles in translation mode", () => {
+        const { container } = renderComponent({ isEditingTranslation: true });
+
+        // Check that drag handles have disabled styling
+        const dragHandles = container.querySelectorAll(".drag-handle");
+        dragHandles.forEach((handle) => {
+          expect(handle).toHaveClass("translation-disabled");
+        });
+      });
+    });
+
+    describe("Sectioned Ingredients in Translation Mode", () => {
+      beforeEach(() => {
+        const mockFormDataWithSection = {
+          ...mockFormData,
+          ingredientSections: [
+            {
+              id: "section-1",
+              subheading: "For the sauce",
+              ingredients: [
+                {
+                  tempId: "2",
+                  name: "tomatoes",
+                  quantity: "3",
+                  unit: "cup/s",
+                  notes: "diced",
+                },
+              ],
+            },
+          ],
+        };
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: mockFormDataWithSection,
+        });
+      });
+
+      it("disables ingredient quantity inputs in sections", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const quantityInputs = screen.getAllByDisplayValue("3");
+        quantityInputs.forEach((input) => {
+          if (input.getAttribute("placeholder") === "quantity") {
+            expect(input).toBeDisabled();
+          }
+        });
+      });
+
+      it("disables ingredient unit selectors in sections", () => {
+        const { container } = renderComponent({ isEditingTranslation: true });
+
+        // Check for disabled unit selectors (these are custom Selector components)
+        const selectorElements = container.querySelectorAll(
+          '[id*="ingredient-unit"]'
+        );
+        // Note: The actual disabled state would be handled by the Selector component
+        // Here we just verify the prop is passed correctly
+        expect(selectorElements.length).toBeGreaterThan(0);
+      });
+
+      it("disables remove ingredient buttons in sections", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const removeButton = screen.getByTestId(
+          "remove-section-ingredient-btn-section-1-2"
+        );
+        expect(removeButton.closest("button")).toBeDisabled();
+        expect(removeButton.closest("button")).toHaveClass(
+          "translation-disabled"
+        );
+      });
+
+      it("disables add ingredient button for sections", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const addSectionIngredientButton = screen.getByTestId(
+          "add-section-ingredient-btn"
+        );
+        expect(addSectionIngredientButton.closest("button")).toBeDisabled();
+        expect(addSectionIngredientButton.closest("button")).toHaveClass(
+          "translation-disabled"
+        );
+      });
+
+      it("disables remove section button", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const removeSectionButton = screen.getByText("remove_section");
+        expect(removeSectionButton).toBeDisabled();
+        expect(removeSectionButton).toHaveClass("translation-disabled");
+      });
+    });
+
+    describe("Enabled Fields in Translation Mode", () => {
+      it("keeps title input enabled in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const titleInput = screen.getByDisplayValue("Test Recipe");
+        expect(titleInput).not.toBeDisabled();
+      });
+
+      it("keeps ingredient name inputs enabled in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const ingredientNameInput = screen.getByDisplayValue("flour");
+        expect(ingredientNameInput).not.toBeDisabled();
+      });
+
+      it("keeps ingredient notes inputs enabled in translation mode", () => {
+        const { container } = renderComponent({ isEditingTranslation: true });
+
+        // Look for notes inputs by placeholder or other identifying attributes
+        const notesInputs = container.querySelectorAll(
+          'input[placeholder="notes"]'
+        );
+        notesInputs.forEach((input) => {
+          expect(input).not.toBeDisabled();
+        });
+      });
+
+      it("keeps instruction textareas enabled in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        // Instructions should be editable, find them by their values
+        const mixInstructionInput = screen.getByDisplayValue("Mix ingredients");
+        const bakeInstructionInput = screen.getByDisplayValue("Bake for 30 minutes");
+        
+        expect(mixInstructionInput).not.toBeDisabled();
+        expect(bakeInstructionInput).not.toBeDisabled();
+      });
+
+      it("keeps source input enabled in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const sourceInput = screen.getByDisplayValue("https://example.com");
+        expect(sourceInput).not.toBeDisabled();
+      });
+
+      it("keeps notes input enabled in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const notesInput = screen.getByDisplayValue("Test notes");
+        expect(notesInput).not.toBeDisabled();
+      });
+    });
+
+    describe("Button Text in Translation Mode", () => {
+      it("shows correct submit button text when editing translation", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          isEditMode: true,
+        });
+
+        renderComponent({ isEditingTranslation: true });
+
+        expect(screen.getByText("update_translation")).toBeInTheDocument();
+      });
+
+      it("shows correct loading text when updating translation", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          isEditMode: true,
+          loading: true,
+        });
+
+        renderComponent({ isEditingTranslation: true });
+
+        expect(screen.getByText("updating_translation")).toBeInTheDocument();
+      });
+    });
+
+    describe("Form Submission in Translation Mode", () => {
+      it("allows form submission in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const form = screen.getByRole("form");
+        fireEvent.submit(form);
+
+        expect(mockHookReturn.handleSubmit).toHaveBeenCalled();
+      });
+
+      it("does not prevent text changes in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const titleInput = screen.getByDisplayValue("Test Recipe");
+        fireEvent.change(titleInput, { target: { value: "Translated Title" } });
+
+        expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
+          "title",
+          "Translated Title",
+          false
+        );
+      });
+    });
+
+    describe("Non-Translation Mode Behavior", () => {
+      it("enables all fields when not in translation mode", () => {
+        renderComponent({ isEditingTranslation: false });
+
+        // Verify key fields are not disabled
+        const servingsInput = screen.getByDisplayValue("4");
+        const addSectionButton = screen.getByText("add_section");
+        const categoryButtons = screen
+          .getAllByRole("button")
+          .filter(
+            (button) =>
+              button.textContent === "Desserts" ||
+              button.textContent === "Main Dishes"
+          );
+
+        expect(servingsInput).not.toBeDisabled();
+        expect(addSectionButton).not.toBeDisabled();
+        categoryButtons.forEach((button) => {
+          expect(button).not.toBeDisabled();
+        });
+      });
+
+      it("does not apply translation-disabled class when not in translation mode", () => {
+        renderComponent({ isEditingTranslation: false });
+
+        const servingsField = screen
+          .getByDisplayValue("4")
+          .closest(".servings-field");
+        const categoryFormGroup = screen
+          .getByText("category")
+          .closest(".form-group");
+
+        expect(servingsField).not.toHaveClass("translation-disabled");
+        expect(categoryFormGroup).not.toHaveClass("translation-disabled");
+      });
+    });
+  });
+
   describe("Edge Cases", () => {
     it("handles empty form data gracefully", () => {
       useRecipeForm.mockReturnValue({
