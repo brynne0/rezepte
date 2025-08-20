@@ -17,7 +17,12 @@ import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
 import "./RecipeForm.css";
 
-const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
+const RecipeForm = ({
+  categories,
+  initialRecipe = null,
+  title = "",
+  isEditingTranslation = false,
+}) => {
   const { t, i18n } = useTranslation();
   const units = t("units", { returnObjects: true });
 
@@ -45,7 +50,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
     handleCancel,
     handleDelete,
     toTitleCase,
-  } = useRecipeForm({ initialRecipe });
+  } = useRecipeForm({ initialRecipe, isEditingTranslation });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -86,16 +91,25 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
   return (
     <div className="card card-form">
       <header className="page-header flex-center">
-        <ArrowBigLeft
-          className="back-arrow-left"
-          size={28}
+        <button
+          className="btn-unstyled back-arrow-left"
           onClick={() => {
             handleCancel();
           }}
           data-testid="back-arrow"
-        />
+          aria-label={t("go_back")}
+        >
+          <ArrowBigLeft size={28} />
+        </button>
         <h1 className="forta">{title}</h1>
       </header>
+
+      {/* Translation Editing Notice */}
+      {isEditingTranslation && (
+        <span className="translation-notice">
+          {t("editing_translation_notice")}
+        </span>
+      )}
 
       {/* Submission Error Message */}
       {submissionError && (
@@ -140,27 +154,42 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               )}
             </div>
 
-            <div className="servings-field">
+            <div
+              className={`servings-field ${
+                isEditingTranslation ? "translation-disabled" : ""
+              }`}
+            >
               <span className="form-header">
                 <h3 id="servings-label">{t("servings")}</h3>
               </span>
-              <input
-                id="servings"
-                type="text"
-                value={formData.servings || ""}
-                onChange={(e) => handleInputChange("servings", e.target.value)}
-                className="input input--full-width input--edit"
-                aria-labelledby="servings-label"
-                onWheel={(e) => {
-                  e.target.blur();
-                }}
-              />
+              <div
+                className={isEditingTranslation ? "translation-disabled" : ""}
+              >
+                <input
+                  id="servings"
+                  type="text"
+                  value={formData.servings || ""}
+                  onChange={(e) =>
+                    handleInputChange("servings", e.target.value)
+                  }
+                  className="input input--full-width input--edit"
+                  aria-labelledby="servings-label"
+                  disabled={isEditingTranslation}
+                  onWheel={(e) => {
+                    e.target.blur();
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Category */}
-        <div className="form-group">
+        <div
+          className={`form-group ${
+            isEditingTranslation ? "translation-disabled" : ""
+          }`}
+        >
           <div className="form-header">
             <h3 id="category-label">{t("category")}</h3>
           </div>
@@ -168,7 +197,7 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           <div
             className={`form-categories-wrapper ${
               validationErrors.category ? "input--error" : ""
-            }`}
+            } ${isEditingTranslation ? "translation-disabled" : ""}`}
             role="group"
             aria-labelledby="category-label"
           >
@@ -179,15 +208,22 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   key={category.value}
                   type="button"
                   className={`subheading-wrapper${
-                    formData.categories?.includes(category.value) ? " selected" : ""
+                    formData.categories?.includes(category.value)
+                      ? " selected"
+                      : ""
                   }`}
+                  disabled={isEditingTranslation}
                   onClick={() => {
                     const currentCategories = formData.categories || [];
-                    const isSelected = currentCategories.includes(category.value);
+                    const isSelected = currentCategories.includes(
+                      category.value
+                    );
                     const newCategories = isSelected
-                      ? currentCategories.filter(cat => cat !== category.value)
+                      ? currentCategories.filter(
+                          (cat) => cat !== category.value
+                        )
                       : [...currentCategories, category.value];
-                    
+
                     handleInputChange(
                       "categories",
                       newCategories,
@@ -214,13 +250,18 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               <button
                 type="button"
                 onClick={addSection}
-                className="btn btn-section"
+                className={`btn btn-section ${
+                  isEditingTranslation ? "translation-disabled" : ""
+                }`}
+                disabled={isEditingTranslation}
               >
                 {t("add_section")}
               </button>
             </div>
 
-            <DragDropContext onDragEnd={handleDragEnd}>
+            <DragDropContext
+              onDragEnd={isEditingTranslation ? () => {} : handleDragEnd}
+            >
               {/* Ungrouped Ingredients First */}
               {formData.ungroupedIngredients.length > 0 && (
                 <Droppable droppableId="ungrouped" type="ingredient">
@@ -251,7 +292,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                 {/* Ingredient Drag Handle */}
                                 <div
                                   {...provided.dragHandleProps}
-                                  className="drag-handle"
+                                  className={`drag-handle ${
+                                    isEditingTranslation
+                                      ? "translation-disabled"
+                                      : ""
+                                  }`}
+                                  style={{
+                                    pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                  }}
                                 >
                                   <GripHorizontal size={16} />
                                 </div>
@@ -276,9 +324,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                     onBlur={(e) => {
                                       const value =
                                         i18n.language === "de"
-                                          ? e.target.value.split(' ').map(word => 
-                                              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                                            ).join(' ')
+                                          ? e.target.value
+                                              .split(" ")
+                                              .map(
+                                                (word) =>
+                                                  word.charAt(0).toUpperCase() +
+                                                  word.slice(1).toLowerCase()
+                                              )
+                                              .join(" ")
                                           : e.target.value.toLowerCase();
 
                                       handleIngredientChange(
@@ -301,45 +354,63 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
                                   {/* Ingredient Details */}
                                   <div className="ingredient-details">
-                                    <input
-                                      id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
-                                      type="text"
-                                      value={(() => {
-                                        // Format values respecting unit's fraction setting
-                                        if (!ingredient.quantity) return "";
-                                        return formatQuantityForUnit(
-                                          ingredient.quantity,
-                                          ingredient.unit,
-                                          units
-                                        );
-                                      })()}
-                                      onChange={(e) =>
-                                        handleIngredientChange(
-                                          "ungrouped",
-                                          ingredient.tempId,
-                                          "quantity",
-                                          e.target.value
-                                        )
+                                    <div
+                                      className={
+                                        isEditingTranslation
+                                          ? "translation-disabled"
+                                          : ""
                                       }
-                                      className="input input--full-width input--edit"
-                                      placeholder={t("quantity")}
-                                      onWheel={(e) => e.target.blur()}
-                                    />
+                                    >
+                                      <input
+                                        id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
+                                        type="text"
+                                        value={(() => {
+                                          // Format values respecting unit's fraction setting
+                                          if (!ingredient.quantity) return "";
+                                          return formatQuantityForUnit(
+                                            ingredient.quantity,
+                                            ingredient.unit,
+                                            units
+                                          );
+                                        })()}
+                                        onChange={(e) =>
+                                          handleIngredientChange(
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            "quantity",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="input input--full-width input--edit"
+                                        placeholder={t("quantity")}
+                                        disabled={isEditingTranslation}
+                                        onWheel={(e) => e.target.blur()}
+                                      />
+                                    </div>
 
-                                    <Selector
-                                      id={`ingredient-unit-ungrouped-${index}-${ingredient.tempId}`}
-                                      value={ingredient.unit || ""}
-                                      onChange={(value) =>
-                                        handleIngredientChange(
-                                          "ungrouped",
-                                          ingredient.tempId,
-                                          "unit",
-                                          value
-                                        )
+                                    <div
+                                      className={
+                                        isEditingTranslation
+                                          ? "translation-disabled"
+                                          : ""
                                       }
-                                      type="unit"
-                                      className="input--full-width"
-                                    />
+                                    >
+                                      <Selector
+                                        id={`ingredient-unit-ungrouped-${index}-${ingredient.tempId}`}
+                                        value={ingredient.unit || ""}
+                                        onChange={(value) =>
+                                          handleIngredientChange(
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            "unit",
+                                            value
+                                          )
+                                        }
+                                        type="unit"
+                                        className="input--full-width"
+                                        disabled={isEditingTranslation}
+                                      />
+                                    </div>
 
                                     <input
                                       id={`ingredient-notes-ungrouped-${index}-${ingredient.tempId}`}
@@ -365,8 +436,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                           ingredient.tempId
                                         )
                                       }
-                                      className="btn btn-icon btn-icon-remove"
+                                      className={`btn btn-icon btn-icon-remove ${
+                                        isEditingTranslation
+                                          ? "translation-disabled"
+                                          : ""
+                                      }`}
                                       aria-label={t("remove_ingredient")}
+                                      disabled={isEditingTranslation}
                                     >
                                       <Trash2
                                         size={16}
@@ -391,7 +467,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                 <button
                   type="button"
                   onClick={() => addIngredient("ungrouped")}
-                  className="btn btn-icon btn-icon-green"
+                  className={`btn btn-icon btn-icon-green ${
+                    isEditingTranslation ? "translation-disabled" : ""
+                  }`}
+                  disabled={isEditingTranslation}
                 >
                   <Plus
                     size={16}
@@ -430,7 +509,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                 <div className="flex-row">
                                   <div
                                     {...provided.dragHandleProps}
-                                    className="drag-handle"
+                                    className={`drag-handle ${
+                                      isEditingTranslation
+                                        ? "translation-disabled"
+                                        : ""
+                                    }`}
+                                    style={{
+                                      pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                    }}
                                   >
                                     <GripHorizontal size={16} />
                                   </div>
@@ -450,7 +536,12 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                   <button
                                     type="button"
                                     onClick={() => removeSection(section.id)}
-                                    className="btn btn-section"
+                                    className={`btn btn-section ${
+                                      isEditingTranslation
+                                        ? "translation-disabled"
+                                        : ""
+                                    }`}
+                                    disabled={isEditingTranslation}
                                   >
                                     {t("remove_section")}
                                   </button>
@@ -492,7 +583,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                 {/* Ingredient Drag Handle */}
                                                 <div
                                                   {...provided.dragHandleProps}
-                                                  className="drag-handle"
+                                                  className={`drag-handle ${
+                                                    isEditingTranslation
+                                                      ? "translation-disabled"
+                                                      : ""
+                                                  }`}
+                                                  style={{
+                                                    pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                                  }}
                                                 >
                                                   <GripHorizontal size={16} />
                                                 </div>
@@ -519,9 +617,18 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                     onBlur={(e) => {
                                                       const value =
                                                         i18n.language === "de"
-                                                          ? e.target.value.split(' ').map(word => 
-                                                              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                                                            ).join(' ')
+                                                          ? e.target.value
+                                                              .split(" ")
+                                                              .map(
+                                                                (word) =>
+                                                                  word
+                                                                    .charAt(0)
+                                                                    .toUpperCase() +
+                                                                  word
+                                                                    .slice(1)
+                                                                    .toLowerCase()
+                                                              )
+                                                              .join(" ")
                                                           : e.target.value.toLowerCase();
 
                                                       handleIngredientChange(
@@ -546,54 +653,76 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
 
                                                   {/* Ingredient Details */}
                                                   <div className="ingredient-details">
-                                                    <input
-                                                      id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                      type="text"
-                                                      value={(() => {
-                                                        // Format values respecting unit's fraction setting
-                                                        if (
-                                                          !ingredient.quantity
-                                                        )
-                                                          return "";
-                                                        return formatQuantityForUnit(
-                                                          ingredient.quantity,
-                                                          ingredient.unit,
-                                                          units
-                                                        );
-                                                      })()}
-                                                      onChange={(e) =>
-                                                        handleIngredientChange(
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          "quantity",
-                                                          e.target.value
-                                                        )
+                                                    <div
+                                                      className={
+                                                        isEditingTranslation
+                                                          ? "translation-disabled"
+                                                          : ""
                                                       }
-                                                      className="input input--full-width input--edit"
-                                                      placeholder={t(
-                                                        "quantity"
-                                                      )}
-                                                      onWheel={(e) =>
-                                                        e.target.blur()
-                                                      }
-                                                    />
+                                                    >
+                                                      <input
+                                                        id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
+                                                        type="text"
+                                                        value={(() => {
+                                                          // Format values respecting unit's fraction setting
+                                                          if (
+                                                            !ingredient.quantity
+                                                          )
+                                                            return "";
+                                                          return formatQuantityForUnit(
+                                                            ingredient.quantity,
+                                                            ingredient.unit,
+                                                            units
+                                                          );
+                                                        })()}
+                                                        onChange={(e) =>
+                                                          handleIngredientChange(
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            "quantity",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        className="input input--full-width input--edit"
+                                                        placeholder={t(
+                                                          "quantity"
+                                                        )}
+                                                        disabled={
+                                                          isEditingTranslation
+                                                        }
+                                                        onWheel={(e) =>
+                                                          e.target.blur()
+                                                        }
+                                                      />
+                                                    </div>
 
-                                                    <Selector
-                                                      id={`ingredient-unit-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                      value={
-                                                        ingredient.unit || ""
+                                                    <div
+                                                      className={
+                                                        isEditingTranslation
+                                                          ? "translation-disabled"
+                                                          : ""
                                                       }
-                                                      onChange={(unitValue) =>
-                                                        handleIngredientChange(
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          "unit",
-                                                          unitValue
-                                                        )
-                                                      }
-                                                      type="unit"
-                                                      className="input--full-width"
-                                                    />
+                                                    >
+                                                      <Selector
+                                                        id={`ingredient-unit-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
+                                                        value={
+                                                          ingredient.unit || ""
+                                                        }
+                                                        onChange={(unitValue) =>
+                                                          handleIngredientChange(
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            "unit",
+                                                            unitValue
+                                                          )
+                                                        }
+                                                        type="unit"
+                                                        className="input--full-width"
+                                                        disabled={
+                                                          isEditingTranslation
+                                                        }
+                                                      />
+                                                    </div>
 
                                                     <input
                                                       id={`ingredient-notes-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
@@ -621,10 +750,17 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                                           ingredient.tempId
                                                         )
                                                       }
-                                                      className="btn btn-icon btn-icon-remove"
+                                                      className={`btn btn-icon btn-icon-remove ${
+                                                        isEditingTranslation
+                                                          ? "translation-disabled"
+                                                          : ""
+                                                      }`}
                                                       aria-label={t(
                                                         "remove_ingredient"
                                                       )}
+                                                      disabled={
+                                                        isEditingTranslation
+                                                      }
                                                       data-testid={`remove-section-ingredient-btn-${section.id}-${ingredient.tempId}`} // Updated data-testid
                                                     >
                                                       <Trash2 size={16} />
@@ -646,8 +782,13 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                                   <button
                                     type="button"
                                     onClick={() => addIngredient(section.id)}
-                                    className="btn btn-icon btn-icon-green"
+                                    className={`btn btn-icon btn-icon-green ${
+                                      isEditingTranslation
+                                        ? "translation-disabled"
+                                        : ""
+                                    }`}
                                     aria-label={t("add_ingredient")}
+                                    disabled={isEditingTranslation}
                                   >
                                     <Plus
                                       size={16}
@@ -695,8 +836,11 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
                   <button
                     type="button"
                     onClick={() => removeInstruction(index)}
-                    className="btn btn-icon btn-icon-remove"
+                    className={`btn btn-icon btn-icon-remove ${
+                      isEditingTranslation ? "translation-disabled" : ""
+                    }`}
                     aria-label={t("remove_instruction")}
+                    disabled={isEditingTranslation}
                   >
                     <Trash2 size={16} data-testid="remove-instruction-btn" />
                   </button>
@@ -707,7 +851,10 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
               <button
                 type="button"
                 onClick={addInstruction}
-                className="btn btn-icon btn-icon-green"
+                className={`btn btn-icon btn-icon-green ${
+                  isEditingTranslation ? "translation-disabled" : ""
+                }`}
+                disabled={isEditingTranslation}
               >
                 <Plus
                   size={16}
@@ -807,10 +954,14 @@ const RecipeForm = ({ categories, initialRecipe = null, title = "" }) => {
           >
             {loading
               ? isEditMode
-                ? "Updating..."
-                : "Creating..."
+                ? isEditingTranslation
+                  ? t("updating_translation")
+                  : t("updating")
+                : t("creating")
               : isEditMode
-              ? t("update_recipe")
+              ? isEditingTranslation
+                ? t("update_translation")
+                : t("update_recipe")
               : t("create_recipe")}
           </button>
         </div>

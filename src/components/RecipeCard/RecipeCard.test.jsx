@@ -90,7 +90,7 @@ describe("RecipeCard", () => {
 
       render(<RecipeCard recipe={recipeWithHttpLink} onClick={mockOnClick} />);
 
-      expect(screen.getByRole("link-icon")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "open_recipe_source_link" })).toBeInTheDocument();
     });
 
     it("shows link icon when recipe has https source", () => {
@@ -102,7 +102,7 @@ describe("RecipeCard", () => {
 
       render(<RecipeCard recipe={recipeWithHttpsLink} onClick={mockOnClick} />);
       
-      expect(screen.getByRole("link-icon")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "open_recipe_source_link" })).toBeInTheDocument();
     });
 
     it("shows link icon when recipe has www source", () => {
@@ -114,7 +114,7 @@ describe("RecipeCard", () => {
 
       render(<RecipeCard recipe={recipeWithWwwLink} onClick={mockOnClick} />);
       
-      expect(screen.getByRole("link-icon")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "open_recipe_source_link" })).toBeInTheDocument();
     });
 
     it("does not show link icon when recipe has text source", () => {
@@ -126,7 +126,7 @@ describe("RecipeCard", () => {
 
       render(<RecipeCard recipe={recipeWithTextSource} onClick={mockOnClick} />);
       
-      expect(screen.queryByRole("link-icon")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
     });
 
     it("does not show link icon when recipe has no source", () => {
@@ -137,7 +137,7 @@ describe("RecipeCard", () => {
 
       render(<RecipeCard recipe={recipeWithoutSource} onClick={mockOnClick} />);
       
-      expect(screen.queryByRole("link-icon")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
     });
 
     it("opens source link in new tab when link icon is clicked", () => {
@@ -149,7 +149,7 @@ describe("RecipeCard", () => {
 
       render(<RecipeCard recipe={recipeWithLink} onClick={mockOnClick} />);
       
-      const linkIcon = screen.getByRole("link-icon");
+      const linkIcon = screen.getByRole("button", { name: "open_recipe_source_link" });
       fireEvent.click(linkIcon);
 
       expect(mockWindowOpen).toHaveBeenCalledTimes(1);
@@ -169,7 +169,7 @@ describe("RecipeCard", () => {
 
       render(<RecipeCard recipe={recipeWithLink} onClick={mockOnClick} />);
       
-      const linkIcon = screen.getByRole("link-icon");
+      const linkIcon = screen.getByRole("button", { name: "open_recipe_source_link" });
       fireEvent.click(linkIcon);
 
       // Card onClick should not be called

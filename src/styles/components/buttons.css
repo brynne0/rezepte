@@ -19,6 +19,21 @@ button {
   justify-content: center;
 }
 
+/* Icon-only button reset - removes all default button styling */
+.btn-unstyled {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Standard button */
 .btn-standard {
   padding: 0.5rem;

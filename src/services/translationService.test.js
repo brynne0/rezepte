@@ -1,20 +1,36 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
-import { getTranslatedRecipe, normaliseInstructions } from "./translationService";
+import {
+  getTranslatedRecipe,
+  normaliseInstructions,
+} from "./translationService";
 
 // Mock Supabase
 vi.mock("../lib/supabase", () => ({
   default: {
     functions: {
-      invoke: vi.fn(),
+      invoke: vi.fn().mockResolvedValue({
+        data: { translatedText: "Mocked translation" },
+        error: null,
+      }),
     },
     from: vi.fn(() => ({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
-          single: vi.fn(),
+          single: vi.fn().mockResolvedValue({
+            data: {
+              translated_recipe: {},
+              translated_names: {},
+              translated_notes: {},
+            },
+            error: null,
+          }),
         })),
       })),
       update: vi.fn(() => ({
-        eq: vi.fn(),
+        eq: vi.fn().mockResolvedValue({
+          data: null,
+          error: null,
+        }),
       })),
     })),
   },
@@ -208,6 +224,104 @@ describe("Translation Service", () => {
   });
 
   describe("Ingredient Display Name Logic", () => {
+    test("uses name_overrides first before other logic", async () => {
+      const recipe = {
+        ...mockRecipeWithUngroupedIngredients,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "1",
+            singular_name: "water",
+            plural_name: "waters",
+            translated_names: {
+              de: {
+                singular_name: "wasser",
+                plural_name: "wässer",
+              },
+            },
+            name_overrides: {
+              de: "Wasse", // User customized override
+            },
+            is_plural: false,
+          },
+        ],
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      // Should use name_overrides first, not translated_names
+      expect(result.ungroupedIngredients[0].name).toBe("Wasse");
+    });
+
+    test("falls back to regular translation when no override exists", async () => {
+      const recipe = {
+        ...mockRecipeWithUngroupedIngredients,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "1",
+            singular_name: "water",
+            plural_name: "waters",
+            translated_names: {
+              de: {
+                singular_name: "wasser",
+                plural_name: "wässer",
+              },
+            },
+            // No name_overrides
+            is_plural: false,
+          },
+        ],
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      // Should use translated_names when no override
+      expect(result.ungroupedIngredients[0].name).toBe("wasser");
+    });
+
+    test("applies overrides in ingredient sections", async () => {
+      const recipe = {
+        id: "recipe-override-sections",
+        title: "Override Sections Recipe",
+        original_language: "en",
+        instructions: ["Mix ingredients", "Bake"], // Add required instructions
+        ingredientSections: [
+          {
+            subheading: "Base ingredients",
+            ingredients: [
+              {
+                id: "ing-1",
+                recipe_ingredient_id: "ri-1",
+                quantity: "2",
+                singular_name: "lime",
+                plural_name: "limes",
+                translated_names: {
+                  de: {
+                    singular_name: "limette",
+                    plural_name: "limetten",
+                  },
+                },
+                name_overrides: {
+                  de: "Bio-Limetten", // User override
+                },
+                is_plural: false,
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      // Should use name_overrides in sections too
+      expect(result.ingredientSections[0].ingredients[0].name).toBe(
+        "Bio-Limetten"
+      );
+    });
+
     test("uses is_plural flag for ingredient name selection", async () => {
       const recipe = {
         ...mockRecipeWithUngroupedIngredients,
@@ -440,7 +554,7 @@ describe("Translation Service", () => {
       const instructions = [
         "Mix the ingredients",
         "Bake for 30 minutes",
-        "Let cool"
+        "Let cool",
       ];
 
       const result = normaliseInstructions(instructions);
@@ -448,10 +562,9 @@ describe("Translation Service", () => {
       expect(result).toEqual([
         "Mix the ingredients.",
         "Bake for 30 minutes.",
-        "Let cool."
+        "Let cool.",
       ]);
     });
-
 
     test("normaliseInstructions preserves existing punctuation", () => {
       const instructions = [
@@ -459,7 +572,7 @@ describe("Translation Service", () => {
         "Mix dry ingredients!  ",
         "  Add wet ingredients?  ",
         "Bake for 25-30 minutes.",
-        "  Cool completely  "
+        "  Cool completely  ",
       ];
 
       const result = normaliseInstructions(instructions);
@@ -469,7 +582,7 @@ describe("Translation Service", () => {
         "Mix dry ingredients!",
         "Add wet ingredients?",
         "Bake for 25-30 minutes.",
-        "Cool completely."
+        "Cool completely.",
       ]);
     });
 
@@ -485,13 +598,13 @@ describe("Translation Service", () => {
       const mockSupabase = await import("../lib/supabase");
       mockSupabase.default.functions.invoke.mockResolvedValue({
         data: { translatedText: "Mischen Sie die Zutaten" },
-        error: null
+        error: null,
       });
 
       const recipe = {
         title: "Test Recipe",
         instructions: ["Mix the ingredients"],
-        original_language: "en"
+        original_language: "en",
       };
 
       const result = await getTranslatedRecipe(recipe, "de");

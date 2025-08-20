@@ -61,7 +61,8 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
 
     // Normalise original instructions to ensure they end with full stops
     if (recipe.instructions && Array.isArray(recipe.instructions)) {
-      processedResult.instructions = recipe.instructions.map(normaliseInstruction);
+      processedResult.instructions =
+        recipe.instructions.map(normaliseInstruction);
     }
 
     // Handle ungrouped ingredients
@@ -142,7 +143,8 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
     const processedResult = { ...recipe };
     // Normalise original instructions to ensure they end with full stop
     if (recipe.instructions && Array.isArray(recipe.instructions)) {
-      processedResult.instructions = recipe.instructions.map(normaliseInstruction);
+      processedResult.instructions =
+        recipe.instructions.map(normaliseInstruction);
     }
     return processedResult;
   }
@@ -241,6 +243,11 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
 // Helper function to get the correct ingredient name for display
 const getIngredientDisplayName = async (ingredient, targetLanguage) => {
   const usePlural = ingredient.is_plural || false;
+
+  // Check for recipe-specific name overrides
+  if (ingredient.name_overrides && ingredient.name_overrides[targetLanguage]) {
+    return ingredient.name_overrides[targetLanguage];
+  }
 
   // If target language is English, use database columns
   if (targetLanguage === "en") {
@@ -638,7 +645,8 @@ export const updateRecipeTranslations = async (
           newRecipeData.instructions,
           language
         );
-        fieldsToUpdate.instructions = translatedInstructions.map(normaliseInstruction);
+        fieldsToUpdate.instructions =
+          translatedInstructions.map(normaliseInstruction);
         needsUpdate = true;
       } else {
         fieldsToUpdate.instructions = translation.instructions;
@@ -665,6 +673,66 @@ export const updateRecipeTranslations = async (
   }
 };
 
+// Update a specific translation for a recipe (for translation editing)
+export const updateTranslationOnly = async (
+  recipeId,
+  language,
+  translatedData,
+  ingredientOverrides = [],
+  ingredientNotesUpdates = []
+) => {
+  try {
+    // Get current translations
+    const { data: currentRecipe, error: fetchError } = await supabase
+      .from("recipes")
+      .select("translated_recipe")
+      .eq("id", recipeId)
+      .single();
+
+    if (fetchError) {
+      throw new Error(
+        `Failed to fetch current translations: ${fetchError.message}`
+      );
+    }
+
+    const existingTranslations = currentRecipe.translated_recipe || {};
+
+    // Update only the specified language translation
+    const updatedTranslations = {
+      ...existingTranslations,
+      [language]: {
+        ...existingTranslations[language],
+        ...translatedData,
+      },
+    };
+
+    // Save updated translations back to database
+    const { error: updateError } = await supabase
+      .from("recipes")
+      .update({ translated_recipe: updatedTranslations })
+      .eq("id", recipeId);
+
+    if (updateError) {
+      throw new Error(`Failed to update translation: ${updateError.message}`);
+    }
+
+    // Handle ingredient name overrides
+    if (ingredientOverrides && ingredientOverrides.length > 0) {
+      await updateIngredientOverrides(ingredientOverrides);
+    }
+
+    // Handle ingredient notes updates
+    if (ingredientNotesUpdates && ingredientNotesUpdates.length > 0) {
+      await updateIngredientNotesTranslations(ingredientNotesUpdates);
+    }
+
+    return updatedTranslations[language];
+  } catch (error) {
+    console.error("Error updating translation:", error);
+    throw error;
+  }
+};
+
 // Clear all translations for a recipe (nuclear option)
 export const clearRecipeTranslations = async (recipeId) => {
   try {
@@ -674,6 +742,62 @@ export const clearRecipeTranslations = async (recipeId) => {
       .eq("id", recipeId);
   } catch (error) {
     console.error("Failed to clear recipe translations:", error);
+  }
+};
+
+// Update ingredient name overrides for translation editing
+const updateIngredientOverrides = async (ingredientOverrides) => {
+  try {
+    for (const override of ingredientOverrides) {
+      const { recipe_ingredient_id, name, language } = override;
+      
+      // Get current name_overrides for this ingredient
+      const { data: currentIngredient, error: fetchError } = await supabase
+        .from("recipe_ingredients")
+        .select("name_overrides")
+        .eq("id", recipe_ingredient_id)
+        .single();
+
+      if (fetchError) {
+        console.error(`Failed to fetch ingredient ${recipe_ingredient_id}:`, fetchError);
+        continue; // Skip this override and continue with others
+      }
+
+      // Merge the new override with existing overrides
+      const updatedOverrides = {
+        ...(currentIngredient.name_overrides || {}),
+        [language]: name,
+      };
+
+      // Update the database
+      const { error: updateError } = await supabase
+        .from("recipe_ingredients")
+        .update({ name_overrides: updatedOverrides })
+        .eq("id", recipe_ingredient_id);
+
+      if (updateError) {
+        console.error(`Failed to update ingredient override ${recipe_ingredient_id}:`, updateError);
+        // Continue with other overrides even if one fails
+      }
+    }
+  } catch (error) {
+    console.error("Failed to update ingredient overrides:", error);
+    // Don't throw error - translation update should still succeed
+  }
+};
+
+// Update ingredient notes translations for translation editing
+const updateIngredientNotesTranslations = async (ingredientNotesUpdates) => {
+  try {
+    for (const notesUpdate of ingredientNotesUpdates) {
+      const { recipe_ingredient_id, notes, language } = notesUpdate;
+      
+      // Use the existing saveIngredientNotesTranslation function
+      await saveIngredientNotesTranslation(recipe_ingredient_id, language, notes);
+    }
+  } catch (error) {
+    console.error("Failed to update ingredient notes translations:", error);
+    // Don't throw error - translation update should still succeed
   }
 };
 

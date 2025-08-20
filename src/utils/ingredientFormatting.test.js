@@ -112,6 +112,29 @@ describe("ingredientFormatting", () => {
   });
 
   describe("getIngredientDisplayName - with is_plural flag", () => {
+    test("prioritizes processed name from translation service first", () => {
+      const ingredient = {
+        name: "Wasse", // Already processed by translation service with overrides
+        quantity: "1",
+        unit: "cup/s",
+        singular_name: "water",
+        plural_name: "waters",
+        translated_names: {
+          de: {
+            singular_name: "wasser",
+            plural_name: "wässer",
+          },
+        },
+        name_overrides: {
+          de: "Wasse",
+        },
+        is_plural: false,
+      };
+
+      // Should use the processed name field first (from translation service)
+      expect(getIngredientDisplayName(ingredient, "de")).toBe("Wasse");
+    });
+
     test("uses is_plural flag when available", () => {
       const ingredient1 = {
         quantity: "1/2 - 1",
@@ -209,9 +232,9 @@ describe("ingredientFormatting", () => {
       );
     });
 
-    test("uses database fields for English even when name property exists", () => {
+    test("prioritizes processed name first", () => {
       const ingredient = {
-        name: "translated apple name",
+        name: "processed apple name", // Already processed by translation service
         quantity: "1 - 5",
         unit: "piece/s",
         singular_name: "apple",
@@ -219,19 +242,19 @@ describe("ingredientFormatting", () => {
         is_plural: true, // Stored as plural
       };
 
-      // For English, should use database fields based on is_plural flag
-      expect(getIngredientDisplayName(ingredient, "en")).toBe("apples");
+      // Should use processed name first, even for English
+      expect(getIngredientDisplayName(ingredient, "en")).toBe("processed apple name");
 
       const ingredientSingular = {
-        name: "translated apple name",
+        name: "processed apple singular", // Already processed name
         quantity: "5", // High quantity but stored as singular
         unit: "piece/s",
         singular_name: "apple",
         plural_name: "apples",
         is_plural: false, // User typed singular form
       };
-      // Should respect stored is_plural flag over quantity
-      expect(getIngredientDisplayName(ingredientSingular, "en")).toBe("apple");
+      // Should use processed name first
+      expect(getIngredientDisplayName(ingredientSingular, "en")).toBe("processed apple singular");
     });
   });
 
@@ -314,6 +337,32 @@ describe("ingredientFormatting", () => {
 
       expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
         "1 - 3 cups all-purpose flour"
+      );
+    });
+
+    test("uses processed name with overrides from translation service", () => {
+      const ingredient = {
+        name: "Wasse", // Already processed by translation service (override applied)
+        quantity: "0.75",
+        unit: "cup/s",
+        singular_name: "water",
+        plural_name: "waters",
+        translated_names: {
+          de: {
+            singular_name: "wasser", // Original translation
+            plural_name: "wässer",
+          },
+        },
+        name_overrides: {
+          de: "Wasse", // User override
+        },
+        is_plural: false,
+      };
+
+      // Should use the processed name field that includes the override
+      // Note: 0.75 displays as fraction (3/4) for cup units
+      expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
+        "3/4 cup Wasse"
       );
     });
   });

@@ -502,7 +502,7 @@ export const fetchRecipe = async (id) => {
     .from("recipes")
     .select(
       `*, 
-       recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural),
+       recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural, name_overrides),
        recipe_categories(categoriy_id, categories(name, translated_category))`
     )
     .eq("id", id)
@@ -516,23 +516,27 @@ export const fetchRecipe = async (id) => {
   const ingredientsList =
     data.recipe_ingredients
       ?.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
-      .map((item) => ({
-        id: item.ingredients.id,
-        recipe_ingredient_id: item.id,
-        singular_name: item.ingredients.singular_name,
-        plural_name: item.ingredients.plural_name,
-        translated_names: item.ingredients.translated_names,
-        quantity: item.quantity,
-        unit: item.unit,
-        notes: item.notes,
-        subheading: item.subheading,
-        order_index: item.order_index,
-        is_plural: item.is_plural,
-      })) || [];
+      .map((item) => {
+        return {
+          id: item.ingredients.id,
+          recipe_ingredient_id: item.id,
+          singular_name: item.ingredients.singular_name,
+          plural_name: item.ingredients.plural_name,
+          translated_names: item.ingredients.translated_names,
+          name_overrides: item.name_overrides,
+          quantity: item.quantity,
+          unit: item.unit,
+          notes: item.notes,
+          subheading: item.subheading,
+          order_index: item.order_index,
+          is_plural: item.is_plural,
+        };
+      }) || [];
 
   // Separate ungrouped ingredients from grouped ones
   const ungroupedIngredients = [];
   const groupedIngredients = [];
+  
 
   ingredientsList.forEach((ingredient) => {
     if (!ingredient.subheading || ingredient.subheading.trim() === "") {

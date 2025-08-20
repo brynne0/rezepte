@@ -3,6 +3,39 @@
   margin-right: auto;
 }
 
+/* Translation notice */
+.translation-notice {
+  /* TODO - maybe make border dashed and add pink colour to variables file */
+  background-color: #f8e8e8;
+  border: 1px solid var(--red);
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1rem;
+  color: var(--dark-red);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Translation mode disabled fields */
+.translation-disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  position: relative;
+}
+
+.translation-disabled input,
+.translation-disabled button,
+.translation-disabled .input {
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+  pointer-events: none !important;
+}
+
+.translation-disabled button {
+  opacity: 0.3 !important;
+}
+
 /* Title and Servings Layout */
 .title-servings-row {
   display: flex;

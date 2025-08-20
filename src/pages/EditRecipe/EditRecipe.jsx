@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useRecipe } from "../../hooks/data/useRecipe";
@@ -10,17 +10,19 @@ const EditRecipePage = ({ categories }) => {
   const { recipe, loading } = useRecipe(id);
   const { t, i18n } = useTranslation();
   const originalUserLanguage = useRef(null);
+  const [isEditingTranslation, setIsEditingTranslation] = useState(false);
 
-  // Switch to recipe's original language when recipe loads and preserve user's language
+  // Determine if editing a recipe translation
   useEffect(() => {
     if (
       recipe &&
       recipe.original_language &&
       recipe.original_language !== i18n.language
     ) {
-      // Store the user's current language before switching
+      setIsEditingTranslation(true);
       originalUserLanguage.current = i18n.language;
-      i18n.changeLanguage(recipe.original_language);
+    } else {
+      setIsEditingTranslation(false);
     }
   }, [recipe, i18n]);
 
@@ -49,6 +51,7 @@ const EditRecipePage = ({ categories }) => {
       categories={categories}
       initialRecipe={recipe}
       title={t("edit_recipe")}
+      isEditingTranslation={isEditingTranslation}
     />
   );
 };

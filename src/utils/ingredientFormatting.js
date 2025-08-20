@@ -68,6 +68,12 @@ export const getIngredientDisplayName = (
   ingredient,
   currentLanguage = "en"
 ) => {
+  // FIRST: Check if translation service has already processed this ingredient
+  // The translation service sets ingredient.name with the final result (including overrides)
+  if (ingredient.name) {
+    return ingredient.name;
+  }
+
   // Handle nested ingredient structure from API
   const ingredientData = ingredient.ingredients || ingredient;
 
@@ -87,11 +93,6 @@ export const getIngredientDisplayName = (
     return shouldUseIngredientPlural && translation.plural_name
       ? translation.plural_name
       : translation.singular_name;
-  }
-
-  // Fallback to translated name if available (without plural/singular consideration)
-  if (ingredient.name) {
-    return ingredient.name;
   }
 
   // Final fallback to English names
