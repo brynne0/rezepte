@@ -1,5 +1,5 @@
 import "./RecipeCard.css";
-import { Link as LinkIcon } from "lucide-react";
+import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const RecipeCard = ({ recipe, onClick }) => {
@@ -27,7 +27,7 @@ const RecipeCard = ({ recipe, onClick }) => {
           aria-label={t("open_recipe_source_link")}
           title={t("open_recipe_source_link")}
         >
-          <LinkIcon size={16} />
+          <Link size={16} />
         </a>
       )}
     </div>
