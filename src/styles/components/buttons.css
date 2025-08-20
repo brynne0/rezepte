@@ -1,5 +1,6 @@
 /* Remove grey border when clicking on mobile */
-button {
+button,
+a.btn-unstyled {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   -webkit-user-select: none;

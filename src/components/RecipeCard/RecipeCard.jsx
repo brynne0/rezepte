@@ -1,5 +1,5 @@
 import "./RecipeCard.css";
-import { Link } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const RecipeCard = ({ recipe, onClick }) => {
@@ -12,21 +12,23 @@ const RecipeCard = ({ recipe, onClick }) => {
       recipe.source.startsWith("www."));
 
   return (
-    <div className="recipe-card" onClick={() => onClick(recipe)}>
+    <div className="recipe-card" onClick={() => onClick && onClick(recipe)}>
       {/* <img className="recipe-image" src={recipe.image} /> */}
       <h4 className="recipe-card-title">{recipe.title}</h4>
       {hasSourceLink && (
-        <button
+        <a
+          href={recipe.source}
+          target="_blank"
+          rel="noopener noreferrer"
           className="btn-unstyled recipe-card-link"
           onClick={(e) => {
             e.stopPropagation(); // Prevent triggering the card click
-            window.open(recipe.source, "_blank", "noopener,noreferrer");
           }}
           aria-label={t("open_recipe_source_link")}
           title={t("open_recipe_source_link")}
         >
-          <Link size={16} />
-        </button>
+          <LinkIcon size={16} />
+        </a>
       )}
     </div>
   );
