@@ -678,7 +678,8 @@ export const updateTranslationOnly = async (
   recipeId,
   language,
   translatedData,
-  ingredientOverrides = []
+  ingredientOverrides = [],
+  ingredientNotesUpdates = []
 ) => {
   try {
     // Get current translations
@@ -718,6 +719,11 @@ export const updateTranslationOnly = async (
     // Handle ingredient name overrides
     if (ingredientOverrides && ingredientOverrides.length > 0) {
       await updateIngredientOverrides(ingredientOverrides);
+    }
+
+    // Handle ingredient notes updates
+    if (ingredientNotesUpdates && ingredientNotesUpdates.length > 0) {
+      await updateIngredientNotesTranslations(ingredientNotesUpdates);
     }
 
     return updatedTranslations[language];
@@ -776,6 +782,21 @@ const updateIngredientOverrides = async (ingredientOverrides) => {
     }
   } catch (error) {
     console.error("Failed to update ingredient overrides:", error);
+    // Don't throw error - translation update should still succeed
+  }
+};
+
+// Update ingredient notes translations for translation editing
+const updateIngredientNotesTranslations = async (ingredientNotesUpdates) => {
+  try {
+    for (const notesUpdate of ingredientNotesUpdates) {
+      const { recipe_ingredient_id, notes, language } = notesUpdate;
+      
+      // Use the existing saveIngredientNotesTranslation function
+      await saveIngredientNotesTranslation(recipe_ingredient_id, language, notes);
+    }
+  } catch (error) {
+    console.error("Failed to update ingredient notes translations:", error);
     // Don't throw error - translation update should still succeed
   }
 };

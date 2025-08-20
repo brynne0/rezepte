@@ -647,8 +647,9 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
             source: recipeData.source,
           };
           
-          // Also handle ingredient name overrides for translation
+          // Also handle ingredient name overrides and notes updates for translation
           const ingredientOverrides = [];
+          const ingredientNotesUpdates = [];
           
           // Helper function to get the original displayed name (accounting for pluralization)
           const getOriginalDisplayName = (originalIngredient) => {
@@ -659,38 +660,21 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
             return originalIngredient.name || '';
           };
           
+          // Helper function to get the original displayed notes
+          const getOriginalDisplayNotes = (originalIngredient) => {
+            if (!originalIngredient) return '';
+            return originalIngredient.notes || '';
+          };
+          
           // Collect ungrouped ingredient overrides (only for changed ingredients)
           formData.ungroupedIngredients.forEach((ingredient) => {
-            if (ingredient.name && ingredient.recipe_ingredient_id) {
+            if (ingredient.recipe_ingredient_id) {
               const originalIngredient = initialRecipe.ungroupedIngredients?.find(
                 ing => ing.recipe_ingredient_id === ingredient.recipe_ingredient_id
               );
-              const originalDisplayName = getOriginalDisplayName(originalIngredient);
               
-              // Only save override if the name actually changed
-              if (originalDisplayName !== ingredient.name) {
-                ingredientOverrides.push({
-                  recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                  name: ingredient.name,
-                  language: currentLanguage
-                });
-              }
-            }
-          });
-          
-          // Collect sectioned ingredient overrides (only for changed ingredients)
-          formData.ingredientSections.forEach((section) => {
-            section.ingredients.forEach((ingredient) => {
-              if (ingredient.name && ingredient.recipe_ingredient_id) {
-                // Find original ingredient in sections
-                let originalIngredient = null;
-                for (const originalSection of initialRecipe.ingredientSections || []) {
-                  originalIngredient = originalSection.ingredients.find(
-                    ing => ing.recipe_ingredient_id === ingredient.recipe_ingredient_id
-                  );
-                  if (originalIngredient) break;
-                }
-                
+              // Handle name overrides
+              if (ingredient.name) {
                 const originalDisplayName = getOriginalDisplayName(originalIngredient);
                 
                 // Only save override if the name actually changed
@@ -702,10 +686,66 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
                   });
                 }
               }
+              
+              // Handle notes updates
+              const originalDisplayNotes = getOriginalDisplayNotes(originalIngredient);
+              const currentNotes = ingredient.notes || '';
+              
+              // Only save notes update if the notes actually changed
+              if (originalDisplayNotes !== currentNotes) {
+                ingredientNotesUpdates.push({
+                  recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                  notes: currentNotes,
+                  language: currentLanguage
+                });
+              }
+            }
+          });
+          
+          // Collect sectioned ingredient overrides (only for changed ingredients)
+          formData.ingredientSections.forEach((section) => {
+            section.ingredients.forEach((ingredient) => {
+              if (ingredient.recipe_ingredient_id) {
+                // Find original ingredient in sections
+                let originalIngredient = null;
+                for (const originalSection of initialRecipe.ingredientSections || []) {
+                  originalIngredient = originalSection.ingredients.find(
+                    ing => ing.recipe_ingredient_id === ingredient.recipe_ingredient_id
+                  );
+                  if (originalIngredient) break;
+                }
+                
+                // Handle name overrides
+                if (ingredient.name) {
+                  const originalDisplayName = getOriginalDisplayName(originalIngredient);
+                  
+                  // Only save override if the name actually changed
+                  if (originalDisplayName !== ingredient.name) {
+                    ingredientOverrides.push({
+                      recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                      name: ingredient.name,
+                      language: currentLanguage
+                    });
+                  }
+                }
+                
+                // Handle notes updates
+                const originalDisplayNotes = getOriginalDisplayNotes(originalIngredient);
+                const currentNotes = ingredient.notes || '';
+                
+                // Only save notes update if the notes actually changed
+                if (originalDisplayNotes !== currentNotes) {
+                  ingredientNotesUpdates.push({
+                    recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                    notes: currentNotes,
+                    language: currentLanguage
+                  });
+                }
+              }
             });
           });
           
-          await updateTranslation(initialRecipe.id, currentLanguage, translationData, ingredientOverrides);
+          await updateTranslation(initialRecipe.id, currentLanguage, translationData, ingredientOverrides, ingredientNotesUpdates);
           result = initialRecipe; // Return original recipe data
         } else {
           // Normal recipe editing - update the original recipe

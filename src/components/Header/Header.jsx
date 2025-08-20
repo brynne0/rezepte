@@ -189,9 +189,9 @@ const Header = ({
         <div className="header-container flex-between">
           {/* Login and Logout */}
           <div className="logo-language-wrapper">
-            <button className="btn-unstyled">
-              <Squirrel size={40} className="header-logo" />
-            </button>
+            {/* <button className="btn-unstyled"> */}
+            <Squirrel size={40} className="header-logo" />
+            {/* </button> */}
 
             {/* {isMe && (
                 <Squirrel
