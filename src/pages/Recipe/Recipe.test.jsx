@@ -511,7 +511,7 @@ describe("Recipe Component", () => {
       expect(screen.getByText(/3 rice/)).toBeInTheDocument();
     });
 
-    test("uses database fields for English pluralization", () => {
+    test("uses processed name field first", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [
@@ -521,15 +521,15 @@ describe("Recipe Component", () => {
             quantity: "2",
             singular_name: "flour",
             plural_name: "flours",
-            name: "Mehl", // Translated name exists but English prioritises database
+            name: "Mehl", // Processed name from translation service takes priority
             is_plural: false,
           },
         ],
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 flour/)).toBeInTheDocument();
-      expect(screen.queryByText(/2 Mehl/)).not.toBeInTheDocument();
+      expect(screen.getByText(/2 Mehl/)).toBeInTheDocument();
+      expect(screen.queryByText(/2 flour/)).not.toBeInTheDocument();
     });
 
     test("uses is_plural for sectioned ingredients in English", () => {
@@ -657,7 +657,7 @@ describe("Recipe Component", () => {
       mockLanguage = "en";
     });
 
-    test("handles ingredient sections with database fallback", () => {
+    test("handles ingredient sections with processed names", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [],
@@ -672,7 +672,7 @@ describe("Recipe Component", () => {
                 unit: "ml",
                 singular_name: "water",
                 plural_name: "water",
-                name: "Wasser", // Has translated name but English uses database fields
+                name: "Wasser", // Processed name from translation service takes priority
                 is_plural: false,
               },
               {
@@ -682,7 +682,7 @@ describe("Recipe Component", () => {
                 unit: "g",
                 singular_name: "flour",
                 plural_name: "flour",
-                name: "Mehl", // Has translated name but English uses database fields
+                name: "Mehl", // Processed name from translation service takes priority
                 is_plural: false,
               },
             ],
@@ -692,9 +692,9 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText("Für den Teig")).toBeInTheDocument();
-      // English language uses database fields (singular_name/plural_name) for proper pluralization
-      expect(screen.getByText(/400 ml water/)).toBeInTheDocument();
-      expect(screen.getByText(/500 g flour/)).toBeInTheDocument();
+      // Uses processed names from translation service (including overrides)
+      expect(screen.getByText(/400 ml Wasser/)).toBeInTheDocument();
+      expect(screen.getByText(/500 g Mehl/)).toBeInTheDocument();
     });
 
     test("handles ingredients with translated notes", () => {

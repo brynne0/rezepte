@@ -291,14 +291,15 @@ const RecipeForm = ({
                               >
                                 {/* Ingredient Drag Handle */}
                                 <div
-                                  {...(isEditingTranslation
-                                    ? {}
-                                    : provided.dragHandleProps)}
+                                  {...provided.dragHandleProps}
                                   className={`drag-handle ${
                                     isEditingTranslation
                                       ? "translation-disabled"
                                       : ""
                                   }`}
+                                  style={{
+                                    pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                  }}
                                 >
                                   <GripHorizontal size={16} />
                                 </div>
@@ -507,14 +508,15 @@ const RecipeForm = ({
                                 {/* Section Header */}
                                 <div className="flex-row">
                                   <div
-                                    {...(isEditingTranslation
-                                      ? {}
-                                      : provided.dragHandleProps)}
+                                    {...provided.dragHandleProps}
                                     className={`drag-handle ${
                                       isEditingTranslation
                                         ? "translation-disabled"
                                         : ""
                                     }`}
+                                    style={{
+                                      pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                    }}
                                   >
                                     <GripHorizontal size={16} />
                                   </div>
@@ -580,14 +582,15 @@ const RecipeForm = ({
                                               >
                                                 {/* Ingredient Drag Handle */}
                                                 <div
-                                                  {...(isEditingTranslation
-                                                    ? {}
-                                                    : provided.dragHandleProps)}
+                                                  {...provided.dragHandleProps}
                                                   className={`drag-handle ${
                                                     isEditingTranslation
                                                       ? "translation-disabled"
                                                       : ""
                                                   }`}
+                                                  style={{
+                                                    pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                                  }}
                                                 >
                                                   <GripHorizontal size={16} />
                                                 </div>

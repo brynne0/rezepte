@@ -34,6 +34,7 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
           (ing) => ({
             tempId: generateUniqueId(),
             ingredient_id: ing.ingredient_id || "",
+            recipe_ingredient_id: ing.recipe_ingredient_id || "",
             name: ing.name || ing.singular_name || "",
             quantity: ing.quantity || "",
             unit: ing.unit || "",
@@ -48,6 +49,7 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
             ingredients: section.ingredients.map((ing) => ({
               tempId: generateUniqueId(),
               ingredient_id: ing.ingredient_id || "",
+              recipe_ingredient_id: ing.recipe_ingredient_id || "",
               name: ing.name || ing.singular_name || "",
               quantity: ing.quantity || "",
               unit: ing.unit || "",
@@ -636,7 +638,7 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
       if (initialRecipe) {
         // Edit mode
         if (isEditingTranslation) {
-          // Translation editing mode - only update the translation data
+          // Translation editing mode - update translation data and ingredient overrides
           const currentLanguage = i18n.language.split("-")[0];
           const translationData = {
             title: recipeData.title,
@@ -644,7 +646,66 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
             notes: recipeData.notes,
             source: recipeData.source,
           };
-          await updateTranslation(initialRecipe.id, currentLanguage, translationData);
+          
+          // Also handle ingredient name overrides for translation
+          const ingredientOverrides = [];
+          
+          // Helper function to get the original displayed name (accounting for pluralization)
+          const getOriginalDisplayName = (originalIngredient) => {
+            if (!originalIngredient) return '';
+            
+            // This should return exactly what the user saw when they opened the translation
+            // which is what's in the 'name' field after translation processing
+            return originalIngredient.name || '';
+          };
+          
+          // Collect ungrouped ingredient overrides (only for changed ingredients)
+          formData.ungroupedIngredients.forEach((ingredient) => {
+            if (ingredient.name && ingredient.recipe_ingredient_id) {
+              const originalIngredient = initialRecipe.ungroupedIngredients?.find(
+                ing => ing.recipe_ingredient_id === ingredient.recipe_ingredient_id
+              );
+              const originalDisplayName = getOriginalDisplayName(originalIngredient);
+              
+              // Only save override if the name actually changed
+              if (originalDisplayName !== ingredient.name) {
+                ingredientOverrides.push({
+                  recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                  name: ingredient.name,
+                  language: currentLanguage
+                });
+              }
+            }
+          });
+          
+          // Collect sectioned ingredient overrides (only for changed ingredients)
+          formData.ingredientSections.forEach((section) => {
+            section.ingredients.forEach((ingredient) => {
+              if (ingredient.name && ingredient.recipe_ingredient_id) {
+                // Find original ingredient in sections
+                let originalIngredient = null;
+                for (const originalSection of initialRecipe.ingredientSections || []) {
+                  originalIngredient = originalSection.ingredients.find(
+                    ing => ing.recipe_ingredient_id === ingredient.recipe_ingredient_id
+                  );
+                  if (originalIngredient) break;
+                }
+                
+                const originalDisplayName = getOriginalDisplayName(originalIngredient);
+                
+                // Only save override if the name actually changed
+                if (originalDisplayName !== ingredient.name) {
+                  ingredientOverrides.push({
+                    recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                    name: ingredient.name,
+                    language: currentLanguage
+                  });
+                }
+              }
+            });
+          });
+          
+          await updateTranslation(initialRecipe.id, currentLanguage, translationData, ingredientOverrides);
           result = initialRecipe; // Return original recipe data
         } else {
           // Normal recipe editing - update the original recipe

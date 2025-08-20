@@ -55,12 +55,12 @@ export const useRecipeActions = () => {
     }
   };
 
-  const handleUpdateTranslation = async (id, language, translatedData) => {
+  const handleUpdateTranslation = async (id, language, translatedData, ingredientOverrides = []) => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await updateTranslationOnly(id, language, translatedData);
+      const result = await updateTranslationOnly(id, language, translatedData, ingredientOverrides);
       return result;
     } catch (err) {
       const errorMessage = err.message || "Failed to update translation";

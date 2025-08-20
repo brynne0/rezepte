@@ -244,6 +244,11 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
 const getIngredientDisplayName = async (ingredient, targetLanguage) => {
   const usePlural = ingredient.is_plural || false;
 
+  // Check for recipe-specific name overrides
+  if (ingredient.name_overrides && ingredient.name_overrides[targetLanguage]) {
+    return ingredient.name_overrides[targetLanguage];
+  }
+
   // If target language is English, use database columns
   if (targetLanguage === "en") {
     const result =
@@ -672,7 +677,8 @@ export const updateRecipeTranslations = async (
 export const updateTranslationOnly = async (
   recipeId,
   language,
-  translatedData
+  translatedData,
+  ingredientOverrides = []
 ) => {
   try {
     // Get current translations
@@ -709,6 +715,11 @@ export const updateTranslationOnly = async (
       throw new Error(`Failed to update translation: ${updateError.message}`);
     }
 
+    // Handle ingredient name overrides
+    if (ingredientOverrides && ingredientOverrides.length > 0) {
+      await updateIngredientOverrides(ingredientOverrides);
+    }
+
     return updatedTranslations[language];
   } catch (error) {
     console.error("Error updating translation:", error);
@@ -725,6 +736,47 @@ export const clearRecipeTranslations = async (recipeId) => {
       .eq("id", recipeId);
   } catch (error) {
     console.error("Failed to clear recipe translations:", error);
+  }
+};
+
+// Update ingredient name overrides for translation editing
+const updateIngredientOverrides = async (ingredientOverrides) => {
+  try {
+    for (const override of ingredientOverrides) {
+      const { recipe_ingredient_id, name, language } = override;
+      
+      // Get current name_overrides for this ingredient
+      const { data: currentIngredient, error: fetchError } = await supabase
+        .from("recipe_ingredients")
+        .select("name_overrides")
+        .eq("id", recipe_ingredient_id)
+        .single();
+
+      if (fetchError) {
+        console.error(`Failed to fetch ingredient ${recipe_ingredient_id}:`, fetchError);
+        continue; // Skip this override and continue with others
+      }
+
+      // Merge the new override with existing overrides
+      const updatedOverrides = {
+        ...(currentIngredient.name_overrides || {}),
+        [language]: name,
+      };
+
+      // Update the database
+      const { error: updateError } = await supabase
+        .from("recipe_ingredients")
+        .update({ name_overrides: updatedOverrides })
+        .eq("id", recipe_ingredient_id);
+
+      if (updateError) {
+        console.error(`Failed to update ingredient override ${recipe_ingredient_id}:`, updateError);
+        // Continue with other overrides even if one fails
+      }
+    }
+  } catch (error) {
+    console.error("Failed to update ingredient overrides:", error);
+    // Don't throw error - translation update should still succeed
   }
 };
 
