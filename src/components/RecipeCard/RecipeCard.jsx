@@ -11,11 +11,21 @@ const RecipeCard = ({ recipe, onClick }) => {
       recipe.source.startsWith("https://") ||
       recipe.source.startsWith("www."));
 
+  // Check if recipe has no content (no ingredients and no instructions)
+  const hasNoIngredients = 
+    (!recipe.ingredients || recipe.ingredients.length === 0) &&
+    (!recipe.ungroupedIngredients || recipe.ungroupedIngredients.length === 0) &&
+    (!recipe.ingredientSections || recipe.ingredientSections.length === 0);
+  
+  const hasNoInstructions = !recipe.instructions || recipe.instructions.length === 0;
+  
+  const hasNoContent = hasNoIngredients && hasNoInstructions;
+
   return (
     <div className="recipe-card" onClick={() => onClick && onClick(recipe)}>
       {/* <img className="recipe-image" src={recipe.image} /> */}
       <h4 className="recipe-card-title">{recipe.title}</h4>
-      {hasSourceLink && (
+      {hasSourceLink && hasNoContent && (
         <a
           href={recipe.source}
           target="_blank"

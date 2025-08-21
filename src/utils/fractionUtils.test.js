@@ -40,6 +40,21 @@ describe("fractionUtils", () => {
       expect(parseFraction("1 1/3")).toBeCloseTo(1.333, 2);
     });
 
+    test("preserves incomplete mixed fractions while user types", () => {
+      expect(parseFraction("1 ")).toBe("1 ");
+      expect(parseFraction("2 ")).toBe("2 ");
+      expect(parseFraction("10 ")).toBe("10 ");
+      expect(parseFraction("1 1")).toBe("1 1");
+      expect(parseFraction("2 3")).toBe("2 3");
+      expect(parseFraction("1 1/")).toBe("1 1/");
+    });
+
+    test("trims trailing spaces from complete fractions", () => {
+      expect(parseFraction("1 1/2 ")).toBe(1.5); // Complete fraction, should be parsed
+      expect(parseFraction("2 3/4  ")).toBe(2.75); // Complete fraction with multiple spaces
+      expect(parseFraction("1/2 ")).toBe(0.5); // Simple fraction with trailing space
+    });
+
     test("handles invalid input gracefully", () => {
       expect(parseFraction("invalid")).toBe("invalid");
       expect(parseFraction("1/")).toBe("1/");
@@ -50,6 +65,10 @@ describe("fractionUtils", () => {
     test("handles whitespace", () => {
       expect(parseFraction("  1/4  ")).toBe(0.25);
       expect(parseFraction(" 1 1/2 ")).toBe(1.5);
+      // Test multiple spaces between whole number and fraction
+      expect(parseFraction("1  1/2")).toBe(1.5);
+      expect(parseFraction("1   1/2")).toBe(1.5);
+      expect(parseFraction("2    3/4")).toBe(2.75);
     });
   });
 

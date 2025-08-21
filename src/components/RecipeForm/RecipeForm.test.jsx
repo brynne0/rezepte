@@ -254,13 +254,13 @@ describe("RecipeForm", () => {
       const toggleButton = screen.getByLabelText(/switch_to/);
       const sourceInput = screen.getByDisplayValue("https://example.com");
 
-      // Initially should be in link mode
-      expect(sourceInput).toHaveAttribute("placeholder", "source_link");
+      // Initially should be in note mode (new default)
+      expect(sourceInput).toHaveAttribute("placeholder", "source_note");
 
-      // Click toggle to switch to note mode
+      // Click toggle to switch to link mode
       fireEvent.click(toggleButton);
 
-      expect(sourceInput).toHaveAttribute("placeholder", "source_note");
+      expect(sourceInput).toHaveAttribute("placeholder", "source_link");
     });
   });
 
