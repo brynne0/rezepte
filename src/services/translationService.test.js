@@ -420,7 +420,9 @@ describe("Translation Service", () => {
       // Title should have hyphen replaced with space
       expect(result.title).toBe("Test Gurke");
       // Instructions should also have hyphens replaced with spaces
-      expect(result.instructions[0]).toBe("Mischen Sie die Test Gurke gründlich.");
+      expect(result.instructions[0]).toBe(
+        "Mischen Sie die Test Gurke gründlich."
+      );
     });
 
     test("handles multiple hyphens in translated text", async () => {
