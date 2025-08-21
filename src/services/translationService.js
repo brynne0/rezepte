@@ -29,7 +29,13 @@ const translateText = async (text, targetLanguage) => {
       throw new Error(`Translation error: ${error.message}`);
     }
 
-    return data.translatedText || text;
+    let result = data.translatedText || text;
+    
+    // Post-process translated text: replace hyphens with spaces for better readability
+    // This handles DeepL's compound word formatting in German translations
+    result = result.replace(/-/g, ' ');
+    
+    return result;
   } catch (error) {
     console.error("Translation failed:", error);
     return text; // Return original text if translation fails

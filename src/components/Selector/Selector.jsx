@@ -12,6 +12,7 @@ const Selector = ({
   options = [],
   placeholder,
   type = "generic", // "unit", "category", or "generic"
+  onKeyDown, // Custom keydown handler
 }) => {
   const { t } = useTranslation();
 
@@ -66,6 +67,13 @@ const Selector = ({
 
   // Close dropdown when clicking outside
   const dropdownRef = useClickOutside(() => {
+    // If there's a selected option, use it before closing
+    if (selectedIndex >= 0 && filteredOptions[selectedIndex]) {
+      const selectedOption = filteredOptions[selectedIndex];
+      if (selectedOption.value !== value) {
+        onChange(selectedOption.value);
+      }
+    }
     setIsOpen(false);
     setSearchTerm("");
     setSelectedIndex(-1);
@@ -141,6 +149,10 @@ const Selector = ({
         e.preventDefault();
         if (selectedIndex >= 0 && filteredOptions[selectedIndex]) {
           handleOptionSelect(filteredOptions[selectedIndex]);
+          // Call custom onKeyDown handler after selection (for navigation flow)
+          if (onKeyDown) {
+            setTimeout(() => onKeyDown(e), 10);
+          }
         }
         break;
       case "Escape":

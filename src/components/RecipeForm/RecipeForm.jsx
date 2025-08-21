@@ -46,6 +46,7 @@ const RecipeForm = ({
     removeIngredient,
     handleDragEnd,
     handleEnter,
+    handleIngredientFieldEnter,
     handleSubmit,
     handleCancel,
     handleDelete,
@@ -224,11 +225,7 @@ const RecipeForm = ({
                         )
                       : [...currentCategories, category.value];
 
-                    handleInputChange(
-                      "categories",
-                      newCategories,
-                      !!validationErrors.category
-                    );
+                    handleInputChange("categories", newCategories, true);
                   }}
                 >
                   <h3 className="forta">{category.label}</h3>
@@ -298,7 +295,9 @@ const RecipeForm = ({
                                       : ""
                                   }`}
                                   style={{
-                                    pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                    pointerEvents: isEditingTranslation
+                                      ? "none"
+                                      : "auto",
                                   }}
                                 >
                                   <GripHorizontal size={16} />
@@ -321,6 +320,15 @@ const RecipeForm = ({
                                           : null
                                       );
                                     }}
+                                    onKeyDown={(e) =>
+                                      handleIngredientFieldEnter(
+                                        e,
+                                        "name",
+                                        "ungrouped",
+                                        ingredient.tempId,
+                                        index
+                                      )
+                                    }
                                     onBlur={(e) => {
                                       const value =
                                         i18n.language === "de"
@@ -381,6 +389,15 @@ const RecipeForm = ({
                                             e.target.value
                                           )
                                         }
+                                        onKeyDown={(e) =>
+                                          handleIngredientFieldEnter(
+                                            e,
+                                            "quantity",
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            index
+                                          )
+                                        }
                                         className="input input--full-width input--edit"
                                         placeholder={t("quantity")}
                                         disabled={isEditingTranslation}
@@ -406,6 +423,15 @@ const RecipeForm = ({
                                             value
                                           )
                                         }
+                                        onKeyDown={(e) =>
+                                          handleIngredientFieldEnter(
+                                            e,
+                                            "unit",
+                                            "ungrouped",
+                                            ingredient.tempId,
+                                            index
+                                          )
+                                        }
                                         type="unit"
                                         className="input--full-width"
                                         disabled={isEditingTranslation}
@@ -422,6 +448,15 @@ const RecipeForm = ({
                                           ingredient.tempId,
                                           "notes",
                                           e.target.value.toLowerCase()
+                                        )
+                                      }
+                                      onKeyDown={(e) =>
+                                        handleIngredientFieldEnter(
+                                          e,
+                                          "notes",
+                                          "ungrouped",
+                                          ingredient.tempId,
+                                          index
                                         )
                                       }
                                       className="input input--full-width input--edit"
@@ -515,7 +550,9 @@ const RecipeForm = ({
                                         : ""
                                     }`}
                                     style={{
-                                      pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                      pointerEvents: isEditingTranslation
+                                        ? "none"
+                                        : "auto",
                                     }}
                                   >
                                     <GripHorizontal size={16} />
@@ -589,7 +626,10 @@ const RecipeForm = ({
                                                       : ""
                                                   }`}
                                                   style={{
-                                                    pointerEvents: isEditingTranslation ? 'none' : 'auto'
+                                                    pointerEvents:
+                                                      isEditingTranslation
+                                                        ? "none"
+                                                        : "auto",
                                                   }}
                                                 >
                                                   <GripHorizontal size={16} />
@@ -614,6 +654,15 @@ const RecipeForm = ({
                                                           : null
                                                       );
                                                     }}
+                                                    onKeyDown={(e) =>
+                                                      handleIngredientFieldEnter(
+                                                        e,
+                                                        "name",
+                                                        section.id,
+                                                        ingredient.tempId,
+                                                        ingredientIndex
+                                                      )
+                                                    }
                                                     onBlur={(e) => {
                                                       const value =
                                                         i18n.language === "de"
@@ -690,6 +739,15 @@ const RecipeForm = ({
                                                         disabled={
                                                           isEditingTranslation
                                                         }
+                                                        onKeyDown={(e) =>
+                                                          handleIngredientFieldEnter(
+                                                            e,
+                                                            "quantity",
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            ingredientIndex
+                                                          )
+                                                        }
                                                         onWheel={(e) =>
                                                           e.target.blur()
                                                         }
@@ -717,6 +775,15 @@ const RecipeForm = ({
                                                           )
                                                         }
                                                         type="unit"
+                                                        onKeyDown={(e) =>
+                                                          handleIngredientFieldEnter(
+                                                            e,
+                                                            "unit",
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            ingredientIndex
+                                                          )
+                                                        }
                                                         className="input--full-width"
                                                         disabled={
                                                           isEditingTranslation
@@ -736,6 +803,15 @@ const RecipeForm = ({
                                                           ingredient.tempId,
                                                           "notes",
                                                           e.target.value.toLowerCase()
+                                                        )
+                                                      }
+                                                      onKeyDown={(e) =>
+                                                        handleIngredientFieldEnter(
+                                                          e,
+                                                          "notes",
+                                                          section.id,
+                                                          ingredient.tempId,
+                                                          ingredientIndex
                                                         )
                                                       }
                                                       className="input input--full-width input--edit"

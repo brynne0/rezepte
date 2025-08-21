@@ -166,8 +166,10 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
     setFormData((prev) => ({ ...prev, [field]: value }));
 
     // Clear validation error for this field when user types (like auth form)
-    if (clearError || validationErrors[field]) {
-      setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+    // Special handling for categories field since error key is "category"
+    const errorKey = field === "categories" ? "category" : field;
+    if (clearError || validationErrors[errorKey]) {
+      setValidationErrors((prev) => ({ ...prev, [errorKey]: "" }));
     }
   };
 
@@ -260,7 +262,10 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
         ".instruction-row .input"
       );
       if (instructionTextareas.length > 0) {
-        instructionTextareas[instructionTextareas.length - 1].focus();
+        const lastTextarea = instructionTextareas[instructionTextareas.length - 1];
+        lastTextarea.focus();
+        // Trigger click to ensure mobile keyboard opens
+        lastTextarea.click();
       }
     }, 10);
   };
@@ -318,11 +323,28 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
 
     // Focus on the new ingredient name input
     setTimeout(() => {
-      const ingredientNameInputs = document.querySelectorAll(
-        '[id^="ingredient-name-"]'
-      );
-      if (ingredientNameInputs.length > 0) {
-        ingredientNameInputs[ingredientNameInputs.length - 1].focus();
+      if (sectionId === "ungrouped") {
+        // Focus on the last ungrouped ingredient
+        const ungroupedInputs = document.querySelectorAll(
+          '[id^="ingredient-name-ungrouped-"]'
+        );
+        if (ungroupedInputs.length > 0) {
+          const lastInput = ungroupedInputs[ungroupedInputs.length - 1];
+          lastInput.focus();
+          // Trigger click to ensure mobile keyboard opens
+          lastInput.click();
+        }
+      } else {
+        // Focus on the last ingredient in the specific section
+        const sectionInputs = document.querySelectorAll(
+          `[id^="ingredient-name-${sectionId}-"]`
+        );
+        if (sectionInputs.length > 0) {
+          const lastInput = sectionInputs[sectionInputs.length - 1];
+          lastInput.focus();
+          // Trigger click to ensure mobile keyboard opens
+          lastInput.click();
+        }
       }
     }, 10);
   };
@@ -351,6 +373,14 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
         },
       ],
     }));
+
+    // Focus on the new section title input
+    setTimeout(() => {
+      const sectionTitleInputs = document.querySelectorAll('.section-title-input');
+      if (sectionTitleInputs.length > 0) {
+        sectionTitleInputs[sectionTitleInputs.length - 1].focus();
+      }
+    }, 10);
   };
 
   const removeSection = (sectionId) => {
@@ -548,6 +578,36 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
           const newTextareas = document.querySelectorAll(".input--textarea");
           newTextareas[newTextareas.length - 1].focus();
         }, 10);
+      }
+    }
+  };
+
+  const handleIngredientFieldEnter = (event, currentField, sectionId, tempId, index) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      
+      const fieldOrder = ['name', 'quantity', 'unit', 'notes'];
+      const currentIndex = fieldOrder.indexOf(currentField);
+      
+      if (currentIndex < fieldOrder.length - 1) {
+        // Move to next field in same ingredient
+        const nextField = fieldOrder[currentIndex + 1];
+        let nextInputId;
+        
+        if (sectionId === 'ungrouped') {
+          nextInputId = `ingredient-${nextField}-ungrouped-${index}-${tempId}`;
+        } else {
+          nextInputId = `ingredient-${nextField}-${sectionId}-${index}-${tempId}`;
+        }
+        
+        const nextInput = document.getElementById(nextInputId);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.click(); // For mobile keyboards
+        }
+      } else {
+        // Last field (notes) - create new ingredient and focus on its name
+        addIngredient(sectionId);
       }
     }
   };
@@ -792,6 +852,7 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
   return {
     formData,
     validationErrors,
+    setValidationErrors,
     submissionError,
     loading,
     error,
@@ -809,6 +870,7 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
     removeIngredient,
     handleDragEnd,
     handleEnter,
+    handleIngredientFieldEnter,
     handleSubmit,
     handleCancel,
     handleDelete,

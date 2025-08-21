@@ -125,6 +125,7 @@ describe("RecipeForm", () => {
     removeIngredient: vi.fn(),
     handleDragEnd: vi.fn(),
     handleEnter: vi.fn(),
+    handleIngredientFieldEnter: vi.fn(),
     handleSubmit: vi.fn(),
     handleCancel: vi.fn(),
     handleDelete: vi.fn(),
@@ -206,7 +207,7 @@ describe("RecipeForm", () => {
       expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
         "categories",
         ["desserts", "main-dishes"],
-        false
+        true
       );
     });
 
@@ -956,6 +957,88 @@ describe("RecipeForm", () => {
 
     it("handles missing categories prop", () => {
       expect(() => renderComponent({ categories: undefined })).not.toThrow();
+    });
+  });
+
+  describe("Ingredient Field Navigation", () => {
+    beforeEach(() => {
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        handleIngredientFieldEnter: vi.fn(),
+        formData: {
+          ...mockFormData,
+          ungroupedIngredients: [
+            {
+              tempId: "temp-1",
+              name: "flour",
+              quantity: "2",
+              unit: "cups",
+              notes: "sifted",
+            },
+          ],
+          ingredientSections: [
+            {
+              id: "section-1",
+              subheading: "For the sauce",
+              ingredients: [
+                {
+                  tempId: "temp-2",
+                  name: "butter",
+                  quantity: "1",
+                  unit: "tbsp",
+                  notes: "melted",
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    it("renders ingredient fields with navigation handlers without errors", () => {
+      expect(() => renderComponent()).not.toThrow();
+      
+      // Verify that handleIngredientFieldEnter is available in hook
+      expect(mockHookReturn.handleIngredientFieldEnter).toBeDefined();
+      expect(typeof mockHookReturn.handleIngredientFieldEnter).toBe("function");
+    });
+
+    it("renders ungrouped ingredient fields with proper IDs for navigation", () => {
+      renderComponent();
+      
+      // Check that ungrouped ingredient fields exist with correct IDs
+      expect(document.querySelector('#ingredient-name-ungrouped-0-temp-1')).toBeInTheDocument();
+      expect(document.querySelector('#ingredient-quantity-ungrouped-0-temp-1')).toBeInTheDocument();
+      expect(document.querySelector('#ingredient-unit-ungrouped-0-temp-1')).toBeInTheDocument();
+      expect(document.querySelector('#ingredient-notes-ungrouped-0-temp-1')).toBeInTheDocument();
+    });
+
+    it("renders section ingredient fields with proper IDs for navigation", () => {
+      renderComponent();
+      
+      // Check that section ingredient fields exist with correct IDs
+      expect(document.querySelector('#ingredient-name-section-1-0-temp-2')).toBeInTheDocument();
+      expect(document.querySelector('#ingredient-quantity-section-1-0-temp-2')).toBeInTheDocument();
+      expect(document.querySelector('#ingredient-unit-section-1-0-temp-2')).toBeInTheDocument();
+      expect(document.querySelector('#ingredient-notes-section-1-0-temp-2')).toBeInTheDocument();
+    });
+
+    it("ingredient fields have onKeyDown attribute for navigation", () => {
+      renderComponent();
+      
+      const nameInput = document.querySelector('#ingredient-name-ungrouped-0-temp-1');
+      const quantityInput = document.querySelector('#ingredient-quantity-ungrouped-0-temp-1');
+      const notesInput = document.querySelector('#ingredient-notes-ungrouped-0-temp-1');
+      
+      // Test that elements exist and can receive keydown events
+      expect(nameInput).toBeInTheDocument();
+      expect(quantityInput).toBeInTheDocument();
+      expect(notesInput).toBeInTheDocument();
+      
+      // Test that keydown events can be fired (verifies event handler exists)
+      expect(() => fireEvent.keyDown(nameInput, { key: "Enter" })).not.toThrow();
+      expect(() => fireEvent.keyDown(quantityInput, { key: "Enter" })).not.toThrow();
+      expect(() => fireEvent.keyDown(notesInput, { key: "Enter" })).not.toThrow();
     });
   });
 });

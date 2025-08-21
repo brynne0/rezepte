@@ -182,7 +182,6 @@ const AccountSettings = () => {
       setIsEditingLanguage(false);
       setSuccessMessage(t("successfully_updated_language"));
       setTimeout(() => setSuccessMessage(""), 3000);
-      console.log(`Language saved to ${tempLanguage}`);
     } catch (err) {
       setError(`Failed to update language: ${err.message}`);
       console.error("Language save error:", err);

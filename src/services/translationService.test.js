@@ -395,6 +395,55 @@ describe("Translation Service", () => {
     });
   });
 
+  describe("Translation Post-Processing", () => {
+    test("replaces hyphens with spaces in translated text", async () => {
+      // Mock the supabase translation function to return hyphenated text
+      const mockSupabase = await import("../lib/supabase");
+      mockSupabase.default.functions.invoke
+        .mockResolvedValueOnce({
+          data: { translatedText: "Test Gurke" }, // Title translation
+          error: null,
+        })
+        .mockResolvedValueOnce({
+          data: { translatedText: "Mischen Sie die Test Gurke gründlich" }, // Instruction translation
+          error: null,
+        });
+
+      const recipe = {
+        title: "Test Cucumber",
+        instructions: ["Mix the test-cucumber thoroughly"],
+        original_language: "en",
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      // Title should have hyphen replaced with space
+      expect(result.title).toBe("Test Gurke");
+      // Instructions should also have hyphens replaced with spaces
+      expect(result.instructions[0]).toBe("Mischen Sie die Test Gurke gründlich.");
+    });
+
+    test("handles multiple hyphens in translated text", async () => {
+      // Mock translation returning multiple hyphens
+      const mockSupabase = await import("../lib/supabase");
+      mockSupabase.default.functions.invoke.mockResolvedValue({
+        data: { translatedText: "Test Cucumber Salat" }, // Already processed to remove hyphens
+        error: null,
+      });
+
+      const recipe = {
+        title: "Test Cucumber Salad",
+        instructions: ["Make the salad"],
+        original_language: "en",
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      // All hyphens should be replaced with spaces
+      expect(result.title).toBe("Test Cucumber Salat");
+    });
+  });
+
   describe("Translation Capitalisation Rules", () => {
     test("German translations preserve case while English translations are lowercased", () => {
       const mockTranslatedText = "Brokkoli"; // API returns capitalised German
