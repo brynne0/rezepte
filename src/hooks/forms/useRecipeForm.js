@@ -323,14 +323,28 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
 
     // Focus on the new ingredient name input
     setTimeout(() => {
-      const ingredientNameInputs = document.querySelectorAll(
-        '[id^="ingredient-name-"]'
-      );
-      if (ingredientNameInputs.length > 0) {
-        const lastInput = ingredientNameInputs[ingredientNameInputs.length - 1];
-        lastInput.focus();
-        // Trigger click to ensure mobile keyboard opens
-        lastInput.click();
+      if (sectionId === "ungrouped") {
+        // Focus on the last ungrouped ingredient
+        const ungroupedInputs = document.querySelectorAll(
+          '[id^="ingredient-name-ungrouped-"]'
+        );
+        if (ungroupedInputs.length > 0) {
+          const lastInput = ungroupedInputs[ungroupedInputs.length - 1];
+          lastInput.focus();
+          // Trigger click to ensure mobile keyboard opens
+          lastInput.click();
+        }
+      } else {
+        // Focus on the last ingredient in the specific section
+        const sectionInputs = document.querySelectorAll(
+          `[id^="ingredient-name-${sectionId}-"]`
+        );
+        if (sectionInputs.length > 0) {
+          const lastInput = sectionInputs[sectionInputs.length - 1];
+          lastInput.focus();
+          // Trigger click to ensure mobile keyboard opens
+          lastInput.click();
+        }
       }
     }, 10);
   };
