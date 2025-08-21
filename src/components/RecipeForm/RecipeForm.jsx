@@ -69,14 +69,14 @@ const RecipeForm = ({
         return "note";
       }
     }
-    return "link"; // default to link mode
+    return "note"; // default to note mode
   });
 
-  // Smart detection: auto-switch to link mode when URL is detected
+  // Smart detection: auto-switch between link and note modes
   const handleSourceChange = (value) => {
     handleInputChange("source", value);
 
-    // Auto-detect URLs and switch mode
+    // Auto-detect URLs and switch to link mode
     if (
       value &&
       (value.startsWith("http://") ||
@@ -86,6 +86,9 @@ const RecipeForm = ({
       if (sourceMode !== "link") {
         setSourceMode("link");
       }
+    } else if (value && sourceMode !== "note") {
+      // Auto-switch to note mode for non-link content
+      setSourceMode("note");
     }
   };
 
