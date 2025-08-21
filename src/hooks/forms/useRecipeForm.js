@@ -582,6 +582,36 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
     }
   };
 
+  const handleIngredientFieldEnter = (event, currentField, sectionId, tempId, index) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      
+      const fieldOrder = ['name', 'quantity', 'unit', 'notes'];
+      const currentIndex = fieldOrder.indexOf(currentField);
+      
+      if (currentIndex < fieldOrder.length - 1) {
+        // Move to next field in same ingredient
+        const nextField = fieldOrder[currentIndex + 1];
+        let nextInputId;
+        
+        if (sectionId === 'ungrouped') {
+          nextInputId = `ingredient-${nextField}-ungrouped-${index}-${tempId}`;
+        } else {
+          nextInputId = `ingredient-${nextField}-${sectionId}-${index}-${tempId}`;
+        }
+        
+        const nextInput = document.getElementById(nextInputId);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.click(); // For mobile keyboards
+        }
+      } else {
+        // Last field (notes) - create new ingredient and focus on its name
+        addIngredient(sectionId);
+      }
+    }
+  };
+
   const handleValidation = async () => {
     const errors = validateRecipeForm(formData, t);
 
@@ -840,6 +870,7 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
     removeIngredient,
     handleDragEnd,
     handleEnter,
+    handleIngredientFieldEnter,
     handleSubmit,
     handleCancel,
     handleDelete,

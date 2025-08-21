@@ -12,6 +12,7 @@ const Selector = ({
   options = [],
   placeholder,
   type = "generic", // "unit", "category", or "generic"
+  onKeyDown, // Custom keydown handler
 }) => {
   const { t } = useTranslation();
 
@@ -148,6 +149,10 @@ const Selector = ({
         e.preventDefault();
         if (selectedIndex >= 0 && filteredOptions[selectedIndex]) {
           handleOptionSelect(filteredOptions[selectedIndex]);
+          // Call custom onKeyDown handler after selection (for navigation flow)
+          if (onKeyDown) {
+            setTimeout(() => onKeyDown(e), 10);
+          }
         }
         break;
       case "Escape":
