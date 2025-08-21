@@ -66,6 +66,13 @@ const Selector = ({
 
   // Close dropdown when clicking outside
   const dropdownRef = useClickOutside(() => {
+    // If there's a selected option, use it before closing
+    if (selectedIndex >= 0 && filteredOptions[selectedIndex]) {
+      const selectedOption = filteredOptions[selectedIndex];
+      if (selectedOption.value !== value) {
+        onChange(selectedOption.value);
+      }
+    }
     setIsOpen(false);
     setSearchTerm("");
     setSelectedIndex(-1);

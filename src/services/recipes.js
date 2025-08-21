@@ -536,7 +536,6 @@ export const fetchRecipe = async (id) => {
   // Separate ungrouped ingredients from grouped ones
   const ungroupedIngredients = [];
   const groupedIngredients = [];
-  
 
   ingredientsList.forEach((ingredient) => {
     if (!ingredient.subheading || ingredient.subheading.trim() === "") {
@@ -565,7 +564,9 @@ export const fetchRecipe = async (id) => {
   });
 
   // Extract categories from the many-to-many relationship
-  const categories = data.recipe_categories?.map(rc => rc.categories?.name).filter(Boolean) || [];
+  const categories =
+    data.recipe_categories?.map((rc) => rc.categories?.name).filter(Boolean) ||
+    [];
 
   const transformedData = {
     ...data,
@@ -603,7 +604,11 @@ const addRecipeToCategory = async (recipeId, categoryName) => {
       });
 
       // Ignore duplicate key errors (PGRST09 is unique constraint violation)
-      if (error && !error.message.includes('duplicate') && !error.code?.includes('23505')) {
+      if (
+        error &&
+        !error.message.includes("duplicate") &&
+        !error.code?.includes("23505")
+      ) {
         console.warn("Failed to add recipe to category:", error);
       }
     }
@@ -874,7 +879,10 @@ export const createRecipe = async (recipeData) => {
     for (const categoryName of recipeData.categories) {
       if (categoryName && categoryName !== "all") {
         // First, try to get or create the category
-        const category = await getOrCreateCategory(categoryName, recipeData.original_language || "en");
+        const category = await getOrCreateCategory(
+          categoryName,
+          recipeData.original_language || "en"
+        );
         if (category) {
           await addRecipeToCategory(recipe.id, categoryName);
         }

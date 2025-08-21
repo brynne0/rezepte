@@ -206,7 +206,7 @@ describe("RecipeForm", () => {
       expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
         "categories",
         ["desserts", "main-dishes"],
-        false
+        true
       );
     });
 

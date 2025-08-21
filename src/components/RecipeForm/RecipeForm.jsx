@@ -29,6 +29,7 @@ const RecipeForm = ({
   const {
     formData,
     validationErrors,
+    setValidationErrors,
     submissionError,
     loading,
     // error,
@@ -227,7 +228,7 @@ const RecipeForm = ({
                     handleInputChange(
                       "categories",
                       newCategories,
-                      !!validationErrors.category
+                      true
                     );
                   }}
                 >

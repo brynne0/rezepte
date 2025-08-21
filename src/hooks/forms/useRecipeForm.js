@@ -166,8 +166,10 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
     setFormData((prev) => ({ ...prev, [field]: value }));
 
     // Clear validation error for this field when user types (like auth form)
-    if (clearError || validationErrors[field]) {
-      setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+    // Special handling for categories field since error key is "category"
+    const errorKey = field === "categories" ? "category" : field;
+    if (clearError || validationErrors[errorKey]) {
+      setValidationErrors((prev) => ({ ...prev, [errorKey]: "" }));
     }
   };
 
@@ -260,7 +262,10 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
         ".instruction-row .input"
       );
       if (instructionTextareas.length > 0) {
-        instructionTextareas[instructionTextareas.length - 1].focus();
+        const lastTextarea = instructionTextareas[instructionTextareas.length - 1];
+        lastTextarea.focus();
+        // Trigger click to ensure mobile keyboard opens
+        lastTextarea.click();
       }
     }, 10);
   };
@@ -322,7 +327,10 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
         '[id^="ingredient-name-"]'
       );
       if (ingredientNameInputs.length > 0) {
-        ingredientNameInputs[ingredientNameInputs.length - 1].focus();
+        const lastInput = ingredientNameInputs[ingredientNameInputs.length - 1];
+        lastInput.focus();
+        // Trigger click to ensure mobile keyboard opens
+        lastInput.click();
       }
     }, 10);
   };
@@ -351,6 +359,14 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
         },
       ],
     }));
+
+    // Focus on the new section title input
+    setTimeout(() => {
+      const sectionTitleInputs = document.querySelectorAll('.section-title-input');
+      if (sectionTitleInputs.length > 0) {
+        sectionTitleInputs[sectionTitleInputs.length - 1].focus();
+      }
+    }, 10);
   };
 
   const removeSection = (sectionId) => {
@@ -792,6 +808,7 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
   return {
     formData,
     validationErrors,
+    setValidationErrors,
     submissionError,
     loading,
     error,
