@@ -4,7 +4,13 @@
 export const parseFraction = (input) => {
   if (!input && input !== 0) return "";
 
-  const str = input.toString().trim();
+  const originalStr = input.toString();
+  const str = originalStr.trim();
+
+  // Preserve incomplete mixed fractions while typing (e.g., "1 ", "1 1", "1 1/")
+  if (originalStr !== str && /^\d+\s+(\d+\/?)?$/.test(originalStr)) {
+    return input;
+  }
 
   // Handle ranges like "1/2 - 1", "1-2", "1/4-1/2"
   const rangeMatch = str.match(/^(.+?)\s*[-–—]\s*(.+)$/);
@@ -14,16 +20,16 @@ export const parseFraction = (input) => {
     return input;
   }
 
-  // Already a decimal or whole number
-  if (!isNaN(str) && !str.includes("/")) {
-    return parseFloat(str);
-  }
-
   // Handle mixed numbers like "1 1/4", "2 3/4"
   const mixedMatch = str.match(/^(\d+)\s+(\d+)\/(\d+)$/);
   if (mixedMatch) {
     const [, whole, numerator, denominator] = mixedMatch;
     return parseFloat(whole) + parseFloat(numerator) / parseFloat(denominator);
+  }
+
+  // Already a decimal or whole number (no spaces)
+  if (!isNaN(str) && !str.includes("/") && !str.includes(" ")) {
+    return parseFloat(str);
   }
 
   // Handle simple fractions like "1/4", "3/4"
@@ -110,15 +116,15 @@ export const formatQuantity = (decimal) => {
 // Handles ranges by using the end value for pluralization
 export const shouldUsePlural = (quantity) => {
   if (!quantity) return false;
-  
-  // Handle ranges like "1-3", "1/2 - 2"  
+
+  // Handle ranges like "1-3", "1/2 - 2"
   const rangeMatch = quantity.toString().match(/^(.+?)\s*[-–—]\s*(.+)$/);
   if (rangeMatch) {
     const [, _, end] = rangeMatch;
     const endValue = parseFraction(end.trim());
     return !isNaN(endValue) && endValue > 1;
   }
-  
+
   // Single value
   const num = parseFraction(quantity);
   return !isNaN(num) && num > 1;
