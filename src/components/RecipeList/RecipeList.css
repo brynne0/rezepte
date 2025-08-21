@@ -1,8 +1,14 @@
 .recipe-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.4rem;
   justify-content: start;
   flex-wrap: wrap;
   overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .recipe-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
