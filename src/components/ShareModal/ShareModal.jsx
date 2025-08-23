@@ -96,7 +96,6 @@ const ShareModal = ({ isOpen, onClose, recipe }) => {
     <div className="confirmation-modal-overlay" onClick={handleOverlayClick}>
       <div className="confirmation-modal-content">
         <h3 className="confirmation-modal-title flex-center">
-          <Share2 size={20} />
           {t("share_recipe")}
         </h3>
 
