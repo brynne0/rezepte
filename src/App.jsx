@@ -184,6 +184,7 @@ function AppRoutes(props) {
           }
         />
         <Route path="/:id/:slug" element={<Recipe />} />
+        <Route path="/shared/:shareToken/:slug?" element={<Recipe isSharedView={true} />} />
         <Route
           path="/add-recipe"
           element={<AddRecipePage categories={props.categories} />}
