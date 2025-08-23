@@ -110,7 +110,7 @@ const RecipeForm = ({
 
       {/* Translation Editing Notice */}
       {isEditingTranslation && (
-        <span className="translation-notice flex-center">
+        <span className="warning-notice flex-center">
           {t("editing_translation_notice")}
         </span>
       )}

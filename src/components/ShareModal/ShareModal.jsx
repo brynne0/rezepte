@@ -105,7 +105,7 @@ const ShareModal = ({ isOpen, onClose, recipe }) => {
         {!isShared ? (
           <>
             {t("share_recipe_description")}
-            <p className="translation-notice">
+            <p className="warning-notice">
               <strong>{t("note")}:</strong> {t("public_link_note")}
             </p>
             <div className="confirmation-modal-actions">
@@ -140,7 +140,7 @@ const ShareModal = ({ isOpen, onClose, recipe }) => {
               </button>
             </div>
 
-            <p className="translation-notice">
+            <p className="warning-notice">
               <strong>{t("note")}:</strong> {t("public_link_note")}
             </p>
 

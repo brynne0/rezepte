@@ -60,8 +60,7 @@
   user-select: none;
 }
 
-/* TODO - move this somewhere else and rename */
-.translation-notice {
+.warning-notice {
   background-color: var(--pink);
   border: 1px solid var(--red);
   border-radius: var(--border-radius);
