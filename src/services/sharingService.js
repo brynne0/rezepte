@@ -154,7 +154,7 @@ export const fetchSharedRecipe = async (shareToken) => {
 
     if (error) {
       if (error.code === "PGRST116") {
-        throw new Error("Share link not found or has been disabled");
+        throw new Error("SHARED_RECIPE_NOT_FOUND");
       }
       throw new Error(`Failed to fetch shared recipe: ${error.message}`);
     }

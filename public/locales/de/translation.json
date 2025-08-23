@@ -141,7 +141,7 @@
   "stopping": "Wird gestoppt",
   "shared_recipe": "Geteiltes Rezept",
   "recipe_not_available": "Rezept Nicht Verfügbar",
-  "shared_recipe_not_found": "Dieses geteilte Rezept konnte nicht gefunden werden oder wurde möglicherweise entfernt.",
+  "shared_recipe_not_found": "Rezept nicht gefunden oder nicht mehr geteilt.",
   "close": "Schließen",
 
   "edit_first_name": "Vorname bearbeiten",

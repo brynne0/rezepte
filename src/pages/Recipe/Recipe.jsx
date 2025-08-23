@@ -122,7 +122,14 @@ const Recipe = ({ isSharedView = false }) => {
   if (loading) {
     return <LoadingAcorn />;
   }
-  if (error) return <div>{error}</div>;
+  if (error) {
+    const isSharedRecipeNotFound = error === "SHARED_RECIPE_NOT_FOUND";
+    const errorMessage = isSharedRecipeNotFound
+      ? t("shared_recipe_not_found")
+      : error;
+
+    return <div className="page-centered">{errorMessage}</div>;
+  }
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
   return (

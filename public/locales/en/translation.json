@@ -145,7 +145,7 @@
   "stopping": "Stopping...",
   "shared_recipe": "Shared Recipe",
   "recipe_not_available": "Recipe Not Available",
-  "shared_recipe_not_found": "This shared recipe could not be found or may have been removed.",
+  "shared_recipe_not_found": "Recipe not found or no longer shared.",
   "close": "Close",
 
   "edit_first_name": "Edit first name",
