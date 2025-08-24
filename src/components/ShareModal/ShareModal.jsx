@@ -145,17 +145,17 @@ const ShareModal = ({ isOpen, onClose, recipe }) => {
 
             <div className="confirmation-modal-actions">
               <button
+                className="btn btn-action btn-secondary"
+                onClick={handleClose}
+              >
+                {t("close")}
+              </button>
+              <button
                 className="btn btn-action btn-danger"
                 onClick={handleStopSharing}
                 disabled={isStopping}
               >
                 {isStopping ? t("stopping") : t("stop_sharing")}
-              </button>
-              <button
-                className="btn btn-action btn-secondary"
-                onClick={handleClose}
-              >
-                {t("close")}
               </button>
             </div>
           </>
