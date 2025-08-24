@@ -24,7 +24,7 @@ const Recipe = ({ isSharedView = false }) => {
   const [sharedLoading, setSharedLoading] = useState(false);
   const [sharedError, setSharedError] = useState("");
   const navigate = useNavigate();
-  const { isLoggedIn, isGuest } = useAuth();
+  const { isLoggedIn } = useAuth();
   const { t, i18n } = useTranslation();
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -142,37 +142,35 @@ const Recipe = ({ isSharedView = false }) => {
         </div>
       )}
 
-      <div className="flex-row">
+      <div className="flex-between">
         <h1 className="forta-red">{recipe.title}</h1>
 
         {/* Only show actions for owned recipes */}
         {!isSharedView && (
           <>
             {/* Show share button when logged in and user owns the recipe */}
-            {isLoggedIn && !isGuest && (
-              <button
-                className="btn btn-icon-red"
-                onClick={() => setShowShareModal(true)}
-                data-testid="share-recipe-btn"
-                aria-label={t("share_recipe")}
-                title={t("share_recipe")}
-              >
-                <Share2 />
-              </button>
-            )}
-
-            {/* Show edit button only when logged in  */}
-            {isLoggedIn && !isGuest && (
-              <button
-                className="btn btn-icon-red"
-                onClick={() => {
-                  navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
-                }}
-                data-testid="edit-recipe-btn"
-                aria-label={t("edit_recipe")}
-              >
-                <Pencil />
-              </button>
+            {isLoggedIn && (
+              <div className="flex-row recipe-actions">
+                <button
+                  className="btn btn-icon-red"
+                  onClick={() => {
+                    navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
+                  }}
+                  data-testid="edit-recipe-btn"
+                  aria-label={t("edit_recipe")}
+                >
+                  <Pencil />
+                </button>
+                <button
+                  className="btn btn-icon-red"
+                  onClick={() => setShowShareModal(true)}
+                  data-testid="share-recipe-btn"
+                  aria-label={t("share_recipe")}
+                  title={t("share_recipe")}
+                >
+                  <Share2 />
+                </button>
+              </div>
             )}
           </>
         )}
