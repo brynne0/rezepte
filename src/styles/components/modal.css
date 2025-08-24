@@ -10,6 +10,14 @@
   align-items: center;
   justify-content: center;
   z-index: var(--z-modal);
+  opacity: 0;
+  animation: fadeIn 0.15s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
 }
 
 .confirmation-modal-content {
@@ -24,9 +32,11 @@
 
 .confirmation-modal-title {
   color: var(--dark-brown);
-  margin: 0 0 1rem 0;
+  font-family: forta;
+  margin-bottom: 1rem;
   font-size: 1.25rem;
   font-weight: 600;
+  gap: 0.5rem;
 }
 
 .confirmation-modal-message {
@@ -58,10 +68,67 @@
   user-select: none;
 }
 
+.warning-notice {
+  background-color: var(--pink);
+  border: 1px solid var(--red);
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1rem;
+  color: var(--dark-red);
+  font-size: 0.9rem;
+}
+
+/* Share Modal Specific Styles */
+.share-url-container {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.share-url-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--dark-brown);
+}
+
+.share-url-input {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  min-width: 0;
+  width: 100%;
+  word-break: break-all;
+  white-space: normal;
+}
+
+.share-copy-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--dark-brown);
+  padding: 0.5rem;
+}
+
+.share-error-box {
+  padding: 0.75rem;
+  background-color: var(--pink);
+  border: 1px dashed var(--error-red);
+  border-radius: 6px;
+  color: var(--error-red);
+  margin-bottom: 1rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .confirmation-modal-content {
     min-width: 16rem;
     margin: 0.5rem;
+  }
+
+  .share-url-input {
+    font-size: 0.9rem;
   }
 }

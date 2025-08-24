@@ -96,11 +96,9 @@ export const useRecipesPagination = (
     // Listen to auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || !session) {
-        setAllRecipes([]);
-        setLoading(false);
-      } else if (event === "SIGNED_IN") {
+    } = supabase.auth.onAuthStateChange((event) => {
+      // Reload recipes when user signs in or out to ensure proper access
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
         loadRecipes();
       }
     });

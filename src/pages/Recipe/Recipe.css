@@ -4,6 +4,21 @@
   margin: 0.5rem;
 }
 
+/* Shared recipe indicator */
+.shared-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--pink);
+  border: 1px solid var(--dark-red);
+  border-radius: var(--border-radius);
+  color: var(--dark-red);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
 .recipe-subheading {
   margin-top: 0.5rem;
   gap: 0.5rem;
@@ -14,6 +29,12 @@
 
 .flex-row.recipe-subheading {
   align-items: center;
+}
+
+.recipe-actions {
+  border: 2px solid var(--red);
+  border-radius: var(--border-radius);
+  padding: 0.1rem;
 }
 
 /* Ingredients */

@@ -37,7 +37,6 @@ import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
 import AccountSettings from "./pages/AccountSettings/AccountSettings";
 
 function App() {
-  const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -80,8 +79,6 @@ function App() {
     <div className="app">
       <Router>
         <AppRoutes
-          language={language}
-          setLanguage={setLanguage}
           setSelectedCategory={handleCategoryChange}
           setSearchTerm={handleSearchChange}
           setLoginMessage={setLoginMessage}
@@ -146,8 +143,6 @@ function AppRoutes(props) {
   return (
     <>
       <Header
-        language={props.language}
-        setLanguage={props.setLanguage}
         setSelectedCategory={props.setSelectedCategory}
         setSearchTerm={props.setSearchTerm}
         searchTerm={props.searchTerm}
@@ -184,6 +179,10 @@ function AppRoutes(props) {
           }
         />
         <Route path="/:id/:slug" element={<Recipe />} />
+        <Route
+          path="/shared/:shareToken/:slug?"
+          element={<Recipe isSharedView={true} />}
+        />
         <Route
           path="/add-recipe"
           element={<AddRecipePage categories={props.categories} />}

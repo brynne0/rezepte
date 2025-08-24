@@ -1,20 +1,62 @@
 import "./Recipe.css";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Pencil, ShoppingBasket, Loader2 } from "lucide-react";
+import { Pencil, ShoppingBasket, Loader2, Share2 } from "lucide-react";
 
 import { useRecipe } from "../../hooks/data/useRecipe";
+import { fetchSharedRecipe } from "../../services/sharingService";
+import { getTranslatedRecipe } from "../../services/translationService";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import ShareModal from "../../components/ShareModal/ShareModal";
 import { formatCompleteIngredient } from "../../utils/ingredientFormatting";
 
-const Recipe = () => {
-  const { id } = useParams();
-  const { recipe, loading, error } = useRecipe(id);
+const Recipe = ({ isSharedView = false }) => {
+  const { id, shareToken } = useParams();
+  const {
+    recipe: ownedRecipe,
+    loading: ownedLoading,
+    error: ownedError,
+  } = useRecipe(isSharedView ? null : id);
+  const [sharedRecipe, setSharedRecipe] = useState(null);
+  const [sharedLoading, setSharedLoading] = useState(false);
+  const [sharedError, setSharedError] = useState("");
   const navigate = useNavigate();
-  const { isLoggedIn, isGuest } = useAuth();
+  const { isLoggedIn } = useAuth();
   const { t, i18n } = useTranslation();
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // Load shared recipe if in shared view
+  useEffect(() => {
+    if (isSharedView && shareToken) {
+      const loadSharedRecipe = async () => {
+        try {
+          setSharedLoading(true);
+          setSharedError("");
+
+          const fetchedSharedRecipe = await fetchSharedRecipe(shareToken);
+          const translatedRecipe = await getTranslatedRecipe(
+            fetchedSharedRecipe,
+            i18n.language
+          );
+          setSharedRecipe(translatedRecipe);
+        } catch (err) {
+          setSharedError(err.message || "Failed to load shared recipe");
+        } finally {
+          setSharedLoading(false);
+        }
+      };
+
+      loadSharedRecipe();
+    }
+  }, [isSharedView, shareToken, i18n.language]);
+
+  // Determine which recipe and state to use
+  const recipe = isSharedView ? sharedRecipe : ownedRecipe;
+  const loading = isSharedView ? sharedLoading : ownedLoading;
+  const error = isSharedView ? sharedError : ownedError;
 
   // Use the grocery list hook
   const {
@@ -55,29 +97,82 @@ const Recipe = () => {
     return allIngredients;
   };
 
+  // Helper to render an ingredient item
+  const renderIngredientItem = (ingredient, keyPrefix, index) => (
+    <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
+      <input
+        type="checkbox"
+        checked={checkedIngredients[ingredient.recipe_ingredient_id] || false}
+        onChange={() => handleCheckboxChange(ingredient.recipe_ingredient_id)}
+        id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
+      />
+      <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
+        {formatCompleteIngredient(
+          ingredient,
+          t("units", { returnObjects: true }),
+          i18n.language
+        )}
+        {ingredient.notes && (
+          <span className="ingredient-notes"> {ingredient.notes}</span>
+        )}
+      </label>
+    </li>
+  );
+
   if (loading) {
     return <LoadingAcorn />;
   }
-  if (error) return <div>{error}</div>;
+  if (error) {
+    const isSharedRecipeNotFound = error === "SHARED_RECIPE_NOT_FOUND";
+    const errorMessage = isSharedRecipeNotFound
+      ? t("shared_recipe_not_found")
+      : error;
+
+    return <div className="page-centered">{errorMessage}</div>;
+  }
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
   return (
     <div className="recipe-container card card-recipe">
-      <div className="flex-row">
+      {/* Show shared indicator for shared recipes */}
+      {isSharedView && (
+        <div className="shared-indicator">
+          <Share2 size={16} />
+          <span>{t("shared_recipe")}</span>
+        </div>
+      )}
+
+      <div className="flex-between">
         <h1 className="forta-red">{recipe.title}</h1>
 
-        {/* Show edit button only when logged in  */}
-        {isLoggedIn && !isGuest && (
-          <button
-            className="btn btn-icon-red"
-            onClick={() => {
-              navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
-            }}
-            data-testid="edit-recipe-btn"
-            aria-label={t("edit_recipe")}
-          >
-            <Pencil />
-          </button>
+        {/* Only show actions for owned recipes */}
+        {!isSharedView && (
+          <>
+            {/* Show share button when logged in and user owns the recipe */}
+            {isLoggedIn && (
+              <div className="flex-row recipe-actions">
+                <button
+                  className="btn btn-icon-red"
+                  onClick={() => {
+                    navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
+                  }}
+                  data-testid="edit-recipe-btn"
+                  aria-label={t("edit_recipe")}
+                >
+                  <Pencil />
+                </button>
+                <button
+                  className="btn btn-icon-red"
+                  onClick={() => setShowShareModal(true)}
+                  data-testid="share-recipe-btn"
+                  aria-label={t("share_recipe")}
+                  title={t("share_recipe")}
+                >
+                  <Share2 />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -97,8 +192,8 @@ const Recipe = () => {
         <>
           <div className="flex-row recipe-subheading">
             <h2>{t("ingredients")}:</h2>
-            {/* Grocery Cart */}
-            {isLoggedIn && (
+            {/* Grocery Cart - only show for owned recipes */}
+            {!isSharedView && isLoggedIn && (
               <div className="cart-container">
                 <button
                   onClick={() =>
@@ -137,46 +232,16 @@ const Recipe = () => {
                 </button>
               </div>
             )}
-            {showSuccess && t("added_to_groceries")}
+            {!isSharedView && showSuccess && t("added_to_groceries")}
           </div>
 
           {/* Ungrouped Ingredients */}
           {recipe.ungroupedIngredients &&
             recipe.ungroupedIngredients.length > 0 && (
               <ul>
-                {recipe.ungroupedIngredients.map((ingredient, index) => (
-                  <li
-                    key={`ungrouped-${index}-${ingredient.id}`}
-                    className="ingredient"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={
-                        checkedIngredients[ingredient.recipe_ingredient_id] ||
-                        false
-                      }
-                      onChange={() =>
-                        handleCheckboxChange(ingredient.recipe_ingredient_id)
-                      }
-                      id={`ingredient-ungrouped-${index}-${ingredient.id}`}
-                    />
-                    <label
-                      htmlFor={`ingredient-ungrouped-${index}-${ingredient.id}`}
-                    >
-                      {formatCompleteIngredient(
-                        ingredient,
-                        t("units", { returnObjects: true }),
-                        i18n.language
-                      )}
-                      {ingredient.notes && (
-                        <span className="ingredient-notes">
-                          {" "}
-                          {ingredient.notes}
-                        </span>
-                      )}
-                    </label>
-                  </li>
-                ))}
+                {recipe.ungroupedIngredients.map((ingredient, index) =>
+                  renderIngredientItem(ingredient, "ungrouped", index)
+                )}
               </ul>
             )}
 
@@ -188,42 +253,11 @@ const Recipe = () => {
                   <div key={sectionIndex} className="ingredient-section">
                     <h3 className="section-subheading">{section.subheading}</h3>
                     <ul>
-                      {section.ingredients.map(
-                        (ingredient, ingredientIndex) => (
-                          <li
-                            key={`section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
-                            className="ingredient"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                checkedIngredients[
-                                  ingredient.recipe_ingredient_id
-                                ] || false
-                              }
-                              onChange={() =>
-                                handleCheckboxChange(
-                                  ingredient.recipe_ingredient_id
-                                )
-                              }
-                              id={`ingredient-section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
-                            />
-                            <label
-                              htmlFor={`ingredient-section-${sectionIndex}-${ingredientIndex}-${ingredient.id}`}
-                            >
-                              {formatCompleteIngredient(
-                                ingredient,
-                                t("units", { returnObjects: true }),
-                                i18n.language
-                              )}
-                              {ingredient.notes && (
-                                <span className="ingredient-notes">
-                                  {" "}
-                                  {ingredient.notes}
-                                </span>
-                              )}
-                            </label>
-                          </li>
+                      {section.ingredients.map((ingredient, ingredientIndex) =>
+                        renderIngredientItem(
+                          ingredient,
+                          `section-${sectionIndex}`,
+                          ingredientIndex
                         )
                       )}
                     </ul>
@@ -238,39 +272,9 @@ const Recipe = () => {
             recipe.ingredients &&
             recipe.ingredients.length > 0 && (
               <ul>
-                {recipe.ingredients.map((ingredient, index) => (
-                  <li
-                    key={`flat-${index}-${ingredient.id}`}
-                    className="ingredient"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={
-                        checkedIngredients[ingredient.recipe_ingredient_id] ||
-                        false
-                      }
-                      onChange={() =>
-                        handleCheckboxChange(ingredient.recipe_ingredient_id)
-                      }
-                      id={`ingredient-flat-${index}-${ingredient.id}`}
-                    />
-                    <label
-                      htmlFor={`ingredient-flat-${index}-${ingredient.id}`}
-                    >
-                      {formatCompleteIngredient(
-                        ingredient,
-                        t("units", { returnObjects: true }),
-                        i18n.language
-                      )}
-                      {ingredient.notes && (
-                        <span className="ingredient-notes">
-                          {" "}
-                          {ingredient.notes}
-                        </span>
-                      )}
-                    </label>
-                  </li>
-                ))}
+                {recipe.ingredients.map((ingredient, index) =>
+                  renderIngredientItem(ingredient, "flat", index)
+                )}
               </ul>
             )}
         </>
@@ -318,6 +322,15 @@ const Recipe = () => {
           <h2>{t("notes")}:</h2>
           {recipe.notes}
         </div>
+      )}
+
+      {/* Share Modal - only for owned recipes */}
+      {!isSharedView && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          recipe={recipe}
+        />
       )}
     </div>
   );
