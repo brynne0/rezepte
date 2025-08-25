@@ -168,6 +168,7 @@ const GroceryList = ({
       );
       if (newItemNameInput) {
         newItemNameInput.focus();
+        newItemNameInput.click(); // For Mobile
       }
     }, 10);
   };

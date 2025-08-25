@@ -8,11 +8,20 @@ import {
 } from "../../utils/validation";
 import { parseFraction } from "../../utils/fractionUtils";
 
-export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = false }) => {
+export const useRecipeForm = ({
+  initialRecipe = null,
+  isEditingTranslation = false,
+}) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { createRecipe, updateRecipe, updateTranslation, deleteRecipe, loading, error } =
-    useRecipeActions();
+  const {
+    createRecipe,
+    updateRecipe,
+    updateTranslation,
+    deleteRecipe,
+    loading,
+    error,
+  } = useRecipeActions();
 
   // Generate unique IDs for ingredients
   const generateUniqueId = () => {
@@ -262,9 +271,9 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
         ".instruction-row .input"
       );
       if (instructionTextareas.length > 0) {
-        const lastTextarea = instructionTextareas[instructionTextareas.length - 1];
+        const lastTextarea =
+          instructionTextareas[instructionTextareas.length - 1];
         lastTextarea.focus();
-        // Trigger click to ensure mobile keyboard opens
         lastTextarea.click();
       }
     }, 10);
@@ -376,9 +385,12 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
 
     // Focus on the new section title input
     setTimeout(() => {
-      const sectionTitleInputs = document.querySelectorAll('.section-title-input');
+      const sectionTitleInputs = document.querySelectorAll(
+        ".section-title-input"
+      );
       if (sectionTitleInputs.length > 0) {
         sectionTitleInputs[sectionTitleInputs.length - 1].focus();
+        sectionTitleInputs[sectionTitleInputs.length - 1].click();
       }
     }, 10);
   };
@@ -577,29 +589,36 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
         setTimeout(() => {
           const newTextareas = document.querySelectorAll(".input--textarea");
           newTextareas[newTextareas.length - 1].focus();
+          newTextareas[newTextareas.length - 1].click();
         }, 10);
       }
     }
   };
 
-  const handleIngredientFieldEnter = (event, currentField, sectionId, tempId, index) => {
+  const handleIngredientFieldEnter = (
+    event,
+    currentField,
+    sectionId,
+    tempId,
+    index
+  ) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      
-      const fieldOrder = ['name', 'quantity', 'unit', 'notes'];
+
+      const fieldOrder = ["name", "quantity", "unit", "notes"];
       const currentIndex = fieldOrder.indexOf(currentField);
-      
+
       if (currentIndex < fieldOrder.length - 1) {
         // Move to next field in same ingredient
         const nextField = fieldOrder[currentIndex + 1];
         let nextInputId;
-        
-        if (sectionId === 'ungrouped') {
+
+        if (sectionId === "ungrouped") {
           nextInputId = `ingredient-${nextField}-ungrouped-${index}-${tempId}`;
         } else {
           nextInputId = `ingredient-${nextField}-${sectionId}-${index}-${tempId}`;
         }
-        
+
         const nextInput = document.getElementById(nextInputId);
         if (nextInput) {
           nextInput.focus();
@@ -706,106 +725,121 @@ export const useRecipeForm = ({ initialRecipe = null, isEditingTranslation = fal
             notes: recipeData.notes,
             source: recipeData.source,
           };
-          
+
           // Also handle ingredient name overrides and notes updates for translation
           const ingredientOverrides = [];
           const ingredientNotesUpdates = [];
-          
+
           // Helper function to get the original displayed name (accounting for pluralization)
           const getOriginalDisplayName = (originalIngredient) => {
-            if (!originalIngredient) return '';
-            
+            if (!originalIngredient) return "";
+
             // This should return exactly what the user saw when they opened the translation
             // which is what's in the 'name' field after translation processing
-            return originalIngredient.name || '';
+            return originalIngredient.name || "";
           };
-          
+
           // Helper function to get the original displayed notes
           const getOriginalDisplayNotes = (originalIngredient) => {
-            if (!originalIngredient) return '';
-            return originalIngredient.notes || '';
+            if (!originalIngredient) return "";
+            return originalIngredient.notes || "";
           };
-          
+
           // Collect ungrouped ingredient overrides (only for changed ingredients)
           formData.ungroupedIngredients.forEach((ingredient) => {
             if (ingredient.recipe_ingredient_id) {
-              const originalIngredient = initialRecipe.ungroupedIngredients?.find(
-                ing => ing.recipe_ingredient_id === ingredient.recipe_ingredient_id
-              );
-              
+              const originalIngredient =
+                initialRecipe.ungroupedIngredients?.find(
+                  (ing) =>
+                    ing.recipe_ingredient_id === ingredient.recipe_ingredient_id
+                );
+
               // Handle name overrides
               if (ingredient.name) {
-                const originalDisplayName = getOriginalDisplayName(originalIngredient);
-                
+                const originalDisplayName =
+                  getOriginalDisplayName(originalIngredient);
+
                 // Only save override if the name actually changed
                 if (originalDisplayName !== ingredient.name) {
                   ingredientOverrides.push({
                     recipe_ingredient_id: ingredient.recipe_ingredient_id,
                     name: ingredient.name,
-                    language: currentLanguage
+                    language: currentLanguage,
                   });
                 }
               }
-              
+
               // Handle notes updates
-              const originalDisplayNotes = getOriginalDisplayNotes(originalIngredient);
-              const currentNotes = ingredient.notes || '';
-              
+              const originalDisplayNotes =
+                getOriginalDisplayNotes(originalIngredient);
+              const currentNotes = ingredient.notes || "";
+
               // Only save notes update if the notes actually changed
               if (originalDisplayNotes !== currentNotes) {
                 ingredientNotesUpdates.push({
                   recipe_ingredient_id: ingredient.recipe_ingredient_id,
                   notes: currentNotes,
-                  language: currentLanguage
+                  language: currentLanguage,
                 });
               }
             }
           });
-          
+
           // Collect sectioned ingredient overrides (only for changed ingredients)
           formData.ingredientSections.forEach((section) => {
             section.ingredients.forEach((ingredient) => {
               if (ingredient.recipe_ingredient_id) {
                 // Find original ingredient in sections
                 let originalIngredient = null;
-                for (const originalSection of initialRecipe.ingredientSections || []) {
+                for (const originalSection of initialRecipe.ingredientSections ||
+                  []) {
                   originalIngredient = originalSection.ingredients.find(
-                    ing => ing.recipe_ingredient_id === ingredient.recipe_ingredient_id
+                    (ing) =>
+                      ing.recipe_ingredient_id ===
+                      ingredient.recipe_ingredient_id
                   );
                   if (originalIngredient) break;
                 }
-                
+
                 // Handle name overrides
                 if (ingredient.name) {
-                  const originalDisplayName = getOriginalDisplayName(originalIngredient);
-                  
+                  const originalDisplayName =
+                    getOriginalDisplayName(originalIngredient);
+
                   // Only save override if the name actually changed
                   if (originalDisplayName !== ingredient.name) {
                     ingredientOverrides.push({
                       recipe_ingredient_id: ingredient.recipe_ingredient_id,
                       name: ingredient.name,
-                      language: currentLanguage
+                      language: currentLanguage,
                     });
                   }
                 }
-                
+
                 // Handle notes updates
-                const originalDisplayNotes = getOriginalDisplayNotes(originalIngredient);
-                const currentNotes = ingredient.notes || '';
-                
+                const originalDisplayNotes =
+                  getOriginalDisplayNotes(originalIngredient);
+                const currentNotes = ingredient.notes || "";
+
                 // Only save notes update if the notes actually changed
                 if (originalDisplayNotes !== currentNotes) {
                   ingredientNotesUpdates.push({
                     recipe_ingredient_id: ingredient.recipe_ingredient_id,
                     notes: currentNotes,
-                    language: currentLanguage
+                    language: currentLanguage,
                   });
                 }
               }
             });
           });
-          
-          await updateTranslation(initialRecipe.id, currentLanguage, translationData, ingredientOverrides, ingredientNotesUpdates);
+
+          await updateTranslation(
+            initialRecipe.id,
+            currentLanguage,
+            translationData,
+            ingredientOverrides,
+            ingredientNotesUpdates
+          );
           result = initialRecipe; // Return original recipe data
         } else {
           // Normal recipe editing - update the original recipe

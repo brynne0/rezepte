@@ -10,15 +10,15 @@
 .page-numbers {
   display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
 .pagination .btn-page {
   font-size: 0.875rem;
-  width: 2rem;
-  height: 2rem;
   font-weight: 500;
   background: var(--color-background);
   color: var(--color-text);
+  transition: none;
 }
 
 .btn-page:hover,
@@ -26,12 +26,15 @@
   color: var(--dark-red);
 }
 
+.btn-page.active {
+  border: 2px solid var(--dark-red);
+  border-radius: var(--border-radius);
+}
+
 .page-ellipsis {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
   color: var(--color-text-muted);
   font-size: 0.875rem;
 }

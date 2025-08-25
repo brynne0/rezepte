@@ -1117,6 +1117,7 @@ describe("Header Component", () => {
 
       const searchInput = screen.getByRole("textbox");
       searchInput.focus();
+      searchInput.click();
 
       // Type and verify focus is maintained
       fireEvent.change(searchInput, { target: { value: "test" } });
