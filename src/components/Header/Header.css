@@ -71,7 +71,6 @@
 .header-logo,
 .header-logo-2 {
   color: var(--brown);
- 
 }
 
 .header-logo-2 {
@@ -211,6 +210,7 @@
   padding: 0.5rem;
   margin: 0;
   border-radius: var(--border-radius);
+  align-items: center;
 }
 
 .search-bar {

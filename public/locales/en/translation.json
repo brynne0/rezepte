@@ -70,6 +70,8 @@
   "delete_account_error": "Failed to delete account. Please try again.",
 
   "search": "Search",
+  "sort_by_title": "Sort by title",
+  "sort_by_date": "Sort by date",
   "recipe_not_found": "Recipe not found.",
   "no_recipes_found": "No recipes for \"{{searchTerm}}\" found",
 

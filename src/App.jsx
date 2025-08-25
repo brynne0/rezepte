@@ -40,11 +40,12 @@ function App() {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("title_asc");
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const { recipes, loading, refreshRecipes, paginationInfo } =
-    useRecipesPagination(currentPage, 36, selectedCategory, searchTerm);
+    useRecipesPagination(currentPage, 36, selectedCategory, searchTerm, sortBy);
 
   // Categories from database
   const { categories, loading: categoriesLoading } = useCategories();
@@ -81,6 +82,8 @@ function App() {
         <AppRoutes
           setSelectedCategory={handleCategoryChange}
           setSearchTerm={handleSearchChange}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
           setLoginMessage={setLoginMessage}
           loginMessage={loginMessage}
           t={t}
@@ -150,6 +153,8 @@ function AppRoutes(props) {
         loginMessage={props.loginMessage}
         t={props.t}
         disableLanguageSwitch={isGroceryListEditing}
+        sortBy={props.sortBy}
+        setSortBy={props.setSortBy}
       />
       <Routes>
         <Route

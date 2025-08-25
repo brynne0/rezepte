@@ -12,6 +12,7 @@ import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import useClickOutside from "../../hooks/ui/useClickOutside";
+import SortButtons from "../SortButtons/SortButtons";
 import "./Header.css";
 
 const Header = ({
@@ -21,6 +22,8 @@ const Header = ({
   setLoginMessage,
   loginMessage,
   disableLanguageSwitch = false,
+  sortBy,
+  setSortBy,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -338,6 +341,9 @@ const Header = ({
               }}
             >
               <div className="search-input-wrapper">
+                {setSortBy && (
+                  <SortButtons sortBy={sortBy} onSortChange={setSortBy} />
+                )}
                 <input
                   id="search"
                   type="text"

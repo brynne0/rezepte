@@ -70,6 +70,8 @@
   "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
 
   "search": "Suchen",
+  "sort_by_title": "Nach Titel sortieren",
+  "sort_by_date": "Nach Datum sortieren",
   "recipe_not_found": "Rezept nicht gefunden.",
   "no_recipes_found": "Keine Rezepte für \"{{searchTerm}}\" gefunden",
 

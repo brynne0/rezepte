@@ -1,0 +1,19 @@
+.sort-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  position: absolute;
+  left: -4.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* TODO - move to buttons css file */
+.btn-sort {
+  transition: all 0.2s ease;
+}
+
+.btn-sort:hover,
+.btn-sort.active {
+  color: var(--dark-red);
+}

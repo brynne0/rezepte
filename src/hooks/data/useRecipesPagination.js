@@ -8,7 +8,8 @@ export const useRecipesPagination = (
   page = 1,
   limit = 12,
   category = "all",
-  searchTerm = ""
+  searchTerm = "",
+  sortBy = "created_at_desc"
 ) => {
   const [allRecipes, setAllRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +107,7 @@ export const useRecipesPagination = (
     return () => subscription.unsubscribe();
   }, [loadRecipes]);
 
-  // Client-side filtering and pagination
+  // Client-side filtering, sorting and pagination
   const paginatedData = useMemo(() => {
     // First filter by search term if it exists
     const searchFilteredRecipes = searchTerm
@@ -124,20 +125,35 @@ export const useRecipesPagination = (
           (r) => r.categories && r.categories.includes(category)
         );
 
-    // Then paginate the filtered results
+    // Then sort the filtered results
+    const sortedRecipes = [...filteredRecipes].sort((a, b) => {
+      switch (sortBy) {
+        case "title_asc":
+          return (a.title || "").localeCompare(b.title || "");
+        case "title_desc":
+          return (b.title || "").localeCompare(a.title || "");
+        case "created_at_asc":
+          return new Date(a.created_at) - new Date(b.created_at);
+        case "created_at_desc":
+        default:
+          return new Date(b.created_at) - new Date(a.created_at);
+      }
+    });
+
+    // Then paginate the sorted results
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    const paginatedRecipes = filteredRecipes.slice(startIndex, endIndex);
+    const paginatedRecipes = sortedRecipes.slice(startIndex, endIndex);
 
     return {
       recipes: paginatedRecipes,
-      totalCount: filteredRecipes.length,
-      totalPages: Math.ceil(filteredRecipes.length / limit),
+      totalCount: sortedRecipes.length,
+      totalPages: Math.ceil(sortedRecipes.length / limit),
       currentPage: page,
-      hasNextPage: page < Math.ceil(filteredRecipes.length / limit),
+      hasNextPage: page < Math.ceil(sortedRecipes.length / limit),
       hasPrevPage: page > 1,
     };
-  }, [allRecipes, page, limit, category, searchTerm]);
+  }, [allRecipes, page, limit, category, searchTerm, sortBy]);
 
   return {
     recipes: paginatedData.recipes,

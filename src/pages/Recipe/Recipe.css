@@ -34,7 +34,7 @@
 .recipe-actions {
   border: 2px solid var(--red);
   border-radius: var(--border-radius);
-  padding: 0.1rem;
+  padding: 0.2rem;
 }
 
 /* Ingredients */
@@ -89,4 +89,10 @@
   font-size: 1rem;
   word-break: break-word;
   overflow-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+  .recipe-actions {
+    padding: 0.1rem;
+  }
 }
