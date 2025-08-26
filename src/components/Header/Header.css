@@ -213,6 +213,14 @@
   align-items: center;
 }
 
+.search-and-sort-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
 .search-bar {
   display: flex;
   width: 100%;
@@ -255,6 +263,12 @@
   /* Show language-wrapper when inside dropdown */
   .dropdown .language-wrapper {
     display: flex;
+  }
+
+  /* Stack search and sort vertically on mobile */
+  .search-and-sort-container {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   /* Show mobile navigation on mobile */

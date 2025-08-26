@@ -332,41 +332,43 @@ const Header = ({
         {/*  Search Recipe - Always visible on home page  */}
         {isHomePage && (
           <div className="search-bar-wrapper">
-            <form
-              className="search-bar"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSearchTerm(currentSearchInput);
-                navigate("/");
-              }}
-            >
-              <div className="search-input-wrapper">
-                {setSortBy && (
-                  <SortButtons sortBy={sortBy} onSortChange={setSortBy} />
-                )}
-                <input
-                  id="search"
-                  type="text"
-                  value={currentSearchInput}
-                  onChange={(e) => {
-                    setCurrentSearchInput(e.target.value);
-                    setSearchTerm(e.target.value);
-                    if (e.target.value.length > 0) {
-                      setSelectedCategory("all");
-                    }
-                  }}
-                  className="input input--cream search-input-with-icon"
-                  placeholder={t("search")}
-                />
-                <button
-                  className="btn btn-icon btn-icon-neutral btn-search"
-                  type="submit"
-                  aria-label={t("search")}
-                >
-                  <Search size={20} />
-                </button>
-              </div>
-            </form>
+            <div className="search-and-sort-container">
+              <form
+                className="search-bar"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSearchTerm(currentSearchInput);
+                  navigate("/");
+                }}
+              >
+                <div className="search-input-wrapper">
+                  <input
+                    id="search"
+                    type="text"
+                    value={currentSearchInput}
+                    onChange={(e) => {
+                      setCurrentSearchInput(e.target.value);
+                      setSearchTerm(e.target.value);
+                      if (e.target.value.length > 0) {
+                        setSelectedCategory("all");
+                      }
+                    }}
+                    className="input input--cream search-input-with-icon"
+                    placeholder={t("search")}
+                  />
+                  <button
+                    className="btn btn-icon btn-icon-neutral btn-search"
+                    type="submit"
+                    aria-label={t("search")}
+                  >
+                    <Search size={20} />
+                  </button>
+                </div>
+              </form>
+              {setSortBy && (
+                <SortButtons sortBy={sortBy} onSortChange={setSortBy} />
+              )}
+            </div>
           </div>
         )}
       </header>
