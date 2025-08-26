@@ -372,15 +372,9 @@ const RecipeForm = ({
                                   <input
                                     id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
                                     type="text"
-                                    value={(() => {
-                                      // Format values respecting unit's fraction setting
-                                      if (!ingredient.quantity) return "";
-                                      return formatQuantityForUnit(
-                                        ingredient.quantity,
-                                        ingredient.unit,
-                                        units
-                                      );
-                                    })()}
+                                    value={formatQuantityForUnit(
+                                      ingredient.quantity
+                                    )}
                                     onChange={(e) =>
                                       handleIngredientChange(
                                         "ungrouped",
@@ -707,18 +701,9 @@ const RecipeForm = ({
                                                     <input
                                                       id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
                                                       type="text"
-                                                      value={(() => {
-                                                        // Format values respecting unit's fraction setting
-                                                        if (
-                                                          !ingredient.quantity
-                                                        )
-                                                          return "";
-                                                        return formatQuantityForUnit(
-                                                          ingredient.quantity,
-                                                          ingredient.unit,
-                                                          units
-                                                        );
-                                                      })()}
+                                                      value={formatQuantityForUnit(
+                                                        ingredient.quantity
+                                                      )}
                                                       onChange={(e) =>
                                                         handleIngredientChange(
                                                           section.id,

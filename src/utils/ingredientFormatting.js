@@ -1,49 +1,15 @@
-import {
-  formatQuantity,
-  parseFraction,
-  shouldUsePlural,
-} from "./fractionUtils";
+import { shouldUsePlural } from "./fractionUtils";
 
 /**
  * Comprehensive ingredient formatting utility
  * Handles quantity formatting, unit translation/pluralization, and ingredient name logic
  */
 
-// Format quantity based on unit type (fractions vs decimals)
-export const formatQuantityForUnit = (quantity, unit, units) => {
-  if (!quantity) return "";
-
-  // Check if it's a range first (before parsing)
-
-  if (typeof quantity === "string") {
-    const rangeMatch = quantity.match(/^(.+?)\s*[-–—]\s*(.+)$/);
-    if (rangeMatch) {
-      return quantity; // Return ranges as-is
-    }
-  }
-
-  // Parse the quantity if it's a string (handles fractions like "1/2")
-  const parsedQuantity =
-    typeof quantity === "string" ? parseFraction(quantity) : quantity;
-
-  // If parseFraction returned the original input (couldn't parse), use as-is
-  if (parsedQuantity === quantity && typeof quantity === "string") {
-    return quantity;
-  }
-
-  // Find the unit object to check if it uses fractions
-  // Handle null/undefined unit as empty string
-  const normalisedUnit = unit || "";
-  const unitObj = units?.find((u) => u.value === normalisedUnit);
-
-  // Default to fractions if no unit (cooking context) or if unit uses fractions
-  if (!normalisedUnit || unitObj?.useFractions) {
-    return formatQuantity(parsedQuantity);
-  } else {
-    // For metric units, keep as decimal
-    const num = parseFloat(parsedQuantity);
-    return Number.isInteger(num) ? num.toString() : parsedQuantity.toString();
-  }
+// Format quantity - now simply returns input as-is for maximum user flexibility
+export const formatQuantityForUnit = (quantity) => {
+  // Accept any input: 1/2, 1.5, 2 1/4, 2-3 cups, etc.
+  // Users can enter whatever format they prefer
+  return quantity || "";
 };
 
 // Get translated and pluralized unit display
@@ -105,7 +71,7 @@ export const getIngredientDisplayName = (
 export const formatIngredientMeasurement = (quantity, unit, units) => {
   if (!quantity && !unit) return "";
 
-  const displayQuantity = formatQuantityForUnit(quantity, unit, units);
+  const displayQuantity = formatQuantityForUnit(quantity);
   const displayUnit = formatUnitDisplay(unit, quantity, units);
 
   // Combine quantity and unit with proper spacing

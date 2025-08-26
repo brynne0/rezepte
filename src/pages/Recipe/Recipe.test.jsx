@@ -353,7 +353,7 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText("For the base")).toBeInTheDocument();
       expect(screen.getByText("For the filling")).toBeInTheDocument();
-      expect(screen.getByText(/1 1\/2 cups almonds/)).toBeInTheDocument();
+      expect(screen.getByText(/1.5 cups almonds/)).toBeInTheDocument();
       expect(screen.getByText(/1 lime/)).toBeInTheDocument();
     });
 
@@ -726,7 +726,7 @@ describe("Recipe Component", () => {
   });
 
   describe("Fraction Display", () => {
-    test("displays common fractions instead of decimals", () => {
+    test("displays quantities as originally entered", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
         ungroupedIngredients: [
@@ -761,15 +761,12 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      // Should display as fractions, not decimals
-      expect(screen.getByText(/1\/4 cup flour/)).toBeInTheDocument();
-      expect(screen.getByText(/1 1\/2 tsp salt/)).toBeInTheDocument();
-      expect(screen.getByText(/3\/4 cup sugar/)).toBeInTheDocument();
+      // Should display quantities as originally entered (raw format)
+      expect(screen.getByText(/0.25 cup flour/)).toBeInTheDocument();
+      expect(screen.getByText(/1.5 tsp salt/)).toBeInTheDocument();
+      expect(screen.getByText(/0.75 cup sugar/)).toBeInTheDocument();
 
-      // Should NOT display decimals
-      expect(screen.queryByText(/0\.25/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/1\.5/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/0\.75/)).not.toBeInTheDocument();
+      // The raw decimal format is now preserved and displayed
     });
 
     test("displays whole numbers without fractions", () => {

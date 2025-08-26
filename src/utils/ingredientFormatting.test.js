@@ -60,14 +60,14 @@ describe("ingredientFormatting", () => {
       );
     });
 
-    test("uses fractions for imperial units", () => {
-      expect(formatQuantityForUnit(0.5, "cup/s", mockUnits)).toBe("1/2");
-      expect(formatQuantityForUnit(0.25, "tsp", mockUnits)).toBe("1/4");
-    });
-
-    test("uses decimals for metric units", () => {
-      expect(formatQuantityForUnit(0.5, "ml", mockUnits)).toBe("0.5");
-      expect(formatQuantityForUnit(2.5, "g", mockUnits)).toBe("2.5");
+    test("returns input as-is for any input type", () => {
+      expect(formatQuantityForUnit("1/2")).toBe("1/2");
+      expect(formatQuantityForUnit("0.5")).toBe("0.5");
+      expect(formatQuantityForUnit(0.5)).toBe(0.5);
+      expect(formatQuantityForUnit("2-3")).toBe("2-3");
+      expect(formatQuantityForUnit("")).toBe("");
+      expect(formatQuantityForUnit(null)).toBe("");
+      expect(formatQuantityForUnit(undefined)).toBe("");
     });
   });
 
@@ -243,7 +243,9 @@ describe("ingredientFormatting", () => {
       };
 
       // Should use processed name first, even for English
-      expect(getIngredientDisplayName(ingredient, "en")).toBe("processed apple name");
+      expect(getIngredientDisplayName(ingredient, "en")).toBe(
+        "processed apple name"
+      );
 
       const ingredientSingular = {
         name: "processed apple singular", // Already processed name
@@ -254,7 +256,9 @@ describe("ingredientFormatting", () => {
         is_plural: false, // User typed singular form
       };
       // Should use processed name first
-      expect(getIngredientDisplayName(ingredientSingular, "en")).toBe("processed apple singular");
+      expect(getIngredientDisplayName(ingredientSingular, "en")).toBe(
+        "processed apple singular"
+      );
     });
   });
 
@@ -360,9 +364,9 @@ describe("ingredientFormatting", () => {
       };
 
       // Should use the processed name field that includes the override
-      // Note: 0.75 displays as fraction (3/4) for cup units
+      // Note: 0.75 displays as-is (no formatting conversion)
       expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
-        "3/4 cup Wasse"
+        "0.75 cup Wasse"
       );
     });
   });
