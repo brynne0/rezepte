@@ -112,8 +112,9 @@
 
 .step-number {
   font-weight: 600;
-  padding: 0.25rem;
   min-width: 0.8rem;
+  padding: 0.25rem;
+  padding-bottom: 0;
 }
 
 /* Source */
