@@ -15,7 +15,7 @@ export const useRecipes = () => {
       const data = await fetchRecipes();
 
       // Translate only recipe titles for the current language
-      const currentLanguage = i18n.language;
+      const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
       const translatedRecipes = await Promise.all(
         data.map((recipe) => getTranslatedRecipeTitle(recipe, currentLanguage))
       );
@@ -35,7 +35,7 @@ export const useRecipes = () => {
         const data = await fetchRecipes();
 
         // Translate only recipe titles for the current language
-        const currentLanguage = i18n.language;
+        const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
         const translatedRecipes = await Promise.all(
           data.map((recipe) =>
             getTranslatedRecipeTitle(recipe, currentLanguage)
