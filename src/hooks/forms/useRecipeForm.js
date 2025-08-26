@@ -6,7 +6,6 @@ import {
   validateRecipeForm,
   validateRecipeTitleUnique,
 } from "../../utils/validation";
-import { parseFraction } from "../../utils/fractionUtils";
 
 export const useRecipeForm = ({
   initialRecipe = null,
@@ -703,7 +702,7 @@ export const useRecipeForm = ({
         source: formData.source.trim() || null,
         ungroupedIngredients: validUngroupedIngredients.map((ing) => ({
           name: ing.name.trim(),
-          quantity: ing.quantity ? parseFraction(ing.quantity) : null,
+          quantity: ing.quantity ? ing.quantity.toString().trim() : null,
           unit: ing.unit.trim() || null,
           notes: ing.notes.trim() || null,
         })),
@@ -711,7 +710,7 @@ export const useRecipeForm = ({
           ...section,
           ingredients: section.ingredients.map((ing) => ({
             name: ing.name.trim(),
-            quantity: ing.quantity ? parseFraction(ing.quantity) : null,
+            quantity: ing.quantity ? ing.quantity.toString().trim() : null,
             unit: ing.unit.trim() || null,
             notes: ing.notes.trim() || null,
           })),
