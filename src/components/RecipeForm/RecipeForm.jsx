@@ -24,7 +24,6 @@ const RecipeForm = ({
   isEditingTranslation = false,
 }) => {
   const { t, i18n } = useTranslation();
-  const units = t("units", { returnObjects: true });
 
   const {
     formData,
