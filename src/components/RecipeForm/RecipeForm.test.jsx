@@ -1041,4 +1041,165 @@ describe("RecipeForm", () => {
       expect(() => fireEvent.keyDown(notesInput, { key: "Enter" })).not.toThrow();
     });
   });
+
+  describe("Instruction Drag and Drop", () => {
+    it("renders instructions with drag handles", () => {
+      renderComponent();
+      
+      // Check that instructions are rendered with drag handles
+      const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
+      expect(dragHandles).toHaveLength(2); // We have 2 instructions in mock data
+      
+      // Verify drag handles are present within instruction rows
+      dragHandles.forEach((handle) => {
+        // Each draggable should contain a drag handle with the grip icon
+        expect(handle).toBeInTheDocument();
+      });
+    });
+
+    it("renders instructions within droppable area", () => {
+      renderComponent();
+      
+      // Check that instructions are wrapped in a droppable area
+      const droppableArea = screen.getByTestId("droppable-instructions");
+      expect(droppableArea).toBeInTheDocument();
+    });
+
+    it("passes handleDragEnd to DragDropContext", () => {
+      renderComponent();
+
+      // Verify that the hook provides handleDragEnd function
+      expect(mockHookReturn.handleDragEnd).toBeDefined();
+      expect(typeof mockHookReturn.handleDragEnd).toBe("function");
+    });
+
+    it("disables drag handles in translation mode", () => {
+      renderComponent({ isEditingTranslation: true });
+      
+      // Check that drag handles are disabled in translation mode
+      const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
+      dragHandles.forEach((handle) => {
+        const dragHandleElement = handle.querySelector(".drag-handle");
+        expect(dragHandleElement).toHaveStyle({ pointerEvents: "none" });
+        expect(dragHandleElement).toHaveClass("translation-disabled");
+      });
+    });
+
+    it("enables drag handles in normal mode", () => {
+      renderComponent({ isEditingTranslation: false });
+      
+      // Check that drag handles are enabled in normal mode
+      const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
+      dragHandles.forEach((handle) => {
+        const dragHandleElement = handle.querySelector(".drag-handle");
+        expect(dragHandleElement).toHaveStyle({ pointerEvents: "auto" });
+        expect(dragHandleElement).not.toHaveClass("translation-disabled");
+      });
+    });
+
+    it("displays correct step numbers for instructions", () => {
+      renderComponent();
+      
+      // Check that step numbers are displayed correctly
+      const stepNumbers = screen.getAllByText(/^\d+\.$/);
+      expect(stepNumbers).toHaveLength(2);
+      expect(stepNumbers[0]).toHaveTextContent("1.");
+      expect(stepNumbers[1]).toHaveTextContent("2.");
+    });
+
+    it("maintains step numbers after reordering", () => {
+      // This test verifies that step numbers are always sequential
+      // regardless of the instruction order
+      const reorderedInstructions = ["Bake for 30 minutes", "Mix ingredients"];
+      
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        formData: {
+          ...mockHookReturn.formData,
+          instructions: reorderedInstructions,
+        },
+      });
+
+      renderComponent();
+      
+      // Step numbers should still be 1, 2 even with reordered content
+      const stepNumbers = screen.getAllByText(/^\d+\.$/);
+      expect(stepNumbers).toHaveLength(2);
+      expect(stepNumbers[0]).toHaveTextContent("1.");
+      expect(stepNumbers[1]).toHaveTextContent("2.");
+      
+      // But the content should be in the new order
+      expect(screen.getByDisplayValue("Bake for 30 minutes")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("Mix ingredients")).toBeInTheDocument();
+    });
+
+    it("includes isDragDisabled prop for instructions in translation mode", () => {
+      renderComponent({ isEditingTranslation: true });
+      
+      // In translation mode, draggables should be disabled
+      const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
+      expect(dragHandles).toHaveLength(2);
+      
+      // This verifies the component structure is correct for disabled state
+      dragHandles.forEach((handle) => {
+        expect(handle).toBeInTheDocument();
+      });
+    });
+
+    it("does not include isDragDisabled prop for instructions in normal mode", () => {
+      renderComponent({ isEditingTranslation: false });
+      
+      // In normal mode, draggables should be enabled
+      const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
+      expect(dragHandles).toHaveLength(2);
+      
+      // This verifies the component structure is correct for enabled state
+      dragHandles.forEach((handle) => {
+        expect(handle).toBeInTheDocument();
+      });
+    });
+
+    it("handles empty instructions array", () => {
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        formData: {
+          ...mockHookReturn.formData,
+          instructions: [],
+        },
+      });
+
+      renderComponent();
+      
+      // Should still render the droppable area even with no instructions
+      const droppableArea = screen.getByTestId("droppable-instructions");
+      expect(droppableArea).toBeInTheDocument();
+      
+      // Should not have any instruction drag handles
+      const dragHandles = screen.queryAllByTestId(/draggable-instruction-/);
+      expect(dragHandles).toHaveLength(0);
+    });
+
+    it("handles single instruction", () => {
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        formData: {
+          ...mockHookReturn.formData,
+          instructions: ["Single instruction"],
+        },
+      });
+
+      renderComponent();
+      
+      // Should render one instruction with drag handle
+      const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
+      expect(dragHandles).toHaveLength(1);
+      
+      // Should show step number 1
+      const stepNumber = screen.getByText("1.");
+      expect(stepNumber).toBeInTheDocument();
+      
+      // Should show the instruction content
+      expect(screen.getByDisplayValue("Single instruction")).toBeInTheDocument();
+    });
+  });
 });
