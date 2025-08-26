@@ -12,6 +12,7 @@ import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import useClickOutside from "../../hooks/ui/useClickOutside";
+import SortButtons from "../SortButtons/SortButtons";
 import "./Header.css";
 
 const Header = ({
@@ -21,6 +22,8 @@ const Header = ({
   setLoginMessage,
   loginMessage,
   disableLanguageSwitch = false,
+  sortBy,
+  setSortBy,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -329,38 +332,43 @@ const Header = ({
         {/*  Search Recipe - Always visible on home page  */}
         {isHomePage && (
           <div className="search-bar-wrapper">
-            <form
-              className="search-bar"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSearchTerm(currentSearchInput);
-                navigate("/");
-              }}
-            >
-              <div className="search-input-wrapper">
-                <input
-                  id="search"
-                  type="text"
-                  value={currentSearchInput}
-                  onChange={(e) => {
-                    setCurrentSearchInput(e.target.value);
-                    setSearchTerm(e.target.value);
-                    if (e.target.value.length > 0) {
-                      setSelectedCategory("all");
-                    }
-                  }}
-                  className="input input--cream search-input-with-icon"
-                  placeholder={t("search")}
-                />
-                <button
-                  className="btn btn-icon btn-icon-neutral btn-search"
-                  type="submit"
-                  aria-label={t("search")}
-                >
-                  <Search size={20} />
-                </button>
-              </div>
-            </form>
+            <div className="search-and-sort-container">
+              <form
+                className="search-bar"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSearchTerm(currentSearchInput);
+                  navigate("/");
+                }}
+              >
+                <div className="search-input-wrapper">
+                  <input
+                    id="search"
+                    type="text"
+                    value={currentSearchInput}
+                    onChange={(e) => {
+                      setCurrentSearchInput(e.target.value);
+                      setSearchTerm(e.target.value);
+                      if (e.target.value.length > 0) {
+                        setSelectedCategory("all");
+                      }
+                    }}
+                    className="input input--cream search-input-with-icon"
+                    placeholder={t("search")}
+                  />
+                  <button
+                    className="btn btn-icon btn-icon-neutral btn-search"
+                    type="submit"
+                    aria-label={t("search")}
+                  >
+                    <Search size={20} />
+                  </button>
+                </div>
+              </form>
+              {setSortBy && (
+                <SortButtons sortBy={sortBy} onSortChange={setSortBy} />
+              )}
+            </div>
           </div>
         )}
       </header>

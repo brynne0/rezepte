@@ -55,6 +55,8 @@ h3 {
 h1.forta-red {
   font-family: var(--font-forta);
   color: var(--dark-red);
+  /* TODO - maybe remove below line? */
+  line-height: 1;
 }
 
 h1.forta {
@@ -93,6 +95,8 @@ h3.forta {
 
 .link-red {
   color: var(--dark-red);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .error-message-small {
