@@ -91,7 +91,6 @@
   justify-content: center;
   cursor: grab;
   color: var(--brown);
-  min-height: 2rem;
 }
 
 .drag-handle:active {
@@ -149,7 +148,7 @@
 
   .ingredient-row {
     display: flex;
-    align-items: flex-start;
+    align-items: baseline;
     gap: 0.25rem;
   }
 
