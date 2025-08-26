@@ -35,7 +35,7 @@
 
 .input--edit {
   box-shadow: 0 0.0625rem 0.1rem var(--shadow-black);
-  border: var(--border-width) dashed var(--lighter-brown);
+  border: var(--border-width) solid var(--lighter-brown);
 }
 
 .input--full-width {
