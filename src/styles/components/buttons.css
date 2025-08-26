@@ -117,8 +117,6 @@ a.btn-unstyled {
 }
 
 .btn-icon-neutral:hover {
-  /* background: var(--cream-light); */
-  /* border-radius: 2rem; */
   transform: translateY(-1px);
   color: var(--red);
 }

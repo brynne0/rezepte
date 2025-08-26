@@ -15,12 +15,3 @@
   }
 }
 
-/* TODO - move to buttons css file */
-.btn-sort {
-  transition: all 0.2s ease;
-}
-
-.btn-sort:hover,
-.btn-sort.active {
-  color: var(--dark-red);
-}

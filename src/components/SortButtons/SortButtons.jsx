@@ -46,7 +46,7 @@ const SortButtons = ({ sortBy, onSortChange }) => {
   return (
     <div className="sort-buttons">
       <button
-        className={`btn-unstyled btn-sort ${isTitleActive ? "active" : ""}`}
+        className={`btn-unstyled btn-icon-neutral ${isTitleActive ? "selected" : ""}`}
         onClick={handleTitleSort}
         aria-label={t("sort_by_title")}
         title={t("sort_by_title")}
@@ -54,7 +54,7 @@ const SortButtons = ({ sortBy, onSortChange }) => {
         {getTitleIcon()}
       </button>
       <button
-        className={`btn-unstyled btn-sort ${isDateActive ? "active" : ""}`}
+        className={`btn-unstyled btn-icon-neutral ${isDateActive ? "selected" : ""}`}
         onClick={handleDateSort}
         aria-label={t("sort_by_date")}
         title={t("sort_by_date")}
