@@ -27,28 +27,16 @@ vi.mock("react-i18next", () => ({
     t: (key) => {
       if (key === "units") {
         return [
-          { value: "", label: "unit", useFractions: true },
-          { value: "tsp", label: "tsp", useFractions: true },
-          { value: "tbsp", label: "tbsp", useFractions: true },
-          {
-            value: "cup/s",
-            label: "cup/s",
-            useFractions: true,
-          },
-          { value: "ml", label: "ml", useFractions: false },
-          { value: "l", label: "l", useFractions: false },
-          { value: "g", label: "g", useFractions: false },
-          { value: "kg", label: "kg", useFractions: false },
-          {
-            value: "can/s",
-            label: "can/s",
-            useFractions: true,
-          },
-          {
-            value: "piece/s",
-            label: "piece/s",
-            useFractions: true,
-          },
+          { value: "", label: "unit" },
+          { value: "tsp", label: "tsp" },
+          { value: "tbsp", label: "tbsp" },
+          { value: "cup/s", label: "cup/s" },
+          { value: "ml", label: "ml" },
+          { value: "l", label: "l" },
+          { value: "g", label: "g" },
+          { value: "kg", label: "kg" },
+          { value: "can/s", label: "can/s" },
+          { value: "piece/s", label: "piece/s" },
         ];
       }
       return key;
