@@ -38,6 +38,10 @@
   border: var(--border-width) solid var(--lighter-brown);
 }
 
+.input--edit:focus {
+  border-style: dashed;
+}
+
 .input--full-width {
   width: 100%;
 }
