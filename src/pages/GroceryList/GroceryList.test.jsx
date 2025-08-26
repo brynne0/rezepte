@@ -22,6 +22,14 @@ vi.mock("../../services/groceryListService", () => ({
   normaliseIngredientName: (name) => name, // Simple mock for testing
 }));
 
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key) => {
@@ -159,7 +167,7 @@ describe("GroceryList", () => {
     expect(mockSetIsEditing).toHaveBeenCalledWith(false);
   });
 
-  it("cancels changes when cancel button is clicked", () => {
+  it("cancels changes when cancel button is clicked", async () => {
     setup({ isEditing: true });
     const nameInput = screen.getByDisplayValue("Apples");
     fireEvent.change(nameInput, { target: { value: "Green Apples" } });
@@ -167,8 +175,14 @@ describe("GroceryList", () => {
     const cancelButton = screen.getByRole("button", { name: "cancel" });
     fireEvent.click(cancelButton);
 
+    // Now the cancel button triggers navigation confirmation
+    // Since there are changes, it should show the confirmation modal
+    await waitFor(() => {
+      expect(screen.getByText("unsaved_changes_warning")).toBeInTheDocument();
+    });
+
     expect(mockUpdateGroceryList).not.toHaveBeenCalled();
-    expect(mockSetIsEditing).toHaveBeenCalledWith(false);
+    // setIsEditing is no longer called directly by the cancel button
   });
 
   it("adds a new item, fills it out, and saves", () => {
