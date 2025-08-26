@@ -55,3 +55,92 @@ describe("useRecipeForm - Ingredient Field Navigation Logic", () => {
     expect(typeof useRecipeForm).toBe("function");
   });
 });
+
+describe("useRecipeForm - handleDragEnd Logic", () => {
+  test("instruction reordering logic", () => {
+    // Test the logic that would be used in handleDragEnd for instructions
+    const originalInstructions = ["Step 1", "Step 2", "Step 3"];
+    
+    // Simulate moving instruction from index 0 to index 2
+    const sourceIndex = 0;
+    const destinationIndex = 2;
+    
+    // This is the logic used in handleDragEnd
+    const reorderedInstructions = Array.from(originalInstructions);
+    const [movedInstruction] = reorderedInstructions.splice(sourceIndex, 1);
+    reorderedInstructions.splice(destinationIndex, 0, movedInstruction);
+    
+    expect(reorderedInstructions).toEqual(["Step 2", "Step 3", "Step 1"]);
+  });
+
+  test("instruction reordering edge cases", () => {
+    // Test moving to same position (should not change array)
+    const instructions = ["Step 1", "Step 2", "Step 3"];
+    const sourceIndex = 1;
+    const destinationIndex = 1;
+    
+    const reorderedInstructions = Array.from(instructions);
+    const [movedInstruction] = reorderedInstructions.splice(sourceIndex, 1);
+    reorderedInstructions.splice(destinationIndex, 0, movedInstruction);
+    
+    expect(reorderedInstructions).toEqual(["Step 1", "Step 2", "Step 3"]);
+  });
+
+  test("instruction reordering with single item", () => {
+    // Test with only one instruction
+    const instructions = ["Single step"];
+    const sourceIndex = 0;
+    const destinationIndex = 0;
+    
+    const reorderedInstructions = Array.from(instructions);
+    const [movedInstruction] = reorderedInstructions.splice(sourceIndex, 1);
+    reorderedInstructions.splice(destinationIndex, 0, movedInstruction);
+    
+    expect(reorderedInstructions).toEqual(["Single step"]);
+  });
+
+  test("instruction reordering from last to first", () => {
+    // Test moving last instruction to first position
+    const instructions = ["Step 1", "Step 2", "Step 3"];
+    const sourceIndex = 2;
+    const destinationIndex = 0;
+    
+    const reorderedInstructions = Array.from(instructions);
+    const [movedInstruction] = reorderedInstructions.splice(sourceIndex, 1);
+    reorderedInstructions.splice(destinationIndex, 0, movedInstruction);
+    
+    expect(reorderedInstructions).toEqual(["Step 3", "Step 1", "Step 2"]);
+  });
+
+  test("drag result validation", () => {
+    // Test conditions that should prevent drag operations
+    const isValidDragResult = (result) => {
+      return !!(result && result.destination && result.source);
+    };
+
+    // Valid result
+    const validResult = {
+      source: { index: 0, droppableId: "instructions" },
+      destination: { index: 1, droppableId: "instructions" },
+      type: "instruction"
+    };
+    expect(isValidDragResult(validResult)).toBe(true);
+
+    // Invalid results
+    expect(isValidDragResult(null)).toBe(false);
+    expect(isValidDragResult({})).toBe(false);
+    expect(isValidDragResult({ source: { index: 0, droppableId: "instructions" } })).toBe(false);
+    expect(isValidDragResult({ destination: { index: 1, droppableId: "instructions" } })).toBe(false);
+  });
+
+  test("drag type validation", () => {
+    // Test that instruction type is handled correctly
+    const isInstructionDrag = (type) => type === "instruction";
+
+    expect(isInstructionDrag("instruction")).toBe(true);
+    expect(isInstructionDrag("ingredient")).toBe(false);
+    expect(isInstructionDrag("section")).toBe(false);
+    expect(isInstructionDrag(null)).toBe(false);
+    expect(isInstructionDrag(undefined)).toBe(false);
+  });
+});

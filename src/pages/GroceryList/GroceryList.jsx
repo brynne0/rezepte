@@ -284,15 +284,7 @@ const GroceryList = ({
                           <input
                             id={`item-quantity-${itemId}`}
                             type="text"
-                            value={(() => {
-                              // Format the value respecting unit's fraction setting
-                              if (!item.quantity) return "";
-                              return formatQuantityForUnit(
-                                item.quantity,
-                                item.unit,
-                                units
-                              );
-                            })()}
+                            value={formatQuantityForUnit(item.quantity)}
                             className="input input--edit input--full-width"
                             readOnly={!isEditing}
                             placeholder={t("quantity")}
@@ -378,11 +370,8 @@ const GroceryList = ({
                                 }
                               }
 
-                              const displayQuantity = formatQuantityForUnit(
-                                qty,
-                                unit,
-                                units
-                              );
+                              const displayQuantity =
+                                formatQuantityForUnit(qty);
                               const displayUnit = unit
                                 ? formatUnitDisplay(unit, qty, units)
                                 : "";
@@ -412,11 +401,7 @@ const GroceryList = ({
                           }
                         }
 
-                        const displayQuantity = formatQuantityForUnit(
-                          qty,
-                          unit,
-                          units
-                        );
+                        const displayQuantity = formatQuantityForUnit(qty);
                         const displayUnit = unit
                           ? formatUnitDisplay(unit, qty, units)
                           : "";

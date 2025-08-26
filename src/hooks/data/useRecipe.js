@@ -26,7 +26,7 @@ export const useRecipe = (id) => {
         const originalRecipe = await fetchRecipe(id);
 
         // Get translated recipe if needed
-        const currentLanguage = i18n.language;
+        const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
         const translatedRecipe = await getTranslatedRecipe(
           originalRecipe,
           currentLanguage

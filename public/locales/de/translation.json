@@ -85,33 +85,17 @@
   "switch_to_note": "Zu Notiz wechseln",
 
   "units": [
-    { "value": "", "label": "-", "useFractions": true },
-    { "value": "ml", "label": "ml", "useFractions": false },
-    { "value": "l", "label": "l", "useFractions": false },
-    { "value": "g", "label": "g", "useFractions": false },
-    { "value": "kg", "label": "kg", "useFractions": false },
-    { "value": "tsp", "label": "TL", "useFractions": true },
-    { "value": "tbsp", "label": "EL", "useFractions": true },
-    {
-      "value": "cup/s",
-      "label": "Tasse/n",
-      "useFractions": true
-    },
-    {
-      "value": "can/s",
-      "label": "Dose/n",
-      "useFractions": true
-    },
-    {
-      "value": "piece/s",
-      "label": "Stück/e",
-      "useFractions": true
-    },
-    {
-      "value": "pinch/es",
-      "label": "Prise/n",
-      "useFractions": true
-    }
+    { "value": "", "label": "-" },
+    { "value": "ml", "label": "ml" },
+    { "value": "l", "label": "l" },
+    { "value": "g", "label": "g" },
+    { "value": "kg", "label": "kg" },
+    { "value": "tsp", "label": "TL" },
+    { "value": "tbsp", "label": "EL" },
+    { "value": "cup/s", "label": "Tasse/n" },
+    { "value": "can/s", "label": "Dose/n" },
+    { "value": "piece/s", "label": "Stück/e" },
+    { "value": "pinch/es", "label": "Prise/n" }
   ],
 
   "recipe_delete_confirmation": "Möchten Sie dieses Rezept wirklich löschen?",

@@ -17,7 +17,7 @@ const EditRecipePage = ({ categories }) => {
     if (
       recipe &&
       recipe.original_language &&
-      recipe.original_language !== i18n.language
+      recipe.original_language !== i18n.language.split("-")[0] // Normalize region codes
     ) {
       setIsEditingTranslation(true);
       originalUserLanguage.current = i18n.language;

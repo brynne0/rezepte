@@ -88,10 +88,9 @@
 .drag-handle {
   display: flex;
   align-items: center;
+  justify-content: center;
   cursor: grab;
   color: var(--brown);
-  padding-top: 0.25rem;
-  min-height: 2rem;
 }
 
 .drag-handle:active {
@@ -112,8 +111,9 @@
 
 .step-number {
   font-weight: 600;
-  padding: 0.25rem;
   min-width: 0.8rem;
+  padding: 0.25rem;
+  padding-bottom: 0;
 }
 
 /* Source */
@@ -148,7 +148,7 @@
 
   .ingredient-row {
     display: flex;
-    align-items: flex-start;
+    align-items: baseline;
     gap: 0.25rem;
   }
 
