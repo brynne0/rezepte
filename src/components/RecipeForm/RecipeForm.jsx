@@ -12,6 +12,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import { formatQuantityForUnit } from "../../utils/ingredientFormatting";
+import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
@@ -32,6 +33,7 @@ const RecipeForm = ({
     loading,
     // error,
     isEditMode,
+    hasUnsavedChanges,
     handleInputChange,
     handleTitleBlur,
     handleIngredientChange,
@@ -47,12 +49,20 @@ const RecipeForm = ({
     handleEnter,
     handleIngredientFieldEnter,
     handleSubmit,
-    handleCancel,
     handleDelete,
     toTitleCase,
   } = useRecipeForm({ initialRecipe, isEditingTranslation });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Unsaved changes detection
+  const {
+    isModalOpen: isUnsavedChangesModalOpen,
+    navigate: navigateWithConfirmation,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedChangesMessage,
+  } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
 
   const [sourceMode, setSourceMode] = useState(() => {
     // Initialise based on existing source content
@@ -97,7 +107,7 @@ const RecipeForm = ({
         <button
           className="btn-unstyled back-arrow-left"
           onClick={() => {
-            handleCancel();
+            navigateWithConfirmation(-1);
           }}
           data-testid="back-arrow"
           aria-label={t("go_back")}
@@ -1046,7 +1056,7 @@ const RecipeForm = ({
           {/* Cancel Button */}
           <button
             type="button"
-            onClick={handleCancel}
+            onClick={() => navigateWithConfirmation(-1)}
             className="btn btn-action btn-secondary"
           >
             {t("cancel")}
@@ -1081,6 +1091,17 @@ const RecipeForm = ({
         confirmText={t("delete")}
         cancelText={t("cancel")}
         confirmButtonType="danger"
+      />
+
+      {/* Unsaved Changes Modal */}
+      <ConfirmationModal
+        isOpen={isUnsavedChangesModalOpen}
+        onClose={confirmNavigation}
+        onConfirm={cancelNavigation}
+        message={unsavedChangesMessage}
+        confirmText={t("stay")}
+        cancelText={t("leave_page")}
+        confirmButtonType="primary"
       />
     </div>
   );

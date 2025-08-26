@@ -154,11 +154,14 @@ export const useRecipeForm = ({
   const [formData, setFormData] = useState(getInitialFormData);
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionError, setSubmissionError] = useState("");
+  const [initialFormData, setInitialFormData] = useState(getInitialFormData);
 
   // Update form data when initialRecipe changes (for edit mode)
   useEffect(() => {
     if (initialRecipe) {
-      setFormData(getInitialFormData());
+      const newFormData = getInitialFormData();
+      setFormData(newFormData);
+      setInitialFormData(newFormData);
     }
   }, [initialRecipe, getInitialFormData]);
 
@@ -895,6 +898,61 @@ export const useRecipeForm = ({
     }
   };
 
+  // Check if form has unsaved changes
+  const hasUnsavedChanges = () => {
+    // Deep comparison function for ingredients
+    const compareIngredients = (arr1, arr2) => {
+      if (arr1.length !== arr2.length) return false;
+      return arr1.every((item1, index) => {
+        const item2 = arr2[index];
+        if (!item2) return false;
+        return (
+          item1.name === item2.name &&
+          item1.quantity === item2.quantity &&
+          item1.unit === item2.unit &&
+          item1.notes === item2.notes
+        );
+      });
+    };
+
+    // Deep comparison function for ingredient sections
+    const compareSections = (sections1, sections2) => {
+      if (sections1.length !== sections2.length) return false;
+      return sections1.every((section1, index) => {
+        const section2 = sections2[index];
+        if (!section2) return false;
+        return (
+          section1.subheading === section2.subheading &&
+          compareIngredients(section1.ingredients, section2.ingredients)
+        );
+      });
+    };
+
+    // Compare arrays
+    const compareArrays = (arr1, arr2) => {
+      if (arr1.length !== arr2.length) return false;
+      return arr1.every((item, index) => item === arr2[index]);
+    };
+
+    // Compare form data with initial form data
+    return (
+      formData.title !== initialFormData.title ||
+      formData.servings !== initialFormData.servings ||
+      formData.source !== initialFormData.source ||
+      formData.notes !== initialFormData.notes ||
+      !compareArrays(formData.categories, initialFormData.categories) ||
+      !compareArrays(formData.instructions, initialFormData.instructions) ||
+      !compareIngredients(
+        formData.ungroupedIngredients,
+        initialFormData.ungroupedIngredients
+      ) ||
+      !compareSections(
+        formData.ingredientSections,
+        initialFormData.ingredientSections
+      )
+    );
+  };
+
   return {
     formData,
     validationErrors,
@@ -903,6 +961,7 @@ export const useRecipeForm = ({
     loading,
     error,
     isEditMode: !!initialRecipe,
+    hasUnsavedChanges,
     handleInputChange,
     handleTitleBlur,
     handleIngredientChange,

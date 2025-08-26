@@ -5,6 +5,7 @@ import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 
 import "./GroceryList.css";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
+import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
@@ -33,8 +34,41 @@ const GroceryList = ({
 
   const [editedList, setEditedList] = useState([]);
   const [checkedItems, setCheckedItems] = useState(new Set());
+  const [originalGroceryList, setOriginalGroceryList] = useState([]);
 
   const currentList = isEditing ? editedList : groceryList;
+
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    if (!isEditing) return false;
+    
+    // Compare current edited list with original list
+    if (editedList.length !== originalGroceryList.length) return true;
+    
+    return editedList.some((editedItem, index) => {
+      const originalItem = originalGroceryList[index];
+      if (!originalItem) return true;
+      
+      return (
+        editedItem.name !== originalItem.name ||
+        editedItem.quantity !== originalItem.quantity ||
+        editedItem.unit !== originalItem.unit ||
+        editedItem.notes !== originalItem.notes
+      );
+    });
+  };
+
+  // Unsaved changes detection
+  const {
+    isModalOpen: isUnsavedChangesModalOpen,
+    navigate: navigateWithConfirmation,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedChangesMessage,
+  } = useUnsavedChanges(
+    hasUnsavedChanges(),
+    t("unsaved_changes_warning")
+  );
 
   // Group ingredients by normalised name for display
   const groupIngredients = (items) => {
@@ -92,10 +126,12 @@ const GroceryList = ({
 
       setIsEditing(true);
       setEditedList([...groceryList]); // Create a copy to edit
+      setOriginalGroceryList([...groceryList]); // Store original for comparison
     } catch (error) {
       console.error("Error switching to preferred language:", error);
       setIsEditing(true);
       setEditedList([...groceryList]);
+      setOriginalGroceryList([...groceryList]);
     }
   };
 
@@ -110,16 +146,12 @@ const GroceryList = ({
     }
   };
 
-  const cancelEditing = () => {
-    setIsEditing(false);
-    setEditedList([]);
-    restoreOriginalLanguage();
-  };
 
   const saveChanges = () => {
     updateGroceryList(editedList);
     setIsEditing(false);
     setEditedList([]);
+    setOriginalGroceryList([]);
     restoreOriginalLanguage();
   };
 
@@ -229,7 +261,7 @@ const GroceryList = ({
         ) : (
           <button
             className="btn-unstyled back-arrow-left"
-            onClick={() => navigate(-1)}
+            onClick={() => navigateWithConfirmation(-1)}
             aria-label={t("go_back")}
           >
             <ArrowBigLeft size={28} />
@@ -458,7 +490,7 @@ const GroceryList = ({
           {/* Cancel Button */}
           <button
             className="btn btn-action btn-secondary"
-            onClick={cancelEditing}
+            onClick={() => navigateWithConfirmation(-1)}
           >
             {t("cancel")}
           </button>
@@ -476,12 +508,24 @@ const GroceryList = ({
         onConfirm={() => {
           clearGroceryList();
           setEditedList([]);
+          setOriginalGroceryList([]);
           setIsClearModalOpen(false);
         }}
         message={t("grocery_list_clear_confirmation")}
         confirmText={t("clear_list")}
         cancelText={t("cancel")}
         confirmButtonType="danger"
+      />
+
+      {/* Unsaved Changes Modal */}
+      <ConfirmationModal
+        isOpen={isUnsavedChangesModalOpen}
+        onClose={confirmNavigation}
+        onConfirm={cancelNavigation}
+        message={unsavedChangesMessage}
+        confirmText={t("stay")}
+        cancelText={t("leave_page")}
+        confirmButtonType="primary"
       />
     </div>
   );
