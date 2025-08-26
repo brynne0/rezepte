@@ -411,7 +411,20 @@ export const useRecipeForm = ({
 
     const { source, destination, type } = result;
 
-    if (type === "section") {
+    if (type === "instruction") {
+      // Reorder instructions
+      const reorderedInstructions = Array.from(formData.instructions);
+      const [reorderedInstruction] = reorderedInstructions.splice(
+        source.index,
+        1
+      );
+      reorderedInstructions.splice(destination.index, 0, reorderedInstruction);
+
+      setFormData((prev) => ({
+        ...prev,
+        instructions: reorderedInstructions,
+      }));
+    } else if (type === "section") {
       // Reorder sections
       const reorderedSections = Array.from(formData.ingredientSections);
       const [reorderedSection] = reorderedSections.splice(source.index, 1);

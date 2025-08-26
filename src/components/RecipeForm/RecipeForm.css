@@ -88,9 +88,9 @@
 .drag-handle {
   display: flex;
   align-items: center;
+  justify-content: center;
   cursor: grab;
   color: var(--brown);
-  padding-top: 0.25rem;
   min-height: 2rem;
 }
 
