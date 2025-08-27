@@ -87,6 +87,7 @@ export const deleteRecipeImage = async (imagePath) => {
   }
 };
 
+
 // Update recipe images in database
 export const updateRecipeImages = async (recipeId, images) => {
   try {
@@ -151,15 +152,11 @@ export const setMainImage = (images, imageId) => {
 
 // Upload all local images when recipe is saved
 export const uploadLocalImages = async (images, recipeId) => {
-  console.log('uploadLocalImages called with:', { images: images.length, recipeId });
   const uploadedImages = [];
   
   for (const image of images) {
-    console.log('Processing image:', { id: image.id, isLocal: image.isLocal, hasFile: !!image.file });
-    
     if (image.isLocal && image.file) {
       try {
-        console.log('Uploading local image:', image.filename);
         // Upload the local file
         const uploadedImage = await uploadRecipeImage(image.file, recipeId);
         
@@ -173,7 +170,6 @@ export const uploadLocalImages = async (images, recipeId) => {
         
         // Clean up the local preview URL
         URL.revokeObjectURL(image.url);
-        console.log('Successfully uploaded:', image.filename);
       } catch (error) {
         console.error(`Failed to upload image ${image.filename}:`, error);
         throw error;
@@ -181,10 +177,29 @@ export const uploadLocalImages = async (images, recipeId) => {
     } else {
       // Keep already uploaded images as-is
       uploadedImages.push(image);
-      console.log('Keeping existing image:', image.id);
     }
   }
   
-  console.log('uploadLocalImages completed:', uploadedImages.length, 'images processed');
   return uploadedImages;
+};
+
+// Delete orphaned images when recipe is updated
+export const cleanupOrphanedImages = async (oldImages, newImages) => {
+  if (!oldImages || oldImages.length === 0) {
+    return;
+  }
+  
+  const newImageIds = new Set(newImages.map(img => img.id));
+  const imagesToDelete = oldImages.filter(img => !newImageIds.has(img.id));
+  
+  for (const image of imagesToDelete) {
+    if (image.path) {
+      try {
+        await deleteRecipeImage(image.path);
+      } catch (error) {
+        console.error(`Failed to delete orphaned image ${image.path}:`, error);
+        // Don't throw - continue with other deletions
+      }
+    }
+  }
 };

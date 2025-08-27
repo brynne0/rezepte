@@ -1,7 +1,10 @@
 import supabase from "../lib/supabase";
 import pluralize from "pluralize";
 import { updateRecipeTranslations } from "./translationService";
-import { uploadLocalImages } from "./imageService";
+import {
+  uploadLocalImages,
+  cleanupOrphanedImages,
+} from "./imageService";
 
 // Helper function to determine if an ingredient name was entered as plural
 const determineIngredientPlurality = async (inputName, language = "en") => {
@@ -893,13 +896,19 @@ export const createRecipe = async (recipeData) => {
   }
 
   // Upload any local images after creating the recipe
-  console.log('Recipe creation - checking images:', { hasImages: !!recipeData.images, imageCount: recipeData.images?.length });
-  
+  console.log("Recipe creation - checking images:", {
+    hasImages: !!recipeData.images,
+    imageCount: recipeData.images?.length,
+  });
+
   if (recipeData.images && recipeData.images.length > 0) {
-    console.log('Found images to process:', recipeData.images);
+    console.log("Found images to process:", recipeData.images);
     try {
-      const uploadedImages = await uploadLocalImages(recipeData.images, recipe.id);
-      
+      const uploadedImages = await uploadLocalImages(
+        recipeData.images,
+        recipe.id
+      );
+
       // Update the recipe with the uploaded images
       const { error: updateError } = await supabase
         .from("recipes")
@@ -917,7 +926,7 @@ export const createRecipe = async (recipeData) => {
       // Don't fail the recipe creation if image upload fails
     }
   } else {
-    console.log('No images to upload for recipe');
+    console.log("No images to upload for recipe");
   }
 
   return recipe;
@@ -925,16 +934,24 @@ export const createRecipe = async (recipeData) => {
 
 // Update an existing recipe
 export const updateRecipe = async (id, recipeData) => {
-  // First fetch the original recipe for smart translation updates
+  // First fetch the original recipe for smart translation updates and image cleanup
   const { data: originalRecipe, error: fetchError } = await supabase
     .from("recipes")
-    .select("title, instructions, notes, source")
+    .select("title, instructions, notes, source, images")
     .eq("id", id)
     .single();
 
   if (fetchError) {
     throw new Error(`Failed to fetch original recipe: ${fetchError.message}`);
   }
+
+  console.log("=== FETCHED ORIGINAL RECIPE ===");
+  console.log("Recipe ID:", id);
+  console.log("Original recipe data:", originalRecipe);
+  console.log("Original recipe images field:", originalRecipe.images);
+  console.log("Images type:", typeof originalRecipe.images);
+  console.log("Images length:", originalRecipe.images?.length);
+  console.log("=== END FETCH DEBUG ===");
 
   const cleanRecipeData = Object.fromEntries(
     Object.entries({
@@ -1186,25 +1203,48 @@ export const updateRecipe = async (id, recipeData) => {
     }
   }
 
-  // Upload any local images after updating the recipe
-  if (recipeData.images && recipeData.images.length > 0) {
+  // Handle image cleanup and upload after updating the recipe
+  if (recipeData.images !== undefined) {
     try {
-      const uploadedImages = await uploadLocalImages(recipeData.images, id);
-      
-      // Update the recipe with the uploaded images
-      const { error: updateError } = await supabase
-        .from("recipes")
-        .update({ images: uploadedImages })
-        .eq("id", id);
+      // Clean up orphaned images first
+      if (originalRecipe.images && originalRecipe.images.length > 0) {
+        await cleanupOrphanedImages(
+          originalRecipe.images,
+          recipeData.images || []
+        );
+      }
 
-      if (updateError) {
-        console.error("Failed to update recipe with images:", updateError);
+      // Upload any local images if there are images to process
+      if (recipeData.images && recipeData.images.length > 0) {
+        const uploadedImages = await uploadLocalImages(recipeData.images, id);
+
+        // Update the recipe with the uploaded images
+        const { error: updateError } = await supabase
+          .from("recipes")
+          .update({ images: uploadedImages })
+          .eq("id", id);
+
+        if (updateError) {
+          console.error("Failed to update recipe with images:", updateError);
+        } else {
+          recipe.images = uploadedImages;
+        }
       } else {
-        recipe.images = uploadedImages;
+        // No images left - clear the images field
+        const { error: updateError } = await supabase
+          .from("recipes")
+          .update({ images: [] })
+          .eq("id", id);
+
+        if (updateError) {
+          console.error("Failed to clear recipe images:", updateError);
+        } else {
+          recipe.images = [];
+        }
       }
     } catch (error) {
-      console.error("Failed to upload images:", error);
-      // Don't fail the recipe update if image upload fails
+      console.error("Failed to process images:", error);
+      // Don't fail the recipe update if image processing fails
     }
   }
 

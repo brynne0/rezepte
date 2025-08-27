@@ -3,7 +3,6 @@ import { Upload, Crown, Trash2, Loader2, Image } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./ImageUpload.css";
 import {
-  deleteRecipeImage,
   validateImageFile,
   setMainImage,
 } from "../../services/imageService";
@@ -57,17 +56,13 @@ const ImageUpload = ({ images = [], onChange, disabled = false }) => {
 
     try {
       setError("");
-      console.log("Deleting image:", imageToDelete.id);
 
       // If it's a local preview, just revoke the URL
       if (imageToDelete.isLocal) {
         URL.revokeObjectURL(imageToDelete.url);
-      } else {
-        // Delete from storage if it's already uploaded
-        if (imageToDelete.path) {
-          await deleteRecipeImage(imageToDelete.path);
-        }
       }
+      // Don't delete from storage here - let the cleanup process handle it when recipe is saved
+      // This prevents double-deletion attempts
 
       // Remove from images array
       const newImages = images.filter((img) => img.id !== imageToDelete.id);
@@ -77,7 +72,6 @@ const ImageUpload = ({ images = [], onChange, disabled = false }) => {
         newImages[0].is_main = true;
       }
 
-      console.log("Calling onChange with new images:", newImages.length);
       onChange(newImages);
     } catch (err) {
       console.error("Error deleting image:", err);
