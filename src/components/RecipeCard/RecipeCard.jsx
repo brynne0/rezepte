@@ -1,16 +1,16 @@
 import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import {
-  getMainImage,
-  getOptimizedImageUrl,
-} from "../../services/imageService";
+// import {
+//   getMainImage,
+//   getOptimizedImageUrl,
+// } from "../../services/imageService";
 
 const RecipeCard = ({ recipe, onClick }) => {
   const { t } = useTranslation();
 
   // Get main image
-  const mainImage = getMainImage(recipe.images);
+  // const mainImage = getMainImage(recipe.images);
 
   // Check if recipe has a source link
   const hasSourceLink =

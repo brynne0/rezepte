@@ -95,7 +95,6 @@
 .recipe-layout {
   display: grid;
   grid-template-columns: 1fr 350px;
-  gap: 2rem;
 }
 
 .recipe-content {
@@ -116,7 +115,6 @@
   /* Stack layout on mobile */
   .recipe-layout {
     grid-template-columns: 1fr;
-    gap: 1rem;
   }
 
   .recipe-images {

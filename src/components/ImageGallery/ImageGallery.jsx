@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import "./ImageGallery.css";
@@ -10,6 +10,18 @@ import {
 const ImageGallery = ({ images = [] }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
+
+  // Memoize optimized URLs to prevent refetching
+  const optimizedUrls = useMemo(() => {
+    return images.reduce((acc, image) => {
+      acc[image.id] = {
+        main: getOptimizedImageUrl(image.url, { width: 600, height: 300 }),
+        thumb: getOptimizedImageUrl(image.url, { width: 120, height: 80 }),
+        full: image.url,
+      };
+      return acc;
+    }, {});
+  }, [images]);
 
   if (!images || images.length === 0) {
     return null;
@@ -36,10 +48,8 @@ const ImageGallery = ({ images = [] }) => {
     <div>
       {/* Main Image */}
       <img
-        src={getOptimizedImageUrl(currentImage.url, {
-          width: 600,
-          height: 300,
-        })}
+        key={`main-${currentImage.id}`}
+        src={optimizedUrls[currentImage.id]?.main}
         alt={currentImage.filename || "Recipe image"}
         className="main-image"
         onClick={openModal}
@@ -52,7 +62,7 @@ const ImageGallery = ({ images = [] }) => {
           {images.map((image, index) => (
             <img
               key={image.id}
-              src={getOptimizedImageUrl(image.url, { width: 120, height: 80 })}
+              src={optimizedUrls[image.id]?.thumb}
               alt={image.filename || `Recipe image ${index + 1}`}
               className={`thumbnail ${
                 index === currentImageIndex ? "active" : ""
@@ -65,24 +75,25 @@ const ImageGallery = ({ images = [] }) => {
       )}
 
       {/* Modal for full-size viewing - rendered as portal */}
-      {showModal && createPortal(
-        <div className="image-modal" onClick={closeModal}>
-          <button
-            className="btn-unstyled close-modal"
-            onClick={closeModal}
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-          <img
-            src={currentImage.url}
-            alt={currentImage.filename || "Recipe image"}
-            className="modal-image"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking image
-          />
-        </div>,
-        document.body
-      )}
+      {showModal &&
+        createPortal(
+          <div className="image-modal" onClick={closeModal}>
+            <button
+              className="btn-unstyled close-modal"
+              onClick={closeModal}
+              aria-label="Close"
+            >
+              <X size={20} />
+            </button>
+            <img
+              src={optimizedUrls[currentImage.id]?.full}
+              alt={currentImage.filename || "Recipe image"}
+              className="modal-image"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking image
+            />
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

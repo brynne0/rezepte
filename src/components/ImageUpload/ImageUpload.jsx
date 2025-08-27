@@ -3,17 +3,14 @@ import { Upload, Crown, Trash2, Loader2, Image } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./ImageUpload.css";
 import {
-  uploadRecipeImage,
   deleteRecipeImage,
   validateImageFile,
   setMainImage,
 } from "../../services/imageService";
 
-const ImageUpload = ({ images = [], onChange, recipeId, disabled = false }) => {
+const ImageUpload = ({ images = [], onChange, disabled = false }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState("");
 
@@ -60,6 +57,7 @@ const ImageUpload = ({ images = [], onChange, recipeId, disabled = false }) => {
 
     try {
       setError("");
+      console.log("Deleting image:", imageToDelete.id);
 
       // If it's a local preview, just revoke the URL
       if (imageToDelete.isLocal) {
@@ -79,8 +77,10 @@ const ImageUpload = ({ images = [], onChange, recipeId, disabled = false }) => {
         newImages[0].is_main = true;
       }
 
+      console.log("Calling onChange with new images:", newImages.length);
       onChange(newImages);
     } catch (err) {
+      console.error("Error deleting image:", err);
       setError(`Failed to delete image: ${err.message}`);
     }
   };
@@ -152,17 +152,6 @@ const ImageUpload = ({ images = [], onChange, recipeId, disabled = false }) => {
 
       {error && <div className="error-message">{error}</div>}
 
-      {uploading && (
-        <div className="upload-progress">
-          <div>{t("uploading")}...</div>
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{ width: `${uploadProgress}%` }}
-            />
-          </div>
-        </div>
-      )}
 
       {images.length > 0 && (
         <div className="image-preview-grid">
@@ -185,6 +174,7 @@ const ImageUpload = ({ images = [], onChange, recipeId, disabled = false }) => {
               <div className="image-overlay">
                 {!image.is_main && (
                   <button
+                    type="button"
                     className="btn-unstyled image-action-btn set-main"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -198,6 +188,7 @@ const ImageUpload = ({ images = [], onChange, recipeId, disabled = false }) => {
                 )}
 
                 <button
+                  type="button"
                   className="btn-unstyled image-action-btn delete"
                   onClick={(e) => {
                     e.stopPropagation();
