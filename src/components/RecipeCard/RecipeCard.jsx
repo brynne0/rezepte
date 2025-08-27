@@ -1,9 +1,17 @@
 import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import {
+  getMainImage,
+  getOptimizedImageUrl,
+} from "../../services/imageService";
 
 const RecipeCard = ({ recipe, onClick }) => {
   const { t } = useTranslation();
+
+  // Get main image
+  const mainImage = getMainImage(recipe.images);
+
   // Check if recipe has a source link
   const hasSourceLink =
     recipe.source &&
@@ -12,18 +20,27 @@ const RecipeCard = ({ recipe, onClick }) => {
       recipe.source.startsWith("www."));
 
   // Check if recipe has no content (no ingredients and no instructions)
-  const hasNoIngredients = 
+  const hasNoIngredients =
     (!recipe.ingredients || recipe.ingredients.length === 0) &&
-    (!recipe.ungroupedIngredients || recipe.ungroupedIngredients.length === 0) &&
+    (!recipe.ungroupedIngredients ||
+      recipe.ungroupedIngredients.length === 0) &&
     (!recipe.ingredientSections || recipe.ingredientSections.length === 0);
-  
-  const hasNoInstructions = !recipe.instructions || recipe.instructions.length === 0;
-  
+
+  const hasNoInstructions =
+    !recipe.instructions || recipe.instructions.length === 0;
+
   const hasNoContent = hasNoIngredients && hasNoInstructions;
 
   return (
     <div className="recipe-card" onClick={() => onClick && onClick(recipe)}>
-      {/* <img className="recipe-image" src={recipe.image} /> */}
+      {/* {mainImage && (
+        <img 
+          className="recipe-image" 
+          src={getOptimizedImageUrl(mainImage.url, { width: 300, height: 200 })} 
+          alt={recipe.title}
+          loading="lazy"
+        />
+      )} */}
       <h4 className="recipe-card-title">{recipe.title}</h4>
       {hasSourceLink && hasNoContent && (
         <a

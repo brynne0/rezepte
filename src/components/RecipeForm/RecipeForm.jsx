@@ -16,6 +16,7 @@ import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
+import ImageUpload from "../ImageUpload/ImageUpload";
 import "./RecipeForm.css";
 
 const RecipeForm = ({
@@ -36,6 +37,7 @@ const RecipeForm = ({
     hasUnsavedChanges,
     handleInputChange,
     handleTitleBlur,
+    handleImagesChange,
     handleIngredientChange,
     handleSectionChange,
     handleInstructionChange,
@@ -249,6 +251,23 @@ const RecipeForm = ({
               {validationErrors.category}
             </span>
           )}
+        </div>
+
+        {/* Recipe Images */}
+        <div
+          className={`form-group ${
+            isEditingTranslation ? "translation-disabled" : ""
+          }`}
+        >
+          <div className="form-header">
+            <h3>{t("images")}</h3>
+          </div>
+          <ImageUpload
+            images={formData.images}
+            onChange={handleImagesChange}
+            recipeId={initialRecipe?.id || 'temp'}
+            disabled={isEditingTranslation}
+          />
         </div>
 
         <DragDropContext

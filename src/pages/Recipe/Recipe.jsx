@@ -11,6 +11,7 @@ import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ShareModal from "../../components/ShareModal/ShareModal";
+import ImageGallery from "../../components/ImageGallery/ImageGallery";
 import { formatCompleteIngredient } from "../../utils/ingredientFormatting";
 
 const Recipe = ({ isSharedView = false }) => {
@@ -176,6 +177,12 @@ const Recipe = ({ isSharedView = false }) => {
         )}
       </div>
 
+      {/* Two column layout on desktop */}
+      <div className="recipe-layout">
+        <div className="recipe-content">
+
+      {/* Recipe Images - moved to right column */}
+
       {/* Servings */}
       {recipe.servings && (
         <div className="recipe-subheading">
@@ -323,6 +330,14 @@ const Recipe = ({ isSharedView = false }) => {
           {recipe.notes}
         </div>
       )}
+
+        </div>
+
+        {/* Images column */}
+        <div className="recipe-images">
+          <ImageGallery images={recipe.images} />
+        </div>
+      </div>
 
       {/* Share Modal - only for owned recipes */}
       {!isSharedView && (

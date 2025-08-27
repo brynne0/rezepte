@@ -91,8 +91,37 @@
   overflow-wrap: break-word;
 }
 
+/* Two column layout */
+.recipe-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.recipe-content {
+  min-width: 0; /* Prevent overflow */
+}
+
+.recipe-images {
+  position: sticky;
+  top: 1rem;
+  height: fit-content;
+}
+
 @media (max-width: 768px) {
   .recipe-actions {
     padding: 0.1rem;
+  }
+
+  /* Stack layout on mobile */
+  .recipe-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .recipe-images {
+    position: static;
+    order: -1; /* Show images first on mobile */
   }
 }

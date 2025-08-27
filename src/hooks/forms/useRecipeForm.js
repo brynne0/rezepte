@@ -126,6 +126,7 @@ export const useRecipeForm = ({
         ungroupedIngredients: ungroupedIngredients,
         ingredientSections: ingredientSections,
         notes: initialRecipe.notes,
+        images: initialRecipe.images || [],
       };
     }
 
@@ -146,6 +147,7 @@ export const useRecipeForm = ({
         },
       ],
       ingredientSections: [],
+      images: [],
 
       notes: "",
     };
@@ -196,6 +198,10 @@ export const useRecipeForm = ({
         setValidationErrors((prev) => ({ ...prev, title: titleError }));
       }
     }
+  };
+
+  const handleImagesChange = (images) => {
+    setFormData((prev) => ({ ...prev, images }));
   };
 
   const handleIngredientChange = (
@@ -720,7 +726,11 @@ export const useRecipeForm = ({
         })),
 
         notes: formData.notes,
+        images: formData.images || [],
       };
+
+      console.log('Form submission - formData.images:', formData.images);
+      console.log('Form submission - recipeData.images:', recipeData.images);
 
       // Only set original_language when creating a new recipe
       if (!initialRecipe) {
@@ -964,6 +974,7 @@ export const useRecipeForm = ({
     hasUnsavedChanges,
     handleInputChange,
     handleTitleBlur,
+    handleImagesChange,
     handleIngredientChange,
     handleSectionChange,
     handleInstructionChange,

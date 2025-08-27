@@ -180,5 +180,14 @@
 
   "unsaved_changes_warning": "You have unsaved changes. Are you sure you want to leave this page?",
   "leave_page": "Leave page",
-  "stay": "Stay"
+  "stay": "Stay",
+
+  "images": "Images",
+  "upload_images": "Upload Images",
+  "click_or_drag": "Click to select or drag and drop",
+  "image_upload_hint": "PNG, JPEG, WebP up to 5MB",
+  "uploading": "Uploading",
+  "main": "Main",
+  "set_as_main_image": "Set as main image",
+  "delete_image": "Delete image"
 }
