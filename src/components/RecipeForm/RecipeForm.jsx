@@ -265,7 +265,7 @@ const RecipeForm = ({
           <ImageUpload
             images={formData.images}
             onChange={handleImagesChange}
-            recipeId={initialRecipe?.id || 'temp'}
+            recipeId={initialRecipe?.id || "temp"}
             disabled={isEditingTranslation}
           />
         </div>
