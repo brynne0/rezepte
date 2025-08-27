@@ -51,7 +51,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,6 +62,10 @@
 
 .image-preview-item:hover .image-overlay {
   opacity: 1;
+}
+
+.image-preview-item:hover {
+  border: var(--border-width) dashed var(--dark-red);
 }
 
 .image-action-btn {
@@ -81,11 +85,11 @@
 }
 
 .image-action-btn.set-main {
-  color: var(--red);
+  color: var(--error-red);
 }
 
 .image-action-btn.delete {
-  color: var(--red);
+  color: var(--error-red);
 }
 
 .main-image-badge {

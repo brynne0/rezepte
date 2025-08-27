@@ -193,7 +193,7 @@ const ImageUpload = ({ images = [], onChange, recipeId, disabled = false }) => {
                     title={t("set_as_main_image")}
                     disabled={disabled}
                   >
-                    <Crown size={16} />
+                    <Crown size={20} />
                   </button>
                 )}
 
@@ -206,7 +206,7 @@ const ImageUpload = ({ images = [], onChange, recipeId, disabled = false }) => {
                   title={t("delete_image")}
                   disabled={disabled}
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={20} />
                 </button>
               </div>
             </div>
