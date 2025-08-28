@@ -15,7 +15,7 @@
 
 .card-grocery {
   padding: 2rem 3rem;
-  min-width: calc(0.3 * 100vw);
+  min-width: 30vw;
   max-width: -webkit-fill-available;
 }
 
