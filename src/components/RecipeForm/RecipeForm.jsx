@@ -35,8 +35,8 @@ const RecipeForm = ({
     // error,
     isEditMode,
     hasUnsavedChanges,
-    uploadProgress,
-    isUploadingImages,
+
+    uploadingImageIds,
     handleInputChange,
     handleTitleBlur,
     handleImagesChange,
@@ -262,22 +262,6 @@ const RecipeForm = ({
               {validationErrors.category}
             </span>
           )}
-        </div>
-
-        {/* Recipe Images */}
-        <div
-          className={`form-group ${
-            isEditingTranslation ? "translation-disabled" : ""
-          }`}
-        >
-          <div className="form-header">
-            <h3>{t("images")}</h3>
-          </div>
-          <ImageUpload
-            images={formData.images}
-            onChange={handleImagesChange}
-            disabled={isEditingTranslation}
-          />
         </div>
 
         <DragDropContext
@@ -1010,6 +994,23 @@ const RecipeForm = ({
           </div>
         </DragDropContext>
 
+        {/* Recipe Images */}
+        <div
+          className={`form-group ${
+            isEditingTranslation ? "translation-disabled" : ""
+          }`}
+        >
+          <div className="form-header">
+            <h3>{t("images")}</h3>
+          </div>
+          <ImageUpload
+            images={formData.images}
+            onChange={handleImagesChange}
+            disabled={isEditingTranslation}
+            uploadingImageIds={uploadingImageIds}
+          />
+        </div>
+
         {/* Source */}
         <div className="form-group">
           <div className="form-header">
@@ -1068,27 +1069,6 @@ const RecipeForm = ({
             placeholder={t("notes")}
           />
         </div>
-
-        {/* Image Upload Progress */}
-        {isUploadingImages && uploadProgress && (
-          <div className="upload-progress form-group flex-column-center">
-            <span>
-              <h3>{t("uploading_images")}</h3>
-            </span>
-            <span>
-              {t("uploading")} {uploadProgress.currentFile}...
-            </span>
-            <span>
-              {uploadProgress.current} / {uploadProgress.total} {t("images")}
-            </span>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{ width: `${uploadProgress.progress}%` }}
-              />
-            </div>
-          </div>
-        )}
 
         <div className={`btn-wrapper ${isEditMode ? "edit" : ""}`}>
           {/* Delete Button */}

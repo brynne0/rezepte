@@ -5,7 +5,7 @@ import "./ImageUpload.css";
 import { validateImageFile, setMainImage } from "../../services/imageService";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 
-const ImageUpload = ({ images = [], onChange, disabled = false }) => {
+const ImageUpload = ({ images = [], onChange, disabled = false, uploadingImageIds = new Set() }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
@@ -183,14 +183,14 @@ const ImageUpload = ({ images = [], onChange, disabled = false }) => {
                   src={image.url}
                   alt={image.filename}
                   className={`image-preview ${
-                    loadingImages.has(image.id) ? "loading" : ""
+                    (loadingImages.has(image.id) || uploadingImageIds.has(image.id)) ? "loading" : ""
                   }`}
                   loading="lazy"
                   onLoadStart={() => handleImageLoadStart(image.id)}
                   onLoad={() => handleImageLoad(image.id)}
                   onError={() => handleImageLoad(image.id)}
                 />
-                {loadingImages.has(image.id) && (
+                {(loadingImages.has(image.id) || uploadingImageIds.has(image.id)) && (
                   <div className="loading-spinner">
                     <LoadingAcorn size={20} className="loading-acorn-small" />
                   </div>
