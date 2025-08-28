@@ -12,7 +12,9 @@ export const validateImageFile = (file) => {
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    throw new Error("Invalid file type. Please upload JPEG, PNG, or WebP images.");
+    throw new Error(
+      "Invalid file type. Please upload JPEG, PNG, or WebP images."
+    );
   }
 
   if (file.size > MAX_FILE_SIZE) {
@@ -26,7 +28,7 @@ export const validateImageFile = (file) => {
 const generateFileName = (originalName) => {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 15);
-  const extension = originalName.split('.').pop().toLowerCase();
+  const extension = originalName.split(".").pop().toLowerCase();
   return `${timestamp}-${randomString}.${extension}`;
 };
 
@@ -63,7 +65,7 @@ export const uploadRecipeImage = async (file, recipeId) => {
       size: file.size,
       type: file.type,
       is_main: false,
-      caption: ""
+      caption: "",
     };
   } catch (error) {
     throw new Error(`Failed to upload image: ${error.message}`);
@@ -87,7 +89,6 @@ export const deleteRecipeImage = async (imagePath) => {
   }
 };
 
-
 // Update recipe images in database
 export const updateRecipeImages = async (recipeId, images) => {
   try {
@@ -109,65 +110,66 @@ export const updateRecipeImages = async (recipeId, images) => {
 // Get optimized image URL (for thumbnails, etc.)
 export const getOptimizedImageUrl = (originalUrl, options = {}) => {
   if (!originalUrl) return null;
-  
-  const { width, height, quality = 80 } = options;
-  
+
+  const { width, height, quality = 60 } = options; // Lower default quality for better performance
+
   // If using Supabase storage, we can add transform parameters
-  if (originalUrl.includes('supabase')) {
+  if (originalUrl.includes("supabase")) {
     const url = new URL(originalUrl);
     const params = new URLSearchParams();
-    
-    if (width) params.set('width', width);
-    if (height) params.set('height', height);
-    if (quality !== 80) params.set('quality', quality);
-    
+
+    if (width) params.set("width", width);
+    if (height) params.set("height", height);
+    params.set("quality", quality);
+    params.set("format", "webp"); // Use WebP for better compression
+
     if (params.toString()) {
       url.search = params.toString();
     }
-    
+
     return url.toString();
   }
-  
+
   return originalUrl;
 };
 
 // Helper to get main image from images array
 export const getMainImage = (images = []) => {
   if (!images || images.length === 0) return null;
-  
+
   // Find the main image
-  const mainImage = images.find(img => img.is_main);
-  
+  const mainImage = images.find((img) => img.is_main);
+
   // If no main image is set, return the first one
   return mainImage || images[0];
 };
 
 // Helper to set main image
 export const setMainImage = (images, imageId) => {
-  return images.map(img => ({
+  return images.map((img) => ({
     ...img,
-    is_main: img.id === imageId
+    is_main: img.id === imageId,
   }));
 };
 
 // Upload all local images when recipe is saved
 export const uploadLocalImages = async (images, recipeId) => {
   const uploadedImages = [];
-  
+
   for (const image of images) {
     if (image.isLocal && image.file) {
       try {
         // Upload the local file
         const uploadedImage = await uploadRecipeImage(image.file, recipeId);
-        
+
         // Keep the same ID and main status
         uploadedImages.push({
           ...uploadedImage,
           id: image.id,
           is_main: image.is_main,
-          caption: image.caption
+          caption: image.caption,
         });
-        
+
         // Clean up the local preview URL
         URL.revokeObjectURL(image.url);
       } catch (error) {
@@ -179,7 +181,7 @@ export const uploadLocalImages = async (images, recipeId) => {
       uploadedImages.push(image);
     }
   }
-  
+
   return uploadedImages;
 };
 
@@ -188,10 +190,10 @@ export const cleanupOrphanedImages = async (oldImages, newImages) => {
   if (!oldImages || oldImages.length === 0) {
     return;
   }
-  
-  const newImageIds = new Set(newImages.map(img => img.id));
-  const imagesToDelete = oldImages.filter(img => !newImageIds.has(img.id));
-  
+
+  const newImageIds = new Set(newImages.map((img) => img.id));
+  const imagesToDelete = oldImages.filter((img) => !newImageIds.has(img.id));
+
   for (const image of imagesToDelete) {
     if (image.path) {
       try {

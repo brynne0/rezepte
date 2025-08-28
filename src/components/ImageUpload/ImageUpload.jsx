@@ -2,10 +2,7 @@ import { useState, useRef } from "react";
 import { Upload, Crown, Trash2, Loader2, Image } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./ImageUpload.css";
-import {
-  validateImageFile,
-  setMainImage,
-} from "../../services/imageService";
+import { validateImageFile, setMainImage } from "../../services/imageService";
 
 const ImageUpload = ({ images = [], onChange, disabled = false }) => {
   const { t } = useTranslation();
@@ -146,7 +143,6 @@ const ImageUpload = ({ images = [], onChange, disabled = false }) => {
 
       {error && <div className="error-message">{error}</div>}
 
-
       {images.length > 0 && (
         <div className="image-preview-grid">
           {images.map((image) => (
@@ -169,7 +165,7 @@ const ImageUpload = ({ images = [], onChange, disabled = false }) => {
                 {!image.is_main && (
                   <button
                     type="button"
-                    className="btn-unstyled image-action-btn set-main"
+                    className="btn-unstyled image-action-btn"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSetMainImage(image.id);
@@ -183,7 +179,7 @@ const ImageUpload = ({ images = [], onChange, disabled = false }) => {
 
                 <button
                   type="button"
-                  className="btn-unstyled image-action-btn delete"
+                  className="btn-unstyled image-action-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteImage(image);

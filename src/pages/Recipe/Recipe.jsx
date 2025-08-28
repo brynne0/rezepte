@@ -177,168 +177,168 @@ const Recipe = ({ isSharedView = false }) => {
         )}
       </div>
 
-      {/* Two column layout on desktop */}
+      {/* Single column layout with floating images */}
       <div className="recipe-layout">
         <div className="recipe-content">
+          {/* Recipe Images - floating within content */}
+          {recipe.images && recipe.images.length > 0 && (
+            <div className="recipe-images-float">
+              <ImageGallery images={recipe.images} />
+            </div>
+          )}
 
-      {/* Recipe Images - moved to right column */}
+          {/* Servings */}
+          {recipe.servings && (
+            <div className="recipe-subheading">
+              <h2>{t("servings")}:</h2>
+              {recipe.servings}
+            </div>
+          )}
 
-      {/* Servings */}
-      {recipe.servings && (
-        <div className="recipe-subheading">
-          <h2>{t("servings")}:</h2>
-          {recipe.servings}
-        </div>
-      )}
-
-      {/* Ingredients */}
-      {((recipe.ungroupedIngredients &&
-        recipe.ungroupedIngredients.length > 0) ||
-        (recipe.ingredientSections && recipe.ingredientSections.length > 0) ||
-        (recipe.ingredients && recipe.ingredients.length > 0)) && (
-        <>
-          <div className="flex-row recipe-subheading">
-            <h2>{t("ingredients")}:</h2>
-            {/* Grocery Cart - only show for owned recipes */}
-            {!isSharedView && isLoggedIn && (
-              <div className="cart-container">
-                <button
-                  onClick={() =>
-                    addToGroceryList(
-                      getAllIngredients(),
-                      recipe.title,
-                      recipe.id
-                    )
-                  }
-                  className="btn btn-icon-red"
-                  disabled={addingToGroceryList}
-                  data-testid="lucide-shopping-basket"
-                  aria-label={t("add_to_grocery_list")}
-                >
-                  <ShoppingBasket />
-                  {/* Selected ingredients counter or loading spinner */}
-                  {addingToGroceryList ? (
-                    <span className="cart-counter flex-center">
-                      <Loader2
-                        size={12}
-                        className="animate-spin"
-                        data-testid="cart-loader"
-                      />
-                    </span>
-                  ) : (
-                    Object.values(checkedIngredients).filter(Boolean).length >
-                      0 && (
-                      <span className="cart-counter flex-center">
-                        {
-                          Object.values(checkedIngredients).filter(Boolean)
-                            .length
-                        }
-                      </span>
-                    )
-                  )}
-                </button>
-              </div>
-            )}
-            {!isSharedView && showSuccess && t("added_to_groceries")}
-          </div>
-
-          {/* Ungrouped Ingredients */}
-          {recipe.ungroupedIngredients &&
-            recipe.ungroupedIngredients.length > 0 && (
-              <ul>
-                {recipe.ungroupedIngredients.map((ingredient, index) =>
-                  renderIngredientItem(ingredient, "ungrouped", index)
-                )}
-              </ul>
-            )}
-
-          {/* Ingredient Sections */}
-          {recipe.ingredientSections &&
-            recipe.ingredientSections.length > 0 && (
-              <div className="ingredient-sections">
-                {recipe.ingredientSections.map((section, sectionIndex) => (
-                  <div key={sectionIndex} className="ingredient-section">
-                    <h3 className="section-subheading">{section.subheading}</h3>
-                    <ul>
-                      {section.ingredients.map((ingredient, ingredientIndex) =>
-                        renderIngredientItem(
-                          ingredient,
-                          `section-${sectionIndex}`,
-                          ingredientIndex
+          {/* Ingredients */}
+          {((recipe.ungroupedIngredients &&
+            recipe.ungroupedIngredients.length > 0) ||
+            (recipe.ingredientSections &&
+              recipe.ingredientSections.length > 0) ||
+            (recipe.ingredients && recipe.ingredients.length > 0)) && (
+            <>
+              <div className="flex-row recipe-subheading">
+                <h2>{t("ingredients")}:</h2>
+                {/* Grocery Cart - only show for owned recipes */}
+                {!isSharedView && isLoggedIn && (
+                  <div className="cart-container">
+                    <button
+                      onClick={() =>
+                        addToGroceryList(
+                          getAllIngredients(),
+                          recipe.title,
+                          recipe.id
+                        )
+                      }
+                      className="btn btn-icon-red"
+                      disabled={addingToGroceryList}
+                      data-testid="lucide-shopping-basket"
+                      aria-label={t("add_to_grocery_list")}
+                    >
+                      <ShoppingBasket />
+                      {/* Selected ingredients counter or loading spinner */}
+                      {addingToGroceryList ? (
+                        <span className="cart-counter flex-center">
+                          <Loader2
+                            size={12}
+                            className="animate-spin"
+                            data-testid="cart-loader"
+                          />
+                        </span>
+                      ) : (
+                        Object.values(checkedIngredients).filter(Boolean)
+                          .length > 0 && (
+                          <span className="cart-counter flex-center">
+                            {
+                              Object.values(checkedIngredients).filter(Boolean)
+                                .length
+                            }
+                          </span>
                         )
                       )}
-                    </ul>
+                    </button>
                   </div>
-                ))}
-              </div>
-            )}
-
-          {/* Fallback for old flat ingredient structure */}
-          {!recipe.ungroupedIngredients &&
-            !recipe.ingredientSections &&
-            recipe.ingredients &&
-            recipe.ingredients.length > 0 && (
-              <ul>
-                {recipe.ingredients.map((ingredient, index) =>
-                  renderIngredientItem(ingredient, "flat", index)
                 )}
-              </ul>
-            )}
-        </>
-      )}
+                {!isSharedView && showSuccess && t("added_to_groceries")}
+              </div>
 
-      {/* Instructions */}
-      {recipe.instructions && recipe.instructions.length > 0 && (
-        <>
-          <div className="recipe-subheading">
-            <h2>{t("instructions")}:</h2>
-          </div>
-          <ol>
-            {recipe.instructions.map((instruction, i) => (
-              <li key={i}>{instruction}</li>
-            ))}
-          </ol>
-        </>
-      )}
+              {/* Ungrouped Ingredients */}
+              {recipe.ungroupedIngredients &&
+                recipe.ungroupedIngredients.length > 0 && (
+                  <ul>
+                    {recipe.ungroupedIngredients.map((ingredient, index) =>
+                      renderIngredientItem(ingredient, "ungrouped", index)
+                    )}
+                  </ul>
+                )}
 
-      {/* Source */}
-      {recipe.source && (
-        <div className="recipe-subheading">
-          <h2>{t("source")}:</h2>
+              {/* Ingredient Sections */}
+              {recipe.ingredientSections &&
+                recipe.ingredientSections.length > 0 && (
+                  <div className="ingredient-sections">
+                    {recipe.ingredientSections.map((section, sectionIndex) => (
+                      <div key={sectionIndex} className="ingredient-section">
+                        <h3 className="section-subheading">
+                          {section.subheading}
+                        </h3>
+                        <ul>
+                          {section.ingredients.map(
+                            (ingredient, ingredientIndex) =>
+                              renderIngredientItem(
+                                ingredient,
+                                `section-${sectionIndex}`,
+                                ingredientIndex
+                              )
+                          )}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-          {recipe.source.startsWith("http://") ||
-          recipe.source.startsWith("https://") ||
-          recipe.source.startsWith("www.") ? (
-            <a
-              href={recipe.source}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-red"
-            >
-              {recipe.source}
-            </a>
-          ) : (
-            <span>{recipe.source}</span>
+              {/* Fallback for old flat ingredient structure */}
+              {!recipe.ungroupedIngredients &&
+                !recipe.ingredientSections &&
+                recipe.ingredients &&
+                recipe.ingredients.length > 0 && (
+                  <ul>
+                    {recipe.ingredients.map((ingredient, index) =>
+                      renderIngredientItem(ingredient, "flat", index)
+                    )}
+                  </ul>
+                )}
+            </>
+          )}
+
+          {/* Instructions */}
+          {recipe.instructions && recipe.instructions.length > 0 && (
+            <>
+              <div className="recipe-subheading">
+                <h2>{t("instructions")}:</h2>
+              </div>
+              <ol>
+                {recipe.instructions.map((instruction, i) => (
+                  <li key={i}>{instruction}</li>
+                ))}
+              </ol>
+            </>
+          )}
+
+          {/* Source */}
+          {recipe.source && (
+            <div className="recipe-subheading">
+              <h2>{t("source")}:</h2>
+
+              {recipe.source.startsWith("http://") ||
+              recipe.source.startsWith("https://") ||
+              recipe.source.startsWith("www.") ? (
+                <a
+                  href={recipe.source}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-red"
+                >
+                  {recipe.source}
+                </a>
+              ) : (
+                <span>{recipe.source}</span>
+              )}
+            </div>
+          )}
+
+          {/* Extra Notes */}
+          {recipe.notes && recipe.notes.length > 0 && (
+            <div className="recipe-subheading">
+              <h2>{t("notes")}:</h2>
+              {recipe.notes}
+            </div>
           )}
         </div>
-      )}
-
-      {/* Extra Notes */}
-      {recipe.notes && recipe.notes.length > 0 && (
-        <div className="recipe-subheading">
-          <h2>{t("notes")}:</h2>
-          {recipe.notes}
-        </div>
-      )}
-
-        </div>
-
-        {/* Images column - only show if there are images */}
-        {recipe.images && recipe.images.length > 0 && (
-          <div className="recipe-images">
-            <ImageGallery images={recipe.images} />
-          </div>
-        )}
       </div>
 
       {/* Share Modal - only for owned recipes */}

@@ -1,3 +1,7 @@
+.main-image-wrapper {
+  height: 300px;
+}
+
 .main-image {
   width: 100%;
   height: 300px;
@@ -7,6 +11,7 @@
   transition: all 0.2s ease;
   border: 0.3px solid var(--light-brown);
   -webkit-tap-highlight-color: transparent;
+  display: block;
 }
 
 .main-image:hover {
@@ -46,7 +51,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,7 +71,7 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.8);
   border: none;
   border-radius: 50%;
   padding: 0.5rem;
@@ -80,6 +85,10 @@
 
 @media (max-width: 640px) {
   .main-image {
+    height: 200px;
+  }
+
+  .image-loading-overlay {
     height: 200px;
   }
 
