@@ -109,7 +109,7 @@ function App() {
 
 function AppRoutes(props) {
   const location = useLocation();
-  const { refreshRecipes, isGroceryListEditing, setIsGroceryListEditing } =
+  const { refreshRecipes, isGroceryListEditing, setIsGroceryListEditing, setShowImages } =
     props;
   const isGroceryListPage = location.pathname === "/grocery-list";
 
@@ -140,6 +140,13 @@ function AppRoutes(props) {
   useEffect(() => {
     refreshRecipes();
   }, [currentLanguage, refreshRecipes]);
+
+  // Reset image visibility when user logs out
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setShowImages(false);
+    }
+  }, [isLoggedIn, setShowImages]);
 
   // Scroll to top on all navigation
   useEffect(() => {

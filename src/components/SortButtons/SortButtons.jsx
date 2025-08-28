@@ -15,6 +15,7 @@ const SortButtons = ({
   onSortChange,
   showImages,
   onShowImagesChange,
+  isLoggedIn = false,
 }) => {
   const { t } = useTranslation();
 
@@ -81,16 +82,18 @@ const SortButtons = ({
       >
         {getDateIcon()}
       </button>
-      <button
-        className={`btn-unstyled btn-icon-neutral ${
-          showImages ? "selected" : ""
-        }`}
-        onClick={handleImageToggle}
-        aria-label={showImages ? t("hide_images") : t("show_images")}
-        title={showImages ? t("hide_images") : t("show_images")}
-      >
-        {getImageIcon()}
-      </button>
+      {isLoggedIn && (
+        <button
+          className={`btn-unstyled btn-icon-neutral ${
+            showImages ? "selected" : ""
+          }`}
+          onClick={handleImageToggle}
+          aria-label={showImages ? t("hide_images") : t("show_images")}
+          title={showImages ? t("hide_images") : t("show_images")}
+        >
+          {getImageIcon()}
+        </button>
+      )}
     </div>
   );
 };

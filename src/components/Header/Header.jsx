@@ -373,6 +373,7 @@ const Header = ({
                   onSortChange={setSortBy}
                   showImages={showImages}
                   onShowImagesChange={setShowImages}
+                  isLoggedIn={isLoggedIn}
                 />
               )}
             </div>
