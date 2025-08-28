@@ -12,7 +12,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import { formatQuantityForUnit } from "../../utils/ingredientFormatting";
-import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";

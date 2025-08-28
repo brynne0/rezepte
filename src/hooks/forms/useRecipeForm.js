@@ -729,8 +729,8 @@ export const useRecipeForm = ({
         images: formData.images || [],
       };
 
-      console.log('Form submission - formData.images:', formData.images);
-      console.log('Form submission - recipeData.images:', recipeData.images);
+      console.log("Form submission - formData.images:", formData.images);
+      console.log("Form submission - recipeData.images:", recipeData.images);
 
       // Only set original_language when creating a new recipe
       if (!initialRecipe) {
@@ -949,11 +949,11 @@ export const useRecipeForm = ({
       if (!images1 && !images2) return true;
       if (!images1 || !images2) return false;
       if (images1.length !== images2.length) return false;
-      
+
       return images1.every((img1, index) => {
         const img2 = images2[index];
-        if (!img2) return false;
-        
+        if (!img1 || !img2) return false;
+
         // Compare key properties that indicate changes
         return (
           img1.id === img2.id &&

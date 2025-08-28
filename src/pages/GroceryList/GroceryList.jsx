@@ -5,7 +5,7 @@ import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 
 import "./GroceryList.css";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
-import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
@@ -41,14 +41,14 @@ const GroceryList = ({
   // Check if there are unsaved changes
   const hasUnsavedChanges = () => {
     if (!isEditing) return false;
-    
+
     // Compare current edited list with original list
     if (editedList.length !== originalGroceryList.length) return true;
-    
+
     return editedList.some((editedItem, index) => {
       const originalItem = originalGroceryList[index];
       if (!originalItem) return true;
-      
+
       return (
         editedItem.name !== originalItem.name ||
         editedItem.quantity !== originalItem.quantity ||
@@ -65,10 +65,7 @@ const GroceryList = ({
     confirmNavigation,
     cancelNavigation,
     message: unsavedChangesMessage,
-  } = useUnsavedChanges(
-    hasUnsavedChanges(),
-    t("unsaved_changes_warning")
-  );
+  } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
 
   // Group ingredients by normalised name for display
   const groupIngredients = (items) => {
@@ -145,7 +142,6 @@ const GroceryList = ({
       originalUserLanguage.current = null; // Clear the stored language
     }
   };
-
 
   const saveChanges = () => {
     updateGroceryList(editedList);
