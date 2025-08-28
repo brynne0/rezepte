@@ -157,6 +157,8 @@ export const useRecipeForm = ({
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionError, setSubmissionError] = useState("");
   const [initialFormData, setInitialFormData] = useState(getInitialFormData);
+  const [uploadProgress, setUploadProgress] = useState(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   // Update form data when initialRecipe changes (for edit mode)
   useEffect(() => {
@@ -683,6 +685,20 @@ export const useRecipeForm = ({
       return;
     }
 
+    // Check if we have local images to upload
+    const hasLocalImages = formData.images?.some(img => img.isLocal && img.file);
+    
+    // Set up progress callback
+    const handleImageUploadProgress = (progress) => {
+      setUploadProgress(progress);
+    };
+
+    // Start image upload tracking if we have local images
+    if (hasLocalImages) {
+      setIsUploadingImages(true);
+      setUploadProgress({ current: 0, total: 0, currentFile: '', progress: 0 });
+    }
+
     try {
       // Filter out empty ungrouped ingredients
       const validUngroupedIngredients = formData.ungroupedIngredients.filter(
@@ -728,9 +744,6 @@ export const useRecipeForm = ({
         notes: formData.notes,
         images: formData.images || [],
       };
-
-      console.log("Form submission - formData.images:", formData.images);
-      console.log("Form submission - recipeData.images:", recipeData.images);
 
       // Only set original_language when creating a new recipe
       if (!initialRecipe) {
@@ -868,11 +881,11 @@ export const useRecipeForm = ({
           result = initialRecipe; // Return original recipe data
         } else {
           // Normal recipe editing - update the original recipe
-          result = await updateRecipe(initialRecipe.id, recipeData);
+          result = await updateRecipe(initialRecipe.id, recipeData, hasLocalImages ? handleImageUploadProgress : null);
         }
       } else {
         // Create mode
-        result = await createRecipe(recipeData);
+        result = await createRecipe(recipeData, hasLocalImages ? handleImageUploadProgress : null);
       }
 
       navigate(`/${result.id}/${result.slug}`);
@@ -890,6 +903,10 @@ export const useRecipeForm = ({
 
       // Scroll to top to show the error message
       window.scrollTo(0, 0);
+    } finally {
+      // Clean up upload state
+      setIsUploadingImages(false);
+      setUploadProgress(null);
     }
   };
 
@@ -994,6 +1011,8 @@ export const useRecipeForm = ({
     error,
     isEditMode: !!initialRecipe,
     hasUnsavedChanges,
+    uploadProgress,
+    isUploadingImages,
     handleInputChange,
     handleTitleBlur,
     handleImagesChange,

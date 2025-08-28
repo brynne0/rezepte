@@ -187,6 +187,7 @@
   "click_or_drag": "Click to select or drag and drop",
   "image_upload_hint": "PNG, JPEG, WebP up to 5MB",
   "uploading": "Uploading",
+  "uploading_images": "Uploading Images",
   "main": "Main",
   "set_as_main_image": "Set as main image",
   "delete_image": "Delete image"

@@ -153,12 +153,25 @@ export const setMainImage = (images, imageId) => {
 };
 
 // Upload all local images when recipe is saved
-export const uploadLocalImages = async (images, recipeId) => {
+export const uploadLocalImages = async (images, recipeId, onProgress = null) => {
   const uploadedImages = [];
+  const localImages = images.filter(image => image.isLocal && image.file);
+  const totalImages = localImages.length;
+  let uploadedCount = 0;
 
   for (const image of images) {
     if (image.isLocal && image.file) {
       try {
+        // Update progress before upload
+        if (onProgress) {
+          onProgress({
+            current: uploadedCount,
+            total: totalImages,
+            currentFile: image.filename,
+            progress: Math.round((uploadedCount / totalImages) * 100)
+          });
+        }
+
         // Upload the local file
         const uploadedImage = await uploadRecipeImage(image.file, recipeId);
 
@@ -172,6 +185,18 @@ export const uploadLocalImages = async (images, recipeId) => {
 
         // Clean up the local preview URL
         URL.revokeObjectURL(image.url);
+        
+        uploadedCount++;
+
+        // Update progress after successful upload
+        if (onProgress) {
+          onProgress({
+            current: uploadedCount,
+            total: totalImages,
+            currentFile: image.filename,
+            progress: Math.round((uploadedCount / totalImages) * 100)
+          });
+        }
       } catch (error) {
         console.error(`Failed to upload image ${image.filename}:`, error);
         throw error;

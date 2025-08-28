@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, Crown, Trash2, Loader2, Image } from "lucide-react";
+import { Upload, Crown, Trash2, Image } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./ImageUpload.css";
 import { validateImageFile, setMainImage } from "../../services/imageService";

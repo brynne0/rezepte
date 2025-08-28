@@ -706,7 +706,7 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
 };
 
 // Create a new recipe
-export const createRecipe = async (recipeData) => {
+export const createRecipe = async (recipeData, onImageUploadProgress = null) => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -906,7 +906,8 @@ export const createRecipe = async (recipeData) => {
     try {
       const uploadedImages = await uploadLocalImages(
         recipeData.images,
-        recipe.id
+        recipe.id,
+        onImageUploadProgress
       );
 
       // Update the recipe with the uploaded images
@@ -933,7 +934,7 @@ export const createRecipe = async (recipeData) => {
 };
 
 // Update an existing recipe
-export const updateRecipe = async (id, recipeData) => {
+export const updateRecipe = async (id, recipeData, onImageUploadProgress = null) => {
   // First fetch the original recipe for smart translation updates and image cleanup
   const { data: originalRecipe, error: fetchError } = await supabase
     .from("recipes")
@@ -1216,7 +1217,7 @@ export const updateRecipe = async (id, recipeData) => {
 
       // Upload any local images if there are images to process
       if (recipeData.images && recipeData.images.length > 0) {
-        const uploadedImages = await uploadLocalImages(recipeData.images, id);
+        const uploadedImages = await uploadLocalImages(recipeData.images, id, onImageUploadProgress);
 
         // Update the recipe with the uploaded images
         const { error: updateError } = await supabase

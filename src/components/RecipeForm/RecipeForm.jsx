@@ -35,6 +35,8 @@ const RecipeForm = ({
     // error,
     isEditMode,
     hasUnsavedChanges,
+    uploadProgress,
+    isUploadingImages,
     handleInputChange,
     handleTitleBlur,
     handleImagesChange,
@@ -131,14 +133,14 @@ const RecipeForm = ({
         <div className="error-message submission-error">{submissionError}</div>
       )}
 
-      <form 
-        onSubmit={handleSubmit} 
+      <form
+        onSubmit={handleSubmit}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' && e.target.type !== 'submit') {
+          if (e.key === "Enter" && e.target.type !== "submit") {
             e.preventDefault();
           }
         }}
-        className="recipe-form" 
+        className="recipe-form"
         role="form"
       >
         {/* Recipe Title and Servings */}
@@ -1066,6 +1068,27 @@ const RecipeForm = ({
             placeholder={t("notes")}
           />
         </div>
+
+        {/* Image Upload Progress */}
+        {isUploadingImages && uploadProgress && (
+          <div className="upload-progress form-group flex-column-center">
+            <span>
+              <h3>{t("uploading_images")}</h3>
+            </span>
+            <span>
+              {t("uploading")} {uploadProgress.currentFile}...
+            </span>
+            <span>
+              {uploadProgress.current} / {uploadProgress.total} {t("images")}
+            </span>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${uploadProgress.progress}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         <div className={`btn-wrapper ${isEditMode ? "edit" : ""}`}>
           {/* Delete Button */}

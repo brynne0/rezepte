@@ -187,6 +187,7 @@
   "click_or_drag": "Klicken zum Auswählen oder per Drag & Drop hinzufügen",
   "image_upload_hint": "PNG, JPEG, WebP bis zu 5MB",
   "uploading": "Wird hochgeladen",
+  "uploading_images": "Bilder werden hochgeladen",
   "main": "Hauptbild",
   "set_as_main_image": "Als Hauptbild festlegen",
   "delete_image": "Bild löschen"

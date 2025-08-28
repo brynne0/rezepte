@@ -1,16 +1,16 @@
 import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
-// import {
-//   getMainImage,
-//   getOptimizedImageUrl,
-// } from "../../services/imageService";
+import {
+  getMainImage,
+  getOptimizedImageUrl,
+} from "../../services/imageService";
 
 const RecipeCard = ({ recipe, onClick }) => {
   const { t } = useTranslation();
 
   // Get main image
-  // const mainImage = getMainImage(recipe.images);
+  const mainImage = getMainImage(recipe.images);
 
   // Check if recipe has a source link
   const hasSourceLink =
@@ -33,15 +33,15 @@ const RecipeCard = ({ recipe, onClick }) => {
 
   return (
     <div className="recipe-card" onClick={() => onClick && onClick(recipe)}>
-      {/* {mainImage && (
-        <img 
-          className="recipe-image" 
-          src={getOptimizedImageUrl(mainImage.url, { width: 300, height: 200 })} 
+      <h4 className="recipe-card-title">{recipe.title}</h4>
+      {mainImage && (
+        <img
+          className="recipe-image"
+          src={getOptimizedImageUrl(mainImage.url, { width: 300, height: 200 })}
           alt={recipe.title}
           loading="lazy"
         />
-      )} */}
-      <h4 className="recipe-card-title">{recipe.title}</h4>
+      )}
       {hasSourceLink && hasNoContent && (
         <a
           href={recipe.source}
