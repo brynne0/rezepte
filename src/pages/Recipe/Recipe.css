@@ -103,13 +103,12 @@
 /* Floating images within content */
 .recipe-images-float {
   position: relative;
-  float: right;
-  width: 300px;
-  margin: 1rem;
+  float: none;
+  width: 100%;
+  margin: 1rem 0;
   clear: right;
 }
-
-.recipe-images-float .image-gallery {
+\ .recipe-images-float .image-gallery {
   width: 100%;
 }
 
@@ -131,12 +130,5 @@
 @media (max-width: 768px) {
   .recipe-actions {
     padding: 0.1rem;
-  }
-
-  /* Stack images above content on mobile */
-  .recipe-images-float {
-    float: none;
-    width: 100%;
-    margin: 1rem 0;
   }
 }

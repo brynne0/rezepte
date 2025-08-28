@@ -39,7 +39,7 @@
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 0.3px solid var(--light-brown);
+  border: var(--border-width-thick) solid var(--cream-light);
   -webkit-tap-highlight-color: transparent;
 }
 
