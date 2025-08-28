@@ -78,7 +78,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  z-index: 1;
+  z-index: var(--z-content);
   color: var(--brown);
 }
 

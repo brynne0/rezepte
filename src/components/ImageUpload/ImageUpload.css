@@ -23,6 +23,16 @@
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
+  overflow: hidden;
+}
+
+.image-upload-container {
+  overflow: hidden;
+}
+
+/* Small loading acorn for image thumbnails */
+.loading-acorn-small {
+  min-height: auto !important;
 }
 
 .image-preview-item {

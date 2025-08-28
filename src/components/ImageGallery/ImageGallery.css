@@ -3,7 +3,7 @@
 }
 
 .main-image {
-  width: 100%;
+  width: -webkit-fill-available;
   height: 300px;
   object-fit: cover;
   border-radius: var(--border-radius);
@@ -20,9 +20,16 @@
 
 .thumbnail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 0.5rem;
   margin-top: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.thumbnail-container {
+  position: relative;
+  height: 60px;
 }
 
 .thumbnail {
@@ -94,6 +101,10 @@
 
   .thumbnail-grid {
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
+
+  .thumbnail-container {
+    height: 45px;
   }
 
   .thumbnail {

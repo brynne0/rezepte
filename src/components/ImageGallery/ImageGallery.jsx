@@ -8,11 +8,12 @@ import {
 } from "../../services/imageService";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 
-const ImageGallery = ({ images = [] }) => {
+const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true); // Start with loading true for initial load
   const [modalLoading, setModalLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [loadedImages, setLoadedImages] = useState(new Set());
   const imageRef = useRef(null);
   const preloadImageRef = useRef(null);
   const modalPreloadRef = useRef(null);
@@ -41,6 +42,17 @@ const ImageGallery = ({ images = [] }) => {
       return acc;
     }, {});
   }, [images]);
+
+  // Check if all images have loaded and notify parent
+  useEffect(() => {
+    if (
+      loadedImages.size === images.length &&
+      images.length > 0 &&
+      onAllImagesLoaded
+    ) {
+      onAllImagesLoaded(); // No delay needed
+    }
+  }, [loadedImages.size, images.length, onAllImagesLoaded]);
 
   // Clean up timeout and preload images on unmount
   useEffect(() => {
@@ -73,12 +85,12 @@ const ImageGallery = ({ images = [] }) => {
     if (index === currentImageIndex) return; // Don't reload same image
     if (imageLoading) return; // Prevent multiple clicks while loading
 
+    setImageLoading(true);
+
     // Clear any existing timeout
     if (loadingTimeoutRef.current) {
       clearTimeout(loadingTimeoutRef.current);
     }
-
-    setImageLoading(true);
 
     const startTime = Date.now();
     const minLoadingDuration = 300; // Minimum 300ms loading state
@@ -95,6 +107,7 @@ const ImageGallery = ({ images = [] }) => {
           // Image is fully loaded, now switch
           setCurrentImageIndex(index);
           setImageLoading(false);
+
           if (loadingTimeoutRef.current) {
             clearTimeout(loadingTimeoutRef.current);
           }
@@ -123,11 +136,16 @@ const ImageGallery = ({ images = [] }) => {
 
   // Handle initial image load
   const handleMainImageLoad = () => {
-    setImageLoading(false); // Clear loading state when image loads
+    handleImageLoadComplete(currentImage.id);
   };
 
   const handleMainImageError = () => {
-    setImageLoading(false); // Clear loading state even if image fails
+    handleImageLoadComplete(currentImage.id);
+  };
+
+  // Track when images load for overall progress
+  const handleImageLoadComplete = (imageId) => {
+    setLoadedImages((prev) => new Set(prev).add(imageId));
   };
 
   const openModal = () => {
@@ -172,25 +190,20 @@ const ImageGallery = ({ images = [] }) => {
   };
 
   return (
-    <div>
-      {/* Main Image with loading state */}
-      <div className="main-image-wrapper image-loading-container">
+    <>
+      {/* Main Image */}
+      <div className="main-image-wrapper">
         <img
           ref={imageRef}
           key={`main-${currentImage.id}`}
           src={optimizedUrls[currentImage.id]?.main}
           alt={currentImage.filename || "Recipe image"}
-          className={`main-image ${imageLoading ? "loading" : ""}`}
+          className="main-image"
           onClick={openModal}
           loading="lazy"
           onLoad={handleMainImageLoad}
           onError={handleMainImageError}
         />
-        {imageLoading && (
-          <div className="loading-spinner">
-            <LoadingAcorn />
-          </div>
-        )}
       </div>
 
       {/* Thumbnails - only show if more than 1 image */}
@@ -206,6 +219,8 @@ const ImageGallery = ({ images = [] }) => {
               }`}
               onClick={() => handleThumbnailClick(index)}
               loading="lazy"
+              onLoad={() => handleImageLoadComplete(image.id)}
+              onError={() => handleImageLoadComplete(image.id)}
             />
           ))}
         </div>
@@ -240,7 +255,7 @@ const ImageGallery = ({ images = [] }) => {
           </div>,
           document.body
         )}
-    </div>
+    </>
   );
 };
 

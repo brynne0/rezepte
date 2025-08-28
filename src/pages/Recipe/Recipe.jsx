@@ -28,6 +28,7 @@ const Recipe = ({ isSharedView = false }) => {
   const { isLoggedIn } = useAuth();
   const { t, i18n } = useTranslation();
   const [showShareModal, setShowShareModal] = useState(false);
+  const [imagesLoading, setImagesLoading] = useState(true);
 
   // Load shared recipe if in shared view
   useEffect(() => {
@@ -183,7 +184,15 @@ const Recipe = ({ isSharedView = false }) => {
           {/* Recipe Images - floating within content */}
           {recipe.images && recipe.images.length > 0 && (
             <div className="recipe-images-float">
-              <ImageGallery images={recipe.images} />
+              {imagesLoading && (
+                <div className="images-loading-overlay">
+                  <LoadingAcorn size={20} className="loading-acorn-small" />
+                </div>
+              )}
+              <ImageGallery
+                images={recipe.images}
+                onAllImagesLoaded={() => setImagesLoading(false)}
+              />
             </div>
           )}
 

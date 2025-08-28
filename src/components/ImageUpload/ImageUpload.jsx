@@ -3,12 +3,35 @@ import { Upload, Crown, Trash2, Image } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./ImageUpload.css";
 import { validateImageFile, setMainImage } from "../../services/imageService";
+import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 
 const ImageUpload = ({ images = [], onChange, disabled = false }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState("");
+  const [loadingImages, setLoadingImages] = useState(() => {
+    // Set initial loading state for existing images immediately
+    if (images && images.length > 0) {
+      return new Set(images.map((img) => img.id));
+    }
+    return new Set();
+  });
+
+  const handleImageLoad = (imageId) => {
+    // Add a minimum loading time so users can see the loading state
+    setTimeout(() => {
+      setLoadingImages((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(imageId);
+        return newSet;
+      });
+    }, 500); // Minimum 500ms loading display
+  };
+
+  const handleImageLoadStart = (imageId) => {
+    setLoadingImages((prev) => new Set(prev).add(imageId));
+  };
 
   const handleFileSelect = (files) => {
     if (disabled) return;
@@ -25,12 +48,17 @@ const ImageUpload = ({ images = [], onChange, disabled = false }) => {
       // Validate file
       validateImageFile(file);
 
+      // Create image object with local file
+      const imageId = crypto.randomUUID();
+
+      // Add to loading state first
+      setLoadingImages((prev) => new Set(prev).add(imageId));
+
       // Create preview URL
       const previewUrl = URL.createObjectURL(file);
 
-      // Create image object with local file
       const imagePreview = {
-        id: crypto.randomUUID(),
+        id: imageId,
         file: file, // Store the actual file for later upload
         url: previewUrl,
         filename: file.name,
@@ -150,12 +178,24 @@ const ImageUpload = ({ images = [], onChange, disabled = false }) => {
               key={image.id}
               className={`image-preview-item ${image.is_main ? "is-main" : ""}`}
             >
-              <img
-                src={image.url}
-                alt={image.filename}
-                className="image-preview"
-                loading="lazy"
-              />
+              <div className="image-loading-container">
+                <img
+                  src={image.url}
+                  alt={image.filename}
+                  className={`image-preview ${
+                    loadingImages.has(image.id) ? "loading" : ""
+                  }`}
+                  loading="lazy"
+                  onLoadStart={() => handleImageLoadStart(image.id)}
+                  onLoad={() => handleImageLoad(image.id)}
+                  onError={() => handleImageLoad(image.id)}
+                />
+                {loadingImages.has(image.id) && (
+                  <div className="loading-spinner">
+                    <LoadingAcorn size={20} className="loading-acorn-small" />
+                  </div>
+                )}
+              </div>
 
               {image.is_main && (
                 <div className="main-image-badge">{t("main")}</div>
