@@ -944,6 +944,27 @@ export const useRecipeForm = ({
       return arr1.every((item, index) => item === arr2[index]);
     };
 
+    // Deep comparison function for images
+    const compareImages = (images1, images2) => {
+      if (!images1 && !images2) return true;
+      if (!images1 || !images2) return false;
+      if (images1.length !== images2.length) return false;
+      
+      return images1.every((img1, index) => {
+        const img2 = images2[index];
+        if (!img2) return false;
+        
+        // Compare key properties that indicate changes
+        return (
+          img1.id === img2.id &&
+          img1.url === img2.url &&
+          img1.filename === img2.filename &&
+          img1.is_main === img2.is_main &&
+          img1.sort_order === img2.sort_order
+        );
+      });
+    };
+
     // Compare form data with initial form data
     return (
       formData.title !== initialFormData.title ||
@@ -959,7 +980,8 @@ export const useRecipeForm = ({
       !compareSections(
         formData.ingredientSections,
         initialFormData.ingredientSections
-      )
+      ) ||
+      !compareImages(formData.images, initialFormData.images)
     );
   };
 
