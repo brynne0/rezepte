@@ -6,7 +6,7 @@ import {
   getOptimizedImageUrl,
 } from "../../services/imageService";
 
-const RecipeCard = ({ recipe, onClick }) => {
+const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
 
   // Get main image
@@ -34,7 +34,7 @@ const RecipeCard = ({ recipe, onClick }) => {
   return (
     <div className="recipe-card" onClick={() => onClick && onClick(recipe)}>
       <h4 className="recipe-card-title">{recipe.title}</h4>
-      {mainImage && (
+      {showImages && mainImage && (
         <img
           className="recipe-image"
           src={getOptimizedImageUrl(mainImage.url, { width: 300, height: 200 })}

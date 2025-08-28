@@ -3,7 +3,7 @@ import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
 import "./RecipeList.css";
 
-const RecipeList = ({ selectedCategory, recipes, searchTerm, isPaginated = false }) => {
+const RecipeList = ({ selectedCategory, recipes, searchTerm, showImages = true, isPaginated = false }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -35,6 +35,7 @@ const RecipeList = ({ selectedCategory, recipes, searchTerm, isPaginated = false
           <RecipeCard
             key={r.id}
             recipe={r}
+            showImages={showImages}
             onClick={() => {
               navigate(`/${r.id}/${r.slug}`);
             }}

@@ -40,3 +40,9 @@
   height: 150px;
   object-fit: cover;
 }
+
+@media (max-width: 768px) {
+  .recipe-image {
+    height: 100px;
+  }
+}

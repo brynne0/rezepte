@@ -111,7 +111,7 @@
   display: none;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .image-preview-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }

@@ -41,6 +41,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title_asc");
+  const [showImages, setShowImages] = useState(true);
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,6 +85,8 @@ function App() {
           setSearchTerm={handleSearchChange}
           sortBy={sortBy}
           setSortBy={setSortBy}
+          showImages={showImages}
+          setShowImages={setShowImages}
           setLoginMessage={setLoginMessage}
           loginMessage={loginMessage}
           t={t}
@@ -155,6 +158,8 @@ function AppRoutes(props) {
         disableLanguageSwitch={isGroceryListEditing}
         sortBy={props.sortBy}
         setSortBy={props.setSortBy}
+        showImages={props.showImages}
+        setShowImages={props.setShowImages}
       />
       <Routes>
         <Route
@@ -171,6 +176,7 @@ function AppRoutes(props) {
                 selectedCategory={props.selectedCategory}
                 recipes={props.recipes}
                 searchTerm={props.searchTerm}
+                showImages={props.showImages}
                 isPaginated={true}
               />
               <Pagination

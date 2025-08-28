@@ -10,7 +10,12 @@ import {
 } from "lucide-react";
 import "./SortButtons.css";
 
-const SortButtons = ({ sortBy, onSortChange }) => {
+const SortButtons = ({
+  sortBy,
+  onSortChange,
+  showImages,
+  onShowImagesChange,
+}) => {
   const { t } = useTranslation();
 
   const handleTitleSort = () => {
@@ -41,15 +46,18 @@ const SortButtons = ({ sortBy, onSortChange }) => {
     return <Calendar size={20} />;
   };
 
+  const handleImageToggle = () => {
+    onShowImagesChange(!showImages);
+  };
+
   const getImageIcon = () => {
-    if (showImage) return <Image size={20} />;
+    if (showImages) return <Image size={20} />;
     else return <ImageOff size={20} />;
   };
 
   const isTitleActive = sortBy === "title_asc" || sortBy === "title_desc";
   const isDateActive =
     sortBy === "created_at_asc" || sortBy === "created_at_desc";
-  const showImage = false;
 
   return (
     <div className="sort-buttons">
@@ -75,8 +83,11 @@ const SortButtons = ({ sortBy, onSortChange }) => {
       </button>
       <button
         className={`btn-unstyled btn-icon-neutral ${
-          showImage ? "selected" : ""
+          showImages ? "selected" : ""
         }`}
+        onClick={handleImageToggle}
+        aria-label={showImages ? t("hide_images") : t("show_images")}
+        title={showImages ? t("hide_images") : t("show_images")}
       >
         {getImageIcon()}
       </button>

@@ -24,6 +24,8 @@ const Header = ({
   disableLanguageSwitch = false,
   sortBy,
   setSortBy,
+  showImages,
+  setShowImages,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -366,7 +368,12 @@ const Header = ({
                 </div>
               </form>
               {setSortBy && (
-                <SortButtons sortBy={sortBy} onSortChange={setSortBy} />
+                <SortButtons 
+                  sortBy={sortBy} 
+                  onSortChange={setSortBy}
+                  showImages={showImages}
+                  onShowImagesChange={setShowImages}
+                />
               )}
             </div>
           </div>

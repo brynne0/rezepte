@@ -72,6 +72,8 @@
   "search": "Suchen",
   "sort_by_title": "Nach Titel sortieren",
   "sort_by_date": "Nach Datum sortieren",
+  "show_images": "Bilder anzeigen",
+  "hide_images": "Bilder ausblenden",
   "recipe_not_found": "Rezept nicht gefunden.",
   "no_recipes_found": "Keine Rezepte für \"{{searchTerm}}\" gefunden",
 
