@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -5,12 +6,25 @@ import {
   getMainImage,
   getOptimizedImageUrl,
 } from "../../services/imageService";
+import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
+  const [imageLoading, setImageLoading] = useState(true);
 
   // Get main image
   const mainImage = getMainImage(recipe.images);
+
+  const handleImageLoad = () => {
+    // Add a minimum loading time so users can see the loading state
+    setTimeout(() => {
+      setImageLoading(false);
+    }, 300); // Minimum 300ms loading display
+  };
+
+  const handleImageError = () => {
+    setImageLoading(false);
+  };
 
   // Check if recipe has a source link
   const hasSourceLink =
@@ -35,12 +49,21 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
     <div className="recipe-card" onClick={() => onClick && onClick(recipe)}>
       <h4 className="recipe-card-title">{recipe.title}</h4>
       {showImages && mainImage && (
-        <img
-          className="recipe-image"
-          src={getOptimizedImageUrl(mainImage.url, { width: 300, height: 200 })}
-          alt={recipe.title}
-          loading="lazy"
-        />
+        <div className="recipe-image-container">
+          <img
+            className={`recipe-image ${imageLoading ? 'loading' : ''}`}
+            src={getOptimizedImageUrl(mainImage.url, { width: 300, height: 200 })}
+            alt={recipe.title}
+            loading="lazy"
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+          />
+          {imageLoading && (
+            <div className="recipe-image-loading">
+              <LoadingAcorn size={20} className="loading-acorn-small" />
+            </div>
+          )}
+        </div>
       )}
       {hasSourceLink && hasNoContent && (
         <a

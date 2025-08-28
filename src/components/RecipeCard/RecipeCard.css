@@ -35,13 +35,37 @@
   color: var(--dark-red);
 }
 
+.recipe-image-container {
+  position: relative;
+  width: 100%;
+  height: 150px;
+}
+
 .recipe-image {
   width: 100%;
   height: 150px;
   object-fit: cover;
+  transition: opacity 0.2s ease;
+}
+
+.recipe-image.loading {
+  opacity: 0.3;
+}
+
+.recipe-image-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-content);
+  color: var(--brown);
 }
 
 @media (max-width: 768px) {
+  .recipe-image-container {
+    height: 100px;
+  }
+  
   .recipe-image {
     height: 100px;
   }

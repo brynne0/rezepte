@@ -299,4 +299,70 @@ describe("RecipeCard", () => {
       expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
     });
   });
+
+  describe("Image Display Toggle", () => {
+    const recipeWithImage = {
+      id: 1,
+      title: "Recipe with Image",
+      images: [{ 
+        id: "img1", 
+        url: "test-image.jpg", 
+        is_main: true 
+      }]
+    };
+
+    const recipeWithoutImage = {
+      id: 2,
+      title: "Recipe without Image"
+    };
+
+    it("shows image when showImages is true and recipe has image", () => {
+      render(
+        <RecipeCard 
+          recipe={recipeWithImage} 
+          showImages={true} 
+          onClick={mockOnClick} 
+        />
+      );
+      
+      const image = screen.getByRole("img", { name: "Recipe with Image" });
+      expect(image).toBeInTheDocument();
+      expect(image).toHaveClass("recipe-image");
+    });
+
+    it("hides image when showImages is false even if recipe has image", () => {
+      render(
+        <RecipeCard 
+          recipe={recipeWithImage} 
+          showImages={false} 
+          onClick={mockOnClick} 
+        />
+      );
+      
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    });
+
+    it("does not show image when recipe has no images regardless of showImages", () => {
+      render(
+        <RecipeCard 
+          recipe={recipeWithoutImage} 
+          showImages={true} 
+          onClick={mockOnClick} 
+        />
+      );
+      
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    });
+
+    it("defaults showImages to true when prop not provided", () => {
+      render(
+        <RecipeCard 
+          recipe={recipeWithImage} 
+          onClick={mockOnClick} 
+        />
+      );
+      
+      expect(screen.getByRole("img", { name: "Recipe with Image" })).toBeInTheDocument();
+    });
+  });
 });
