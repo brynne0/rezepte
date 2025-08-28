@@ -333,10 +333,12 @@ const Recipe = ({ isSharedView = false }) => {
 
         </div>
 
-        {/* Images column */}
-        <div className="recipe-images">
-          <ImageGallery images={recipe.images} />
-        </div>
+        {/* Images column - only show if there are images */}
+        {recipe.images && recipe.images.length > 0 && (
+          <div className="recipe-images">
+            <ImageGallery images={recipe.images} />
+          </div>
+        )}
       </div>
 
       {/* Share Modal - only for owned recipes */}

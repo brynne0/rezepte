@@ -131,7 +131,16 @@ const RecipeForm = ({
         <div className="error-message submission-error">{submissionError}</div>
       )}
 
-      <form onSubmit={handleSubmit} className="recipe-form" role="form">
+      <form 
+        onSubmit={handleSubmit} 
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && e.target.type !== 'submit') {
+            e.preventDefault();
+          }
+        }}
+        className="recipe-form" 
+        role="form"
+      >
         {/* Recipe Title and Servings */}
         <div className="form-group">
           <div className="title-servings-row">

@@ -6,6 +6,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   border: 0.3px solid var(--light-brown);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .main-image:hover {
@@ -27,6 +28,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   border: 0.3px solid var(--light-brown);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .thumbnail:hover {
