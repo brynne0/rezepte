@@ -78,16 +78,11 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(255, 255, 255, 0.8);
+  color: var(--cream-light) !important;
   border: none;
   border-radius: 50%;
   padding: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.close-modal:hover {
-  background: white;
 }
 
 @media (max-width: 768px) {
