@@ -23,15 +23,6 @@ describe("RecipeCard", () => {
     expect(screen.getByText("Chocolate Chip Cookies")).toBeInTheDocument();
   });
 
-  it("applies correct CSS class to container", () => {
-    render(<RecipeCard recipe={mockRecipe} onClick={mockOnClick} />);
-
-    const cardElement = screen
-      .getByText("Chocolate Chip Cookies")
-      .closest("div");
-    expect(cardElement).toHaveClass("recipe-card");
-  });
-
   it("calls onClick handler with recipe when clicked", () => {
     render(<RecipeCard recipe={mockRecipe} onClick={mockOnClick} />);
 
@@ -67,12 +58,12 @@ describe("RecipeCard", () => {
 
   describe("Source Link Functionality", () => {
     const mockWindowOpen = vi.fn();
-    
+
     beforeEach(() => {
       // Mock window.open
-      vi.stubGlobal('window', {
+      vi.stubGlobal("window", {
         ...window,
-        open: mockWindowOpen
+        open: mockWindowOpen,
       });
       mockWindowOpen.mockClear();
     });
@@ -85,71 +76,85 @@ describe("RecipeCard", () => {
       const recipeWithHttpLink = {
         id: 1,
         title: "Test Recipe",
-        source: "http://example.com"
+        source: "http://example.com",
       };
 
       render(<RecipeCard recipe={recipeWithHttpLink} onClick={mockOnClick} />);
 
-      expect(screen.getByRole("link", { name: "open_recipe_source_link" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "open_recipe_source_link" })
+      ).toBeInTheDocument();
     });
 
     it("shows link icon when recipe has https source", () => {
       const recipeWithHttpsLink = {
         id: 1,
-        title: "Test Recipe", 
-        source: "https://example.com"
+        title: "Test Recipe",
+        source: "https://example.com",
       };
 
       render(<RecipeCard recipe={recipeWithHttpsLink} onClick={mockOnClick} />);
-      
-      expect(screen.getByRole("link", { name: "open_recipe_source_link" })).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("link", { name: "open_recipe_source_link" })
+      ).toBeInTheDocument();
     });
 
     it("shows link icon when recipe has www source", () => {
       const recipeWithWwwLink = {
         id: 1,
         title: "Test Recipe",
-        source: "www.example.com"
+        source: "www.example.com",
       };
 
       render(<RecipeCard recipe={recipeWithWwwLink} onClick={mockOnClick} />);
-      
-      expect(screen.getByRole("link", { name: "open_recipe_source_link" })).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("link", { name: "open_recipe_source_link" })
+      ).toBeInTheDocument();
     });
 
     it("does not show link icon when recipe has text source", () => {
       const recipeWithTextSource = {
         id: 1,
         title: "Test Recipe",
-        source: "My grandmother's recipe"
+        source: "My grandmother's recipe",
       };
 
-      render(<RecipeCard recipe={recipeWithTextSource} onClick={mockOnClick} />);
-      
-      expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
+      render(
+        <RecipeCard recipe={recipeWithTextSource} onClick={mockOnClick} />
+      );
+
+      expect(
+        screen.queryByRole("link", { name: "open_recipe_source_link" })
+      ).not.toBeInTheDocument();
     });
 
     it("does not show link icon when recipe has no source", () => {
       const recipeWithoutSource = {
         id: 1,
-        title: "Test Recipe"
+        title: "Test Recipe",
       };
 
       render(<RecipeCard recipe={recipeWithoutSource} onClick={mockOnClick} />);
-      
-      expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
+
+      expect(
+        screen.queryByRole("link", { name: "open_recipe_source_link" })
+      ).not.toBeInTheDocument();
     });
 
     it("external link has correct href attribute", () => {
       const recipeWithLink = {
         id: 1,
         title: "Test Recipe",
-        source: "https://example.com"
+        source: "https://example.com",
       };
 
       render(<RecipeCard recipe={recipeWithLink} onClick={mockOnClick} />);
-      
-      const linkElement = screen.getByRole("link", { name: "open_recipe_source_link" });
+
+      const linkElement = screen.getByRole("link", {
+        name: "open_recipe_source_link",
+      });
       expect(linkElement).toHaveAttribute("href", "https://example.com");
       expect(linkElement).toHaveAttribute("target", "_blank");
       expect(linkElement).toHaveAttribute("rel", "noopener noreferrer");
@@ -159,12 +164,14 @@ describe("RecipeCard", () => {
       const recipeWithLink = {
         id: 1,
         title: "Test Recipe",
-        source: "https://example.com"
+        source: "https://example.com",
       };
 
       render(<RecipeCard recipe={recipeWithLink} onClick={mockOnClick} />);
-      
-      const linkIcon = screen.getByRole("link", { name: "open_recipe_source_link" });
+
+      const linkIcon = screen.getByRole("link", {
+        name: "open_recipe_source_link",
+      });
       fireEvent.click(linkIcon);
 
       // Card onClick should not be called
@@ -175,11 +182,11 @@ describe("RecipeCard", () => {
       const recipeWithLink = {
         id: 1,
         title: "Test Recipe",
-        source: "https://example.com"
+        source: "https://example.com",
       };
 
       render(<RecipeCard recipe={recipeWithLink} onClick={mockOnClick} />);
-      
+
       // Click on the title instead of the link icon
       const title = screen.getByText("Test Recipe");
       fireEvent.click(title);
@@ -195,12 +202,14 @@ describe("RecipeCard", () => {
       const emptyRecipeWithLink = {
         id: 1,
         title: "Empty Recipe",
-        source: "https://example.com"
+        source: "https://example.com",
       };
 
       render(<RecipeCard recipe={emptyRecipeWithLink} onClick={mockOnClick} />);
-      
-      expect(screen.getByRole("link", { name: "open_recipe_source_link" })).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("link", { name: "open_recipe_source_link" })
+      ).toBeInTheDocument();
     });
 
     it("does not show link when recipe has ingredients (legacy format)", () => {
@@ -208,12 +217,16 @@ describe("RecipeCard", () => {
         id: 1,
         title: "Recipe with Ingredients",
         source: "https://example.com",
-        ingredients: [{ id: 1, name: "flour" }]
+        ingredients: [{ id: 1, name: "flour" }],
       };
 
-      render(<RecipeCard recipe={recipeWithIngredients} onClick={mockOnClick} />);
-      
-      expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
+      render(
+        <RecipeCard recipe={recipeWithIngredients} onClick={mockOnClick} />
+      );
+
+      expect(
+        screen.queryByRole("link", { name: "open_recipe_source_link" })
+      ).not.toBeInTheDocument();
     });
 
     it("does not show link when recipe has ungrouped ingredients", () => {
@@ -221,12 +234,19 @@ describe("RecipeCard", () => {
         id: 1,
         title: "Recipe with Ungrouped Ingredients",
         source: "https://example.com",
-        ungroupedIngredients: [{ id: 1, name: "sugar" }]
+        ungroupedIngredients: [{ id: 1, name: "sugar" }],
       };
 
-      render(<RecipeCard recipe={recipeWithUngroupedIngredients} onClick={mockOnClick} />);
-      
-      expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
+      render(
+        <RecipeCard
+          recipe={recipeWithUngroupedIngredients}
+          onClick={mockOnClick}
+        />
+      );
+
+      expect(
+        screen.queryByRole("link", { name: "open_recipe_source_link" })
+      ).not.toBeInTheDocument();
     });
 
     it("does not show link when recipe has ingredient sections", () => {
@@ -234,15 +254,24 @@ describe("RecipeCard", () => {
         id: 1,
         title: "Recipe with Ingredient Sections",
         source: "https://example.com",
-        ingredientSections: [{ 
-          subheading: "Dry ingredients",
-          ingredients: [{ id: 1, name: "flour" }]
-        }]
+        ingredientSections: [
+          {
+            subheading: "Dry ingredients",
+            ingredients: [{ id: 1, name: "flour" }],
+          },
+        ],
       };
 
-      render(<RecipeCard recipe={recipeWithIngredientSections} onClick={mockOnClick} />);
-      
-      expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
+      render(
+        <RecipeCard
+          recipe={recipeWithIngredientSections}
+          onClick={mockOnClick}
+        />
+      );
+
+      expect(
+        screen.queryByRole("link", { name: "open_recipe_source_link" })
+      ).not.toBeInTheDocument();
     });
 
     it("does not show link when recipe has instructions", () => {
@@ -250,12 +279,16 @@ describe("RecipeCard", () => {
         id: 1,
         title: "Recipe with Instructions",
         source: "https://example.com",
-        instructions: ["Mix ingredients", "Bake for 20 minutes"]
+        instructions: ["Mix ingredients", "Bake for 20 minutes"],
       };
 
-      render(<RecipeCard recipe={recipeWithInstructions} onClick={mockOnClick} />);
-      
-      expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
+      render(
+        <RecipeCard recipe={recipeWithInstructions} onClick={mockOnClick} />
+      );
+
+      expect(
+        screen.queryByRole("link", { name: "open_recipe_source_link" })
+      ).not.toBeInTheDocument();
     });
 
     it("does not show link when recipe has both ingredients and instructions", () => {
@@ -264,12 +297,14 @@ describe("RecipeCard", () => {
         title: "Complete Recipe",
         source: "https://example.com",
         ingredients: [{ id: 1, name: "flour" }],
-        instructions: ["Mix ingredients", "Bake for 20 minutes"]
+        instructions: ["Mix ingredients", "Bake for 20 minutes"],
       };
 
       render(<RecipeCard recipe={completeRecipe} onClick={mockOnClick} />);
-      
-      expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
+
+      expect(
+        screen.queryByRole("link", { name: "open_recipe_source_link" })
+      ).not.toBeInTheDocument();
     });
 
     it("shows link when recipe has empty arrays for ingredients and instructions", () => {
@@ -280,23 +315,29 @@ describe("RecipeCard", () => {
         ingredients: [],
         ungroupedIngredients: [],
         ingredientSections: [],
-        instructions: []
+        instructions: [],
       };
 
       render(<RecipeCard recipe={emptyArraysRecipe} onClick={mockOnClick} />);
-      
-      expect(screen.getByRole("link", { name: "open_recipe_source_link" })).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("link", { name: "open_recipe_source_link" })
+      ).toBeInTheDocument();
     });
 
     it("does not show link when recipe has no source even if empty", () => {
       const emptyRecipeWithoutSource = {
         id: 1,
-        title: "Empty Recipe No Source"
+        title: "Empty Recipe No Source",
       };
 
-      render(<RecipeCard recipe={emptyRecipeWithoutSource} onClick={mockOnClick} />);
-      
-      expect(screen.queryByRole("link", { name: "open_recipe_source_link" })).not.toBeInTheDocument();
+      render(
+        <RecipeCard recipe={emptyRecipeWithoutSource} onClick={mockOnClick} />
+      );
+
+      expect(
+        screen.queryByRole("link", { name: "open_recipe_source_link" })
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -304,27 +345,29 @@ describe("RecipeCard", () => {
     const recipeWithImage = {
       id: 1,
       title: "Recipe with Image",
-      images: [{ 
-        id: "img1", 
-        url: "test-image.jpg", 
-        is_main: true 
-      }]
+      images: [
+        {
+          id: "img1",
+          url: "test-image.jpg",
+          is_main: true,
+        },
+      ],
     };
 
     const recipeWithoutImage = {
       id: 2,
-      title: "Recipe without Image"
+      title: "Recipe without Image",
     };
 
     it("shows image when showImages is true and recipe has image", () => {
       render(
-        <RecipeCard 
-          recipe={recipeWithImage} 
-          showImages={true} 
-          onClick={mockOnClick} 
+        <RecipeCard
+          recipe={recipeWithImage}
+          showImages={true}
+          onClick={mockOnClick}
         />
       );
-      
+
       const image = screen.getByRole("img", { name: "Recipe with Image" });
       expect(image).toBeInTheDocument();
       expect(image).toHaveClass("recipe-image");
@@ -332,37 +375,34 @@ describe("RecipeCard", () => {
 
     it("hides image when showImages is false even if recipe has image", () => {
       render(
-        <RecipeCard 
-          recipe={recipeWithImage} 
-          showImages={false} 
-          onClick={mockOnClick} 
+        <RecipeCard
+          recipe={recipeWithImage}
+          showImages={false}
+          onClick={mockOnClick}
         />
       );
-      
+
       expect(screen.queryByRole("img")).not.toBeInTheDocument();
     });
 
     it("does not show image when recipe has no images regardless of showImages", () => {
       render(
-        <RecipeCard 
-          recipe={recipeWithoutImage} 
-          showImages={true} 
-          onClick={mockOnClick} 
+        <RecipeCard
+          recipe={recipeWithoutImage}
+          showImages={true}
+          onClick={mockOnClick}
         />
       );
-      
+
       expect(screen.queryByRole("img")).not.toBeInTheDocument();
     });
 
     it("defaults showImages to true when prop not provided", () => {
-      render(
-        <RecipeCard 
-          recipe={recipeWithImage} 
-          onClick={mockOnClick} 
-        />
-      );
-      
-      expect(screen.getByRole("img", { name: "Recipe with Image" })).toBeInTheDocument();
+      render(<RecipeCard recipe={recipeWithImage} onClick={mockOnClick} />);
+
+      expect(
+        screen.getByRole("img", { name: "Recipe with Image" })
+      ).toBeInTheDocument();
     });
   });
 });

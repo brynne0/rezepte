@@ -9,7 +9,7 @@
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
   position: relative;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 /* Title turns red when hovering anywhere on the card */
@@ -24,7 +24,6 @@
 .recipe-card-link {
   position: absolute;
   right: 0.3rem;
-  /* top: 0.3rem; */
   color: var(--text-muted);
   transition: color 0.2s ease;
   justify-content: center;
@@ -65,7 +64,7 @@
   .recipe-image-container {
     height: 100px;
   }
-  
+
   .recipe-image {
     height: 100px;
   }

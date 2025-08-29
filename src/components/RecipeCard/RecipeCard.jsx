@@ -47,12 +47,33 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
 
   return (
     <div className="recipe-card" onClick={() => onClick && onClick(recipe)}>
-      <h4 className="recipe-card-title">{recipe.title}</h4>
+      <div className="flex-center">
+        <h4 className="recipe-card-title">{recipe.title}</h4>
+
+        {hasSourceLink && hasNoContent && (
+          <a
+            href={recipe.source}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-unstyled recipe-card-link"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering the card click
+            }}
+            aria-label={t("open_recipe_source_link")}
+            title={t("open_recipe_source_link")}
+          >
+            <Link size={16} />
+          </a>
+        )}
+      </div>
       {showImages && mainImage && (
         <div className="recipe-image-container">
           <img
-            className={`recipe-image ${imageLoading ? 'loading' : ''}`}
-            src={getOptimizedImageUrl(mainImage.url, { width: 300, height: 200 })}
+            className={`recipe-image ${imageLoading ? "loading" : ""}`}
+            src={getOptimizedImageUrl(mainImage.url, {
+              width: 300,
+              height: 200,
+            })}
             alt={recipe.title}
             loading="lazy"
             onLoad={handleImageLoad}
@@ -64,21 +85,6 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
             </div>
           )}
         </div>
-      )}
-      {hasSourceLink && hasNoContent && (
-        <a
-          href={recipe.source}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-unstyled recipe-card-link"
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent triggering the card click
-          }}
-          aria-label={t("open_recipe_source_link")}
-          title={t("open_recipe_source_link")}
-        >
-          <Link size={16} />
-        </a>
       )}
     </div>
   );
