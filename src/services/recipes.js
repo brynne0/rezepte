@@ -417,7 +417,21 @@ const getOrCreateIngredient = async (
 
 // Fetch all recipes
 export const fetchRecipes = async () => {
-  const { data, error } = await supabase.from("recipes").select("*");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let query = supabase.from("recipes").select("*");
+
+  if (user) {
+    // Logged in: only show user's own recipes
+    query = query.eq("user_id", user.id);
+  } else {
+    // Not logged in: show default recipes
+    query = query.eq("user_id", import.meta.env.VITE_DEFAULT_USER_ID);
+  }
+
+  const { data, error } = await query;
   if (error) {
     throw error;
   }
@@ -433,10 +447,23 @@ export const fetchRecipesPaginated = async (
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   let query = supabase
     .from("recipes")
     .select("*", { count: "exact" })
     .order("created_at", { ascending: false });
+
+  // Apply user filtering first
+  if (user) {
+    // Logged in: only show user's own recipes
+    query = query.eq("user_id", user.id);
+  } else {
+    // Not logged in: show default recipes
+    query = query.eq("user_id", import.meta.env.VITE_DEFAULT_USER_ID);
+  }
 
   // Apply filters
   if (filters.category && filters.category !== "all") {
