@@ -2,7 +2,7 @@ import supabase from "../lib/supabase";
 
 // Configuration
 const STORAGE_BUCKET = "recipe-images";
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 // Helper to validate image file
@@ -18,7 +18,7 @@ export const validateImageFile = (file) => {
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    throw new Error("File too large. Maximum size is 5MB.");
+    throw new Error("File too large. Maximum size is 10MB.");
   }
 
   return true;
@@ -153,9 +153,13 @@ export const setMainImage = (images, imageId) => {
 };
 
 // Upload all local images when recipe is saved
-export const uploadLocalImages = async (images, recipeId, onProgress = null) => {
+export const uploadLocalImages = async (
+  images,
+  recipeId,
+  onProgress = null
+) => {
   const uploadedImages = [];
-  const localImages = images.filter(image => image.isLocal && image.file);
+  const localImages = images.filter((image) => image.isLocal && image.file);
   const totalImages = localImages.length;
   let uploadedCount = 0;
 
@@ -168,7 +172,7 @@ export const uploadLocalImages = async (images, recipeId, onProgress = null) => 
             current: uploadedCount,
             total: totalImages,
             currentFile: image.filename,
-            progress: Math.round((uploadedCount / totalImages) * 100)
+            progress: Math.round((uploadedCount / totalImages) * 100),
           });
         }
 
@@ -185,7 +189,7 @@ export const uploadLocalImages = async (images, recipeId, onProgress = null) => 
 
         // Clean up the local preview URL
         URL.revokeObjectURL(image.url);
-        
+
         uploadedCount++;
 
         // Update progress after successful upload
@@ -194,7 +198,7 @@ export const uploadLocalImages = async (images, recipeId, onProgress = null) => 
             current: uploadedCount,
             total: totalImages,
             currentFile: image.filename,
-            progress: Math.round((uploadedCount / totalImages) * 100)
+            progress: Math.round((uploadedCount / totalImages) * 100),
           });
         }
       } catch (error) {
