@@ -119,7 +119,6 @@ function AppRoutes(props) {
     isGroceryListEditing,
     setIsGroceryListEditing,
     showImages,
-    setShowImages,
     isLoggedIn,
   } = props;
   const isGroceryListPage = location.pathname === "/grocery-list";
@@ -150,17 +149,6 @@ function AppRoutes(props) {
   useEffect(() => {
     refreshRecipes();
   }, [currentLanguage, refreshRecipes]);
-
-  // Reset image visibility when user logs out, restore when logging in
-  useEffect(() => {
-    if (!isLoggedIn) {
-      setShowImages(false);
-      localStorage.removeItem("showImages"); // Clear preference on logout
-    } else {
-      // Always default to true when logging in
-      setShowImages(true);
-    }
-  }, [isLoggedIn, setShowImages]);
 
   // Persist showImages preference to localStorage
   useEffect(() => {
