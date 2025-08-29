@@ -36,7 +36,7 @@
 
 .recipe-image-container {
   position: relative;
-  height: 150px;
+  height: clamp(100px, 12vw, 150px);
   width: -webkit-fill-available;
   margin: 0.5rem;
   margin-top: 0;
@@ -46,7 +46,7 @@
 
 .recipe-image {
   width: 100%;
-  height: 150px;
+  height: 100%;
   object-fit: cover;
   transition: opacity 0.2s ease;
 }
@@ -62,14 +62,4 @@
   transform: translate(-50%, -50%);
   z-index: var(--z-content);
   color: var(--brown);
-}
-
-@media (max-width: 768px) {
-  .recipe-image-container {
-    height: 100px;
-  }
-
-  .recipe-image {
-    height: 100px;
-  }
 }

@@ -360,7 +360,7 @@ describe("Header Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/auth-page");
   });
 
-  test("navigates to home and resets filters when title is clicked", () => {
+  test("navigates to home when title is clicked", () => {
     render(
       <TestWrapper>
         <Header {...defaultProps} />
@@ -369,8 +369,6 @@ describe("Header Component", () => {
 
     fireEvent.click(screen.getByText("Rezepte"));
 
-    expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith("all");
-    expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("");
     expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 

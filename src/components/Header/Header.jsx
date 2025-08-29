@@ -218,8 +218,6 @@ const Header = ({
             <button
               className="site-title"
               onClick={() => {
-                setSelectedCategory("all");
-                setSearchTerm("");
                 navigate("/");
               }}
             >
@@ -368,8 +366,8 @@ const Header = ({
                 </div>
               </form>
               {setSortBy && (
-                <SortButtons 
-                  sortBy={sortBy} 
+                <SortButtons
+                  sortBy={sortBy}
                   onSortChange={setSortBy}
                   showImages={showImages}
                   onShowImagesChange={setShowImages}
