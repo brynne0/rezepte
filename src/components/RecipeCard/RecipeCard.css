@@ -40,6 +40,8 @@
   width: -webkit-fill-available;
   margin: 0.5rem;
   margin-top: 0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
 }
 
 .recipe-image {
