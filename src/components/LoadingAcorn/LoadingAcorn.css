@@ -59,3 +59,41 @@
   width: 5rem;
   height: 5rem;
 }
+
+/* Reusable image loading states */
+.image-loading-container {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.image-loading-container img.loading {
+  opacity: 0.3 !important;
+  transition: none !important;
+}
+
+.image-loading-container .loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: var(--z-content);
+  color: var(--brown);
+}
+
+/* Reusable modal loading overlay */
+.modal-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  cursor: pointer;
+  color: var(--cream-light);
+}

@@ -9,6 +9,7 @@
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
   position: relative;
+  justify-content: space-between;
 }
 
 /* Title turns red when hovering anywhere on the card */
@@ -23,9 +24,9 @@
 .recipe-card-link {
   position: absolute;
   right: 0.3rem;
-  top: 0.3rem;
   color: var(--text-muted);
   transition: color 0.2s ease;
+  justify-content: center;
 }
 
 /* Link icon only turns red when hovering directly on the icon */
@@ -33,6 +34,32 @@
   color: var(--dark-red);
 }
 
-.recipe-card-image {
-  /* TODO */
+.recipe-image-container {
+  position: relative;
+  height: clamp(100px, 12vw, 150px);
+  width: -webkit-fill-available;
+  margin: 0.5rem;
+  margin-top: 0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.recipe-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.2s ease;
+}
+
+.recipe-image.loading {
+  opacity: 0.3;
+}
+
+.recipe-image-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-content);
+  color: var(--brown);
 }

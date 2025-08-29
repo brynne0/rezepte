@@ -5,10 +5,18 @@ import {
   ArrowDownZA,
   CalendarArrowDown,
   CalendarArrowUp,
+  Image,
+  ImageOff,
 } from "lucide-react";
 import "./SortButtons.css";
 
-const SortButtons = ({ sortBy, onSortChange }) => {
+const SortButtons = ({
+  sortBy,
+  onSortChange,
+  showImages,
+  onShowImagesChange,
+  isLoggedIn = false,
+}) => {
   const { t } = useTranslation();
 
   const handleTitleSort = () => {
@@ -39,6 +47,15 @@ const SortButtons = ({ sortBy, onSortChange }) => {
     return <Calendar size={20} />;
   };
 
+  const handleImageToggle = () => {
+    onShowImagesChange(!showImages);
+  };
+
+  const getImageIcon = () => {
+    if (showImages) return <Image size={20} />;
+    else return <ImageOff size={20} />;
+  };
+
   const isTitleActive = sortBy === "title_asc" || sortBy === "title_desc";
   const isDateActive =
     sortBy === "created_at_asc" || sortBy === "created_at_desc";
@@ -46,7 +63,9 @@ const SortButtons = ({ sortBy, onSortChange }) => {
   return (
     <div className="sort-buttons">
       <button
-        className={`btn-unstyled btn-icon-neutral ${isTitleActive ? "selected" : ""}`}
+        className={`btn-unstyled btn-icon-neutral ${
+          isTitleActive ? "selected" : ""
+        }`}
         onClick={handleTitleSort}
         aria-label={t("sort_by_title")}
         title={t("sort_by_title")}
@@ -54,13 +73,27 @@ const SortButtons = ({ sortBy, onSortChange }) => {
         {getTitleIcon()}
       </button>
       <button
-        className={`btn-unstyled btn-icon-neutral ${isDateActive ? "selected" : ""}`}
+        className={`btn-unstyled btn-icon-neutral ${
+          isDateActive ? "selected" : ""
+        }`}
         onClick={handleDateSort}
         aria-label={t("sort_by_date")}
         title={t("sort_by_date")}
       >
         {getDateIcon()}
       </button>
+      {isLoggedIn && (
+        <button
+          className={`btn-unstyled btn-icon-neutral ${
+            showImages ? "selected" : ""
+          }`}
+          onClick={handleImageToggle}
+          aria-label={showImages ? t("hide_images") : t("show_images")}
+          title={showImages ? t("hide_images") : t("show_images")}
+        >
+          {getImageIcon()}
+        </button>
+      )}
     </div>
   );
 };

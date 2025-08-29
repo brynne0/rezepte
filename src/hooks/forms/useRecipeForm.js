@@ -126,6 +126,7 @@ export const useRecipeForm = ({
         ungroupedIngredients: ungroupedIngredients,
         ingredientSections: ingredientSections,
         notes: initialRecipe.notes,
+        images: initialRecipe.images || [],
       };
     }
 
@@ -146,6 +147,7 @@ export const useRecipeForm = ({
         },
       ],
       ingredientSections: [],
+      images: [],
 
       notes: "",
     };
@@ -155,6 +157,9 @@ export const useRecipeForm = ({
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionError, setSubmissionError] = useState("");
   const [initialFormData, setInitialFormData] = useState(getInitialFormData);
+  const [uploadProgress, setUploadProgress] = useState(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [uploadingImageIds, setUploadingImageIds] = useState(new Set());
 
   // Update form data when initialRecipe changes (for edit mode)
   useEffect(() => {
@@ -196,6 +201,10 @@ export const useRecipeForm = ({
         setValidationErrors((prev) => ({ ...prev, title: titleError }));
       }
     }
+  };
+
+  const handleImagesChange = (images) => {
+    setFormData((prev) => ({ ...prev, images }));
   };
 
   const handleIngredientChange = (
@@ -677,6 +686,46 @@ export const useRecipeForm = ({
       return;
     }
 
+    // Check if we have local images to upload
+    const hasLocalImages = formData.images?.some(
+      (img) => img.isLocal && img.file
+    );
+
+    // Set up progress callback
+    const handleImageUploadProgress = (progress) => {
+      setUploadProgress(progress);
+
+      // Track which image is currently being uploaded
+      if (progress.currentFile) {
+        // Find the image ID that corresponds to this file
+        const currentImage = formData.images.find(
+          (img) =>
+            img.isLocal && img.file && img.file.name === progress.currentFile
+        );
+        if (currentImage) {
+          setUploadingImageIds((prev) => new Set(prev).add(currentImage.id));
+        }
+      }
+
+      // Remove completed image from uploading set
+      if (progress.current > 0) {
+        const completedImages = formData.images
+          .filter((img) => img.isLocal && img.file)
+          .slice(0, progress.current - 1);
+        setUploadingImageIds((prev) => {
+          const newSet = new Set(prev);
+          completedImages.forEach((img) => newSet.delete(img.id));
+          return newSet;
+        });
+      }
+    };
+
+    // Start image upload tracking if we have local images
+    if (hasLocalImages) {
+      setIsUploadingImages(true);
+      setUploadProgress({ current: 0, total: 0, currentFile: "", progress: 0 });
+    }
+
     try {
       // Filter out empty ungrouped ingredients
       const validUngroupedIngredients = formData.ungroupedIngredients.filter(
@@ -720,6 +769,7 @@ export const useRecipeForm = ({
         })),
 
         notes: formData.notes,
+        images: formData.images || [],
       };
 
       // Only set original_language when creating a new recipe
@@ -858,11 +908,18 @@ export const useRecipeForm = ({
           result = initialRecipe; // Return original recipe data
         } else {
           // Normal recipe editing - update the original recipe
-          result = await updateRecipe(initialRecipe.id, recipeData);
+          result = await updateRecipe(
+            initialRecipe.id,
+            recipeData,
+            hasLocalImages ? handleImageUploadProgress : null
+          );
         }
       } else {
         // Create mode
-        result = await createRecipe(recipeData);
+        result = await createRecipe(
+          recipeData,
+          hasLocalImages ? handleImageUploadProgress : null
+        );
       }
 
       navigate(`/${result.id}/${result.slug}`);
@@ -880,6 +937,11 @@ export const useRecipeForm = ({
 
       // Scroll to top to show the error message
       window.scrollTo(0, 0);
+    } finally {
+      // Clean up upload state
+      setIsUploadingImages(false);
+      setUploadProgress(null);
+      setUploadingImageIds(new Set());
     }
   };
 
@@ -934,6 +996,27 @@ export const useRecipeForm = ({
       return arr1.every((item, index) => item === arr2[index]);
     };
 
+    // Deep comparison function for images
+    const compareImages = (images1, images2) => {
+      if (!images1 && !images2) return true;
+      if (!images1 || !images2) return false;
+      if (images1.length !== images2.length) return false;
+
+      return images1.every((img1, index) => {
+        const img2 = images2[index];
+        if (!img1 || !img2) return false;
+
+        // Compare key properties that indicate changes
+        return (
+          img1.id === img2.id &&
+          img1.url === img2.url &&
+          img1.filename === img2.filename &&
+          img1.is_main === img2.is_main &&
+          img1.sort_order === img2.sort_order
+        );
+      });
+    };
+
     // Compare form data with initial form data
     return (
       formData.title !== initialFormData.title ||
@@ -949,7 +1032,8 @@ export const useRecipeForm = ({
       !compareSections(
         formData.ingredientSections,
         initialFormData.ingredientSections
-      )
+      ) ||
+      !compareImages(formData.images, initialFormData.images)
     );
   };
 
@@ -962,8 +1046,12 @@ export const useRecipeForm = ({
     error,
     isEditMode: !!initialRecipe,
     hasUnsavedChanges,
+    uploadProgress,
+    isUploadingImages,
+    uploadingImageIds,
     handleInputChange,
     handleTitleBlur,
+    handleImagesChange,
     handleIngredientChange,
     handleSectionChange,
     handleInstructionChange,

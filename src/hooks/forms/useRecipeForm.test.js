@@ -3,46 +3,53 @@ import { describe, test, expect } from "vitest";
 describe("useRecipeForm - Ingredient Field Navigation Logic", () => {
   test("handleIngredientFieldEnter function logic - field navigation order", () => {
     // Test the field order logic that would be used in the actual function
-    const fieldOrder = ['name', 'quantity', 'unit', 'notes'];
-    
+    const fieldOrder = ["name", "quantity", "unit", "notes"];
+
     // Test each field transition
     fieldOrder.forEach((field, index) => {
       const currentIndex = fieldOrder.indexOf(field);
-      
+
       if (currentIndex < fieldOrder.length - 1) {
         const expectedNextField = fieldOrder[currentIndex + 1];
         const actualNextField = fieldOrder[index + 1];
-        
+
         expect(actualNextField).toBe(expectedNextField);
       }
     });
-    
+
     // Test last field behavior (should not have a next field)
-    const lastFieldIndex = fieldOrder.indexOf('notes');
+    const lastFieldIndex = fieldOrder.indexOf("notes");
     expect(lastFieldIndex).toBe(fieldOrder.length - 1);
   });
 
   test("ingredient field ID generation logic", () => {
     // Test ungrouped ingredient ID format
-    const ungroupedId = (field, index, tempId) => 
+    const ungroupedId = (field, index, tempId) =>
       `ingredient-${field}-ungrouped-${index}-${tempId}`;
-    
-    expect(ungroupedId('name', 0, 'temp-123')).toBe('ingredient-name-ungrouped-0-temp-123');
-    expect(ungroupedId('quantity', 1, 'temp-456')).toBe('ingredient-quantity-ungrouped-1-temp-456');
-    
-    // Test section ingredient ID format  
-    const sectionId = (field, sectionId, index, tempId) => 
+
+    expect(ungroupedId("name", 0, "temp-123")).toBe(
+      "ingredient-name-ungrouped-0-temp-123"
+    );
+    expect(ungroupedId("quantity", 1, "temp-456")).toBe(
+      "ingredient-quantity-ungrouped-1-temp-456"
+    );
+
+    // Test section ingredient ID format
+    const sectionId = (field, sectionId, index, tempId) =>
       `ingredient-${field}-${sectionId}-${index}-${tempId}`;
-    
-    expect(sectionId('name', 'section-1', 0, 'temp-123')).toBe('ingredient-name-section-1-0-temp-123');
-    expect(sectionId('unit', 'section-2', 1, 'temp-456')).toBe('ingredient-unit-section-2-1-temp-456');
+
+    expect(sectionId("name", "section-1", 0, "temp-123")).toBe(
+      "ingredient-name-section-1-0-temp-123"
+    );
+    expect(sectionId("unit", "section-2", 1, "temp-456")).toBe(
+      "ingredient-unit-section-2-1-temp-456"
+    );
   });
 
   test("event handling conditions", () => {
     // Test conditions for when the function should execute
-    const shouldExecute = (key, shiftKey) => 
-      key === "Enter" && !shiftKey;
-    
+    const shouldExecute = (key, shiftKey) => key === "Enter" && !shiftKey;
+
     expect(shouldExecute("Enter", false)).toBe(true);
     expect(shouldExecute("Enter", true)).toBe(false);
     expect(shouldExecute("Tab", false)).toBe(false);
@@ -60,16 +67,16 @@ describe("useRecipeForm - handleDragEnd Logic", () => {
   test("instruction reordering logic", () => {
     // Test the logic that would be used in handleDragEnd for instructions
     const originalInstructions = ["Step 1", "Step 2", "Step 3"];
-    
+
     // Simulate moving instruction from index 0 to index 2
     const sourceIndex = 0;
     const destinationIndex = 2;
-    
+
     // This is the logic used in handleDragEnd
     const reorderedInstructions = Array.from(originalInstructions);
     const [movedInstruction] = reorderedInstructions.splice(sourceIndex, 1);
     reorderedInstructions.splice(destinationIndex, 0, movedInstruction);
-    
+
     expect(reorderedInstructions).toEqual(["Step 2", "Step 3", "Step 1"]);
   });
 
@@ -78,11 +85,11 @@ describe("useRecipeForm - handleDragEnd Logic", () => {
     const instructions = ["Step 1", "Step 2", "Step 3"];
     const sourceIndex = 1;
     const destinationIndex = 1;
-    
+
     const reorderedInstructions = Array.from(instructions);
     const [movedInstruction] = reorderedInstructions.splice(sourceIndex, 1);
     reorderedInstructions.splice(destinationIndex, 0, movedInstruction);
-    
+
     expect(reorderedInstructions).toEqual(["Step 1", "Step 2", "Step 3"]);
   });
 
@@ -91,11 +98,11 @@ describe("useRecipeForm - handleDragEnd Logic", () => {
     const instructions = ["Single step"];
     const sourceIndex = 0;
     const destinationIndex = 0;
-    
+
     const reorderedInstructions = Array.from(instructions);
     const [movedInstruction] = reorderedInstructions.splice(sourceIndex, 1);
     reorderedInstructions.splice(destinationIndex, 0, movedInstruction);
-    
+
     expect(reorderedInstructions).toEqual(["Single step"]);
   });
 
@@ -104,11 +111,11 @@ describe("useRecipeForm - handleDragEnd Logic", () => {
     const instructions = ["Step 1", "Step 2", "Step 3"];
     const sourceIndex = 2;
     const destinationIndex = 0;
-    
+
     const reorderedInstructions = Array.from(instructions);
     const [movedInstruction] = reorderedInstructions.splice(sourceIndex, 1);
     reorderedInstructions.splice(destinationIndex, 0, movedInstruction);
-    
+
     expect(reorderedInstructions).toEqual(["Step 3", "Step 1", "Step 2"]);
   });
 
@@ -122,15 +129,21 @@ describe("useRecipeForm - handleDragEnd Logic", () => {
     const validResult = {
       source: { index: 0, droppableId: "instructions" },
       destination: { index: 1, droppableId: "instructions" },
-      type: "instruction"
+      type: "instruction",
     };
     expect(isValidDragResult(validResult)).toBe(true);
 
     // Invalid results
     expect(isValidDragResult(null)).toBe(false);
     expect(isValidDragResult({})).toBe(false);
-    expect(isValidDragResult({ source: { index: 0, droppableId: "instructions" } })).toBe(false);
-    expect(isValidDragResult({ destination: { index: 1, droppableId: "instructions" } })).toBe(false);
+    expect(
+      isValidDragResult({ source: { index: 0, droppableId: "instructions" } })
+    ).toBe(false);
+    expect(
+      isValidDragResult({
+        destination: { index: 1, droppableId: "instructions" },
+      })
+    ).toBe(false);
   });
 
   test("drag type validation", () => {
@@ -144,3 +157,110 @@ describe("useRecipeForm - handleDragEnd Logic", () => {
     expect(isInstructionDrag(undefined)).toBe(false);
   });
 });
+
+describe("useRecipeForm - Image Comparison Logic", () => {
+  // Helper function that replicates the compareImages logic from useRecipeForm
+  const compareImages = (images1, images2) => {
+    if (!images1 && !images2) return true;
+    if (!images1 || !images2) return false;
+    if (images1.length !== images2.length) return false;
+
+    return images1.every((img1, index) => {
+      const img2 = images2[index];
+      if (!img1 || !img2) return false;
+
+      return (
+        img1.id === img2.id &&
+        img1.url === img2.url &&
+        img1.filename === img2.filename &&
+        img1.is_main === img2.is_main &&
+        img1.sort_order === img2.sort_order
+      );
+    });
+  };
+
+  test("identical images should be equal", () => {
+    const images = [
+      {
+        id: 1,
+        url: "test.jpg",
+        filename: "test.jpg",
+        is_main: true,
+        sort_order: 1,
+      },
+    ];
+    expect(compareImages(images, images)).toBe(true);
+  });
+
+  test("null/empty arrays should be equal", () => {
+    expect(compareImages(null, null)).toBe(true);
+    expect(compareImages([], [])).toBe(true);
+  });
+
+  test("different properties should not be equal", () => {
+    const images1 = [
+      {
+        id: 1,
+        url: "test.jpg",
+        filename: "test.jpg",
+        is_main: true,
+        sort_order: 1,
+      },
+    ];
+    const images2 = [
+      {
+        id: 1,
+        url: "test.jpg",
+        filename: "test.jpg",
+        is_main: false,
+        sort_order: 1,
+      },
+    ];
+    expect(compareImages(images1, images2)).toBe(false);
+  });
+
+  test("different lengths should not be equal", () => {
+    const images1 = [
+      {
+        id: 1,
+        url: "test.jpg",
+        filename: "test.jpg",
+        is_main: true,
+        sort_order: 1,
+      },
+    ];
+    const images2 = [
+      ...images1,
+      {
+        id: 2,
+        url: "test2.jpg",
+        filename: "test2.jpg",
+        is_main: false,
+        sort_order: 2,
+      },
+    ];
+    expect(compareImages(images1, images2)).toBe(false);
+  });
+
+  test("reordered images should not be equal", () => {
+    const images1 = [
+      {
+        id: 1,
+        url: "test1.jpg",
+        filename: "test1.jpg",
+        is_main: true,
+        sort_order: 1,
+      },
+      {
+        id: 2,
+        url: "test2.jpg",
+        filename: "test2.jpg",
+        is_main: false,
+        sort_order: 2,
+      },
+    ];
+    const images2 = [images1[1], images1[0]];
+    expect(compareImages(images1, images2)).toBe(false);
+  });
+});
+

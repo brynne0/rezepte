@@ -72,6 +72,8 @@
   "search": "Suchen",
   "sort_by_title": "Nach Titel sortieren",
   "sort_by_date": "Nach Datum sortieren",
+  "show_images": "Bilder anzeigen",
+  "hide_images": "Bilder ausblenden",
   "recipe_not_found": "Rezept nicht gefunden.",
   "no_recipes_found": "Keine Rezepte für \"{{searchTerm}}\" gefunden",
 
@@ -180,5 +182,13 @@
 
   "unsaved_changes_warning": "Sie haben ungespeicherte Änderungen. Möchten Sie diese Seite wirklich verlassen?",
   "leave_page": "Seite verlassen",
-  "stay": "Bleiben"
+  "stay": "Bleiben",
+
+  "images": "Bilder",
+  "upload_images": "Bilder hochladen",
+  "click_or_drag": "Klicken zum Auswählen oder per Drag & Drop hinzufügen",
+  "image_upload_hint": "PNG, JPEG, WebP bis zu 10MB",
+  "main": "Hauptbild",
+  "set_as_main_image": "Als Hauptbild festlegen",
+  "delete_image": "Bild löschen"
 }

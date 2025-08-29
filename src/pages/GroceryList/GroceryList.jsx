@@ -5,7 +5,7 @@ import { Trash2, Pencil, ArrowBigLeft, Plus } from "lucide-react";
 
 import "./GroceryList.css";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
-import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import { getUserPreferredLanguage } from "../../services/userService";
@@ -41,19 +41,27 @@ const GroceryList = ({
   // Check if there are unsaved changes
   const hasUnsavedChanges = () => {
     if (!isEditing) return false;
-    
+
+    // If arrays are empty, no changes
+    if (editedList.length === 0 && originalGroceryList.length === 0)
+      return false;
+
     // Compare current edited list with original list
     if (editedList.length !== originalGroceryList.length) return true;
-    
+
     return editedList.some((editedItem, index) => {
       const originalItem = originalGroceryList[index];
       if (!originalItem) return true;
-      
+
+      // Normalize values for comparison (handle null/undefined/empty string)
+      const normalize = (val) => (val == null ? "" : String(val));
+
+      // Don't compare names as they may be translated when entering edit mode
+      // Only compare the user-editable fields: quantity, unit, notes
       return (
-        editedItem.name !== originalItem.name ||
-        editedItem.quantity !== originalItem.quantity ||
-        editedItem.unit !== originalItem.unit ||
-        editedItem.notes !== originalItem.notes
+        normalize(editedItem.quantity) !== normalize(originalItem.quantity) ||
+        normalize(editedItem.unit) !== normalize(originalItem.unit) ||
+        normalize(editedItem.notes) !== normalize(originalItem.notes)
       );
     });
   };
@@ -65,10 +73,7 @@ const GroceryList = ({
     confirmNavigation,
     cancelNavigation,
     message: unsavedChangesMessage,
-  } = useUnsavedChanges(
-    hasUnsavedChanges(),
-    t("unsaved_changes_warning")
-  );
+  } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
 
   // Group ingredients by normalised name for display
   const groupIngredients = (items) => {
@@ -146,13 +151,38 @@ const GroceryList = ({
     }
   };
 
-
   const saveChanges = () => {
     updateGroceryList(editedList);
     setIsEditing(false);
     setEditedList([]);
     setOriginalGroceryList([]);
     restoreOriginalLanguage();
+  };
+
+  const handleCancel = () => {
+    // Exit edit mode and stay on grocery list page
+    setIsEditing(false);
+    setEditedList([]);
+    setOriginalGroceryList([]);
+    setCheckedItems(new Set());
+    restoreOriginalLanguage();
+  };
+
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+
+  const handleCancelClick = () => {
+    const hasChanges = hasUnsavedChanges();
+
+    if (hasChanges) {
+      setIsCancelModalOpen(true);
+    } else {
+      handleCancel();
+    }
+  };
+
+  const confirmCancel = () => {
+    setIsCancelModalOpen(false);
+    handleCancel();
   };
 
   const handleInputChange = (index, field, value) => {
@@ -490,7 +520,7 @@ const GroceryList = ({
           {/* Cancel Button */}
           <button
             className="btn btn-action btn-secondary"
-            onClick={() => navigateWithConfirmation(-1)}
+            onClick={handleCancelClick}
           >
             {t("cancel")}
           </button>
@@ -514,6 +544,17 @@ const GroceryList = ({
         message={t("grocery_list_clear_confirmation")}
         confirmText={t("clear_list")}
         cancelText={t("cancel")}
+        confirmButtonType="danger"
+      />
+
+      {/* Cancel Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={confirmCancel}
+        message={t("unsaved_changes_warning")}
+        confirmText={t("leave_page")}
+        cancelText={t("stay")}
         confirmButtonType="danger"
       />
 

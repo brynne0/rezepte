@@ -12,10 +12,11 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import { formatQuantityForUnit } from "../../utils/ingredientFormatting";
-import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
+import ImageUpload from "../ImageUpload/ImageUpload";
 import "./RecipeForm.css";
 
 const RecipeForm = ({
@@ -34,8 +35,11 @@ const RecipeForm = ({
     // error,
     isEditMode,
     hasUnsavedChanges,
+
+    uploadingImageIds,
     handleInputChange,
     handleTitleBlur,
+    handleImagesChange,
     handleIngredientChange,
     handleSectionChange,
     handleInstructionChange,
@@ -129,7 +133,16 @@ const RecipeForm = ({
         <div className="error-message submission-error">{submissionError}</div>
       )}
 
-      <form onSubmit={handleSubmit} className="recipe-form" role="form">
+      <form
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && e.target.type !== "submit") {
+            e.preventDefault();
+          }
+        }}
+        className="recipe-form"
+        role="form"
+      >
         {/* Recipe Title and Servings */}
         <div className="form-group">
           <div className="title-servings-row">
@@ -980,6 +993,23 @@ const RecipeForm = ({
             </div>
           </div>
         </DragDropContext>
+
+        {/* Recipe Images */}
+        <div
+          className={`form-group ${
+            isEditingTranslation ? "translation-disabled" : ""
+          }`}
+        >
+          <div className="form-header">
+            <h3>{t("images")}</h3>
+          </div>
+          <ImageUpload
+            images={formData.images}
+            onChange={handleImagesChange}
+            disabled={isEditingTranslation}
+            uploadingImageIds={uploadingImageIds}
+          />
+        </div>
 
         {/* Source */}
         <div className="form-group">

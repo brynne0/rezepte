@@ -1,6 +1,7 @@
 import supabase from "../lib/supabase";
 import pluralize from "pluralize";
 import { updateRecipeTranslations } from "./translationService";
+import { uploadLocalImages, cleanupOrphanedImages } from "./imageService";
 
 // Helper function to determine if an ingredient name was entered as plural
 const determineIngredientPlurality = async (inputName, language = "en") => {
@@ -702,7 +703,10 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
 };
 
 // Create a new recipe
-export const createRecipe = async (recipeData) => {
+export const createRecipe = async (
+  recipeData,
+  onImageUploadProgress = null
+) => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -721,6 +725,7 @@ export const createRecipe = async (recipeData) => {
       user_id: user.id,
       notes: recipeData.notes,
       original_language: recipeData.original_language,
+      images: recipeData.images || [],
     }).filter(([, v]) => v !== undefined)
   );
 
@@ -890,15 +895,41 @@ export const createRecipe = async (recipeData) => {
     }
   }
 
+  if (recipeData.images && recipeData.images.length > 0) {
+    try {
+      const uploadedImages = await uploadLocalImages(
+        recipeData.images,
+        recipe.id,
+        onImageUploadProgress
+      );
+
+      // Update the recipe with the uploaded images
+      const { error: updateError } = await supabase
+        .from("recipes")
+        .update({ images: uploadedImages })
+        .eq("id", recipe.id);
+
+      if (updateError) {
+        recipe.images = uploadedImages;
+      }
+    } catch {
+      console.error("Failed to process images");
+    }
+  }
+
   return recipe;
 };
 
 // Update an existing recipe
-export const updateRecipe = async (id, recipeData) => {
-  // First fetch the original recipe for smart translation updates
+export const updateRecipe = async (
+  id,
+  recipeData,
+  onImageUploadProgress = null
+) => {
+  // First fetch the original recipe for smart translation updates and image cleanup
   const { data: originalRecipe, error: fetchError } = await supabase
     .from("recipes")
-    .select("title, instructions, notes, source")
+    .select("title, instructions, notes, source, images")
     .eq("id", id)
     .single();
 
@@ -913,6 +944,7 @@ export const updateRecipe = async (id, recipeData) => {
       instructions: recipeData.instructions,
       source: recipeData.source,
       notes: recipeData.notes,
+      images: recipeData.images,
     }).filter(([, v]) => v !== undefined)
   );
 
@@ -1152,6 +1184,54 @@ export const updateRecipe = async (id, recipeData) => {
           }
         }
       }
+    }
+  }
+
+  // Handle image cleanup and upload after updating the recipe
+  if (recipeData.images !== undefined) {
+    try {
+      // Clean up orphaned images first
+      if (originalRecipe.images && originalRecipe.images.length > 0) {
+        await cleanupOrphanedImages(
+          originalRecipe.images,
+          recipeData.images || []
+        );
+      }
+
+      // Upload any local images if there are images to process
+      if (recipeData.images && recipeData.images.length > 0) {
+        const uploadedImages = await uploadLocalImages(
+          recipeData.images,
+          id,
+          onImageUploadProgress
+        );
+
+        // Update the recipe with the uploaded images
+        const { error: updateError } = await supabase
+          .from("recipes")
+          .update({ images: uploadedImages })
+          .eq("id", id);
+
+        if (updateError) {
+          console.error("Failed to update recipe with images:", updateError);
+        } else {
+          recipe.images = uploadedImages;
+        }
+      } else {
+        // No images left - clear the images field
+        const { error: updateError } = await supabase
+          .from("recipes")
+          .update({ images: [] })
+          .eq("id", id);
+
+        if (updateError) {
+          console.error("Failed to clear recipe images:", updateError);
+        } else {
+          recipe.images = [];
+        }
+      }
+    } catch {
+      console.error("Failed to process images");
     }
   }
 

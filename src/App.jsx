@@ -38,9 +38,14 @@ import AccountSettings from "./pages/AccountSettings/AccountSettings";
 
 function App() {
   const { t } = useTranslation();
+  const { isLoggedIn } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title_asc");
+  const [showImages, setShowImages] = useState(() => {
+    const stored = localStorage.getItem("showImages");
+    return stored !== null ? JSON.parse(stored) : true;
+  });
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,6 +89,8 @@ function App() {
           setSearchTerm={handleSearchChange}
           sortBy={sortBy}
           setSortBy={setSortBy}
+          showImages={showImages}
+          setShowImages={setShowImages}
           setLoginMessage={setLoginMessage}
           loginMessage={loginMessage}
           t={t}
@@ -98,6 +105,7 @@ function App() {
           paginationInfo={paginationInfo}
           onPageChange={handlePageChange}
           refreshRecipes={refreshRecipes}
+          isLoggedIn={isLoggedIn}
         />
       </Router>
     </div>
@@ -106,8 +114,13 @@ function App() {
 
 function AppRoutes(props) {
   const location = useLocation();
-  const { refreshRecipes, isGroceryListEditing, setIsGroceryListEditing } =
-    props;
+  const {
+    refreshRecipes,
+    isGroceryListEditing,
+    setIsGroceryListEditing,
+    showImages,
+    isLoggedIn,
+  } = props;
   const isGroceryListPage = location.pathname === "/grocery-list";
 
   // Reset grocery list editing state when leaving the grocery list page
@@ -117,7 +130,6 @@ function AppRoutes(props) {
     }
   }, [isGroceryListPage, isGroceryListEditing, setIsGroceryListEditing]);
 
-  const { isLoggedIn } = useAuth();
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
 
@@ -138,6 +150,11 @@ function AppRoutes(props) {
     refreshRecipes();
   }, [currentLanguage, refreshRecipes]);
 
+  // Persist showImages preference to localStorage
+  useEffect(() => {
+    localStorage.setItem("showImages", JSON.stringify(showImages));
+  }, [showImages]);
+
   // Scroll to top on all navigation
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -155,6 +172,8 @@ function AppRoutes(props) {
         disableLanguageSwitch={isGroceryListEditing}
         sortBy={props.sortBy}
         setSortBy={props.setSortBy}
+        showImages={props.showImages}
+        setShowImages={props.setShowImages}
       />
       <Routes>
         <Route
@@ -171,6 +190,7 @@ function AppRoutes(props) {
                 selectedCategory={props.selectedCategory}
                 recipes={props.recipes}
                 searchTerm={props.searchTerm}
+                showImages={props.showImages}
                 isPaginated={true}
               />
               <Pagination

@@ -91,6 +91,43 @@
   overflow-wrap: break-word;
 }
 
+/* Single column layout with floating images */
+.recipe-layout {
+  display: block;
+}
+
+.recipe-content {
+  min-width: 0; /* Prevent overflow */
+}
+
+/* Floating images within content */
+.recipe-images-float {
+  position: relative;
+  float: none;
+  width: 100%;
+  margin: 1rem 0;
+  clear: right;
+}
+
+.recipe-images-float .image-gallery {
+  width: 100%;
+}
+
+/* Loading overlay for entire image section */
+.images-loading-overlay {
+  position: absolute;
+  top: -1rem;
+  left: -1rem;
+  right: -1rem;
+  bottom: -1rem;
+  background: var(--cream-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-content);
+  transition: opacity 0.3s ease-out;
+}
+
 @media (max-width: 768px) {
   .recipe-actions {
     padding: 0.1rem;

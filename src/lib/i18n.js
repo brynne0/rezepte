@@ -10,6 +10,11 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: "en",
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
+    },
     interpolation: {
       escapeValue: false,
     },
