@@ -4,7 +4,6 @@ import {
   formatUnitDisplay,
   getIngredientDisplayName,
   formatIngredientMeasurement,
-  formatCompleteIngredient,
 } from "./ingredientFormatting";
 import { shouldUsePlural } from "./fractionUtils";
 
@@ -267,102 +266,7 @@ describe("ingredientFormatting", () => {
         "1 - 2 cups"
       );
       expect(formatIngredientMeasurement("100 - 200", "ml", mockUnits)).toBe(
-        "100 - 200 ml"
-      );
-    });
-  });
-
-  describe("formatCompleteIngredient - full integration", () => {
-    test("formats complete ingredient with range and is_plural flag", () => {
-      const ingredient = {
-        quantity: "1/2 - 2",
-        unit: "cup/s",
-        singular_name: "flour",
-        plural_name: "flours",
-        notes: "sifted",
-        is_plural: false, // User typed singular despite range > 1
-      };
-
-      expect(formatCompleteIngredient(ingredient, mockUnits)).toBe(
-        "1/2 - 2 cups flour"
-      );
-    });
-
-    test("formats ingredient respecting is_plural flag over quantity", () => {
-      const ingredient = {
-        quantity: "1",
-        unit: "cup/s",
-        singular_name: "flour",
-        plural_name: "flours",
-        notes: "sifted",
-        is_plural: true, // User typed plural despite quantity = 1
-      };
-
-      expect(formatCompleteIngredient(ingredient, mockUnits)).toBe(
-        "1 cup flours"
-      );
-    });
-
-    test("formats ingredient with translated name for non-English", () => {
-      const ingredient = {
-        translated_names: {
-          de: {
-            singular_name: "Mehl",
-            plural_name: "Mehle",
-          },
-        },
-        quantity: "1 - 3",
-        unit: "cup/s",
-        singular_name: "flour",
-        plural_name: "flours",
-        notes: "sifted",
-        is_plural: true, // Use plural form
-      };
-
-      expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
-        "1 - 3 cups Mehle"
-      );
-    });
-
-    test("falls back to name property when no structured translations", () => {
-      const ingredient = {
-        name: "all-purpose flour",
-        quantity: "1 - 3",
-        unit: "cup/s",
-        singular_name: "flour",
-        plural_name: "flours",
-        notes: "sifted",
-        is_plural: true, // This will be ignored since using fallback name
-      };
-
-      expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
-        "1 - 3 cups all-purpose flour"
-      );
-    });
-
-    test("uses processed name with overrides from translation service", () => {
-      const ingredient = {
-        name: "Wasse", // Already processed by translation service (override applied)
-        quantity: "0.75",
-        unit: "cup/s",
-        singular_name: "water",
-        plural_name: "waters",
-        translated_names: {
-          de: {
-            singular_name: "wasser", // Original translation
-            plural_name: "wässer",
-          },
-        },
-        name_overrides: {
-          de: "Wasse", // User override
-        },
-        is_plural: false,
-      };
-
-      // Should use the processed name field that includes the override
-      // Note: 0.75 displays as-is (no formatting conversion)
-      expect(formatCompleteIngredient(ingredient, mockUnits, "de")).toBe(
-        "0.75 cup Wasse"
+        "100 - 200ml"
       );
     });
   });

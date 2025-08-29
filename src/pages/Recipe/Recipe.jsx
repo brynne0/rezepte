@@ -12,7 +12,10 @@ import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ShareModal from "../../components/ShareModal/ShareModal";
 import ImageGallery from "../../components/ImageGallery/ImageGallery";
-import { formatCompleteIngredient } from "../../utils/ingredientFormatting";
+import {
+  formatIngredientMeasurement,
+  getIngredientDisplayName,
+} from "../../utils/ingredientFormatting";
 
 const Recipe = ({ isSharedView = false }) => {
   const { id, shareToken } = useParams();
@@ -109,11 +112,19 @@ const Recipe = ({ isSharedView = false }) => {
         id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
       />
       <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
-        {formatCompleteIngredient(
-          ingredient,
-          t("units", { returnObjects: true }),
-          i18n.language
-        )}
+        <span className="ingredient-measurement">
+          {formatIngredientMeasurement(
+            ingredient.quantity,
+            ingredient.unit,
+            t("units", { returnObjects: true })
+          )}
+        </span>
+        {formatIngredientMeasurement(
+          ingredient.quantity,
+          ingredient.unit,
+          t("units", { returnObjects: true })
+        ) && " "}
+        {getIngredientDisplayName(ingredient, i18n.language)}
         {ingredient.notes && (
           <span className="ingredient-notes"> {ingredient.notes}</span>
         )}
