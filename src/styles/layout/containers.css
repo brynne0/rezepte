@@ -10,7 +10,9 @@
 
 .card-recipe {
   padding: 2rem;
+  min-width: 40rem;
   width: 50vw;
+  margin: 0 auto;
 }
 
 .card-grocery {
@@ -40,6 +42,14 @@
   min-height: 70vh;
   flex-direction: column;
   gap: 1rem;
+}
+
+.page-centered.no-gap {
+  gap: 0;
+}
+
+.welcome-card {
+  padding: 0.5rem 1rem;
 }
 
 .page-header {
@@ -134,7 +144,7 @@
 
 /* Subheading wrappers */
 .subheading-wrapper {
-  padding: 0.5rem 1rem;
+  margin: 0.5rem 1rem;
   color: var(--brown);
   background: none;
   border: none;
@@ -142,9 +152,14 @@
   transition: color 0.2s;
 }
 
-.subheading-wrapper:hover,
 .subheading-wrapper.selected {
   color: var(--red);
+}
+
+@media (hover: hover) {
+  .subheading-wrapper:hover {
+    color: var(--red);
+  }
 }
 
 /* Responsive */
@@ -170,5 +185,6 @@
   .card-recipe {
     padding: 1.5rem;
     width: -webkit-fill-available;
+    min-width: 0;
   }
 }

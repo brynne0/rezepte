@@ -413,8 +413,9 @@ const getTranslatedIngredientNotes = async (
     // Translation not cached, translate and store
     const translatedNotes = await translateText(originalNotes, targetLanguage);
 
-    // Ingredient notes are always lowercase regardless of language
-    const finalTranslatedNotes = translatedNotes.toLowerCase();
+    // Preserve capitalisation for German, lowercase for other languages
+    const finalTranslatedNotes =
+      targetLanguage === "de" ? translatedNotes : translatedNotes.toLowerCase();
 
     await saveIngredientNotesTranslation(
       recipeIngredientId,

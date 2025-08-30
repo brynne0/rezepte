@@ -5,7 +5,12 @@ import "./ImageUpload.css";
 import { validateImageFile, setMainImage } from "../../services/imageService";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 
-const ImageUpload = ({ images = [], onChange, disabled = false, uploadingImageIds = new Set() }) => {
+const ImageUpload = ({
+  images = [],
+  onChange,
+  disabled = false,
+  uploadingImageIds = new Set(),
+}) => {
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
@@ -33,46 +38,51 @@ const ImageUpload = ({ images = [], onChange, disabled = false, uploadingImageId
     setLoadingImages((prev) => new Set(prev).add(imageId));
   };
 
-  const handleFileSelect = (files) => {
+  const handleFileSelect = async (files) => {
     if (disabled) return;
 
-    Array.from(files).forEach((file) => {
-      addImagePreview(file);
-    });
-  };
+    const fileArray = Array.from(files);
+    const newImages = [];
 
-  const addImagePreview = async (file) => {
-    try {
-      setError("");
+    for (const file of fileArray) {
+      try {
+        setError("");
 
-      // Validate file
-      validateImageFile(file);
+        // Validate file
+        validateImageFile(file);
 
-      // Create image object with local file
-      const imageId = crypto.randomUUID();
+        // Create image object with local file
+        const imageId = crypto.randomUUID();
 
-      // Add to loading state first
-      setLoadingImages((prev) => new Set(prev).add(imageId));
+        // Add to loading state first
+        setLoadingImages((prev) => new Set(prev).add(imageId));
 
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
+        // Create preview URL
+        const previewUrl = URL.createObjectURL(file);
 
-      const imagePreview = {
-        id: imageId,
-        file: file, // Store the actual file for later upload
-        url: previewUrl,
-        filename: file.name,
-        size: file.size,
-        type: file.type,
-        is_main: images.length === 0,
-        caption: "",
-        isLocal: true, // Flag to indicate this is a local preview
-      };
+        const imagePreview = {
+          id: imageId,
+          file: file, // Store the actual file for later upload
+          url: previewUrl,
+          filename: file.name,
+          size: file.size,
+          type: file.type,
+          is_main: images.length + newImages.length === 0,
+          caption: "",
+          isLocal: true, // Flag to indicate this is a local preview
+        };
 
-      const newImages = [...images, imagePreview];
-      onChange(newImages);
-    } catch (err) {
-      setError(err.message);
+        newImages.push(imagePreview);
+      } catch (err) {
+        setError(err.message);
+        break; // Stop processing if there's an error
+      }
+    }
+
+    // Add all new images at once to prevent race conditions
+    if (newImages.length > 0) {
+      const allImages = [...images, ...newImages];
+      onChange(allImages);
     }
   };
 
@@ -183,14 +193,18 @@ const ImageUpload = ({ images = [], onChange, disabled = false, uploadingImageId
                   src={image.url}
                   alt={image.filename}
                   className={`image-preview ${
-                    (loadingImages.has(image.id) || uploadingImageIds.has(image.id)) ? "loading" : ""
+                    loadingImages.has(image.id) ||
+                    uploadingImageIds.has(image.id)
+                      ? "loading"
+                      : ""
                   }`}
                   loading="lazy"
                   onLoadStart={() => handleImageLoadStart(image.id)}
                   onLoad={() => handleImageLoad(image.id)}
                   onError={() => handleImageLoad(image.id)}
                 />
-                {(loadingImages.has(image.id) || uploadingImageIds.has(image.id)) && (
+                {(loadingImages.has(image.id) ||
+                  uploadingImageIds.has(image.id)) && (
                   <div className="loading-spinner">
                     <LoadingAcorn size={20} className="loading-acorn-small" />
                   </div>

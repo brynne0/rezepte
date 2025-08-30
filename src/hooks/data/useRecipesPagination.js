@@ -18,8 +18,12 @@ export const useRecipesPagination = (
   // Fetch recipes with category information
   const fetchRecipesWithCategories = async () => {
     try {
-      // Get all recipes
-      const { data: recipes, error } = await supabase
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      // Build query with user filtering
+      let query = supabase
         .from("recipes")
         .select(
           `
@@ -34,6 +38,17 @@ export const useRecipesPagination = (
         `
         )
         .order("created_at", { ascending: false });
+
+      // Apply user filtering
+      if (user) {
+        // Logged in: only show user's own recipes
+        query = query.eq("user_id", user.id);
+      } else {
+        // Not logged in: show default recipes
+        query = query.eq("user_id", import.meta.env.VITE_DEFAULT_USER_ID);
+      }
+
+      const { data: recipes, error } = await query;
 
       if (error) throw error;
 
@@ -159,6 +174,7 @@ export const useRecipesPagination = (
     recipes: paginatedData.recipes,
     loading,
     refreshRecipes,
+    totalRecipeCount: allRecipes.length,
     paginationInfo: {
       totalCount: paginatedData.totalCount,
       totalPages: paginatedData.totalPages,

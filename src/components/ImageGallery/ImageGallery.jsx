@@ -73,6 +73,18 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
     };
   }, []);
 
+  // Reorder images so main image appears first in thumbnails
+  const reorderedImages = useMemo(() => {
+    if (!images || images.length <= 1) return images;
+
+    const mainImage = images.find((img) => img.is_main);
+    if (!mainImage) return images;
+
+    // Put main image first, then other images in original order
+    const otherImages = images.filter((img) => !img.is_main);
+    return [mainImage, ...otherImages];
+  }, [images]);
+
   if (!images || images.length === 0) {
     return null;
   }
@@ -81,8 +93,12 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
   const mainImageObj = getMainImage(images);
   const currentImage = images[currentImageIndex] || mainImageObj;
 
-  const handleThumbnailClick = (index) => {
-    if (index === currentImageIndex) return; // Don't reload same image
+  const handleThumbnailClick = (displayIndex) => {
+    // Map display index back to original images array index
+    const clickedImage = reorderedImages[displayIndex];
+    const originalIndex = images.findIndex((img) => img.id === clickedImage.id);
+
+    if (originalIndex === currentImageIndex) return; // Don't reload same image
     if (imageLoading) return; // Prevent multiple clicks while loading
 
     setImageLoading(true);
@@ -96,7 +112,7 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
     const minLoadingDuration = 300; // Minimum 300ms loading state
 
     // Preload the new image
-    const newImageUrl = optimizedUrls[images[index].id]?.main;
+    const newImageUrl = optimizedUrls[images[originalIndex].id]?.main;
     if (newImageUrl) {
       preloadImageRef.current = new Image();
       preloadImageRef.current.onload = () => {
@@ -105,7 +121,7 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
 
         setTimeout(() => {
           // Image is fully loaded, now switch
-          setCurrentImageIndex(index);
+          setCurrentImageIndex(originalIndex);
           setImageLoading(false);
 
           if (loadingTimeoutRef.current) {
@@ -209,20 +225,26 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
       {/* Thumbnails - only show if more than 1 image */}
       {images.length > 1 && (
         <div className="thumbnail-grid">
-          {images.map((image, index) => (
-            <img
-              key={image.id}
-              src={optimizedUrls[image.id]?.thumb}
-              alt={image.filename || `Recipe image ${index + 1}`}
-              className={`thumbnail ${
-                index === currentImageIndex ? "active" : ""
-              }`}
-              onClick={() => handleThumbnailClick(index)}
-              loading="lazy"
-              onLoad={() => handleImageLoadComplete(image.id)}
-              onError={() => handleImageLoadComplete(image.id)}
-            />
-          ))}
+          {reorderedImages.map((image, displayIndex) => {
+            // Find original index to check if this thumbnail is active
+            const originalIndex = images.findIndex(
+              (img) => img.id === image.id
+            );
+            return (
+              <img
+                key={image.id}
+                src={optimizedUrls[image.id]?.thumb}
+                alt={image.filename || `Recipe image ${displayIndex + 1}`}
+                className={`thumbnail ${
+                  originalIndex === currentImageIndex ? "active" : ""
+                }`}
+                onClick={() => handleThumbnailClick(displayIndex)}
+                loading="lazy"
+                onLoad={() => handleImageLoadComplete(image.id)}
+                onError={() => handleImageLoadComplete(image.id)}
+              />
+            );
+          })}
         </div>
       )}
 
@@ -230,7 +252,7 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
       {modalLoading &&
         createPortal(
           <div className="modal-loading-overlay">
-            <LoadingAcorn size={28} />
+            <LoadingAcorn size={20} />
           </div>,
           document.body
         )}

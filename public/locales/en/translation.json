@@ -11,7 +11,9 @@
   "too_many_requests": "Too many login attempts. Please try again later",
   "logged_out": "Logged Out",
   "login": "Login",
+  "logging_in": "Logging in...",
   "signup": "Sign Up",
+  "signing_up": "Signing up...",
   "logout": "Logout",
   "email": "Email",
   "first_name": "First Name",
@@ -76,6 +78,8 @@
   "hide_images": "Hide images",
   "recipe_not_found": "Recipe not found.",
   "no_recipes_found": "No recipes for \"{{searchTerm}}\" found",
+  "welcome_add_recipe": "Welcome! Click the + to add your first recipe",
+  "logged_in_note": "My recipes aren't available when logged in, log out to see them",
 
   "servings": "Servings",
   "ingredients": "Ingredients",

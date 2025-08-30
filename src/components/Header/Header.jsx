@@ -26,6 +26,7 @@ const Header = ({
   setSortBy,
   showImages,
   setShowImages,
+  onPageReset,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -211,8 +212,9 @@ const Header = ({
 
           {/* Title */}
           <div className="title-wrapper">
-            {/* Display user's first name above header */}
-            {firstName && (
+            {/* Display user's first name above header or login message */}
+            {loginMessage && <span className="login-message">{loginMessage}</span>}
+            {!loginMessage && firstName && (
               <span className="first-name"> {`${firstName}'s`}</span>
             )}
             <button
@@ -223,10 +225,6 @@ const Header = ({
             >
               Rezepte
             </button>
-            {/* Login message - centered below title */}
-            {loginMessage && (
-              <span className="login-message">{loginMessage}</span>
-            )}
           </div>
 
           {/* Desktop Navigation */}
@@ -371,6 +369,7 @@ const Header = ({
                   onSortChange={setSortBy}
                   showImages={showImages}
                   onShowImagesChange={setShowImages}
+                  onPageReset={onPageReset}
                   isLoggedIn={isLoggedIn}
                 />
               )}

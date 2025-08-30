@@ -260,9 +260,11 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(screen.getByText("ingredients:")).toBeInTheDocument();
-      expect(screen.getByText(/2 cups flour/)).toBeInTheDocument();
+      expect(screen.getByText("2 cups")).toBeInTheDocument();
+      expect(screen.getByText("flour")).toBeInTheDocument();
       expect(screen.getByText(/sifted/)).toBeInTheDocument();
-      expect(screen.getByText(/1 tsp salt/)).toBeInTheDocument();
+      expect(screen.getByText("1 tsp")).toBeInTheDocument();
+      expect(screen.getByText("salt")).toBeInTheDocument();
     });
 
     test("handles ingredients without quantity or is_plural", () => {
@@ -353,8 +355,10 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText("For the base")).toBeInTheDocument();
       expect(screen.getByText("For the filling")).toBeInTheDocument();
-      expect(screen.getByText(/1.5 cups almonds/)).toBeInTheDocument();
-      expect(screen.getByText(/1 lime/)).toBeInTheDocument();
+      expect(screen.getByText("1.5 cups")).toBeInTheDocument();
+      expect(screen.getByText("almonds")).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("lime")).toBeInTheDocument();
     });
 
     test("renders checkboxes for sectioned ingredients", () => {
@@ -387,7 +391,8 @@ describe("Recipe Component", () => {
     test("renders flat ingredient structure as fallback", () => {
       renderRecipe();
 
-      expect(screen.getByText(/1 cup sugar/)).toBeInTheDocument();
+      expect(screen.getByText("1 cup")).toBeInTheDocument();
+      expect(screen.getByText("sugar")).toBeInTheDocument();
     });
   });
 
@@ -472,7 +477,8 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/1 apple/)).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("apple")).toBeInTheDocument();
     });
 
     test("uses plural name for is_plural true", () => {
@@ -491,7 +497,8 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/3 apple/)).toBeInTheDocument();
+      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("apples")).toBeInTheDocument();
     });
 
     test("falls back to singular_name when plural_name is missing", () => {
@@ -508,7 +515,8 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/3 rice/)).toBeInTheDocument();
+      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("rice")).toBeInTheDocument();
     });
 
     test("uses processed name field first", () => {
@@ -528,8 +536,9 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 Mehl/)).toBeInTheDocument();
-      expect(screen.queryByText(/2 flour/)).not.toBeInTheDocument();
+      expect(screen.getByText("2")).toBeInTheDocument();
+      expect(screen.getByText("Mehl")).toBeInTheDocument();
+      expect(screen.queryByText("flour")).not.toBeInTheDocument();
     });
 
     test("uses is_plural for sectioned ingredients in English", () => {
@@ -557,7 +566,8 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       // With unit "tbsp" (measurement unit), plural form is used
-      expect(screen.getByText(/2 tbsp banana/)).toBeInTheDocument();
+      expect(screen.getByText("2 tbsp")).toBeInTheDocument();
+      expect(screen.getByText("banana")).toBeInTheDocument();
     });
 
     test("shows fallback message for missing ingredient names", () => {
@@ -574,7 +584,8 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/1 \?/)).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("?")).toBeInTheDocument();
     });
   });
 
@@ -612,8 +623,10 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 cups Mehl/)).toBeInTheDocument();
-      expect(screen.getByText(/1 tsp Salz/)).toBeInTheDocument();
+      expect(screen.getByText("2 cups")).toBeInTheDocument();
+      expect(screen.getByText("Mehl")).toBeInTheDocument();
+      expect(screen.getByText("1 tsp")).toBeInTheDocument();
+      expect(screen.getByText("Salz")).toBeInTheDocument();
       expect(screen.queryByText(/flour/)).not.toBeInTheDocument();
       expect(screen.queryByText(/salt/)).not.toBeInTheDocument();
 
@@ -650,8 +663,10 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/1 Banane/)).toBeInTheDocument();
-      expect(screen.getByText(/2 apples/)).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("Banane")).toBeInTheDocument();
+      expect(screen.getByText("2")).toBeInTheDocument();
+      expect(screen.getByText("apples")).toBeInTheDocument();
 
       // Reset language to English
       mockLanguage = "en";
@@ -693,8 +708,10 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText("Für den Teig")).toBeInTheDocument();
       // Uses processed names from translation service (including overrides)
-      expect(screen.getByText(/400 ml Wasser/)).toBeInTheDocument();
-      expect(screen.getByText(/500 g Mehl/)).toBeInTheDocument();
+      expect(screen.getByText("400ml")).toBeInTheDocument();
+      expect(screen.getByText("Wasser")).toBeInTheDocument();
+      expect(screen.getByText("500g")).toBeInTheDocument();
+      expect(screen.getByText("Mehl")).toBeInTheDocument();
     });
 
     test("handles ingredients with translated notes", () => {
@@ -717,7 +734,8 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 Mehl/)).toBeInTheDocument();
+      expect(screen.getByText("2")).toBeInTheDocument();
+      expect(screen.getByText("Mehl")).toBeInTheDocument();
       expect(screen.getByText(/gesiebt/)).toBeInTheDocument();
 
       // Reset language to English
@@ -762,9 +780,12 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       // Should display quantities as originally entered (raw format)
-      expect(screen.getByText(/0.25 cup flour/)).toBeInTheDocument();
-      expect(screen.getByText(/1.5 tsp salt/)).toBeInTheDocument();
-      expect(screen.getByText(/0.75 cup sugar/)).toBeInTheDocument();
+      expect(screen.getByText("0.25 cup")).toBeInTheDocument();
+      expect(screen.getByText("flour")).toBeInTheDocument();
+      expect(screen.getByText("1.5 tsp")).toBeInTheDocument();
+      expect(screen.getByText("salt")).toBeInTheDocument();
+      expect(screen.getByText("0.75 cup")).toBeInTheDocument();
+      expect(screen.getByText("sugar")).toBeInTheDocument();
 
       // The raw decimal format is now preserved and displayed
     });
@@ -786,7 +807,8 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/2 cups flour/)).toBeInTheDocument();
+      expect(screen.getByText("2 cups")).toBeInTheDocument();
+      expect(screen.getByText("flour")).toBeInTheDocument();
     });
 
     test("displays uncommon decimals as decimals", () => {
@@ -806,7 +828,8 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText(/1\.23 cups flour/)).toBeInTheDocument();
+      expect(screen.getByText("1.23 cups")).toBeInTheDocument();
+      expect(screen.getByText("flour")).toBeInTheDocument();
     });
   });
 

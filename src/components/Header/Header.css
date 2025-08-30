@@ -31,6 +31,13 @@
   font-family: var(--font-forta);
 }
 
+.login-message {
+  font-size: 1rem;
+  color: var(--dark-red);
+  font-weight: 500;
+  line-height: 1;
+}
+
 /* Title Section */
 .title-wrapper {
   position: absolute;
@@ -56,15 +63,6 @@
   border: none;
   padding: 0;
   margin: 0;
-}
-
-/* Login Message */
-.login-message {
-  font-size: 0.9rem;
-  color: var(--dark-red);
-  font-weight: 500;
-  margin: 0.25rem;
-  text-align: center;
 }
 
 /* Logo Icons */

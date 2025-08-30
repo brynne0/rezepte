@@ -76,7 +76,12 @@ export const formatIngredientMeasurement = (quantity, unit, units) => {
 
   // Combine quantity and unit with proper spacing
   if (displayQuantity && displayUnit) {
-    return `${displayQuantity} ${displayUnit}`;
+    // No space for metric units
+    const metricUnits = ["g", "kg", "l", "ml"];
+    const isMetricUnit = metricUnits.includes(unit);
+    return isMetricUnit
+      ? `${displayQuantity}${displayUnit}`
+      : `${displayQuantity} ${displayUnit}`;
   } else if (displayQuantity) {
     return displayQuantity;
   } else if (displayUnit) {
@@ -84,31 +89,4 @@ export const formatIngredientMeasurement = (quantity, unit, units) => {
   }
 
   return "";
-};
-
-// Format ingredient display without notes (quantity + unit + name)
-export const formatCompleteIngredient = (
-  ingredient,
-  units,
-  currentLanguage = "en"
-) => {
-  const parts = [];
-
-  // Add measurement (quantity + unit)
-  const measurement = formatIngredientMeasurement(
-    ingredient.quantity,
-    ingredient.unit,
-    units
-  );
-  if (measurement) {
-    parts.push(measurement);
-  }
-
-  // Add ingredient name
-  const ingredientName = getIngredientDisplayName(ingredient, currentLanguage);
-  if (ingredientName) {
-    parts.push(ingredientName);
-  }
-
-  return parts.join(" ");
 };

@@ -49,7 +49,7 @@ function App() {
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const { recipes, loading, refreshRecipes, paginationInfo } =
+  const { recipes, loading, refreshRecipes, totalRecipeCount, paginationInfo } =
     useRecipesPagination(currentPage, 36, selectedCategory, searchTerm, sortBy);
 
   // Categories from database
@@ -81,6 +81,10 @@ function App() {
     setCurrentPage(1); // Reset to first page when searching
   };
 
+  const handlePageReset = () => {
+    setCurrentPage(1);
+  };
+
   return (
     <div className="app">
       <Router>
@@ -97,6 +101,7 @@ function App() {
           categories={categories}
           selectedCategory={selectedCategory}
           recipes={recipes}
+          totalRecipeCount={totalRecipeCount}
           searchTerm={searchTerm}
           loading={loading}
           isGroceryListEditing={isGroceryListEditing}
@@ -104,6 +109,7 @@ function App() {
           currentPage={currentPage}
           paginationInfo={paginationInfo}
           onPageChange={handlePageChange}
+          onPageReset={handlePageReset}
           refreshRecipes={refreshRecipes}
           isLoggedIn={isLoggedIn}
         />
@@ -174,6 +180,7 @@ function AppRoutes(props) {
         setSortBy={props.setSortBy}
         showImages={props.showImages}
         setShowImages={props.setShowImages}
+        onPageReset={props.onPageReset}
       />
       <Routes>
         <Route
@@ -190,7 +197,8 @@ function AppRoutes(props) {
                 selectedCategory={props.selectedCategory}
                 recipes={props.recipes}
                 searchTerm={props.searchTerm}
-                showImages={props.showImages}
+                showImages={isLoggedIn ? props.showImages : false}
+                totalRecipeCount={props.totalRecipeCount}
                 isPaginated={true}
               />
               <Pagination
