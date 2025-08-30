@@ -1,5 +1,5 @@
 .main-image-wrapper {
-  height: clamp(200px, 30vw + 100px, 280px);
+  height: clamp(200px, 30vw + 100px, 350px);
 }
 
 .main-image {
