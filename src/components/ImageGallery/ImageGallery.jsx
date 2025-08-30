@@ -230,7 +230,7 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
       {modalLoading &&
         createPortal(
           <div className="modal-loading-overlay">
-            <LoadingAcorn size={28} />
+            <LoadingAcorn size={20} />
           </div>,
           document.body
         )}

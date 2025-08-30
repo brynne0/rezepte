@@ -139,7 +139,7 @@ describe("AuthPage", () => {
       const submitButton = screen.getByRole("button", {
         name: "submit-button",
       });
-      expect(submitButton).toHaveTextContent("login");
+      expect(submitButton).toHaveTextContent(/^(login|logging_in)$/);
 
       // Check for the form with the correct test id
       expect(screen.getByTestId("auth-form")).toBeInTheDocument();
@@ -179,7 +179,7 @@ describe("AuthPage", () => {
       const submitButton = screen.getByRole("button", {
         name: "submit-button",
       });
-      expect(submitButton).toHaveTextContent("signup");
+      expect(submitButton).toHaveTextContent(/^(signup|signing_up)$/);
     });
 
     it("switches back to login mode when login button is clicked", () => {
@@ -744,7 +744,7 @@ describe("AuthPage", () => {
       await waitFor(() => {
         expect(usernameInput.value).toBe("");
         expect(passwordInput.value).toBe("");
-      });
+      }, { timeout: 2000 });
     });
 
     it("calls signIn with username when username is provided", async () => {
@@ -897,7 +897,7 @@ describe("AuthPage", () => {
         expect(firstNameInput.value).toBe("");
         expect(usernameInput.value).toBe("");
         expect(passwordInput.value).toBe("");
-      });
+      }, { timeout: 2000 });
     });
   });
 

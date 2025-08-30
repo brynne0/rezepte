@@ -25,6 +25,7 @@ const AuthPage = ({ setLoginMessage }) => {
 
   // Toggle between different modes
   const [isSignUpMode, setIsSignUpMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -44,9 +45,11 @@ const AuthPage = ({ setLoginMessage }) => {
       return;
     }
 
+    setIsLoading(true);
     const { error } = await signIn(username, password);
 
     if (error) {
+      setIsLoading(false);
       // Handle specific error types
       switch (error.type) {
         case "USER_NOT_FOUND":
@@ -65,12 +68,13 @@ const AuthPage = ({ setLoginMessage }) => {
     } else {
       setLoginMessage(t("login_success"));
 
-      // Clear form fields on successful login
-      setUsername("");
-      setPassword("");
-
-      // Navigate on successful login
-      navigate("/");
+      // Wait for recipes to load before navigating
+      setTimeout(() => {
+        // Clear form fields and navigate
+        setUsername("");
+        setPassword("");
+        navigate("/");
+      }, 1000);
     }
 
     setTimeout(() => {
@@ -87,6 +91,8 @@ const AuthPage = ({ setLoginMessage }) => {
     if (!handleValidation()) {
       return;
     }
+
+    setIsLoading(true);
 
     // Collect all validation errors at once
     const errors = {};
@@ -109,6 +115,7 @@ const AuthPage = ({ setLoginMessage }) => {
 
     // If there are any validation errors, show them all and return
     if (Object.keys(errors).length > 0) {
+      setIsLoading(false);
       setValidationErrors({
         ...validationErrors,
         ...errors,
@@ -119,11 +126,20 @@ const AuthPage = ({ setLoginMessage }) => {
     const { error } = await signUp(email, firstName, username, password);
 
     if (error) {
+      setIsLoading(false);
       setErrorMessage(t("signup_failed"));
     } else {
       setLoginMessage(t("signup_success"));
-      // Navigate on successful sign up
-      navigate("/");
+
+      // Wait for recipes to load before navigating
+      setTimeout(() => {
+        // Clear form fields and navigate
+        setEmail("");
+        setFirstName("");
+        setUsername("");
+        setPassword("");
+        navigate("/");
+      }, 1000);
     }
 
     setTimeout(() => {
@@ -131,11 +147,6 @@ const AuthPage = ({ setLoginMessage }) => {
       setLoginMessage("");
       setErrorMessage("");
     }, 3000);
-
-    setEmail("");
-    setFirstName("");
-    setUsername("");
-    setPassword("");
   };
 
   // Clear form when switching modes
@@ -325,8 +336,15 @@ const AuthPage = ({ setLoginMessage }) => {
             type="submit"
             aria-label="submit-button"
             className={"btn btn-standard"}
+            disabled={isLoading}
           >
-            {isSignUpMode ? t("signup") : t("login")}
+            {isLoading
+              ? isSignUpMode
+                ? t("signing_up")
+                : t("logging_in")
+              : isSignUpMode
+              ? t("signup")
+              : t("login")}
           </button>
         </form>
       </div>
