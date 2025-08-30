@@ -144,12 +144,18 @@ export const getMainImage = (images = []) => {
   return mainImage || images[0];
 };
 
-// Helper to set main image
+// Helper to set main image and reorder so main image is first
 export const setMainImage = (images, imageId) => {
-  return images.map((img) => ({
+  const updatedImages = images.map((img) => ({
     ...img,
     is_main: img.id === imageId,
   }));
+
+  // Reorder so main image comes first
+  const mainImage = updatedImages.find((img) => img.is_main);
+  const otherImages = updatedImages.filter((img) => !img.is_main);
+
+  return mainImage ? [mainImage, ...otherImages] : updatedImages;
 };
 
 // Upload all local images when recipe is saved
