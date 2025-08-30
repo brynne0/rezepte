@@ -109,6 +109,11 @@ h3.forta {
   font-size: 1rem;
 }
 
+.grey-small {
+  color: grey;
+  font-size: 0.9em;
+}
+
 @media (max-width: 768px) {
   h1 {
     font-size: 1.5rem;

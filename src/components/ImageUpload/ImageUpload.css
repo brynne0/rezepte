@@ -30,11 +30,6 @@
   overflow: hidden;
 }
 
-/* Small loading acorn for image thumbnails */
-.loading-acorn-small {
-  min-height: auto !important;
-}
-
 .image-preview-item {
   position: relative;
   border-radius: var(--border-radius);

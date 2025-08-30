@@ -7,6 +7,10 @@
   stroke: var(--brown);
 }
 
+.loading-acorn-small {
+  min-height: auto !important;
+}
+
 .acorn-icon {
   animation: bounce 1.4s ease-in-out infinite both;
 }
