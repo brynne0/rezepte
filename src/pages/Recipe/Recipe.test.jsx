@@ -57,6 +57,14 @@ vi.mock("../LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
+vi.mock("../../components/ImageGallery/ImageGallery", () => ({
+  default: ({ images, onAllImagesLoaded }) => {
+    // Call onAllImagesLoaded to simulate images finishing loading
+    if (onAllImagesLoaded) onAllImagesLoaded();
+    return <div data-testid="image-gallery">Images: {images.length}</div>;
+  },
+}));
+
 vi.mock("./Recipe.css", () => ({}));
 
 // Mock variables
@@ -248,6 +256,44 @@ describe("Recipe Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         "/edit-recipe/recipe-1/test-recipe"
       );
+    });
+  });
+
+  describe("Recipe Images", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        images: [
+          { id: 1, url: "image1.jpg" },
+          { id: 2, url: "image2.jpg" }
+        ]
+      };
+    });
+
+    test("shows images when user is logged in", () => {
+      mockAuth.isLoggedIn = true;
+      renderRecipe();
+
+      expect(screen.getByTestId("image-gallery")).toBeInTheDocument();
+      expect(screen.getByText("Images: 2")).toBeInTheDocument();
+    });
+
+    test("hides images when user is not logged in", () => {
+      mockAuth.isLoggedIn = false;
+      renderRecipe();
+
+      expect(screen.queryByTestId("image-gallery")).not.toBeInTheDocument();
+    });
+
+    test("doesn't render image section when no images exist", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        images: []
+      };
+      mockAuth.isLoggedIn = true;
+      renderRecipe();
+
+      expect(screen.queryByTestId("image-gallery")).not.toBeInTheDocument();
     });
   });
 
