@@ -12,10 +12,3 @@
 
 /* Layout */
 @import "./layout/containers.css";
-
-/* Disable hover effects on touch devices */
-@media (hover: none) {
-  *:hover {
-    transform: none !important;
-  }
-}

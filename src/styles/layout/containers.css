@@ -152,9 +152,14 @@
   transition: color 0.2s;
 }
 
-.subheading-wrapper:hover,
 .subheading-wrapper.selected {
   color: var(--red);
+}
+
+@media (hover: hover) {
+  .subheading-wrapper:hover {
+    color: var(--red);
+  }
 }
 
 /* Responsive */
