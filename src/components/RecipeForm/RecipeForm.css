@@ -43,10 +43,6 @@
   padding: 0.5rem;
 }
 
-.form-categories-wrapper .subheading-wrapper {
-  transition: color 0.05s;
-}
-
 .section-title-input {
   flex: 1;
   font-weight: 500;

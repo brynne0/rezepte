@@ -12,3 +12,14 @@
 
 /* Layout */
 @import "./layout/containers.css";
+
+/* Only apply hover effects on devices that support hover */
+@media (hover: none) {
+  *:hover {
+    color: inherit !important;
+    background-color: inherit !important;
+    border-color: inherit !important;
+    transform: none !important;
+    box-shadow: inherit !important;
+  }
+}
