@@ -192,8 +192,8 @@ const Recipe = ({ isSharedView = false }) => {
       {/* Single column layout with floating images */}
       <div className="recipe-layout">
         <div className="recipe-content">
-          {/* Recipe Images - floating within content */}
-          {recipe.images && recipe.images.length > 0 && (
+          {/* Recipe Images - floating within content - only show when logged in */}
+          {isLoggedIn && recipe.images && recipe.images.length > 0 && (
             <div className="recipe-images-float">
               {imagesLoading && (
                 <div className="images-loading-overlay">
