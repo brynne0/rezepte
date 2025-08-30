@@ -26,6 +26,7 @@ const Header = ({
   setSortBy,
   showImages,
   setShowImages,
+  onPageReset,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -371,6 +372,7 @@ const Header = ({
                   onSortChange={setSortBy}
                   showImages={showImages}
                   onShowImagesChange={setShowImages}
+                  onPageReset={onPageReset}
                   isLoggedIn={isLoggedIn}
                 />
               )}

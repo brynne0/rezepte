@@ -81,6 +81,10 @@ function App() {
     setCurrentPage(1); // Reset to first page when searching
   };
 
+  const handlePageReset = () => {
+    setCurrentPage(1);
+  };
+
   return (
     <div className="app">
       <Router>
@@ -104,6 +108,7 @@ function App() {
           currentPage={currentPage}
           paginationInfo={paginationInfo}
           onPageChange={handlePageChange}
+          onPageReset={handlePageReset}
           refreshRecipes={refreshRecipes}
           isLoggedIn={isLoggedIn}
         />
@@ -174,6 +179,7 @@ function AppRoutes(props) {
         setSortBy={props.setSortBy}
         showImages={props.showImages}
         setShowImages={props.setShowImages}
+        onPageReset={props.onPageReset}
       />
       <Routes>
         <Route

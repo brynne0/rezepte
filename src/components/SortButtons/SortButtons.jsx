@@ -15,6 +15,7 @@ const SortButtons = ({
   onSortChange,
   showImages,
   onShowImagesChange,
+  onPageReset,
   isLoggedIn = false,
 }) => {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ const SortButtons = ({
     } else {
       onSortChange("title_asc");
     }
+    onPageReset && onPageReset();
   };
 
   const handleDateSort = () => {
@@ -33,6 +35,7 @@ const SortButtons = ({
     } else {
       onSortChange("created_at_desc");
     }
+    onPageReset && onPageReset();
   };
 
   const getTitleIcon = () => {
