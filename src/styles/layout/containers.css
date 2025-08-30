@@ -42,6 +42,14 @@
   gap: 1rem;
 }
 
+.page-centered.no-gap {
+  gap: 0;
+}
+
+.welcome-card {
+  padding: 0.5rem 1rem;
+}
+
 .page-header {
   display: flex;
   gap: 0.5rem;
@@ -134,7 +142,7 @@
 
 /* Subheading wrappers */
 .subheading-wrapper {
-  padding: 0.5rem 1rem;
+  margin: 0.5rem 1rem;
   color: var(--brown);
   background: none;
   border: none;

@@ -174,6 +174,7 @@ export const useRecipesPagination = (
     recipes: paginatedData.recipes,
     loading,
     refreshRecipes,
+    totalRecipeCount: allRecipes.length,
     paginationInfo: {
       totalCount: paginatedData.totalCount,
       totalPages: paginatedData.totalPages,

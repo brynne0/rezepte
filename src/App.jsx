@@ -49,7 +49,7 @@ function App() {
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const { recipes, loading, refreshRecipes, paginationInfo } =
+  const { recipes, loading, refreshRecipes, totalRecipeCount, paginationInfo } =
     useRecipesPagination(currentPage, 36, selectedCategory, searchTerm, sortBy);
 
   // Categories from database
@@ -101,6 +101,7 @@ function App() {
           categories={categories}
           selectedCategory={selectedCategory}
           recipes={recipes}
+          totalRecipeCount={totalRecipeCount}
           searchTerm={searchTerm}
           loading={loading}
           isGroceryListEditing={isGroceryListEditing}
@@ -197,6 +198,7 @@ function AppRoutes(props) {
                 recipes={props.recipes}
                 searchTerm={props.searchTerm}
                 showImages={isLoggedIn ? props.showImages : false}
+                totalRecipeCount={props.totalRecipeCount}
                 isPaginated={true}
               />
               <Pagination
