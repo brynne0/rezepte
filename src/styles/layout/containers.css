@@ -10,7 +10,9 @@
 
 .card-recipe {
   padding: 2rem;
+  min-width: 40rem;
   width: 50vw;
+  margin: 0 auto;
 }
 
 .card-grocery {
@@ -178,5 +180,6 @@
   .card-recipe {
     padding: 1.5rem;
     width: -webkit-fill-available;
+    min-width: 0;
   }
 }
