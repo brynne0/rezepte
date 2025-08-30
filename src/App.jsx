@@ -43,6 +43,9 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title_asc");
   const [showImages, setShowImages] = useState(() => {
+    if (!isLoggedIn) {
+      return false;
+    }
     const stored = localStorage.getItem("showImages");
     return stored !== null ? JSON.parse(stored) : true;
   });
@@ -149,6 +152,13 @@ function AppRoutes(props) {
   useEffect(() => {
     refreshRecipes();
   }, [currentLanguage, refreshRecipes]);
+
+  // Set showImages to false when user logs out
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setShowImages(false);
+    }
+  }, [isLoggedIn]);
 
   // Persist showImages preference to localStorage
   useEffect(() => {
