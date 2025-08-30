@@ -350,7 +350,6 @@ export const useRecipeForm = ({
         if (ungroupedInputs.length > 0) {
           const lastInput = ungroupedInputs[ungroupedInputs.length - 1];
           lastInput.focus();
-          // Trigger click to ensure mobile keyboard opens
           lastInput.click();
         }
       } else {
@@ -361,7 +360,6 @@ export const useRecipeForm = ({
         if (sectionInputs.length > 0) {
           const lastInput = sectionInputs[sectionInputs.length - 1];
           lastInput.focus();
-          // Trigger click to ensure mobile keyboard opens
           lastInput.click();
         }
       }
@@ -607,6 +605,7 @@ export const useRecipeForm = ({
 
       if (nextTextarea) {
         nextTextarea.focus();
+        nextTextarea.click();
       } else {
         addInstruction();
         setTimeout(() => {
