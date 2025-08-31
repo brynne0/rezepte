@@ -19,10 +19,9 @@ import {
   checkUsernameExists,
   deleteUserAccount,
 } from "../../services/userService";
-import { useCategories } from "../../hooks/data/useCategories";
 import {
-  getUserCategoryPreferences,
   saveUserCategoryPreferences,
+  getAllCategoriesForManagement,
 } from "../../services/categoryPreferencesService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
@@ -646,58 +645,36 @@ const ProfileTab = ({
 };
 
 const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
-  const { categories, loading: categoriesLoading } = useCategories();
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoryPreferences, setCategoryPreferences] = useState([]);
   const [preferencesLoading, setPreferencesLoading] = useState(false);
+  const { i18n } = useTranslation();
 
+  // Load all categories for management (including hidden ones)
   useEffect(() => {
-    const loadPreferences = async () => {
-      if (categories.length > 0) {
-        try {
-          const userPrefs = await getUserCategoryPreferences();
-
-          // Initialize preferences with existing user prefs or defaults
-          const prefs = categories
-            .filter((cat) => cat.value !== "all") // Exclude "all" from management
-            .map((cat, index) => {
-              const existingPref = userPrefs.find(
-                (pref) =>
-                  pref.category_id === cat.id ||
-                  pref.category_value === cat.value
-              );
-
-              return {
-                id: cat.id || cat.value,
-                value: cat.value,
-                label: cat.label,
-                isVisible: existingPref ? existingPref.is_visible : true,
-                order: existingPref ? existingPref.display_order : index,
-                isSystem: cat.isSystem,
-              };
-            });
-
-          // Sort by existing order
-          prefs.sort((a, b) => a.order - b.order);
-          setCategoryPreferences(prefs);
-        } catch (error) {
-          console.error("Error loading category preferences:", error);
-          // Fall back to defaults
-          const prefs = categories
-            .filter((cat) => cat.value !== "all")
-            .map((cat, index) => ({
-              id: cat.id || cat.value,
-              value: cat.value,
-              label: cat.label,
-              isVisible: true,
-              order: index,
-              isSystem: cat.isSystem,
-            }));
-          setCategoryPreferences(prefs);
-        }
+    const loadAllCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const allCategories = await getAllCategoriesForManagement(
+          i18n.language
+        );
+        setCategories(allCategories);
+      } catch (error) {
+        console.error("Error loading categories for management:", error);
+      } finally {
+        setCategoriesLoading(false);
       }
     };
 
-    loadPreferences();
+    loadAllCategories();
+  }, [i18n.language]);
+
+  useEffect(() => {
+    // Categories already come with preference data from getAllCategoriesForManagement
+    if (categories.length > 0) {
+      setCategoryPreferences([...categories]);
+    }
   }, [categories]);
 
   const toggleVisibility = (categoryId) => {
