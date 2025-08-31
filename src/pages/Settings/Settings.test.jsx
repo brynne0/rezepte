@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { useState } from "react";
-import AccountSettings from "./AccountSettings";
+import Settings from "./Settings";
 
 // Create mock functions
 const mockNavigate = vi.fn();
@@ -95,13 +95,13 @@ vi.mock("react-i18next", () => ({
 }));
 
 // Wrapper component for router context
-const AccountSettingsWrapper = () => (
+const SettingsWrapper = () => (
   <BrowserRouter>
-    <AccountSettings />
+    <Settings />
   </BrowserRouter>
 );
 
-describe("AccountSettings", () => {
+describe("Settings", () => {
   let mockGetUserProfile;
   let mockGetUserPreferredLanguage;
   let mockUpdateUserProfile;
@@ -168,7 +168,7 @@ describe("AccountSettings", () => {
         () => new Promise(() => {}) // Never resolves to keep loading
       );
 
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       expect(screen.getByTestId("loading-acorn")).toBeInTheDocument();
     });
@@ -176,18 +176,18 @@ describe("AccountSettings", () => {
     it("renders error state when profile loading fails", async () => {
       mockGetUserProfile.mockRejectedValue(new Error("Failed to load profile"));
 
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText(/Error:/)).toBeInTheDocument();
       });
     });
 
-    it("renders account settings form when data loads successfully", async () => {
-      render(<AccountSettingsWrapper />);
+    it("renders settings form when data loads successfully", async () => {
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("account_settings")).toBeInTheDocument();
+        expect(screen.getByText("settings")).toBeInTheDocument();
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
         expect(screen.getByDisplayValue("johndoe")).toBeInTheDocument();
         expect(
@@ -197,10 +197,10 @@ describe("AccountSettings", () => {
     });
 
     it("renders back arrow that navigates to previous page", async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("account_settings")).toBeInTheDocument();
+        expect(screen.getByText("settings")).toBeInTheDocument();
       });
 
       const backArrow = screen
@@ -214,7 +214,7 @@ describe("AccountSettings", () => {
 
   describe("First Name Editing", () => {
     beforeEach(async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
       await waitFor(() => {
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
       });
@@ -297,7 +297,7 @@ describe("AccountSettings", () => {
 
   describe("Username Editing", () => {
     beforeEach(async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
       await waitFor(() => {
         expect(screen.getByDisplayValue("johndoe")).toBeInTheDocument();
       });
@@ -390,7 +390,7 @@ describe("AccountSettings", () => {
 
   describe("Password Field", () => {
     it("renders readonly password field with pencil icon", async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         const passwordInput = screen.getByDisplayValue("**************");
@@ -400,7 +400,7 @@ describe("AccountSettings", () => {
     });
 
     it("navigates to change password page when pencil is clicked", async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByDisplayValue("**************")).toBeInTheDocument();
@@ -412,14 +412,14 @@ describe("AccountSettings", () => {
       fireEvent.click(pencilIcon);
 
       expect(mockNavigate).toHaveBeenCalledWith("/change-password", {
-        state: { fromAccountSettings: true },
+        state: { fromSettings: true },
       });
     });
   });
 
   describe("Language Preferences", () => {
     beforeEach(async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
       await waitFor(() => {
         expect(screen.getByText("PREFERRED_LANGUAGE")).toBeInTheDocument();
       });
@@ -501,7 +501,7 @@ describe("AccountSettings", () => {
 
   describe("Delete Account", () => {
     beforeEach(async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
       await waitFor(() => {
         expect(
           screen.getByRole("button", { name: "delete_account" })
@@ -648,7 +648,7 @@ describe("AccountSettings", () => {
 
   describe("Success Messages", () => {
     it("displays success messages temporarily", async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
@@ -675,11 +675,9 @@ describe("AccountSettings", () => {
         ).toBeInTheDocument();
       });
 
-      // Success message should be visible in the header
-      const header =
-        screen.getByRole("banner") ||
-        screen.getByText("successfully_updated_first_name").closest("header");
-      expect(header).toContainElement(
+      // Success message should be visible in the unified message area
+      const messageArea = screen.getByText("successfully_updated_first_name").closest(".unified-message-area");
+      expect(messageArea).toContainElement(
         screen.getByText("successfully_updated_first_name")
       );
     });
@@ -689,7 +687,7 @@ describe("AccountSettings", () => {
     it("handles service errors gracefully", async () => {
       mockUpdateUserProfile.mockRejectedValue(new Error("Service unavailable"));
 
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
@@ -719,7 +717,7 @@ describe("AccountSettings", () => {
         new Error("Language service error")
       );
 
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText("PREFERRED_LANGUAGE")).toBeInTheDocument();

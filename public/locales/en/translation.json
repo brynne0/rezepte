@@ -60,7 +60,7 @@
   "password_symbol": "Contains symbol",
   "password_requirements_not_met": "Password must meet all requirements",
 
-  "account_settings": "Account settings",
+  "settings": "Settings",
   "preferred_language": "Preferred Language",
   "successfully_updated_username": "Successfully updated username",
   "successfully_updated_first_name": "Successfully updated first name",

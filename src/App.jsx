@@ -34,7 +34,7 @@ import AuthPage from "./pages/AuthPage/AuthPage";
 import Recipe from "./pages/Recipe/Recipe";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
-import AccountSettings from "./pages/AccountSettings/AccountSettings";
+import Settings from "./pages/Settings/Settings";
 
 function App() {
   const { t } = useTranslation();
@@ -240,7 +240,8 @@ function AppRoutes(props) {
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/change-password" element={<ChangePasswordPage />} />
-        <Route path="/account-settings" element={<AccountSettings />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/account-settings" element={<Settings />} />
       </Routes>
     </>
   );

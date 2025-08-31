@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { getCategoriesForUI } from "../../services/categoriesService";
+import { getCategoriesWithPreferences } from "../../services/categoryPreferencesService";
 
 export const useCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -15,7 +16,18 @@ export const useCategories = () => {
     try {
       setLoading(true);
       setError(null);
-      const categoriesData = await getCategoriesForUI(currentLanguage);
+      // Try to get categories with user preferences first
+      let categoriesData;
+      try {
+        categoriesData = await getCategoriesWithPreferences(currentLanguage);
+      } catch (prefsError) {
+        // Fall back to regular categories if preferences fail
+        console.warn(
+          "Failed to load category preferences, using defaults:",
+          prefsError
+        );
+        categoriesData = await getCategoriesForUI(currentLanguage);
+      }
       setCategories(categoriesData);
     } catch (err) {
       setError(err.message);

@@ -688,10 +688,10 @@ describe("ChangePasswordPage", () => {
     });
   });
 
-  describe("Account Settings Flow", () => {
+  describe("Settings Flow", () => {
     beforeEach(() => {
-      // Set up location state to simulate coming from account settings
-      mockLocation.state = { fromAccountSettings: true };
+      // Set up location state to simulate coming from settings
+      mockLocation.state = { fromSettings: true };
 
       // Set up mocks for valid session
       mockSupabase.auth.getSession.mockResolvedValue({

@@ -35,7 +35,7 @@ const mockT = vi.fn((key) => {
     add_new_recipe: "Add New Recipe",
     grocery_list: "Grocery List",
     user_menu: "User Menu",
-    account_settings: "Account settings",
+    settings: "Settings",
   };
   return translations[key] || key;
 });
@@ -617,11 +617,11 @@ describe("Header Component", () => {
       const chefHatButton = screen.getAllByLabelText("User Menu")[0];
       fireEvent.click(chefHatButton);
 
-      expect(screen.getAllByText("Account settings")).toHaveLength(2); // Desktop and mobile
+      expect(screen.getAllByText("Settings")).toHaveLength(2); // Desktop and mobile
       expect(screen.getAllByText("Logout")).toHaveLength(2);
     });
 
-    test("navigates to account settings page when account settings is clicked", () => {
+    test("navigates to settings page when settings is clicked", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
         isMe: false,
@@ -637,9 +637,9 @@ describe("Header Component", () => {
       const chefHatButton = screen.getAllByLabelText("User Menu")[0];
       fireEvent.click(chefHatButton);
 
-      fireEvent.click(screen.getAllByText("Account settings")[0]);
+      fireEvent.click(screen.getAllByText("Settings")[0]);
 
-      expect(mockNavigate).toHaveBeenCalledWith("/account-settings");
+      expect(mockNavigate).toHaveBeenCalledWith("/settings");
     });
 
     test("chef hat button has selected class when dropdown is open", async () => {

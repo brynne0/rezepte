@@ -24,7 +24,7 @@ const ChangePasswordPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const fromAccountSettings = location.state?.fromAccountSettings || false;
+  const fromSettings = location.state?.fromSettings || false;
 
   useEffect(() => {
     const initializePasswordReset = async (accessToken, refreshToken) => {
@@ -55,7 +55,7 @@ const ChangePasswordPage = () => {
 
             // Verify the session is working
             await supabase.auth.getUser();
-          } else if (!fromAccountSettings) {
+          } else if (!fromSettings) {
             setErrorMessage(t("invalid_reset_link"));
           } else {
             setErrorMessage(t("session_expired"));
@@ -80,7 +80,7 @@ const ChangePasswordPage = () => {
 
     // Initialize session handling
     initializePasswordReset(accessToken, refreshToken);
-  }, [fromAccountSettings, t]);
+  }, [fromSettings, t]);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -93,7 +93,7 @@ const ChangePasswordPage = () => {
     const errors = validateChangePasswordForm(
       { oldPassword, newPassword, newPasswordRepeat },
       t,
-      fromAccountSettings // requireOldPassword when coming from account settings
+      fromSettings // requireOldPassword when coming from account settings
     );
 
     // Check password strength
@@ -116,7 +116,7 @@ const ChangePasswordPage = () => {
         }
 
         // Verify old password if coming from account settings
-        if (fromAccountSettings && oldPassword) {
+        if (fromSettings && oldPassword) {
           const { error: verifyError } = await verifyCurrentPassword(
             oldPassword
           );
@@ -215,7 +215,7 @@ const ChangePasswordPage = () => {
             <span className="error-message">{errorMessage}</span>
           )}
 
-          {fromAccountSettings && (
+          {fromSettings && (
             <div className="input-validation-wrapper">
               <div className="floating-label-input">
                 <PasswordInput

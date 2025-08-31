@@ -132,7 +132,7 @@ const Header = ({
     <div className={"user-icon-wrapper"} ref={userDropdownRef}>
       <button
         className={`btn btn-icon btn-icon-neutral ${
-          showUserDropdown || location.pathname === "/account-settings"
+          showUserDropdown || location.pathname === "/settings"
             ? "selected"
             : ""
         }`}
@@ -153,14 +153,14 @@ const Header = ({
               <>
                 <button
                   className={`dropdown-item ${
-                    location.pathname === "/account-settings" ? "selected" : ""
+                    location.pathname === "/settings" ? "selected" : ""
                   }`}
                   onClick={() => {
                     setShowUserDropdown(false);
-                    navigate("/account-settings");
+                    navigate("/settings");
                   }}
                 >
-                  {t("account_settings")}
+                  {t("settings")}
                 </button>
                 <button
                   className="dropdown-item"
