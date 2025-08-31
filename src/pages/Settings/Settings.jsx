@@ -297,8 +297,10 @@ const Settings = () => {
 
             {activeTab === "profile" && (
               <>
-                <div className="unified-message-area">
-                  <span className="login-message">{successMessage || "\u00A0"}</span>
+                <div className="success-message-wrapper">
+                  <span className="login-message">
+                    {successMessage || "\u00A0"}
+                  </span>
                 </div>
                 <ProfileTab
                   profileData={profileData}
@@ -391,9 +393,9 @@ const ProfileTab = ({
   t,
 }) => {
   return (
-    <div className="acc-settings-container">
-      <div className="acc-settings">
-        <div className="acc-settings-column">
+    <div className="profile-settings-container">
+      <div className="profile-settings">
+        <div className="profile-settings-column">
           <div className="input-validation-wrapper" ref={firstNameContainerRef}>
             <div className="floating-label-input">
               <div className="relative-center">
@@ -426,14 +428,14 @@ const ProfileTab = ({
                 ) : (
                   <>
                     <button
-                      className="btn-unstyled btn-icon btn-icon-green acc-settings-check"
+                      className="btn-unstyled btn-icon btn-icon-green profile-settings-check"
                       onClick={handleSaveFirstName}
                       aria-label={t("save_changes", "Save changes")}
                     >
                       <Check size={20} />
                     </button>
                     <button
-                      className="btn-unstyled btn-icon btn-icon-red acc-settings-cancel"
+                      className="btn-unstyled btn-icon btn-icon-red profile-settings-cancel"
                       onClick={handleCancelFirstName}
                       aria-label={t("cancel", "Cancel")}
                     >
@@ -463,7 +465,7 @@ const ProfileTab = ({
           </div>
         </div>
 
-        <div className="acc-settings-column">
+        <div className="profile-settings-column">
           <div
             className="input-validation-wrapper"
             style={{ position: "relative" }}
@@ -503,14 +505,14 @@ const ProfileTab = ({
                 ) : (
                   <>
                     <button
-                      className="btn-unstyled btn-icon btn-icon-green acc-settings-check"
+                      className="btn-unstyled btn-icon btn-icon-green profile-settings-check"
                       onClick={handleSaveUsername}
                       aria-label={t("save_changes", "Save changes")}
                     >
                       <Check size={20} />
                     </button>
                     <button
-                      className="btn-unstyled btn-icon btn-icon-red acc-settings-cancel"
+                      className="btn-unstyled btn-icon btn-icon-red profile-settings-cancel"
                       onClick={handleCancelUsername}
                       aria-label={t("cancel", "Cancel")}
                     >
@@ -553,11 +555,11 @@ const ProfileTab = ({
         </div>
       </div>
 
-      <div className="acc-settings-language flex-column-center">
+      <div className="profile-settings-language flex-column-center">
         <h2 className="forta-small">{t("preferred_language").toUpperCase()}</h2>
 
         <div
-          className="acc-settings-language-container"
+          className="profile-settings-language-container"
           ref={languageContainerRef}
         >
           {!isEditingLanguage ? (
@@ -606,7 +608,7 @@ const ProfileTab = ({
 
           {!isEditingLanguage ? (
             <button
-              className="btn btn-unstyled acc-settings-check"
+              className="btn btn-unstyled profile-settings-check"
               onClick={handleEditLanguage}
               aria-label={t("edit_language", "Edit language")}
             >
@@ -615,14 +617,14 @@ const ProfileTab = ({
           ) : (
             <>
               <button
-                className="btn btn-icon btn-icon-green acc-settings-check"
+                className="btn btn-icon btn-icon-green profile-settings-check"
                 onClick={handleSaveLanguage}
                 aria-label={t("save_changes", "Save changes")}
               >
                 <Check size={20} />
               </button>
               <button
-                className="btn btn-icon btn-icon-red acc-settings-cancel"
+                className="btn btn-icon btn-icon-red profile-settings-cancel"
                 onClick={handleCancelLanguage}
                 aria-label={t("cancel", "Cancel")}
               >
@@ -751,7 +753,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
   }
 
   return (
-    <div className="categories-management">
+    <div className="flex-column">
       <div className="flex-column-center">
         <p className="grey-small">
           {t(
@@ -826,7 +828,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
         </Droppable>
       </DragDropContext>
 
-      <div className="unified-message-area">
+      <div className="success-message-wrapper">
         <span
           className={`login-message ${
             saveMessage?.includes("Error") ? "error-message" : ""

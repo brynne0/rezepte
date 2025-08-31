@@ -243,10 +243,10 @@ describe("Settings", () => {
       fireEvent.click(pencilIcon);
 
       expect(
-        firstNameContainer.querySelector(".acc-settings-check")
+        firstNameContainer.querySelector(".profile-settings-check")
       ).toBeInTheDocument();
       expect(
-        firstNameContainer.querySelector(".acc-settings-cancel")
+        firstNameContainer.querySelector(".profile-settings-cancel")
       ).toBeInTheDocument();
     });
 
@@ -261,7 +261,7 @@ describe("Settings", () => {
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       const checkButton = firstNameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -286,7 +286,7 @@ describe("Settings", () => {
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       const cancelButton = firstNameContainer.querySelector(
-        ".acc-settings-cancel"
+        ".profile-settings-cancel"
       );
       fireEvent.click(cancelButton);
 
@@ -323,7 +323,7 @@ describe("Settings", () => {
       fireEvent.change(usernameInput, { target: { value: "newusername" } });
 
       const checkButton = usernameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -349,7 +349,7 @@ describe("Settings", () => {
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
       const checkButton = usernameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -371,7 +371,7 @@ describe("Settings", () => {
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
       const checkButton = usernameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -437,7 +437,7 @@ describe("Settings", () => {
     it("enables language editing when pencil is clicked", () => {
       const languageContainer = screen
         .getByText("EN")
-        .closest(".acc-settings-language-container");
+        .closest(".profile-settings-language-container");
       const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
@@ -451,7 +451,7 @@ describe("Settings", () => {
     it("updates language preference successfully", async () => {
       const languageContainer = screen
         .getByText("EN")
-        .closest(".acc-settings-language-container");
+        .closest(".profile-settings-language-container");
       const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
@@ -461,7 +461,7 @@ describe("Settings", () => {
 
       // Click check button
       const checkButton = languageContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -477,7 +477,7 @@ describe("Settings", () => {
     it("cancels language editing", () => {
       const languageContainer = screen
         .getByText("EN")
-        .closest(".acc-settings-language-container");
+        .closest(".profile-settings-language-container");
       const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
@@ -487,13 +487,13 @@ describe("Settings", () => {
 
       // Click cancel button
       const cancelButton = languageContainer.querySelector(
-        ".acc-settings-cancel"
+        ".profile-settings-cancel"
       );
       fireEvent.click(cancelButton);
 
       // Should return to non-editing state - pencil icon should be back
       expect(
-        languageContainer.querySelector(".acc-settings-cancel")
+        languageContainer.querySelector(".profile-settings-cancel")
       ).not.toBeInTheDocument();
       expect(languageContainer.querySelector(".btn")).toBeInTheDocument();
     });
@@ -665,7 +665,7 @@ describe("Settings", () => {
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       const checkButton = firstNameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -676,7 +676,9 @@ describe("Settings", () => {
       });
 
       // Success message should be visible in the unified message area
-      const messageArea = screen.getByText("successfully_updated_first_name").closest(".unified-message-area");
+      const messageArea = screen
+        .getByText("successfully_updated_first_name")
+        .closest(".success-message-wrapper");
       expect(messageArea).toContainElement(
         screen.getByText("successfully_updated_first_name")
       );
@@ -703,7 +705,7 @@ describe("Settings", () => {
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       const checkButton = firstNameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -725,7 +727,7 @@ describe("Settings", () => {
 
       const languageContainer = screen
         .getByText("EN")
-        .closest(".acc-settings-language-container");
+        .closest(".profile-settings-language-container");
       const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
@@ -733,7 +735,7 @@ describe("Settings", () => {
       fireEvent.click(deOption);
 
       const checkButton = languageContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 

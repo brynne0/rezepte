@@ -1,17 +1,17 @@
-.acc-settings {
+.profile-settings {
   display: flex;
   flex-direction: row;
   gap: 1rem;
 }
 
-.acc-settings-column {
+.profile-settings-column {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.acc-settings-header {
+.profile-settings-header {
   display: flex;
   gap: 0.5rem;
   margin: 0.75rem 0 0.25rem 0.25rem;
@@ -25,7 +25,7 @@
 }
 
 /* Action buttons container */
-.acc-settings-actions {
+.profile-settings-actions {
   display: flex;
   gap: 0.5rem;
   position: absolute;
@@ -37,12 +37,12 @@
 }
 
 /* Override input focus border color */
-.acc-settings .input:focus {
+.profile-settings .input:focus {
   border-color: var(--dark-brown);
 }
 
 /* Prevent layout shift by maintaining consistent border width */
-.acc-settings .input--error {
+.profile-settings .input--error {
   border-width: var(--border-width);
 }
 
@@ -55,24 +55,24 @@
 }
 
 /* Settings specific input styling */
-.acc-settings .floating-label-input input {
+.profile-settings .floating-label-input input {
   padding-right: 2.5rem;
 }
 
 /* Check icon positioning (left of X icon) */
-.acc-settings-check {
+.profile-settings-check {
   position: absolute;
   right: 2rem;
 }
 
 /* X icon positioning (rightmost) */
-.acc-settings-cancel {
+.profile-settings-cancel {
   position: absolute;
   right: 0.5rem;
 }
 
 /* Language section container */
-.acc-settings-language-container {
+.profile-settings-language-container {
   position: relative;
   display: flex;
   align-items: center;
@@ -83,13 +83,13 @@
 }
 
 /* Language actions positioned on far right when editing */
-.acc-settings-language-container .acc-settings-language-actions {
+.profile-settings-language-container .profile-settings-language-actions {
   position: absolute;
   right: 0;
 }
 
 /* Settings container with proper spacing */
-.acc-settings-container {
+.profile-settings-container {
   display: flex;
   gap: 1rem;
   justify-content: center;
@@ -126,7 +126,7 @@
   border-bottom: 2px solid var(--red);
 }
 
-.unified-message-area {
+.success-message-wrapper {
   text-align: center;
   min-height: 2.5rem;
   display: flex;
@@ -135,11 +135,6 @@
 }
 
 /* Category Management */
-.categories-management {
-  display: flex;
-  flex-direction: column;
-}
-
 .category-list {
   display: flex;
   flex-direction: column;
@@ -169,15 +164,6 @@
 }
 
 .category-item:active {
-  cursor: grabbing;
-}
-
-.category-drag-handle {
-  color: var(--brown);
-  cursor: grab;
-}
-
-.category-drag-handle:active {
   cursor: grabbing;
 }
 
@@ -223,19 +209,14 @@
   padding: 0.5rem;
 }
 
-.success-message {
-  color: var(--green);
-  font-size: 0.9rem;
-}
-
 /* Mobile: Stack everything vertically */
 @media (max-width: 768px) {
-  .acc-settings {
+  .profile-settings {
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .acc-settings-language .language-wrapper {
+  .profile-settings-language .language-wrapper {
     display: flex !important;
   }
 
