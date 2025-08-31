@@ -1,15 +1,23 @@
-import { shouldUsePlural } from "./fractionUtils";
+import { shouldUsePlural, convertToUnicodeFractions } from "./fractionUtils";
 
 /**
  * Comprehensive ingredient formatting utility
  * Handles quantity formatting, unit translation/pluralization, and ingredient name logic
  */
 
-// Format quantity - now simply returns input as-is for maximum user flexibility
+// Format quantity for input fields - returns as-is for editing
 export const formatQuantityForUnit = (quantity) => {
   // Accept any input: 1/2, 1.5, 2 1/4, 2-3 cups, etc.
   // Users can enter whatever format they prefer
   return quantity || "";
+};
+
+// Format quantity for display - converts regular fractions to Unicode
+export const formatQuantityForDisplay = (quantity) => {
+  if (!quantity) return "";
+  
+  // Convert regular fractions to Unicode for better display
+  return convertToUnicodeFractions(quantity);
 };
 
 // Get translated and pluralized unit display
@@ -67,11 +75,11 @@ export const getIngredientDisplayName = (
     : ingredientData.singular_name || "?";
 };
 
-// Format complete ingredient measurement (quantity + unit)
+// Format complete ingredient measurement (quantity + unit) for display
 export const formatIngredientMeasurement = (quantity, unit, units) => {
   if (!quantity && !unit) return "";
 
-  const displayQuantity = formatQuantityForUnit(quantity);
+  const displayQuantity = formatQuantityForDisplay(quantity);
   const displayUnit = formatUnitDisplay(unit, quantity, units);
 
   // Combine quantity and unit with proper spacing

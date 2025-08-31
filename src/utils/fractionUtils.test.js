@@ -3,6 +3,7 @@ import {
   parseFraction,
   formatQuantity,
   shouldUsePlural,
+  convertToUnicodeFractions,
 } from "./fractionUtils";
 
 describe("fractionUtils", () => {
@@ -204,6 +205,38 @@ describe("fractionUtils", () => {
       expect(shouldUsePlural("1 - 2")).toBe(true);
       expect(shouldUsePlural("1/4 - 3/4")).toBe(false);
       expect(shouldUsePlural("1 - 1 1/2")).toBe(true);
+    });
+  });
+
+  describe("convertToUnicodeFractions", () => {
+    test("converts common fractions to Unicode", () => {
+      expect(convertToUnicodeFractions("1/4")).toBe("¼");
+      expect(convertToUnicodeFractions("1/2")).toBe("½");
+      expect(convertToUnicodeFractions("3/4")).toBe("¾");
+      expect(convertToUnicodeFractions("1/3")).toBe("⅓");
+      expect(convertToUnicodeFractions("2/3")).toBe("⅔");
+    });
+
+    test("converts mixed fractions to Unicode", () => {
+      expect(convertToUnicodeFractions("2 1/4")).toBe("2 ¼");
+      expect(convertToUnicodeFractions("1 1/2")).toBe("1 ½");
+      expect(convertToUnicodeFractions("3 3/4")).toBe("3 ¾");
+    });
+
+    test("leaves uncommon fractions as regular text", () => {
+      expect(convertToUnicodeFractions("1/7")).toBe("1/7");
+      expect(convertToUnicodeFractions("5/9")).toBe("5/9");
+    });
+
+    test("handles empty/null values", () => {
+      expect(convertToUnicodeFractions("")).toBe("");
+      expect(convertToUnicodeFractions(null)).toBe(null);
+      expect(convertToUnicodeFractions(undefined)).toBe(undefined);
+    });
+
+    test("handles ranges with fractions", () => {
+      expect(convertToUnicodeFractions("1/4 - 1/2")).toBe("¼ - ½");
+      expect(convertToUnicodeFractions("1 1/4 - 2 1/2")).toBe("1 ¼ - 2 ½");
     });
   });
 });
