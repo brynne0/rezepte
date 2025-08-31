@@ -1,7 +1,6 @@
 import supabase from "../lib/supabase";
 import pluralize from "pluralize";
 import { getUserPreferredLanguage } from "./userService";
-import { parseFraction } from "../utils/fractionUtils";
 
 // Import translateText function for recipe title translation
 const translateText = async (text, targetLanguage, sourceLanguage = null) => {
@@ -393,7 +392,7 @@ export const updateGroceryList = async (updatedList) => {
     finalItemsToInsert.push({
       user_id: user.id,
       name: preferredLanguageName,
-      quantity: parseFraction(newItem.quantity) || 0,
+      quantity: newItem.quantity || "",
       unit: newItem.unit || "",
       source_recipes: newItem.source_recipes || [],
     });
@@ -442,7 +441,7 @@ export const updateGroceryList = async (updatedList) => {
   for (const item of itemsToUpdate) {
     // Translate item name to user's preferred language if it's not a combined update
     const updateData = {
-      quantity: parseFraction(item.quantity) || 0,
+      quantity: item.quantity || "",
       unit: item.unit,
       source_recipes: item.source_recipes || [],
     };

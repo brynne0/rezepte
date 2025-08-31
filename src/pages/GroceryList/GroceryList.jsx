@@ -12,6 +12,7 @@ import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
 import {
   formatQuantityForUnit,
+  formatQuantityForDisplay,
   formatUnitDisplay,
 } from "../../utils/ingredientFormatting";
 import Selector from "../../components/Selector/Selector";
@@ -433,7 +434,7 @@ const GroceryList = ({
                               }
 
                               const displayQuantity =
-                                formatQuantityForUnit(qty);
+                                formatQuantityForDisplay(qty);
                               const displayUnit = unit
                                 ? formatUnitDisplay(unit, qty, units)
                                 : "";
@@ -463,7 +464,7 @@ const GroceryList = ({
                           }
                         }
 
-                        const displayQuantity = formatQuantityForUnit(qty);
+                        const displayQuantity = formatQuantityForDisplay(qty);
                         const displayUnit = unit
                           ? formatUnitDisplay(unit, qty, units)
                           : "";
