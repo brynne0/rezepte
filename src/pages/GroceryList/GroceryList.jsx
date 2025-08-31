@@ -509,7 +509,7 @@ const GroceryList = ({
       </div>
 
       {isEditing && (
-        <div className="btn-wrapper edit">
+        <div className="action-buttons-end edit">
           {/* Clear Button */}
           <button
             type="button"

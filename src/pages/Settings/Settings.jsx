@@ -803,7 +803,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
         </span>
       </div>
 
-      <div className="category-actions">
+      <div className="action-buttons">
         {/* Cancel Button */}
         <button
           type="button"

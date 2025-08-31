@@ -198,11 +198,6 @@
   color: var(--dark-brown);
 }
 
-.category-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
 
 .preferences-message {
   text-align: center;

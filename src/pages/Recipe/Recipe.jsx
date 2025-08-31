@@ -163,7 +163,7 @@ const Recipe = ({ isSharedView = false }) => {
           <>
             {/* Show share button when logged in and user owns the recipe */}
             {isLoggedIn && (
-              <div className="flex-row recipe-actions">
+              <div className="action-buttons-bordered">
                 <button
                   className="btn btn-icon-red"
                   onClick={() => {

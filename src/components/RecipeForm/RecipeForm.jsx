@@ -975,7 +975,7 @@ const RecipeForm = ({
                 </div>
               )}
             </Droppable>
-            <div className="btn-icon-green-wrapper">
+            <div className="action-buttons-icon">
               <button
                 type="button"
                 onClick={addInstruction}
@@ -1070,7 +1070,7 @@ const RecipeForm = ({
           />
         </div>
 
-        <div className={`btn-wrapper ${isEditMode ? "edit" : ""}`}>
+        <div className={`action-buttons-end ${isEditMode ? "edit" : ""}`}>
           {/* Delete Button */}
           {isEditMode && (
             <>

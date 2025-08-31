@@ -45,11 +45,6 @@
   font-weight: 500;
 }
 
-.confirmation-modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
 
 /* Confirmation checkbox */
 .confirmation-checkbox-wrapper {

@@ -127,9 +127,7 @@ describe("ConfirmationModal Component", () => {
     expect(
       container.querySelector(".confirmation-modal-message")
     ).toBeInTheDocument();
-    expect(
-      container.querySelector(".confirmation-modal-actions")
-    ).toBeInTheDocument();
+    expect(container.querySelector(".action-buttons")).toBeInTheDocument();
   });
 
   test("applies default button classes", () => {
