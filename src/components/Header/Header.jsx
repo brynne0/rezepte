@@ -213,7 +213,7 @@ const Header = ({
           {/* Title */}
           <div className="title-wrapper">
             {/* Display user's first name above header or login message */}
-            {loginMessage && <span className="login-message">{loginMessage}</span>}
+            {loginMessage && <span className="red-small">{loginMessage}</span>}
             {!loginMessage && firstName && (
               <span className="first-name"> {`${firstName}'s`}</span>
             )}

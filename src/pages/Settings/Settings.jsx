@@ -298,7 +298,7 @@ const Settings = () => {
             {activeTab === "profile" && (
               <>
                 <div className="success-message-wrapper">
-                  <span className="login-message">
+                  <span className="red-small">
                     {successMessage || "\u00A0"}
                   </span>
                 </div>
@@ -830,7 +830,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
 
       <div className="success-message-wrapper">
         <span
-          className={`login-message ${
+          className={`red-small ${
             saveMessage?.includes("Error") ? "error-message" : ""
           }`}
         >

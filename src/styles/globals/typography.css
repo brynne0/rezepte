@@ -114,6 +114,13 @@ h3.forta {
   font-size: 0.9em;
 }
 
+.red-small {
+  font-size: 1rem;
+  color: var(--dark-red);
+  font-weight: 500;
+  line-height: 1;
+}
+
 @media (max-width: 768px) {
   h1 {
     font-size: 1.5rem;
