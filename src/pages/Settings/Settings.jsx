@@ -296,38 +296,42 @@ const Settings = () => {
             </div>
 
             {activeTab === "profile" && (
-              <ProfileTab
-                profileData={profileData}
-                isEditingUsername={isEditingUsername}
-                tempUsername={tempUsername}
-                usernameError={usernameError}
-                isEditingFirstName={isEditingFirstName}
-                tempFirstName={tempFirstName}
-                isEditingLanguage={isEditingLanguage}
-                tempLanguage={tempLanguage}
-                usernameInputRef={usernameInputRef}
-                firstNameInputRef={firstNameInputRef}
-                usernameContainerRef={usernameContainerRef}
-                firstNameContainerRef={firstNameContainerRef}
-                languageContainerRef={languageContainerRef}
-                handleEditUsername={handleEditUsername}
-                handleSaveUsername={handleSaveUsername}
-                handleCancelUsername={handleCancelUsername}
-                handleEditFirstName={handleEditFirstName}
-                handleSaveFirstName={handleSaveFirstName}
-                handleCancelFirstName={handleCancelFirstName}
-                handleChangePassword={handleChangePassword}
-                handleEditLanguage={handleEditLanguage}
-                handleSaveLanguage={handleSaveLanguage}
-                handleCancelLanguage={handleCancelLanguage}
-                handleDeleteAccount={handleDeleteAccount}
-                setTempUsername={setTempUsername}
-                setUsernameError={setUsernameError}
-                setTempFirstName={setTempFirstName}
-                setTempLanguage={setTempLanguage}
-                successMessage={successMessage}
-                t={t}
-              />
+              <>
+                <div className="unified-message-area">
+                  <span className="login-message">{successMessage || "\u00A0"}</span>
+                </div>
+                <ProfileTab
+                  profileData={profileData}
+                  isEditingUsername={isEditingUsername}
+                  tempUsername={tempUsername}
+                  usernameError={usernameError}
+                  isEditingFirstName={isEditingFirstName}
+                  tempFirstName={tempFirstName}
+                  isEditingLanguage={isEditingLanguage}
+                  tempLanguage={tempLanguage}
+                  usernameInputRef={usernameInputRef}
+                  firstNameInputRef={firstNameInputRef}
+                  usernameContainerRef={usernameContainerRef}
+                  firstNameContainerRef={firstNameContainerRef}
+                  languageContainerRef={languageContainerRef}
+                  handleEditUsername={handleEditUsername}
+                  handleSaveUsername={handleSaveUsername}
+                  handleCancelUsername={handleCancelUsername}
+                  handleEditFirstName={handleEditFirstName}
+                  handleSaveFirstName={handleSaveFirstName}
+                  handleCancelFirstName={handleCancelFirstName}
+                  handleChangePassword={handleChangePassword}
+                  handleEditLanguage={handleEditLanguage}
+                  handleSaveLanguage={handleSaveLanguage}
+                  handleCancelLanguage={handleCancelLanguage}
+                  handleDeleteAccount={handleDeleteAccount}
+                  setTempUsername={setTempUsername}
+                  setUsernameError={setUsernameError}
+                  setTempFirstName={setTempFirstName}
+                  setTempLanguage={setTempLanguage}
+                  t={t}
+                />
+              </>
             )}
             {activeTab === "categories" && (
               <CategoriesTab
@@ -384,14 +388,10 @@ const ProfileTab = ({
   setUsernameError,
   setTempFirstName,
   setTempLanguage,
-  successMessage,
   t,
 }) => {
   return (
     <div className="acc-settings-container">
-      <div className="unified-message-area">
-        <span className="login-message">{successMessage || "\u00A0"}</span>
-      </div>
       <div className="acc-settings">
         <div className="acc-settings-column">
           <div className="input-validation-wrapper" ref={firstNameContainerRef}>
