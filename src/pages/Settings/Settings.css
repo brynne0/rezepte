@@ -144,8 +144,8 @@
 .category-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  gap: 0.5rem;
+  padding: 0.5rem;
   background-color: var(--cream-light);
   border: 1px solid var(--lighter-brown);
   border-radius: var(--border-radius);
@@ -228,11 +228,6 @@
   .tab-button {
     flex: 1;
     text-align: center;
-  }
-
-  .category-item {
-    padding: 0.5rem;
-    gap: 0.5rem;
   }
 
   .category-name {

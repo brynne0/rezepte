@@ -748,7 +748,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
     }
   };
 
-  if (categoriesLoading) {
+  if (categoriesLoading || categoryPreferences.length === 0) {
     return <LoadingAcorn />;
   }
 
