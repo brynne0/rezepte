@@ -213,4 +213,9 @@
     width: -webkit-fill-available;
     min-width: 0;
   }
+
+  .card-settings {
+    padding: 2rem;
+    width: -webkit-fill-available;
+  }
 }
