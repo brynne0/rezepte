@@ -283,7 +283,7 @@ const Settings = () => {
                 }`}
                 onClick={() => setActiveTab("profile")}
               >
-                {t("profile", "Profile")}
+                {t("profile")}
               </button>
               <button
                 className={`tab-button ${
@@ -291,7 +291,7 @@ const Settings = () => {
                 }`}
                 onClick={() => setActiveTab("categories")}
               >
-                {t("categories", "Categories")}
+                {t("categories")}
               </button>
             </div>
 
@@ -421,7 +421,7 @@ const ProfileTab = ({
                   <button
                     className="btn-unstyled btn-icon btn-icon-right"
                     onClick={handleEditFirstName}
-                    aria-label={t("edit_first_name", "Edit first name")}
+                    aria-label={t("edit_first_name")}
                   >
                     <Pencil size={20} />
                   </button>
@@ -430,14 +430,14 @@ const ProfileTab = ({
                     <button
                       className="btn-unstyled btn-icon btn-icon-green profile-settings-check"
                       onClick={handleSaveFirstName}
-                      aria-label={t("save_changes", "Save changes")}
+                      aria-label={t("save_changes")}
                     >
                       <Check size={20} />
                     </button>
                     <button
                       className="btn-unstyled btn-icon btn-icon-red profile-settings-cancel"
                       onClick={handleCancelFirstName}
-                      aria-label={t("cancel", "Cancel")}
+                      aria-label={t("cancel")}
                     >
                       <X size={20} />
                     </button>
@@ -498,7 +498,7 @@ const ProfileTab = ({
                   <button
                     className="btn-unstyled btn-icon btn-icon-right"
                     onClick={handleEditUsername}
-                    aria-label={t("edit_username", "Edit username")}
+                    aria-label={t("edit_username")}
                   >
                     <Pencil size={20} />
                   </button>
@@ -507,14 +507,14 @@ const ProfileTab = ({
                     <button
                       className="btn-unstyled btn-icon btn-icon-green profile-settings-check"
                       onClick={handleSaveUsername}
-                      aria-label={t("save_changes", "Save changes")}
+                      aria-label={t("save_changes")}
                     >
                       <Check size={20} />
                     </button>
                     <button
                       className="btn-unstyled btn-icon btn-icon-red profile-settings-cancel"
                       onClick={handleCancelUsername}
-                      aria-label={t("cancel", "Cancel")}
+                      aria-label={t("cancel")}
                     >
                       <X size={20} />
                     </button>
@@ -544,7 +544,7 @@ const ProfileTab = ({
                 <button
                   className="btn btn-icon btn-icon-right"
                   onClick={handleChangePassword}
-                  aria-label={t("change_password", "Change password")}
+                  aria-label={t("change_password")}
                 >
                   <Pencil size={20} />
                 </button>
@@ -610,7 +610,7 @@ const ProfileTab = ({
             <button
               className="btn btn-unstyled profile-settings-check"
               onClick={handleEditLanguage}
-              aria-label={t("edit_language", "Edit language")}
+              aria-label={t("edit_language")}
             >
               <Pencil size={20} />
             </button>
@@ -730,18 +730,11 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
 
       await saveUserCategoryPreferences(categoryPreferences);
 
-      setSaveMessage(
-        t(
-          "category_preferences_saved",
-          "Category preferences saved successfully!"
-        )
-      );
+      setSaveMessage(t("category_preferences_saved"));
       setTimeout(() => setSaveMessage(""), 3000);
     } catch (error) {
       console.error("Error saving category preferences:", error);
-      setSaveMessage(
-        t("category_preferences_error", "Error saving category preferences")
-      );
+      setSaveMessage(t("category_preferences_error"));
       setTimeout(() => setSaveMessage(""), 3000);
     } finally {
       setPreferencesLoading(false);
@@ -755,12 +748,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
   return (
     <div className="flex-column">
       <div className="flex-column-center">
-        <p className="grey-small">
-          {t(
-            "category_management_description",
-            "Reorder categories and choose which ones to display."
-          )}
-        </p>
+        <p className="grey-small">{t("category_management_description")}</p>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -798,7 +786,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
                         <span className="category-name">{category.label}</span>
                         {category.isSystem && (
                           <span className="category-system-badge">
-                            {t("system", "System")}
+                            {t("system")}
                           </span>
                         )}
                       </div>
@@ -853,9 +841,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
           onClick={handleSavePreferences}
           disabled={preferencesLoading}
         >
-          {preferencesLoading
-            ? t("saving", "Saving...")
-            : t("save_category_preferences", "Save Preferences")}
+          {preferencesLoading ? t("saving") : t("save_category_preferences")}
         </button>
       </div>
     </div>
