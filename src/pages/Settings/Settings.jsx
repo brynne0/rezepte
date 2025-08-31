@@ -23,6 +23,7 @@ import {
   saveUserCategoryPreferences,
   getAllCategoriesForManagement,
 } from "../../services/categoryPreferencesService";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import "./Settings.css";
@@ -648,6 +649,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoryPreferences, setCategoryPreferences] = useState([]);
+  const [originalCategoryPreferences, setOriginalCategoryPreferences] = useState([]);
   const [preferencesLoading, setPreferencesLoading] = useState(false);
   const { i18n } = useTranslation();
 
@@ -674,8 +676,33 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
     // Categories already come with preference data from getAllCategoriesForManagement
     if (categories.length > 0) {
       setCategoryPreferences([...categories]);
+      setOriginalCategoryPreferences([...categories]);
     }
   }, [categories]);
+
+  // Check if preferences have changed
+  const hasUnsavedChanges = () => {
+    if (categoryPreferences.length !== originalCategoryPreferences.length) {
+      return true;
+    }
+    
+    return categoryPreferences.some((pref, index) => {
+      const original = originalCategoryPreferences[index];
+      return (
+        pref.isVisible !== original.isVisible ||
+        pref.order !== original.order
+      );
+    });
+  };
+
+  // Unsaved changes detection
+  const {
+    isModalOpen: isUnsavedChangesModalOpen,
+    navigate: navigateWithConfirmation,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedChangesMessage,
+  } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
 
   const toggleVisibility = (categoryId) => {
     setCategoryPreferences((prev) =>
@@ -706,6 +733,9 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
       setSaveMessage("");
 
       await saveUserCategoryPreferences(categoryPreferences);
+
+      // Update original preferences to match current state
+      setOriginalCategoryPreferences([...categoryPreferences]);
 
       setSaveMessage(t("category_preferences_saved"));
       setTimeout(() => setSaveMessage(""), 3000);
@@ -807,7 +837,7 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
         {/* Cancel Button */}
         <button
           type="button"
-          // onClick={() => navigateWithConfirmation(-1)}
+          onClick={() => navigateWithConfirmation(-1)}
           className="btn btn-action btn-secondary"
         >
           {t("cancel")}
@@ -821,6 +851,17 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
           {preferencesLoading ? t("saving") : t("save_category_preferences")}
         </button>
       </div>
+
+      {/* Unsaved changes modal */}
+      <ConfirmationModal
+        isOpen={isUnsavedChangesModalOpen}
+        onClose={cancelNavigation}
+        onConfirm={confirmNavigation}
+        message={unsavedChangesMessage}
+        confirmText={t("leave_page")}
+        cancelText={t("stay")}
+        confirmButtonType="danger"
+      />
     </div>
   );
 };
