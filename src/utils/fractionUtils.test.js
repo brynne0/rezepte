@@ -1,5 +1,9 @@
 import { describe, test, expect } from "vitest";
-import { parseFraction, formatQuantity } from "./fractionUtils";
+import {
+  parseFraction,
+  formatQuantity,
+  shouldUsePlural,
+} from "./fractionUtils";
 
 describe("fractionUtils", () => {
   describe("parseFraction", () => {
@@ -38,6 +42,15 @@ describe("fractionUtils", () => {
       expect(parseFraction("2 1/2")).toBe(2.5);
       expect(parseFraction("3 3/4")).toBe(3.75);
       expect(parseFraction("1 1/3")).toBeCloseTo(1.333, 2);
+    });
+
+    test("parses Unicode fraction characters", () => {
+      expect(parseFraction("¼")).toBe(0.25);
+      expect(parseFraction("½")).toBe(0.5);
+      expect(parseFraction("¾")).toBe(0.75);
+      expect(parseFraction("2 ¼")).toBe(2.25);
+      expect(parseFraction("1 ½")).toBe(1.5);
+      expect(parseFraction("3 ¾")).toBe(3.75);
     });
 
     test("preserves incomplete mixed fractions while user types", () => {
@@ -142,7 +155,7 @@ describe("fractionUtils", () => {
         { input: "2 1/2", expected: "2 1/2" },
         { input: "0.25", expected: "1/4" },
         { input: "1.5", expected: "1 1/2" },
-        { input: "2", expected: "2" }
+        { input: "2", expected: "2" },
       ];
 
       testCases.forEach(({ input, expected }) => {
@@ -157,6 +170,40 @@ describe("fractionUtils", () => {
       const parsed = parseFraction("1/7"); // ≈ 0.143
       const formatted = formatQuantity(parsed);
       expect(formatted).toBe(parsed.toString()); // Should show the decimal
+    });
+  });
+
+  describe("shouldUsePlural", () => {
+    test("returns false for quantities <= 1", () => {
+      expect(shouldUsePlural("0")).toBe(false);
+      expect(shouldUsePlural("1")).toBe(false);
+      expect(shouldUsePlural("1/4")).toBe(false);
+      expect(shouldUsePlural("1/2")).toBe(false);
+      expect(shouldUsePlural("3/4")).toBe(false);
+    });
+
+    test("returns true for quantities > 1", () => {
+      expect(shouldUsePlural("2")).toBe(true);
+      expect(shouldUsePlural("1.5")).toBe(true);
+      expect(shouldUsePlural("2 1/4")).toBe(true);
+      expect(shouldUsePlural("1 1/2")).toBe(true);
+      expect(shouldUsePlural("3 3/4")).toBe(true);
+    });
+
+    test("handles Unicode fraction characters", () => {
+      expect(shouldUsePlural("2 ¼")).toBe(true);
+      expect(shouldUsePlural("1 ½")).toBe(true);
+      expect(shouldUsePlural("3 ¾")).toBe(true);
+      expect(shouldUsePlural("¼")).toBe(false);
+      expect(shouldUsePlural("½")).toBe(false);
+      expect(shouldUsePlural("¾")).toBe(false);
+    });
+
+    test("handles ranges using end value", () => {
+      expect(shouldUsePlural("1/2 - 1")).toBe(false);
+      expect(shouldUsePlural("1 - 2")).toBe(true);
+      expect(shouldUsePlural("1/4 - 3/4")).toBe(false);
+      expect(shouldUsePlural("1 - 1 1/2")).toBe(true);
     });
   });
 });

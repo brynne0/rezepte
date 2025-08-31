@@ -23,6 +23,13 @@ describe("ingredientFormatting", () => {
       expect(shouldUsePlural("1/2")).toBe(false);
     });
 
+    test("handles mixed fractions", () => {
+      expect(shouldUsePlural("1 1/4")).toBe(true);
+      expect(shouldUsePlural("2 1/4")).toBe(true);
+      expect(shouldUsePlural("1 1/2")).toBe(true);
+      expect(shouldUsePlural("3 3/4")).toBe(true);
+    });
+
     test("handles empty values", () => {
       expect(shouldUsePlural("")).toBe(false);
       expect(shouldUsePlural(null)).toBe(false);
