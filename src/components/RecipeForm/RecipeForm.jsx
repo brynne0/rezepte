@@ -4,7 +4,7 @@ import {
   Trash2,
   Plus,
   ArrowBigLeft,
-  GripHorizontal,
+  GripVertical,
   Link,
   NotepadText,
 } from "lucide-react";
@@ -322,7 +322,7 @@ const RecipeForm = ({
                                   : "auto",
                               }}
                             >
-                              <GripHorizontal size={16} />
+                              <GripVertical size={16} />
                             </div>
 
                             <div className="ingredient-content">
@@ -570,7 +570,7 @@ const RecipeForm = ({
                                       : "auto",
                                   }}
                                 >
-                                  <GripHorizontal size={16} />
+                                  <GripVertical size={16} />
                                 </div>
                                 <input
                                   type="text"
@@ -645,7 +645,7 @@ const RecipeForm = ({
                                                       : "auto",
                                                 }}
                                               >
-                                                <GripHorizontal size={16} />
+                                                <GripVertical size={16} />
                                               </div>
 
                                               <div className="ingredient-content">
@@ -941,7 +941,7 @@ const RecipeForm = ({
                                   : "auto",
                               }}
                             >
-                              <GripHorizontal size={16} />
+                              <GripVertical size={16} />
                             </div>
                           </div>
                           <AutoResizeTextArea
