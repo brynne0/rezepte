@@ -29,6 +29,18 @@ vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
+const mockNavigateWithConfirmation = vi.fn();
+
+vi.mock("../../hooks/ui/useUnsavedChanges", () => ({
+  useUnsavedChanges: () => ({
+    isModalOpen: false,
+    navigate: mockNavigateWithConfirmation,
+    confirmNavigation: vi.fn(),
+    cancelNavigation: vi.fn(),
+    message: "unsaved_changes_warning",
+  }),
+}));
+
 vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
   default: function ConfirmationModal({
     isOpen,
@@ -208,7 +220,7 @@ describe("Settings", () => {
         .querySelector(".back-arrow-responsive");
       fireEvent.click(backArrow);
 
-      expect(mockNavigate).toHaveBeenCalledWith(-1);
+      expect(mockNavigateWithConfirmation).toHaveBeenCalledWith(-1);
     });
   });
 

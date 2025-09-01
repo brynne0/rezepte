@@ -8,7 +8,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -45,6 +45,9 @@ const Settings = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deletedAccountInfo, setDeletedAccountInfo] = useState(null);
+  const [categoriesHasUnsavedChanges, setCategoriesHasUnsavedChanges] =
+    useState(false);
+  const [pendingTabSwitch, setPendingTabSwitch] = useState(null);
   const usernameInputRef = useRef(null);
   const firstNameInputRef = useRef(null);
   const usernameContainerRef = useRef(null);
@@ -209,6 +212,43 @@ const Settings = () => {
     setIsEditingLanguage(false);
   };
 
+  const hasProfileUnsavedChanges = () => {
+    return isEditingUsername || isEditingFirstName || isEditingLanguage;
+  };
+
+  const {
+    isModalOpen: isUnsavedChangesModalOpen,
+    navigate: navigateWithConfirmation,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedChangesMessage,
+  } = useUnsavedChanges(
+    hasProfileUnsavedChanges() || categoriesHasUnsavedChanges,
+    t("unsaved_changes_warning")
+  );
+
+  const handleTabSwitch = (targetTab) => {
+    if (hasProfileUnsavedChanges() || categoriesHasUnsavedChanges) {
+      setPendingTabSwitch(targetTab);
+      navigateWithConfirmation(`/settings?tab=${targetTab}`);
+    } else {
+      setActiveTab(targetTab);
+    }
+  };
+
+  const handleConfirmModal = () => {
+    if (pendingTabSwitch) {
+      setActiveTab(pendingTabSwitch);
+      setPendingTabSwitch(null);
+    }
+    confirmNavigation();
+  };
+
+  const handleCancelModal = () => {
+    setPendingTabSwitch(null);
+    cancelNavigation();
+  };
+
   const handleDeleteAccount = () => {
     setShowDeleteModal(true);
   };
@@ -267,7 +307,7 @@ const Settings = () => {
               <div className="flex-row">
                 <button
                   className="btn-unstyled back-arrow-responsive"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigateWithConfirmation(-1)}
                   aria-label={t("go_back")}
                 >
                   <ArrowBigLeft size={28} />
@@ -281,7 +321,7 @@ const Settings = () => {
                 className={`tab-button ${
                   activeTab === "profile" ? "active" : ""
                 }`}
-                onClick={() => setActiveTab("profile")}
+                onClick={() => handleTabSwitch("profile")}
               >
                 {t("profile")}
               </button>
@@ -289,7 +329,7 @@ const Settings = () => {
                 className={`tab-button ${
                   activeTab === "categories" ? "active" : ""
                 }`}
-                onClick={() => setActiveTab("categories")}
+                onClick={() => handleTabSwitch("categories")}
               >
                 {t("categories")}
               </button>
@@ -340,6 +380,8 @@ const Settings = () => {
                 t={t}
                 saveMessage={saveMessage}
                 setSaveMessage={setSaveMessage}
+                onUnsavedChangesChange={setCategoriesHasUnsavedChanges}
+                navigateWithConfirmation={navigateWithConfirmation}
               />
             )}
           </div>
@@ -354,6 +396,16 @@ const Settings = () => {
             confirmButtonType="danger"
             requireConfirmation={true}
             confirmationText={t("delete_account_warning")}
+          />
+
+          <ConfirmationModal
+            isOpen={isUnsavedChangesModalOpen}
+            onClose={handleCancelModal}
+            onConfirm={handleConfirmModal}
+            message={unsavedChangesMessage}
+            confirmText={t("leave_page")}
+            cancelText={t("stay")}
+            confirmButtonType="danger"
           />
         </>
       )}
@@ -645,11 +697,17 @@ const ProfileTab = ({
   );
 };
 
-const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
+const CategoriesTab = ({
+  t,
+  saveMessage,
+  setSaveMessage,
+  onUnsavedChangesChange,
+}) => {
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoryPreferences, setCategoryPreferences] = useState([]);
-  const [originalCategoryPreferences, setOriginalCategoryPreferences] = useState([]);
+  const [originalCategoryPreferences, setOriginalCategoryPreferences] =
+    useState([]);
   const [preferencesLoading, setPreferencesLoading] = useState(false);
   const { i18n } = useTranslation();
 
@@ -681,28 +739,23 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
   }, [categories]);
 
   // Check if preferences have changed
-  const hasUnsavedChanges = () => {
+  const hasUnsavedChanges = useCallback(() => {
     if (categoryPreferences.length !== originalCategoryPreferences.length) {
       return true;
     }
-    
+
     return categoryPreferences.some((pref, index) => {
       const original = originalCategoryPreferences[index];
       return (
-        pref.isVisible !== original.isVisible ||
-        pref.order !== original.order
+        pref.isVisible !== original.isVisible || pref.order !== original.order
       );
     });
-  };
+  }, [categoryPreferences, originalCategoryPreferences]);
 
-  // Unsaved changes detection
-  const {
-    isModalOpen: isUnsavedChangesModalOpen,
-    navigate: navigateWithConfirmation,
-    confirmNavigation,
-    cancelNavigation,
-    message: unsavedChangesMessage,
-  } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
+  // Notify parent component about unsaved changes
+  useEffect(() => {
+    onUnsavedChangesChange?.(hasUnsavedChanges());
+  }, [hasUnsavedChanges, onUnsavedChangesChange]);
 
   const toggleVisibility = (categoryId) => {
     setCategoryPreferences((prev) =>
@@ -834,15 +887,6 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
       </div>
 
       <div className="action-buttons">
-        {/* Cancel Button */}
-        <button
-          type="button"
-          onClick={() => navigateWithConfirmation(-1)}
-          className="btn btn-action btn-secondary"
-        >
-          {t("cancel")}
-        </button>
-        {/* Save Button */}
         <button
           className="btn btn-action btn-primary"
           onClick={handleSavePreferences}
@@ -851,17 +895,6 @@ const CategoriesTab = ({ t, saveMessage, setSaveMessage }) => {
           {preferencesLoading ? t("saving") : t("save_category_preferences")}
         </button>
       </div>
-
-      {/* Unsaved changes modal */}
-      <ConfirmationModal
-        isOpen={isUnsavedChangesModalOpen}
-        onClose={cancelNavigation}
-        onConfirm={confirmNavigation}
-        message={unsavedChangesMessage}
-        confirmText={t("leave_page")}
-        cancelText={t("stay")}
-        confirmButtonType="danger"
-      />
     </div>
   );
 };
