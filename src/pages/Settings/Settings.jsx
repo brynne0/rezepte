@@ -844,11 +844,11 @@ const CategoriesTab = ({
 
                       <div className="category-info">
                         <span className="category-name">{category.label}</span>
-                        {category.isSystem && (
+                        {/* {category.isSystem && (
                           <span className="category-system-badge">
                             {t("system")}
                           </span>
-                        )}
+                        )} */}
                       </div>
 
                       <button
