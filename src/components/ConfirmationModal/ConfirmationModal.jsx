@@ -6,6 +6,7 @@ const ConfirmationModal = ({
   onConfirm,
   title,
   message,
+  secondaryMessage,
   confirmText = "Confirm",
   cancelText = "Cancel",
   confirmButtonType = "danger", // "danger" | "primary" | "secondary"
@@ -36,7 +37,12 @@ const ConfirmationModal = ({
       <div className="confirmation-modal-content">
         {title && <h3 className="confirmation-modal-title">{title}</h3>}
         <p className="confirmation-modal-message">{message}</p>
-        
+        {secondaryMessage && (
+          <p className="confirmation-modal-secondary-message">
+            {secondaryMessage}
+          </p>
+        )}
+
         {requireConfirmation && (
           <div className="confirmation-checkbox-wrapper">
             <label className="confirmation-checkbox-label">
@@ -46,13 +52,18 @@ const ConfirmationModal = ({
                 onChange={(e) => setIsConfirmed(e.target.checked)}
                 className="confirmation-checkbox"
               />
-              <span className="confirmation-checkbox-text">{confirmationText}</span>
+              <span className="confirmation-checkbox-text">
+                {confirmationText}
+              </span>
             </label>
           </div>
         )}
-        
+
         <div className="action-buttons">
-          <button onClick={handleClose} className="btn btn-action btn-secondary">
+          <button
+            onClick={handleClose}
+            className="btn btn-action btn-secondary"
+          >
             {cancelText}
           </button>
           <button

@@ -115,7 +115,7 @@ h3.forta {
 }
 
 .red-small {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--dark-red);
   font-weight: 500;
   line-height: 1;

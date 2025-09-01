@@ -157,6 +157,13 @@
 
   "recipe_title": "Recipe Title",
   "category": "Category",
+  "category_name": "Category name",
+  "add_category": "Add Category",
+  "edit_category_name": "Edit category name",
+  "delete_category": "Delete category",
+  "delete_category_confirmation": "Are you sure you want to delete '{{categoryName}}'?",
+  "delete_category_warning": "All recipes in this category will no longer belong to a category and can only be found in All Recipes.",
+  "category_name_required": "Category name is required",
   "select_category": "Select a Category",
   "select_option": "Select an option",
   "open_options": "Open options",

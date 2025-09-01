@@ -128,7 +128,7 @@
 
 .success-message-wrapper {
   text-align: center;
-  min-height: 2.5rem;
+  min-height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -198,6 +198,35 @@
   color: var(--dark-brown);
 }
 
+.add-category-section {
+  margin-top: 1rem;
+}
+
+/* Category edit input styling */
+.category-info .input {
+  flex: 1;
+  margin: 0;
+  min-height: auto;
+  height: auto;
+  padding: 0.375rem 0.5rem;
+}
+
+.category-name-display {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.category-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.category-error {
+  margin-top: 0.25rem;
+}
 
 .preferences-message {
   text-align: center;
@@ -227,5 +256,30 @@
 
   .category-name {
     font-size: 0.9rem;
+  }
+
+  /* On mobile, only wrap edit actions to new line */
+  .category-item {
+    flex-wrap: wrap;
+  }
+
+  .category-info {
+    flex: 1;
+    order: 1;
+  }
+
+  .category-actions {
+    order: 2;
+  }
+
+  /* Only edit mode actions wrap to new line */
+  .category-actions:has(.btn-icon-green) {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+
+  .drag-handle {
+    order: 0;
   }
 }

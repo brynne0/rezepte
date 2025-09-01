@@ -1,12 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import supabase from "../../lib/supabase";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { GripVertical, Eye, EyeOff } from "lucide-react";
+import {
+  GripVertical,
+  Eye,
+  EyeOff,
+  Plus,
+  Pencil,
+  Check,
+  X,
+  Trash2,
+} from "lucide-react";
 import {
   saveUserCategoryPreferences,
   getAllCategoriesForManagement,
 } from "../../services/categoryPreferencesService";
+import {
+  createCategory,
+  updateCategoryName,
+} from "../../services/categoriesService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 
 const CategoriesTab = ({
   t,
@@ -21,6 +36,13 @@ const CategoriesTab = ({
   const [originalCategoryPreferences, setOriginalCategoryPreferences] =
     useState([]);
   const [preferencesLoading, setPreferencesLoading] = useState(false);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState("");
+  const [categoryError, setCategoryError] = useState("");
+  const [deleteCategoryId, setDeleteCategoryId] = useState(null);
+  const [deleteCategoryName, setDeleteCategoryName] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { i18n } = useTranslation();
 
   // Load all categories for management (including hidden ones)
@@ -52,6 +74,11 @@ const CategoriesTab = ({
 
   // Check if preferences have changed
   const hasUnsavedChanges = useCallback(() => {
+    // Check if currently adding or editing
+    if (isAddingCategory || editingCategoryId !== null) {
+      return true;
+    }
+
     if (categoryPreferences.length !== originalCategoryPreferences.length) {
       return true;
     }
@@ -62,7 +89,12 @@ const CategoriesTab = ({
         pref.isVisible !== original.isVisible || pref.order !== original.order
       );
     });
-  }, [categoryPreferences, originalCategoryPreferences]);
+  }, [
+    categoryPreferences,
+    originalCategoryPreferences,
+    isAddingCategory,
+    editingCategoryId,
+  ]);
 
   // Notify parent component about unsaved changes
   useEffect(() => {
@@ -97,10 +129,47 @@ const CategoriesTab = ({
       setPreferencesLoading(true);
       setSaveMessage("");
 
-      await saveUserCategoryPreferences(categoryPreferences);
+      // First, create any pending categories in the database
+      const updatedPreferences = [...categoryPreferences];
 
-      // Update original preferences to match current state
-      setOriginalCategoryPreferences([...categoryPreferences]);
+      for (let i = 0; i < updatedPreferences.length; i++) {
+        const cat = updatedPreferences[i];
+        if (cat.pendingCreation && cat.isTemp) {
+          try {
+            const newCategory = await createCategory(
+              cat.value,
+              cat.translations || {}
+            );
+
+            // Replace temp category with real category
+            updatedPreferences[i] = {
+              id: newCategory.id,
+              value: newCategory.name,
+              label: cat.label,
+              isSystem: false,
+              isVisible: cat.isVisible,
+              order: cat.order,
+              isTemp: false,
+              pendingCreation: false,
+            };
+          } catch (error) {
+            throw new Error(
+              `Error creating category "${cat.label}": ${error.message}`
+            );
+          }
+        }
+      }
+
+      // Filter out any remaining temporary categories before saving
+      const validCategoryPreferences = updatedPreferences.filter(
+        (cat) => !cat.isTemp && cat.id !== "temp-new-category"
+      );
+
+      await saveUserCategoryPreferences(validCategoryPreferences);
+
+      // Update state with the final categories
+      setCategoryPreferences(validCategoryPreferences);
+      setOriginalCategoryPreferences([...validCategoryPreferences]);
 
       // Refresh categories in the main app to reflect preference changes
       if (refreshCategories) {
@@ -118,12 +187,228 @@ const CategoriesTab = ({
     }
   };
 
+  // Add new category
+  const handleAddCategory = () => {
+    // Add temporary category to the list in edit mode
+    const tempCategory = {
+      id: "temp-new-category",
+      value: "",
+      label: "",
+      isSystem: false,
+      isVisible: true,
+      order: categoryPreferences.length,
+      isTemp: true,
+    };
+
+    setCategoryPreferences([...categoryPreferences, tempCategory]);
+    setEditingCategoryId("temp-new-category");
+    setEditingCategoryName("");
+    setIsAddingCategory(true);
+    setCategoryError("");
+  };
+
+  const handleSaveNewCategory = async () => {
+    if (!editingCategoryName.trim()) {
+      setCategoryError(t("category_name_required"));
+      return;
+    }
+
+    try {
+      setCategoryError("");
+
+      // Keep as temporary category with the name - don't create in database yet
+      setCategoryPreferences((prev) =>
+        prev.map((cat) =>
+          cat.id === "temp-new-category"
+            ? {
+                ...cat,
+                label: editingCategoryName.trim(),
+                value: editingCategoryName.trim().toLowerCase(),
+                isTemp: true,
+                pendingCreation: true,
+                translations: {
+                  [i18n.language]: editingCategoryName.trim(),
+                },
+              }
+            : cat
+        )
+      );
+
+      // Reset add state
+      setIsAddingCategory(false);
+      setEditingCategoryId(null);
+      setEditingCategoryName("");
+    } catch (error) {
+      console.error("Error preparing category:", error);
+      setCategoryError(error.message);
+    }
+  };
+
+  const handleCancelAddCategory = () => {
+    // Remove temporary category from list
+    setCategoryPreferences((prev) =>
+      prev.filter((cat) => cat.id !== "temp-new-category")
+    );
+    setIsAddingCategory(false);
+    setEditingCategoryId(null);
+    setEditingCategoryName("");
+    setCategoryError("");
+  };
+
+  // Edit existing category
+  const handleEditCategory = (category) => {
+    if (category.isSystem) return; // Can't edit system categories
+    setEditingCategoryId(category.id);
+    setEditingCategoryName(category.label);
+    setCategoryError("");
+  };
+
+  const handleSaveEditCategory = async () => {
+    if (!editingCategoryName.trim()) {
+      setCategoryError(t("category_name_required"));
+      return;
+    }
+
+    // Handle new category creation vs editing existing category
+    if (editingCategoryId === "temp-new-category") {
+      await handleSaveNewCategory();
+      return;
+    }
+
+    try {
+      setCategoryError("");
+
+      // Update category with new name and translation
+      const translations = {
+        [i18n.language]: editingCategoryName.trim(),
+      };
+
+      await updateCategoryName(
+        editingCategoryId,
+        editingCategoryName.trim(),
+        translations
+      );
+
+      // Update in preferences list
+      setCategoryPreferences((prev) =>
+        prev.map((cat) =>
+          cat.id === editingCategoryId
+            ? { ...cat, label: editingCategoryName.trim() }
+            : cat
+        )
+      );
+
+      // Reset edit state
+      setEditingCategoryId(null);
+      setEditingCategoryName("");
+
+      // Note: Don't auto-refresh - let user save preferences manually
+    } catch (error) {
+      console.error("Error updating category:", error);
+      setCategoryError(error.message);
+    }
+  };
+
+  const handleCancelEditCategory = () => {
+    // If canceling new category creation, remove temp category
+    if (editingCategoryId === "temp-new-category") {
+      handleCancelAddCategory();
+      return;
+    }
+
+    setEditingCategoryId(null);
+    setEditingCategoryName("");
+    setCategoryError("");
+  };
+
+  // Show delete confirmation modal for custom categories
+  const handleDeleteCategory = (categoryId, categoryName) => {
+    setDeleteCategoryId(categoryId);
+    setDeleteCategoryName(categoryName);
+    setShowDeleteModal(true);
+  };
+
+  // Remove category from user preferences and their recipes
+  const handleConfirmDeleteCategory = async () => {
+    try {
+      setCategoryError("");
+
+      // Remove this category from all of the user's recipes
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        // First get all the user's recipe IDs
+        const { data: userRecipes, error: recipesError } = await supabase
+          .from("recipes")
+          .select("id")
+          .eq("user_id", user.id);
+
+        if (recipesError) {
+          throw new Error(
+            `Failed to get user recipes: ${recipesError.message}`
+          );
+        }
+
+        if (userRecipes && userRecipes.length > 0) {
+          const recipeIds = userRecipes.map((recipe) => recipe.id);
+
+          // Remove this category from the user's recipes
+          const { error: recipeCategoryError } = await supabase
+            .from("recipe_categories")
+            .delete()
+            .eq("categoriy_id", deleteCategoryId)
+            .in("recipe_id", recipeIds);
+
+          if (recipeCategoryError) {
+            throw new Error(
+              `Failed to remove category from your recipes: ${recipeCategoryError.message}`
+            );
+          }
+        }
+      }
+
+      // Remove from preferences list (local state only - user must save manually)
+      setCategoryPreferences((prev) =>
+        prev.filter((cat) => cat.id !== deleteCategoryId)
+      );
+
+      // Reset edit state if we were editing this category
+      if (editingCategoryId === deleteCategoryId) {
+        setEditingCategoryId(null);
+        setEditingCategoryName("");
+        setIsAddingCategory(false);
+      }
+
+      setShowDeleteModal(false);
+      setDeleteCategoryId(null);
+      setDeleteCategoryName("");
+    } catch (error) {
+      console.error("Error removing category:", error);
+      setCategoryError(error.message);
+    }
+  };
+
+  // Cancel delete modal
+  const handleCancelDeleteCategory = () => {
+    setShowDeleteModal(false);
+    setDeleteCategoryId(null);
+    setDeleteCategoryName("");
+  };
+
   if (categoriesLoading || categoryPreferences.length === 0) {
     return <LoadingAcorn />;
   }
 
   return (
-    <div className="flex-column">
+    <form
+      className="flex-column"
+      onSubmit={(e) => {
+        e.preventDefault();
+        // Only submit if explicitly clicking Save Preferences
+      }}
+    >
       <div className="flex-column-center">
         <p className="grey-small">{t("category_management_description")}</p>
       </div>
@@ -145,39 +430,134 @@ const CategoriesTab = ({
                   index={index}
                 >
                   {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      className={`category-item ${
-                        !category.isVisible ? "category-hidden" : ""
-                      } ${snapshot.isDragging ? "dragging" : ""}`}
-                    >
+                    <div className="flex-column">
                       <div
-                        {...provided.dragHandleProps}
-                        className="drag-handle"
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={`category-item ${
+                          !category.isVisible ? "category-hidden" : ""
+                        } ${snapshot.isDragging ? "dragging" : ""}`}
                       >
-                        <GripVertical size={16} />
-                      </div>
+                        <div
+                          {...provided.dragHandleProps}
+                          className="drag-handle"
+                        >
+                          <GripVertical size={16} />
+                        </div>
 
-                      <div className="category-info">
-                        <span className="category-name">{category.label}</span>
-                      </div>
+                        <div className="category-info">
+                          {editingCategoryId === category.id ? (
+                            <input
+                              type="text"
+                              value={editingCategoryName}
+                              onChange={(e) => {
+                                setEditingCategoryName(e.target.value);
+                                setCategoryError("");
+                              }}
+                              className={`input input--edit ${
+                                categoryError &&
+                                editingCategoryId === category.id
+                                  ? "input--error"
+                                  : ""
+                              }`}
+                              placeholder={t("category_name")}
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  handleSaveEditCategory();
+                                } else if (e.key === "Escape") {
+                                  handleCancelEditCategory();
+                                }
+                              }}
+                            />
+                          ) : (
+                            <>
+                              <span className="category-name">
+                                {category.label}
+                              </span>
+                              {category.isSystem && (
+                                <span className="category-system-badge">
+                                  {t("system")}
+                                </span>
+                              )}
 
-                      <button
-                        className="btn-unstyled category-visibility-toggle"
-                        onClick={() => toggleVisibility(category.id)}
-                        aria-label={
-                          category.isVisible
-                            ? t("hide_category")
-                            : t("show_category")
-                        }
-                      >
-                        {category.isVisible ? (
-                          <Eye size={16} />
-                        ) : (
-                          <EyeOff size={16} />
-                        )}
-                      </button>
+                              {!category.isSystem && (
+                                <button
+                                  type="button"
+                                  className="btn-unstyled  btn-icon-neutral"
+                                  onClick={() => handleEditCategory(category)}
+                                  aria-label={t("edit_category_name")}
+                                  style={{ marginLeft: "0.5rem" }}
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        <div className="category-actions">
+                          {editingCategoryId === category.id ? (
+                            <>
+                              <button
+                                type="button"
+                                className="btn-unstyled btn-icon-green"
+                                onClick={handleSaveEditCategory}
+                                disabled={false}
+                                aria-label={t("save_changes")}
+                              >
+                                <Check size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-unstyled btn-icon-red"
+                                onClick={handleCancelEditCategory}
+                                aria-label={t("cancel")}
+                              >
+                                <X size={16} />
+                              </button>
+                              {!category.isTemp && !category.isSystem && (
+                                <button
+                                  type="button"
+                                  className="btn-unstyled btn-icon-remove"
+                                  onClick={() =>
+                                    handleDeleteCategory(
+                                      category.id,
+                                      category.label
+                                    )
+                                  }
+                                  disabled={false}
+                                  aria-label={t("delete_category")}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn-unstyled category-visibility-toggle"
+                              onClick={() => toggleVisibility(category.id)}
+                              aria-label={
+                                category.isVisible
+                                  ? t("hide_category")
+                                  : t("show_category")
+                              }
+                            >
+                              {category.isVisible ? (
+                                <Eye size={16} />
+                              ) : (
+                                <EyeOff size={16} />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {categoryError && editingCategoryId === category.id && (
+                        <span className="error-message-small category-error">
+                          {categoryError}
+                        </span>
+                      )}
                     </div>
                   )}
                 </Draggable>
@@ -187,6 +567,21 @@ const CategoriesTab = ({
           )}
         </Droppable>
       </DragDropContext>
+
+      {/* Add New Category Button */}
+      {!isAddingCategory && (
+        <div className="add-category-section flex-center">
+          <button
+            type="button"
+            className="btn btn-section-dotted"
+            onClick={handleAddCategory}
+            disabled={false}
+          >
+            <Plus size={16} />
+            {t("add_category")}
+          </button>
+        </div>
+      )}
 
       <div className="success-message-wrapper">
         <span
@@ -200,6 +595,7 @@ const CategoriesTab = ({
 
       <div className="action-buttons">
         <button
+          type="button"
           className="btn btn-action btn-primary"
           onClick={handleSavePreferences}
           disabled={preferencesLoading}
@@ -207,7 +603,21 @@ const CategoriesTab = ({
           {preferencesLoading ? t("saving") : t("save_category_preferences")}
         </button>
       </div>
-    </div>
+
+      {/* Delete Category Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleCancelDeleteCategory}
+        onConfirm={handleConfirmDeleteCategory}
+        message={t("delete_category_confirmation", {
+          categoryName: deleteCategoryName,
+        })}
+        secondaryMessage={t("delete_category_warning")}
+        confirmText={t("delete_category")}
+        cancelText={t("cancel")}
+        confirmButtonType="danger"
+      />
+    </form>
   );
 };
 

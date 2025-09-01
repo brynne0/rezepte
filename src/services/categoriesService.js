@@ -60,15 +60,26 @@ export const createCategory = async (name, translations = {}) => {
     throw new Error("User not authenticated");
   }
 
-  // Check if category already exists
-  const { data: existingCategory } = await supabase
-    .from("categories")
-    .select("id")
-    .eq("name", name.toLowerCase())
-    .single();
+  // Check if category already exists (handle RLS by ignoring errors)
+  try {
+    const { data: existingCategory } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("name", name.toLowerCase())
+      .single();
 
-  if (existingCategory) {
-    throw new Error("A category with this name already exists");
+    if (existingCategory) {
+      throw new Error("A category with this name already exists");
+    }
+  } catch (error) {
+    // If we get a 406 or RLS error, assume category doesn't exist and continue
+    if (!error.message.includes("already exists")) {
+      console.warn(
+        "Could not check category existence due to RLS, proceeding with creation"
+      );
+    } else {
+      throw error;
+    }
   }
 
   const categoryData = {
@@ -103,6 +114,72 @@ export const updateCategoryTranslations = async (categoryId, translations) => {
 
   if (error) {
     throw new Error(`Error updating category translations: ${error.message}`);
+  }
+
+  return data;
+};
+
+// Update category name and translations (only user-created categories)
+export const updateCategoryName = async (
+  categoryId,
+  newName,
+  newTranslations = {}
+) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  // Check if category exists and user can edit it
+  const { data: category } = await supabase
+    .from("categories")
+    .select("is_system, created_by, name")
+    .eq("id", categoryId)
+    .single();
+
+  if (!category) {
+    throw new Error("Category not found");
+  }
+
+  if (category.is_system) {
+    throw new Error("Cannot rename system categories");
+  }
+
+  if (category.created_by !== user.id) {
+    throw new Error("You can only rename categories you created");
+  }
+
+  // Check if new name already exists (if name is changing)
+  if (newName.toLowerCase() !== category.name) {
+    const { data: existingCategory } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("name", newName.toLowerCase())
+      .single();
+
+    if (existingCategory) {
+      throw new Error("A category with this name already exists");
+    }
+  }
+
+  const updateData = {
+    name: newName.toLowerCase(),
+    translated_category:
+      Object.keys(newTranslations).length > 0 ? newTranslations : null,
+  };
+
+  const { data, error } = await supabase
+    .from("categories")
+    .update(updateData)
+    .eq("id", categoryId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Error updating category: ${error.message}`);
   }
 
   return data;

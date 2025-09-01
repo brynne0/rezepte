@@ -50,6 +50,17 @@ const ProfileTab = ({
                       ? (e) => setTempFirstName(e.target.value)
                       : undefined
                   }
+                  onKeyDown={
+                    isEditingFirstName
+                      ? (e) => {
+                          if (e.key === "Enter") {
+                            handleSaveFirstName();
+                          } else if (e.key === "Escape") {
+                            handleCancelFirstName();
+                          }
+                        }
+                      : undefined
+                  }
                   className={`input   ${
                     isEditingFirstName ? "input--edit" : ""
                   }`}
@@ -124,6 +135,17 @@ const ProfileTab = ({
                       ? (e) => {
                           setTempUsername(e.target.value);
                           setUsernameError("");
+                        }
+                      : undefined
+                  }
+                  onKeyDown={
+                    isEditingUsername
+                      ? (e) => {
+                          if (e.key === "Enter") {
+                            handleSaveUsername();
+                          } else if (e.key === "Escape") {
+                            handleCancelUsername();
+                          }
                         }
                       : undefined
                   }

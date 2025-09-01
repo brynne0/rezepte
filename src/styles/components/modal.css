@@ -45,6 +45,12 @@
   font-weight: 500;
 }
 
+.confirmation-modal-secondary-message {
+  color: var(--grey);
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
 
 /* Confirmation checkbox */
 .confirmation-checkbox-wrapper {

@@ -65,27 +65,6 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get all categories
-  const { data: categories, error: categoriesError } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name");
-
-  if (categoriesError) {
-    throw new Error(`Error fetching categories: ${categoriesError.message}`);
-  }
-
-  let userPreferences = [];
-  if (user) {
-    // Get user preferences if logged in
-    const { data: prefs } = await supabase
-      .from("user_category_preferences")
-      .select("*")
-      .eq("user_id", user.id);
-
-    userPreferences = prefs || [];
-  }
-
   // Always include "all" as the first option
   const formattedCategories = [
     {
@@ -95,36 +74,62 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
     },
   ];
 
-  // Process database categories with preferences
-  const categoriesWithPrefs = categories.map((category) => {
-    let label = category.name;
+  if (!user) {
+    // Not logged in - return just "all" option
+    return formattedCategories;
+  }
 
-    // Use translation if available for the current language
-    if (
-      category.translated_category &&
-      category.translated_category[currentLanguage]
-    ) {
-      label = category.translated_category[currentLanguage];
-    }
+  // Get user's preferred categories by joining preferences with categories
+  const { data: userCategories, error } = await supabase
+    .from("user_category_preferences")
+    .select(
+      `
+      *,
+      categories (
+        id,
+        name,
+        is_system,
+        translated_category
+      )
+    `
+    )
+    .eq("user_id", user.id)
+    .eq("is_visible", true)
+    .order("display_order");
 
-    // Find user preference for this category
-    const userPref = userPreferences.find(
-      (pref) =>
-        pref.category_id === category.id ||
-        pref.category_value === category.name
-    );
+  if (error) {
+    throw new Error(`Error fetching user categories: ${error.message}`);
+  }
 
-    return {
-      value: category.name,
-      label: label,
-      isSystem: category.is_system || false,
-      id: category.id,
-      isVisible: userPref ? userPref.is_visible : true,
-      order: userPref ? userPref.display_order : 999,
-    };
-  });
+  // Process user's preferred categories
+  const categoriesWithPrefs = [];
+  if (userCategories) {
+    userCategories.forEach((pref) => {
+      const category = pref.categories;
+      if (!category) return;
 
-  // Sort by user-defined order, then by default order
+      let label = category.name;
+
+      // Use translation if available for the current language
+      if (
+        category.translated_category &&
+        category.translated_category[currentLanguage]
+      ) {
+        label = category.translated_category[currentLanguage];
+      }
+
+      categoriesWithPrefs.push({
+        value: category.name,
+        label: label,
+        isSystem: category.is_system || false,
+        id: category.id,
+        isVisible: true,
+        order: pref.display_order,
+      });
+    });
+  }
+
+  // Sort by user-defined order, then by label
   categoriesWithPrefs.sort((a, b) => {
     if (a.order !== b.order) {
       return a.order - b.order;
@@ -132,12 +137,7 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
     return a.label.localeCompare(b.label);
   });
 
-  // Add only visible categories to the result
-  categoriesWithPrefs
-    .filter((cat) => cat.isVisible)
-    .forEach((cat) => formattedCategories.push(cat));
-
-  return formattedCategories;
+  return [...formattedCategories, ...categoriesWithPrefs];
 };
 
 // Get all categories for management (includes hidden ones)
@@ -146,57 +146,63 @@ export const getAllCategoriesForManagement = async (currentLanguage = "en") => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get all categories
-  const { data: categories, error: categoriesError } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name");
-
-  if (categoriesError) {
-    throw new Error(`Error fetching categories: ${categoriesError.message}`);
+  if (!user) {
+    return [];
   }
 
-  let userPreferences = [];
-  if (user) {
-    // Get user preferences if logged in
-    const { data: prefs } = await supabase
-      .from("user_category_preferences")
-      .select("*")
-      .eq("user_id", user.id);
+  // Get user's categories by joining preferences with categories
+  const { data: userCategories, error } = await supabase
+    .from("user_category_preferences")
+    .select(
+      `
+      *,
+      categories (
+        id,
+        name,
+        is_system,
+        translated_category
+      )
+    `
+    )
+    .eq("user_id", user.id)
+    .order("display_order");
 
-    userPreferences = prefs || [];
-  }
-
-  // Process all categories (including hidden ones) with preferences
-  const categoriesWithPrefs = categories.map((category) => {
-    let label = category.name;
-
-    // Use translation if available for the current language
-    if (
-      category.translated_category &&
-      category.translated_category[currentLanguage]
-    ) {
-      label = category.translated_category[currentLanguage];
-    }
-
-    // Find user preference for this category
-    const userPref = userPreferences.find(
-      (pref) =>
-        pref.category_id === category.id ||
-        pref.category_value === category.name
+  if (error) {
+    throw new Error(
+      `Error fetching user categories for management: ${error.message}`
     );
+  }
 
-    return {
-      value: category.name,
-      label: label,
-      isSystem: category.is_system || false,
-      id: category.id,
-      isVisible: userPref ? userPref.is_visible : true,
-      order: userPref ? userPref.display_order : 999,
-    };
-  });
+  // Process user's categories (including hidden ones for management)
+  const categoriesWithPrefs = [];
 
-  // Sort by user-defined order, then by default order
+  if (userCategories) {
+    userCategories.forEach((pref) => {
+      const category = pref.categories;
+      if (!category) return;
+
+      let label = category.name;
+
+      // Use translation if available for the current language
+      if (
+        category.translated_category &&
+        category.translated_category[currentLanguage]
+      ) {
+        label = category.translated_category[currentLanguage];
+      }
+
+      categoriesWithPrefs.push({
+        value: category.name,
+        label: label,
+        isSystem: category.is_system || false,
+        id: category.id,
+        isVisible: pref.is_visible,
+        order: pref.display_order,
+      });
+    });
+  }
+
+  // Sort by user-defined order, then by label
   categoriesWithPrefs.sort((a, b) => {
     if (a.order !== b.order) {
       return a.order - b.order;
@@ -204,6 +210,6 @@ export const getAllCategoriesForManagement = async (currentLanguage = "en") => {
     return a.label.localeCompare(b.label);
   });
 
-  // Return ALL categories (including hidden) for management
+  // Return ALL user categories (including hidden) for management
   return categoriesWithPrefs;
 };

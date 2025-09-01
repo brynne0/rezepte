@@ -134,48 +134,36 @@ describe("categoryPreferencesService", () => {
 
   describe("getCategoriesWithPreferences", () => {
     test("applies user preferences to categories with correct ordering", async () => {
-      const mockCategories = [
-        { id: 1, name: "dinner", is_system: false },
-        { id: 2, name: "brunch", is_system: false },
-        { id: 3, name: "baking", is_system: false },
-      ];
-
-      const mockUserPreferences = [
+      const mockUserCategories = [
         {
           category_id: 2,
           category_value: "brunch",
           is_visible: true,
           display_order: 0,
-        }, // First
+          categories: { id: 2, name: "brunch", is_system: false },
+        },
         {
           category_id: 1,
           category_value: "dinner",
           is_visible: true,
           display_order: 1,
-        }, // Second
-        {
-          category_id: 3,
-          category_value: "baking",
-          is_visible: false,
-          display_order: 2,
-        }, // Hidden
+          categories: { id: 1, name: "dinner", is_system: false },
+        },
       ];
 
-      const mockCategoriesQuery = {
+      const mockQuery = {
         select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockCategories, error: null }),
-      };
-      const mockPrefsQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ data: mockUserPreferences }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi
+          .fn()
+          .mockResolvedValue({ data: mockUserCategories, error: null }),
       };
 
-      supabase.from
-        .mockReturnValueOnce(mockCategoriesQuery)
-        .mockReturnValueOnce(mockPrefsQuery);
+      supabase.from.mockReturnValue(mockQuery);
 
       const result = await getCategoriesWithPreferences("en");
 
+      expect(supabase.from).toHaveBeenCalledWith("user_category_preferences");
       expect(result).toEqual([
         { value: "all", label: "All Recipes", isSystem: true },
         {
@@ -194,74 +182,50 @@ describe("categoryPreferencesService", () => {
           isVisible: true,
           order: 1,
         },
-        // baking should be filtered out because isVisible: false
       ]);
     });
 
     test("handles categories without user preferences (defaults)", async () => {
-      const mockCategories = [
-        { id: 1, name: "dinner", is_system: false },
-        { id: 2, name: "brunch", is_system: false },
-      ];
-
-      const mockCategoriesQuery = {
+      const mockQuery = {
         select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockCategories, error: null }),
-      };
-      const mockPrefsQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ data: [] }), // No preferences
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }), // No preferences
       };
 
-      supabase.from
-        .mockReturnValueOnce(mockCategoriesQuery)
-        .mockReturnValueOnce(mockPrefsQuery);
+      supabase.from.mockReturnValue(mockQuery);
 
       const result = await getCategoriesWithPreferences("en");
 
       expect(result).toEqual([
         { value: "all", label: "All Recipes", isSystem: true },
-        {
-          value: "brunch",
-          label: "brunch",
-          isSystem: false,
-          id: 2,
-          isVisible: true,
-          order: 999,
-        },
-        {
-          value: "dinner",
-          label: "dinner",
-          isSystem: false,
-          id: 1,
-          isVisible: true,
-          order: 999,
-        },
       ]);
     });
 
     test("uses translated category names when available", async () => {
-      const mockCategories = [
+      const mockUserCategories = [
         {
-          id: 1,
-          name: "dinner",
-          is_system: false,
-          translated_category: { de: "Abendessen", en: "Dinner" },
+          category_id: 1,
+          category_value: "dinner",
+          is_visible: true,
+          display_order: 0,
+          categories: {
+            id: 1,
+            name: "dinner",
+            is_system: false,
+            translated_category: { de: "Abendessen", en: "Dinner" },
+          },
         },
       ];
 
-      const mockCategoriesQuery = {
+      const mockQuery = {
         select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockCategories, error: null }),
-      };
-      const mockPrefsQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ data: [] }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi
+          .fn()
+          .mockResolvedValue({ data: mockUserCategories, error: null }),
       };
 
-      supabase.from
-        .mockReturnValueOnce(mockCategoriesQuery)
-        .mockReturnValueOnce(mockPrefsQuery);
+      supabase.from.mockReturnValue(mockQuery);
 
       const result = await getCategoriesWithPreferences("de");
 
@@ -273,7 +237,7 @@ describe("categoryPreferencesService", () => {
           isSystem: false,
           id: 1,
           isVisible: true,
-          order: 999,
+          order: 0,
         },
       ]);
     });
@@ -281,63 +245,33 @@ describe("categoryPreferencesService", () => {
     test("handles unauthenticated users gracefully", async () => {
       supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
 
-      const mockCategories = [{ id: 1, name: "dinner", is_system: false }];
-
-      const mockCategoriesQuery = {
-        select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockCategories, error: null }),
-      };
-
-      supabase.from.mockReturnValueOnce(mockCategoriesQuery);
-
       const result = await getCategoriesWithPreferences("en");
 
       expect(result).toEqual([
         { value: "all", label: "All Recipes", isSystem: true },
-        {
-          value: "dinner",
-          label: "dinner",
-          isSystem: false,
-          id: 1,
-          isVisible: true,
-          order: 999,
-        },
       ]);
     });
 
     test("filters out hidden categories", async () => {
-      const mockCategories = [
-        { id: 1, name: "dinner", is_system: false },
-        { id: 2, name: "brunch", is_system: false },
-      ];
-
-      const mockUserPreferences = [
-        {
-          category_id: 1,
-          category_value: "dinner",
-          is_visible: false,
-          display_order: 0,
-        },
+      const mockUserCategories = [
         {
           category_id: 2,
           category_value: "brunch",
           is_visible: true,
           display_order: 1,
+          categories: { id: 2, name: "brunch", is_system: false },
         },
       ];
 
-      const mockCategoriesQuery = {
+      const mockQuery = {
         select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockCategories, error: null }),
-      };
-      const mockPrefsQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ data: mockUserPreferences }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi
+          .fn()
+          .mockResolvedValue({ data: mockUserCategories, error: null }),
       };
 
-      supabase.from
-        .mockReturnValueOnce(mockCategoriesQuery)
-        .mockReturnValueOnce(mockPrefsQuery);
+      supabase.from.mockReturnValue(mockQuery);
 
       const result = await getCategoriesWithPreferences("en");
 
@@ -351,50 +285,43 @@ describe("categoryPreferencesService", () => {
           isVisible: true,
           order: 1,
         },
-        // dinner should be filtered out because isVisible: false
       ]);
     });
 
     test("sorts categories by display_order correctly", async () => {
-      const mockCategories = [
-        { id: 1, name: "dinner", is_system: false },
-        { id: 2, name: "brunch", is_system: false },
-        { id: 3, name: "baking", is_system: false },
-      ];
-
-      const mockUserPreferences = [
-        {
-          category_id: 1,
-          category_value: "dinner",
-          is_visible: true,
-          display_order: 2,
-        }, // Third
+      const mockUserCategories = [
         {
           category_id: 2,
           category_value: "brunch",
           is_visible: true,
           display_order: 0,
-        }, // First
+          categories: { id: 2, name: "brunch", is_system: false },
+        },
         {
           category_id: 3,
           category_value: "baking",
           is_visible: true,
           display_order: 1,
-        }, // Second
+          categories: { id: 3, name: "baking", is_system: false },
+        },
+        {
+          category_id: 1,
+          category_value: "dinner",
+          is_visible: true,
+          display_order: 2,
+          categories: { id: 1, name: "dinner", is_system: false },
+        },
       ];
 
-      const mockCategoriesQuery = {
+      const mockQuery = {
         select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockCategories, error: null }),
-      };
-      const mockPrefsQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ data: mockUserPreferences }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi
+          .fn()
+          .mockResolvedValue({ data: mockUserCategories, error: null }),
       };
 
-      supabase.from
-        .mockReturnValueOnce(mockCategoriesQuery)
-        .mockReturnValueOnce(mockPrefsQuery);
+      supabase.from.mockReturnValue(mockQuery);
 
       const result = await getCategoriesWithPreferences("en");
 
@@ -428,54 +355,49 @@ describe("categoryPreferencesService", () => {
     });
 
     test("handles database errors gracefully", async () => {
-      const mockCategoriesQuery = {
+      const mockQuery = {
         select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
         order: vi.fn().mockResolvedValue({
           data: null,
           error: { message: "Database error" },
         }),
       };
 
-      supabase.from.mockReturnValue(mockCategoriesQuery);
+      supabase.from.mockReturnValue(mockQuery);
 
       await expect(getCategoriesWithPreferences("en")).rejects.toThrow(
-        "Error fetching categories: Database error"
+        "Error fetching user categories: Database error"
       );
     });
 
     test("falls back to alphabetical order for categories with same display_order", async () => {
-      const mockCategories = [
-        { id: 1, name: "zebra", is_system: false },
-        { id: 2, name: "apple", is_system: false },
-      ];
-
-      const mockUserPreferences = [
+      const mockUserCategories = [
         {
           category_id: 1,
           category_value: "zebra",
           is_visible: true,
           display_order: 0,
+          categories: { id: 1, name: "zebra", is_system: false },
         },
         {
           category_id: 2,
           category_value: "apple",
           is_visible: true,
           display_order: 0,
-        }, // Same order
+          categories: { id: 2, name: "apple", is_system: false },
+        },
       ];
 
-      const mockCategoriesQuery = {
+      const mockQuery = {
         select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockCategories, error: null }),
-      };
-      const mockPrefsQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ data: mockUserPreferences }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi
+          .fn()
+          .mockResolvedValue({ data: mockUserCategories, error: null }),
       };
 
-      supabase.from
-        .mockReturnValueOnce(mockCategoriesQuery)
-        .mockReturnValueOnce(mockPrefsQuery);
+      supabase.from.mockReturnValue(mockQuery);
 
       const result = await getCategoriesWithPreferences("en");
 
