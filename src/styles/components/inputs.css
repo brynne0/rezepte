@@ -5,7 +5,7 @@
   font-size: 1rem;
   font-family: inherit;
   color: var(--dark-brown);
-  background: white;
+  background: var(--white);
   border: var(--border-width) solid var(--dark-brown);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
@@ -20,7 +20,7 @@
 }
 
 .input:invalid {
-  color: grey;
+  color: var(--grey);
 }
 
 /* Variations */
@@ -141,7 +141,7 @@
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: grey;
+  color: var(--grey);
   font-size: 1rem;
   pointer-events: none;
   transition: all 0.2s ease;

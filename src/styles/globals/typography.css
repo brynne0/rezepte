@@ -110,7 +110,7 @@ h3.forta {
 }
 
 .grey-small {
-  color: grey;
+  color: var(--grey);
   font-size: 0.9em;
 }
 

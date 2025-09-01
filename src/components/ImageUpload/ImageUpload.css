@@ -86,7 +86,7 @@
   top: 0.5rem;
   left: 0.5rem;
   background: var(--dark-red);
-  color: white;
+  color: var(--white);
   padding: 0.25rem 0.5rem;
   border-radius: var(--border-radius);
   font-size: var(--font-size-small);

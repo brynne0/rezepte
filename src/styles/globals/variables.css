@@ -1,4 +1,6 @@
 :root {
+  --white: white;
+  --grey: grey;
   --cream: #f2e7d2;
   --cream-light: #fffbf4;
   --cream-opaque: #fffbf4da;
@@ -28,4 +30,29 @@
   --border-radius: 0.5rem;
   --border-width: 0.0625rem;
   --border-width-thick: 0.1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* TODO Rename the colours to primary, secondary etc. */
+    --cream: #55443c;
+    --brown: #ccb3a3;
+    --cream-light: #342a24;
+    --dark-brown: #d4c2b3;
+    --cream-opaque: #342a24da;
+    --white: #342a24;
+    /* Fix the grey colour below */
+    --grey: #b6a991;
+    --cream-lighter: #3a2f28;
+    --light-brown: #a08777bf;
+    --lighter-brown: #a0877755;
+    --red: #d4736a;
+    --dark-red: #c5635a;
+    --error-red: #e57373;
+    --pink: #3a302e;
+    --dark-pink: #8b6b7aa4;
+    --green: #4db380;
+    --shadow-black: #00000033;
+    --error-shadow: #e5737322;
+  }
 }

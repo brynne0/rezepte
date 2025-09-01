@@ -61,7 +61,7 @@
 }
 
 .ingredient-notes {
-  color: grey;
+  color: var(--grey);
 }
 
 /* Shopping cart */

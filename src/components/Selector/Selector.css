@@ -29,7 +29,7 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
+  background: var(--white);
   border: var(--border-width) dashed var(--dark-red);
   border-top: none;
   border-radius: 0 0 var(--border-radius) var(--border-radius);
