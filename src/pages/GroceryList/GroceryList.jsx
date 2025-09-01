@@ -12,6 +12,7 @@ import { getUserPreferredLanguage } from "../../services/userService";
 import { normaliseIngredientName } from "../../services/groceryListService";
 import {
   formatQuantityForUnit,
+  formatQuantityForDisplay,
   formatUnitDisplay,
 } from "../../utils/ingredientFormatting";
 import Selector from "../../components/Selector/Selector";
@@ -70,7 +71,6 @@ const GroceryList = ({
   const {
     isModalOpen: isUnsavedChangesModalOpen,
     navigate: navigateWithConfirmation,
-    confirmNavigation,
     cancelNavigation,
     message: unsavedChangesMessage,
   } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
@@ -168,21 +168,17 @@ const GroceryList = ({
     restoreOriginalLanguage();
   };
 
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-
   const handleCancelClick = () => {
-    const hasChanges = hasUnsavedChanges();
-
-    if (hasChanges) {
-      setIsCancelModalOpen(true);
+    if (hasUnsavedChanges()) {
+      navigateWithConfirmation();
     } else {
       handleCancel();
     }
   };
 
   const confirmCancel = () => {
-    setIsCancelModalOpen(false);
     handleCancel();
+    cancelNavigation();
   };
 
   const handleInputChange = (index, field, value) => {
@@ -291,7 +287,7 @@ const GroceryList = ({
         ) : (
           <button
             className="btn-unstyled back-arrow-left"
-            onClick={() => navigateWithConfirmation(-1)}
+            onClick={handleCancelClick}
             aria-label={t("go_back")}
           >
             <ArrowBigLeft size={28} />
@@ -433,7 +429,7 @@ const GroceryList = ({
                               }
 
                               const displayQuantity =
-                                formatQuantityForUnit(qty);
+                                formatQuantityForDisplay(qty);
                               const displayUnit = unit
                                 ? formatUnitDisplay(unit, qty, units)
                                 : "";
@@ -463,7 +459,7 @@ const GroceryList = ({
                           }
                         }
 
-                        const displayQuantity = formatQuantityForUnit(qty);
+                        const displayQuantity = formatQuantityForDisplay(qty);
                         const displayUnit = unit
                           ? formatUnitDisplay(unit, qty, units)
                           : "";
@@ -508,7 +504,7 @@ const GroceryList = ({
       </div>
 
       {isEditing && (
-        <div className="btn-wrapper edit">
+        <div className="action-buttons-end edit">
           {/* Clear Button */}
           <button
             type="button"
@@ -547,26 +543,15 @@ const GroceryList = ({
         confirmButtonType="danger"
       />
 
-      {/* Cancel Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={isCancelModalOpen}
-        onClose={() => setIsCancelModalOpen(false)}
-        onConfirm={confirmCancel}
-        message={t("unsaved_changes_warning")}
-        confirmText={t("leave_page")}
-        cancelText={t("stay")}
-        confirmButtonType="danger"
-      />
-
       {/* Unsaved Changes Modal */}
       <ConfirmationModal
         isOpen={isUnsavedChangesModalOpen}
-        onClose={confirmNavigation}
-        onConfirm={cancelNavigation}
+        onClose={cancelNavigation}
+        onConfirm={confirmCancel}
         message={unsavedChangesMessage}
-        confirmText={t("stay")}
-        cancelText={t("leave_page")}
-        confirmButtonType="primary"
+        confirmText={t("leave_page")}
+        cancelText={t("stay")}
+        confirmButtonType="danger"
       />
     </div>
   );

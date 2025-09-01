@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { useState } from "react";
-import AccountSettings from "./AccountSettings";
+import Settings from "./Settings";
 
 // Create mock functions
 const mockNavigate = vi.fn();
@@ -27,6 +27,18 @@ vi.mock("../../services/userService", () => ({
 
 vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
+}));
+
+const mockNavigateWithConfirmation = vi.fn();
+
+vi.mock("../../hooks/ui/useUnsavedChanges", () => ({
+  useUnsavedChanges: () => ({
+    isModalOpen: false,
+    navigate: mockNavigateWithConfirmation,
+    confirmNavigation: vi.fn(),
+    cancelNavigation: vi.fn(),
+    message: "unsaved_changes_warning",
+  }),
 }));
 
 vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
@@ -95,13 +107,13 @@ vi.mock("react-i18next", () => ({
 }));
 
 // Wrapper component for router context
-const AccountSettingsWrapper = () => (
+const SettingsWrapper = () => (
   <BrowserRouter>
-    <AccountSettings />
+    <Settings />
   </BrowserRouter>
 );
 
-describe("AccountSettings", () => {
+describe("Settings", () => {
   let mockGetUserProfile;
   let mockGetUserPreferredLanguage;
   let mockUpdateUserProfile;
@@ -168,7 +180,7 @@ describe("AccountSettings", () => {
         () => new Promise(() => {}) // Never resolves to keep loading
       );
 
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       expect(screen.getByTestId("loading-acorn")).toBeInTheDocument();
     });
@@ -176,18 +188,18 @@ describe("AccountSettings", () => {
     it("renders error state when profile loading fails", async () => {
       mockGetUserProfile.mockRejectedValue(new Error("Failed to load profile"));
 
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText(/Error:/)).toBeInTheDocument();
       });
     });
 
-    it("renders account settings form when data loads successfully", async () => {
-      render(<AccountSettingsWrapper />);
+    it("renders settings form when data loads successfully", async () => {
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("account_settings")).toBeInTheDocument();
+        expect(screen.getByText("settings")).toBeInTheDocument();
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
         expect(screen.getByDisplayValue("johndoe")).toBeInTheDocument();
         expect(
@@ -197,24 +209,24 @@ describe("AccountSettings", () => {
     });
 
     it("renders back arrow that navigates to previous page", async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("account_settings")).toBeInTheDocument();
+        expect(screen.getByText("settings")).toBeInTheDocument();
       });
 
       const backArrow = screen
         .getByRole("banner")
-        .querySelector(".back-arrow-responsive");
+        .querySelector(".back-arrow-left");
       fireEvent.click(backArrow);
 
-      expect(mockNavigate).toHaveBeenCalledWith(-1);
+      expect(mockNavigateWithConfirmation).toHaveBeenCalledWith(-1);
     });
   });
 
   describe("First Name Editing", () => {
     beforeEach(async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
       await waitFor(() => {
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
       });
@@ -243,10 +255,10 @@ describe("AccountSettings", () => {
       fireEvent.click(pencilIcon);
 
       expect(
-        firstNameContainer.querySelector(".acc-settings-check")
+        firstNameContainer.querySelector(".profile-settings-check")
       ).toBeInTheDocument();
       expect(
-        firstNameContainer.querySelector(".acc-settings-cancel")
+        firstNameContainer.querySelector(".profile-settings-cancel")
       ).toBeInTheDocument();
     });
 
@@ -261,7 +273,7 @@ describe("AccountSettings", () => {
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       const checkButton = firstNameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -286,7 +298,7 @@ describe("AccountSettings", () => {
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       const cancelButton = firstNameContainer.querySelector(
-        ".acc-settings-cancel"
+        ".profile-settings-cancel"
       );
       fireEvent.click(cancelButton);
 
@@ -297,7 +309,7 @@ describe("AccountSettings", () => {
 
   describe("Username Editing", () => {
     beforeEach(async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
       await waitFor(() => {
         expect(screen.getByDisplayValue("johndoe")).toBeInTheDocument();
       });
@@ -323,7 +335,7 @@ describe("AccountSettings", () => {
       fireEvent.change(usernameInput, { target: { value: "newusername" } });
 
       const checkButton = usernameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -349,7 +361,7 @@ describe("AccountSettings", () => {
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
       const checkButton = usernameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -371,7 +383,7 @@ describe("AccountSettings", () => {
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
       const checkButton = usernameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -390,7 +402,7 @@ describe("AccountSettings", () => {
 
   describe("Password Field", () => {
     it("renders readonly password field with pencil icon", async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         const passwordInput = screen.getByDisplayValue("**************");
@@ -400,7 +412,7 @@ describe("AccountSettings", () => {
     });
 
     it("navigates to change password page when pencil is clicked", async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByDisplayValue("**************")).toBeInTheDocument();
@@ -412,14 +424,14 @@ describe("AccountSettings", () => {
       fireEvent.click(pencilIcon);
 
       expect(mockNavigate).toHaveBeenCalledWith("/change-password", {
-        state: { fromAccountSettings: true },
+        state: { fromSettings: true },
       });
     });
   });
 
   describe("Language Preferences", () => {
     beforeEach(async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
       await waitFor(() => {
         expect(screen.getByText("PREFERRED_LANGUAGE")).toBeInTheDocument();
       });
@@ -437,7 +449,7 @@ describe("AccountSettings", () => {
     it("enables language editing when pencil is clicked", () => {
       const languageContainer = screen
         .getByText("EN")
-        .closest(".acc-settings-language-container");
+        .closest(".profile-settings-language-container");
       const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
@@ -451,7 +463,7 @@ describe("AccountSettings", () => {
     it("updates language preference successfully", async () => {
       const languageContainer = screen
         .getByText("EN")
-        .closest(".acc-settings-language-container");
+        .closest(".profile-settings-language-container");
       const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
@@ -461,7 +473,7 @@ describe("AccountSettings", () => {
 
       // Click check button
       const checkButton = languageContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -477,7 +489,7 @@ describe("AccountSettings", () => {
     it("cancels language editing", () => {
       const languageContainer = screen
         .getByText("EN")
-        .closest(".acc-settings-language-container");
+        .closest(".profile-settings-language-container");
       const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
@@ -487,13 +499,13 @@ describe("AccountSettings", () => {
 
       // Click cancel button
       const cancelButton = languageContainer.querySelector(
-        ".acc-settings-cancel"
+        ".profile-settings-cancel"
       );
       fireEvent.click(cancelButton);
 
       // Should return to non-editing state - pencil icon should be back
       expect(
-        languageContainer.querySelector(".acc-settings-cancel")
+        languageContainer.querySelector(".profile-settings-cancel")
       ).not.toBeInTheDocument();
       expect(languageContainer.querySelector(".btn")).toBeInTheDocument();
     });
@@ -501,7 +513,7 @@ describe("AccountSettings", () => {
 
   describe("Delete Account", () => {
     beforeEach(async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
       await waitFor(() => {
         expect(
           screen.getByRole("button", { name: "delete_account" })
@@ -648,7 +660,7 @@ describe("AccountSettings", () => {
 
   describe("Success Messages", () => {
     it("displays success messages temporarily", async () => {
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
@@ -665,7 +677,7 @@ describe("AccountSettings", () => {
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       const checkButton = firstNameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -675,11 +687,11 @@ describe("AccountSettings", () => {
         ).toBeInTheDocument();
       });
 
-      // Success message should be visible in the header
-      const header =
-        screen.getByRole("banner") ||
-        screen.getByText("successfully_updated_first_name").closest("header");
-      expect(header).toContainElement(
+      // Success message should be visible in the unified message area
+      const messageArea = screen
+        .getByText("successfully_updated_first_name")
+        .closest(".success-message-wrapper");
+      expect(messageArea).toContainElement(
         screen.getByText("successfully_updated_first_name")
       );
     });
@@ -689,7 +701,7 @@ describe("AccountSettings", () => {
     it("handles service errors gracefully", async () => {
       mockUpdateUserProfile.mockRejectedValue(new Error("Service unavailable"));
 
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByDisplayValue("John")).toBeInTheDocument();
@@ -705,7 +717,7 @@ describe("AccountSettings", () => {
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       const checkButton = firstNameContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 
@@ -719,7 +731,7 @@ describe("AccountSettings", () => {
         new Error("Language service error")
       );
 
-      render(<AccountSettingsWrapper />);
+      render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText("PREFERRED_LANGUAGE")).toBeInTheDocument();
@@ -727,7 +739,7 @@ describe("AccountSettings", () => {
 
       const languageContainer = screen
         .getByText("EN")
-        .closest(".acc-settings-language-container");
+        .closest(".profile-settings-language-container");
       const pencilIcon = languageContainer.querySelector(".btn");
       fireEvent.click(pencilIcon);
 
@@ -735,7 +747,7 @@ describe("AccountSettings", () => {
       fireEvent.click(deOption);
 
       const checkButton = languageContainer.querySelector(
-        ".acc-settings-check"
+        ".profile-settings-check"
       );
       fireEvent.click(checkButton);
 

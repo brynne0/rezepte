@@ -1,6 +1,7 @@
 import { describe, test, expect } from "vitest";
 import {
   formatQuantityForUnit,
+  formatQuantityForDisplay,
   formatUnitDisplay,
   getIngredientDisplayName,
   formatIngredientMeasurement,
@@ -21,6 +22,13 @@ describe("ingredientFormatting", () => {
       expect(shouldUsePlural("1")).toBe(false);
       expect(shouldUsePlural("2")).toBe(true);
       expect(shouldUsePlural("1/2")).toBe(false);
+    });
+
+    test("handles mixed fractions", () => {
+      expect(shouldUsePlural("1 1/4")).toBe(true);
+      expect(shouldUsePlural("2 1/4")).toBe(true);
+      expect(shouldUsePlural("1 1/2")).toBe(true);
+      expect(shouldUsePlural("3 3/4")).toBe(true);
     });
 
     test("handles empty values", () => {
@@ -45,24 +53,26 @@ describe("ingredientFormatting", () => {
   ];
 
   describe("formatQuantityForUnit", () => {
-    test("handles ranges correctly", () => {
-      expect(formatQuantityForUnit("1/2 - 1", "cup/s", mockUnits)).toBe(
-        "1/2 - 1"
-      );
-      expect(formatQuantityForUnit("1-2", "tsp", mockUnits)).toBe("1-2");
-      expect(formatQuantityForUnit("0.5 – 1.5", "ml", mockUnits)).toBe(
-        "0.5 – 1.5"
-      );
-    });
-
-    test("returns input as-is for any input type", () => {
+    test("returns input as-is for editing", () => {
+      expect(formatQuantityForUnit("1/2 - 1")).toBe("1/2 - 1");
+      expect(formatQuantityForUnit("1-2")).toBe("1-2");
+      expect(formatQuantityForUnit("0.5 – 1.5")).toBe("0.5 – 1.5");
       expect(formatQuantityForUnit("1/2")).toBe("1/2");
+      expect(formatQuantityForUnit("2 1/4")).toBe("2 1/4");
       expect(formatQuantityForUnit("0.5")).toBe("0.5");
-      expect(formatQuantityForUnit(0.5)).toBe(0.5);
-      expect(formatQuantityForUnit("2-3")).toBe("2-3");
       expect(formatQuantityForUnit("")).toBe("");
-      expect(formatQuantityForUnit(null)).toBe("");
-      expect(formatQuantityForUnit(undefined)).toBe("");
+    });
+  });
+
+  describe("formatQuantityForDisplay", () => {
+    test("converts fractions to Unicode for display", () => {
+      expect(formatQuantityForDisplay("1/2")).toBe("½");
+      expect(formatQuantityForDisplay("1/4")).toBe("¼");
+      expect(formatQuantityForDisplay("2 1/4")).toBe("2 ¼");
+      expect(formatQuantityForDisplay("1/2 - 1")).toBe("½ - 1");
+      expect(formatQuantityForDisplay("0.5")).toBe("0.5");
+      expect(formatQuantityForDisplay("2-3")).toBe("2-3");
+      expect(formatQuantityForDisplay("")).toBe("");
     });
   });
 
@@ -260,7 +270,7 @@ describe("ingredientFormatting", () => {
   describe("formatIngredientMeasurement - integration with ranges", () => {
     test("formats ranges with units correctly", () => {
       expect(formatIngredientMeasurement("1/2 - 1", "cup/s", mockUnits)).toBe(
-        "1/2 - 1 cup"
+        "½ - 1 cup"
       );
       expect(formatIngredientMeasurement("1 - 2", "cup/s", mockUnits)).toBe(
         "1 - 2 cups"

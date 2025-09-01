@@ -51,7 +51,7 @@ const ConfirmationModal = ({
           </div>
         )}
         
-        <div className="confirmation-modal-actions">
+        <div className="action-buttons">
           <button onClick={handleClose} className="btn btn-action btn-secondary">
             {cancelText}
           </button>

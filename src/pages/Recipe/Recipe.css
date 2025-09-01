@@ -30,12 +30,6 @@
   align-items: center;
 }
 
-.recipe-actions {
-  border: 2px solid var(--red);
-  border-radius: var(--border-radius);
-  padding: 0.2rem;
-}
-
 /* Ingredients */
 .ingredient-list-display {
   padding: 0;
@@ -63,7 +57,7 @@
 }
 
 .ingredient-measurement {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .ingredient-notes {
@@ -129,10 +123,4 @@
   justify-content: center;
   z-index: var(--z-content);
   transition: opacity 0.3s ease-out;
-}
-
-@media (max-width: 768px) {
-  .recipe-actions {
-    padding: 0.1rem;
-  }
 }

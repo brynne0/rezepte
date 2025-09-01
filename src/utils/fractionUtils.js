@@ -1,11 +1,79 @@
 // Utility functions for handling fractions in recipes
 
+// Normalises Unicode fraction characters to regular fractions
+export const normaliseUnicodeFractions = (input) => {
+  if (!input) return input;
+
+  const unicodeFractions = {
+    "¼": "1/4",
+    "½": "1/2",
+    "¾": "3/4",
+    "⅛": "1/8",
+    "⅜": "3/8",
+    "⅝": "5/8",
+    "⅞": "7/8",
+    "⅓": "1/3",
+    "⅔": "2/3",
+    "⅕": "1/5",
+    "⅖": "2/5",
+    "⅗": "3/5",
+    "⅘": "4/5",
+    "⅙": "1/6",
+    "⅚": "5/6",
+  };
+
+  let normalised = input.toString();
+  for (const [unicode, fraction] of Object.entries(unicodeFractions)) {
+    normalised = normalised.replace(new RegExp(unicode, "g"), fraction);
+  }
+
+  return normalised;
+};
+
+// Converts regular fractions to Unicode for display
+export const convertToUnicodeFractions = (input) => {
+  if (!input) return input;
+  
+  const regularToUnicode = {
+    '1/8': '⅛',
+    '1/7': '1/7', // No Unicode equivalent
+    '1/6': '⅙',
+    '1/5': '⅕',
+    '1/4': '¼',
+    '1/3': '⅓',
+    '3/8': '⅜',
+    '2/5': '⅖',
+    '1/2': '½',
+    '3/5': '⅗',
+    '5/8': '⅝',
+    '2/3': '⅔',
+    '3/4': '¾',
+    '4/5': '⅘',
+    '5/6': '⅚',
+    '7/8': '⅞'
+  };
+  
+  let display = input.toString();
+  
+  // Sort by length (longest first) to avoid partial matches
+  const sortedFractions = Object.entries(regularToUnicode)
+    .filter(([regular, unicode]) => unicode !== regular) // Skip fractions without Unicode
+    .sort(([a], [b]) => b.length - a.length);
+  
+  for (const [regular, unicode] of sortedFractions) {
+    display = display.replace(new RegExp(regular, 'g'), unicode);
+  }
+  
+  return display;
+};
+
 // Parses user input and converts fractions to decimal numbers
 export const parseFraction = (input) => {
   if (!input && input !== 0) return "";
 
   const originalStr = input.toString();
-  const str = originalStr.trim();
+  const normalised = normaliseUnicodeFractions(originalStr);
+  const str = normalised.trim();
 
   // Preserve incomplete mixed fractions while typing (e.g., "1 ", "1 1", "1 1/")
   if (originalStr !== str && /^\d+\s+(\d+\/?)?$/.test(originalStr)) {
