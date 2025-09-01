@@ -13,6 +13,7 @@ const CategoriesTab = ({
   saveMessage,
   setSaveMessage,
   onUnsavedChangesChange,
+  refreshCategories,
 }) => {
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -100,6 +101,11 @@ const CategoriesTab = ({
 
       // Update original preferences to match current state
       setOriginalCategoryPreferences([...categoryPreferences]);
+
+      // Refresh categories in the main app to reflect preference changes
+      if (refreshCategories) {
+        refreshCategories();
+      }
 
       setSaveMessage(t("category_preferences_saved"));
       setTimeout(() => setSaveMessage(""), 3000);

@@ -22,6 +22,16 @@ vi.mock("../../services/categoryPreferencesService", () => ({
   getCategoriesWithPreferences: vi.fn(),
 }));
 
+vi.mock("../../lib/supabase", () => ({
+  default: {
+    auth: {
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
+    },
+  },
+}));
+
 import { getCategoriesForUI } from "../../services/categoriesService";
 import { getCategoriesWithPreferences } from "../../services/categoryPreferencesService";
 
