@@ -115,9 +115,18 @@ describe("useCategories", () => {
       { value: "dinner", label: "Abendessen", isSystem: false },
     ];
 
-    getCategoriesWithPreferences
-      .mockResolvedValueOnce(mockEnglishCategories)
-      .mockResolvedValueOnce(mockGermanCategories);
+    // Mock both services for different languages
+    getCategoriesWithPreferences.mockImplementation((language) => {
+      if (language === "en") return Promise.resolve(mockEnglishCategories);
+      if (language === "de") return Promise.resolve(mockGermanCategories);
+      return Promise.resolve(mockEnglishCategories);
+    });
+
+    getCategoriesForUI.mockImplementation((language) => {
+      if (language === "en") return Promise.resolve(mockEnglishCategories);
+      if (language === "de") return Promise.resolve(mockGermanCategories);
+      return Promise.resolve(mockEnglishCategories);
+    });
 
     const { result, rerender } = renderHook(() => useCategories());
 
@@ -127,8 +136,23 @@ describe("useCategories", () => {
 
     expect(result.current.categories).toEqual(mockEnglishCategories);
 
-    // Change language
+    // Change language - need to clear mocks and reset
+    vi.clearAllMocks();
     mockUseTranslation.i18n.language = "de";
+
+    // Re-setup mocks after language change
+    getCategoriesWithPreferences.mockImplementation((language) => {
+      if (language === "en") return Promise.resolve(mockEnglishCategories);
+      if (language === "de") return Promise.resolve(mockGermanCategories);
+      return Promise.resolve(mockEnglishCategories);
+    });
+
+    getCategoriesForUI.mockImplementation((language) => {
+      if (language === "en") return Promise.resolve(mockEnglishCategories);
+      if (language === "de") return Promise.resolve(mockGermanCategories);
+      return Promise.resolve(mockEnglishCategories);
+    });
+
     rerender();
 
     await waitFor(() => {
