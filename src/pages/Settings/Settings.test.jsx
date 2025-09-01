@@ -217,7 +217,7 @@ describe("Settings", () => {
 
       const backArrow = screen
         .getByRole("banner")
-        .querySelector(".back-arrow-responsive");
+        .querySelector(".back-arrow-left");
       fireEvent.click(backArrow);
 
       expect(mockNavigateWithConfirmation).toHaveBeenCalledWith(-1);

@@ -169,13 +169,6 @@ a.btn-unstyled {
   cursor: pointer;
 }
 
-.back-arrow-responsive {
-  left: 0;
-  position: absolute;
-  padding-left: 3rem;
-  cursor: pointer;
-}
-
 .auth-container .back-arrow {
   color: var(--brown);
 }
@@ -221,11 +214,5 @@ a.btn-unstyled {
 
   .btn-section {
     padding: 0.375rem 0.625rem;
-  }
-
-  .back-arrow-responsive {
-    padding-right: 0.5rem;
-    position: relative;
-    padding-left: 0;
   }
 }

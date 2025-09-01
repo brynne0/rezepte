@@ -96,6 +96,10 @@
   align-items: center;
 }
 
+.relative {
+  position: relative;
+}
+
 /* Form wrappers */
 .form-group {
   margin-bottom: 1rem;

@@ -292,10 +292,10 @@ const Settings = () => {
       ) : (
         <>
           <div className="card card-settings">
-            <header className="flex-column-center">
+            <header className="flex-column-center relative">
               <div className="flex-row">
                 <button
-                  className="btn-unstyled back-arrow-responsive"
+                  className="btn-unstyled back-arrow-left"
                   onClick={() => navigateWithConfirmation(-1)}
                   aria-label={t("go_back")}
                 >
