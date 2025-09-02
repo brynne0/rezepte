@@ -125,7 +125,7 @@ describe("useCategories", () => {
       { value: "dinner", label: "Abendessen", isSystem: false },
     ];
 
-    // Mock both services for different languages
+    // Set up persistent mock implementation that handles both languages
     getCategoriesWithPreferences.mockImplementation((language) => {
       if (language === "en") return Promise.resolve(mockEnglishCategories);
       if (language === "de") return Promise.resolve(mockGermanCategories);
@@ -140,36 +140,28 @@ describe("useCategories", () => {
 
     const { result, rerender } = renderHook(() => useCategories());
 
+    // Wait for initial English categories to load
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.categories).toEqual(mockEnglishCategories);
 
-    // Change language - need to clear mocks and reset
-    vi.clearAllMocks();
+    // Change language to German
     mockUseTranslation.i18n.language = "de";
-
-    // Re-setup mocks after language change
-    getCategoriesWithPreferences.mockImplementation((language) => {
-      if (language === "en") return Promise.resolve(mockEnglishCategories);
-      if (language === "de") return Promise.resolve(mockGermanCategories);
-      return Promise.resolve(mockEnglishCategories);
-    });
-
-    getCategoriesForUI.mockImplementation((language) => {
-      if (language === "en") return Promise.resolve(mockEnglishCategories);
-      if (language === "de") return Promise.resolve(mockGermanCategories);
-      return Promise.resolve(mockEnglishCategories);
-    });
 
     rerender();
 
-    await waitFor(() => {
-      expect(getCategoriesWithPreferences).toHaveBeenCalledWith("de");
-    });
+    // Wait for the categories to update to German
+    await waitFor(
+      () => {
+        expect(result.current.categories).toEqual(mockGermanCategories);
+      },
+      { timeout: 3000 }
+    );
 
-    expect(result.current.categories).toEqual(mockGermanCategories);
+    // Verify the correct language was called
+    expect(getCategoriesWithPreferences).toHaveBeenCalledWith("de");
   });
 
   test("provides refresh function that reloads categories", async () => {
