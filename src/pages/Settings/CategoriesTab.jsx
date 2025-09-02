@@ -166,6 +166,11 @@ const CategoriesTab = ({
         (cat) => !cat.isTemp && !cat.id?.startsWith("temp-new-category-")
       );
 
+      // Normalise orders to be sequential (0, 1, 2, 3, ...)
+      validCategoryPreferences.forEach((cat, index) => {
+        cat.order = index;
+      });
+
       await saveUserCategoryPreferences(validCategoryPreferences);
 
       // Update state with the final categories
