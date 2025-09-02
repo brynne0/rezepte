@@ -242,13 +242,55 @@ describe("categoryPreferencesService", () => {
       ]);
     });
 
-    test("handles unauthenticated users gracefully", async () => {
+    test("handles unauthenticated users by showing system categories", async () => {
       supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+
+      // Mock system categories
+      const mockSystemCategories = [
+        {
+          id: 1,
+          name: "breakfast",
+          is_system: true,
+          translated_category: { en: "Breakfast", de: "Frühstück" },
+        },
+        {
+          id: 2,
+          name: "dinner",
+          is_system: true,
+          translated_category: { en: "Dinner", de: "Abendessen" },
+        },
+      ];
+
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi
+          .fn()
+          .mockResolvedValue({ data: mockSystemCategories, error: null }),
+      };
+
+      supabase.from.mockReturnValue(mockQuery);
 
       const result = await getCategoriesWithPreferences("en");
 
       expect(result).toEqual([
         { value: "all", label: "All Recipes", isSystem: true },
+        {
+          value: "breakfast",
+          label: "Breakfast",
+          isSystem: true,
+          id: 1,
+          isVisible: true,
+          order: 1,
+        },
+        {
+          value: "dinner",
+          label: "Dinner",
+          isSystem: true,
+          id: 2,
+          isVisible: true,
+          order: 2,
+        },
       ]);
     });
 

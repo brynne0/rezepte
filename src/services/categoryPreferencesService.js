@@ -75,7 +75,44 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
   ];
 
   if (!user) {
-    // Not logged in - return just "all" option
+    // Not logged in - show system categories alphabetically
+    const { data: systemCategories, error } = await supabase
+      .from("categories")
+      .select("id, name, is_system, translated_category")
+      .eq("is_system", true)
+      .order("name");
+
+    if (error) {
+      console.warn(
+        "Could not fetch system categories for logged-out user:",
+        error
+      );
+      return formattedCategories;
+    }
+
+    if (systemCategories && systemCategories.length > 0) {
+      systemCategories.forEach((category) => {
+        let label = category.name;
+
+        // Use translation if available for the current language
+        if (
+          category.translated_category &&
+          category.translated_category[currentLanguage]
+        ) {
+          label = category.translated_category[currentLanguage];
+        }
+
+        formattedCategories.push({
+          value: category.name,
+          label: label,
+          isSystem: category.is_system || false,
+          id: category.id,
+          isVisible: true,
+          order: formattedCategories.length,
+        });
+      });
+    }
+
     return formattedCategories;
   }
 
