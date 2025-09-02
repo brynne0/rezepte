@@ -22,6 +22,16 @@ vi.mock("../../services/categoryPreferencesService", () => ({
   getCategoriesWithPreferences: vi.fn(),
 }));
 
+vi.mock("../../lib/supabase", () => ({
+  default: {
+    auth: {
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
+    },
+  },
+}));
+
 import { getCategoriesForUI } from "../../services/categoriesService";
 import { getCategoriesWithPreferences } from "../../services/categoryPreferencesService";
 
@@ -115,27 +125,43 @@ describe("useCategories", () => {
       { value: "dinner", label: "Abendessen", isSystem: false },
     ];
 
-    getCategoriesWithPreferences
-      .mockResolvedValueOnce(mockEnglishCategories)
-      .mockResolvedValueOnce(mockGermanCategories);
+    // Set up persistent mock implementation that handles both languages
+    getCategoriesWithPreferences.mockImplementation((language) => {
+      if (language === "en") return Promise.resolve(mockEnglishCategories);
+      if (language === "de") return Promise.resolve(mockGermanCategories);
+      return Promise.resolve(mockEnglishCategories);
+    });
+
+    getCategoriesForUI.mockImplementation((language) => {
+      if (language === "en") return Promise.resolve(mockEnglishCategories);
+      if (language === "de") return Promise.resolve(mockGermanCategories);
+      return Promise.resolve(mockEnglishCategories);
+    });
 
     const { result, rerender } = renderHook(() => useCategories());
 
+    // Wait for initial English categories to load
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.categories).toEqual(mockEnglishCategories);
 
-    // Change language
+    // Change language to German
     mockUseTranslation.i18n.language = "de";
+
     rerender();
 
-    await waitFor(() => {
-      expect(getCategoriesWithPreferences).toHaveBeenCalledWith("de");
-    });
+    // Wait for the categories to update to German
+    await waitFor(
+      () => {
+        expect(result.current.categories).toEqual(mockGermanCategories);
+      },
+      { timeout: 3000 }
+    );
 
-    expect(result.current.categories).toEqual(mockGermanCategories);
+    // Verify the correct language was called
+    expect(getCategoriesWithPreferences).toHaveBeenCalledWith("de");
   });
 
   test("provides refresh function that reloads categories", async () => {

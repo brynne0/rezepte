@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { getCategoriesForUI } from "../../services/categoriesService";
 import { getCategoriesWithPreferences } from "../../services/categoryPreferencesService";
+import supabase from "../../lib/supabase";
 
 export const useCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -39,6 +40,19 @@ export const useCategories = () => {
 
   useEffect(() => {
     refreshCategories();
+  }, [refreshCategories]);
+
+  // Listen to auth state changes and refresh categories
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        refreshCategories();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [refreshCategories]);
 
   // Memoize categories to prevent unnecessary re-renders

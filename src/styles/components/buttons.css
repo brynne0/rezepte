@@ -179,13 +179,13 @@ a.btn-unstyled {
   background: transparent;
   color: var(--brown);
   border: var(--border-width) dashed var(--brown);
+  border-radius: var(--border-radius);
   font-size: 0.9rem;
   font-weight: 500;
   gap: 0.375rem;
 }
 
 .btn-section-dotted:hover {
-  background: var(--cream-light);
   border-style: solid;
 }
 

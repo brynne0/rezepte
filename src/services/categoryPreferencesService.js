@@ -65,27 +65,6 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get all categories
-  const { data: categories, error: categoriesError } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name");
-
-  if (categoriesError) {
-    throw new Error(`Error fetching categories: ${categoriesError.message}`);
-  }
-
-  let userPreferences = [];
-  if (user) {
-    // Get user preferences if logged in
-    const { data: prefs } = await supabase
-      .from("user_category_preferences")
-      .select("*")
-      .eq("user_id", user.id);
-
-    userPreferences = prefs || [];
-  }
-
   // Always include "all" as the first option
   const formattedCategories = [
     {
@@ -95,36 +74,124 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
     },
   ];
 
-  // Process database categories with preferences
-  const categoriesWithPrefs = categories.map((category) => {
-    let label = category.name;
+  if (!user) {
+    // Not logged in - show system categories alphabetically
+    const { data: systemCategories, error } = await supabase
+      .from("categories")
+      .select("id, name, is_system, translated_category")
+      .eq("is_system", true)
+      .order("name");
 
-    // Use translation if available for the current language
-    if (
-      category.translated_category &&
-      category.translated_category[currentLanguage]
-    ) {
-      label = category.translated_category[currentLanguage];
+    if (error) {
+      console.warn(
+        "Could not fetch system categories for logged-out user:",
+        error
+      );
+      return formattedCategories;
     }
 
-    // Find user preference for this category
-    const userPref = userPreferences.find(
-      (pref) =>
-        pref.category_id === category.id ||
-        pref.category_value === category.name
-    );
+    if (systemCategories && systemCategories.length > 0) {
+      systemCategories.forEach((category) => {
+        let label = category.name;
 
-    return {
-      value: category.name,
-      label: label,
-      isSystem: category.is_system || false,
-      id: category.id,
-      isVisible: userPref ? userPref.is_visible : true,
-      order: userPref ? userPref.display_order : 999,
-    };
-  });
+        // Use translation if available for the current language
+        if (
+          category.translated_category &&
+          category.translated_category[currentLanguage]
+        ) {
+          label = category.translated_category[currentLanguage];
+        }
 
-  // Sort by user-defined order, then by default order
+        formattedCategories.push({
+          value: category.name,
+          label: label,
+          isSystem: category.is_system || false,
+          id: category.id,
+          isVisible: true,
+          order: formattedCategories.length,
+        });
+      });
+    }
+
+    return formattedCategories;
+  }
+
+  // Get user's preferred categories by joining preferences with categories
+  let { data: userCategories, error } = await supabase
+    .from("user_category_preferences")
+    .select(
+      `
+      *,
+      categories (
+        id,
+        name,
+        is_system,
+        translated_category
+      )
+    `
+    )
+    .eq("user_id", user.id)
+    .eq("is_visible", true)
+    .order("display_order");
+
+  if (error) {
+    throw new Error(`Error fetching user categories: ${error.message}`);
+  }
+
+  // If user has no preferences, create defaults and retry
+  if (!userCategories || userCategories.length === 0) {
+    await createDefaultCategoryPreferences(user.id);
+
+    // Retry fetching after creating defaults
+    const { data: newUserCategories } = await supabase
+      .from("user_category_preferences")
+      .select(
+        `
+        *,
+        categories (
+          id,
+          name,
+          is_system,
+          translated_category
+        )
+      `
+      )
+      .eq("user_id", user.id)
+      .eq("is_visible", true)
+      .order("display_order");
+
+    userCategories = newUserCategories || [];
+  }
+
+  // Process user's preferred categories
+  const categoriesWithPrefs = [];
+  if (userCategories) {
+    userCategories.forEach((pref) => {
+      const category = pref.categories;
+      if (!category) return;
+
+      let label = category.name;
+
+      // Use translation if available for the current language
+      if (
+        category.translated_category &&
+        category.translated_category[currentLanguage]
+      ) {
+        label = category.translated_category[currentLanguage];
+      }
+
+      categoriesWithPrefs.push({
+        value: category.name,
+        label: label,
+        isSystem: category.is_system || false,
+        id: category.id,
+        isVisible: true,
+        order: pref.display_order,
+      });
+    });
+  }
+
+  // Sort by user-defined order, then by label
   categoriesWithPrefs.sort((a, b) => {
     if (a.order !== b.order) {
       return a.order - b.order;
@@ -132,12 +199,47 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
     return a.label.localeCompare(b.label);
   });
 
-  // Add only visible categories to the result
-  categoriesWithPrefs
-    .filter((cat) => cat.isVisible)
-    .forEach((cat) => formattedCategories.push(cat));
+  return [...formattedCategories, ...categoriesWithPrefs];
+};
 
-  return formattedCategories;
+// Create default category preferences for new users
+const createDefaultCategoryPreferences = async (userId) => {
+  // Get all system categories
+  const { data: systemCategories, error: categoriesError } = await supabase
+    .from("categories")
+    .select("id, name, is_system, translated_category")
+    .eq("is_system", true)
+    .order("name");
+
+  if (categoriesError) {
+    throw new Error(
+      `Error fetching system categories: ${categoriesError.message}`
+    );
+  }
+
+  if (!systemCategories || systemCategories.length === 0) {
+    return; // No system categories to create preferences for
+  }
+
+  // Create preferences for all system categories in alphabetical order
+  const defaultPreferences = systemCategories.map((category, index) => ({
+    user_id: userId,
+    category_id: category.id,
+    category_value: category.name,
+    is_visible: true,
+    display_order: index,
+  }));
+
+  // Insert default preferences
+  const { error: insertError } = await supabase
+    .from("user_category_preferences")
+    .insert(defaultPreferences);
+
+  if (insertError) {
+    throw new Error(
+      `Error creating default category preferences: ${insertError.message}`
+    );
+  }
 };
 
 // Get all categories for management (includes hidden ones)
@@ -146,57 +248,87 @@ export const getAllCategoriesForManagement = async (currentLanguage = "en") => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get all categories
-  const { data: categories, error: categoriesError } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name");
-
-  if (categoriesError) {
-    throw new Error(`Error fetching categories: ${categoriesError.message}`);
+  if (!user) {
+    return [];
   }
 
-  let userPreferences = [];
-  if (user) {
-    // Get user preferences if logged in
-    const { data: prefs } = await supabase
-      .from("user_category_preferences")
-      .select("*")
-      .eq("user_id", user.id);
+  // Get user's categories by joining preferences with categories
+  let { data: userCategories, error } = await supabase
+    .from("user_category_preferences")
+    .select(
+      `
+      *,
+      categories (
+        id,
+        name,
+        is_system,
+        translated_category
+      )
+    `
+    )
+    .eq("user_id", user.id)
+    .order("display_order");
 
-    userPreferences = prefs || [];
-  }
-
-  // Process all categories (including hidden ones) with preferences
-  const categoriesWithPrefs = categories.map((category) => {
-    let label = category.name;
-
-    // Use translation if available for the current language
-    if (
-      category.translated_category &&
-      category.translated_category[currentLanguage]
-    ) {
-      label = category.translated_category[currentLanguage];
-    }
-
-    // Find user preference for this category
-    const userPref = userPreferences.find(
-      (pref) =>
-        pref.category_id === category.id ||
-        pref.category_value === category.name
+  if (error) {
+    throw new Error(
+      `Error fetching user categories for management: ${error.message}`
     );
+  }
 
-    return {
-      value: category.name,
-      label: label,
-      isSystem: category.is_system || false,
-      id: category.id,
-      isVisible: userPref ? userPref.is_visible : true,
-      order: userPref ? userPref.display_order : 999,
-    };
-  });
+  // If user has no preferences, create default preferences from system categories
+  if (!userCategories || userCategories.length === 0) {
+    await createDefaultCategoryPreferences(user.id);
 
-  // Sort by user-defined order, then by default order
+    // Retry fetching after creating defaults
+    const { data: newUserCategories } = await supabase
+      .from("user_category_preferences")
+      .select(
+        `
+        *,
+        categories (
+          id,
+          name,
+          is_system,
+          translated_category
+        )
+      `
+      )
+      .eq("user_id", user.id)
+      .order("display_order");
+
+    userCategories = newUserCategories || [];
+  }
+
+  // Process user's categories (including hidden ones for management)
+  const categoriesWithPrefs = [];
+
+  if (userCategories) {
+    userCategories.forEach((pref) => {
+      const category = pref.categories;
+      if (!category) return;
+
+      let label = category.name;
+
+      // Use translation if available for the current language
+      if (
+        category.translated_category &&
+        category.translated_category[currentLanguage]
+      ) {
+        label = category.translated_category[currentLanguage];
+      }
+
+      categoriesWithPrefs.push({
+        value: category.name,
+        label: label,
+        isSystem: category.is_system || false,
+        id: category.id,
+        isVisible: pref.is_visible,
+        order: pref.display_order,
+      });
+    });
+  }
+
+  // Sort by user-defined order, then by label
   categoriesWithPrefs.sort((a, b) => {
     if (a.order !== b.order) {
       return a.order - b.order;
@@ -204,6 +336,6 @@ export const getAllCategoriesForManagement = async (currentLanguage = "en") => {
     return a.label.localeCompare(b.label);
   });
 
-  // Return ALL categories (including hidden) for management
+  // Return ALL user categories (including hidden) for management
   return categoriesWithPrefs;
 };

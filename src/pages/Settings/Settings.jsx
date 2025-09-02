@@ -17,7 +17,7 @@ import ProfileTab from "./ProfileTab";
 import CategoriesTab from "./CategoriesTab";
 import "./Settings.css";
 
-const Settings = () => {
+const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   const [activeTab, setActiveTab] = useState("profile");
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -370,6 +370,8 @@ const Settings = () => {
                 saveMessage={saveMessage}
                 setSaveMessage={setSaveMessage}
                 onUnsavedChangesChange={setCategoriesHasUnsavedChanges}
+                refreshCategories={refreshCategories}
+                resetCategoryFilter={resetCategoryFilter}
               />
             )}
           </div>

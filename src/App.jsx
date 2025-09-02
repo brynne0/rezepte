@@ -53,7 +53,11 @@ function App() {
     useRecipesPagination(currentPage, 36, selectedCategory, searchTerm, sortBy);
 
   // Categories from database
-  const { categories, loading: categoriesLoading } = useCategories();
+  const {
+    categories,
+    loading: categoriesLoading,
+    refreshCategories,
+  } = useCategories();
 
   // Show loading screen only for home page where recipes and categories are needed
   const location = window.location;
@@ -112,6 +116,7 @@ function App() {
           onPageChange={handlePageChange}
           onPageReset={handlePageReset}
           refreshRecipes={refreshRecipes}
+          refreshCategories={refreshCategories}
           isLoggedIn={isLoggedIn}
         />
       </Router>
@@ -123,6 +128,7 @@ function AppRoutes(props) {
   const location = useLocation();
   const {
     refreshRecipes,
+    refreshCategories,
     isGroceryListEditing,
     setIsGroceryListEditing,
     showImages,
@@ -240,8 +246,10 @@ function AppRoutes(props) {
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/change-password" element={<ChangePasswordPage />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/account-settings" element={<Settings />} />
+        <Route
+          path="/settings"
+          element={<Settings refreshCategories={refreshCategories} resetCategoryFilter={() => props.setSelectedCategory("all")} />}
+        />
       </Routes>
     </>
   );

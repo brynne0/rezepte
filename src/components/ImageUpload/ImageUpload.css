@@ -93,15 +93,6 @@
   font-weight: 600;
 }
 
-.error-message {
-  color: var(--error-red);
-  font-size: var(--font-size-small);
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: var(--pink);
-  border-radius: var(--border-radius);
-}
-
 .hidden-input {
   display: none;
 }
