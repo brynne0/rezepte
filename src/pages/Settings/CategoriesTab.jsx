@@ -162,7 +162,7 @@ const CategoriesTab = ({
 
       // Filter out any remaining temporary categories before saving
       const validCategoryPreferences = updatedPreferences.filter(
-        (cat) => !cat.isTemp && cat.id !== "temp-new-category"
+        (cat) => !cat.isTemp && !cat.id?.startsWith("temp-new-category-")
       );
 
       await saveUserCategoryPreferences(validCategoryPreferences);
@@ -189,9 +189,12 @@ const CategoriesTab = ({
 
   // Add new category
   const handleAddCategory = () => {
+    // Generate unique ID for each new temporary category
+    const tempId = `temp-new-category-${Date.now()}`;
+
     // Add temporary category to the list in edit mode
     const tempCategory = {
-      id: "temp-new-category",
+      id: tempId,
       value: "",
       label: "",
       isSystem: false,
@@ -201,7 +204,7 @@ const CategoriesTab = ({
     };
 
     setCategoryPreferences([...categoryPreferences, tempCategory]);
-    setEditingCategoryId("temp-new-category");
+    setEditingCategoryId(tempId);
     setEditingCategoryName("");
     setIsAddingCategory(true);
     setCategoryError("");
@@ -213,13 +216,81 @@ const CategoriesTab = ({
       return;
     }
 
+    const trimmedName = editingCategoryName.trim();
+
+    // Check for duplicates in local preferences first
+    const localDuplicate = categoryPreferences.some((cat) => {
+      const catName = cat.value || cat.label || "";
+      return (
+        cat.id !== editingCategoryId &&
+        catName.toLowerCase() === trimmedName.toLowerCase()
+      );
+    });
+
+    if (localDuplicate) {
+      setCategoryError(t("category_name_already_exists"));
+      return;
+    }
+
+    // Check if this category already exists in the database
+    try {
+      const { data: existingCategory } = await supabase
+        .from("categories")
+        .select("id, name, is_system, translated_category")
+        .eq("name", trimmedName.toLowerCase())
+        .single();
+
+      if (existingCategory) {
+        // Category exists! Add it to user's preferences instead of creating new one
+        let label = existingCategory.name;
+        if (
+          existingCategory.translated_category &&
+          existingCategory.translated_category[i18n.language]
+        ) {
+          label = existingCategory.translated_category[i18n.language];
+        }
+
+        // Replace temp category with existing category
+        setCategoryPreferences((prev) =>
+          prev.map((cat) =>
+            cat.id === editingCategoryId
+              ? {
+                  id: existingCategory.id,
+                  value: existingCategory.name,
+                  label: label,
+                  isSystem: existingCategory.is_system || false,
+                  isVisible: true,
+                  order: cat.order,
+                  isTemp: false,
+                  pendingCreation: false,
+                }
+              : cat
+          )
+        );
+
+        // Reset add state
+        setIsAddingCategory(false);
+        setEditingCategoryId(null);
+        setEditingCategoryName("");
+        return;
+      }
+    } catch (error) {
+      // If it's not a "not found" error, log warning but continue with creation
+      if (
+        !error.message.includes("No rows") &&
+        !error.message.includes("PGRST116")
+      ) {
+        console.warn("Could not check for existing categories:", error);
+      }
+    }
+
     try {
       setCategoryError("");
 
       // Keep as temporary category with the name - don't create in database yet
       setCategoryPreferences((prev) =>
         prev.map((cat) =>
-          cat.id === "temp-new-category"
+          cat.id === editingCategoryId
             ? {
                 ...cat,
                 label: editingCategoryName.trim(),
@@ -247,7 +318,7 @@ const CategoriesTab = ({
   const handleCancelAddCategory = () => {
     // Remove temporary category from list
     setCategoryPreferences((prev) =>
-      prev.filter((cat) => cat.id !== "temp-new-category")
+      prev.filter((cat) => cat.id !== editingCategoryId)
     );
     setIsAddingCategory(false);
     setEditingCategoryId(null);
@@ -270,8 +341,24 @@ const CategoriesTab = ({
     }
 
     // Handle new category creation vs editing existing category
-    if (editingCategoryId === "temp-new-category") {
+    if (editingCategoryId?.startsWith("temp-new-category-")) {
       await handleSaveNewCategory();
+      return;
+    }
+
+    const trimmedName = editingCategoryName.trim();
+
+    // For existing categories, only check for duplicates in local preferences
+    const localDuplicate = categoryPreferences.some((cat) => {
+      const catName = cat.value || cat.label || "";
+      return (
+        cat.id !== editingCategoryId &&
+        catName.toLowerCase() === trimmedName.toLowerCase()
+      );
+    });
+
+    if (localDuplicate) {
+      setCategoryError(t("category_name_already_exists"));
       return;
     }
 
@@ -311,7 +398,7 @@ const CategoriesTab = ({
 
   const handleCancelEditCategory = () => {
     // If canceling new category creation, remove temp category
-    if (editingCategoryId === "temp-new-category") {
+    if (editingCategoryId?.startsWith("temp-new-category-")) {
       handleCancelAddCategory();
       return;
     }
