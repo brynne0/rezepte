@@ -122,7 +122,7 @@ a.btn-unstyled {
 }
 
 .btn-icon-neutral.selected {
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
 }
 
 .btn-icon-green {
@@ -155,7 +155,7 @@ a.btn-unstyled {
 }
 
 .btn-icon-right:hover {
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
 }
 
 /* Navigation buttons */

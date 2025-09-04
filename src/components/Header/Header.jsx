@@ -351,7 +351,7 @@ const Header = ({
                         setSelectedCategory("all");
                       }
                     }}
-                    className="input input--cream search-input-with-icon"
+                    className="input input--secondary search-input-with-icon"
                     placeholder={t("search")}
                   />
                   <button

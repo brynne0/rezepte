@@ -24,13 +24,13 @@
 }
 
 /* Variations */
-.input--cream {
+.input--secondary {
   background: var(--color-background-secondary);
   padding: 0.5rem;
 }
 
-.input--cream:focus {
-  border-color: var(--dark-brown);
+.input--secondary:focus {
+  border-color: var(--color-text-strong);
 }
 
 .input--edit {
@@ -152,7 +152,7 @@
   top: 0.25rem;
   transform: translateY(0);
   font-size: 0.75rem;
-  color: var(--dark-red) !important;
+  color: var(--color-danger-dark) !important;
 }
 
 .floating-label-input input:not(:placeholder-shown) + label {
@@ -167,7 +167,7 @@
   top: 0.25rem;
   transform: translateY(0);
   font-size: 0.75rem;
-  color: var(--dark-red) !important;
+  color: var(--color-danger-dark) !important;
 }
 
 .floating-label-input
