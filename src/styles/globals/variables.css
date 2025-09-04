@@ -1,22 +1,22 @@
 :root {
-  --white: white;
-  --grey: grey;
-  --cream: #f2e7d2;
-  --cream-light: #fffbf4;
-  --cream-opaque: #fffbf4da;
-  --cream-lighter: #fdf8f0;
-  --lighter-brown: #523f1955;
-  --light-brown: #523f19bf;
-  --brown: #55443c;
-  --dark-brown: #342a24;
-  --red: #933c1f;
-  --dark-red: #7e341b;
-  --error-red: #c03636;
-  --pink: #f8e8e8;
-  --dark-pink: #c58293a4;
-  --green: #2a905d;
-  --shadow-black: #0000000d;
-  --error-shadow: #ef444411;
+  --color-surface-primary: white;
+  --color-text-secondary: grey;
+  --color-background-primary: #f2e7d2;
+  --color-background-secondary: #fffbf4;
+  --color-background-overlay: #fffbf4da;
+  --color-background-tertiary: #fdf8f0;
+  --color-border-light: #523f1955;
+  --color-border-medium: #523f19bf;
+  --color-text-primary: #55443c;
+  --color-text-strong: #342a24;
+  --color-danger: #933c1f;
+  --color-danger-dark: #7e341b;
+  --color-error: #c03636;
+  --color-error-background: #f8e8e8;
+  --color-accent: #c58293a4;
+  --color-success: #2a905d;
+  --color-shadow: #0000000d;
+  --color-error-shadow: #ef444411;
 
   --font-size-small: 0.8rem;
   --font-size-base: 1rem;
@@ -34,25 +34,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* TODO Rename the colours to primary, secondary etc. */
-    --cream: #55443c;
-    --brown: #ccb3a3;
-    --cream-light: #342a24;
-    --dark-brown: #d4c2b3;
-    --cream-opaque: #342a24da;
-    --white: #342a24;
-    /* Fix the grey colour below */
-    --grey: #b6a991;
-    --cream-lighter: #3a2f28;
-    --light-brown: #a08777bf;
-    --lighter-brown: #a0877755;
-    --red: #d4736a;
-    --dark-red: #c5635a;
-    --error-red: #e57373;
-    --pink: #3a302e;
-    --dark-pink: #8b6b7aa4;
-    --green: #4db380;
-    --shadow-black: #00000033;
-    --error-shadow: #e5737322;
+    /* Dark mode semantic color overrides */
+    --color-background-primary: #55443c;
+    --color-text-primary: #ccb3a3;
+    --color-background-secondary: #342a24;
+    --color-text-strong: #d4c2b3;
+    --color-background-overlay: #342a24da;
+    --color-surface-primary: #342a24;
+    --color-text-secondary: #b6a991;
+    --color-background-tertiary: #3a2f28;
+    --color-border-medium: #a08777bf;
+    --color-border-light: #a0877755;
+    --color-danger: #d4736a;
+    --color-danger-dark: #c5635a;
+    --color-error: #e57373;
+    --color-error-background: #3a302e;
+    --color-accent: #8b6b7aa4;
+    --color-success: #4db380;
+    --color-shadow: #00000033;
+    --color-error-shadow: #e5737322;
   }
 }

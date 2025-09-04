@@ -169,7 +169,9 @@ describe("useCategories", () => {
       expect(getCategoriesWithPreferences).toHaveBeenCalledWith("de");
     });
 
-    expect(result.current.categories).toEqual(mockGermanCategories);
+    await waitFor(() => {
+      expect(result.current.categories).toEqual(mockGermanCategories);
+    });
   });
 
   test("provides refresh function that reloads categories", async () => {

@@ -21,17 +21,17 @@
 }
 
 .confirmation-modal-content {
-  background: var(--white);
+  background: var(--color-surface-primary);
   border-radius: var(--border-radius);
   padding: 1.5rem;
-  box-shadow: 0 1rem 3rem var(--shadow-black);
+  box-shadow: 0 1rem 3rem var(--color-shadow);
   max-width: 90vw;
   max-height: 90vh;
   min-width: 20rem;
 }
 
 .confirmation-modal-title {
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
   font-family: forta;
   margin-bottom: 1rem;
   font-size: 1.25rem;
@@ -40,13 +40,13 @@
 }
 
 .confirmation-modal-message {
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
   margin: 0 0 1rem 0;
   font-weight: 500;
 }
 
 .confirmation-modal-secondary-message {
-  color: var(--grey);
+  color: var(--color-text-secondary);
   margin: 0 0 1rem 0;
   font-size: 0.9rem;
   font-weight: 400;
@@ -70,11 +70,11 @@
 }
 
 .warning-notice {
-  background-color: var(--pink);
-  border: 1px solid var(--red);
+  background-color: var(--color-error-background);
+  border: 1px solid var(--color-danger);
   border-radius: var(--border-radius);
   padding: 0.75rem 1rem;
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
   font-size: 0.9rem;
 }
 
@@ -90,7 +90,7 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
 }
 
 .share-url-input {
@@ -109,16 +109,16 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
   padding: 0.5rem;
 }
 
 .share-error-box {
   padding: 0.75rem;
-  background-color: var(--pink);
-  border: 1px dashed var(--error-red);
+  background-color: var(--color-error-background);
+  border: 1px dashed var(--color-error);
   border-radius: 6px;
-  color: var(--error-red);
+  color: var(--color-error);
   margin-bottom: 1rem;
 }
 

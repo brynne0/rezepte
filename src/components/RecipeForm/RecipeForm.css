@@ -62,7 +62,7 @@
 
 .ingredient-section.dragging,
 .ingredient-row.dragging {
-  background-color: var(--cream-light);
+  background-color: var(--color-background-secondary);
 }
 
 /* Ingredient rows */
@@ -90,7 +90,7 @@
   align-items: center;
   justify-content: center;
   cursor: grab;
-  color: var(--brown);
+  color: var(--color-text-primary);
 }
 
 .drag-handle:active {
@@ -125,12 +125,12 @@
 
 .source-toggle {
   flex-shrink: 0;
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
   transition: color 0.2s ease;
 }
 
 .source-toggle:hover {
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
 }
 
 /* Responsive */
