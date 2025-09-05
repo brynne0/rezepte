@@ -6,6 +6,7 @@ export const useAuth = () => {
   const [isGuest, setIsGuest] = useState(false);
   const [isMe, setIsMe] = useState(false);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Check if user is logged in
   useEffect(() => {
@@ -14,19 +15,21 @@ export const useAuth = () => {
       setUser(session?.user || null);
       setIsGuest(session?.user?.user_metadata?.is_guest === true);
       setIsMe(session?.user?.user_metadata?.is_me === true);
+      setLoading(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
       setUser(session?.user || null);
       setIsGuest(session?.user?.user_metadata?.is_guest === true);
       setIsMe(session?.user?.user_metadata?.is_me === true);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  return { isGuest, isLoggedIn, isMe, user };
+  return { isGuest, isLoggedIn, isMe, user, loading };
 };
