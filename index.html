@@ -85,8 +85,8 @@
   <body>
     <div id="root"></div>
     <script>
-      // Update theme-color meta tag based on user preference
-      function updateThemeColor() {
+      // Set initial theme color on page load
+      function setInitialThemeColor() {
         const savedTheme = localStorage.getItem("theme");
         const systemPrefersDark = window.matchMedia(
           "(prefers-color-scheme: dark)"
@@ -106,14 +106,7 @@
       }
 
       // Set initial theme color
-      updateThemeColor();
-
-      // Listen for theme changes
-      window.addEventListener("storage", function (e) {
-        if (e.key === "theme") {
-          updateThemeColor();
-        }
-      });
+      setInitialThemeColor();
     </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>

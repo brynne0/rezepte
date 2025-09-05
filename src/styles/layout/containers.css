@@ -59,6 +59,7 @@
   position: relative;
   justify-content: center;
   align-items: center;
+  color: var(--color-text-primary);
 }
 
 /* Flex utilities */

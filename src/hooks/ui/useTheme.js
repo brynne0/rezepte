@@ -14,6 +14,23 @@ export const useTheme = () => {
   useEffect(() => {
     localStorage.setItem("theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
+    
+    // Update theme-color meta tag for mobile browsers
+    const updateThemeColor = () => {
+      const themeColor = theme === "dark" ? "#55443c" : "#f2e7d2";
+      
+      // Remove existing theme-color meta tags
+      const existingTags = document.querySelectorAll('meta[name="theme-color"]');
+      existingTags.forEach(tag => tag.remove());
+      
+      // Add new theme-color meta tag
+      const newMetaTag = document.createElement("meta");
+      newMetaTag.name = "theme-color";
+      newMetaTag.content = themeColor;
+      document.head.appendChild(newMetaTag);
+    };
+    
+    updateThemeColor();
   }, [theme]);
 
   const toggleTheme = () => {
