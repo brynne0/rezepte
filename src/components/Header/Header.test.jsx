@@ -11,6 +11,12 @@ import "@testing-library/jest-dom";
 vi.mock("../../hooks/data/useAuth");
 vi.mock("../../services/auth");
 vi.mock("../../hooks/ui/useClickOutside");
+vi.mock("../../hooks/ui/useTheme", () => ({
+  useTheme: () => ({
+    theme: "light",
+    toggleTheme: vi.fn(),
+  }),
+}));
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {

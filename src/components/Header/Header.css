@@ -189,7 +189,7 @@
   padding: 0.5rem 0.75rem;
   font-weight: 500;
   color: var(--color-text-primary);
-  border-bottom: var(--border-width) solid var(--dark-brown);
+  border-bottom: var(--border-width) solid var(--color-text-strong);
   margin-bottom: 0.25rem;
 }
 

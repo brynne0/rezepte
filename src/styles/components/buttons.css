@@ -79,8 +79,8 @@ a.btn-unstyled {
 }
 
 .btn-secondary:hover {
-  color: var(--light-brown);
-  border-color: var(--light-brown);
+  color: var(--color-border-medium);
+  border-color: var(--color-border-medium);
   box-shadow: 0 0.25rem 0.5rem var(--shadow-black);
 }
 
