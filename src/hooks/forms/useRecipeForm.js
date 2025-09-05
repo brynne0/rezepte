@@ -604,24 +604,28 @@ export const useRecipeForm = ({
       const currentIndex = allTextareas.indexOf(current);
       const nextTextarea = allTextareas[currentIndex + 1];
 
+      const focusAndActivate = (textarea) => {
+        // Use a single requestAnimationFrame to ensure smooth operation
+        requestAnimationFrame(() => {
+          textarea.focus();
+          // For mobile: trigger both focus and selection to ensure keyboard opens
+          textarea.setSelectionRange(0, 0);
+          // Only click if the textarea is empty to avoid double-tap issues
+          if (!textarea.value.trim()) {
+            textarea.click();
+          }
+        });
+      };
+
       if (nextTextarea) {
-        // Focus and trigger mobile keyboard
-        nextTextarea.focus();
-        // Small delay to ensure focus is set, then trigger click for mobile keyboard
-        setTimeout(() => {
-          nextTextarea.click();
-        }, 10);
+        focusAndActivate(nextTextarea);
       } else {
         addInstruction();
         setTimeout(() => {
           const newTextareas = document.querySelectorAll(".input--textarea");
           if (newTextareas.length > 0) {
             const lastTextarea = newTextareas[newTextareas.length - 1];
-            lastTextarea.focus();
-            // Trigger click for mobile keyboard after focus
-            setTimeout(() => {
-              lastTextarea.click();
-            }, 10);
+            focusAndActivate(lastTextarea);
           }
         }, 50);
       }
