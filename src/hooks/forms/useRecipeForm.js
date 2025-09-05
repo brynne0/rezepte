@@ -598,36 +598,44 @@ export const useRecipeForm = ({
   const handleEnter = (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
+      event.stopPropagation();
 
       const current = event.target;
       const allTextareas = [...document.querySelectorAll(".input--textarea")];
       const currentIndex = allTextareas.indexOf(current);
       const nextTextarea = allTextareas[currentIndex + 1];
 
-      const focusAndActivate = (textarea) => {
-        // Use a single requestAnimationFrame to ensure smooth operation
-        requestAnimationFrame(() => {
+      const focusTextarea = (textarea) => {
+        // Blur current element first
+        current.blur();
+        
+        // Use a longer delay for mobile
+        setTimeout(() => {
           textarea.focus();
-          // For mobile: trigger both focus and selection to ensure keyboard opens
-          textarea.setSelectionRange(0, 0);
-          // Only click if the textarea is empty to avoid double-tap issues
-          if (!textarea.value.trim()) {
-            textarea.click();
-          }
-        });
+          // Set cursor at end of text
+          const length = textarea.value.length;
+          textarea.setSelectionRange(length, length);
+          
+          // Force mobile keyboard with a synthetic touch event
+          const touchEvent = new TouchEvent('touchstart', {
+            bubbles: true,
+            cancelable: true,
+          });
+          textarea.dispatchEvent(touchEvent);
+        }, 100);
       };
 
       if (nextTextarea) {
-        focusAndActivate(nextTextarea);
+        focusTextarea(nextTextarea);
       } else {
         addInstruction();
         setTimeout(() => {
           const newTextareas = document.querySelectorAll(".input--textarea");
           if (newTextareas.length > 0) {
             const lastTextarea = newTextareas[newTextareas.length - 1];
-            focusAndActivate(lastTextarea);
+            focusTextarea(lastTextarea);
           }
-        }, 50);
+        }, 150);
       }
     }
   };
