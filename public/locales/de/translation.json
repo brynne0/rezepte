@@ -167,6 +167,7 @@
   "delete_category_confirmation": "Sind Sie sicher, dass Sie '{{categoryName}}' löschen möchten?",
   "delete_category_warning": "Alle Rezepte in dieser Kategorie gehören dann zu keiner Kategorie mehr und sind nur noch unter 'Alle Rezepte' zu finden.",
   "category_name_required": "Kategoriename ist erforderlich",
+  "category_name_already_exists": "Diese Kategorie existiert bereits",
   "select_category": "Wählen Sie eine Kategorie",
   "select_option": "Wählen Sie eine Option",
   "open_options": "Optionen öffnen",

@@ -248,7 +248,7 @@ function AppRoutes(props) {
         <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route
           path="/settings"
-          element={<Settings refreshCategories={refreshCategories} />}
+          element={<Settings refreshCategories={refreshCategories} resetCategoryFilter={() => props.setSelectedCategory("all")} />}
         />
       </Routes>
     </>

@@ -116,10 +116,14 @@
   font-family: forta;
 }
 
-/* TODO - make sure to remove hover for mobile here */
-.tab-button:hover,
 .tab-button.active {
   color: var(--color-danger);
+}
+
+@media (hover: hover) {
+  .tab-button:hover {
+    color: var(--red);
+  }
 }
 
 .tab-button.active {

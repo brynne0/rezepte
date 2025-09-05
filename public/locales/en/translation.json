@@ -167,6 +167,7 @@
   "delete_category_confirmation": "Are you sure you want to delete '{{categoryName}}'?",
   "delete_category_warning": "All recipes in this category will no longer belong to a category and can only be found in All Recipes.",
   "category_name_required": "Category name is required",
+  "category_name_already_exists": "This category already exists",
   "select_category": "Select a Category",
   "select_option": "Select an option",
   "open_options": "Open options",

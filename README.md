@@ -9,24 +9,34 @@ Built to have all my recipes in one place and add ingredients to a grocery list.
 
 ## Features
 ### Current functionality:
-- View, add, edit and delete recipes
-- Filter recipes based on category
-- Search recipes (search icon)
-- Login functionality (squirrel icon)
-- Responsive design for mobiles
+- Display my recipes as default when users not logged in
+- Login/signup and account management functionality
+- Filter, search and sort recipes
+- Users can view, add, edit and delete their own recipes
+- Users can add images and toggle image visibility on home page (images hidden when not logged in)
+- Users can share recipe using individual shared links 
+- Responsive design for mobiles (drop down menu)
 - Multi-language interface (German and English)
+- Grocery list (cart icon) - ingredients can be added from recipes
 
 ### In Progress/Future functionality:
-- Grocery list (cart icon) to contain all ingredients added from recipes 
-- Import grocery list ingredients to external Reminders app grocery list or pdf
-- Alter login functionality so users can only view, add, edit and delete their own recipes, currently users can only view mine
+- Export grocery list ingredients to external Reminders app grocery list or pdf
+- Category Management - add, remove and reorder recipe categories
+- Cooking times page to display common cooking times and conversions (e.g. cup to tbsp)
+- Shared link management - bulk select and alter if recipes are public
+- Friend system - add friends and browse their recipes
+- Imaging cropping - crop and reposition recipe images
 
 ### Screenshots:
 
-<img width="500" alt="Home Page" src="https://github.com/user-attachments/assets/4be7bd17-3448-4ca9-a1e6-a3b4cf8df1fe" />
-<img width="500" alt="Recipe Page" src="https://github.com/user-attachments/assets/e118e8d6-3e1b-4a60-9c2b-c872defb6827" />
-<img width="500" alt="Add Recipe Page" src="https://github.com/user-attachments/assets/9ea19b2f-f5eb-4fd6-9e38-b80535f5ed06" />
-<img width="173.5" alt="Home Page on iPhone" src="https://github.com/user-attachments/assets/e947cab7-6699-4b3c-a3cf-59d01548c913" />
+<img width="200" alt="Mobile Homepage" src="https://github.com/user-attachments/assets/3db0bbcf-5700-4e3c-ae0f-0ad8a6fd70ec" />
+<img width="200"  alt="Mobile Recipe" src="https://github.com/user-attachments/assets/bd4f90ca-ecc2-4175-87b1-7875d5ccaf27" />
+<img width="200"  alt="Login/Signup" src="https://github.com/user-attachments/assets/564674f9-4728-46e7-ae7d-5d6144f7cc6d" />
+<img width="200"  alt="Share Recipe" src="https://github.com/user-attachments/assets/ebf903ba-0e69-4006-aaa1-f37f9f6b2b3a" />
+<img width="400" alt="Desktop Homepage" src="https://github.com/user-attachments/assets/f7fc5696-d339-4f45-b3ad-86b452340d5f" />
+<img width="400"  alt="Desktop Recipe" src="https://github.com/user-attachments/assets/d4162af4-137b-4af9-87b0-644e0dc12eec" />
+<img width="400" alt="Add Recipe Page" src="https://github.com/user-attachments/assets/0a59b9e5-9138-4833-a754-7a03cebaa4a4" />
+
 
 ### Deployment:
 www.acorn-rezepte.com
