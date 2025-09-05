@@ -24,6 +24,7 @@ import Header from "./components/Header/Header";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Pagination from "./components/Pagination/Pagination";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { Squirrel } from "lucide-react";
 
 // Pages
@@ -225,19 +226,29 @@ function AppRoutes(props) {
         />
         <Route
           path="/add-recipe"
-          element={<AddRecipePage categories={props.categories} />}
+          element={
+            <ProtectedRoute>
+              <AddRecipePage categories={props.categories} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/edit-recipe/:id/:slug"
-          element={<EditRecipePage categories={props.categories} />}
+          element={
+            <ProtectedRoute>
+              <EditRecipePage categories={props.categories} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/grocery-list"
           element={
-            <GroceryList
-              isEditing={isGroceryListEditing}
-              setIsEditing={setIsGroceryListEditing}
-            />
+            <ProtectedRoute>
+              <GroceryList
+                isEditing={isGroceryListEditing}
+                setIsEditing={setIsGroceryListEditing}
+              />
+            </ProtectedRoute>
           }
         />
         <Route
@@ -248,7 +259,11 @@ function AppRoutes(props) {
         <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route
           path="/settings"
-          element={<Settings refreshCategories={refreshCategories} resetCategoryFilter={() => props.setSelectedCategory("all")} />}
+          element={
+            <ProtectedRoute>
+              <Settings refreshCategories={refreshCategories} />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </>
