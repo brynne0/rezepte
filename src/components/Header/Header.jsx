@@ -158,20 +158,20 @@ const Header = ({
       {showUserDropdown && (
         <div className="dropdown user-menu">
           <div className="dropdown-content">
+            <button
+              className="dropdown-item"
+              onClick={() => {
+                toggleTheme();
+                setShowUserDropdown(false);
+              }}
+              aria-label={
+                theme === "light" ? t("theme_dark") : t("theme_light")
+              }
+            >
+              {getThemeIcon()}
+            </button>
             {isLoggedIn ? (
               <>
-                <button
-                  className="dropdown-item"
-                  onClick={() => {
-                    toggleTheme();
-                    setShowUserDropdown(false);
-                  }}
-                  aria-label={
-                    theme === "light" ? t("theme_dark") : t("theme_light")
-                  }
-                >
-                  {getThemeIcon()}
-                </button>
                 <button
                   className={`dropdown-item ${
                     location.pathname === "/settings" ? "selected" : ""
