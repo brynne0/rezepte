@@ -67,6 +67,20 @@
       href="https://fonts.googleapis.com/css2?family=Savate:ital,wght@0,200..900;1,200..900&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Set theme immediately to prevent flash
+      (function () {
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const isDark = savedTheme ? savedTheme === "dark" : systemPrefersDark;
+
+        if (isDark) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
