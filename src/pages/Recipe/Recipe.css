@@ -9,10 +9,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background-color: var(--pink);
-  border: 1px solid var(--dark-red);
+  background-color: var(--color-error-background);
+  border: 1px solid var(--color-danger-dark);
   border-radius: var(--border-radius);
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
   font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
@@ -61,7 +61,7 @@
 }
 
 .ingredient-notes {
-  color: grey;
+  color: var(--color-text-secondary);
 }
 
 /* Shopping cart */
@@ -74,7 +74,7 @@
   position: absolute;
   top: -2px;
   right: -2px;
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
   font-size: 12px;
   font-weight: bold;
 }
@@ -117,7 +117,7 @@
   left: -1rem;
   right: -1rem;
   bottom: -1rem;
-  background: var(--cream-lighter);
+  background: var(--color-background-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;

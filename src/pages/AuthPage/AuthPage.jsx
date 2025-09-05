@@ -226,7 +226,7 @@ const AuthPage = ({ setLoginMessage }) => {
                       setValidationErrors((prev) => ({ ...prev, email: "" }));
                     }}
                     placeholder=" "
-                    className={`input input--cream input--with-icon ${
+                    className={`input input--secondary input--with-icon ${
                       validationErrors.email ? "input--error" : ""
                     }`}
                   />
@@ -254,7 +254,7 @@ const AuthPage = ({ setLoginMessage }) => {
                       }));
                     }}
                     placeholder=" "
-                    className={`input input--cream input--with-icon ${
+                    className={`input input--secondary input--with-icon ${
                       validationErrors.firstName ? "input--error" : ""
                     }`}
                   />
@@ -282,7 +282,7 @@ const AuthPage = ({ setLoginMessage }) => {
                   setValidationErrors((prev) => ({ ...prev, username: "" }));
                 }}
                 placeholder=" "
-                className={`input input--cream input--with-icon ${
+                className={`input input--secondary input--with-icon ${
                   validationErrors.username ? "input--error" : ""
                 }`}
               />
@@ -308,7 +308,7 @@ const AuthPage = ({ setLoginMessage }) => {
                   setValidationErrors((prev) => ({ ...prev, password: "" }));
                 }}
                 placeholder=" "
-                className={`input input--cream input--with-icon ${
+                className={`input input--secondary input--with-icon ${
                   validationErrors.password ? "input--error" : ""
                 }`}
               />

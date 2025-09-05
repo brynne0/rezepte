@@ -43,6 +43,7 @@
   "invalid_session": "Invalid session",
   "session_expired": "Session expired",
   "go_to_login": "Go to login",
+  "go_to_home": "Go to home",
 
   "firstname_required": "First name is required",
   "username_required": "Username is required",
@@ -61,6 +62,8 @@
   "password_requirements_not_met": "Password must meet all requirements",
 
   "settings": "Settings",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
   "preferred_language": "Preferred Language",
   "successfully_updated_username": "Successfully updated username",
   "successfully_updated_first_name": "Successfully updated first name",

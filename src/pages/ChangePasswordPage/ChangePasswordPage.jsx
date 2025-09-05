@@ -230,7 +230,7 @@ const ChangePasswordPage = () => {
                     }));
                   }}
                   placeholder=" "
-                  className={`input input--cream ${
+                  className={`input input--secondary ${
                     validationErrors.oldPassword ? "input--error" : ""
                   }`}
                 />
@@ -254,7 +254,7 @@ const ChangePasswordPage = () => {
                   setValidationErrors((prev) => ({ ...prev, newPassword: "" }));
                 }}
                 placeholder=" "
-                className={`input input--cream ${
+                className={`input input--secondary ${
                   validationErrors.newPassword ? "input--error" : ""
                 }`}
               />
@@ -280,7 +280,7 @@ const ChangePasswordPage = () => {
                   }));
                 }}
                 placeholder=" "
-                className={`input input--cream ${
+                className={`input input--secondary ${
                   validationErrors.newPasswordRepeat ? "input--error" : ""
                 }`}
               />

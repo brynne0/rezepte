@@ -23,11 +23,11 @@
 
 .btn-page:hover,
 .btn-page.active {
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
 }
 
 .btn-page.active {
-  border: 2px solid var(--dark-red);
+  border: 2px solid var(--color-danger-dark);
   border-radius: var(--border-radius);
 }
 

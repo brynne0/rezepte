@@ -81,7 +81,7 @@ const ForgotPasswordPage = () => {
             <div className="input-with-icon floating-label-input">
               <Mail size={20} />
               <input
-                className={`input input--cream ${
+                className={`input input--secondary ${
                   validationErrors.email ? "input--error" : ""
                 }`}
                 id="reset-email"

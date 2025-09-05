@@ -4,7 +4,7 @@
   justify-content: center;
   gap: 0.5rem;
   min-height: 70vh;
-  stroke: var(--brown);
+  stroke: var(--color-text-primary);
 }
 
 .loading-acorn-small {
@@ -59,7 +59,7 @@
 }
 
 .loading-squirrel svg {
-  color: var(--brown);
+  color: var(--color-text-primary);
   width: 5rem;
   height: 5rem;
 }
@@ -83,7 +83,7 @@
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: var(--z-content);
-  color: var(--brown);
+  color: var(--color-text-primary);
 }
 
 /* Reusable modal loading overlay */
@@ -99,5 +99,5 @@
   justify-content: center;
   z-index: var(--z-modal);
   cursor: pointer;
-  color: var(--cream-light);
+  color: var(--color-background-secondary);
 }

@@ -1,5 +1,5 @@
 :root {
-  background-color: var(--cream);
+  background-color: var(--color-background-primary);
   color-scheme: light dark;
 
   font-family: "Gabarito", sans-serif;
@@ -9,7 +9,7 @@
   font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
   line-height: 1.5;
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
 
   /* Font rendering */
   font-synthesis: none;
@@ -54,7 +54,7 @@ h3 {
 
 h1.forta-red {
   font-family: var(--font-forta);
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
   /* TODO - maybe remove below line? */
   line-height: 1;
 }
@@ -90,33 +90,33 @@ h3.forta {
 }
 
 .link:hover {
-  color: var(--red);
+  color: var(--color-danger);
 }
 
 .link-red {
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
 .error-message-small {
-  color: var(--error-red);
+  color: var(--color-error);
   font-size: 0.8rem;
 }
 
 .error-message {
-  color: var(--error-red);
+  color: var(--color-error);
   font-size: 1rem;
 }
 
 .grey-small {
-  color: grey;
+  color: var(--color-text-secondary);
   font-size: 0.9em;
 }
 
 .red-small {
   font-size: 0.9rem;
-  color: var(--dark-red);
+  color: var(--color-danger-dark);
   font-weight: 500;
   line-height: 1;
 }

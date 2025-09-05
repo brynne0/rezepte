@@ -4,9 +4,9 @@
   border-radius: var(--border-radius);
   font-size: 1rem;
   font-family: inherit;
-  color: var(--dark-brown);
-  background: white;
-  border: var(--border-width) solid var(--dark-brown);
+  color: var(--color-text-strong);
+  background: var(--color-surface-primary);
+  border: var(--border-width) solid var(--color-text-strong);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
   min-width: 0;
@@ -16,26 +16,26 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--dark-red);
+  border-color: var(--color-danger-dark);
 }
 
 .input:invalid {
-  color: grey;
+  color: var(--color-text-secondary);
 }
 
 /* Variations */
-.input--cream {
-  background: var(--cream-light);
+.input--secondary {
+  background: var(--color-background-secondary);
   padding: 0.5rem;
 }
 
-.input--cream:focus {
-  border-color: var(--dark-brown);
+.input--secondary:focus {
+  border-color: var(--color-text-strong);
 }
 
 .input--edit {
-  box-shadow: 0 0.0625rem 0.1rem var(--shadow-black);
-  border: var(--border-width) solid var(--lighter-brown);
+  box-shadow: 0 0.0625rem 0.1rem var(--color-shadow);
+  border: var(--border-width) solid var(--color-border-light);
 }
 
 .input--edit:focus {
@@ -64,13 +64,13 @@
 /* Error state */
 .input--error {
   border-width: 0.1rem;
-  border: 0.1rem dashed var(--error-red);
+  border: 0.1rem dashed var(--color-error);
   border-radius: var(--border-radius);
 }
 
 .input--error:focus {
-  border-color: var(--error-red);
-  box-shadow: 0 0 0 0.2rem var(--error-shadow);
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 0.2rem var(--color-error-shadow);
 }
 
 /* Disabled state cleanup */
@@ -102,7 +102,7 @@
 .input-with-icon svg {
   position: absolute;
   left: 0.75rem;
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
   z-index: var(--z-content);
 }
 
@@ -141,7 +141,7 @@
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: grey;
+  color: var(--color-text-secondary);
   font-size: 1rem;
   pointer-events: none;
   transition: all 0.2s ease;
@@ -152,14 +152,14 @@
   top: 0.25rem;
   transform: translateY(0);
   font-size: 0.75rem;
-  color: var(--dark-red) !important;
+  color: var(--color-danger-dark) !important;
 }
 
 .floating-label-input input:not(:placeholder-shown) + label {
   top: 0.25rem;
   transform: translateY(0);
   font-size: 0.75rem;
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
 }
 
 /* For PasswordInput: when input inside relative-center is focused/has content, target the label after relative-center */
@@ -167,7 +167,7 @@
   top: 0.25rem;
   transform: translateY(0);
   font-size: 0.75rem;
-  color: var(--dark-red) !important;
+  color: var(--color-danger-dark) !important;
 }
 
 .floating-label-input
@@ -176,7 +176,7 @@
   top: 0.25rem;
   transform: translateY(0);
   font-size: 0.75rem;
-  color: var(--dark-brown);
+  color: var(--color-text-strong);
 }
 
 /* Adjust padding for PasswordInput in floating label */
@@ -185,7 +185,7 @@
 }
 
 .floating-label-input input:focus {
-  border-color: var(--dark-red);
+  border-color: var(--color-danger-dark);
 }
 
 /* Floating Label with Icons - just positioning adjustments */

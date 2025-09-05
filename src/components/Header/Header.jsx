@@ -7,11 +7,14 @@ import {
   Squirrel,
   Menu,
   User,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import useClickOutside from "../../hooks/ui/useClickOutside";
+import { useTheme } from "../../hooks/ui/useTheme";
 import SortButtons from "../SortButtons/SortButtons";
 import "./Header.css";
 
@@ -32,6 +35,7 @@ const Header = ({
   const location = useLocation();
 
   const { isLoggedIn } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   // Hide search bar on all pages except home
   const isHomePage = location.pathname === "/";
@@ -127,6 +131,11 @@ const Header = ({
     </div>
   );
 
+  // Get theme icon
+  const getThemeIcon = () => {
+    return theme === "light" ? <Moon size={20} /> : <Sun size={20} />;
+  };
+
   // Reusable User Dropdown Component
   const UserDropdown = () => (
     <div className={"user-icon-wrapper"} ref={userDropdownRef}>
@@ -149,6 +158,18 @@ const Header = ({
       {showUserDropdown && (
         <div className="dropdown user-menu">
           <div className="dropdown-content">
+            <button
+              className="dropdown-item"
+              onClick={() => {
+                toggleTheme();
+                setShowUserDropdown(false);
+              }}
+              aria-label={
+                theme === "light" ? t("theme_dark") : t("theme_light")
+              }
+            >
+              {getThemeIcon()}
+            </button>
             {isLoggedIn ? (
               <>
                 <button
@@ -197,7 +218,6 @@ const Header = ({
           <div className="logo-language-wrapper">
             {/* <button className="btn-unstyled"> */}
             <Squirrel size={40} className="header-logo" />
-            {/* </button> */}
 
             {/* {isMe && (
                 <Squirrel
@@ -222,6 +242,7 @@ const Header = ({
               onClick={() => {
                 navigate("/");
               }}
+              aria-label={t("go_to_home")}
             >
               Rezepte
             </button>
@@ -294,9 +315,9 @@ const Header = ({
                             navigate("/add-recipe");
                             setShowNavMenu(false);
                           }}
+                          aria-label={t("add_new_recipe")}
                         >
                           <Plus size={20} />
-                          {/* {t("add_new_recipe")} */}
                         </button>
                         <button
                           className={`dropdown-item ${
@@ -308,9 +329,9 @@ const Header = ({
                             navigate("/grocery-list");
                             setShowNavMenu(false);
                           }}
+                          aria-label={t("grocery_list")}
                         >
                           <ShoppingBasket size={20} />
-                          {/* {t("grocery_list")} */}
                         </button>
                       </>
                     )}
@@ -351,7 +372,7 @@ const Header = ({
                         setSelectedCategory("all");
                       }
                     }}
-                    className="input input--cream search-input-with-icon"
+                    className="input input--secondary search-input-with-icon"
                     placeholder={t("search")}
                   />
                   <button

@@ -3,19 +3,19 @@
 }
 
 .image-upload-area {
-  border: var(--border-width) dashed var(--brown);
+  border: var(--border-width) dashed var(--color-text-primary);
   border-radius: var(--border-radius);
   padding: 1.5rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: var(--cream-light);
+  background: var(--color-background-secondary);
 }
 
 .image-upload-area:hover,
 .image-upload-area.drag-over {
-  border-color: var(--dark-red);
-  background: var(--pink);
+  border-color: var(--color-danger-dark);
+  background: var(--color-error-background);
 }
 
 .image-preview-grid {
@@ -34,12 +34,12 @@
   position: relative;
   border-radius: var(--border-radius);
   overflow: hidden;
-  border: var(--border-width) solid var(--lighter-brown);
+  border: var(--border-width) solid var(--color-border-light);
   transition: all 0.2s ease;
 }
 
 .image-preview-item.is-main {
-  border-color: var(--dark-red);
+  border-color: var(--color-danger-dark);
 }
 
 .image-preview {
@@ -56,7 +56,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--cream-light);
+  background: var(--color-background-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,11 +70,11 @@
 }
 
 .image-preview-item:hover {
-  border: var(--border-width) dashed var(--dark-red);
+  border: var(--border-width) dashed var(--color-danger-dark);
 }
 
 .image-action-btn {
-  color: var(--red) !important;
+  color: var(--color-danger) !important;
 }
 
 .image-action-btn:hover {
@@ -85,8 +85,8 @@
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
-  background: var(--dark-red);
-  color: white;
+  background: var(--color-danger-dark);
+  color: var(--color-surface-primary);
   padding: 0.25rem 0.5rem;
   border-radius: var(--border-radius);
   font-size: var(--font-size-small);

@@ -5,12 +5,19 @@ import Header from "./Header";
 import { useAuth } from "../../hooks/data/useAuth";
 import { signOut, getFirstName } from "../../services/auth";
 import useClickOutside from "../../hooks/ui/useClickOutside";
+import { useTheme } from "../../hooks/ui/useTheme";
 import "@testing-library/jest-dom";
 
 // Mock the hooks and services
 vi.mock("../../hooks/data/useAuth");
 vi.mock("../../services/auth");
 vi.mock("../../hooks/ui/useClickOutside");
+vi.mock("../../hooks/ui/useTheme", () => ({
+  useTheme: vi.fn(() => ({
+    theme: "light",
+    toggleTheme: vi.fn(),
+  })),
+}));
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
@@ -36,6 +43,8 @@ const mockT = vi.fn((key) => {
     grocery_list: "Grocery List",
     user_menu: "User Menu",
     settings: "Settings",
+    theme_dark: "Switch to dark mode",
+    theme_light: "Switch to light mode",
   };
   return translations[key] || key;
 });
@@ -59,6 +68,7 @@ describe("Header Component", () => {
   let mockSignOut;
   let mockGetFirstName;
   let mockUseClickOutside;
+  let mockToggleTheme;
 
   const defaultProps = {
     setSelectedCategory: vi.fn(),
@@ -75,6 +85,7 @@ describe("Header Component", () => {
     mockSignOut = vi.fn().mockResolvedValue();
     mockGetFirstName = vi.fn().mockResolvedValue("John");
     mockUseClickOutside = vi.fn().mockReturnValue({ current: null });
+    mockToggleTheme = vi.fn();
 
     mockUseAuth = vi.fn().mockReturnValue({
       isLoggedIn: false,
@@ -89,6 +100,10 @@ describe("Header Component", () => {
     signOut.mockImplementation(mockSignOut);
     getFirstName.mockImplementation(mockGetFirstName);
     useClickOutside.mockImplementation(mockUseClickOutside);
+    useTheme.mockReturnValue({
+      theme: "light",
+      toggleTheme: mockToggleTheme,
+    });
 
     // Reset function mocks
     vi.clearAllMocks();
@@ -1153,6 +1168,186 @@ describe("Header Component", () => {
         searchTerm.length
       );
       expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith("all");
+    });
+  });
+
+  describe("Dark Mode Toggle Functionality", () => {
+    test("shows moon icon when theme is light", () => {
+      useTheme.mockReturnValue({
+        theme: "light",
+        toggleTheme: mockToggleTheme,
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // Open user dropdown
+      const chefHatButton = screen.getAllByLabelText("Login")[0];
+      fireEvent.click(chefHatButton);
+
+      // Should show moon icon for switching to dark mode (desktop and mobile versions)
+      const themeButtons = screen.getAllByLabelText("Switch to dark mode");
+      expect(themeButtons).toHaveLength(2); // Desktop and mobile versions
+      expect(themeButtons[0]).toBeInTheDocument();
+    });
+
+    test("shows sun icon when theme is dark", () => {
+      useTheme.mockReturnValue({
+        theme: "dark",
+        toggleTheme: mockToggleTheme,
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // Open user dropdown
+      const chefHatButton = screen.getAllByLabelText("Login")[0];
+      fireEvent.click(chefHatButton);
+
+      // Should show sun icon for switching to light mode (desktop and mobile versions)
+      const themeButtons = screen.getAllByLabelText("Switch to light mode");
+      expect(themeButtons).toHaveLength(2); // Desktop and mobile versions
+      expect(themeButtons[0]).toBeInTheDocument();
+    });
+
+    test("calls toggleTheme when theme toggle button is clicked", () => {
+      useTheme.mockReturnValue({
+        theme: "light",
+        toggleTheme: mockToggleTheme,
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // Open user dropdown
+      const chefHatButton = screen.getAllByLabelText("Login")[0];
+      fireEvent.click(chefHatButton);
+
+      // Click theme toggle button
+      const themeButtons = screen.getAllByLabelText("Switch to dark mode");
+      fireEvent.click(themeButtons[0]);
+
+      expect(mockToggleTheme).toHaveBeenCalled();
+    });
+
+    test("closes user dropdown after theme toggle", () => {
+      useTheme.mockReturnValue({
+        theme: "light",
+        toggleTheme: mockToggleTheme,
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // Open user dropdown
+      const chefHatButton = screen.getAllByLabelText("Login")[0];
+      fireEvent.click(chefHatButton);
+
+      // Verify dropdown is open
+      const initialThemeButtons = screen.getAllByLabelText(
+        "Switch to dark mode"
+      );
+      expect(initialThemeButtons).toHaveLength(2); // Desktop and mobile versions
+      expect(initialThemeButtons[0]).toBeInTheDocument();
+
+      // Click theme toggle button
+      fireEvent.click(initialThemeButtons[0]);
+
+      // Verify dropdown closes (theme buttons should no longer be visible)
+      expect(
+        screen.queryByLabelText("Switch to dark mode")
+      ).not.toBeInTheDocument();
+    });
+
+    test("theme toggle is available when not logged in", () => {
+      mockUseAuth.mockReturnValue({
+        isLoggedIn: false,
+        isMe: false,
+        isGuest: false,
+      });
+
+      useTheme.mockReturnValue({
+        theme: "light",
+        toggleTheme: mockToggleTheme,
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // Open user dropdown
+      const chefHatButton = screen.getAllByLabelText("Login")[0];
+      fireEvent.click(chefHatButton);
+
+      // Theme toggle should still be available (desktop and mobile versions)
+      const themeButtons = screen.getAllByLabelText("Switch to dark mode");
+      expect(themeButtons).toHaveLength(2); // Desktop and mobile versions
+      expect(themeButtons[0]).toBeInTheDocument();
+    });
+
+    test("theme toggle is available when logged in", () => {
+      mockUseAuth.mockReturnValue({
+        isLoggedIn: true,
+        isMe: false,
+        isGuest: false,
+      });
+
+      useTheme.mockReturnValue({
+        theme: "dark",
+        toggleTheme: mockToggleTheme,
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // Open user dropdown
+      const chefHatButton = screen.getAllByLabelText("User Menu")[0];
+      fireEvent.click(chefHatButton);
+
+      // Theme toggle should be available (desktop and mobile versions)
+      const themeButtons = screen.getAllByLabelText("Switch to light mode");
+      expect(themeButtons).toHaveLength(2); // Desktop and mobile versions
+      expect(themeButtons[0]).toBeInTheDocument();
+    });
+
+    test("theme toggle works in mobile dropdown", () => {
+      useTheme.mockReturnValue({
+        theme: "light",
+        toggleTheme: mockToggleTheme,
+      });
+
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+
+      // Open user dropdown (both desktop and mobile versions render)
+      const chefHatButtons = screen.getAllByLabelText("Login");
+      fireEvent.click(chefHatButtons[1]); // Click mobile version
+
+      // Theme toggle should work in mobile dropdown too
+      const themeButtons = screen.getAllByLabelText("Switch to dark mode");
+      fireEvent.click(themeButtons[1]); // Click mobile version
+
+      expect(mockToggleTheme).toHaveBeenCalled();
     });
   });
 });
