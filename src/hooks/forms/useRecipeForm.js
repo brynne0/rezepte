@@ -598,31 +598,62 @@ export const useRecipeForm = ({
   const handleEnter = (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      event.stopPropagation();
 
       const current = event.target;
       const allTextareas = [...document.querySelectorAll(".input--textarea")];
       const currentIndex = allTextareas.indexOf(current);
       const nextTextarea = allTextareas[currentIndex + 1];
 
+      // Detect if we're on mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                      ('ontouchstart' in window) || 
+                      (navigator.maxTouchPoints > 0);
+
       const focusTextarea = (textarea) => {
-        // Blur current element first
-        current.blur();
-        
-        // Use a longer delay for mobile
-        setTimeout(() => {
-          textarea.focus();
-          // Set cursor at end of text
-          const length = textarea.value.length;
-          textarea.setSelectionRange(length, length);
+        if (isMobile) {
+          // Mobile-specific approach
+          // First blur everything to clear focus state
+          document.activeElement?.blur();
           
-          // Force mobile keyboard with a synthetic touch event
-          const touchEvent = new TouchEvent('touchstart', {
-            bubbles: true,
-            cancelable: true,
-          });
-          textarea.dispatchEvent(touchEvent);
-        }, 100);
+          // Wait for blur to complete, then focus with user gesture simulation
+          setTimeout(() => {
+            // Focus the textarea
+            textarea.focus();
+            
+            // Immediately trigger a pointerdown event to simulate user interaction
+            const rect = textarea.getBoundingClientRect();
+            const pointerEvent = new PointerEvent('pointerdown', {
+              bubbles: true,
+              cancelable: true,
+              clientX: rect.left + rect.width / 2,
+              clientY: rect.top + rect.height / 2,
+              pointerId: 1,
+              pointerType: 'touch',
+              isPrimary: true
+            });
+            
+            textarea.dispatchEvent(pointerEvent);
+            
+            // Follow up with pointerup
+            setTimeout(() => {
+              const pointerUpEvent = new PointerEvent('pointerup', {
+                bubbles: true,
+                cancelable: true,
+                clientX: rect.left + rect.width / 2,
+                clientY: rect.top + rect.height / 2,
+                pointerId: 1,
+                pointerType: 'touch',
+                isPrimary: true
+              });
+              textarea.dispatchEvent(pointerUpEvent);
+            }, 50);
+            
+          }, 200);
+        } else {
+          // Desktop approach - simple and reliable
+          textarea.focus();
+          textarea.setSelectionRange(0, 0);
+        }
       };
 
       if (nextTextarea) {
@@ -635,7 +666,7 @@ export const useRecipeForm = ({
             const lastTextarea = newTextareas[newTextareas.length - 1];
             focusTextarea(lastTextarea);
           }
-        }, 150);
+        }, isMobile ? 300 : 50);
       }
     }
   };
