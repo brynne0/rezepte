@@ -604,69 +604,16 @@ export const useRecipeForm = ({
       const currentIndex = allTextareas.indexOf(current);
       const nextTextarea = allTextareas[currentIndex + 1];
 
-      // Detect if we're on mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                      ('ontouchstart' in window) || 
-                      (navigator.maxTouchPoints > 0);
-
-      const focusTextarea = (textarea) => {
-        if (isMobile) {
-          // Mobile-specific approach
-          // First blur everything to clear focus state
-          document.activeElement?.blur();
-          
-          // Wait for blur to complete, then focus with user gesture simulation
-          setTimeout(() => {
-            // Focus the textarea
-            textarea.focus();
-            
-            // Immediately trigger a pointerdown event to simulate user interaction
-            const rect = textarea.getBoundingClientRect();
-            const pointerEvent = new PointerEvent('pointerdown', {
-              bubbles: true,
-              cancelable: true,
-              clientX: rect.left + rect.width / 2,
-              clientY: rect.top + rect.height / 2,
-              pointerId: 1,
-              pointerType: 'touch',
-              isPrimary: true
-            });
-            
-            textarea.dispatchEvent(pointerEvent);
-            
-            // Follow up with pointerup
-            setTimeout(() => {
-              const pointerUpEvent = new PointerEvent('pointerup', {
-                bubbles: true,
-                cancelable: true,
-                clientX: rect.left + rect.width / 2,
-                clientY: rect.top + rect.height / 2,
-                pointerId: 1,
-                pointerType: 'touch',
-                isPrimary: true
-              });
-              textarea.dispatchEvent(pointerUpEvent);
-            }, 50);
-            
-          }, 200);
-        } else {
-          // Desktop approach - simple and reliable
-          textarea.focus();
-          textarea.setSelectionRange(0, 0);
-        }
-      };
-
       if (nextTextarea) {
-        focusTextarea(nextTextarea);
+        nextTextarea.focus();
+        nextTextarea.click();
       } else {
         addInstruction();
         setTimeout(() => {
           const newTextareas = document.querySelectorAll(".input--textarea");
-          if (newTextareas.length > 0) {
-            const lastTextarea = newTextareas[newTextareas.length - 1];
-            focusTextarea(lastTextarea);
-          }
-        }, isMobile ? 300 : 50);
+          newTextareas[newTextareas.length - 1].focus();
+          newTextareas[newTextareas.length - 1].click();
+        }, 10);
       }
     }
   };
