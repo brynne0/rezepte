@@ -3,7 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f2e7d2" />
+    <!-- Theme colors for light and dark mode -->
+    <meta
+      name="theme-color"
+      content="#f2e7d2"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#55443c"
+      media="(prefers-color-scheme: dark)"
+    />
     <title>Rezepte</title>
     <meta name="author" content="Brynne O'Brien" />
     <link rel="manifest" href="/eichhörnchen/site.webmanifest" />
@@ -24,6 +34,8 @@
       href="eichhörnchen/apple-touch-icon.png"
     />
     <meta name="apple-mobile-web-app-title" content="Rezepte" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
     <!-- Open Graph Preview -->
     <meta property="og:title" content="Rezepte" />
@@ -58,6 +70,37 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Update theme-color meta tag based on user preference
+      function updateThemeColor() {
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const isDark = savedTheme ? savedTheme === "dark" : systemPrefersDark;
+
+        const themeColor = isDark ? "#55443c" : "#f2e7d2";
+
+        // Update theme-color meta tags
+        const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+        metaTags.forEach((tag) => tag.remove());
+
+        const newMetaTag = document.createElement("meta");
+        newMetaTag.name = "theme-color";
+        newMetaTag.content = themeColor;
+        document.head.appendChild(newMetaTag);
+      }
+
+      // Set initial theme color
+      updateThemeColor();
+
+      // Listen for theme changes
+      window.addEventListener("storage", function (e) {
+        if (e.key === "theme") {
+          updateThemeColor();
+        }
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
