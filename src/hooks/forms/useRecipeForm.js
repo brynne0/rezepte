@@ -605,15 +605,25 @@ export const useRecipeForm = ({
       const nextTextarea = allTextareas[currentIndex + 1];
 
       if (nextTextarea) {
+        // Focus and trigger mobile keyboard
         nextTextarea.focus();
-        nextTextarea.click();
+        // Small delay to ensure focus is set, then trigger click for mobile keyboard
+        setTimeout(() => {
+          nextTextarea.click();
+        }, 10);
       } else {
         addInstruction();
         setTimeout(() => {
           const newTextareas = document.querySelectorAll(".input--textarea");
-          newTextareas[newTextareas.length - 1].focus();
-          newTextareas[newTextareas.length - 1].click();
-        }, 10);
+          if (newTextareas.length > 0) {
+            const lastTextarea = newTextareas[newTextareas.length - 1];
+            lastTextarea.focus();
+            // Trigger click for mobile keyboard after focus
+            setTimeout(() => {
+              lastTextarea.click();
+            }, 10);
+          }
+        }, 50);
       }
     }
   };
