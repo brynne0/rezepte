@@ -130,7 +130,6 @@ const Recipe = ({ isSharedView = false }) => {
             <a
               className="ingredient-name-linked"
               href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
-              title={`Go to ${ingredient.linked_recipe.title}`}
               onClick={(e) => e.stopPropagation()}
             >
               {getIngredientDisplayName(ingredient, i18n.language)}
