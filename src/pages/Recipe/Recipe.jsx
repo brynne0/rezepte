@@ -2,7 +2,7 @@ import "./Recipe.css";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Pencil, ShoppingBasket, Loader2, Share2, ExternalLink } from "lucide-react";
+import { Pencil, ShoppingBasket, Loader2, Share2 } from "lucide-react";
 
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { fetchSharedRecipe } from "../../services/sharingService";
@@ -102,16 +102,8 @@ const Recipe = ({ isSharedView = false }) => {
     return allIngredients;
   };
 
-  // Helper function to get linked recipe for an ingredient
-  const getLinkedRecipe = (ingredient, keyPrefix, index) => {
-    const linkKey = `${keyPrefix}-${ingredient.id || ingredient.recipe_ingredient_id || index}`;
-    return recipe.ingredientLinks?.[linkKey];
-  };
-
   // Helper to render an ingredient item
   const renderIngredientItem = (ingredient, keyPrefix, index) => {
-    const linkedRecipe = getLinkedRecipe(ingredient, keyPrefix, index);
-    
     return (
       <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
         <input
@@ -133,20 +125,20 @@ const Recipe = ({ isSharedView = false }) => {
             ingredient.unit,
             t("units", { returnObjects: true })
           ) && " "}
-          
-          {linkedRecipe ? (
-            <span 
+
+          {ingredient.linked_recipe ? (
+            <a
               className="ingredient-name-linked"
-              onClick={() => navigate(`/${linkedRecipe.id}/${linkedRecipe.slug || linkedRecipe.title.toLowerCase().replace(/\s+/g, '-')}`)}
-              title={`Go to ${linkedRecipe.title}`}
+              href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
+              title={`Go to ${ingredient.linked_recipe.title}`}
+              onClick={(e) => e.stopPropagation()}
             >
               {getIngredientDisplayName(ingredient, i18n.language)}
-              <ExternalLink size={12} className="link-icon" />
-            </span>
+            </a>
           ) : (
             getIngredientDisplayName(ingredient, i18n.language)
           )}
-          
+
           {ingredient.notes && (
             <span className="ingredient-notes"> {ingredient.notes}</span>
           )}
