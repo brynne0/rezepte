@@ -128,7 +128,7 @@ h3.forta {
 }
 
 .bold-small {
-  font-weight: bold;
+  font-weight: 600;
   color: var(--color-text-strong);
   font-size: 1rem;
 }
