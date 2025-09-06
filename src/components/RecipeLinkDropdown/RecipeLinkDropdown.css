@@ -65,14 +65,15 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  margin: 1rem;
+  margin: 0.5rem 1rem;
+}
+
+.recipe-list-container:last-child {
+  margin-bottom: 0.75rem;
 }
 
 .recipe-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   border: none;
   background: none;
   text-align: left;
@@ -80,15 +81,8 @@
   transition: all 0.15s ease;
 }
 
-.recipe-item:hover {
-  color: var(--color-danger-dark);
-  font-weight: 500;
-  background-color: var(--color-background-hover);
-}
-
-.recipe-item:hover .recipe-title {
-  font-weight: 500;
-  color: var(--color-danger-dark);
+.recipe-item .bold-small:hover {
+  color: var(--color-danger);
 }
 
 /* Mobile responsive */
