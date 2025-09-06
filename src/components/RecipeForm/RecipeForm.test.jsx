@@ -113,6 +113,8 @@ describe("RecipeForm", () => {
     instructions: ["Mix ingredients", "Bake for 30 minutes"],
     source: "https://example.com",
     notes: "Test notes",
+    images: [],
+    ingredientLinks: {},
   };
 
   const mockHookReturn = {
@@ -138,6 +140,11 @@ describe("RecipeForm", () => {
     handleSubmit: vi.fn(),
     handleDelete: vi.fn(),
     toTitleCase: vi.fn((str) => str),
+    handleIngredientLink: vi.fn(),
+    removeIngredientLink: vi.fn(),
+    getIngredientLink: vi.fn(() => null),
+    handleImagesChange: vi.fn(),
+    uploadingImageIds: new Set(),
   };
 
   beforeEach(() => {
@@ -844,8 +851,10 @@ describe("RecipeForm", () => {
 
         // Instructions should be editable, find them by their values
         const mixInstructionInput = screen.getByDisplayValue("Mix ingredients");
-        const bakeInstructionInput = screen.getByDisplayValue("Bake for 30 minutes");
-        
+        const bakeInstructionInput = screen.getByDisplayValue(
+          "Bake for 30 minutes"
+        );
+
         expect(mixInstructionInput).not.toBeDisabled();
         expect(bakeInstructionInput).not.toBeDisabled();
       });
@@ -1008,7 +1017,7 @@ describe("RecipeForm", () => {
 
     it("renders ingredient fields with navigation handlers without errors", () => {
       expect(() => renderComponent()).not.toThrow();
-      
+
       // Verify that handleIngredientFieldEnter is available in hook
       expect(mockHookReturn.handleIngredientFieldEnter).toBeDefined();
       expect(typeof mockHookReturn.handleIngredientFieldEnter).toBe("function");
@@ -1016,51 +1025,79 @@ describe("RecipeForm", () => {
 
     it("renders ungrouped ingredient fields with proper IDs for navigation", () => {
       renderComponent();
-      
+
       // Check that ungrouped ingredient fields exist with correct IDs
-      expect(document.querySelector('#ingredient-name-ungrouped-0-temp-1')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-quantity-ungrouped-0-temp-1')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-unit-ungrouped-0-temp-1')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-notes-ungrouped-0-temp-1')).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-name-ungrouped-0-temp-1")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-quantity-ungrouped-0-temp-1")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-unit-ungrouped-0-temp-1")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-notes-ungrouped-0-temp-1")
+      ).toBeInTheDocument();
     });
 
     it("renders section ingredient fields with proper IDs for navigation", () => {
       renderComponent();
-      
+
       // Check that section ingredient fields exist with correct IDs
-      expect(document.querySelector('#ingredient-name-section-1-0-temp-2')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-quantity-section-1-0-temp-2')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-unit-section-1-0-temp-2')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-notes-section-1-0-temp-2')).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-name-section-1-0-temp-2")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-quantity-section-1-0-temp-2")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-unit-section-1-0-temp-2")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-notes-section-1-0-temp-2")
+      ).toBeInTheDocument();
     });
 
     it("ingredient fields have onKeyDown attribute for navigation", () => {
       renderComponent();
-      
-      const nameInput = document.querySelector('#ingredient-name-ungrouped-0-temp-1');
-      const quantityInput = document.querySelector('#ingredient-quantity-ungrouped-0-temp-1');
-      const notesInput = document.querySelector('#ingredient-notes-ungrouped-0-temp-1');
-      
+
+      const nameInput = document.querySelector(
+        "#ingredient-name-ungrouped-0-temp-1"
+      );
+      const quantityInput = document.querySelector(
+        "#ingredient-quantity-ungrouped-0-temp-1"
+      );
+      const notesInput = document.querySelector(
+        "#ingredient-notes-ungrouped-0-temp-1"
+      );
+
       // Test that elements exist and can receive keydown events
       expect(nameInput).toBeInTheDocument();
       expect(quantityInput).toBeInTheDocument();
       expect(notesInput).toBeInTheDocument();
-      
+
       // Test that keydown events can be fired (verifies event handler exists)
-      expect(() => fireEvent.keyDown(nameInput, { key: "Enter" })).not.toThrow();
-      expect(() => fireEvent.keyDown(quantityInput, { key: "Enter" })).not.toThrow();
-      expect(() => fireEvent.keyDown(notesInput, { key: "Enter" })).not.toThrow();
+      expect(() =>
+        fireEvent.keyDown(nameInput, { key: "Enter" })
+      ).not.toThrow();
+      expect(() =>
+        fireEvent.keyDown(quantityInput, { key: "Enter" })
+      ).not.toThrow();
+      expect(() =>
+        fireEvent.keyDown(notesInput, { key: "Enter" })
+      ).not.toThrow();
     });
   });
 
   describe("Instruction Drag and Drop", () => {
     it("renders instructions with drag handles", () => {
       renderComponent();
-      
+
       // Check that instructions are rendered with drag handles
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(2); // We have 2 instructions in mock data
-      
+
       // Verify drag handles are present within instruction rows
       dragHandles.forEach((handle) => {
         // Each draggable should contain a drag handle with the grip icon
@@ -1070,7 +1107,7 @@ describe("RecipeForm", () => {
 
     it("renders instructions within droppable area", () => {
       renderComponent();
-      
+
       // Check that instructions are wrapped in a droppable area
       const droppableArea = screen.getByTestId("droppable-instructions");
       expect(droppableArea).toBeInTheDocument();
@@ -1086,7 +1123,7 @@ describe("RecipeForm", () => {
 
     it("disables drag handles in translation mode", () => {
       renderComponent({ isEditingTranslation: true });
-      
+
       // Check that drag handles are disabled in translation mode
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       dragHandles.forEach((handle) => {
@@ -1098,7 +1135,7 @@ describe("RecipeForm", () => {
 
     it("enables drag handles in normal mode", () => {
       renderComponent({ isEditingTranslation: false });
-      
+
       // Check that drag handles are enabled in normal mode
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       dragHandles.forEach((handle) => {
@@ -1110,7 +1147,7 @@ describe("RecipeForm", () => {
 
     it("displays correct step numbers for instructions", () => {
       renderComponent();
-      
+
       // Check that step numbers are displayed correctly
       const stepNumbers = screen.getAllByText(/^\d+\.$/);
       expect(stepNumbers).toHaveLength(2);
@@ -1122,7 +1159,7 @@ describe("RecipeForm", () => {
       // This test verifies that step numbers are always sequential
       // regardless of the instruction order
       const reorderedInstructions = ["Bake for 30 minutes", "Mix ingredients"];
-      
+
       useRecipeForm.mockReturnValue({
         ...mockHookReturn,
         formData: {
@@ -1132,25 +1169,27 @@ describe("RecipeForm", () => {
       });
 
       renderComponent();
-      
+
       // Step numbers should still be 1, 2 even with reordered content
       const stepNumbers = screen.getAllByText(/^\d+\.$/);
       expect(stepNumbers).toHaveLength(2);
       expect(stepNumbers[0]).toHaveTextContent("1.");
       expect(stepNumbers[1]).toHaveTextContent("2.");
-      
+
       // But the content should be in the new order
-      expect(screen.getByDisplayValue("Bake for 30 minutes")).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue("Bake for 30 minutes")
+      ).toBeInTheDocument();
       expect(screen.getByDisplayValue("Mix ingredients")).toBeInTheDocument();
     });
 
     it("includes isDragDisabled prop for instructions in translation mode", () => {
       renderComponent({ isEditingTranslation: true });
-      
+
       // In translation mode, draggables should be disabled
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(2);
-      
+
       // This verifies the component structure is correct for disabled state
       dragHandles.forEach((handle) => {
         expect(handle).toBeInTheDocument();
@@ -1159,11 +1198,11 @@ describe("RecipeForm", () => {
 
     it("does not include isDragDisabled prop for instructions in normal mode", () => {
       renderComponent({ isEditingTranslation: false });
-      
+
       // In normal mode, draggables should be enabled
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(2);
-      
+
       // This verifies the component structure is correct for enabled state
       dragHandles.forEach((handle) => {
         expect(handle).toBeInTheDocument();
@@ -1180,11 +1219,11 @@ describe("RecipeForm", () => {
       });
 
       renderComponent();
-      
+
       // Should still render the droppable area even with no instructions
       const droppableArea = screen.getByTestId("droppable-instructions");
       expect(droppableArea).toBeInTheDocument();
-      
+
       // Should not have any instruction drag handles
       const dragHandles = screen.queryAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(0);
@@ -1200,17 +1239,19 @@ describe("RecipeForm", () => {
       });
 
       renderComponent();
-      
+
       // Should render one instruction with drag handle
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(1);
-      
+
       // Should show step number 1
       const stepNumber = screen.getByText("1.");
       expect(stepNumber).toBeInTheDocument();
-      
+
       // Should show the instruction content
-      expect(screen.getByDisplayValue("Single instruction")).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue("Single instruction")
+      ).toBeInTheDocument();
     });
   });
 
@@ -1227,7 +1268,7 @@ describe("RecipeForm", () => {
 
       // Verify that the component renders without errors when unsaved changes exist
       expect(screen.getByText("Create Recipe")).toBeInTheDocument();
-      
+
       // Verify that hasUnsavedChanges function is available and called
       expect(mockHasUnsavedChanges).toBeDefined();
       expect(typeof mockHasUnsavedChanges).toBe("function");
@@ -1236,7 +1277,7 @@ describe("RecipeForm", () => {
     it("should pass hasUnsavedChanges state correctly to form interactions", () => {
       let hasChanges = false;
       const mockHasUnsavedChanges = vi.fn(() => hasChanges);
-      
+
       useRecipeForm.mockReturnValue({
         ...mockHookReturn,
         hasUnsavedChanges: mockHasUnsavedChanges,
@@ -1272,7 +1313,9 @@ describe("RecipeForm", () => {
       });
 
       // Re-render with updated state
-      rerender(<RecipeForm categories={mockCategories} title="Create Recipe" />);
+      rerender(
+        <RecipeForm categories={mockCategories} title="Create Recipe" />
+      );
 
       // Should now have unsaved changes
       expect(updatedMockHasUnsavedChanges()).toBe(true);
@@ -1316,7 +1359,9 @@ describe("RecipeForm", () => {
       const initialFunction = mockHookReturn.hasUnsavedChanges;
 
       // Re-render and verify function reference stability
-      rerender(<RecipeForm categories={mockCategories} title="Create Recipe" />);
+      rerender(
+        <RecipeForm categories={mockCategories} title="Create Recipe" />
+      );
 
       // The function should remain the same instance for performance
       expect(mockHookReturn.hasUnsavedChanges).toBe(initialFunction);
@@ -1339,7 +1384,7 @@ describe("RecipeForm", () => {
 
       // The component should be able to use the hasUnsavedChanges function
       expect(mockHasUnsavedChanges).toBeDefined();
-      expect(typeof mockHasUnsavedChanges).toBe('function');
+      expect(typeof mockHasUnsavedChanges).toBe("function");
     });
   });
 });
