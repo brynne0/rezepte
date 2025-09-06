@@ -117,17 +117,6 @@
   padding-right: 2.5rem;
 }
 
-/* Spacing to the right for ingredient link */
-.input-with-icon-right {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-with-icon-right input {
-  padding-right: 2.5rem;
-}
-
 /* Fix eye icon positioning - override the general svg rule */
 .input-with-icon .btn-icon-right svg {
   position: static;

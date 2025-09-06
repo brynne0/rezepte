@@ -198,16 +198,45 @@
   }
 
   .ingredient-content {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
 
+  /* Make ingredient name and buttons share the same row on mobile */
+  .ingredient-content > input:first-child,
+  .ingredient-content .flex-row {
+    order: -1;
+  }
+
+  .ingredient-content > input:first-child {
+    flex: 1;
+  }
+
+  .ingredient-content .flex-row {
+    flex-shrink: 0;
+  }
+
+  /* Change ingredient-content to row layout for the first row */
+  .ingredient-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  /* Force ingredient-details to next line */
   .ingredient-details {
+    flex-basis: 100%;
+    order: 1;
+  }
+
+  .ingredient-details {
+    display: flex;
     gap: 0.25rem;
     align-items: center;
     display: grid;
-    grid-template-columns: 1.5fr 2fr 2fr auto auto;
+    grid-template-columns: 1.5fr 2fr 2fr;
   }
 }
