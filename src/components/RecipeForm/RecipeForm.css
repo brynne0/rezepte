@@ -130,10 +130,8 @@
 }
 
 .source-toggle:hover {
-  color: var(--color-danger-dark);
+  color: var(--color-danger);
 }
-
-/* TODO - FROM HERE */
 
 /* Link button styling */
 .btn-icon-link {
@@ -142,29 +140,43 @@
 }
 
 .btn-icon-link:hover {
-  color: var(--color-danger-dark);
+  color: var(--color-danger);
 }
 
 /* Linked button styling */
 .btn-icon-linked {
-  color: var(--color-danger-dark);
+  color: var(--color-danger);
   transition: all 0.2s ease;
 }
 
 .btn-icon-linked:hover {
   /* TODO - make it clear this will remove the current link i.e change into an x */
-  color: var(--color-danger-dark);
+  color: var(--color-danger);
 }
 
-/* Ingredient name styling for linked ingredients */
-.ingredient-linked {
-  text-decoration: underline;
-  text-decoration-color: var(--color-danger-dark);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+/* Ingredient name styling for linked ingredients - color + italic styling */
+.input.ingredient-linked {
+  color: var(--color-danger) !important;
+  font-weight: 500 !important;
 }
 
-/* TODO - TO HERE */
+/* Hover X icon functionality for link buttons */
+.btn-icon-linked .link-hover {
+  display: none;
+}
+
+.btn-icon-linked:hover .link-default {
+  display: none;
+}
+
+.btn-icon-linked:hover .link-hover {
+  display: block;
+}
+
+/* For unlinked buttons, only show the default link icon */
+.btn-icon-link .link-hover {
+  display: none;
+}
 
 /* Responsive */
 @media (max-width: 768px) {

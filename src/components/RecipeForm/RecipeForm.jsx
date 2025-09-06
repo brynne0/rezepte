@@ -7,6 +7,7 @@ import {
   GripVertical,
   Link,
   NotepadText,
+  X,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
@@ -402,7 +403,6 @@ const RecipeForm = ({
                                     ? "input--error"
                                     : ""
                                 } ${
-                                  // TODO
                                   getIngredientLink(
                                     "ungrouped",
                                     ingredient.tempId
@@ -547,7 +547,7 @@ const RecipeForm = ({
                                         "ungrouped",
                                         ingredient.tempId
                                       )
-                                        ? "Remove recipe link"
+                                        ? "Remove link"
                                         : "Link to recipe"
                                     }
                                     disabled={isEditingTranslation}
@@ -556,7 +556,7 @@ const RecipeForm = ({
                                         "ungrouped",
                                         ingredient.tempId
                                       )
-                                        ? `Linked to: ${
+                                        ? `Linked to ${
                                             getIngredientLink(
                                               "ungrouped",
                                               ingredient.tempId
@@ -565,7 +565,8 @@ const RecipeForm = ({
                                         : "Link to recipe"
                                     }
                                   >
-                                    <Link size={16} />
+                                    <Link size={16} className="link-default" />
+                                    <X size={16} className="link-hover" />
                                   </button>
 
                                   <button
@@ -960,7 +961,7 @@ const RecipeForm = ({
                                                           section.id,
                                                           ingredient.tempId
                                                         )
-                                                          ? "Remove recipe link"
+                                                          ? "Remove link"
                                                           : "Link to recipe"
                                                       }
                                                       disabled={
@@ -980,7 +981,14 @@ const RecipeForm = ({
                                                           : "Link to recipe"
                                                       }
                                                     >
-                                                      <Link size={16} />
+                                                      <Link
+                                                        size={16}
+                                                        className="link-default"
+                                                      />
+                                                      <X
+                                                        size={16}
+                                                        className="link-hover"
+                                                      />
                                                     </button>
 
                                                     <button
