@@ -186,6 +186,9 @@
   "section_title": "Section title",
   "add_instruction": "Add instruction",
   "remove_instruction": "Remove instruction",
+  
+  "link_to_recipe": "Link to Recipe",
+  "search_recipes": "Search recipes...",
 
   "add_new_recipe": "Add New Recipe",
   "edit_recipe": "Edit Recipe",

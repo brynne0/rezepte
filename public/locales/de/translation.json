@@ -186,6 +186,9 @@
   "section_title": "Bereichstitel",
   "add_instruction": "Anweisung hinzufügen",
   "remove_instruction": "Anweisung entfernen",
+  
+  "link_to_recipe": "Mit Rezept verknüpfen",
+  "search_recipes": "Rezepte suchen...",
 
   "add_new_recipe": "Neues Rezept Hinzufügen",
   "edit_recipe": "Rezept bearbeiten",

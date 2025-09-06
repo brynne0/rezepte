@@ -172,9 +172,7 @@ const ImageUpload = ({
         onDrop={handleDrop}
       >
         <Upload className="upload-icon" size={32} />
-        <div className="upload-text">
-          <strong>{t("upload_images")}</strong>
-        </div>
+        <div className="bold-small">{t("upload_images")}</div>
         <div className="upload-hint">{t("click_or_drag")}</div>
         <div className="upload-hint">{t("image_upload_hint")}</div>
       </div>

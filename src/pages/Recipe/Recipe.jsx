@@ -2,7 +2,7 @@ import "./Recipe.css";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Pencil, ShoppingBasket, Loader2, Share2 } from "lucide-react";
+import { Pencil, ShoppingBasket, Loader2, Share2, ExternalLink } from "lucide-react";
 
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { fetchSharedRecipe } from "../../services/sharingService";
@@ -102,35 +102,58 @@ const Recipe = ({ isSharedView = false }) => {
     return allIngredients;
   };
 
+  // Helper function to get linked recipe for an ingredient
+  const getLinkedRecipe = (ingredient, keyPrefix, index) => {
+    const linkKey = `${keyPrefix}-${ingredient.id || ingredient.recipe_ingredient_id || index}`;
+    return recipe.ingredientLinks?.[linkKey];
+  };
+
   // Helper to render an ingredient item
-  const renderIngredientItem = (ingredient, keyPrefix, index) => (
-    <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
-      <input
-        type="checkbox"
-        checked={checkedIngredients[ingredient.recipe_ingredient_id] || false}
-        onChange={() => handleCheckboxChange(ingredient.recipe_ingredient_id)}
-        id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
-      />
-      <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
-        <span className="ingredient-measurement">
+  const renderIngredientItem = (ingredient, keyPrefix, index) => {
+    const linkedRecipe = getLinkedRecipe(ingredient, keyPrefix, index);
+    
+    return (
+      <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
+        <input
+          type="checkbox"
+          checked={checkedIngredients[ingredient.recipe_ingredient_id] || false}
+          onChange={() => handleCheckboxChange(ingredient.recipe_ingredient_id)}
+          id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
+        />
+        <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
+          <span className="ingredient-measurement">
+            {formatIngredientMeasurement(
+              ingredient.quantity,
+              ingredient.unit,
+              t("units", { returnObjects: true })
+            )}
+          </span>
           {formatIngredientMeasurement(
             ingredient.quantity,
             ingredient.unit,
             t("units", { returnObjects: true })
+          ) && " "}
+          
+          {linkedRecipe ? (
+            <span 
+              className="ingredient-name-linked"
+              onClick={() => navigate(`/${linkedRecipe.id}/${linkedRecipe.slug || linkedRecipe.title.toLowerCase().replace(/\s+/g, '-')}`)}
+              title={`Go to ${linkedRecipe.title}`}
+            >
+              {getIngredientDisplayName(ingredient, i18n.language)}
+              <ExternalLink size={12} className="link-icon" />
+            </span>
+          ) : (
+            getIngredientDisplayName(ingredient, i18n.language)
           )}
-        </span>
-        {formatIngredientMeasurement(
-          ingredient.quantity,
-          ingredient.unit,
-          t("units", { returnObjects: true })
-        ) && " "}
-        {getIngredientDisplayName(ingredient, i18n.language)}
-        {ingredient.notes && (
-          <span className="ingredient-notes"> {ingredient.notes}</span>
-        )}
-      </label>
-    </li>
-  );
+          
+          {ingredient.notes && (
+            <span className="ingredient-notes"> {ingredient.notes}</span>
+          )}
+        </label>
+      </li>
+    );
+  };
 
   if (loading) {
     return <LoadingAcorn />;

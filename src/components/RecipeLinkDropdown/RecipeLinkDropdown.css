@@ -1,0 +1,115 @@
+.recipe-link-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.recipe-link-dropdown {
+  background: var(--color-surface-primary);
+  border: var(--border-width) dashed var(--color-danger-dark);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.recipe-link-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-bottom: var(--border-width) dashed var(--color-danger-dark);
+}
+
+.recipe-link-dropdown-header h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--color-danger-dark);
+}
+
+.recipe-search-container {
+  padding: 0.75rem 1rem;
+  border-bottom: var(--border-width) dashed var(--color-danger-dark);
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--color-text-light);
+  z-index: 1;
+}
+
+.recipe-search-input {
+  padding-left: 2.5rem !important;
+}
+
+.recipe-list-container {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  margin: 1rem;
+}
+
+.recipe-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 0.5rem;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.recipe-item:hover {
+  color: var(--color-danger-dark);
+  font-weight: 500;
+  background-color: var(--color-background-hover);
+}
+
+.recipe-item:hover .recipe-title {
+  font-weight: 500;
+  color: var(--color-danger-dark);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .recipe-link-dropdown-overlay {
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+
+  .recipe-link-dropdown {
+    max-height: 85vh;
+    width: 100%;
+    max-width: none;
+  }
+
+  .recipe-link-dropdown-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .recipe-search-container {
+    padding: 0.5rem 0.75rem;
+  }
+}

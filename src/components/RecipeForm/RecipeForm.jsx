@@ -17,6 +17,7 @@ import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
 import ImageUpload from "../ImageUpload/ImageUpload";
+import RecipeLinkDropdown from "../RecipeLinkDropdown/RecipeLinkDropdown";
 import "./RecipeForm.css";
 
 const RecipeForm = ({
@@ -55,9 +56,14 @@ const RecipeForm = ({
     handleSubmit,
     handleDelete,
     toTitleCase,
+    handleIngredientLink,
+    removeIngredientLink,
+    getIngredientLink,
   } = useRecipeForm({ initialRecipe, isEditingTranslation });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
+  const [linkingIngredient, setLinkingIngredient] = useState(null);
 
   // Unsaved changes detection
   const {
@@ -102,6 +108,23 @@ const RecipeForm = ({
     } else if (value && sourceMode !== "note") {
       // Auto-switch to note mode for non-link content
       setSourceMode("note");
+    }
+  };
+
+  // Handle opening the recipe link dropdown
+  const handleOpenLinkDropdown = (sectionId, tempId, ingredient) => {
+    setLinkingIngredient({ sectionId, tempId, ingredient });
+    setLinkDropdownOpen(true);
+  };
+
+  // Handle selecting a recipe to link to
+  const handleSelectRecipe = (recipe) => {
+    if (linkingIngredient) {
+      handleIngredientLink(
+        linkingIngredient.sectionId,
+        linkingIngredient.tempId,
+        recipe
+      );
     }
   };
 
@@ -378,6 +401,14 @@ const RecipeForm = ({
                                   validationErrors.ingredients
                                     ? "input--error"
                                     : ""
+                                } ${
+                                  // TODO
+                                  getIngredientLink(
+                                    "ungrouped",
+                                    ingredient.tempId
+                                  )
+                                    ? "ingredient-linked"
+                                    : ""
                                 }`}
                                 placeholder={t("ingredient_name")}
                               />
@@ -478,28 +509,87 @@ const RecipeForm = ({
                                   className="input input--full-width input--edit"
                                   placeholder={t("notes")}
                                 />
+                                <div className="flex-row">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const linkedRecipe = getIngredientLink(
+                                        "ungrouped",
+                                        ingredient.tempId
+                                      );
+                                      if (linkedRecipe) {
+                                        removeIngredientLink(
+                                          "ungrouped",
+                                          ingredient.tempId
+                                        );
+                                      } else {
+                                        handleOpenLinkDropdown(
+                                          "ungrouped",
+                                          ingredient.tempId,
+                                          ingredient
+                                        );
+                                      }
+                                    }}
+                                    className={`btn btn-icon ${
+                                      getIngredientLink(
+                                        "ungrouped",
+                                        ingredient.tempId
+                                      )
+                                        ? "btn-icon-linked"
+                                        : "btn-icon-link"
+                                    } ${
+                                      isEditingTranslation
+                                        ? "translation-disabled"
+                                        : ""
+                                    }`}
+                                    aria-label={
+                                      getIngredientLink(
+                                        "ungrouped",
+                                        ingredient.tempId
+                                      )
+                                        ? "Remove recipe link"
+                                        : "Link to recipe"
+                                    }
+                                    disabled={isEditingTranslation}
+                                    title={
+                                      getIngredientLink(
+                                        "ungrouped",
+                                        ingredient.tempId
+                                      )
+                                        ? `Linked to: ${
+                                            getIngredientLink(
+                                              "ungrouped",
+                                              ingredient.tempId
+                                            ).title
+                                          }`
+                                        : "Link to recipe"
+                                    }
+                                  >
+                                    <Link size={16} />
+                                  </button>
 
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    removeIngredient(
-                                      "ungrouped",
-                                      ingredient.tempId
-                                    )
-                                  }
-                                  className={`btn btn-icon btn-icon-remove ${
-                                    isEditingTranslation
-                                      ? "translation-disabled"
-                                      : ""
-                                  }`}
-                                  aria-label={t("remove_ingredient")}
-                                  disabled={isEditingTranslation}
-                                >
-                                  <Trash2
-                                    size={16}
-                                    data-testid="remove-ingredient-btn"
-                                  />
-                                </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      removeIngredient(
+                                        "ungrouped",
+                                        ingredient.tempId
+                                      )
+                                    }
+                                    className={`btn btn-icon btn-icon-remove ${
+                                      isEditingTranslation
+                                        ? "translation-disabled"
+                                        : ""
+                                    }`}
+                                    aria-label={t("remove_ingredient")}
+                                    disabled={isEditingTranslation}
+                                  >
+                                    <Trash2
+                                      size={16}
+                                      data-testid="remove-ingredient-btn"
+                                    />
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -649,67 +739,78 @@ const RecipeForm = ({
                                               </div>
 
                                               <div className="ingredient-content">
-                                                {/* Ingredient Name */}
-                                                <input
-                                                  id={`ingredient-name-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                  type="text"
-                                                  value={ingredient.name || ""}
-                                                  onChange={(e) => {
-                                                    handleIngredientChange(
-                                                      section.id,
-                                                      ingredient.tempId,
-                                                      "name",
-                                                      e.target.value,
-                                                      validationErrors.ingredients
-                                                        ? "ingredients"
-                                                        : null
-                                                    );
-                                                  }}
-                                                  onKeyDown={(e) =>
-                                                    handleIngredientFieldEnter(
-                                                      e,
-                                                      "name",
-                                                      section.id,
-                                                      ingredient.tempId,
-                                                      ingredientIndex
-                                                    )
-                                                  }
-                                                  onBlur={(e) => {
-                                                    const value =
-                                                      i18n.language === "de"
-                                                        ? e.target.value
-                                                            .split(" ")
-                                                            .map(
-                                                              (word) =>
-                                                                word
-                                                                  .charAt(0)
-                                                                  .toUpperCase() +
-                                                                word
-                                                                  .slice(1)
-                                                                  .toLowerCase()
-                                                            )
-                                                            .join(" ")
-                                                        : e.target.value.toLowerCase();
+                                                <div className=" input-with-icon-right ">
+                                                  {/* Ingredient Name */}
+                                                  <input
+                                                    id={`ingredient-name-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
+                                                    type="text"
+                                                    value={
+                                                      ingredient.name || ""
+                                                    }
+                                                    onChange={(e) => {
+                                                      handleIngredientChange(
+                                                        section.id,
+                                                        ingredient.tempId,
+                                                        "name",
+                                                        e.target.value,
+                                                        validationErrors.ingredients
+                                                          ? "ingredients"
+                                                          : null
+                                                      );
+                                                    }}
+                                                    onKeyDown={(e) =>
+                                                      handleIngredientFieldEnter(
+                                                        e,
+                                                        "name",
+                                                        section.id,
+                                                        ingredient.tempId,
+                                                        ingredientIndex
+                                                      )
+                                                    }
+                                                    onBlur={(e) => {
+                                                      const value =
+                                                        i18n.language === "de"
+                                                          ? e.target.value
+                                                              .split(" ")
+                                                              .map(
+                                                                (word) =>
+                                                                  word
+                                                                    .charAt(0)
+                                                                    .toUpperCase() +
+                                                                  word
+                                                                    .slice(1)
+                                                                    .toLowerCase()
+                                                              )
+                                                              .join(" ")
+                                                          : e.target.value.toLowerCase();
 
-                                                    handleIngredientChange(
-                                                      section.id,
-                                                      ingredient.tempId,
-                                                      "name",
-                                                      value,
+                                                      handleIngredientChange(
+                                                        section.id,
+                                                        ingredient.tempId,
+                                                        "name",
+                                                        value,
+                                                        validationErrors.ingredients
+                                                          ? "ingredients"
+                                                          : null
+                                                      );
+                                                    }}
+                                                    className={`input input--full-width input--edit ${
                                                       validationErrors.ingredients
-                                                        ? "ingredients"
-                                                        : null
-                                                    );
-                                                  }}
-                                                  className={`input input--full-width input--edit ${
-                                                    validationErrors.ingredients
-                                                      ? "input--error"
-                                                      : ""
-                                                  }`}
-                                                  placeholder={t(
-                                                    "ingredient_name"
-                                                  )}
-                                                />
+                                                        ? "input--error"
+                                                        : ""
+                                                    } ${
+                                                      getIngredientLink(
+                                                        section.id,
+                                                        ingredient.tempId
+                                                      )
+                                                        ? "ingredient-linked"
+                                                        : ""
+                                                    }`}
+                                                    placeholder={t(
+                                                      "ingredient_name"
+                                                    )}
+                                                  />
+                                                </div>
 
                                                 {/* Ingredient Details */}
                                                 <div className="ingredient-details">
@@ -820,29 +921,92 @@ const RecipeForm = ({
                                                     placeholder={t("notes")}
                                                   />
 
-                                                  <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                      removeIngredient(
-                                                        section.id,
-                                                        ingredient.tempId
-                                                      )
-                                                    }
-                                                    className={`btn btn-icon btn-icon-remove ${
-                                                      isEditingTranslation
-                                                        ? "translation-disabled"
-                                                        : ""
-                                                    }`}
-                                                    aria-label={t(
-                                                      "remove_ingredient"
-                                                    )}
-                                                    disabled={
-                                                      isEditingTranslation
-                                                    }
-                                                    data-testid={`remove-section-ingredient-btn-${section.id}-${ingredient.tempId}`} // Updated data-testid
-                                                  >
-                                                    <Trash2 size={16} />
-                                                  </button>
+                                                  <div className="flex-row">
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => {
+                                                        const linkedRecipe =
+                                                          getIngredientLink(
+                                                            section.id,
+                                                            ingredient.tempId
+                                                          );
+                                                        if (linkedRecipe) {
+                                                          removeIngredientLink(
+                                                            section.id,
+                                                            ingredient.tempId
+                                                          );
+                                                        } else {
+                                                          handleOpenLinkDropdown(
+                                                            section.id,
+                                                            ingredient.tempId,
+                                                            ingredient
+                                                          );
+                                                        }
+                                                      }}
+                                                      className={`btn btn-icon ${
+                                                        getIngredientLink(
+                                                          section.id,
+                                                          ingredient.tempId
+                                                        )
+                                                          ? "btn-icon-linked"
+                                                          : "btn-icon-link"
+                                                      } ${
+                                                        isEditingTranslation
+                                                          ? "translation-disabled"
+                                                          : ""
+                                                      }`}
+                                                      aria-label={
+                                                        getIngredientLink(
+                                                          section.id,
+                                                          ingredient.tempId
+                                                        )
+                                                          ? "Remove recipe link"
+                                                          : "Link to recipe"
+                                                      }
+                                                      disabled={
+                                                        isEditingTranslation
+                                                      }
+                                                      title={
+                                                        getIngredientLink(
+                                                          section.id,
+                                                          ingredient.tempId
+                                                        )
+                                                          ? `Linked to: ${
+                                                              getIngredientLink(
+                                                                section.id,
+                                                                ingredient.tempId
+                                                              ).title
+                                                            }`
+                                                          : "Link to recipe"
+                                                      }
+                                                    >
+                                                      <Link size={16} />
+                                                    </button>
+
+                                                    <button
+                                                      type="button"
+                                                      onClick={() =>
+                                                        removeIngredient(
+                                                          section.id,
+                                                          ingredient.tempId
+                                                        )
+                                                      }
+                                                      className={`btn btn-icon btn-icon-remove ${
+                                                        isEditingTranslation
+                                                          ? "translation-disabled"
+                                                          : ""
+                                                      }`}
+                                                      aria-label={t(
+                                                        "remove_ingredient"
+                                                      )}
+                                                      disabled={
+                                                        isEditingTranslation
+                                                      }
+                                                      data-testid={`remove-section-ingredient-btn-${section.id}-${ingredient.tempId}`} // Updated data-testid
+                                                    >
+                                                      <Trash2 size={16} />
+                                                    </button>
+                                                  </div>
                                                 </div>
                                               </div>
                                             </div>
@@ -1132,6 +1296,17 @@ const RecipeForm = ({
         confirmText={t("stay")}
         cancelText={t("leave_page")}
         confirmButtonType="primary"
+      />
+
+      {/* Recipe Link Dropdown */}
+      <RecipeLinkDropdown
+        isOpen={linkDropdownOpen}
+        onClose={() => {
+          setLinkDropdownOpen(false);
+          setLinkingIngredient(null);
+        }}
+        onSelectRecipe={handleSelectRecipe}
+        currentRecipeId={initialRecipe?.id}
       />
     </div>
   );
