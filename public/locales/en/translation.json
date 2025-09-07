@@ -81,6 +81,8 @@
   "hide_images": "Hide images",
   "recipe_not_found": "Recipe not found.",
   "no_recipes_found": "No recipes for \"{{searchTerm}}\" found",
+  "no_recipes_available": "No recipes available.",
+  "loading_recipes": "Loading recipes...",
   "welcome_add_recipe": "Welcome! Click the + to add your first recipe",
   "logged_in_note": "My recipes aren't available when logged in, log out to see them",
 

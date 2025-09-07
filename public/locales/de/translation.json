@@ -81,6 +81,8 @@
   "hide_images": "Bilder ausblenden",
   "recipe_not_found": "Rezept nicht gefunden.",
   "no_recipes_found": "Keine Rezepte für \"{{searchTerm}}\" gefunden",
+  "no_recipes_available": "Keine Rezepte verfügbar",
+  "loading_recipes": "Lade Rezepte...",
   "welcome_add_recipe": "Willkommen! Klicken Sie auf das +, um Ihr erstes Rezept hinzuzufügen",
   "logged_in_note": "Meine Rezepte sind beim Anmelden nicht verfügbar, loggen Sie sich aus, um sie zu sehen",
 
