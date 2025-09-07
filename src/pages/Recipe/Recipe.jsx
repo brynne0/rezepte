@@ -48,7 +48,7 @@ const Recipe = ({ isSharedView = false }) => {
           );
           setSharedRecipe(translatedRecipe);
         } catch (err) {
-          setSharedError(err.message || "Failed to load shared recipe");
+          setSharedError(err.message || t("failed_load_shared_recipe"));
         } finally {
           setSharedLoading(false);
         }
@@ -56,7 +56,7 @@ const Recipe = ({ isSharedView = false }) => {
 
       loadSharedRecipe();
     }
-  }, [isSharedView, shareToken, i18n.language]);
+  }, [isSharedView, shareToken, i18n.language, t]);
 
   // Determine which recipe and state to use
   const recipe = isSharedView ? sharedRecipe : ownedRecipe;

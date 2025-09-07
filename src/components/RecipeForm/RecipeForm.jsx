@@ -542,23 +542,10 @@ const RecipeForm = ({
                                       "ungrouped",
                                       ingredient.tempId
                                     )
-                                      ? "Remove link"
-                                      : "Link to recipe"
+                                      ? t("unlink_recipe")
+                                      : t("link_to_recipe")
                                   }
                                   disabled={isEditingTranslation}
-                                  title={
-                                    getIngredientLink(
-                                      "ungrouped",
-                                      ingredient.tempId
-                                    )
-                                      ? `Linked to ${
-                                          getIngredientLink(
-                                            "ungrouped",
-                                            ingredient.tempId
-                                          ).title
-                                        }`
-                                      : "Link to recipe"
-                                  }
                                 >
                                   <Link size={16} className="link-default" />
                                   <X size={16} className="link-hover" />
@@ -945,24 +932,11 @@ const RecipeForm = ({
                                                         section.id,
                                                         ingredient.tempId
                                                       )
-                                                        ? "Remove link"
-                                                        : "Link to recipe"
+                                                        ? t("unlink_recipe")
+                                                        : t("link_to_recipe")
                                                     }
                                                     disabled={
                                                       isEditingTranslation
-                                                    }
-                                                    title={
-                                                      getIngredientLink(
-                                                        section.id,
-                                                        ingredient.tempId
-                                                      )
-                                                        ? `Linked to: ${
-                                                            getIngredientLink(
-                                                              section.id,
-                                                              ingredient.tempId
-                                                            ).title
-                                                          }`
-                                                        : "Link to recipe"
                                                     }
                                                   >
                                                     <Link

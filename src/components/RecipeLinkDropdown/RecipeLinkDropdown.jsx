@@ -106,9 +106,7 @@ const RecipeLinkDropdown = ({
     <div className="recipe-link-dropdown-overlay">
       <div className="recipe-link-dropdown" ref={dropdownRef}>
         <div className="recipe-link-dropdown-header">
-          <h2 className="forta-red">
-            {t("link_to_recipe") || "Link to Recipe"}
-          </h2>
+          <h2 className="forta-red">{t("link_to_recipe")}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -127,7 +125,7 @@ const RecipeLinkDropdown = ({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t("search_recipes") || "Search recipes..."}
+              placeholder={t("search_recipes")}
               className="input input--full-width recipe-search-input"
             />
           </div>

@@ -186,9 +186,11 @@
   "section_title": "Section title",
   "add_instruction": "Add instruction",
   "remove_instruction": "Remove instruction",
-  
+
   "link_to_recipe": "Link to Recipe",
+  "unlink_recipe": "Remove link",
   "search_recipes": "Search recipes...",
+  "failed_load_shared_recipe": "Failed to load shared recipe",
 
   "add_new_recipe": "Add New Recipe",
   "edit_recipe": "Edit Recipe",

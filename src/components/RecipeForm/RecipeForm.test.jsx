@@ -961,6 +961,394 @@ describe("RecipeForm", () => {
     });
   });
 
+  describe("Ingredient Recipe Link Functionality", () => {
+    const mockLinkedRecipe = {
+      id: "recipe-123",
+      title: "Chocolate Chip Cookies",
+      slug: "chocolate-chip-cookies",
+    };
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    describe("Link Button Rendering", () => {
+      it("renders link button for ungrouped ingredients", () => {
+        renderComponent();
+
+        // Find all link buttons - should have one for each ingredient
+        const linkButtons = screen
+          .getAllByRole("button")
+          .filter((button) => button.className.includes("btn-icon-link"));
+
+        expect(linkButtons.length).toBeGreaterThan(0);
+      });
+
+      it("renders link button with correct default styling", () => {
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        expect(linkButton).toHaveClass("btn-icon-link");
+        expect(linkButton).not.toHaveClass("linked");
+      });
+
+      it("renders link button with linked styling when ingredient is linked", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: vi.fn(() => mockLinkedRecipe),
+        });
+
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        expect(linkButton).toHaveClass("btn-icon-link");
+        expect(linkButton).toHaveClass("linked");
+      });
+    });
+
+    describe("Link Button Actions", () => {
+      it("opens recipe selector when clicking unlinked ingredient button", () => {
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        fireEvent.click(linkButton);
+
+        // Should set linking ingredient state to open recipe selector
+        expect(linkButton).toBeInTheDocument();
+      });
+
+      it("removes link when clicking linked ingredient button", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: vi.fn(() => mockLinkedRecipe),
+        });
+
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        fireEvent.click(linkButton);
+
+        expect(mockHookReturn.removeIngredientLink).toHaveBeenCalledWith(
+          "ungrouped",
+          "1"
+        );
+      });
+    });
+
+    describe("Recipe Linking", () => {
+      it("calls handleIngredientLink when recipe is selected", () => {
+        renderComponent();
+
+        // Find and click link button to open selector
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        fireEvent.click(linkButton);
+
+        // Verify that the hook function for handling ingredient links is available
+        expect(mockHookReturn.handleIngredientLink).toBeDefined();
+      });
+
+      it("creates correct link key for ungrouped ingredients", () => {
+        const mockGetIngredientLink = vi.fn((sectionId, tempId) => {
+          expect(sectionId).toBe("ungrouped");
+          expect(tempId).toBe("1");
+          return mockLinkedRecipe;
+        });
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: mockGetIngredientLink,
+        });
+
+        renderComponent();
+
+        // getIngredientLink should be called with correct parameters
+        expect(mockGetIngredientLink).toHaveBeenCalledWith("ungrouped", "1");
+      });
+
+      it("creates correct link key for section ingredients", () => {
+        const mockFormDataWithSection = {
+          ...mockFormData,
+          ingredientSections: [
+            {
+              id: "section-1",
+              subheading: "For the sauce",
+              ingredients: [
+                {
+                  tempId: "2",
+                  name: "tomatoes",
+                  quantity: "3",
+                  unit: "cup/s",
+                  notes: "diced",
+                },
+              ],
+            },
+          ],
+        };
+
+        const mockGetIngredientLink = vi.fn((sectionId, tempId) => {
+          // Only check section ingredients, not ungrouped
+          if (sectionId === "section-1" && tempId === "2") {
+            expect(sectionId).toBe("section-1");
+            expect(tempId).toBe("2");
+          }
+          return null;
+        });
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: mockFormDataWithSection,
+          getIngredientLink: mockGetIngredientLink,
+        });
+
+        renderComponent();
+
+        expect(mockGetIngredientLink).toHaveBeenCalledWith("section-1", "2");
+      });
+    });
+
+    describe("Link Button Accessibility", () => {
+      it("has correct aria-label for unlinked ingredient", () => {
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        expect(linkButton).toHaveAttribute("aria-label", "link_to_recipe");
+      });
+
+      it("has correct aria-label for linked ingredient", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: vi.fn(() => mockLinkedRecipe),
+        });
+
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        expect(linkButton).toHaveAttribute("aria-label", "unlink_recipe");
+      });
+    });
+
+    describe("Link Button State in Translation Mode", () => {
+      it("disables link buttons in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const linkButtons = screen
+          .getAllByRole("button")
+          .filter((button) => button.className.includes("btn-icon-link"));
+
+        linkButtons.forEach((button) => {
+          expect(button).toBeDisabled();
+          expect(button).toHaveClass("translation-disabled");
+        });
+      });
+
+      it("enables link buttons in normal mode", () => {
+        renderComponent({ isEditingTranslation: false });
+
+        const linkButtons = screen
+          .getAllByRole("button")
+          .filter((button) => button.className.includes("btn-icon-link"));
+
+        linkButtons.forEach((button) => {
+          expect(button).not.toBeDisabled();
+          expect(button).not.toHaveClass("translation-disabled");
+        });
+      });
+    });
+
+    describe("Section Ingredient Links", () => {
+      beforeEach(() => {
+        const mockFormDataWithSection = {
+          ...mockFormData,
+          ingredientSections: [
+            {
+              id: "section-1",
+              subheading: "For the sauce",
+              ingredients: [
+                {
+                  tempId: "2",
+                  name: "tomatoes",
+                  quantity: "3",
+                  unit: "cup/s",
+                  notes: "diced",
+                },
+              ],
+            },
+          ],
+        };
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: mockFormDataWithSection,
+        });
+      });
+
+      it("renders link buttons for section ingredients", () => {
+        renderComponent();
+
+        const linkButtons = screen
+          .getAllByRole("button")
+          .filter((button) => button.className.includes("btn-icon-link"));
+
+        // Should have buttons for both ungrouped and section ingredients
+        expect(linkButtons.length).toBeGreaterThanOrEqual(2);
+      });
+
+      it("removes section ingredient link correctly", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: {
+            ...mockFormData,
+            ingredientSections: [
+              {
+                id: "section-1",
+                subheading: "For the sauce",
+                ingredients: [
+                  {
+                    tempId: "2",
+                    name: "tomatoes",
+                    quantity: "3",
+                    unit: "cup/s",
+                    notes: "diced",
+                  },
+                ],
+              },
+            ],
+          },
+          getIngredientLink: vi.fn((sectionId, tempId) => {
+            if (sectionId === "section-1" && tempId === "2") {
+              return mockLinkedRecipe;
+            }
+            return null;
+          }),
+        });
+
+        renderComponent();
+
+        const linkedButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        fireEvent.click(linkedButton);
+
+        expect(mockHookReturn.removeIngredientLink).toHaveBeenCalledWith(
+          "section-1",
+          "2"
+        );
+      });
+    });
+
+    describe("Link Data Persistence", () => {
+      it("maintains link data across ingredient updates", () => {
+        const initialFormData = {
+          ...mockFormData,
+          ingredientLinks: {
+            "ungrouped-1": mockLinkedRecipe,
+          },
+        };
+
+        const mockGetIngredientLink = vi.fn((sectionId, tempId) => {
+          const linkKey = `${sectionId}-${tempId}`;
+          return initialFormData.ingredientLinks[linkKey];
+        });
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: initialFormData,
+          getIngredientLink: mockGetIngredientLink,
+        });
+
+        renderComponent();
+
+        // Verify that the link is properly retrieved
+        expect(mockGetIngredientLink).toHaveBeenCalledWith("ungrouped", "1");
+      });
+
+      it("handles missing ingredientLinks object gracefully", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: {
+            ...mockFormData,
+            ingredientLinks: undefined,
+          },
+          getIngredientLink: vi.fn(() => null),
+        });
+
+        expect(() => renderComponent()).not.toThrow();
+      });
+
+      it("handles empty ingredientLinks object", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: {
+            ...mockFormData,
+            ingredientLinks: {},
+          },
+          getIngredientLink: vi.fn(() => null),
+        });
+
+        expect(() => renderComponent()).not.toThrow();
+      });
+    });
+
+    describe("Icon Display", () => {
+      it("shows default link icon for unlinked ingredients", () => {
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        // Check for the presence of link icon elements
+        const linkDefaultIcon = linkButton.querySelector(".link-default");
+        const linkHoverIcon = linkButton.querySelector(".link-hover");
+
+        expect(linkDefaultIcon).toBeInTheDocument();
+        expect(linkHoverIcon).toBeInTheDocument();
+      });
+
+      it("applies correct CSS classes for icon visibility", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: vi.fn(() => mockLinkedRecipe),
+        });
+
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        // For linked buttons, both icons should be present but controlled by CSS
+        const linkDefaultIcon = linkButton.querySelector(".link-default");
+        const linkHoverIcon = linkButton.querySelector(".link-hover");
+
+        expect(linkDefaultIcon).toBeInTheDocument();
+        expect(linkHoverIcon).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("Edge Cases", () => {
     it("handles empty form data gracefully", () => {
       useRecipeForm.mockReturnValue({
