@@ -987,15 +987,19 @@ describe("ChangePasswordPage", () => {
 
     it("shows password requirements when user types in new password field", async () => {
       const newPasswordInput = screen.getByLabelText("new_password");
-      
+
       fireEvent.change(newPasswordInput, { target: { value: "testpass" } });
 
       expect(screen.getByTestId("password-requirements")).toBeInTheDocument();
-      expect(screen.getByText("Password requirements for: testpass")).toBeInTheDocument();
+      expect(
+        screen.getByText("Password requirements for: testpass")
+      ).toBeInTheDocument();
     });
 
     it("does not show password requirements when password is empty", () => {
-      expect(screen.queryByTestId("password-requirements")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("password-requirements")
+      ).not.toBeInTheDocument();
     });
 
     it("validates password strength before submission", async () => {
@@ -1015,7 +1019,9 @@ describe("ChangePasswordPage", () => {
 
       await waitFor(() => {
         expect(mockIsPasswordStrong).toHaveBeenCalledWith("weak");
-        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(
+          screen.getByText("password_requirements_not_met")
+        ).toBeInTheDocument();
         expect(mockChangePassword).not.toHaveBeenCalled();
       });
     });
@@ -1028,8 +1034,12 @@ describe("ChangePasswordPage", () => {
       const newPasswordInput = screen.getByLabelText("new_password");
       const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
 
-      fireEvent.change(newPasswordInput, { target: { value: "StrongPass123!" } });
-      fireEvent.change(repeatPasswordInput, { target: { value: "StrongPass123!" } });
+      fireEvent.change(newPasswordInput, {
+        target: { value: "StrongPass123!" },
+      });
+      fireEvent.change(repeatPasswordInput, {
+        target: { value: "StrongPass123!" },
+      });
 
       const form = screen
         .getByRole("button", { name: "confirm" })
@@ -1060,7 +1070,9 @@ describe("ChangePasswordPage", () => {
       fireEvent.submit(form);
 
       await waitFor(() => {
-        expect(screen.getByText("password_requirements_not_met")).toBeInTheDocument();
+        expect(
+          screen.getByText("password_requirements_not_met")
+        ).toBeInTheDocument();
         expect(screen.getByText("passwords_do_not_match")).toBeInTheDocument();
         expect(mockChangePassword).not.toHaveBeenCalled();
       });

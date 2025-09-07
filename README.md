@@ -1,25 +1,30 @@
 # Rezepte Website 🐿️
-A recipe website to store and manage recipes. 
+
+A recipe website to store and manage recipes.
 Built to have all my recipes in one place and add ingredients to a grocery list.
 
 ## Tech Stack
+
 - **Frontend:** React
-- **Backend:** Node.js  
+- **Backend:** Node.js
 - **Database:** Supabase
 
 ## Features
+
 ### Current functionality:
+
 - Display my recipes as default when users not logged in
 - Login/signup and account management functionality
 - Filter, search and sort recipes
 - Users can view, add, edit and delete their own recipes
 - Users can add images and toggle image visibility on home page (images hidden when not logged in)
-- Users can share recipe using individual shared links 
+- Users can share recipe using individual shared links
 - Responsive design for mobiles (drop down menu)
 - Multi-language interface (German and English)
 - Grocery list (cart icon) - ingredients can be added from recipes
 
 ### In Progress/Future functionality:
+
 - Export grocery list ingredients to external Reminders app grocery list or pdf
 - Category Management - add, remove and reorder recipe categories
 - Cooking times page to display common cooking times and conversions (e.g. cup to tbsp)
@@ -37,8 +42,8 @@ Built to have all my recipes in one place and add ingredients to a grocery list.
 <img width="400"  alt="Desktop Recipe" src="https://github.com/user-attachments/assets/d4162af4-137b-4af9-87b0-644e0dc12eec" />
 <img width="400" alt="Add Recipe Page" src="https://github.com/user-attachments/assets/0a59b9e5-9138-4833-a754-7a03cebaa4a4" />
 
-
 ### Deployment:
+
 www.acorn-rezepte.com
 
 ### To run this project locally:

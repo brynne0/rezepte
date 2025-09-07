@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
+import { useEffect } from "react";
 import "@testing-library/jest-dom";
 import Recipe from "./Recipe";
 
@@ -53,17 +54,25 @@ vi.mock("../../hooks/data/useGroceryList", () => ({
   useGroceryList: () => mockGroceryListHook,
 }));
 
+vi.mock("../../services/userService", () => ({
+  getUserPreferredLanguage: () => mockGetUserPreferredLanguage(),
+}));
+
 vi.mock("../LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
-vi.mock("../../components/ImageGallery/ImageGallery", () => ({
-  default: ({ images, onAllImagesLoaded }) => {
-    // Call onAllImagesLoaded to simulate images finishing loading
-    if (onAllImagesLoaded) onAllImagesLoaded();
+vi.mock("../../components/ImageGallery/ImageGallery", () => {
+  const MockImageGallery = ({ images, onAllImagesLoaded }) => {
+    useEffect(() => {
+      if (onAllImagesLoaded) onAllImagesLoaded();
+    }, [onAllImagesLoaded]);
     return <div data-testid="image-gallery">Images: {images.length}</div>;
-  },
-}));
+  };
+  return {
+    default: MockImageGallery,
+  };
+});
 
 vi.mock("./Recipe.css", () => ({}));
 
@@ -72,6 +81,7 @@ let mockNavigate;
 let mockRecipeHook;
 let mockAuth;
 let mockGroceryListHook;
+let mockGetUserPreferredLanguage;
 
 describe("Recipe Component", () => {
   beforeEach(() => {
@@ -80,6 +90,7 @@ describe("Recipe Component", () => {
 
     // Default mock values
     mockNavigate = vi.fn();
+    mockLanguage = "en";
     mockAuth = {
       isLoggedIn: false,
       isGuest: false,
@@ -96,6 +107,7 @@ describe("Recipe Component", () => {
       loading: false,
       error: null,
     };
+    mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
   });
 
   const renderRecipe = () => {
@@ -446,10 +458,16 @@ describe("Recipe Component", () => {
     beforeEach(() => {
       mockRecipeHook.recipe = mockRecipeData;
       mockAuth.isLoggedIn = true;
+      // Default: user's preferred language matches current UI language
+      mockLanguage = "en";
+      mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
     });
 
-    test("shows grocery cart button for logged in users", () => {
+    test("shows grocery cart button for logged in users viewing in preferred language", async () => {
       renderRecipe();
+
+      // Wait for language preference to be loaded
+      await screen.findByTestId("lucide-shopping-basket");
       expect(screen.getByTestId("lucide-shopping-basket")).toBeInTheDocument();
     });
 
@@ -462,31 +480,50 @@ describe("Recipe Component", () => {
       ).not.toBeInTheDocument();
     });
 
-    test("shows loading spinner when adding to grocery list", () => {
+    test("doesn't show grocery cart button when user is not viewing in preferred language", async () => {
+      // User prefers German but is viewing in English
+      mockLanguage = "en";
+      mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("de"));
+
+      renderRecipe();
+
+      // Wait for component to settle
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(
+        screen.queryByTestId("lucide-shopping-basket")
+      ).not.toBeInTheDocument();
+    });
+
+    test("shows loading spinner when adding to grocery list", async () => {
       mockGroceryListHook.addingToGroceryList = true;
       renderRecipe();
 
+      await screen.findByTestId("cart-loader");
       expect(screen.getByTestId("cart-loader")).toBeInTheDocument();
     });
 
-    test("shows counter when ingredients are selected", () => {
+    test("shows counter when ingredients are selected", async () => {
       mockGroceryListHook.checkedIngredients = { "ri-1": true, "ri-2": true };
       renderRecipe();
 
+      await screen.findByText("2");
       expect(screen.getByText("2")).toBeInTheDocument();
     });
 
-    test("shows success message after adding to grocery list", () => {
+    test("shows success message after adding to grocery list", async () => {
       mockGroceryListHook.showSuccess = true;
       renderRecipe();
 
+      await screen.findByText("added_to_groceries");
       expect(screen.getByText("added_to_groceries")).toBeInTheDocument();
     });
 
-    test("calls addToGroceryList when cart button clicked", () => {
+    test("calls addToGroceryList when cart button clicked", async () => {
       renderRecipe();
 
-      fireEvent.click(screen.getByTestId("lucide-shopping-basket"));
+      const cartButton = await screen.findByTestId("lucide-shopping-basket");
+      fireEvent.click(cartButton);
 
       expect(mockGroceryListHook.addToGroceryList).toHaveBeenCalledWith(
         mockRecipeData.ungroupedIngredients,
@@ -495,14 +532,12 @@ describe("Recipe Component", () => {
       );
     });
 
-    test("disables cart button when adding to grocery list", () => {
+    test("disables cart button when adding to grocery list", async () => {
       mockGroceryListHook.addingToGroceryList = true;
       renderRecipe();
 
-      const cartButton = screen
-        .getByTestId("lucide-shopping-basket")
-        .closest("button");
-      expect(cartButton).toBeDisabled();
+      const cartButton = await screen.findByTestId("lucide-shopping-basket");
+      expect(cartButton.closest("button")).toBeDisabled();
     });
   });
 
@@ -1170,7 +1205,7 @@ describe("Recipe Component", () => {
   });
 
   describe("getAllIngredients Helper Function", () => {
-    test("combines ungrouped ingredients and sectioned ingredients for grocery list", () => {
+    test("combines ungrouped ingredients and sectioned ingredients for grocery list", async () => {
       mockAuth.isLoggedIn = true;
 
       mockRecipeHook.recipe = {
@@ -1191,8 +1226,9 @@ describe("Recipe Component", () => {
 
       renderRecipe();
 
-      // Click add to grocery list
-      fireEvent.click(screen.getByTestId("lucide-shopping-basket"));
+      // Wait for and click add to grocery list
+      const cartButton = await screen.findByTestId("lucide-shopping-basket");
+      fireEvent.click(cartButton);
 
       // Should be called with combined ingredients
       expect(mockGroceryListHook.addToGroceryList).toHaveBeenCalledWith(
@@ -1203,6 +1239,79 @@ describe("Recipe Component", () => {
         ]),
         "Test Recipe",
         "recipe-1"
+      );
+    });
+  });
+
+  describe("Language Preference Integration", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = mockRecipeData;
+      mockAuth.isLoggedIn = true;
+      // Default: user's preferred language matches current UI language
+      mockLanguage = "en";
+      mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
+    });
+
+    test("shows grocery list features when current language matches user preference", async () => {
+      mockLanguage = "en";
+      mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
+      mockGroceryListHook.showSuccess = true;
+
+      renderRecipe();
+
+      // Should show grocery cart button
+      await screen.findByTestId("lucide-shopping-basket");
+      expect(screen.getByTestId("lucide-shopping-basket")).toBeInTheDocument();
+
+      // Should show success message when present
+      expect(screen.getByText("added_to_groceries")).toBeInTheDocument();
+    });
+
+    test("hides grocery list features when current language differs from user preference", async () => {
+      mockLanguage = "de";
+      mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
+      mockGroceryListHook.showSuccess = true;
+
+      renderRecipe();
+
+      // Wait for component to settle
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Should hide grocery cart button
+      expect(
+        screen.queryByTestId("lucide-shopping-basket")
+      ).not.toBeInTheDocument();
+
+      // Should hide success message even when it would normally show
+      expect(screen.queryByText("added_to_groceries")).not.toBeInTheDocument();
+    });
+
+    test("handles loading state of user preferred language gracefully", async () => {
+      // Simulate slow user preference loading
+      let resolvePreference;
+      const preferencePromise = new Promise((resolve) => {
+        resolvePreference = resolve;
+      });
+      mockGetUserPreferredLanguage = vi.fn(() => preferencePromise);
+
+      renderRecipe();
+
+      // Initially should not show grocery cart (waiting for preference)
+      expect(
+        screen.queryByTestId("lucide-shopping-basket")
+      ).not.toBeInTheDocument();
+
+      // Resolve the preference to match current language
+      resolvePreference("en");
+
+      // Now should show grocery cart button after state updates
+      await waitFor(
+        () => {
+          expect(
+            screen.getByTestId("lucide-shopping-basket")
+          ).toBeInTheDocument();
+        },
+        { timeout: 3000 }
       );
     });
   });

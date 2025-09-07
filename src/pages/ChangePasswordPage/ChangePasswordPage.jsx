@@ -117,9 +117,8 @@ const ChangePasswordPage = () => {
 
         // Verify old password if coming from account settings
         if (fromSettings && oldPassword) {
-          const { error: verifyError } = await verifyCurrentPassword(
-            oldPassword
-          );
+          const { error: verifyError } =
+            await verifyCurrentPassword(oldPassword);
           if (verifyError) {
             setValidationErrors({
               ...validationErrors,

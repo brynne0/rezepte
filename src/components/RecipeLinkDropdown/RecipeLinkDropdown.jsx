@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, X } from "lucide-react";
 import { fetchRecipes } from "../../services/recipes";
+import { getTranslatedRecipeTitle } from "../../services/translationService";
 import "./RecipeLinkDropdown.css";
 
 const RecipeLinkDropdown = ({
@@ -10,7 +11,7 @@ const RecipeLinkDropdown = ({
   onSelectRecipe,
   currentRecipeId,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [recipes, setRecipes] = useState([]);
   const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,13 +23,22 @@ const RecipeLinkDropdown = ({
     if (isOpen) {
       setLoading(true);
       fetchRecipes()
-        .then((recipeList) => {
+        .then(async (recipeList) => {
           // Filter out current recipe to prevent self-linking
           const filteredList = recipeList.filter(
             (recipe) => recipe.id !== currentRecipeId
           );
-          setRecipes(filteredList);
-          setFilteredRecipes(filteredList);
+
+          // Translate recipe titles for current language (like home page does)
+          const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
+          const translatedRecipes = await Promise.all(
+            filteredList.map((recipe) =>
+              getTranslatedRecipeTitle(recipe, currentLanguage)
+            )
+          );
+
+          setRecipes(translatedRecipes);
+          setFilteredRecipes(translatedRecipes);
         })
         .catch((error) => {
           console.error("Error fetching recipes:", error);
@@ -49,7 +59,7 @@ const RecipeLinkDropdown = ({
       setRecipes([]);
       setFilteredRecipes([]);
     }
-  }, [isOpen, currentRecipeId]);
+  }, [isOpen, currentRecipeId, i18n.language]);
 
   useEffect(() => {
     // Filter recipes based on search term
@@ -133,13 +143,12 @@ const RecipeLinkDropdown = ({
 
         <div className="recipe-list-container">
           {loading ? (
-            <div className="recipe-loading">Loading recipes...</div>
+            <div className="recipe-loading">{t("loading_recipes")}</div>
           ) : filteredRecipes.length === 0 ? (
             <div>
-              {/* TODO - add to locale files - more in this file  */}
               {searchTerm
-                ? "No recipes found matching your search."
-                : "No recipes available."}
+                ? t("no_recipes_found", { searchTerm })
+                : t("no_recipes_available")}
             </div>
           ) : (
             <div className="flex-column">

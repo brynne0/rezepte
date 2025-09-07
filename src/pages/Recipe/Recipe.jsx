@@ -7,6 +7,7 @@ import { Pencil, ShoppingBasket, Loader2, Share2 } from "lucide-react";
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { fetchSharedRecipe } from "../../services/sharingService";
 import { getTranslatedRecipe } from "../../services/translationService";
+import { getUserPreferredLanguage } from "../../services/userService";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -32,6 +33,14 @@ const Recipe = ({ isSharedView = false }) => {
   const { t, i18n } = useTranslation();
   const [showShareModal, setShowShareModal] = useState(false);
   const [imagesLoading, setImagesLoading] = useState(true);
+  const [userPreferredLanguage, setUserPreferredLanguage] = useState(null);
+
+  // Load user's preferred language
+  useEffect(() => {
+    if (isLoggedIn) {
+      getUserPreferredLanguage().then(setUserPreferredLanguage);
+    }
+  }, [isLoggedIn]);
 
   // Load shared recipe if in shared view
   useEffect(() => {
@@ -62,6 +71,11 @@ const Recipe = ({ isSharedView = false }) => {
   const recipe = isSharedView ? sharedRecipe : ownedRecipe;
   const loading = isSharedView ? sharedLoading : ownedLoading;
   const error = isSharedView ? sharedError : ownedError;
+
+  // Check if user is viewing the site in their preferred language
+  const currentLanguage = i18n.language.split("-")[0]; // Normalise region codes
+  const isViewingInPreferredLanguage =
+    currentLanguage === userPreferredLanguage;
 
   // Use the grocery list hook
   const {
@@ -238,47 +252,53 @@ const Recipe = ({ isSharedView = false }) => {
             <>
               <div className="flex-row recipe-subheading">
                 <h2>{t("ingredients")}:</h2>
-                {/* Grocery Cart - only show for owned recipes */}
-                {!isSharedView && isLoggedIn && (
-                  <div className="cart-container">
-                    <button
-                      onClick={() =>
-                        addToGroceryList(
-                          getAllIngredients(),
-                          recipe.title,
-                          recipe.id
-                        )
-                      }
-                      className="btn btn-icon-red"
-                      disabled={addingToGroceryList}
-                      data-testid="lucide-shopping-basket"
-                      aria-label={t("add_to_grocery_list")}
-                    >
-                      <ShoppingBasket />
-                      {/* Selected ingredients counter or loading spinner */}
-                      {addingToGroceryList ? (
-                        <span className="cart-counter flex-center">
-                          <Loader2
-                            size={12}
-                            className="animate-spin"
-                            data-testid="cart-loader"
-                          />
-                        </span>
-                      ) : (
-                        Object.values(checkedIngredients).filter(Boolean)
-                          .length > 0 && (
+                {/* Grocery Cart - only show for owned recipes and when viewing in preferred language */}
+                {!isSharedView &&
+                  isLoggedIn &&
+                  isViewingInPreferredLanguage && (
+                    <div className="cart-container">
+                      <button
+                        onClick={() =>
+                          addToGroceryList(
+                            getAllIngredients(),
+                            recipe.title,
+                            recipe.id
+                          )
+                        }
+                        className="btn btn-icon-red"
+                        disabled={addingToGroceryList}
+                        data-testid="lucide-shopping-basket"
+                        aria-label={t("add_to_grocery_list")}
+                      >
+                        <ShoppingBasket />
+                        {/* Selected ingredients counter or loading spinner */}
+                        {addingToGroceryList ? (
                           <span className="cart-counter flex-center">
-                            {
-                              Object.values(checkedIngredients).filter(Boolean)
-                                .length
-                            }
+                            <Loader2
+                              size={12}
+                              className="animate-spin"
+                              data-testid="cart-loader"
+                            />
                           </span>
-                        )
-                      )}
-                    </button>
-                  </div>
-                )}
-                {!isSharedView && showSuccess && t("added_to_groceries")}
+                        ) : (
+                          Object.values(checkedIngredients).filter(Boolean)
+                            .length > 0 && (
+                            <span className="cart-counter flex-center">
+                              {
+                                Object.values(checkedIngredients).filter(
+                                  Boolean
+                                ).length
+                              }
+                            </span>
+                          )
+                        )}
+                      </button>
+                    </div>
+                  )}
+                {!isSharedView &&
+                  isViewingInPreferredLanguage &&
+                  showSuccess &&
+                  t("added_to_groceries")}
               </div>
 
               {/* Ungrouped Ingredients */}

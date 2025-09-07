@@ -106,6 +106,11 @@
   margin-bottom: 1rem;
 }
 
+/* Spacing utilities */
+.mt-1 {
+  margin-top: 1rem;
+}
+
 .auth-form,
 .auth-container {
   display: flex;

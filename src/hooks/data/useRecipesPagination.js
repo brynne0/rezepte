@@ -135,10 +135,10 @@ export const useRecipesPagination = (
     const filteredRecipes = searchTerm
       ? searchFilteredRecipes // When searching, show all search results regardless of category
       : category === "all"
-      ? allRecipes
-      : allRecipes.filter(
-          (r) => r.categories && r.categories.includes(category)
-        );
+        ? allRecipes
+        : allRecipes.filter(
+            (r) => r.categories && r.categories.includes(category)
+          );
 
     // Then sort the filtered results
     const sortedRecipes = [...filteredRecipes].sort((a, b) => {

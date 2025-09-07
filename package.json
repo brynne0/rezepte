@@ -12,6 +12,8 @@
     "test:ui": "NODE_NO_WARNINGS=1 vitest --ui",
     "test:run": "NODE_NO_WARNINGS=1 vitest run",
     "test:coverage": "NODE_NO_WARNINGS=1 vitest run --coverage",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "husky"
   },
   "dependencies": {
@@ -41,6 +43,7 @@
     "globals": "^16.0.0",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "prettier": "^3.6.2",
     "vite": "^6.3.5",
     "vitest": "^3.2.4"
   }

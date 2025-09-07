@@ -81,7 +81,7 @@
   transition: all 0.15s ease;
 }
 
-.recipe-item .bold-small:hover {
+.recipe-item:hover .bold-small {
   color: var(--color-danger);
 }
 

@@ -390,12 +390,12 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
 
           <ConfirmationModal
             isOpen={isUnsavedChangesModalOpen}
-            onClose={handleCancelModal}
-            onConfirm={handleConfirmModal}
+            onConfirm={handleCancelModal}
+            onClose={handleConfirmModal}
             message={unsavedChangesMessage}
-            confirmText={t("leave_page")}
-            cancelText={t("stay")}
-            confirmButtonType="danger"
+            cancelText={t("leave_page")}
+            confirmText={t("stay")}
+            confirmButtonType="primary"
           />
         </>
       )}

@@ -250,8 +250,12 @@ describe("Grocery List Service", () => {
         error: { message: "Auth failed" },
       });
 
-      await expect(fetchGroceryList()).rejects.toThrow("User not authenticated");
-      await expect(clearGroceryList()).rejects.toThrow("User not authenticated");
+      await expect(fetchGroceryList()).rejects.toThrow(
+        "User not authenticated"
+      );
+      await expect(clearGroceryList()).rejects.toThrow(
+        "User not authenticated"
+      );
     });
 
     test("handles network errors gracefully", async () => {
@@ -268,7 +272,7 @@ describe("Grocery List Service", () => {
         data: { translatedText: "Äpfel" },
         error: null,
       };
-      
+
       supabase.functions.invoke.mockResolvedValue(mockTranslationResponse);
 
       // The translation is internal to the service, so we test it indirectly

@@ -671,7 +671,7 @@ const CategoriesTab = ({
         <div className="add-category-section flex-center">
           <button
             type="button"
-            className="btn btn-section-dotted"
+            className="btn btn-tertiary"
             onClick={handleAddCategory}
             disabled={false}
           >

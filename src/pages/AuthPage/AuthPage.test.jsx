@@ -741,10 +741,13 @@ describe("AuthPage", () => {
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
 
-      await waitFor(() => {
-        expect(usernameInput.value).toBe("");
-        expect(passwordInput.value).toBe("");
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(usernameInput.value).toBe("");
+          expect(passwordInput.value).toBe("");
+        },
+        { timeout: 2000 }
+      );
     });
 
     it("calls signIn with username when username is provided", async () => {
@@ -892,12 +895,15 @@ describe("AuthPage", () => {
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
 
-      await waitFor(() => {
-        expect(emailInput.value).toBe("");
-        expect(firstNameInput.value).toBe("");
-        expect(usernameInput.value).toBe("");
-        expect(passwordInput.value).toBe("");
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(emailInput.value).toBe("");
+          expect(firstNameInput.value).toBe("");
+          expect(usernameInput.value).toBe("");
+          expect(passwordInput.value).toBe("");
+        },
+        { timeout: 2000 }
+      );
     });
   });
 

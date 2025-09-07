@@ -18,10 +18,12 @@ export const signUp = async (email, first_name, username, password) => {
 export const signIn = async (usernameOrEmail, password) => {
   try {
     // Check if input is an email
-    const isEmailInput = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usernameOrEmail.trim());
-    
+    const isEmailInput = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      usernameOrEmail.trim()
+    );
+
     let email;
-    
+
     if (isEmailInput) {
       // Input is an email, use it directly
       email = usernameOrEmail;
@@ -35,7 +37,10 @@ export const signIn = async (usernameOrEmail, password) => {
 
       if (userError) {
         // Username not found
-        return { data: null, error: { type: 'USER_NOT_FOUND', translationKey: 'user_not_found' } };
+        return {
+          data: null,
+          error: { type: "USER_NOT_FOUND", translationKey: "user_not_found" },
+        };
       }
       email = user.email;
     }
@@ -48,20 +53,44 @@ export const signIn = async (usernameOrEmail, password) => {
     if (error) {
       // Map Supabase auth errors to specific error types with translation keys
       switch (error.message) {
-        case 'Invalid login credentials':
-          return { data: null, error: { type: 'INVALID_PASSWORD', translationKey: 'invalid_password' } };
-        case 'Email not confirmed':
-          return { data: null, error: { type: 'EMAIL_NOT_CONFIRMED', translationKey: 'email_not_confirmed' } };
-        case 'Too many requests':
-          return { data: null, error: { type: 'TOO_MANY_REQUESTS', translationKey: 'too_many_requests' } };
+        case "Invalid login credentials":
+          return {
+            data: null,
+            error: {
+              type: "INVALID_PASSWORD",
+              translationKey: "invalid_password",
+            },
+          };
+        case "Email not confirmed":
+          return {
+            data: null,
+            error: {
+              type: "EMAIL_NOT_CONFIRMED",
+              translationKey: "email_not_confirmed",
+            },
+          };
+        case "Too many requests":
+          return {
+            data: null,
+            error: {
+              type: "TOO_MANY_REQUESTS",
+              translationKey: "too_many_requests",
+            },
+          };
         default:
-          return { data: null, error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' } };
+          return {
+            data: null,
+            error: { type: "GENERAL_ERROR", translationKey: "login_failed" },
+          };
       }
     }
 
     return { data, error: null };
   } catch {
-    return { data: null, error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' } };
+    return {
+      data: null,
+      error: { type: "GENERAL_ERROR", translationKey: "login_failed" },
+    };
   }
 };
 
