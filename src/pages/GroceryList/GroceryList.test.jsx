@@ -270,6 +270,94 @@ describe("GroceryList", () => {
     expect(checkbox).not.toBeChecked();
   });
 
+  describe("Remove Selected Functionality", () => {
+    it("shows remove selected button disabled when no items are checked", () => {
+      setup();
+      const removeButton = screen.getByRole("button", {
+        name: /remove_all_checked/i,
+      });
+      expect(removeButton).toBeInTheDocument();
+      expect(removeButton).toBeDisabled();
+    });
+
+    it("does not show remove selected button in editing mode", () => {
+      setup({ isEditing: true });
+
+      // In editing mode, there are no checkboxes, so no remove selected button should appear
+      expect(
+        screen.queryByRole("button", { name: /remove_all_checked/i })
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows remove selected button enabled when items are checked in view mode", () => {
+      setup();
+
+      // Initially disabled
+      const removeButton = screen.getByRole("button", {
+        name: /remove_all_checked/i,
+      });
+      expect(removeButton).toBeDisabled();
+
+      // Check an item
+      const checkbox = screen.getAllByRole("checkbox")[0];
+      fireEvent.click(checkbox);
+
+      // Now should be enabled
+      expect(removeButton).not.toBeDisabled();
+    });
+
+    it("removes only checked items when remove selected button is clicked", () => {
+      setup();
+
+      // Check the first item (Apples)
+      const checkboxes = screen.getAllByRole("checkbox");
+      fireEvent.click(checkboxes[0]);
+
+      // Verify the remove selected button appears
+      const removeButton = screen.getByRole("button", {
+        name: /remove_all_checked/i,
+      });
+      expect(removeButton).toBeInTheDocument();
+
+      // Click the remove selected button
+      fireEvent.click(removeButton);
+
+      // Verify updateGroceryList was called with only the unchecked items
+      expect(mockUpdateGroceryList).toHaveBeenCalledWith([
+        expect.objectContaining({ name: "Bananas" }), // Only Bananas should remain
+      ]);
+    });
+
+    it("removes multiple checked items when remove selected button is clicked", () => {
+      setup();
+
+      // Check both items
+      const checkboxes = screen.getAllByRole("checkbox");
+      fireEvent.click(checkboxes[0]); // Check Apples
+      fireEvent.click(checkboxes[1]); // Check Bananas
+
+      // Click the remove selected button
+      const removeButton = screen.getByRole("button", {
+        name: /remove_all_checked/i,
+      });
+      fireEvent.click(removeButton);
+
+      // Verify updateGroceryList was called with empty array
+      expect(mockUpdateGroceryList).toHaveBeenCalledWith([]);
+    });
+
+    it("shows button as always visible but disabled when no items or empty list", () => {
+      // Test with empty list
+      setup({}, []);
+
+      const removeButton = screen.getByRole("button", {
+        name: /remove_all_checked/i,
+      });
+      expect(removeButton).toBeInTheDocument();
+      expect(removeButton).toBeDisabled();
+    });
+  });
+
   describe("Language Preservation", () => {
     it("imports getUserPreferredLanguage function correctly", () => {
       // Simple test to ensure the function is available and mocked

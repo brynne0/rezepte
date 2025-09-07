@@ -210,6 +210,7 @@
   "add_item": "Add item",
   "remove_item": "Remove item",
   "clear_list": "Clear List",
+  "remove_all_checked": "Remove Selected",
   "grocery_list_clear_confirmation": "Are you sure you want to clear the grocery list?",
 
   "unsaved_changes_warning": "You have unsaved changes. Are you sure you want to leave this page?",

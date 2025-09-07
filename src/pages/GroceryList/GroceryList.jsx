@@ -269,6 +269,17 @@ const GroceryList = ({
     setCheckedItems(newCheckedItems);
   };
 
+  const clearAllChecked = () => {
+    // Remove all checked items from the grocery list
+    const uncheckedItems = currentList.filter((item) => {
+      const itemId = item.id || item.tempId || currentList.indexOf(item);
+      return !checkedItems.has(itemId);
+    });
+
+    updateGroceryList(uncheckedItems);
+    setCheckedItems(new Set());
+  };
+
   if (loading) {
     return <LoadingAcorn />;
   }
@@ -502,6 +513,20 @@ const GroceryList = ({
           </ul>
         )}
       </div>
+
+      {/* Remove Selected Button - always visible in view mode but disabled when no items checked */}
+      {!isEditing && (
+        <div className="flex-center mt-1">
+          <button
+            className="btn btn-tertiary"
+            onClick={clearAllChecked}
+            disabled={checkedItems.size === 0}
+            aria-label={t("remove_all_checked")}
+          >
+            {t("remove_all_checked")}
+          </button>
+        </div>
+      )}
 
       {isEditing && (
         <div className="action-buttons-end edit">
