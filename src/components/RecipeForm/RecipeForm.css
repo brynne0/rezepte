@@ -133,7 +133,7 @@
   color: var(--color-danger);
 }
 
-/* Link button styling */
+/* Base link button styling */
 .btn-icon-link {
   color: var(--color-text-primary);
   transition: all 0.2s ease;
@@ -146,31 +146,27 @@
   color: var(--color-danger);
 }
 
-/* Linked button styling */
-.btn-icon-linked {
+/* Linked state modifier */
+.btn-icon-link.linked {
   color: var(--color-danger);
-  transition: all 0.2s ease;
-  border: 2px dashed var(--color-danger) !important;
-  border-radius: var(--border-radius);
-  padding: 0.3rem !important;
+  border-color: var(--color-danger) !important;
 }
 
-/* Hover X icon functionality for link buttons */
-.btn-icon-linked .link-hover {
-  display: none;
-}
-
-.btn-icon-linked:hover .link-default {
-  display: none;
-}
-
-.btn-icon-linked:hover .link-hover {
-  display: block;
-}
-
-/* For unlinked buttons, only show the default link icon */
+/* Icon visibility rules */
 .btn-icon-link .link-hover {
   display: none;
+}
+
+.btn-icon-link.linked .link-hover {
+  display: none;
+}
+
+.btn-icon-link.linked:hover .link-default {
+  display: none;
+}
+
+.btn-icon-link.linked:hover .link-hover {
+  display: block;
 }
 
 /* Responsive */

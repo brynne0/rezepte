@@ -530,7 +530,7 @@ const RecipeForm = ({
                                       "ungrouped",
                                       ingredient.tempId
                                     )
-                                      ? "btn-icon-linked"
+                                      ? "btn-icon-link linked"
                                       : "btn-icon-link"
                                   } ${
                                     isEditingTranslation
@@ -933,7 +933,7 @@ const RecipeForm = ({
                                                         section.id,
                                                         ingredient.tempId
                                                       )
-                                                        ? "btn-icon-linked"
+                                                        ? "btn-icon-link linked"
                                                         : "btn-icon-link"
                                                     } ${
                                                       isEditingTranslation
