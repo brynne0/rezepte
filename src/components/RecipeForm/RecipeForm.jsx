@@ -402,13 +402,6 @@ const RecipeForm = ({
                                   validationErrors.ingredients
                                     ? "input--error"
                                     : ""
-                                } ${
-                                  getIngredientLink(
-                                    "ungrouped",
-                                    ingredient.tempId
-                                  )
-                                    ? "ingredient-linked"
-                                    : ""
                                 }`}
                                 placeholder={t("ingredient_name")}
                               />
@@ -797,14 +790,7 @@ const RecipeForm = ({
                                                     validationErrors.ingredients
                                                       ? "input--error"
                                                       : ""
-                                                  } ${
-                                                    getIngredientLink(
-                                                      section.id,
-                                                      ingredient.tempId
-                                                    )
-                                                      ? "ingredient-linked"
-                                                      : ""
-                                                  }`}
+                                                  } `}
                                                   placeholder={t(
                                                     "ingredient_name"
                                                   )}

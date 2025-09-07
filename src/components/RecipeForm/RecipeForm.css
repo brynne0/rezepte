@@ -137,6 +137,9 @@
 .btn-icon-link {
   color: var(--color-text-primary);
   transition: all 0.2s ease;
+  border: 2px dashed transparent !important;
+  border-radius: var(--border-radius);
+  padding: 0.3rem !important;
 }
 
 .btn-icon-link:hover {
@@ -147,17 +150,9 @@
 .btn-icon-linked {
   color: var(--color-danger);
   transition: all 0.2s ease;
-}
-
-.btn-icon-linked:hover {
-  /* TODO - make it clear this will remove the current link i.e change into an x */
-  color: var(--color-danger);
-}
-
-/* Ingredient name styling for linked ingredients - color + italic styling */
-.input.ingredient-linked {
-  color: var(--color-danger) !important;
-  font-weight: 500 !important;
+  border: 2px dashed var(--color-danger) !important;
+  border-radius: var(--border-radius);
+  padding: 0.3rem !important;
 }
 
 /* Hover X icon functionality for link buttons */
