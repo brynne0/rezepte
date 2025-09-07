@@ -55,7 +55,6 @@ h3 {
 h1.forta-red {
   font-family: var(--font-forta);
   color: var(--color-danger-dark);
-  /* TODO - maybe remove below line? */
   line-height: 1;
 }
 
@@ -71,6 +70,12 @@ h1.forta-small {
 
 h2.forta {
   font-family: var(--font-forta);
+  font-size: 1rem;
+}
+
+h2.forta-red {
+  font-family: var(--font-forta);
+  color: var(--color-danger-dark);
   font-size: 1rem;
 }
 
@@ -121,8 +126,18 @@ h3.forta {
   line-height: 1;
 }
 
+.bold-small {
+  font-weight: 600;
+  color: var(--color-text-strong);
+  font-size: 1rem;
+}
+
 @media (max-width: 768px) {
   h1 {
     font-size: 1.5rem;
+  }
+
+  .bold-small {
+    font-size: 0.9rem;
   }
 }

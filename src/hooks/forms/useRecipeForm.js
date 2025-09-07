@@ -48,6 +48,7 @@ export const useRecipeForm = ({
             quantity: ing.quantity || "",
             unit: ing.unit || "",
             notes: ing.notes || "",
+            linked_recipe: ing.linked_recipe,
           })
         );
 
@@ -63,6 +64,7 @@ export const useRecipeForm = ({
               quantity: ing.quantity || "",
               unit: ing.unit || "",
               notes: ing.notes || "",
+              linked_recipe: ing.linked_recipe,
             })),
           })
         );
@@ -76,6 +78,7 @@ export const useRecipeForm = ({
             quantity: ing.quantity || "",
             unit: ing.unit || "",
             notes: ing.notes || "",
+            linked_recipe: ing.linked_recipe,
           };
 
           if (!ing.subheading || ing.subheading.trim() === "") {
@@ -115,6 +118,27 @@ export const useRecipeForm = ({
         ];
       }
 
+      // Build ingredientLinks from database data
+      let ingredientLinks = {};
+
+      // Process ungrouped ingredients
+      ungroupedIngredients.forEach((ing) => {
+        if (ing.linked_recipe) {
+          const linkKey = `ungrouped-${ing.tempId}`;
+          ingredientLinks[linkKey] = ing.linked_recipe;
+        }
+      });
+
+      // Process sectioned ingredients
+      ingredientSections.forEach((section) => {
+        section.ingredients.forEach((ing) => {
+          if (ing.linked_recipe) {
+            const linkKey = `${section.id}-${ing.tempId}`;
+            ingredientLinks[linkKey] = ing.linked_recipe;
+          }
+        });
+      });
+
       return {
         title: initialRecipe.title || "",
         categories: initialRecipe.categories || [], // Array of selected categories
@@ -128,6 +152,7 @@ export const useRecipeForm = ({
         ingredientSections: ingredientSections,
         notes: initialRecipe.notes,
         images: initialRecipe.images || [],
+        ingredientLinks: ingredientLinks,
       };
     }
 
@@ -149,7 +174,7 @@ export const useRecipeForm = ({
       ],
       ingredientSections: [],
       images: [],
-
+      ingredientLinks: {},
       notes: "",
     };
   }, [initialRecipe]);
@@ -752,6 +777,7 @@ export const useRecipeForm = ({
         instructions: validInstructions,
         source: formData.source.trim() || null,
         ungroupedIngredients: validUngroupedIngredients.map((ing) => ({
+          tempId: ing.tempId,
           name: ing.name.trim(),
           quantity: ing.quantity
             ? normaliseUnicodeFractions(ing.quantity.toString().trim())
@@ -762,6 +788,7 @@ export const useRecipeForm = ({
         ingredientSections: validSections.map((section) => ({
           ...section,
           ingredients: section.ingredients.map((ing) => ({
+            tempId: ing.tempId,
             name: ing.name.trim(),
             quantity: ing.quantity
               ? normaliseUnicodeFractions(ing.quantity.toString().trim())
@@ -773,6 +800,7 @@ export const useRecipeForm = ({
 
         notes: formData.notes,
         images: formData.images || [],
+        ingredientLinks: formData.ingredientLinks || {},
       };
 
       // Only set original_language when creating a new recipe
@@ -963,6 +991,35 @@ export const useRecipeForm = ({
     }
   };
 
+  // Handle ingredient links
+  const handleIngredientLink = (sectionId, tempId, linkedRecipe) => {
+    const linkKey = `${sectionId}-${tempId}`;
+    setFormData((prev) => ({
+      ...prev,
+      ingredientLinks: {
+        ...prev.ingredientLinks,
+        [linkKey]: linkedRecipe,
+      },
+    }));
+  };
+
+  const removeIngredientLink = (sectionId, tempId) => {
+    const linkKey = `${sectionId}-${tempId}`;
+    setFormData((prev) => {
+      const newLinks = { ...prev.ingredientLinks };
+      delete newLinks[linkKey];
+      return {
+        ...prev,
+        ingredientLinks: newLinks,
+      };
+    });
+  };
+
+  const getIngredientLink = (sectionId, tempId) => {
+    const linkKey = `${sectionId}-${tempId}`;
+    return formData.ingredientLinks?.[linkKey];
+  };
+
   // Check if form has unsaved changes
   const hasUnsavedChanges = () => {
     // Deep comparison function for ingredients
@@ -1036,7 +1093,9 @@ export const useRecipeForm = ({
         formData.ingredientSections,
         initialFormData.ingredientSections
       ) ||
-      !compareImages(formData.images, initialFormData.images)
+      !compareImages(formData.images, initialFormData.images) ||
+      JSON.stringify(formData.ingredientLinks) !==
+        JSON.stringify(initialFormData.ingredientLinks)
     );
   };
 
@@ -1071,5 +1130,8 @@ export const useRecipeForm = ({
     handleCancel,
     handleDelete,
     toTitleCase,
+    handleIngredientLink,
+    removeIngredientLink,
+    getIngredientLink,
   };
 };

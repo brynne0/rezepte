@@ -7,6 +7,7 @@ import {
   GripVertical,
   Link,
   NotepadText,
+  X,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
@@ -17,6 +18,7 @@ import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import Selector from "../Selector/Selector";
 import ImageUpload from "../ImageUpload/ImageUpload";
+import RecipeLinkDropdown from "../RecipeLinkDropdown/RecipeLinkDropdown";
 import "./RecipeForm.css";
 
 const RecipeForm = ({
@@ -55,9 +57,14 @@ const RecipeForm = ({
     handleSubmit,
     handleDelete,
     toTitleCase,
+    handleIngredientLink,
+    removeIngredientLink,
+    getIngredientLink,
   } = useRecipeForm({ initialRecipe, isEditingTranslation });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
+  const [linkingIngredient, setLinkingIngredient] = useState(null);
 
   // Unsaved changes detection
   const {
@@ -102,6 +109,23 @@ const RecipeForm = ({
     } else if (value && sourceMode !== "note") {
       // Auto-switch to note mode for non-link content
       setSourceMode("note");
+    }
+  };
+
+  // Handle opening the recipe link dropdown
+  const handleOpenLinkDropdown = (sectionId, tempId, ingredient) => {
+    setLinkingIngredient({ sectionId, tempId, ingredient });
+    setLinkDropdownOpen(true);
+  };
+
+  // Handle selecting a recipe to link to
+  const handleSelectRecipe = (recipe) => {
+    if (linkingIngredient) {
+      handleIngredientLink(
+        linkingIngredient.sectionId,
+        linkingIngredient.tempId,
+        recipe
+      );
     }
   };
 
@@ -478,6 +502,54 @@ const RecipeForm = ({
                                   className="input input--full-width input--edit"
                                   placeholder={t("notes")}
                                 />
+                              </div>
+
+                              <div className="flex-row">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const linkedRecipe = getIngredientLink(
+                                      "ungrouped",
+                                      ingredient.tempId
+                                    );
+                                    if (linkedRecipe) {
+                                      removeIngredientLink(
+                                        "ungrouped",
+                                        ingredient.tempId
+                                      );
+                                    } else {
+                                      handleOpenLinkDropdown(
+                                        "ungrouped",
+                                        ingredient.tempId,
+                                        ingredient
+                                      );
+                                    }
+                                  }}
+                                  className={`btn btn-icon ${
+                                    getIngredientLink(
+                                      "ungrouped",
+                                      ingredient.tempId
+                                    )
+                                      ? "btn-icon-link linked"
+                                      : "btn-icon-link"
+                                  } ${
+                                    isEditingTranslation
+                                      ? "translation-disabled"
+                                      : ""
+                                  }`}
+                                  aria-label={
+                                    getIngredientLink(
+                                      "ungrouped",
+                                      ingredient.tempId
+                                    )
+                                      ? t("unlink_recipe")
+                                      : t("link_to_recipe")
+                                  }
+                                  disabled={isEditingTranslation}
+                                >
+                                  <Link size={16} className="link-default" />
+                                  <X size={16} className="link-hover" />
+                                </button>
 
                                 <button
                                   type="button"
@@ -705,7 +777,7 @@ const RecipeForm = ({
                                                     validationErrors.ingredients
                                                       ? "input--error"
                                                       : ""
-                                                  }`}
+                                                  } `}
                                                   placeholder={t(
                                                     "ingredient_name"
                                                   )}
@@ -819,6 +891,63 @@ const RecipeForm = ({
                                                     className="input input--full-width input--edit"
                                                     placeholder={t("notes")}
                                                   />
+                                                </div>
+
+                                                <div className="flex-row">
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                      const linkedRecipe =
+                                                        getIngredientLink(
+                                                          section.id,
+                                                          ingredient.tempId
+                                                        );
+                                                      if (linkedRecipe) {
+                                                        removeIngredientLink(
+                                                          section.id,
+                                                          ingredient.tempId
+                                                        );
+                                                      } else {
+                                                        handleOpenLinkDropdown(
+                                                          section.id,
+                                                          ingredient.tempId,
+                                                          ingredient
+                                                        );
+                                                      }
+                                                    }}
+                                                    className={`btn btn-icon ${
+                                                      getIngredientLink(
+                                                        section.id,
+                                                        ingredient.tempId
+                                                      )
+                                                        ? "btn-icon-link linked"
+                                                        : "btn-icon-link"
+                                                    } ${
+                                                      isEditingTranslation
+                                                        ? "translation-disabled"
+                                                        : ""
+                                                    }`}
+                                                    aria-label={
+                                                      getIngredientLink(
+                                                        section.id,
+                                                        ingredient.tempId
+                                                      )
+                                                        ? t("unlink_recipe")
+                                                        : t("link_to_recipe")
+                                                    }
+                                                    disabled={
+                                                      isEditingTranslation
+                                                    }
+                                                  >
+                                                    <Link
+                                                      size={16}
+                                                      className="link-default"
+                                                    />
+                                                    <X
+                                                      size={16}
+                                                      className="link-hover"
+                                                    />
+                                                  </button>
 
                                                   <button
                                                     type="button"
@@ -839,7 +968,7 @@ const RecipeForm = ({
                                                     disabled={
                                                       isEditingTranslation
                                                     }
-                                                    data-testid={`remove-section-ingredient-btn-${section.id}-${ingredient.tempId}`} // Updated data-testid
+                                                    data-testid={`remove-section-ingredient-btn-${section.id}-${ingredient.tempId}`}
                                                   >
                                                     <Trash2 size={16} />
                                                   </button>
@@ -1132,6 +1261,17 @@ const RecipeForm = ({
         confirmText={t("stay")}
         cancelText={t("leave_page")}
         confirmButtonType="primary"
+      />
+
+      {/* Recipe Link Dropdown */}
+      <RecipeLinkDropdown
+        isOpen={linkDropdownOpen}
+        onClose={() => {
+          setLinkDropdownOpen(false);
+          setLinkingIngredient(null);
+        }}
+        onSelectRecipe={handleSelectRecipe}
+        currentRecipeId={initialRecipe?.id}
       />
     </div>
   );

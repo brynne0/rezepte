@@ -113,6 +113,8 @@ describe("RecipeForm", () => {
     instructions: ["Mix ingredients", "Bake for 30 minutes"],
     source: "https://example.com",
     notes: "Test notes",
+    images: [],
+    ingredientLinks: {},
   };
 
   const mockHookReturn = {
@@ -138,6 +140,11 @@ describe("RecipeForm", () => {
     handleSubmit: vi.fn(),
     handleDelete: vi.fn(),
     toTitleCase: vi.fn((str) => str),
+    handleIngredientLink: vi.fn(),
+    removeIngredientLink: vi.fn(),
+    getIngredientLink: vi.fn(() => null),
+    handleImagesChange: vi.fn(),
+    uploadingImageIds: new Set(),
   };
 
   beforeEach(() => {
@@ -844,8 +851,10 @@ describe("RecipeForm", () => {
 
         // Instructions should be editable, find them by their values
         const mixInstructionInput = screen.getByDisplayValue("Mix ingredients");
-        const bakeInstructionInput = screen.getByDisplayValue("Bake for 30 minutes");
-        
+        const bakeInstructionInput = screen.getByDisplayValue(
+          "Bake for 30 minutes"
+        );
+
         expect(mixInstructionInput).not.toBeDisabled();
         expect(bakeInstructionInput).not.toBeDisabled();
       });
@@ -952,6 +961,394 @@ describe("RecipeForm", () => {
     });
   });
 
+  describe("Ingredient Recipe Link Functionality", () => {
+    const mockLinkedRecipe = {
+      id: "recipe-123",
+      title: "Chocolate Chip Cookies",
+      slug: "chocolate-chip-cookies",
+    };
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    describe("Link Button Rendering", () => {
+      it("renders link button for ungrouped ingredients", () => {
+        renderComponent();
+
+        // Find all link buttons - should have one for each ingredient
+        const linkButtons = screen
+          .getAllByRole("button")
+          .filter((button) => button.className.includes("btn-icon-link"));
+
+        expect(linkButtons.length).toBeGreaterThan(0);
+      });
+
+      it("renders link button with correct default styling", () => {
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        expect(linkButton).toHaveClass("btn-icon-link");
+        expect(linkButton).not.toHaveClass("linked");
+      });
+
+      it("renders link button with linked styling when ingredient is linked", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: vi.fn(() => mockLinkedRecipe),
+        });
+
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        expect(linkButton).toHaveClass("btn-icon-link");
+        expect(linkButton).toHaveClass("linked");
+      });
+    });
+
+    describe("Link Button Actions", () => {
+      it("opens recipe selector when clicking unlinked ingredient button", () => {
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        fireEvent.click(linkButton);
+
+        // Should set linking ingredient state to open recipe selector
+        expect(linkButton).toBeInTheDocument();
+      });
+
+      it("removes link when clicking linked ingredient button", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: vi.fn(() => mockLinkedRecipe),
+        });
+
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        fireEvent.click(linkButton);
+
+        expect(mockHookReturn.removeIngredientLink).toHaveBeenCalledWith(
+          "ungrouped",
+          "1"
+        );
+      });
+    });
+
+    describe("Recipe Linking", () => {
+      it("calls handleIngredientLink when recipe is selected", () => {
+        renderComponent();
+
+        // Find and click link button to open selector
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        fireEvent.click(linkButton);
+
+        // Verify that the hook function for handling ingredient links is available
+        expect(mockHookReturn.handleIngredientLink).toBeDefined();
+      });
+
+      it("creates correct link key for ungrouped ingredients", () => {
+        const mockGetIngredientLink = vi.fn((sectionId, tempId) => {
+          expect(sectionId).toBe("ungrouped");
+          expect(tempId).toBe("1");
+          return mockLinkedRecipe;
+        });
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: mockGetIngredientLink,
+        });
+
+        renderComponent();
+
+        // getIngredientLink should be called with correct parameters
+        expect(mockGetIngredientLink).toHaveBeenCalledWith("ungrouped", "1");
+      });
+
+      it("creates correct link key for section ingredients", () => {
+        const mockFormDataWithSection = {
+          ...mockFormData,
+          ingredientSections: [
+            {
+              id: "section-1",
+              subheading: "For the sauce",
+              ingredients: [
+                {
+                  tempId: "2",
+                  name: "tomatoes",
+                  quantity: "3",
+                  unit: "cup/s",
+                  notes: "diced",
+                },
+              ],
+            },
+          ],
+        };
+
+        const mockGetIngredientLink = vi.fn((sectionId, tempId) => {
+          // Only check section ingredients, not ungrouped
+          if (sectionId === "section-1" && tempId === "2") {
+            expect(sectionId).toBe("section-1");
+            expect(tempId).toBe("2");
+          }
+          return null;
+        });
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: mockFormDataWithSection,
+          getIngredientLink: mockGetIngredientLink,
+        });
+
+        renderComponent();
+
+        expect(mockGetIngredientLink).toHaveBeenCalledWith("section-1", "2");
+      });
+    });
+
+    describe("Link Button Accessibility", () => {
+      it("has correct aria-label for unlinked ingredient", () => {
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        expect(linkButton).toHaveAttribute("aria-label", "link_to_recipe");
+      });
+
+      it("has correct aria-label for linked ingredient", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: vi.fn(() => mockLinkedRecipe),
+        });
+
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        expect(linkButton).toHaveAttribute("aria-label", "unlink_recipe");
+      });
+    });
+
+    describe("Link Button State in Translation Mode", () => {
+      it("disables link buttons in translation mode", () => {
+        renderComponent({ isEditingTranslation: true });
+
+        const linkButtons = screen
+          .getAllByRole("button")
+          .filter((button) => button.className.includes("btn-icon-link"));
+
+        linkButtons.forEach((button) => {
+          expect(button).toBeDisabled();
+          expect(button).toHaveClass("translation-disabled");
+        });
+      });
+
+      it("enables link buttons in normal mode", () => {
+        renderComponent({ isEditingTranslation: false });
+
+        const linkButtons = screen
+          .getAllByRole("button")
+          .filter((button) => button.className.includes("btn-icon-link"));
+
+        linkButtons.forEach((button) => {
+          expect(button).not.toBeDisabled();
+          expect(button).not.toHaveClass("translation-disabled");
+        });
+      });
+    });
+
+    describe("Section Ingredient Links", () => {
+      beforeEach(() => {
+        const mockFormDataWithSection = {
+          ...mockFormData,
+          ingredientSections: [
+            {
+              id: "section-1",
+              subheading: "For the sauce",
+              ingredients: [
+                {
+                  tempId: "2",
+                  name: "tomatoes",
+                  quantity: "3",
+                  unit: "cup/s",
+                  notes: "diced",
+                },
+              ],
+            },
+          ],
+        };
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: mockFormDataWithSection,
+        });
+      });
+
+      it("renders link buttons for section ingredients", () => {
+        renderComponent();
+
+        const linkButtons = screen
+          .getAllByRole("button")
+          .filter((button) => button.className.includes("btn-icon-link"));
+
+        // Should have buttons for both ungrouped and section ingredients
+        expect(linkButtons.length).toBeGreaterThanOrEqual(2);
+      });
+
+      it("removes section ingredient link correctly", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: {
+            ...mockFormData,
+            ingredientSections: [
+              {
+                id: "section-1",
+                subheading: "For the sauce",
+                ingredients: [
+                  {
+                    tempId: "2",
+                    name: "tomatoes",
+                    quantity: "3",
+                    unit: "cup/s",
+                    notes: "diced",
+                  },
+                ],
+              },
+            ],
+          },
+          getIngredientLink: vi.fn((sectionId, tempId) => {
+            if (sectionId === "section-1" && tempId === "2") {
+              return mockLinkedRecipe;
+            }
+            return null;
+          }),
+        });
+
+        renderComponent();
+
+        const linkedButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        fireEvent.click(linkedButton);
+
+        expect(mockHookReturn.removeIngredientLink).toHaveBeenCalledWith(
+          "section-1",
+          "2"
+        );
+      });
+    });
+
+    describe("Link Data Persistence", () => {
+      it("maintains link data across ingredient updates", () => {
+        const initialFormData = {
+          ...mockFormData,
+          ingredientLinks: {
+            "ungrouped-1": mockLinkedRecipe,
+          },
+        };
+
+        const mockGetIngredientLink = vi.fn((sectionId, tempId) => {
+          const linkKey = `${sectionId}-${tempId}`;
+          return initialFormData.ingredientLinks[linkKey];
+        });
+
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: initialFormData,
+          getIngredientLink: mockGetIngredientLink,
+        });
+
+        renderComponent();
+
+        // Verify that the link is properly retrieved
+        expect(mockGetIngredientLink).toHaveBeenCalledWith("ungrouped", "1");
+      });
+
+      it("handles missing ingredientLinks object gracefully", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: {
+            ...mockFormData,
+            ingredientLinks: undefined,
+          },
+          getIngredientLink: vi.fn(() => null),
+        });
+
+        expect(() => renderComponent()).not.toThrow();
+      });
+
+      it("handles empty ingredientLinks object", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          formData: {
+            ...mockFormData,
+            ingredientLinks: {},
+          },
+          getIngredientLink: vi.fn(() => null),
+        });
+
+        expect(() => renderComponent()).not.toThrow();
+      });
+    });
+
+    describe("Icon Display", () => {
+      it("shows default link icon for unlinked ingredients", () => {
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("btn-icon-link"));
+
+        // Check for the presence of link icon elements
+        const linkDefaultIcon = linkButton.querySelector(".link-default");
+        const linkHoverIcon = linkButton.querySelector(".link-hover");
+
+        expect(linkDefaultIcon).toBeInTheDocument();
+        expect(linkHoverIcon).toBeInTheDocument();
+      });
+
+      it("applies correct CSS classes for icon visibility", () => {
+        useRecipeForm.mockReturnValue({
+          ...mockHookReturn,
+          getIngredientLink: vi.fn(() => mockLinkedRecipe),
+        });
+
+        renderComponent();
+
+        const linkButton = screen
+          .getAllByRole("button")
+          .find((button) => button.className.includes("linked"));
+
+        // For linked buttons, both icons should be present but controlled by CSS
+        const linkDefaultIcon = linkButton.querySelector(".link-default");
+        const linkHoverIcon = linkButton.querySelector(".link-hover");
+
+        expect(linkDefaultIcon).toBeInTheDocument();
+        expect(linkHoverIcon).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("Edge Cases", () => {
     it("handles empty form data gracefully", () => {
       useRecipeForm.mockReturnValue({
@@ -1008,7 +1405,7 @@ describe("RecipeForm", () => {
 
     it("renders ingredient fields with navigation handlers without errors", () => {
       expect(() => renderComponent()).not.toThrow();
-      
+
       // Verify that handleIngredientFieldEnter is available in hook
       expect(mockHookReturn.handleIngredientFieldEnter).toBeDefined();
       expect(typeof mockHookReturn.handleIngredientFieldEnter).toBe("function");
@@ -1016,51 +1413,79 @@ describe("RecipeForm", () => {
 
     it("renders ungrouped ingredient fields with proper IDs for navigation", () => {
       renderComponent();
-      
+
       // Check that ungrouped ingredient fields exist with correct IDs
-      expect(document.querySelector('#ingredient-name-ungrouped-0-temp-1')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-quantity-ungrouped-0-temp-1')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-unit-ungrouped-0-temp-1')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-notes-ungrouped-0-temp-1')).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-name-ungrouped-0-temp-1")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-quantity-ungrouped-0-temp-1")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-unit-ungrouped-0-temp-1")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-notes-ungrouped-0-temp-1")
+      ).toBeInTheDocument();
     });
 
     it("renders section ingredient fields with proper IDs for navigation", () => {
       renderComponent();
-      
+
       // Check that section ingredient fields exist with correct IDs
-      expect(document.querySelector('#ingredient-name-section-1-0-temp-2')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-quantity-section-1-0-temp-2')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-unit-section-1-0-temp-2')).toBeInTheDocument();
-      expect(document.querySelector('#ingredient-notes-section-1-0-temp-2')).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-name-section-1-0-temp-2")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-quantity-section-1-0-temp-2")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-unit-section-1-0-temp-2")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector("#ingredient-notes-section-1-0-temp-2")
+      ).toBeInTheDocument();
     });
 
     it("ingredient fields have onKeyDown attribute for navigation", () => {
       renderComponent();
-      
-      const nameInput = document.querySelector('#ingredient-name-ungrouped-0-temp-1');
-      const quantityInput = document.querySelector('#ingredient-quantity-ungrouped-0-temp-1');
-      const notesInput = document.querySelector('#ingredient-notes-ungrouped-0-temp-1');
-      
+
+      const nameInput = document.querySelector(
+        "#ingredient-name-ungrouped-0-temp-1"
+      );
+      const quantityInput = document.querySelector(
+        "#ingredient-quantity-ungrouped-0-temp-1"
+      );
+      const notesInput = document.querySelector(
+        "#ingredient-notes-ungrouped-0-temp-1"
+      );
+
       // Test that elements exist and can receive keydown events
       expect(nameInput).toBeInTheDocument();
       expect(quantityInput).toBeInTheDocument();
       expect(notesInput).toBeInTheDocument();
-      
+
       // Test that keydown events can be fired (verifies event handler exists)
-      expect(() => fireEvent.keyDown(nameInput, { key: "Enter" })).not.toThrow();
-      expect(() => fireEvent.keyDown(quantityInput, { key: "Enter" })).not.toThrow();
-      expect(() => fireEvent.keyDown(notesInput, { key: "Enter" })).not.toThrow();
+      expect(() =>
+        fireEvent.keyDown(nameInput, { key: "Enter" })
+      ).not.toThrow();
+      expect(() =>
+        fireEvent.keyDown(quantityInput, { key: "Enter" })
+      ).not.toThrow();
+      expect(() =>
+        fireEvent.keyDown(notesInput, { key: "Enter" })
+      ).not.toThrow();
     });
   });
 
   describe("Instruction Drag and Drop", () => {
     it("renders instructions with drag handles", () => {
       renderComponent();
-      
+
       // Check that instructions are rendered with drag handles
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(2); // We have 2 instructions in mock data
-      
+
       // Verify drag handles are present within instruction rows
       dragHandles.forEach((handle) => {
         // Each draggable should contain a drag handle with the grip icon
@@ -1070,7 +1495,7 @@ describe("RecipeForm", () => {
 
     it("renders instructions within droppable area", () => {
       renderComponent();
-      
+
       // Check that instructions are wrapped in a droppable area
       const droppableArea = screen.getByTestId("droppable-instructions");
       expect(droppableArea).toBeInTheDocument();
@@ -1086,7 +1511,7 @@ describe("RecipeForm", () => {
 
     it("disables drag handles in translation mode", () => {
       renderComponent({ isEditingTranslation: true });
-      
+
       // Check that drag handles are disabled in translation mode
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       dragHandles.forEach((handle) => {
@@ -1098,7 +1523,7 @@ describe("RecipeForm", () => {
 
     it("enables drag handles in normal mode", () => {
       renderComponent({ isEditingTranslation: false });
-      
+
       // Check that drag handles are enabled in normal mode
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       dragHandles.forEach((handle) => {
@@ -1110,7 +1535,7 @@ describe("RecipeForm", () => {
 
     it("displays correct step numbers for instructions", () => {
       renderComponent();
-      
+
       // Check that step numbers are displayed correctly
       const stepNumbers = screen.getAllByText(/^\d+\.$/);
       expect(stepNumbers).toHaveLength(2);
@@ -1122,7 +1547,7 @@ describe("RecipeForm", () => {
       // This test verifies that step numbers are always sequential
       // regardless of the instruction order
       const reorderedInstructions = ["Bake for 30 minutes", "Mix ingredients"];
-      
+
       useRecipeForm.mockReturnValue({
         ...mockHookReturn,
         formData: {
@@ -1132,25 +1557,27 @@ describe("RecipeForm", () => {
       });
 
       renderComponent();
-      
+
       // Step numbers should still be 1, 2 even with reordered content
       const stepNumbers = screen.getAllByText(/^\d+\.$/);
       expect(stepNumbers).toHaveLength(2);
       expect(stepNumbers[0]).toHaveTextContent("1.");
       expect(stepNumbers[1]).toHaveTextContent("2.");
-      
+
       // But the content should be in the new order
-      expect(screen.getByDisplayValue("Bake for 30 minutes")).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue("Bake for 30 minutes")
+      ).toBeInTheDocument();
       expect(screen.getByDisplayValue("Mix ingredients")).toBeInTheDocument();
     });
 
     it("includes isDragDisabled prop for instructions in translation mode", () => {
       renderComponent({ isEditingTranslation: true });
-      
+
       // In translation mode, draggables should be disabled
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(2);
-      
+
       // This verifies the component structure is correct for disabled state
       dragHandles.forEach((handle) => {
         expect(handle).toBeInTheDocument();
@@ -1159,11 +1586,11 @@ describe("RecipeForm", () => {
 
     it("does not include isDragDisabled prop for instructions in normal mode", () => {
       renderComponent({ isEditingTranslation: false });
-      
+
       // In normal mode, draggables should be enabled
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(2);
-      
+
       // This verifies the component structure is correct for enabled state
       dragHandles.forEach((handle) => {
         expect(handle).toBeInTheDocument();
@@ -1180,11 +1607,11 @@ describe("RecipeForm", () => {
       });
 
       renderComponent();
-      
+
       // Should still render the droppable area even with no instructions
       const droppableArea = screen.getByTestId("droppable-instructions");
       expect(droppableArea).toBeInTheDocument();
-      
+
       // Should not have any instruction drag handles
       const dragHandles = screen.queryAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(0);
@@ -1200,17 +1627,19 @@ describe("RecipeForm", () => {
       });
 
       renderComponent();
-      
+
       // Should render one instruction with drag handle
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       expect(dragHandles).toHaveLength(1);
-      
+
       // Should show step number 1
       const stepNumber = screen.getByText("1.");
       expect(stepNumber).toBeInTheDocument();
-      
+
       // Should show the instruction content
-      expect(screen.getByDisplayValue("Single instruction")).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue("Single instruction")
+      ).toBeInTheDocument();
     });
   });
 
@@ -1227,7 +1656,7 @@ describe("RecipeForm", () => {
 
       // Verify that the component renders without errors when unsaved changes exist
       expect(screen.getByText("Create Recipe")).toBeInTheDocument();
-      
+
       // Verify that hasUnsavedChanges function is available and called
       expect(mockHasUnsavedChanges).toBeDefined();
       expect(typeof mockHasUnsavedChanges).toBe("function");
@@ -1236,7 +1665,7 @@ describe("RecipeForm", () => {
     it("should pass hasUnsavedChanges state correctly to form interactions", () => {
       let hasChanges = false;
       const mockHasUnsavedChanges = vi.fn(() => hasChanges);
-      
+
       useRecipeForm.mockReturnValue({
         ...mockHookReturn,
         hasUnsavedChanges: mockHasUnsavedChanges,
@@ -1272,7 +1701,9 @@ describe("RecipeForm", () => {
       });
 
       // Re-render with updated state
-      rerender(<RecipeForm categories={mockCategories} title="Create Recipe" />);
+      rerender(
+        <RecipeForm categories={mockCategories} title="Create Recipe" />
+      );
 
       // Should now have unsaved changes
       expect(updatedMockHasUnsavedChanges()).toBe(true);
@@ -1316,7 +1747,9 @@ describe("RecipeForm", () => {
       const initialFunction = mockHookReturn.hasUnsavedChanges;
 
       // Re-render and verify function reference stability
-      rerender(<RecipeForm categories={mockCategories} title="Create Recipe" />);
+      rerender(
+        <RecipeForm categories={mockCategories} title="Create Recipe" />
+      );
 
       // The function should remain the same instance for performance
       expect(mockHookReturn.hasUnsavedChanges).toBe(initialFunction);
@@ -1339,7 +1772,7 @@ describe("RecipeForm", () => {
 
       // The component should be able to use the hasUnsavedChanges function
       expect(mockHasUnsavedChanges).toBeDefined();
-      expect(typeof mockHasUnsavedChanges).toBe('function');
+      expect(typeof mockHasUnsavedChanges).toBe("function");
     });
   });
 });

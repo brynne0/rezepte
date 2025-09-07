@@ -48,7 +48,7 @@ const Recipe = ({ isSharedView = false }) => {
           );
           setSharedRecipe(translatedRecipe);
         } catch (err) {
-          setSharedError(err.message || "Failed to load shared recipe");
+          setSharedError(err.message || t("failed_load_shared_recipe"));
         } finally {
           setSharedLoading(false);
         }
@@ -56,7 +56,7 @@ const Recipe = ({ isSharedView = false }) => {
 
       loadSharedRecipe();
     }
-  }, [isSharedView, shareToken, i18n.language]);
+  }, [isSharedView, shareToken, i18n.language, t]);
 
   // Determine which recipe and state to use
   const recipe = isSharedView ? sharedRecipe : ownedRecipe;
@@ -103,34 +103,48 @@ const Recipe = ({ isSharedView = false }) => {
   };
 
   // Helper to render an ingredient item
-  const renderIngredientItem = (ingredient, keyPrefix, index) => (
-    <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
-      <input
-        type="checkbox"
-        checked={checkedIngredients[ingredient.recipe_ingredient_id] || false}
-        onChange={() => handleCheckboxChange(ingredient.recipe_ingredient_id)}
-        id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
-      />
-      <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
-        <span className="ingredient-measurement">
+  const renderIngredientItem = (ingredient, keyPrefix, index) => {
+    return (
+      <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
+        <input
+          type="checkbox"
+          checked={checkedIngredients[ingredient.recipe_ingredient_id] || false}
+          onChange={() => handleCheckboxChange(ingredient.recipe_ingredient_id)}
+          id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
+        />
+        <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
+          <span className="ingredient-measurement">
+            {formatIngredientMeasurement(
+              ingredient.quantity,
+              ingredient.unit,
+              t("units", { returnObjects: true })
+            )}
+          </span>
           {formatIngredientMeasurement(
             ingredient.quantity,
             ingredient.unit,
             t("units", { returnObjects: true })
+          ) && " "}
+
+          {ingredient.linked_recipe ? (
+            <a
+              className="ingredient-name-linked"
+              href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {getIngredientDisplayName(ingredient, i18n.language)}
+            </a>
+          ) : (
+            getIngredientDisplayName(ingredient, i18n.language)
           )}
-        </span>
-        {formatIngredientMeasurement(
-          ingredient.quantity,
-          ingredient.unit,
-          t("units", { returnObjects: true })
-        ) && " "}
-        {getIngredientDisplayName(ingredient, i18n.language)}
-        {ingredient.notes && (
-          <span className="ingredient-notes"> {ingredient.notes}</span>
-        )}
-      </label>
-    </li>
-  );
+
+          {ingredient.notes && (
+            <span className="ingredient-notes"> {ingredient.notes}</span>
+          )}
+        </label>
+      </li>
+    );
+  };
 
   if (loading) {
     return <LoadingAcorn />;

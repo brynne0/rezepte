@@ -570,7 +570,7 @@ const CategoriesTab = ({
                             />
                           ) : (
                             <>
-                              <span className="category-name">
+                              <span className="bold-small">
                                 {category.label}
                               </span>
                               {category.isSystem && (

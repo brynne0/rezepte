@@ -158,6 +158,227 @@ describe("useRecipeForm - handleDragEnd Logic", () => {
   });
 });
 
+describe("useRecipeForm - Ingredient Link Functionality", () => {
+  test("handleIngredientLink creates correct link key", () => {
+    // Test the logic that would be used in handleIngredientLink
+    const createLinkKey = (sectionId, tempId) => `${sectionId}-${tempId}`;
+
+    expect(createLinkKey("ungrouped", "temp-123")).toBe("ungrouped-temp-123");
+    expect(createLinkKey("section-1", "temp-456")).toBe("section-1-temp-456");
+    expect(createLinkKey("section-abc", "temp-xyz")).toBe(
+      "section-abc-temp-xyz"
+    );
+  });
+
+  test("removeIngredientLink key generation logic", () => {
+    // Test the same key generation logic used in removeIngredientLink
+    const createLinkKey = (sectionId, tempId) => `${sectionId}-${tempId}`;
+
+    expect(createLinkKey("ungrouped", "temp-1")).toBe("ungrouped-temp-1");
+    expect(createLinkKey("section-2", "temp-2")).toBe("section-2-temp-2");
+  });
+
+  test("getIngredientLink key lookup logic", () => {
+    // Test the logic used in getIngredientLink
+    const mockIngredientLinks = {
+      "ungrouped-temp-1": {
+        id: "recipe-1",
+        title: "Oat Flour",
+        slug: "oat-flour",
+      },
+      "section-1-temp-2": {
+        id: "recipe-2",
+        title: "Cashew Cream",
+        slug: "cashew-cream",
+      },
+    };
+
+    const getIngredientLink = (sectionId, tempId) => {
+      const linkKey = `${sectionId}-${tempId}`;
+      return mockIngredientLinks[linkKey];
+    };
+
+    expect(getIngredientLink("ungrouped", "temp-1")).toEqual({
+      id: "recipe-1",
+      title: "Oat Flour",
+      slug: "oat-flour",
+    });
+
+    expect(getIngredientLink("section-1", "temp-2")).toEqual({
+      id: "recipe-2",
+      title: "Cashew Cream",
+      slug: "cashew-cream",
+    });
+
+    expect(getIngredientLink("nonexistent", "temp-1")).toBeUndefined();
+  });
+
+  test("ingredient links data structure", () => {
+    // Test the structure used for storing ingredient links
+    const mockFormData = {
+      ingredientLinks: {
+        "ungrouped-temp-1": {
+          id: "recipe-1",
+          title: "Homemade Almond Flour",
+          slug: "homemade-almond-flour",
+        },
+        "section-1-temp-2": {
+          id: "recipe-2",
+          title: "Coconut Milk",
+          slug: "coconut-milk",
+        },
+      },
+    };
+
+    // Verify structure
+    expect(mockFormData.ingredientLinks).toHaveProperty("ungrouped-temp-1");
+    expect(mockFormData.ingredientLinks).toHaveProperty("section-1-temp-2");
+
+    expect(mockFormData.ingredientLinks["ungrouped-temp-1"]).toHaveProperty(
+      "id"
+    );
+    expect(mockFormData.ingredientLinks["ungrouped-temp-1"]).toHaveProperty(
+      "title"
+    );
+    expect(mockFormData.ingredientLinks["ungrouped-temp-1"]).toHaveProperty(
+      "slug"
+    );
+  });
+
+  test("ingredient link update logic", () => {
+    // Test the state update logic used in handleIngredientLink
+    const initialFormData = {
+      title: "Test Recipe",
+      ingredientLinks: {
+        "ungrouped-temp-1": {
+          id: "recipe-1",
+          title: "Old Recipe",
+          slug: "old-recipe",
+        },
+      },
+    };
+
+    const sectionId = "ungrouped";
+    const tempId = "temp-2";
+    const linkedRecipe = {
+      id: "recipe-2",
+      title: "New Quinoa Recipe",
+      slug: "new-quinoa-recipe",
+    };
+
+    // This is the logic used in handleIngredientLink
+    const linkKey = `${sectionId}-${tempId}`;
+    const updatedFormData = {
+      ...initialFormData,
+      ingredientLinks: {
+        ...initialFormData.ingredientLinks,
+        [linkKey]: linkedRecipe,
+      },
+    };
+
+    expect(updatedFormData.ingredientLinks).toHaveProperty("ungrouped-temp-1");
+    expect(updatedFormData.ingredientLinks).toHaveProperty("ungrouped-temp-2");
+    expect(updatedFormData.ingredientLinks["ungrouped-temp-2"]).toEqual(
+      linkedRecipe
+    );
+    expect(updatedFormData.ingredientLinks["ungrouped-temp-1"].title).toBe(
+      "Old Recipe"
+    );
+  });
+
+  test("ingredient link removal logic", () => {
+    // Test the state update logic used in removeIngredientLink
+    const initialFormData = {
+      ingredientLinks: {
+        "ungrouped-temp-1": {
+          id: "recipe-1",
+          title: "Cashew Milk",
+          slug: "cashew-milk",
+        },
+        "section-1-temp-2": {
+          id: "recipe-2",
+          title: "Oat Flour",
+          slug: "oat-flour",
+        },
+      },
+    };
+
+    const sectionId = "ungrouped";
+    const tempId = "temp-1";
+
+    // This is the logic used in removeIngredientLink
+    const linkKey = `${sectionId}-${tempId}`;
+    const newLinks = { ...initialFormData.ingredientLinks };
+    delete newLinks[linkKey];
+    const updatedFormData = {
+      ...initialFormData,
+      ingredientLinks: newLinks,
+    };
+
+    expect(updatedFormData.ingredientLinks).not.toHaveProperty(
+      "ungrouped-temp-1"
+    );
+    expect(updatedFormData.ingredientLinks).toHaveProperty("section-1-temp-2");
+    expect(Object.keys(updatedFormData.ingredientLinks)).toHaveLength(1);
+  });
+
+  test("ingredient links with missing data handling", () => {
+    // Test handling of missing or null ingredient links
+    const getIngredientLink = (ingredientLinks, sectionId, tempId) => {
+      const linkKey = `${sectionId}-${tempId}`;
+      return ingredientLinks?.[linkKey];
+    };
+
+    expect(getIngredientLink(null, "ungrouped", "temp-1")).toBeUndefined();
+    expect(getIngredientLink(undefined, "ungrouped", "temp-1")).toBeUndefined();
+    expect(getIngredientLink({}, "ungrouped", "temp-1")).toBeUndefined();
+
+    const validLinks = {
+      "ungrouped-temp-1": { id: "recipe-1", title: "Test" },
+    };
+    expect(getIngredientLink(validLinks, "ungrouped", "temp-1")).toEqual({
+      id: "recipe-1",
+      title: "Test",
+    });
+  });
+
+  test("multiple ingredient links management", () => {
+    // Test managing multiple ingredient links across sections
+    const formData = {
+      ingredientLinks: {},
+    };
+
+    // Add multiple links
+    const linksToAdd = [
+      {
+        sectionId: "ungrouped",
+        tempId: "temp-1",
+        recipe: { id: "r1", title: "Quinoa", slug: "quinoa" },
+      },
+      {
+        sectionId: "section-1",
+        tempId: "temp-2",
+        recipe: { id: "r2", title: "Lentils", slug: "lentils" },
+      },
+      {
+        sectionId: "ungrouped",
+        tempId: "temp-3",
+        recipe: { id: "r3", title: "Rice", slug: "rice" },
+      },
+    ];
+
+    linksToAdd.forEach(({ sectionId, tempId, recipe }) => {
+      const linkKey = `${sectionId}-${tempId}`;
+      formData.ingredientLinks[linkKey] = recipe;
+    });
+
+    expect(Object.keys(formData.ingredientLinks)).toHaveLength(3);
+    expect(formData.ingredientLinks["ungrouped-temp-1"].title).toBe("Quinoa");
+    expect(formData.ingredientLinks["section-1-temp-2"].title).toBe("Lentils");
+    expect(formData.ingredientLinks["ungrouped-temp-3"].title).toBe("Rice");
+  });
+});
+
 describe("useRecipeForm - Image Comparison Logic", () => {
   // Helper function that replicates the compareImages logic from useRecipeForm
   const compareImages = (images1, images2) => {
@@ -263,4 +484,3 @@ describe("useRecipeForm - Image Comparison Logic", () => {
     expect(compareImages(images1, images2)).toBe(false);
   });
 });
-

@@ -530,7 +530,7 @@ export const fetchRecipe = async (id) => {
     .from("recipes")
     .select(
       `*, 
-       recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural, name_overrides),
+       recipe_ingredients!recipe_ingredients_recipe_id_fkey(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural, name_overrides, linked_recipe_id, linked_recipe:recipes!linked_recipe_id(id, title, slug)),
        recipe_categories(categoriy_id, categories(name, translated_category))`
     )
     .eq("id", id)
@@ -558,6 +558,8 @@ export const fetchRecipe = async (id) => {
           subheading: item.subheading,
           order_index: item.order_index,
           is_plural: item.is_plural,
+          linked_recipe_id: item.linked_recipe_id,
+          linked_recipe: item.linked_recipe,
         };
       }) || [];
 
@@ -796,6 +798,10 @@ export const createRecipe = async (
         throw new Error("Ingredient must have either ingredient_id or name");
       }
 
+      // Check for linked recipe
+      const linkKey = `ungrouped-${ingredient.tempId}`;
+      const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
+
       recipeIngredientsToInsert.push({
         recipe_id: recipe.id,
         ingredient_id: ingredientId,
@@ -805,6 +811,7 @@ export const createRecipe = async (
         subheading: null, // Ungrouped ingredients have no subheading
         order_index: globalOrderIndex++,
         is_plural: isPlural,
+        linked_recipe_id: linkedRecipe?.id || null,
       });
     }
   }
@@ -836,6 +843,10 @@ export const createRecipe = async (
           throw new Error("Ingredient must have either ingredient_id or name");
         }
 
+        // Check for linked recipe
+        const linkKey = `${section.id}-${ingredient.tempId}`;
+        const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
+
         recipeIngredientsToInsert.push({
           recipe_id: recipe.id,
           ingredient_id: ingredientId,
@@ -845,6 +856,7 @@ export const createRecipe = async (
           subheading: section.subheading || null,
           order_index: globalOrderIndex++,
           is_plural: isPlural,
+          linked_recipe_id: linkedRecipe?.id || null,
         });
       }
     }
@@ -881,6 +893,11 @@ export const createRecipe = async (
         throw new Error("Ingredient must have either ingredient_id or name");
       }
 
+      // Check for linked recipe (fallback structure)
+      const sectionId = ingredient.subheading ? `section-${i}` : "ungrouped";
+      const linkKey = `${sectionId}-${ingredient.tempId}`;
+      const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
+
       recipeIngredientsToInsert.push({
         recipe_id: recipe.id,
         ingredient_id: ingredientId,
@@ -890,6 +907,7 @@ export const createRecipe = async (
         subheading: ingredient.subheading || null,
         order_index: i,
         is_plural: isPlural,
+        linked_recipe_id: linkedRecipe?.id || null,
       });
     }
   }
@@ -1046,6 +1064,10 @@ export const updateRecipe = async (
         existingRecipe?.original_language || "en"
       );
 
+      // Check for linked recipe
+      const linkKey = `ungrouped-${ingredient.tempId}`;
+      const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
+
       recipeIngredientsToInsert.push({
         recipe_id: id,
         ingredient_id: ingredientId,
@@ -1055,6 +1077,7 @@ export const updateRecipe = async (
         subheading: null, // Ungrouped ingredients have no subheading
         order_index: globalOrderIndex++,
         is_plural: isPlural,
+        linked_recipe_id: linkedRecipe?.id || null,
       });
     }
   }
@@ -1102,6 +1125,10 @@ export const updateRecipe = async (
           existingRecipe?.original_language || "en"
         );
 
+        // Check for linked recipe
+        const linkKey = `${section.id}-${ingredient.tempId}`;
+        const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
+
         recipeIngredientsToInsert.push({
           recipe_id: id,
           ingredient_id: ingredientId,
@@ -1111,6 +1138,7 @@ export const updateRecipe = async (
           subheading: section.subheading || null,
           order_index: globalOrderIndex++,
           is_plural: isPlural,
+          linked_recipe_id: linkedRecipe?.id || null,
         });
       }
     }
@@ -1161,6 +1189,11 @@ export const updateRecipe = async (
         existingRecipe?.original_language || "en"
       );
 
+      // Check for linked recipe (fallback structure)
+      const sectionId = ingredient.subheading ? `section-${i}` : "ungrouped";
+      const linkKey = `${sectionId}-${ingredient.tempId}`;
+      const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
+
       recipeIngredientsToInsert.push({
         recipe_id: id,
         ingredient_id: ingredientId,
@@ -1170,6 +1203,7 @@ export const updateRecipe = async (
         subheading: ingredient.subheading || null,
         order_index: i,
         is_plural: isPlural,
+        linked_recipe_id: linkedRecipe?.id || null,
       });
     }
   }

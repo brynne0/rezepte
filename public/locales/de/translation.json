@@ -187,6 +187,11 @@
   "add_instruction": "Anweisung hinzufügen",
   "remove_instruction": "Anweisung entfernen",
 
+  "link_to_recipe": "Mit Rezept verknüpfen",
+  "unlink_recipe": "Verknüpfung entfernen",
+  "search_recipes": "Rezepte suchen...",
+  "failed_load_shared_recipe": "Geteiltes Rezept konnte nicht geladen werden",
+
   "add_new_recipe": "Neues Rezept Hinzufügen",
   "edit_recipe": "Rezept bearbeiten",
 

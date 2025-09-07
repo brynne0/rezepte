@@ -68,7 +68,7 @@
 /* Ingredient rows */
 .ingredient-row {
   display: grid;
-  grid-template-columns: auto 2fr 1fr 1fr 2fr auto;
+  grid-template-columns: auto 2fr 1fr 1fr 2fr auto auto;
   gap: 0.5rem;
   align-items: center;
   border-radius: var(--border-radius);
@@ -130,7 +130,43 @@
 }
 
 .source-toggle:hover {
-  color: var(--color-danger-dark);
+  color: var(--color-danger);
+}
+
+/* Base link button styling */
+.btn-icon-link {
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+  border: 2px dashed transparent !important;
+  border-radius: var(--border-radius);
+  padding: 0.3rem !important;
+}
+
+.btn-icon-link:hover {
+  color: var(--color-danger);
+}
+
+/* Linked state modifier */
+.btn-icon-link.linked {
+  color: var(--color-danger);
+  border-color: var(--color-danger) !important;
+}
+
+/* Icon visibility rules */
+.btn-icon-link .link-hover {
+  display: none;
+}
+
+.btn-icon-link.linked .link-hover {
+  display: none;
+}
+
+.btn-icon-link.linked:hover .link-default {
+  display: none;
+}
+
+.btn-icon-link.linked:hover .link-hover {
+  display: block;
 }
 
 /* Responsive */
@@ -153,16 +189,45 @@
   }
 
   .ingredient-content {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
 
+  /* Make ingredient name and buttons share the same row on mobile */
+  .ingredient-content > input:first-child,
+  .ingredient-content .flex-row {
+    order: -1;
+  }
+
+  .ingredient-content > input:first-child {
+    flex: 1;
+  }
+
+  .ingredient-content .flex-row {
+    flex-shrink: 0;
+  }
+
+  /* Change ingredient-content to row layout for the first row */
+  .ingredient-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  /* Force ingredient-details to next line */
   .ingredient-details {
+    flex-basis: 100%;
+    order: 1;
+  }
+
+  .ingredient-details {
+    display: flex;
     gap: 0.25rem;
     align-items: center;
     display: grid;
-    grid-template-columns: 1.5fr 2fr 2fr auto;
+    grid-template-columns: 1.5fr 2fr 2fr;
   }
 }

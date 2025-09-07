@@ -265,8 +265,8 @@ describe("Recipe Component", () => {
         ...mockRecipeData,
         images: [
           { id: 1, url: "image1.jpg" },
-          { id: 2, url: "image2.jpg" }
-        ]
+          { id: 2, url: "image2.jpg" },
+        ],
       };
     });
 
@@ -288,7 +288,7 @@ describe("Recipe Component", () => {
     test("doesn't render image section when no images exist", () => {
       mockRecipeHook.recipe = {
         ...mockRecipeData,
-        images: []
+        images: [],
       };
       mockAuth.isLoggedIn = true;
       renderRecipe();
@@ -876,6 +876,296 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText("1.23 cups")).toBeInTheDocument();
       expect(screen.getByText("flour")).toBeInTheDocument();
+    });
+  });
+
+  describe("Ingredient Recipe Links", () => {
+    test("renders linked ingredient names as clickable links", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "2",
+            unit: "cup/s",
+            singular_name: "oat flour",
+            plural_name: "oat flours",
+            is_plural: false,
+            linked_recipe: {
+              id: "recipe-123",
+              slug: "homemade-oat-flour",
+              title: "Homemade Oat Flour",
+            },
+          },
+          {
+            id: "ing-2",
+            recipe_ingredient_id: "ri-2",
+            quantity: "1",
+            unit: "tsp",
+            singular_name: "sea salt",
+            plural_name: "sea salts",
+            is_plural: false,
+            // No linked_recipe - should render as regular text
+          },
+        ],
+      };
+
+      renderRecipe();
+
+      // Linked ingredient should be a clickable link
+      const linkedIngredient = screen.getByText("oat flour");
+      expect(linkedIngredient.closest("a")).toHaveAttribute(
+        "href",
+        "/recipe-123/homemade-oat-flour"
+      );
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "ingredient-name-linked"
+      );
+
+      // Unlinked ingredient should be plain text
+      const unlinkedIngredient = screen.getByText("sea salt");
+      expect(unlinkedIngredient.closest("a")).toBeNull();
+    });
+
+    test("linked ingredient links open in same tab with proper navigation", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "1",
+            singular_name: "cashew cream",
+            linked_recipe: {
+              id: "recipe-456",
+              slug: "cashew-cream-recipe",
+              title: "Homemade Cashew Cream",
+            },
+          },
+        ],
+      };
+
+      renderRecipe();
+
+      const link = screen.getByText("cashew cream").closest("a");
+      expect(link).toHaveAttribute("href", "/recipe-456/cashew-cream-recipe");
+      // Should NOT have target="_blank" - opens in same tab for internal navigation
+      expect(link).not.toHaveAttribute("target", "_blank");
+    });
+
+    test("linked ingredients work with sectioned ingredients", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [],
+        ingredientSections: [
+          {
+            subheading: "For the base",
+            ingredients: [
+              {
+                id: "ing-3",
+                recipe_ingredient_id: "ri-3",
+                quantity: "2",
+                unit: "cup/s",
+                singular_name: "coconut flour",
+                plural_name: "coconut flours",
+                is_plural: false,
+                linked_recipe: {
+                  id: "recipe-789",
+                  slug: "coconut-flour-recipe",
+                  title: "Homemade Coconut Flour",
+                },
+              },
+              {
+                id: "ing-4",
+                recipe_ingredient_id: "ri-4",
+                quantity: "1",
+                singular_name: "vanilla extract",
+                // No linked_recipe
+              },
+            ],
+          },
+        ],
+      };
+
+      renderRecipe();
+
+      // Linked sectioned ingredient should be a clickable link
+      const linkedIngredient = screen.getByText("coconut flour");
+      expect(linkedIngredient.closest("a")).toHaveAttribute(
+        "href",
+        "/recipe-789/coconut-flour-recipe"
+      );
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "ingredient-name-linked"
+      );
+
+      // Unlinked sectioned ingredient should be plain text
+      const unlinkedIngredient = screen.getByText("vanilla extract");
+      expect(unlinkedIngredient.closest("a")).toBeNull();
+    });
+
+    test("linked ingredients have proper click handling", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "1",
+            singular_name: "coconut oil",
+            linked_recipe: {
+              id: "recipe-999",
+              slug: "coconut-oil-guide",
+              title: "Coconut Oil Guide",
+            },
+          },
+        ],
+      };
+
+      renderRecipe();
+
+      const link = screen.getByText("coconut oil").closest("a");
+
+      // Simulate click and verify the link exists and is clickable
+      fireEvent.click(link);
+      expect(link).toBeInTheDocument();
+    });
+
+    test("handles linked ingredients with translated names", () => {
+      // Set language to German
+      mockLanguage = "de";
+
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "2",
+            unit: "cup/s",
+            singular_name: "almond flour",
+            plural_name: "almond flours",
+            name: "Mandelmehl", // German translation
+            is_plural: false,
+            linked_recipe: {
+              id: "recipe-101",
+              slug: "selbstgemachtes-mandelmehl",
+              title: "Selbstgemachtes Mandelmehl",
+            },
+          },
+        ],
+      };
+
+      renderRecipe();
+
+      // Should display translated name as link
+      const linkedIngredient = screen.getByText("Mandelmehl");
+      expect(linkedIngredient.closest("a")).toHaveAttribute(
+        "href",
+        "/recipe-101/selbstgemachtes-mandelmehl"
+      );
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "ingredient-name-linked"
+      );
+
+      // Reset language to English
+      mockLanguage = "en";
+    });
+
+    test("handles linked ingredients without linked_recipe gracefully", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "1",
+            singular_name: "maple syrup",
+            linked_recipe: null, // Explicitly null
+          },
+          {
+            id: "ing-2",
+            recipe_ingredient_id: "ri-2",
+            quantity: "2",
+            singular_name: "bananas",
+            // linked_recipe property missing entirely
+          },
+        ],
+      };
+
+      renderRecipe();
+
+      // Both should render as plain text, not links
+      const syrup = screen.getByText("maple syrup");
+      const bananas = screen.getByText("bananas");
+
+      expect(syrup.closest("a")).toBeNull();
+      expect(bananas.closest("a")).toBeNull();
+    });
+
+    test("linked ingredients work with plural forms", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "3",
+            singular_name: "mushroom",
+            plural_name: "mushrooms",
+            is_plural: true,
+            linked_recipe: {
+              id: "recipe-202",
+              slug: "fresh-mushrooms",
+              title: "Fresh Mushrooms",
+            },
+          },
+        ],
+      };
+
+      renderRecipe();
+
+      // Should use plural form as link text
+      const linkedIngredient = screen.getByText("mushrooms");
+      expect(linkedIngredient.closest("a")).toHaveAttribute(
+        "href",
+        "/recipe-202/fresh-mushrooms"
+      );
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "ingredient-name-linked"
+      );
+    });
+
+    test("linked ingredients work with missing slug", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        ungroupedIngredients: [
+          {
+            id: "ing-1",
+            recipe_ingredient_id: "ri-1",
+            quantity: "1",
+            singular_name: "oat milk",
+            linked_recipe: {
+              id: "recipe-303",
+              title: "Fresh Oat Milk",
+              // slug missing
+            },
+          },
+        ],
+      };
+
+      renderRecipe();
+
+      // Should still create link with just ID
+      const linkedIngredient = screen.getByText("oat milk");
+      expect(linkedIngredient.closest("a")).toHaveAttribute(
+        "href",
+        "/recipe-303/undefined"
+      );
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "ingredient-name-linked"
+      );
     });
   });
 
