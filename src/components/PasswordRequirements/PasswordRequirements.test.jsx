@@ -32,21 +32,25 @@ describe("PasswordRequirements", () => {
   it("shows length requirement as met for 8+ character password", () => {
     render(<PasswordRequirements password="12345678" />);
 
-    const lengthRequirement = screen.getByText("password_min_length").parentElement;
+    const lengthRequirement = screen.getByText(
+      "password_min_length"
+    ).parentElement;
     expect(lengthRequirement).toHaveClass("met");
   });
 
   it("shows lowercase requirement as met when password contains lowercase", () => {
     render(<PasswordRequirements password="Password" />);
 
-    const lowercaseRequirement = screen.getByText("password_lowercase").parentElement;
+    const lowercaseRequirement =
+      screen.getByText("password_lowercase").parentElement;
     expect(lowercaseRequirement).toHaveClass("met");
   });
 
   it("shows uppercase requirement as met when password contains uppercase", () => {
     render(<PasswordRequirements password="Password" />);
 
-    const uppercaseRequirement = screen.getByText("password_uppercase").parentElement;
+    const uppercaseRequirement =
+      screen.getByText("password_uppercase").parentElement;
     expect(uppercaseRequirement).toHaveClass("met");
   });
 
@@ -76,9 +80,13 @@ describe("PasswordRequirements", () => {
   it("shows mixed requirements for partially strong password", () => {
     render(<PasswordRequirements password="password123" />); // Missing uppercase and symbol
 
-    const lengthRequirement = screen.getByText("password_min_length").parentElement;
-    const lowercaseRequirement = screen.getByText("password_lowercase").parentElement;
-    const uppercaseRequirement = screen.getByText("password_uppercase").parentElement;
+    const lengthRequirement = screen.getByText(
+      "password_min_length"
+    ).parentElement;
+    const lowercaseRequirement =
+      screen.getByText("password_lowercase").parentElement;
+    const uppercaseRequirement =
+      screen.getByText("password_uppercase").parentElement;
     const digitRequirement = screen.getByText("password_digit").parentElement;
     const symbolRequirement = screen.getByText("password_symbol").parentElement;
 
@@ -92,18 +100,18 @@ describe("PasswordRequirements", () => {
   it("renders check icons for met requirements", () => {
     render(<PasswordRequirements password="Password123!" />);
 
-    const metRequirements = screen.getAllByText(/password_/).filter(element => 
-      element.parentElement.classList.contains('met')
-    );
+    const metRequirements = screen
+      .getAllByText(/password_/)
+      .filter((element) => element.parentElement.classList.contains("met"));
     expect(metRequirements).toHaveLength(5); // All 5 requirements met
   });
 
   it("renders X icons for unmet requirements", () => {
     render(<PasswordRequirements password="pass" />);
 
-    const unmetRequirements = screen.getAllByText(/password_/).filter(element => 
-      element.parentElement.classList.contains('unmet')
-    );
+    const unmetRequirements = screen
+      .getAllByText(/password_/)
+      .filter((element) => element.parentElement.classList.contains("unmet"));
     expect(unmetRequirements).toHaveLength(4); // 4 requirements unmet (only lowercase is met)
   });
 });

@@ -343,8 +343,8 @@ const AuthPage = ({ setLoginMessage }) => {
                 ? t("signing_up")
                 : t("logging_in")
               : isSignUpMode
-              ? t("signup")
-              : t("login")}
+                ? t("signup")
+                : t("login")}
           </button>
         </form>
       </div>

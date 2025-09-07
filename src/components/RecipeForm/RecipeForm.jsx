@@ -1233,10 +1233,10 @@ const RecipeForm = ({
                   : t("updating")
                 : t("creating")
               : isEditMode
-              ? isEditingTranslation
-                ? t("update_translation")
-                : t("update_recipe")
-              : t("create_recipe")}
+                ? isEditingTranslation
+                  ? t("update_translation")
+                  : t("update_recipe")
+                : t("create_recipe")}
           </button>
         </div>
       </form>

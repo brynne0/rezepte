@@ -15,7 +15,7 @@ export const formatQuantityForUnit = (quantity) => {
 // Format quantity for display - converts regular fractions to Unicode
 export const formatQuantityForDisplay = (quantity) => {
   if (!quantity) return "";
-  
+
   // Convert regular fractions to Unicode for better display
   return convertToUnicodeFractions(quantity);
 };

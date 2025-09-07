@@ -142,7 +142,7 @@ describe("Auth Service", () => {
 
       expect(result).toEqual({
         data: null,
-        error: { type: 'USER_NOT_FOUND', translationKey: 'user_not_found' },
+        error: { type: "USER_NOT_FOUND", translationKey: "user_not_found" },
       });
 
       expect(supabase.auth.signInWithPassword).not.toHaveBeenCalled();
@@ -166,7 +166,7 @@ describe("Auth Service", () => {
 
       expect(result).toEqual({
         data: null,
-        error: { type: 'GENERAL_ERROR', translationKey: 'login_failed' },
+        error: { type: "GENERAL_ERROR", translationKey: "login_failed" },
       });
     });
   });

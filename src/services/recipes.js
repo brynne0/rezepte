@@ -378,10 +378,10 @@ const getOrCreateIngredient = async (
           plural_name: isFallbackPlural
             ? trimmedName
             : currentLanguage === "de"
-            ? trimmedName.endsWith("e")
-              ? trimmedName + "n"
-              : trimmedName + "e"
-            : pluralize.plural(trimmedName),
+              ? trimmedName.endsWith("e")
+                ? trimmedName + "n"
+                : trimmedName + "e"
+              : pluralize.plural(trimmedName),
         },
       };
     }

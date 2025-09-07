@@ -7,7 +7,9 @@
   color: var(--color-text-strong);
   background: var(--color-surface-primary);
   border: var(--border-width) solid var(--color-text-strong);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   box-sizing: border-box;
   min-width: 0;
   word-break: break-word;

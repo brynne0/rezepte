@@ -33,37 +33,37 @@ export const normaliseUnicodeFractions = (input) => {
 // Converts regular fractions to Unicode for display
 export const convertToUnicodeFractions = (input) => {
   if (!input) return input;
-  
+
   const regularToUnicode = {
-    '1/8': '⅛',
-    '1/7': '1/7', // No Unicode equivalent
-    '1/6': '⅙',
-    '1/5': '⅕',
-    '1/4': '¼',
-    '1/3': '⅓',
-    '3/8': '⅜',
-    '2/5': '⅖',
-    '1/2': '½',
-    '3/5': '⅗',
-    '5/8': '⅝',
-    '2/3': '⅔',
-    '3/4': '¾',
-    '4/5': '⅘',
-    '5/6': '⅚',
-    '7/8': '⅞'
+    "1/8": "⅛",
+    "1/7": "1/7", // No Unicode equivalent
+    "1/6": "⅙",
+    "1/5": "⅕",
+    "1/4": "¼",
+    "1/3": "⅓",
+    "3/8": "⅜",
+    "2/5": "⅖",
+    "1/2": "½",
+    "3/5": "⅗",
+    "5/8": "⅝",
+    "2/3": "⅔",
+    "3/4": "¾",
+    "4/5": "⅘",
+    "5/6": "⅚",
+    "7/8": "⅞",
   };
-  
+
   let display = input.toString();
-  
+
   // Sort by length (longest first) to avoid partial matches
   const sortedFractions = Object.entries(regularToUnicode)
     .filter(([regular, unicode]) => unicode !== regular) // Skip fractions without Unicode
     .sort(([a], [b]) => b.length - a.length);
-  
+
   for (const [regular, unicode] of sortedFractions) {
-    display = display.replace(new RegExp(regular, 'g'), unicode);
+    display = display.replace(new RegExp(regular, "g"), unicode);
   }
-  
+
   return display;
 };
 

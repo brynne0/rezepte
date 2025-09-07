@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { createRecipe, updateRecipe, deleteRecipe } from "../../services/recipes";
+import {
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+} from "../../services/recipes";
 import { updateTranslationOnly } from "../../services/translationService";
 
 // Hooks for manual CRUD operations
@@ -7,7 +11,10 @@ export const useRecipeActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleCreateRecipe = async (recipeData, onImageUploadProgress = null) => {
+  const handleCreateRecipe = async (
+    recipeData,
+    onImageUploadProgress = null
+  ) => {
     setLoading(true);
     setError(null);
 
@@ -23,7 +30,11 @@ export const useRecipeActions = () => {
     }
   };
 
-  const handleUpdateRecipe = async (id, recipeData, onImageUploadProgress = null) => {
+  const handleUpdateRecipe = async (
+    id,
+    recipeData,
+    onImageUploadProgress = null
+  ) => {
     setLoading(true);
     setError(null);
 
@@ -55,12 +66,24 @@ export const useRecipeActions = () => {
     }
   };
 
-  const handleUpdateTranslation = async (id, language, translatedData, ingredientOverrides = [], ingredientNotesUpdates = []) => {
+  const handleUpdateTranslation = async (
+    id,
+    language,
+    translatedData,
+    ingredientOverrides = [],
+    ingredientNotesUpdates = []
+  ) => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await updateTranslationOnly(id, language, translatedData, ingredientOverrides, ingredientNotesUpdates);
+      const result = await updateTranslationOnly(
+        id,
+        language,
+        translatedData,
+        ingredientOverrides,
+        ingredientNotesUpdates
+      );
       return result;
     } catch (err) {
       const errorMessage = err.message || "Failed to update translation";

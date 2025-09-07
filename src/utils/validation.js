@@ -99,7 +99,11 @@ export const validateForgotPasswordForm = (email, t) => {
   return errors;
 };
 
-export const validateChangePasswordForm = (formData, t, requireOldPassword = false) => {
+export const validateChangePasswordForm = (
+  formData,
+  t,
+  requireOldPassword = false
+) => {
   const errors = {};
   const { oldPassword, newPassword, newPasswordRepeat } = formData;
 
@@ -113,7 +117,12 @@ export const validateChangePasswordForm = (formData, t, requireOldPassword = fal
   if (passwordError) errors.newPassword = passwordError;
 
   // Check if new password is the same as old password
-  if (requireOldPassword && oldPassword && newPassword && oldPassword === newPassword) {
+  if (
+    requireOldPassword &&
+    oldPassword &&
+    newPassword &&
+    oldPassword === newPassword
+  ) {
     errors.newPassword = t("new_password_same_as_old");
   }
 
@@ -174,7 +183,9 @@ export const validateRecipeForm = (formData, t) => {
 // Username uniqueness validation for signup
 export const validateUsernameUnique = async (username, t) => {
   try {
-    const { checkUsernameExistsForSignup } = await import("../services/userService");
+    const { checkUsernameExistsForSignup } = await import(
+      "../services/userService"
+    );
     const exists = await checkUsernameExistsForSignup(username);
     if (exists) {
       return t("username_already_exists");
@@ -189,7 +200,9 @@ export const validateUsernameUnique = async (username, t) => {
 // Email uniqueness validation for signup
 export const validateEmailUnique = async (email, t) => {
   try {
-    const { checkEmailExistsForSignup } = await import("../services/userService");
+    const { checkEmailExistsForSignup } = await import(
+      "../services/userService"
+    );
     const exists = await checkEmailExistsForSignup(email);
     if (exists) {
       return t("email_already_exists");
