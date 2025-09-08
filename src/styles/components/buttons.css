@@ -222,7 +222,7 @@ a.btn-unstyled {
   }
 }
 
-/* Disable hover effects on touch devices only when hover is not available */
+/* Disable transform hover effects on touch devices */
 @media (hover: none) {
   .btn-primary:hover:not(:disabled),
   .btn-secondary:hover,
@@ -234,6 +234,13 @@ a.btn-unstyled {
   .btn-icon-red:hover,
   .btn-icon-right:hover,
   .btn-section:hover {
-    all: revert;
+    transform: none;
+  }
+}
+
+@media (hover: none) {
+  .btn-icon-neutral:hover {
+    color: var(--color-text-primary);
+    transform: none;
   }
 }
