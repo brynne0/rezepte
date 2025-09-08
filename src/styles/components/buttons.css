@@ -138,13 +138,6 @@ a.btn-unstyled {
   color: var(--color-danger);
 }
 
-@media (hover: none) {
-  .btn-icon-neutral:hover {
-    color: var(--color-text-primary);
-    transform: none;
-  }
-}
-
 .btn-icon-neutral.selected {
   color: var(--color-danger-dark);
 }
@@ -226,5 +219,21 @@ a.btn-unstyled {
 
   .btn-tertiary {
     font-size: 0.9rem;
+  }
+}
+
+/* Disable hover effects on touch devices only when hover is not available */
+@media (hover: none) {
+  .btn-primary:hover:not(:disabled),
+  .btn-secondary:hover,
+  .btn-tertiary:hover,
+  .btn-danger:hover,
+  .btn-icon-neutral:hover,
+  .btn-icon-green:hover,
+  .btn-icon-remove:hover,
+  .btn-icon-red:hover,
+  .btn-icon-right:hover,
+  .btn-section:hover {
+    all: revert;
   }
 }
