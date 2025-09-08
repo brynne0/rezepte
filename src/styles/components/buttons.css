@@ -138,6 +138,13 @@ a.btn-unstyled {
   color: var(--color-danger);
 }
 
+@media (hover: none) {
+  .btn-icon-neutral:hover {
+    color: var(--color-text-primary);
+    transform: none;
+  }
+}
+
 .btn-icon-neutral.selected {
   color: var(--color-danger-dark);
 }
