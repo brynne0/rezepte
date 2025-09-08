@@ -1,8 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 
-export const useRecipeFormState = ({
-  initialRecipe = null,
-}) => {
+export const useRecipeFormState = ({ initialRecipe = null }) => {
   // Generate unique IDs for ingredients
   const generateUniqueId = () => {
     return `temp-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -153,16 +151,19 @@ export const useRecipeFormState = ({
   }, [initialRecipe, getInitialFormData]);
 
   // Basic input change handler
-  const handleInputChange = useCallback((field, value, clearError = false) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleInputChange = useCallback(
+    (field, value, clearError = false) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
 
-    // Clear validation error for this field when user types (like auth form)
-    // Special handling for categories field since error key is "category"
-    const errorKey = field === "categories" ? "category" : field;
-    if (clearError || validationErrors[errorKey]) {
-      setValidationErrors((prev) => ({ ...prev, [errorKey]: "" }));
-    }
-  }, [validationErrors, setValidationErrors]);
+      // Clear validation error for this field when user types (like auth form)
+      // Special handling for categories field since error key is "category"
+      const errorKey = field === "categories" ? "category" : field;
+      if (clearError || validationErrors[errorKey]) {
+        setValidationErrors((prev) => ({ ...prev, [errorKey]: "" }));
+      }
+    },
+    [validationErrors, setValidationErrors]
+  );
 
   // Unsaved changes detection
   const hasUnsavedChanges = useCallback(() => {
@@ -187,10 +188,10 @@ export const useRecipeFormState = ({
     setIsUploadingImages,
     uploadingImageIds,
     setUploadingImageIds,
-    
+
     // Computed
     isEditMode: !!initialRecipe,
-    
+
     // Utilities
     generateUniqueId,
     getInitialFormData,

@@ -7,14 +7,14 @@ import { useRecipeFormActions } from "./useRecipeFormActions";
 export const useRecipeForm = (options) => {
   // Core form state management
   const formState = useRecipeFormState(options);
-  
+
   // Form validation
   const validation = useRecipeFormValidation({
     formData: formState.formData,
     setValidationErrors: formState.setValidationErrors,
     initialRecipe: options.initialRecipe,
   });
-  
+
   // Ingredient management
   const ingredients = useIngredientManagement({
     formData: formState.formData,
@@ -23,12 +23,12 @@ export const useRecipeForm = (options) => {
     setValidationErrors: formState.setValidationErrors,
     generateUniqueId: formState.generateUniqueId,
   });
-  
+
   // Instructions management
   const instructions = useInstructionsManagement({
     setFormData: formState.setFormData,
   });
-  
+
   // Form actions (submit, cancel, delete, etc.)
   const actions = useRecipeFormActions({
     formData: formState.formData,
@@ -54,14 +54,14 @@ export const useRecipeForm = (options) => {
     uploadProgress: formState.uploadProgress,
     isUploadingImages: formState.isUploadingImages,
     uploadingImageIds: formState.uploadingImageIds,
-    
+
     // Basic input handling
     handleInputChange: formState.handleInputChange,
-    
+
     // Validation
     toTitleCase: validation.toTitleCase,
     handleTitleBlur: validation.handleTitleBlur,
-    
+
     // Ingredients
     handleIngredientChange: ingredients.handleIngredientChange,
     handleSectionChange: ingredients.handleSectionChange,
@@ -74,13 +74,13 @@ export const useRecipeForm = (options) => {
     getIngredientLink: ingredients.getIngredientLink,
     handleIngredientFieldEnter: ingredients.handleIngredientFieldEnter,
     handleDragEnd: ingredients.handleDragEnd,
-    
+
     // Instructions
     handleInstructionChange: instructions.handleInstructionChange,
     addInstruction: instructions.addInstruction,
     removeInstruction: instructions.removeInstruction,
     handleEnter: instructions.handleEnter,
-    
+
     // Actions
     handleImagesChange: actions.handleImagesChange,
     handleSubmit: actions.handleSubmit,

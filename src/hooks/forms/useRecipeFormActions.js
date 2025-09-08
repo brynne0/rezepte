@@ -27,41 +27,47 @@ export const useRecipeFormActions = ({
   } = useRecipeActions();
 
   // Handle images change
-  const handleImagesChange = useCallback((images) => {
-    setFormData((prev) => ({ ...prev, images }));
-  }, [setFormData]);
+  const handleImagesChange = useCallback(
+    (images) => {
+      setFormData((prev) => ({ ...prev, images }));
+    },
+    [setFormData]
+  );
 
   // Handle image upload progress
-  const handleImageUploadProgress = useCallback((imageId, progress) => {
-    if (progress === 0) {
-      // Starting upload
-      setIsUploadingImages(true);
-      setUploadingImageIds((prev) => new Set([...prev, imageId]));
-    } else if (progress === 100) {
-      // Upload complete
-      setUploadingImageIds((prev) => {
-        const newSet = new Set([...prev]);
-        newSet.delete(imageId);
-        return newSet;
-      });
-      
-      if (setUploadingImageIds.size === 1) {
-        // This was the last upload
-        setIsUploadingImages(false);
-        setUploadProgress(null);
+  const handleImageUploadProgress = useCallback(
+    (imageId, progress) => {
+      if (progress === 0) {
+        // Starting upload
+        setIsUploadingImages(true);
+        setUploadingImageIds((prev) => new Set([...prev, imageId]));
+      } else if (progress === 100) {
+        // Upload complete
+        setUploadingImageIds((prev) => {
+          const newSet = new Set([...prev]);
+          newSet.delete(imageId);
+          return newSet;
+        });
+
+        if (setUploadingImageIds.size === 1) {
+          // This was the last upload
+          setIsUploadingImages(false);
+          setUploadProgress(null);
+        }
+      } else {
+        // Progress update
+        setUploadProgress(progress);
       }
-    } else {
-      // Progress update
-      setUploadProgress(progress);
-    }
-  }, [setIsUploadingImages, setUploadProgress, setUploadingImageIds]);
+    },
+    [setIsUploadingImages, setUploadProgress, setUploadingImageIds]
+  );
 
   // Transform form data for submission
   const transformFormDataForSubmission = useCallback(() => {
     // Helper to prepare ingredient data
     const prepareIngredientData = (ingredient) => {
       let quantity = ingredient.quantity || "";
-      
+
       // Normalize Unicode fractions
       if (quantity) {
         quantity = normaliseUnicodeFractions(quantity);
@@ -74,7 +80,10 @@ export const useRecipeFormActions = ({
         quantity: quantity,
         unit: ingredient.unit || "",
         notes: ingredient.notes || "",
-        linked_recipe: formData.ingredientLinks?.[`${ingredient.sectionId || 'ungrouped'}-${ingredient.tempId}`] || null,
+        linked_recipe:
+          formData.ingredientLinks?.[
+            `${ingredient.sectionId || "ungrouped"}-${ingredient.tempId}`
+          ] || null,
       };
     };
 
@@ -83,12 +92,17 @@ export const useRecipeFormActions = ({
       .filter((ing) => ing.name.trim() !== "")
       .map((ing) => ({
         ...prepareIngredientData(ing),
-        linked_recipe: formData.ingredientLinks?.[`ungrouped-${ing.tempId}`] || null,
+        linked_recipe:
+          formData.ingredientLinks?.[`ungrouped-${ing.tempId}`] || null,
       }));
 
     // Convert ingredient sections
     const ingredientSections = formData.ingredientSections
-      .filter((section) => section.subheading.trim() !== "" || section.ingredients.some((ing) => ing.name.trim() !== ""))
+      .filter(
+        (section) =>
+          section.subheading.trim() !== "" ||
+          section.ingredients.some((ing) => ing.name.trim() !== "")
+      )
       .map((section) => ({
         id: section.id,
         subheading: section.subheading || "",
@@ -96,7 +110,8 @@ export const useRecipeFormActions = ({
           .filter((ing) => ing.name.trim() !== "")
           .map((ing) => ({
             ...prepareIngredientData(ing),
-            linked_recipe: formData.ingredientLinks?.[`${section.id}-${ing.tempId}`] || null,
+            linked_recipe:
+              formData.ingredientLinks?.[`${section.id}-${ing.tempId}`] || null,
           })),
       }));
 
@@ -114,103 +129,77 @@ export const useRecipeFormActions = ({
   }, [formData]);
 
   // Handle form submission
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    
-    // Clear any previous submission errors
-    setSubmissionError("");
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
 
-    // Validate form
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      window.scrollTo(0, 0);
-      return;
-    }
+      // Clear any previous submission errors
+      setSubmissionError("");
 
-    const recipeData = transformFormDataForSubmission();
-    const hasLocalImages = formData.images?.some((img) => img.file);
+      // Validate form
+      const errors = validateForm();
+      if (Object.keys(errors).length > 0) {
+        window.scrollTo(0, 0);
+        return;
+      }
 
-    try {
-      let result;
+      const recipeData = transformFormDataForSubmission();
+      const hasLocalImages = formData.images?.some((img) => img.file);
 
-      if (initialRecipe) {
-        if (isEditingTranslation) {
-          // Translation editing mode
-          const currentLanguage = i18n.language;
-          
-          // Prepare translation data
-          const translationData = {
-            title: recipeData.title,
-            source: recipeData.source,
-            notes: recipeData.notes,
-            instructions: recipeData.instructions,
-          };
+      try {
+        let result;
 
-          // Collect ingredient name overrides and notes updates
-          const ingredientOverrides = [];
-          const ingredientNotesUpdates = [];
+        if (initialRecipe) {
+          if (isEditingTranslation) {
+            // Translation editing mode
+            const currentLanguage = i18n.language;
 
-          // Helper functions
-          const getOriginalDisplayName = (originalIngredient) => {
-            const overrides = originalIngredient.name_overrides || [];
-            const override = overrides.find(o => o.language === currentLanguage);
-            return override?.name || originalIngredient.singular_name || originalIngredient.name || "";
-          };
+            // Prepare translation data
+            const translationData = {
+              title: recipeData.title,
+              source: recipeData.source,
+              notes: recipeData.notes,
+              instructions: recipeData.instructions,
+            };
 
-          const getOriginalDisplayNotes = (originalIngredient) => {
-            const notes = originalIngredient.notes_by_language || {};
-            return notes[currentLanguage] || originalIngredient.notes || "";
-          };
+            // Collect ingredient name overrides and notes updates
+            const ingredientOverrides = [];
+            const ingredientNotesUpdates = [];
 
-          // Process ungrouped ingredients
-          formData.ungroupedIngredients.forEach((ingredient) => {
-            if (ingredient.recipe_ingredient_id) {
-              const originalIngredient = initialRecipe.ungroupedIngredients?.find(
-                orig => orig.recipe_ingredient_id === ingredient.recipe_ingredient_id
+            // Helper functions
+            const getOriginalDisplayName = (originalIngredient) => {
+              const overrides = originalIngredient.name_overrides || [];
+              const override = overrides.find(
+                (o) => o.language === currentLanguage
               );
-              
-              if (originalIngredient) {
-                // Handle name overrides
-                if (ingredient.name) {
-                  const originalDisplayName = getOriginalDisplayName(originalIngredient);
-                  if (originalDisplayName !== ingredient.name) {
-                    ingredientOverrides.push({
-                      recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                      name: ingredient.name,
-                      language: currentLanguage,
-                    });
-                  }
-                }
+              return (
+                override?.name ||
+                originalIngredient.singular_name ||
+                originalIngredient.name ||
+                ""
+              );
+            };
 
-                // Handle notes updates
-                const originalDisplayNotes = getOriginalDisplayNotes(originalIngredient);
-                const currentNotes = ingredient.notes || "";
-                if (originalDisplayNotes !== currentNotes) {
-                  ingredientNotesUpdates.push({
-                    recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                    notes: currentNotes,
-                    language: currentLanguage,
-                  });
-                }
-              }
-            }
-          });
+            const getOriginalDisplayNotes = (originalIngredient) => {
+              const notes = originalIngredient.notes_by_language || {};
+              return notes[currentLanguage] || originalIngredient.notes || "";
+            };
 
-          // Process ingredient sections
-          formData.ingredientSections.forEach((section) => {
-            section.ingredients.forEach((ingredient) => {
+            // Process ungrouped ingredients
+            formData.ungroupedIngredients.forEach((ingredient) => {
               if (ingredient.recipe_ingredient_id) {
-                const originalSection = initialRecipe.ingredientSections?.find(
-                  origSection => origSection.id === section.id
-                );
-                const originalIngredient = originalSection?.ingredients?.find(
-                  orig => orig.recipe_ingredient_id === ingredient.recipe_ingredient_id
-                );
-                
+                const originalIngredient =
+                  initialRecipe.ungroupedIngredients?.find(
+                    (orig) =>
+                      orig.recipe_ingredient_id ===
+                      ingredient.recipe_ingredient_id
+                  );
+
                 if (originalIngredient) {
                   // Handle name overrides
                   if (ingredient.name) {
-                    const originalDisplayName = getOriginalDisplayName(originalIngredient);
+                    const originalDisplayName =
+                      getOriginalDisplayName(originalIngredient);
                     if (originalDisplayName !== ingredient.name) {
                       ingredientOverrides.push({
                         recipe_ingredient_id: ingredient.recipe_ingredient_id,
@@ -221,7 +210,8 @@ export const useRecipeFormActions = ({
                   }
 
                   // Handle notes updates
-                  const originalDisplayNotes = getOriginalDisplayNotes(originalIngredient);
+                  const originalDisplayNotes =
+                    getOriginalDisplayNotes(originalIngredient);
                   const currentNotes = ingredient.notes || "";
                   if (originalDisplayNotes !== currentNotes) {
                     ingredientNotesUpdates.push({
@@ -233,71 +223,116 @@ export const useRecipeFormActions = ({
                 }
               }
             });
-          });
 
-          await updateTranslation(
-            initialRecipe.id,
-            currentLanguage,
-            translationData,
-            ingredientOverrides,
-            ingredientNotesUpdates
-          );
-          result = initialRecipe; // Return original recipe data
+            // Process ingredient sections
+            formData.ingredientSections.forEach((section) => {
+              section.ingredients.forEach((ingredient) => {
+                if (ingredient.recipe_ingredient_id) {
+                  const originalSection =
+                    initialRecipe.ingredientSections?.find(
+                      (origSection) => origSection.id === section.id
+                    );
+                  const originalIngredient = originalSection?.ingredients?.find(
+                    (orig) =>
+                      orig.recipe_ingredient_id ===
+                      ingredient.recipe_ingredient_id
+                  );
+
+                  if (originalIngredient) {
+                    // Handle name overrides
+                    if (ingredient.name) {
+                      const originalDisplayName =
+                        getOriginalDisplayName(originalIngredient);
+                      if (originalDisplayName !== ingredient.name) {
+                        ingredientOverrides.push({
+                          recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                          name: ingredient.name,
+                          language: currentLanguage,
+                        });
+                      }
+                    }
+
+                    // Handle notes updates
+                    const originalDisplayNotes =
+                      getOriginalDisplayNotes(originalIngredient);
+                    const currentNotes = ingredient.notes || "";
+                    if (originalDisplayNotes !== currentNotes) {
+                      ingredientNotesUpdates.push({
+                        recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                        notes: currentNotes,
+                        language: currentLanguage,
+                      });
+                    }
+                  }
+                }
+              });
+            });
+
+            await updateTranslation(
+              initialRecipe.id,
+              currentLanguage,
+              translationData,
+              ingredientOverrides,
+              ingredientNotesUpdates
+            );
+            result = initialRecipe; // Return original recipe data
+          } else {
+            // Normal recipe editing - update the original recipe
+            result = await updateRecipe(
+              initialRecipe.id,
+              recipeData,
+              hasLocalImages ? handleImageUploadProgress : null
+            );
+          }
         } else {
-          // Normal recipe editing - update the original recipe
-          result = await updateRecipe(
-            initialRecipe.id,
+          // Create mode
+          result = await createRecipe(
             recipeData,
             hasLocalImages ? handleImageUploadProgress : null
           );
         }
-      } else {
-        // Create mode
-        result = await createRecipe(
-          recipeData,
-          hasLocalImages ? handleImageUploadProgress : null
+
+        navigate(`/${result.id}/${result.slug}`);
+      } catch (err) {
+        console.error(
+          `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
+          err
         );
+
+        // Set user-friendly error message
+        const errorKey = initialRecipe
+          ? "recipe_update_error"
+          : "recipe_create_error";
+        setSubmissionError(t(errorKey));
+
+        // Scroll to top to show the error message
+        window.scrollTo(0, 0);
+      } finally {
+        // Clean up upload state
+        setIsUploadingImages(false);
+        setUploadProgress(null);
+        setUploadingImageIds(new Set());
       }
-
-      navigate(`/${result.id}/${result.slug}`);
-    } catch (err) {
-      console.error(
-        `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
-        err
-      );
-
-      // Set user-friendly error message
-      const errorKey = initialRecipe
-        ? "recipe_update_error"
-        : "recipe_create_error";
-      setSubmissionError(t(errorKey));
-
-      // Scroll to top to show the error message
-      window.scrollTo(0, 0);
-    } finally {
-      // Clean up upload state
-      setIsUploadingImages(false);
-      setUploadProgress(null);
-      setUploadingImageIds(new Set());
-    }
-  }, [
-    formData,
-    initialRecipe,
-    isEditingTranslation,
-    validateForm,
-    transformFormDataForSubmission,
-    handleImageUploadProgress,
-    setSubmissionError,
-    setIsUploadingImages,
-    setUploadProgress,
-    setUploadingImageIds,
-    createRecipe,
-    updateRecipe,
-    updateTranslation,
-    navigate,
-    t,
-    i18n
-  ]);
+    },
+    [
+      formData,
+      initialRecipe,
+      isEditingTranslation,
+      validateForm,
+      transformFormDataForSubmission,
+      handleImageUploadProgress,
+      setSubmissionError,
+      setIsUploadingImages,
+      setUploadProgress,
+      setUploadingImageIds,
+      createRecipe,
+      updateRecipe,
+      updateTranslation,
+      navigate,
+      t,
+      i18n,
+    ]
+  );
 
   // Handle cancel action
   const handleCancel = useCallback(() => {

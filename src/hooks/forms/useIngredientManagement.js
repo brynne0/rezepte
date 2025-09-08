@@ -8,131 +8,134 @@ export const useIngredientManagement = ({
   generateUniqueId,
 }) => {
   // Handle ingredient field changes
-  const handleIngredientChange = useCallback((
-    sectionId,
-    tempId,
-    field,
-    value,
-    clearError
-  ) => {
-    // Store raw value - parsing happens during display
-    const processedValue = value;
+  const handleIngredientChange = useCallback(
+    (sectionId, tempId, field, value, clearError) => {
+      // Store raw value - parsing happens during display
+      const processedValue = value;
 
-    if (sectionId === "ungrouped") {
-      // Handle ungrouped ingredients
-      setFormData((prev) => ({
-        ...prev,
-        ungroupedIngredients: prev.ungroupedIngredients.map((ingredient) =>
-          ingredient.tempId === tempId
-            ? { ...ingredient, [field]: processedValue }
-            : ingredient
-        ),
-      }));
-    } else {
-      // Handle grouped ingredients
-      setFormData((prev) => ({
-        ...prev,
-        ingredientSections: prev.ingredientSections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                ingredients: section.ingredients.map((ingredient) =>
-                  ingredient.tempId === tempId
-                    ? { ...ingredient, [field]: processedValue }
-                    : ingredient
-                ),
-              }
-            : section
-        ),
-      }));
-    }
+      if (sectionId === "ungrouped") {
+        // Handle ungrouped ingredients
+        setFormData((prev) => ({
+          ...prev,
+          ungroupedIngredients: prev.ungroupedIngredients.map((ingredient) =>
+            ingredient.tempId === tempId
+              ? { ...ingredient, [field]: processedValue }
+              : ingredient
+          ),
+        }));
+      } else {
+        // Handle grouped ingredients
+        setFormData((prev) => ({
+          ...prev,
+          ingredientSections: prev.ingredientSections.map((section) =>
+            section.id === sectionId
+              ? {
+                  ...section,
+                  ingredients: section.ingredients.map((ingredient) =>
+                    ingredient.tempId === tempId
+                      ? { ...ingredient, [field]: processedValue }
+                      : ingredient
+                  ),
+                }
+              : section
+          ),
+        }));
+      }
 
-    // Clear validation error for ingredients when user types
-    if (clearError || validationErrors[clearError]) {
-      setValidationErrors((prev) => ({ ...prev, [clearError]: "" }));
-    }
-  }, [setFormData, validationErrors, setValidationErrors]);
+      // Clear validation error for ingredients when user types
+      if (clearError || validationErrors[clearError]) {
+        setValidationErrors((prev) => ({ ...prev, [clearError]: "" }));
+      }
+    },
+    [setFormData, validationErrors, setValidationErrors]
+  );
 
   // Handle section field changes
-  const handleSectionChange = useCallback((sectionId, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      ingredientSections: prev.ingredientSections.map((section) =>
-        section.id === sectionId ? { ...section, [field]: value } : section
-      ),
-    }));
-  }, [setFormData]);
-
-  // Add new ingredient
-  const addIngredient = useCallback((sectionId) => {
-    const newTempId = generateUniqueId();
-
-    if (sectionId === "ungrouped") {
-      // Add to ungrouped ingredients
-      setFormData((prev) => ({
-        ...prev,
-        ungroupedIngredients: [
-          ...prev.ungroupedIngredients,
-          {
-            tempId: newTempId,
-            ingredient_id: "",
-            name: "",
-            quantity: "",
-            unit: "",
-            notes: "",
-          },
-        ],
-      }));
-    } else {
-      // Add to specific section
+  const handleSectionChange = useCallback(
+    (sectionId, field, value) => {
       setFormData((prev) => ({
         ...prev,
         ingredientSections: prev.ingredientSections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                ingredients: [
-                  ...section.ingredients,
-                  {
-                    tempId: newTempId,
-                    ingredient_id: "",
-                    name: "",
-                    quantity: "",
-                    unit: "",
-                    notes: "",
-                  },
-                ],
-              }
-            : section
+          section.id === sectionId ? { ...section, [field]: value } : section
         ),
       }));
-    }
+    },
+    [setFormData]
+  );
 
-    // Focus on the new ingredient name input
-    setTimeout(() => {
+  // Add new ingredient
+  const addIngredient = useCallback(
+    (sectionId) => {
+      const newTempId = generateUniqueId();
+
       if (sectionId === "ungrouped") {
-        // Focus on the last ungrouped ingredient
-        const ungroupedInputs = document.querySelectorAll(
-          '[id^="ingredient-name-ungrouped-"]'
-        );
-        if (ungroupedInputs.length > 0) {
-          const lastInput = ungroupedInputs[ungroupedInputs.length - 1];
-          lastInput.focus();
-          lastInput.click();
-        }
+        // Add to ungrouped ingredients
+        setFormData((prev) => ({
+          ...prev,
+          ungroupedIngredients: [
+            ...prev.ungroupedIngredients,
+            {
+              tempId: newTempId,
+              ingredient_id: "",
+              name: "",
+              quantity: "",
+              unit: "",
+              notes: "",
+            },
+          ],
+        }));
       } else {
-        // Focus on the last ingredient in the specific section
-        const sectionInputs = document.querySelectorAll(
-          `[id^="ingredient-name-${sectionId}-"]`
-        );
-        if (sectionInputs.length > 0) {
-          const lastInput = sectionInputs[sectionInputs.length - 1];
-          lastInput.focus();
-          lastInput.click();
-        }
+        // Add to specific section
+        setFormData((prev) => ({
+          ...prev,
+          ingredientSections: prev.ingredientSections.map((section) =>
+            section.id === sectionId
+              ? {
+                  ...section,
+                  ingredients: [
+                    ...section.ingredients,
+                    {
+                      tempId: newTempId,
+                      ingredient_id: "",
+                      name: "",
+                      quantity: "",
+                      unit: "",
+                      notes: "",
+                    },
+                  ],
+                }
+              : section
+          ),
+        }));
       }
-    }, 10);
-  }, [setFormData, generateUniqueId]);
+
+      // Focus on the new ingredient name input
+      setTimeout(() => {
+        if (sectionId === "ungrouped") {
+          // Focus on the last ungrouped ingredient
+          const ungroupedInputs = document.querySelectorAll(
+            '[id^="ingredient-name-ungrouped-"]'
+          );
+          if (ungroupedInputs.length > 0) {
+            const lastInput = ungroupedInputs[ungroupedInputs.length - 1];
+            lastInput.focus();
+            lastInput.click();
+          }
+        } else {
+          // Focus on the last ingredient in the specific section
+          const sectionInputs = document.querySelectorAll(
+            `[id^="ingredient-name-${sectionId}-"]`
+          );
+          if (sectionInputs.length > 0) {
+            const lastInput = sectionInputs[sectionInputs.length - 1];
+            lastInput.focus();
+            lastInput.click();
+          }
+        }
+      }, 10);
+    },
+    [setFormData, generateUniqueId]
+  );
 
   // Add new section
   const addSection = useCallback(() => {
@@ -172,242 +175,273 @@ export const useIngredientManagement = ({
   }, [setFormData, generateUniqueId]);
 
   // Remove section
-  const removeSection = useCallback((sectionId) => {
-    setFormData((prev) => ({
-      ...prev,
-      ingredientSections: prev.ingredientSections.filter(
-        (section) => section.id !== sectionId
-      ),
-    }));
-  }, [setFormData]);
+  const removeSection = useCallback(
+    (sectionId) => {
+      setFormData((prev) => ({
+        ...prev,
+        ingredientSections: prev.ingredientSections.filter(
+          (section) => section.id !== sectionId
+        ),
+      }));
+    },
+    [setFormData]
+  );
 
   // Remove ingredient
-  const removeIngredient = useCallback((sectionId, tempId) => {
-    if (sectionId === "ungrouped") {
-      setFormData((prev) => ({
-        ...prev,
-        ungroupedIngredients: prev.ungroupedIngredients.filter(
-          (ingredient) => ingredient.tempId !== tempId
-        ),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        ingredientSections: prev.ingredientSections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                ingredients: section.ingredients.filter(
-                  (ingredient) => ingredient.tempId !== tempId
-                ),
-              }
-            : section
-        ),
-      }));
-    }
-  }, [setFormData]);
+  const removeIngredient = useCallback(
+    (sectionId, tempId) => {
+      if (sectionId === "ungrouped") {
+        setFormData((prev) => ({
+          ...prev,
+          ungroupedIngredients: prev.ungroupedIngredients.filter(
+            (ingredient) => ingredient.tempId !== tempId
+          ),
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          ingredientSections: prev.ingredientSections.map((section) =>
+            section.id === sectionId
+              ? {
+                  ...section,
+                  ingredients: section.ingredients.filter(
+                    (ingredient) => ingredient.tempId !== tempId
+                  ),
+                }
+              : section
+          ),
+        }));
+      }
+    },
+    [setFormData]
+  );
 
   // Handle ingredient linking
-  const handleIngredientLink = useCallback((sectionId, tempId, linkedRecipe) => {
-    const linkKey = `${sectionId}-${tempId}`;
-    setFormData((prev) => ({
-      ...prev,
-      ingredientLinks: {
-        ...prev.ingredientLinks,
-        [linkKey]: linkedRecipe,
-      },
-    }));
-  }, [setFormData]);
+  const handleIngredientLink = useCallback(
+    (sectionId, tempId, linkedRecipe) => {
+      const linkKey = `${sectionId}-${tempId}`;
+      setFormData((prev) => ({
+        ...prev,
+        ingredientLinks: {
+          ...prev.ingredientLinks,
+          [linkKey]: linkedRecipe,
+        },
+      }));
+    },
+    [setFormData]
+  );
 
   // Remove ingredient link
-  const removeIngredientLink = useCallback((sectionId, tempId) => {
-    const linkKey = `${sectionId}-${tempId}`;
-    setFormData((prev) => {
-      const newLinks = { ...prev.ingredientLinks };
-      delete newLinks[linkKey];
-      return {
-        ...prev,
-        ingredientLinks: newLinks,
-      };
-    });
-  }, [setFormData]);
+  const removeIngredientLink = useCallback(
+    (sectionId, tempId) => {
+      const linkKey = `${sectionId}-${tempId}`;
+      setFormData((prev) => {
+        const newLinks = { ...prev.ingredientLinks };
+        delete newLinks[linkKey];
+        return {
+          ...prev,
+          ingredientLinks: newLinks,
+        };
+      });
+    },
+    [setFormData]
+  );
 
   // Get ingredient link
-  const getIngredientLink = useCallback((sectionId, tempId) => {
-    const linkKey = `${sectionId}-${tempId}`;
-    return formData.ingredientLinks?.[linkKey] || null;
-  }, [formData.ingredientLinks]);
+  const getIngredientLink = useCallback(
+    (sectionId, tempId) => {
+      const linkKey = `${sectionId}-${tempId}`;
+      return formData.ingredientLinks?.[linkKey] || null;
+    },
+    [formData.ingredientLinks]
+  );
 
   // Handle keyboard navigation between ingredient fields
-  const handleIngredientFieldEnter = useCallback((
-    e,
-    currentField,
-    sectionId,
-    tempId,
-    index
-  ) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleIngredientFieldEnter = useCallback(
+    (e, currentField, sectionId, tempId, index) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
 
-      const fieldOrder = ["name", "quantity", "unit", "notes"];
-      const currentFieldIndex = fieldOrder.indexOf(currentField);
-      const nextFieldIndex = currentFieldIndex + 1;
+        const fieldOrder = ["name", "quantity", "unit", "notes"];
+        const currentFieldIndex = fieldOrder.indexOf(currentField);
+        const nextFieldIndex = currentFieldIndex + 1;
 
-      if (nextFieldIndex < fieldOrder.length) {
-        // Move to next field in same ingredient
-        const nextField = fieldOrder[nextFieldIndex];
-        const nextInput = document.getElementById(
-          `ingredient-${nextField}-${sectionId}-${index}-${tempId}`
-        );
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.click();
-        }
-      } else {
-        // Move to first field of next ingredient or create new one
-        const nextIndex = index + 1;
-        let nextIngredientInput;
-
-        if (sectionId === "ungrouped") {
-          nextIngredientInput = document.getElementById(
-            `ingredient-name-ungrouped-${nextIndex}-${formData.ungroupedIngredients[nextIndex]?.tempId}`
+        if (nextFieldIndex < fieldOrder.length) {
+          // Move to next field in same ingredient
+          const nextField = fieldOrder[nextFieldIndex];
+          const nextInput = document.getElementById(
+            `ingredient-${nextField}-${sectionId}-${index}-${tempId}`
           );
+          if (nextInput) {
+            nextInput.focus();
+            nextInput.click();
+          }
         } else {
-          const section = formData.ingredientSections.find(s => s.id === sectionId);
-          if (section && section.ingredients[nextIndex]) {
+          // Move to first field of next ingredient or create new one
+          const nextIndex = index + 1;
+          let nextIngredientInput;
+
+          if (sectionId === "ungrouped") {
             nextIngredientInput = document.getElementById(
-              `ingredient-name-${sectionId}-${nextIndex}-${section.ingredients[nextIndex].tempId}`
+              `ingredient-name-ungrouped-${nextIndex}-${formData.ungroupedIngredients[nextIndex]?.tempId}`
             );
+          } else {
+            const section = formData.ingredientSections.find(
+              (s) => s.id === sectionId
+            );
+            if (section && section.ingredients[nextIndex]) {
+              nextIngredientInput = document.getElementById(
+                `ingredient-name-${sectionId}-${nextIndex}-${section.ingredients[nextIndex].tempId}`
+              );
+            }
+          }
+
+          if (nextIngredientInput) {
+            nextIngredientInput.focus();
+            nextIngredientInput.click();
+          } else {
+            // No next ingredient, add a new one
+            addIngredient(sectionId);
           }
         }
-
-        if (nextIngredientInput) {
-          nextIngredientInput.focus();
-          nextIngredientInput.click();
-        } else {
-          // No next ingredient, add a new one
-          addIngredient(sectionId);
-        }
       }
-    }
-  }, [formData, addIngredient]);
+    },
+    [formData, addIngredient]
+  );
 
   // Handle drag and drop reordering
-  const handleDragEnd = useCallback((result) => {
-    if (!result.destination) return;
+  const handleDragEnd = useCallback(
+    (result) => {
+      if (!result.destination) return;
 
-    const { source, destination, type } = result;
+      const { source, destination, type } = result;
 
-    if (type === "instruction") {
-      // Handle instruction reordering
-      setFormData((prev) => {
-        const newInstructions = Array.from(prev.instructions);
-        const [reorderedItem] = newInstructions.splice(source.index, 1);
-        newInstructions.splice(destination.index, 0, reorderedItem);
-        return { ...prev, instructions: newInstructions };
-      });
-    } else if (type === "ingredient") {
-      // Handle ingredient reordering
-      const sourceDroppableId = source.droppableId;
-      const destinationDroppableId = destination.droppableId;
-
-      if (sourceDroppableId === destinationDroppableId) {
-        // Same container
-        if (sourceDroppableId === "ungrouped") {
-          setFormData((prev) => {
-            const newIngredients = Array.from(prev.ungroupedIngredients);
-            const [reorderedItem] = newIngredients.splice(source.index, 1);
-            newIngredients.splice(destination.index, 0, reorderedItem);
-            return { ...prev, ungroupedIngredients: newIngredients };
-          });
-        } else {
-          // Within a section
-          setFormData((prev) => ({
-            ...prev,
-            ingredientSections: prev.ingredientSections.map((section) =>
-              section.id === sourceDroppableId
-                ? {
-                    ...section,
-                    ingredients: (() => {
-                      const newIngredients = Array.from(section.ingredients);
-                      const [reorderedItem] = newIngredients.splice(
-                        source.index,
-                        1
-                      );
-                      newIngredients.splice(destination.index, 0, reorderedItem);
-                      return newIngredients;
-                    })(),
-                  }
-                : section
-            ),
-          }));
-        }
-      } else {
-        // Different containers - move ingredient
+      if (type === "instruction") {
+        // Handle instruction reordering
         setFormData((prev) => {
-          let sourceIngredients, destinationIngredients;
-          let ingredientToMove;
+          const newInstructions = Array.from(prev.instructions);
+          const [reorderedItem] = newInstructions.splice(source.index, 1);
+          newInstructions.splice(destination.index, 0, reorderedItem);
+          return { ...prev, instructions: newInstructions };
+        });
+      } else if (type === "ingredient") {
+        // Handle ingredient reordering
+        const sourceDroppableId = source.droppableId;
+        const destinationDroppableId = destination.droppableId;
 
-          // Get source ingredients
+        if (sourceDroppableId === destinationDroppableId) {
+          // Same container
           if (sourceDroppableId === "ungrouped") {
-            sourceIngredients = [...prev.ungroupedIngredients];
-            [ingredientToMove] = sourceIngredients.splice(source.index, 1);
+            setFormData((prev) => {
+              const newIngredients = Array.from(prev.ungroupedIngredients);
+              const [reorderedItem] = newIngredients.splice(source.index, 1);
+              newIngredients.splice(destination.index, 0, reorderedItem);
+              return { ...prev, ungroupedIngredients: newIngredients };
+            });
           } else {
-            const sourceSection = prev.ingredientSections.find(
-              (s) => s.id === sourceDroppableId
-            );
-            sourceIngredients = [...sourceSection.ingredients];
-            [ingredientToMove] = sourceIngredients.splice(source.index, 1);
+            // Within a section
+            setFormData((prev) => ({
+              ...prev,
+              ingredientSections: prev.ingredientSections.map((section) =>
+                section.id === sourceDroppableId
+                  ? {
+                      ...section,
+                      ingredients: (() => {
+                        const newIngredients = Array.from(section.ingredients);
+                        const [reorderedItem] = newIngredients.splice(
+                          source.index,
+                          1
+                        );
+                        newIngredients.splice(
+                          destination.index,
+                          0,
+                          reorderedItem
+                        );
+                        return newIngredients;
+                      })(),
+                    }
+                  : section
+              ),
+            }));
           }
+        } else {
+          // Different containers - move ingredient
+          setFormData((prev) => {
+            let sourceIngredients, destinationIngredients;
+            let ingredientToMove;
 
-          // Update destination ingredients
-          if (destinationDroppableId === "ungrouped") {
-            destinationIngredients = [...prev.ungroupedIngredients];
-            destinationIngredients.splice(destination.index, 0, ingredientToMove);
-          } else {
-            const destinationSection = prev.ingredientSections.find(
-              (s) => s.id === destinationDroppableId
-            );
-            destinationIngredients = [...destinationSection.ingredients];
-            destinationIngredients.splice(destination.index, 0, ingredientToMove);
-          }
+            // Get source ingredients
+            if (sourceDroppableId === "ungrouped") {
+              sourceIngredients = [...prev.ungroupedIngredients];
+              [ingredientToMove] = sourceIngredients.splice(source.index, 1);
+            } else {
+              const sourceSection = prev.ingredientSections.find(
+                (s) => s.id === sourceDroppableId
+              );
+              sourceIngredients = [...sourceSection.ingredients];
+              [ingredientToMove] = sourceIngredients.splice(source.index, 1);
+            }
 
-          // Build new state
-          const newState = { ...prev };
+            // Update destination ingredients
+            if (destinationDroppableId === "ungrouped") {
+              destinationIngredients = [...prev.ungroupedIngredients];
+              destinationIngredients.splice(
+                destination.index,
+                0,
+                ingredientToMove
+              );
+            } else {
+              const destinationSection = prev.ingredientSections.find(
+                (s) => s.id === destinationDroppableId
+              );
+              destinationIngredients = [...destinationSection.ingredients];
+              destinationIngredients.splice(
+                destination.index,
+                0,
+                ingredientToMove
+              );
+            }
 
-          if (sourceDroppableId === "ungrouped") {
-            newState.ungroupedIngredients = sourceIngredients;
-          } else {
-            newState.ingredientSections = prev.ingredientSections.map((section) =>
-              section.id === sourceDroppableId
-                ? { ...section, ingredients: sourceIngredients }
-                : section
-            );
-          }
+            // Build new state
+            const newState = { ...prev };
 
-          if (destinationDroppableId === "ungrouped") {
-            newState.ungroupedIngredients = destinationIngredients;
-          } else {
-            newState.ingredientSections = newState.ingredientSections.map((section) =>
-              section.id === destinationDroppableId
-                ? { ...section, ingredients: destinationIngredients }
-                : section
-            );
-          }
+            if (sourceDroppableId === "ungrouped") {
+              newState.ungroupedIngredients = sourceIngredients;
+            } else {
+              newState.ingredientSections = prev.ingredientSections.map(
+                (section) =>
+                  section.id === sourceDroppableId
+                    ? { ...section, ingredients: sourceIngredients }
+                    : section
+              );
+            }
 
-          return newState;
+            if (destinationDroppableId === "ungrouped") {
+              newState.ungroupedIngredients = destinationIngredients;
+            } else {
+              newState.ingredientSections = newState.ingredientSections.map(
+                (section) =>
+                  section.id === destinationDroppableId
+                    ? { ...section, ingredients: destinationIngredients }
+                    : section
+              );
+            }
+
+            return newState;
+          });
+        }
+      } else if (type === "section") {
+        // Handle section reordering
+        setFormData((prev) => {
+          const newSections = Array.from(prev.ingredientSections);
+          const [reorderedItem] = newSections.splice(source.index, 1);
+          newSections.splice(destination.index, 0, reorderedItem);
+          return { ...prev, ingredientSections: newSections };
         });
       }
-    } else if (type === "section") {
-      // Handle section reordering
-      setFormData((prev) => {
-        const newSections = Array.from(prev.ingredientSections);
-        const [reorderedItem] = newSections.splice(source.index, 1);
-        newSections.splice(destination.index, 0, reorderedItem);
-        return { ...prev, ingredientSections: newSections };
-      });
-    }
-  }, [setFormData]);
+    },
+    [setFormData]
+  );
 
   return {
     handleIngredientChange,

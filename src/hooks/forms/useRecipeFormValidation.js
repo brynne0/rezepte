@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { 
-  validateRecipeForm, 
-  validateRecipeTitleUnique 
+import {
+  validateRecipeForm,
+  validateRecipeTitleUnique,
 } from "../../utils/validation";
 
 export const useRecipeFormValidation = ({
