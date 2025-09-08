@@ -77,6 +77,7 @@ export const useIngredientManagement = ({
             {
               tempId: newTempId,
               ingredient_id: "",
+              recipe_ingredient_id: "",
               name: "",
               quantity: "",
               unit: "",
@@ -153,6 +154,7 @@ export const useIngredientManagement = ({
             {
               tempId: newTempId,
               ingredient_id: "",
+              recipe_ingredient_id: "",
               name: "",
               quantity: "",
               unit: "",

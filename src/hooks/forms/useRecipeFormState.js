@@ -79,7 +79,24 @@ export const useRecipeFormState = ({ initialRecipe = null }) => {
         });
       }
 
-      // Build ingredient links object
+      // Build ingredient links object - ensure at least one ungrouped ingredient if none exist
+      if (
+        ungroupedIngredients.length === 0 &&
+        ingredientSections.length === 0
+      ) {
+        ungroupedIngredients = [
+          {
+            tempId: generateUniqueId(),
+            ingredient_id: "",
+            recipe_ingredient_id: "",
+            name: "",
+            quantity: "",
+            unit: "",
+            notes: "",
+          },
+        ];
+      }
+
       const ingredientLinks = {};
       ungroupedIngredients.forEach((ing) => {
         if (ing.linked_recipe) {
@@ -118,6 +135,8 @@ export const useRecipeFormState = ({ initialRecipe = null }) => {
       ungroupedIngredients: [
         {
           tempId: generateUniqueId(),
+          ingredient_id: "",
+          recipe_ingredient_id: "",
           name: "",
           quantity: "",
           unit: "",
