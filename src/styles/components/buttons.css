@@ -221,11 +221,3 @@ a.btn-unstyled {
     font-size: 0.9rem;
   }
 }
-
-/* Disable mobile hover effects */
-@media (hover: none) {
-  .btn-icon-neutral:hover {
-    color: var(--color-text-primary);
-    transform: none;
-  }
-}
