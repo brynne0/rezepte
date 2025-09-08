@@ -331,7 +331,9 @@ const RecipeForm = ({
                             provided={provided}
                             snapshot={snapshot}
                             handleIngredientChange={handleIngredientChange}
-                            handleIngredientFieldEnter={handleIngredientFieldEnter}
+                            handleIngredientFieldEnter={
+                              handleIngredientFieldEnter
+                            }
                             handleOpenLinkDropdown={handleOpenLinkDropdown}
                             removeIngredient={removeIngredient}
                             getIngredientLink={getIngredientLink}
@@ -459,16 +461,32 @@ const RecipeForm = ({
                                               ingredient={ingredient}
                                               index={ingredientIndex}
                                               sectionId={section.id}
-                                              validationErrors={validationErrors}
-                                              isEditingTranslation={isEditingTranslation}
+                                              validationErrors={
+                                                validationErrors
+                                              }
+                                              isEditingTranslation={
+                                                isEditingTranslation
+                                              }
                                               provided={provided}
                                               snapshot={snapshot}
-                                              handleIngredientChange={handleIngredientChange}
-                                              handleIngredientFieldEnter={handleIngredientFieldEnter}
-                                              handleOpenLinkDropdown={handleOpenLinkDropdown}
-                                              removeIngredient={removeIngredient}
-                                              getIngredientLink={getIngredientLink}
-                                              removeIngredientLink={removeIngredientLink}
+                                              handleIngredientChange={
+                                                handleIngredientChange
+                                              }
+                                              handleIngredientFieldEnter={
+                                                handleIngredientFieldEnter
+                                              }
+                                              handleOpenLinkDropdown={
+                                                handleOpenLinkDropdown
+                                              }
+                                              removeIngredient={
+                                                removeIngredient
+                                              }
+                                              getIngredientLink={
+                                                getIngredientLink
+                                              }
+                                              removeIngredientLink={
+                                                removeIngredientLink
+                                              }
                                             />
                                           )}
                                         </Draggable>
