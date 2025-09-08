@@ -65,7 +65,7 @@ export const useRecipeFormActions = ({
   // Transform form data for submission
   const transformFormDataForSubmission = useCallback(() => {
     // Helper to prepare ingredient data
-    const prepareIngredientData = (ingredient) => {
+    const prepareIngredientData = (ingredient, sectionId = "ungrouped") => {
       let quantity = ingredient.quantity || "";
 
       // Normalize Unicode fractions
@@ -80,21 +80,17 @@ export const useRecipeFormActions = ({
         quantity: quantity,
         unit: ingredient.unit || "",
         notes: ingredient.notes || "",
+        tempId: ingredient.tempId,
         linked_recipe:
-          formData.ingredientLinks?.[
-            `${ingredient.sectionId || "ungrouped"}-${ingredient.tempId}`
-          ] || null,
+          formData.ingredientLinks?.[`${sectionId}-${ingredient.tempId}`] ||
+          null,
       };
     };
 
     // Convert ungrouped ingredients
     const ungroupedIngredients = formData.ungroupedIngredients
       .filter((ing) => ing.name.trim() !== "")
-      .map((ing) => ({
-        ...prepareIngredientData(ing),
-        linked_recipe:
-          formData.ingredientLinks?.[`ungrouped-${ing.tempId}`] || null,
-      }));
+      .map((ing) => prepareIngredientData(ing, "ungrouped"));
 
     // Convert ingredient sections
     const ingredientSections = formData.ingredientSections
@@ -108,11 +104,7 @@ export const useRecipeFormActions = ({
         subheading: section.subheading || "",
         ingredients: section.ingredients
           .filter((ing) => ing.name.trim() !== "")
-          .map((ing) => ({
-            ...prepareIngredientData(ing),
-            linked_recipe:
-              formData.ingredientLinks?.[`${section.id}-${ing.tempId}`] || null,
-          })),
+          .map((ing) => prepareIngredientData(ing, section.id)),
       }));
 
     return {
@@ -125,6 +117,7 @@ export const useRecipeFormActions = ({
       source: formData.source?.trim() || "",
       notes: formData.notes?.trim() || "",
       images: formData.images || [],
+      ingredientLinks: formData.ingredientLinks || {},
     };
   }, [formData]);
 
@@ -298,7 +291,6 @@ export const useRecipeFormActions = ({
           `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
           err
         );
-
         // Set user-friendly error message
         const errorKey = initialRecipe
           ? "recipe_update_error"
