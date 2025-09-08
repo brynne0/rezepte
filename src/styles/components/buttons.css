@@ -222,22 +222,7 @@ a.btn-unstyled {
   }
 }
 
-/* Disable transform hover effects on touch devices */
-@media (hover: none) {
-  .btn-primary:hover:not(:disabled),
-  .btn-secondary:hover,
-  .btn-tertiary:hover,
-  .btn-danger:hover,
-  .btn-icon-neutral:hover,
-  .btn-icon-green:hover,
-  .btn-icon-remove:hover,
-  .btn-icon-red:hover,
-  .btn-icon-right:hover,
-  .btn-section:hover {
-    transform: none;
-  }
-}
-
+/* Disable mobile hover effects */
 @media (hover: none) {
   .btn-icon-neutral:hover {
     color: var(--color-text-primary);
