@@ -31,6 +31,7 @@ import { Squirrel } from "lucide-react";
 import AddRecipePage from "./pages/AddRecipe/AddRecipe";
 import EditRecipePage from "./pages/EditRecipe/EditRecipe";
 import GroceryList from "./pages/GroceryList/GroceryList";
+import CookingTimes from "./pages/CookingTimes/CookingTimes";
 import AuthPage from "./pages/AuthPage/AuthPage";
 import Recipe from "./pages/Recipe/Recipe";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
@@ -248,6 +249,14 @@ function AppRoutes(props) {
                 isEditing={isGroceryListEditing}
                 setIsEditing={setIsGroceryListEditing}
               />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cooking-times"
+          element={
+            <ProtectedRoute>
+              <CookingTimes />
             </ProtectedRoute>
           }
         />

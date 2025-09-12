@@ -122,7 +122,7 @@
 
 @media (hover: hover) {
   .tab-button:hover {
-    color: var(--red);
+    color: var(--color-danger);
   }
 }
 

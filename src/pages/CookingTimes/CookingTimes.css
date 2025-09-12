@@ -1,0 +1,207 @@
+.tab-navigation {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.cookingtime-tabs-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  padding: 0 3rem;
+  align-items: center;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--background-hover);
+  color: var(--text-secondary);
+  border-radius: calc(var(--border-radius) / 2);
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.conversion-ratio {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.conversion-description {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.item-notes {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.ungrouped-section {
+  margin-bottom: 2rem;
+}
+
+.cooking-time-section {
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--background-hover);
+  border-bottom: 1px solid var(--border-color);
+  gap: 0.5rem;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cooking-time-section .items-grid {
+  padding: 1rem;
+}
+
+.section-add-item {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+}
+
+.sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cooking-times-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.add-section-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-state-icon {
+  color: var(--text-tertiary);
+  margin-bottom: 1.5rem;
+}
+
+.empty-state-title {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.empty-state-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.ungrouped-section {
+  margin-bottom: 2rem;
+}
+
+/* Search bar wrapper positioning */
+.search-bar-wrapper {
+  position: relative;
+}
+
+/* Edit mode toggle button - absolutely positioned to the right */
+.edit-mode-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .cooking-times-page {
+    padding: 1rem 0;
+  }
+
+  .page-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .item-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .drag-handle {
+    align-self: flex-start;
+  }
+
+  .item-actions {
+    opacity: 1;
+    align-self: flex-end;
+  }
+
+  .section-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .time-info {
+    justify-content: flex-start;
+  }
+
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+}

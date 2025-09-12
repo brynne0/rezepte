@@ -9,6 +9,7 @@ import {
   User,
   Sun,
   Moon,
+  Clock,
 } from "lucide-react";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -266,6 +267,17 @@ const Header = ({
                 >
                   <Plus size={28} />
                 </button>
+                {/* Cooking Times */}
+                <button
+                  data-testid="lucide-clock"
+                  className={`btn btn-icon btn-icon-neutral ${
+                    location.pathname === "/cooking-times" ? "selected" : ""
+                  }`}
+                  onClick={() => navigate("/cooking-times")}
+                  aria-label={t("cooking_times", "Cooking Times")}
+                >
+                  <Clock size={28} />
+                </button>
                 {/* Grocery List */}
                 <button
                   data-testid="lucide-shopping-basket"
@@ -318,6 +330,20 @@ const Header = ({
                           aria-label={t("add_new_recipe")}
                         >
                           <Plus size={20} />
+                        </button>
+                        <button
+                          className={`dropdown-item ${
+                            location.pathname === "/cooking-times"
+                              ? "selected"
+                              : ""
+                          }`}
+                          onClick={() => {
+                            navigate("/cooking-times");
+                            setShowNavMenu(false);
+                          }}
+                          aria-label={t("cooking_times", "Cooking Times")}
+                        >
+                          <Clock size={20} />
                         </button>
                         <button
                           className={`dropdown-item ${
