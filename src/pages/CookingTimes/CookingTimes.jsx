@@ -601,21 +601,14 @@ const CookingTimes = () => {
     { type, icon: IconComponent, onAddClick } // eslint-disable-line no-unused-vars
   ) => (
     <div className="empty-state">
-      <div className="empty-state-icon">
-        <IconComponent size={64} />
+      <div>
+        <IconComponent size={40} />
       </div>
       <h3 className="empty-state-title">
         {type === "cooking-times" &&
           t("no_cooking_times_title", "No cooking times yet")}
       </h3>
-      <p className="empty-state-description">
-        {type === "cooking-times" &&
-          t(
-            "no_cooking_times_description",
-            "Start building your personal cooking reference by adding ingredient cooking and soaking times."
-          )}
-      </p>
-      <button className="btn btn--primary" onClick={onAddClick}>
+      <button className="btn btn-tertiary" onClick={onAddClick}>
         <Plus size={20} />
         {type === "cooking-times"
           ? t("add_first_cooking_time", "Add your first cooking time")
@@ -673,7 +666,7 @@ const CookingTimes = () => {
 
   return (
     <div className="card card-grocery">
-      <div className="container">
+      <div className="flex-column-center">
         <div className="cookingtime-tabs-wrapper">
           <button
             className="btn-unstyled back-arrow-left"
@@ -706,45 +699,49 @@ const CookingTimes = () => {
             {t("conversions_tab")}
           </button>
         </div>
-        {/* Search Bar and Controls - Hidden in edit mode */}
-        {!isEditMode && (
-          <div className="search-bar-wrapper">
-            <form
-              className="search-bar"
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <div className="search-input-wrapper">
-                <input
-                  id="cooking-times-search"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="input input--secondary search-input-with-icon"
-                  placeholder={t("search_placeholder", "Search...")}
-                />
-                <button
-                  className="btn btn-icon btn-icon-neutral btn-search"
-                  type="submit"
-                  aria-label={t("search")}
-                >
-                  <Search size={20} />
-                </button>
-              </div>
-            </form>
-
-            {activeTab === "cooking-times" && (
-              <button
-                className="btn btn-unstyled"
-                onClick={() => setIsEditMode(!isEditMode)}
-                aria-label={t("edit_mode", "Edit Mode")}
+        {/* Search Bar and Controls - Hidden in edit mode and when no cooking times */}
+        {!isEditMode &&
+          (formData.ungroupedCookingTimes.length > 0 ||
+            formData.cookingTimeSections.length > 0) && (
+            <div className="search-bar-wrapper">
+              <form
+                className="search-bar"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                }}
               >
-                <Pencil size={20} />
-              </button>
-            )}
-          </div>
-        )}
+                <div className="search-input-wrapper">
+                  <input
+                    id="cooking-times-search"
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="input input--secondary search-input-with-icon"
+                    placeholder={t("search_placeholder", "Search...")}
+                  />
+                  <button
+                    className="btn btn-icon btn-icon-neutral btn-search"
+                    type="submit"
+                    aria-label={t("search")}
+                  >
+                    <Search size={20} />
+                  </button>
+                </div>
+              </form>
+
+              {activeTab === "cooking-times" &&
+                (formData.ungroupedCookingTimes.length > 0 ||
+                  formData.cookingTimeSections.length > 0) && (
+                  <button
+                    className="btn btn-unstyled"
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    aria-label={t("edit_mode", "Edit Mode")}
+                  >
+                    <Pencil size={20} />
+                  </button>
+                )}
+            </div>
+          )}
 
         <DragDropContext onDragEnd={handleDragEnd}>
           {activeTab === "cooking-times" && (
@@ -754,7 +751,10 @@ const CookingTimes = () => {
                 <EmptyState
                   type="cooking-times"
                   icon={Timer}
-                  onAddClick={() => addCookingTime("ungrouped")}
+                  onAddClick={() => {
+                    setIsEditMode(true);
+                    addCookingTime("ungrouped");
+                  }}
                 />
               ) : (
                 <>

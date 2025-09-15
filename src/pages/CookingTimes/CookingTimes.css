@@ -119,26 +119,16 @@
 
 .empty-state {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 2rem 0;
   max-width: 500px;
-  margin: 0 auto;
-}
-
-.empty-state-icon {
-  color: var(--text-tertiary);
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .empty-state-title {
-  font-size: 1.5rem;
-  color: var(--text-primary);
+  font-size: 1.3rem;
   margin: 0 0 1rem 0;
-}
-
-.empty-state-description {
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin: 0 0 2rem 0;
 }
 
 .ungrouped-section {
@@ -199,9 +189,5 @@
 
   .time-info {
     justify-content: flex-start;
-  }
-
-  .empty-state {
-    padding: 2rem 1rem;
   }
 }
