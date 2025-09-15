@@ -16,13 +16,12 @@
 }
 
 .cookingtime-tabs-wrapper {
-  position: relative;
   margin-bottom: 1rem;
   display: flex;
   gap: 1rem;
   justify-content: center;
-  padding: 0 3rem;
   align-items: center;
+  color: var(--color-text-primary);
 }
 
 .category-badge {
@@ -31,28 +30,21 @@
   background-color: var(--background-hover);
   color: var(--text-secondary);
   border-radius: calc(var(--border-radius) / 2);
-  font-size: 0.75rem;
-  text-transform: capitalize;
-}
-
-.conversion-ratio {
-  font-weight: 500;
-  color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 0.9rem;
 }
 
 .conversion-description {
   font-weight: 500;
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 0.9rem;
 }
 
 .item-notes {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.4;
-  font-style: italic;
+  font-size: 0.9rem;
+  text-align: left;
+  padding: 0.25rem 0.5rem;
 }
 
 .no-results {
@@ -135,32 +127,19 @@
   margin-bottom: 2rem;
 }
 
-/* Search bar wrapper positioning */
-.search-bar-wrapper {
-  position: relative;
-}
-
-/* Edit mode toggle button - absolutely positioned to the right */
-.edit-mode-toggle {
-  position: absolute;
-  top: 0;
-  right: 0;
+/* Cooking Times Header */
+.cooking-times-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 0.5rem;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .cooking-times-page {
     padding: 1rem 0;
-  }
-
-  .page-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 0.5rem;
-  }
-
-  .page-header h1 {
-    font-size: 1.5rem;
   }
 
   .items-grid {

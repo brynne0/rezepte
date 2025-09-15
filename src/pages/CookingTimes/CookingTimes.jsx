@@ -17,6 +17,7 @@ import "../../components/CookingTimeRow/CookingTimeRow.css";
 import {
   fetchUserCookingTimes,
   createCookingTime,
+  updateCookingTime,
   deleteCookingTime,
 } from "../../services/cookingTimesService";
 import {
@@ -174,6 +175,8 @@ const CookingTimes = () => {
         ingredient_name: "",
         cooking_time: "",
         soaking_time: "",
+        dry_weight: "",
+        cooked_weight: "",
         notes: "",
       };
 
@@ -220,6 +223,8 @@ const CookingTimes = () => {
           ingredient_name: "",
           cooking_time: "",
           soaking_time: "",
+          dry_weight: "",
+          cooked_weight: "",
           notes: "",
         },
       ],
@@ -380,13 +385,10 @@ const CookingTimes = () => {
       // Process ungrouped items
       formData.ungroupedCookingTimes.forEach((item) => {
         if (item.ingredient_name?.trim() && !item.id) {
-          // Skip if no times provided
-          if (item.cooking_time || item.soaking_time) {
-            itemsToCreate.push({
-              ...item,
-              section_name: null, // ungrouped
-            });
-          }
+          itemsToCreate.push({
+            ...item,
+            section_name: null, // ungrouped
+          });
         }
       });
 
@@ -395,38 +397,140 @@ const CookingTimes = () => {
         if (section.subheading?.trim()) {
           section.cookingTimes.forEach((item) => {
             if (item.ingredient_name?.trim() && !item.id) {
-              // Skip if no times provided
-              if (item.cooking_time || item.soaking_time) {
-                itemsToCreate.push({
-                  ...item,
-                  section_name: section.subheading,
-                });
-              }
+              itemsToCreate.push({
+                ...item,
+                section_name: section.subheading,
+              });
             }
           });
         }
       });
 
       // Create new items
-      for (const item of itemsToCreate) {
+      console.log("Items to create:", itemsToCreate);
+      for (let i = 0; i < itemsToCreate.length; i++) {
+        const item = itemsToCreate[i];
         const cookingTimeData = {
           ingredient_name: item.ingredient_name.trim(),
           cooking_time: item.cooking_time ? parseInt(item.cooking_time) : null,
           soaking_time: item.soaking_time ? parseInt(item.soaking_time) : null,
+          dry_weight: item.dry_weight ? parseInt(item.dry_weight) : null,
+          cooked_weight: item.cooked_weight
+            ? parseInt(item.cooked_weight)
+            : null,
           notes: item.notes?.trim() || null,
         };
+
+        // Calculate order index - get the highest existing order index and increment
+        const existingItems = await fetchUserCookingTimes();
+        const maxOrderIndex =
+          existingItems.length > 0
+            ? Math.max(...existingItems.map((item) => item.order_index || 0))
+            : -1;
+        const orderIndex = maxOrderIndex + 1 + i;
 
         console.log(
           "Creating cooking time:",
           cookingTimeData,
           "in section:",
-          item.section_name
+          item.section_name,
+          "with order_index:",
+          orderIndex
         );
-        await createCookingTime(cookingTimeData, item.section_name);
+        await createCookingTime(cookingTimeData, item.section_name, orderIndex);
       }
 
-      // Step 3: Handle updates for existing items (if needed in the future)
-      // For now, we only handle create and delete since there's no edit functionality for existing items
+      // Step 3: Handle updates for existing items
+      const itemsToUpdate = [];
+
+      // Process ungrouped items for updates
+      formData.ungroupedCookingTimes.forEach((item) => {
+        if (item.ingredient_name?.trim() && item.id) {
+          // Find the original item to compare
+          const originalItem =
+            originalData.ungroupedCookingTimes.find(
+              (orig) => orig.id === item.id
+            ) ||
+            originalData.cookingTimeSections
+              .flatMap((s) => s.cookingTimes)
+              .find((orig) => orig.id === item.id);
+
+          if (originalItem) {
+            // Check if any field has changed
+            const hasChanges =
+              item.ingredient_name !== originalItem.ingredient_name ||
+              item.cooking_time !== originalItem.cooking_time ||
+              item.soaking_time !== originalItem.soaking_time ||
+              item.dry_weight !== originalItem.dry_weight ||
+              item.cooked_weight !== originalItem.cooked_weight ||
+              item.notes !== originalItem.notes;
+
+            if (hasChanges) {
+              itemsToUpdate.push({
+                ...item,
+                section_name: null, // ungrouped
+              });
+            }
+          }
+        }
+      });
+
+      // Process sectioned items for updates
+      formData.cookingTimeSections.forEach((section) => {
+        if (section.subheading?.trim()) {
+          section.cookingTimes.forEach((item) => {
+            if (item.ingredient_name?.trim() && item.id) {
+              // Find the original item to compare
+              const originalItem =
+                originalData.ungroupedCookingTimes.find(
+                  (orig) => orig.id === item.id
+                ) ||
+                originalData.cookingTimeSections
+                  .flatMap((s) => s.cookingTimes)
+                  .find((orig) => orig.id === item.id);
+
+              if (originalItem) {
+                // Check if any field has changed
+                const hasChanges =
+                  item.ingredient_name !== originalItem.ingredient_name ||
+                  item.cooking_time !== originalItem.cooking_time ||
+                  item.soaking_time !== originalItem.soaking_time ||
+                  item.dry_weight !== originalItem.dry_weight ||
+                  item.cooked_weight !== originalItem.cooked_weight ||
+                  item.notes !== originalItem.notes ||
+                  section.subheading !== originalItem.section_name;
+
+                if (hasChanges) {
+                  itemsToUpdate.push({
+                    ...item,
+                    section_name: section.subheading,
+                  });
+                }
+              }
+            }
+          });
+        }
+      });
+
+      // Update existing items
+      console.log("Items to update:", itemsToUpdate);
+      for (const item of itemsToUpdate) {
+        const cookingTimeData = {
+          ingredient_name: item.ingredient_name.trim(),
+          cooking_time: item.cooking_time ? parseInt(item.cooking_time) : null,
+          soaking_time: item.soaking_time ? parseInt(item.soaking_time) : null,
+          dry_weight: item.dry_weight ? parseInt(item.dry_weight) : null,
+          cooked_weight: item.cooked_weight
+            ? parseInt(item.cooked_weight)
+            : null,
+          notes: item.notes?.trim() || null,
+          section_name: item.section_name,
+          order_index: item.order_index || 0,
+        };
+
+        console.log("Updating cooking time:", item.id, cookingTimeData);
+        await updateCookingTime(item.id, cookingTimeData);
+      }
 
       // Reload data after saving
       await loadData();
@@ -446,6 +550,8 @@ const CookingTimes = () => {
           "ingredient_name",
           "cooking_time",
           "soaking_time",
+          "dry_weight",
+          "cooked_weight",
           "notes",
         ];
         const currentFieldIndex = fieldOrder.indexOf(currentField);
@@ -455,7 +561,7 @@ const CookingTimes = () => {
           // Move to next field in same item
           const nextField = fieldOrder[nextFieldIndex];
           const nextInput = document.getElementById(
-            `cooking-time-${nextField.replace("_", "-")}-${sectionId}-${index}-${tempId}`
+            `cooking-time-${nextField.replace(/_/g, "-")}-${sectionId}-${index}-${tempId}`
           );
           if (nextInput) {
             nextInput.focus();
@@ -669,22 +775,6 @@ const CookingTimes = () => {
       <div className="flex-column-center">
         <div className="cookingtime-tabs-wrapper">
           <button
-            className="btn-unstyled back-arrow-left"
-            onClick={() => {
-              if (isEditMode) {
-                setIsEditMode(false);
-              } else {
-                navigate(-1);
-              }
-            }}
-            aria-label={
-              isEditMode ? t("view_mode", "View Mode") : t("go_back", "Go Back")
-            }
-          >
-            <ArrowBigLeft size={28} />
-          </button>
-
-          <button
             className={`tab-button ${activeTab === "cooking-times" ? "active" : ""}`}
             onClick={() => setActiveTab("cooking-times")}
           >
@@ -699,369 +789,393 @@ const CookingTimes = () => {
             {t("conversions_tab")}
           </button>
         </div>
-        {/* Search Bar and Controls - Hidden in edit mode and when no cooking times */}
-        {!isEditMode &&
-          (formData.ungroupedCookingTimes.length > 0 ||
-            formData.cookingTimeSections.length > 0) && (
-            <div className="search-bar-wrapper">
-              <form
-                className="search-bar"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                <div className="search-input-wrapper">
-                  <input
-                    id="cooking-times-search"
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="input input--secondary search-input-with-icon"
-                    placeholder={t("search_placeholder", "Search...")}
-                  />
-                  <button
-                    className="btn btn-icon btn-icon-neutral btn-search"
-                    type="submit"
-                    aria-label={t("search")}
-                  >
-                    <Search size={20} />
-                  </button>
-                </div>
-              </form>
 
-              {activeTab === "cooking-times" &&
-                (formData.ungroupedCookingTimes.length > 0 ||
-                  formData.cookingTimeSections.length > 0) && (
-                  <button
-                    className="btn btn-unstyled"
-                    onClick={() => setIsEditMode(!isEditMode)}
-                    aria-label={t("edit_mode", "Edit Mode")}
-                  >
-                    <Pencil size={20} />
-                  </button>
-                )}
-            </div>
-          )}
-
-        <DragDropContext onDragEnd={handleDragEnd}>
-          {activeTab === "cooking-times" && (
-            <>
-              {formData.ungroupedCookingTimes.length === 0 &&
-              formData.cookingTimeSections.length === 0 ? (
-                <EmptyState
-                  type="cooking-times"
-                  icon={Timer}
-                  onAddClick={() => {
-                    setIsEditMode(true);
-                    addCookingTime("ungrouped");
+        {/* Cooking Times Tab Content */}
+        <div className="cooking-times-tab-content">
+          {/* Search Bar and Controls - Hidden in edit mode and when no cooking times */}
+          {!isEditMode &&
+            (formData.ungroupedCookingTimes.length > 0 ||
+              formData.cookingTimeSections.length > 0) && (
+              <div className="page-header flex-between">
+                <button
+                  className="btn-unstyled back-arrow"
+                  onClick={() => {
+                    if (isEditMode) {
+                      setIsEditMode(false);
+                    } else {
+                      navigate(-1);
+                    }
                   }}
-                />
-              ) : (
-                <>
-                  {filteredData.ungroupedCookingTimes.length === 0 &&
-                  filteredData.cookingTimeSections.length === 0 &&
-                  searchQuery ? (
-                    <div className="no-results">
-                      <p>
-                        {t(
-                          "no_search_results",
-                          "No results found for your search."
-                        )}
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Form header */}
-                      <div className="form-header flex-between">
-                        <div></div>
-                        {isEditMode && (
-                          <button
-                            type="button"
-                            onClick={addSection}
-                            className="btn btn-section"
-                          >
-                            {t("add_section")}
-                          </button>
-                        )}
-                      </div>
+                  aria-label={
+                    isEditMode
+                      ? t("view_mode", "View Mode")
+                      : t("go_back", "Go Back")
+                  }
+                >
+                  <ArrowBigLeft size={28} />
+                </button>
+                <form
+                  className="search-bar"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  <div className="search-input-wrapper">
+                    <input
+                      id="cooking-times-search"
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="input input--secondary search-input-with-icon"
+                      placeholder={t("search_placeholder", "Search...")}
+                    />
+                    <button
+                      className="btn btn-icon btn-icon-neutral btn-search"
+                      type="submit"
+                      aria-label={t("search")}
+                    >
+                      <Search size={20} />
+                    </button>
+                  </div>
+                </form>
 
-                      {/* Ungrouped Cooking Times */}
-                      {filteredData.ungroupedCookingTimes.length > 0 && (
-                        <>
-                          {isEditMode ? (
-                            <Droppable
-                              droppableId="ungrouped"
-                              type="cooking-time-item"
-                            >
-                              {(provided, snapshot) => (
-                                <div
-                                  className={`flex-column cooking-time-list ${
-                                    snapshot.isDraggingOver ? "drag-over" : ""
-                                  }`}
-                                  {...provided.droppableProps}
-                                  ref={provided.innerRef}
-                                >
-                                  {filteredData.ungroupedCookingTimes.map(
-                                    (item, index) => (
-                                      <Draggable
-                                        key={`ungrouped-${index}-${item.tempId || item.id}`}
-                                        draggableId={`ungrouped-${index}-${item.tempId || item.id}`}
-                                        index={index}
-                                        type="cooking-time-item"
-                                      >
-                                        {(provided, snapshot) =>
-                                          renderCookingTimeItem(
-                                            item,
-                                            index,
-                                            "ungrouped",
-                                            provided,
-                                            snapshot
-                                          )
-                                        }
-                                      </Draggable>
-                                    )
-                                  )}
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-                          ) : (
-                            <div className="flex-column cooking-time-list">
-                              {filteredData.ungroupedCookingTimes.map(
-                                (item, index) =>
-                                  renderCookingTimeItem(
-                                    item,
-                                    index,
-                                    "ungrouped",
-                                    null,
-                                    null
-                                  )
-                              )}
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                      {/* Add Cooking Time Button for Ungrouped */}
-                      {isEditMode && (
-                        <div className="flex-center">
-                          <button
-                            type="button"
-                            onClick={() => addCookingTime("ungrouped")}
-                            className="btn btn-icon btn-icon-green"
-                          >
-                            <Plus
-                              size={16}
-                              data-testid="add-cooking-time-btn"
-                              aria-label={t("add_cooking_time")}
-                            />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Cooking Time Sections */}
-                      {filteredData.cookingTimeSections.length > 0 && (
-                        <Droppable
-                          droppableId="sections"
-                          type="cooking-time-section"
-                        >
-                          {(provided) => (
-                            <div
-                              className="flex-column"
-                              {...provided.droppableProps}
-                              ref={provided.innerRef}
-                            >
-                              {filteredData.cookingTimeSections.map(
-                                (section, sectionIndex) => (
-                                  <Draggable
-                                    key={section.id}
-                                    draggableId={section.id}
-                                    index={sectionIndex}
-                                    type="cooking-time-section"
-                                  >
-                                    {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        className={`cooking-time-section ${
-                                          snapshot.isDragging ? "dragging" : ""
-                                        }`}
-                                      >
-                                        {/* Section Header */}
-                                        {isEditMode ? (
-                                          <div className="flex-row">
-                                            <div
-                                              {...provided.dragHandleProps}
-                                              className="drag-handle"
-                                            >
-                                              <GripVertical size={16} />
-                                            </div>
-                                            <input
-                                              type="text"
-                                              value={section.subheading}
-                                              onChange={(e) =>
-                                                handleSectionChange(
-                                                  section.id,
-                                                  "subheading",
-                                                  e.target.value
-                                                )
-                                              }
-                                              className="input input--borderless section-title-input"
-                                              placeholder={t("section_title")}
-                                            />
-                                            <button
-                                              type="button"
-                                              onClick={() =>
-                                                removeSection(section.id)
-                                              }
-                                              className="btn btn-section"
-                                            >
-                                              {t("remove_section")}
-                                            </button>
-                                          </div>
-                                        ) : (
-                                          <div className="section-subheading">
-                                            <h3>{section.subheading}</h3>
-                                          </div>
-                                        )}
-
-                                        {/* Section Cooking Times */}
-                                        {isEditMode ? (
-                                          <Droppable
-                                            droppableId={section.id}
-                                            type="cooking-time-item"
-                                          >
-                                            {(provided, snapshot) => (
-                                              <div
-                                                className={`flex-column cooking-time-list ${
-                                                  snapshot.isDraggingOver
-                                                    ? "drag-over"
-                                                    : ""
-                                                }`}
-                                                {...provided.droppableProps}
-                                                ref={provided.innerRef}
-                                              >
-                                                {section.cookingTimes.map(
-                                                  (item, itemIndex) => (
-                                                    <Draggable
-                                                      key={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
-                                                      draggableId={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
-                                                      index={itemIndex}
-                                                      type="cooking-time-item"
-                                                    >
-                                                      {(provided, snapshot) =>
-                                                        renderCookingTimeItem(
-                                                          item,
-                                                          itemIndex,
-                                                          section.id,
-                                                          provided,
-                                                          snapshot
-                                                        )
-                                                      }
-                                                    </Draggable>
-                                                  )
-                                                )}
-                                                {provided.placeholder}
-                                              </div>
-                                            )}
-                                          </Droppable>
-                                        ) : (
-                                          <div className="flex-column cooking-time-list">
-                                            {section.cookingTimes.map(
-                                              (item, itemIndex) =>
-                                                renderCookingTimeItem(
-                                                  item,
-                                                  itemIndex,
-                                                  section.id,
-                                                  null,
-                                                  null
-                                                )
-                                            )}
-                                          </div>
-                                        )}
-
-                                        {/* Add Cooking Time Button (like RecipeForm) */}
-                                        {isEditMode && (
-                                          <div className="flex-center">
-                                            <button
-                                              type="button"
-                                              onClick={() =>
-                                                addCookingTime(section.id)
-                                              }
-                                              className="btn btn-icon btn-icon-green"
-                                              aria-label={t("add_cooking_time")}
-                                            >
-                                              <Plus
-                                                size={16}
-                                                data-testid="add-section-cooking-time-btn"
-                                              />
-                                            </button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                )
-                              )}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      )}
-                    </>
+                {activeTab === "cooking-times" &&
+                  (formData.ungroupedCookingTimes.length > 0 ||
+                    formData.cookingTimeSections.length > 0) && (
+                    <button
+                      className="btn btn-unstyled"
+                      onClick={() => setIsEditMode(!isEditMode)}
+                      aria-label={t("edit_mode", "Edit Mode")}
+                    >
+                      <Pencil size={20} />
+                    </button>
                   )}
-                </>
-              )}
+              </div>
+            )}
 
-              {/* Action buttons for edit mode */}
-              {isEditMode && (
-                <div className="action-buttons-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      // Cancel changes - reload original data and exit edit mode
-                      loadData();
-                      setIsEditMode(false);
+          <DragDropContext onDragEnd={handleDragEnd}>
+            {activeTab === "cooking-times" && (
+              <>
+                {formData.ungroupedCookingTimes.length === 0 &&
+                formData.cookingTimeSections.length === 0 ? (
+                  <EmptyState
+                    type="cooking-times"
+                    icon={Timer}
+                    onAddClick={() => {
+                      setIsEditMode(true);
+                      addCookingTime("ungrouped");
                     }}
-                    className="btn btn-action btn-secondary"
-                  >
-                    {t("cancel")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      // Save all changes and exit edit mode
-                      await saveAllChanges();
-                      setIsEditMode(false);
-                    }}
-                    className="btn btn-action btn-primary"
-                  >
-                    {t("save_changes", "Save Changes")}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+                  />
+                ) : (
+                  <>
+                    {filteredData.ungroupedCookingTimes.length === 0 &&
+                    filteredData.cookingTimeSections.length === 0 &&
+                    searchQuery ? (
+                      <div className="no-results">
+                        <p>
+                          {t(
+                            "no_search_results",
+                            "No results found for your search."
+                          )}
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Form header */}
+                        <div className="form-header flex-between">
+                          {isEditMode && (
+                            <button
+                              type="button"
+                              onClick={addSection}
+                              className="btn btn-section"
+                            >
+                              {t("add_section")}
+                            </button>
+                          )}
+                        </div>
 
-          {activeTab === "conversions" && (
-            <>
-              {filteredConversions.length === 0 && searchQuery ? (
-                <div className="no-results">
-                  <p>
-                    {t(
-                      "no_search_results",
-                      "No results found for your search."
+                        {/* Ungrouped Cooking Times */}
+                        {filteredData.ungroupedCookingTimes.length > 0 && (
+                          <>
+                            {isEditMode ? (
+                              <Droppable
+                                droppableId="ungrouped"
+                                type="cooking-time-item"
+                              >
+                                {(provided, snapshot) => (
+                                  <div
+                                    className={`flex-column cooking-time-list ${
+                                      snapshot.isDraggingOver ? "drag-over" : ""
+                                    }`}
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                  >
+                                    {filteredData.ungroupedCookingTimes.map(
+                                      (item, index) => (
+                                        <Draggable
+                                          key={`ungrouped-${index}-${item.tempId || item.id}`}
+                                          draggableId={`ungrouped-${index}-${item.tempId || item.id}`}
+                                          index={index}
+                                          type="cooking-time-item"
+                                        >
+                                          {(provided, snapshot) =>
+                                            renderCookingTimeItem(
+                                              item,
+                                              index,
+                                              "ungrouped",
+                                              provided,
+                                              snapshot
+                                            )
+                                          }
+                                        </Draggable>
+                                      )
+                                    )}
+                                    {provided.placeholder}
+                                  </div>
+                                )}
+                              </Droppable>
+                            ) : (
+                              <div className="flex-column cooking-time-list">
+                                {filteredData.ungroupedCookingTimes.map(
+                                  (item, index) =>
+                                    renderCookingTimeItem(
+                                      item,
+                                      index,
+                                      "ungrouped",
+                                      null,
+                                      null
+                                    )
+                                )}
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {/* Add Cooking Time Button for Ungrouped */}
+                        {isEditMode && (
+                          <div className="flex-center">
+                            <button
+                              type="button"
+                              onClick={() => addCookingTime("ungrouped")}
+                              className="btn btn-icon btn-icon-green"
+                            >
+                              <Plus
+                                size={16}
+                                data-testid="add-cooking-time-btn"
+                                aria-label={t("add_cooking_time")}
+                              />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Cooking Time Sections */}
+                        {filteredData.cookingTimeSections.length > 0 && (
+                          <Droppable
+                            droppableId="sections"
+                            type="cooking-time-section"
+                          >
+                            {(provided) => (
+                              <div
+                                className="flex-column"
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                              >
+                                {filteredData.cookingTimeSections.map(
+                                  (section, sectionIndex) => (
+                                    <Draggable
+                                      key={section.id}
+                                      draggableId={section.id}
+                                      index={sectionIndex}
+                                      type="cooking-time-section"
+                                    >
+                                      {(provided, snapshot) => (
+                                        <div
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          className={`cooking-time-section ${
+                                            snapshot.isDragging
+                                              ? "dragging"
+                                              : ""
+                                          }`}
+                                        >
+                                          {/* Section Header */}
+                                          {isEditMode ? (
+                                            <div className="flex-row">
+                                              <div
+                                                {...provided.dragHandleProps}
+                                                className="drag-handle"
+                                              >
+                                                <GripVertical size={16} />
+                                              </div>
+                                              <input
+                                                type="text"
+                                                value={section.subheading}
+                                                onChange={(e) =>
+                                                  handleSectionChange(
+                                                    section.id,
+                                                    "subheading",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="input input--borderless section-title-input"
+                                                placeholder={t("section_title")}
+                                              />
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  removeSection(section.id)
+                                                }
+                                                className="btn btn-section"
+                                              >
+                                                {t("remove_section")}
+                                              </button>
+                                            </div>
+                                          ) : (
+                                            <div className="section-subheading">
+                                              <h3>{section.subheading}</h3>
+                                            </div>
+                                          )}
+
+                                          {/* Section Cooking Times */}
+                                          {isEditMode ? (
+                                            <Droppable
+                                              droppableId={section.id}
+                                              type="cooking-time-item"
+                                            >
+                                              {(provided, snapshot) => (
+                                                <div
+                                                  className={`flex-column cooking-time-list ${
+                                                    snapshot.isDraggingOver
+                                                      ? "drag-over"
+                                                      : ""
+                                                  }`}
+                                                  {...provided.droppableProps}
+                                                  ref={provided.innerRef}
+                                                >
+                                                  {section.cookingTimes.map(
+                                                    (item, itemIndex) => (
+                                                      <Draggable
+                                                        key={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
+                                                        draggableId={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
+                                                        index={itemIndex}
+                                                        type="cooking-time-item"
+                                                      >
+                                                        {(provided, snapshot) =>
+                                                          renderCookingTimeItem(
+                                                            item,
+                                                            itemIndex,
+                                                            section.id,
+                                                            provided,
+                                                            snapshot
+                                                          )
+                                                        }
+                                                      </Draggable>
+                                                    )
+                                                  )}
+                                                  {provided.placeholder}
+                                                </div>
+                                              )}
+                                            </Droppable>
+                                          ) : (
+                                            <div className="flex-column cooking-time-list">
+                                              {section.cookingTimes.map(
+                                                (item, itemIndex) =>
+                                                  renderCookingTimeItem(
+                                                    item,
+                                                    itemIndex,
+                                                    section.id,
+                                                    null,
+                                                    null
+                                                  )
+                                              )}
+                                            </div>
+                                          )}
+
+                                          {/* Add Cooking Time Button (like RecipeForm) */}
+                                          {isEditMode && (
+                                            <div className="flex-center">
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  addCookingTime(section.id)
+                                                }
+                                                className="btn btn-icon btn-icon-green"
+                                                aria-label={t(
+                                                  "add_cooking_time"
+                                                )}
+                                              >
+                                                <Plus
+                                                  size={16}
+                                                  data-testid="add-section-cooking-time-btn"
+                                                />
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </Draggable>
+                                  )
+                                )}
+                                {provided.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
+                        )}
+                      </>
                     )}
-                  </p>
-                </div>
-              ) : (
-                <div className="items-grid">
-                  {filteredConversions.map(renderConversionItem)}
-                </div>
-              )}
-            </>
-          )}
-        </DragDropContext>
+                  </>
+                )}
+
+                {/* Action buttons for edit mode */}
+                {isEditMode && (
+                  <div className="action-buttons-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Cancel changes - reload original data and exit edit mode
+                        loadData();
+                        setIsEditMode(false);
+                      }}
+                      className="btn btn-action btn-secondary"
+                    >
+                      {t("cancel")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        // Save all changes and exit edit mode
+                        await saveAllChanges();
+                        setIsEditMode(false);
+                      }}
+                      className="btn btn-action btn-primary"
+                    >
+                      {t("save_changes", "Save Changes")}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === "conversions" && (
+              <>
+                {filteredConversions.length === 0 && searchQuery ? (
+                  <div className="no-results">
+                    <p>
+                      {t(
+                        "no_search_results",
+                        "No results found for your search."
+                      )}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="items-grid">
+                    {filteredConversions.map(renderConversionItem)}
+                  </div>
+                )}
+              </>
+            )}
+          </DragDropContext>
+        </div>
       </div>
     </div>
   );
