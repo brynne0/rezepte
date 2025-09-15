@@ -177,6 +177,8 @@ export const fetchSharedRecipe = async (shareToken) => {
             subheading: item.subheading,
             order_index: item.order_index,
             is_plural: item.is_plural,
+            linked_recipe_id: item.linked_recipe_id,
+            linked_recipe: item.linked_recipe,
           };
         }) || [];
 
