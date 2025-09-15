@@ -773,7 +773,7 @@ const CookingTimes = () => {
   return (
     <div className="card card-grocery">
       <div className="flex-column-center">
-        <div className="cookingtime-tabs-wrapper">
+        <div className="cookingtime-tabs-wrapper flex-center">
           <button
             className={`tab-button ${activeTab === "cooking-times" ? "active" : ""}`}
             onClick={() => setActiveTab("cooking-times")}
@@ -791,12 +791,12 @@ const CookingTimes = () => {
         </div>
 
         {/* Cooking Times Tab Content */}
-        <div className="cooking-times-tab-content">
+        <div className={`${isEditMode ? "flex-column-center" : ""}`}>
           {/* Search Bar and Controls - Hidden in edit mode and when no cooking times */}
           {!isEditMode &&
             (formData.ungroupedCookingTimes.length > 0 ||
               formData.cookingTimeSections.length > 0) && (
-              <div className="page-header flex-between">
+              <div className="cooking-times-search-bar flex-between">
                 <button
                   className="btn-unstyled back-arrow"
                   onClick={() => {
@@ -882,7 +882,7 @@ const CookingTimes = () => {
                     ) : (
                       <>
                         {/* Form header */}
-                        <div className="form-header flex-between">
+                        <div className="add-section-wrapper flex-between">
                           {isEditMode && (
                             <button
                               type="button"
@@ -1031,7 +1031,7 @@ const CookingTimes = () => {
                                               </button>
                                             </div>
                                           ) : (
-                                            <div className="section-subheading">
+                                            <div className="cookingtime-section-subheading">
                                               <h3>{section.subheading}</h3>
                                             </div>
                                           )}

@@ -16,12 +16,12 @@
 }
 
 .cookingtime-tabs-wrapper {
-  margin-bottom: 1rem;
-  display: flex;
   gap: 1rem;
-  justify-content: center;
-  align-items: center;
   color: var(--color-text-primary);
+}
+
+.cookingtime-section-subheading {
+  margin-bottom: 0.5rem;
 }
 
 .category-badge {
@@ -31,6 +31,14 @@
   color: var(--text-secondary);
   border-radius: calc(var(--border-radius) / 2);
   font-size: 0.9rem;
+}
+
+.cooking-times-search-bar {
+  margin: 1.5rem 0rem 2rem 0;
+}
+
+.add-section-wrapper {
+  margin: 1.5rem 0rem 1rem 0;
 }
 
 .conversion-description {
