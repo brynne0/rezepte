@@ -12,7 +12,8 @@ import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
-  const [imageLoading, setImageLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Get main image
   const mainImage = getMainImage(recipe.images);
@@ -21,14 +22,13 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const shouldShowImages = isLoggedIn && showImages;
 
   const handleImageLoad = () => {
-    // Add a minimum loading time so users can see the loading state
-    setTimeout(() => {
-      setImageLoading(false);
-    }, 300); // Minimum 300ms loading display
+    setImageLoaded(true);
+    setImageError(false);
   };
 
   const handleImageError = () => {
-    setImageLoading(false);
+    setImageLoaded(false);
+    setImageError(true);
   };
 
   // Check if recipe has a source link
@@ -40,7 +40,8 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
 
   // Check if recipe has no content (no ingredients and no instructions)
   const hasNoIngredients = !recipe.hasIngredients;
-  const hasNoInstructions = !recipe.instructions || recipe.instructions.length === 0;
+  const hasNoInstructions =
+    !recipe.instructions || recipe.instructions.length === 0;
   const hasNoContent = hasNoIngredients && hasNoInstructions;
 
   return (
@@ -64,20 +65,22 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           </a>
         )}
       </div>
-      {shouldShowImages && mainImage && (
+      {shouldShowImages && mainImage && !imageError && (
         <div className="recipe-image-container">
           <img
-            className={`recipe-image ${imageLoading ? "loading" : ""}`}
+            className={`recipe-image ${imageLoaded ? "loaded" : "loading"}`}
             src={getOptimizedImageUrl(mainImage.url, {
               width: 300,
               height: 200,
+              quality: 75,
             })}
             alt={recipe.title}
             loading="lazy"
             onLoad={handleImageLoad}
             onError={handleImageError}
+            key={mainImage.id}
           />
-          {imageLoading && (
+          {!imageLoaded && (
             <div className="recipe-image-loading">
               <LoadingAcorn size={20} className="loading-acorn-small" />
             </div>

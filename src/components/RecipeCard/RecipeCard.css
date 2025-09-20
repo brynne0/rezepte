@@ -48,11 +48,16 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease-in-out;
+  will-change: opacity;
 }
 
 .recipe-image.loading {
-  opacity: 0.3;
+  opacity: 0;
+}
+
+.recipe-image.loaded {
+  opacity: 1;
 }
 
 .recipe-image-loading {
