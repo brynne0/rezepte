@@ -1,24 +1,21 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Trash2,
   Plus,
   ArrowBigLeft,
   GripVertical,
   Link,
   NotepadText,
-  X,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
-import { formatQuantityForUnit } from "../../utils/ingredientFormatting";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
-import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
-import Selector from "../Selector/Selector";
 import ImageUpload from "../ImageUpload/ImageUpload";
 import RecipeLinkDropdown from "../RecipeLinkDropdown/RecipeLinkDropdown";
+import IngredientRow from "./IngredientRow";
+import InstructionsSection from "./InstructionsSection";
 import "./RecipeForm.css";
 
 const RecipeForm = ({
@@ -27,7 +24,7 @@ const RecipeForm = ({
   title = "",
   isEditingTranslation = false,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const {
     formData,
@@ -325,256 +322,23 @@ const RecipeForm = ({
                         type="ingredient"
                       >
                         {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={`ingredient-row ${
-                              snapshot.isDragging ? "dragging" : ""
-                            }`}
-                          >
-                            {/* Ingredient Drag Handle */}
-                            <div
-                              {...provided.dragHandleProps}
-                              className={`drag-handle ${
-                                isEditingTranslation
-                                  ? "translation-disabled"
-                                  : ""
-                              }`}
-                              style={{
-                                pointerEvents: isEditingTranslation
-                                  ? "none"
-                                  : "auto",
-                              }}
-                            >
-                              <GripVertical size={16} />
-                            </div>
-
-                            <div className="ingredient-content">
-                              {/* Ingredient Name */}
-                              <input
-                                id={`ingredient-name-ungrouped-${index}-${ingredient.tempId}`}
-                                type="text"
-                                value={ingredient.name || ""}
-                                onChange={(e) => {
-                                  handleIngredientChange(
-                                    "ungrouped",
-                                    ingredient.tempId,
-                                    "name",
-                                    e.target.value,
-                                    validationErrors.ingredients
-                                      ? "ingredients"
-                                      : null
-                                  );
-                                }}
-                                onKeyDown={(e) =>
-                                  handleIngredientFieldEnter(
-                                    e,
-                                    "name",
-                                    "ungrouped",
-                                    ingredient.tempId,
-                                    index
-                                  )
-                                }
-                                onBlur={(e) => {
-                                  const value =
-                                    i18n.language === "de"
-                                      ? e.target.value
-                                          .split(" ")
-                                          .map(
-                                            (word) =>
-                                              word.charAt(0).toUpperCase() +
-                                              word.slice(1).toLowerCase()
-                                          )
-                                          .join(" ")
-                                      : e.target.value.toLowerCase();
-
-                                  handleIngredientChange(
-                                    "ungrouped",
-                                    ingredient.tempId,
-                                    "name",
-                                    value,
-                                    validationErrors.ingredients
-                                      ? "ingredients"
-                                      : null
-                                  );
-                                }}
-                                className={`input input--full-width input--edit ${
-                                  validationErrors.ingredients
-                                    ? "input--error"
-                                    : ""
-                                }`}
-                                placeholder={t("ingredient_name")}
-                              />
-
-                              {/* Ingredient Details */}
-                              <div className="ingredient-details">
-                                <div
-                                  className={
-                                    isEditingTranslation
-                                      ? "translation-disabled"
-                                      : ""
-                                  }
-                                >
-                                  <input
-                                    id={`ingredient-quantity-ungrouped-${index}-${ingredient.tempId}`}
-                                    type="text"
-                                    value={formatQuantityForUnit(
-                                      ingredient.quantity
-                                    )}
-                                    onChange={(e) =>
-                                      handleIngredientChange(
-                                        "ungrouped",
-                                        ingredient.tempId,
-                                        "quantity",
-                                        e.target.value.toLowerCase()
-                                      )
-                                    }
-                                    onKeyDown={(e) =>
-                                      handleIngredientFieldEnter(
-                                        e,
-                                        "quantity",
-                                        "ungrouped",
-                                        ingredient.tempId,
-                                        index
-                                      )
-                                    }
-                                    className="input input--full-width input--edit"
-                                    placeholder={t("quantity")}
-                                    disabled={isEditingTranslation}
-                                    onWheel={(e) => e.target.blur()}
-                                  />
-                                </div>
-
-                                <div
-                                  className={
-                                    isEditingTranslation
-                                      ? "translation-disabled"
-                                      : ""
-                                  }
-                                >
-                                  <Selector
-                                    id={`ingredient-unit-ungrouped-${index}-${ingredient.tempId}`}
-                                    value={ingredient.unit || ""}
-                                    onChange={(value) =>
-                                      handleIngredientChange(
-                                        "ungrouped",
-                                        ingredient.tempId,
-                                        "unit",
-                                        value
-                                      )
-                                    }
-                                    onKeyDown={(e) =>
-                                      handleIngredientFieldEnter(
-                                        e,
-                                        "unit",
-                                        "ungrouped",
-                                        ingredient.tempId,
-                                        index
-                                      )
-                                    }
-                                    type="unit"
-                                    className="input--full-width"
-                                    disabled={isEditingTranslation}
-                                  />
-                                </div>
-
-                                <input
-                                  id={`ingredient-notes-ungrouped-${index}-${ingredient.tempId}`}
-                                  type="text"
-                                  value={ingredient.notes || ""}
-                                  onChange={(e) =>
-                                    handleIngredientChange(
-                                      "ungrouped",
-                                      ingredient.tempId,
-                                      "notes",
-                                      e.target.value.toLowerCase()
-                                    )
-                                  }
-                                  onKeyDown={(e) =>
-                                    handleIngredientFieldEnter(
-                                      e,
-                                      "notes",
-                                      "ungrouped",
-                                      ingredient.tempId,
-                                      index
-                                    )
-                                  }
-                                  className="input input--full-width input--edit"
-                                  placeholder={t("notes")}
-                                />
-                              </div>
-
-                              <div className="flex-row">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const linkedRecipe = getIngredientLink(
-                                      "ungrouped",
-                                      ingredient.tempId
-                                    );
-                                    if (linkedRecipe) {
-                                      removeIngredientLink(
-                                        "ungrouped",
-                                        ingredient.tempId
-                                      );
-                                    } else {
-                                      handleOpenLinkDropdown(
-                                        "ungrouped",
-                                        ingredient.tempId,
-                                        ingredient
-                                      );
-                                    }
-                                  }}
-                                  className={`btn btn-icon ${
-                                    getIngredientLink(
-                                      "ungrouped",
-                                      ingredient.tempId
-                                    )
-                                      ? "btn-icon-link linked"
-                                      : "btn-icon-link"
-                                  } ${
-                                    isEditingTranslation
-                                      ? "translation-disabled"
-                                      : ""
-                                  }`}
-                                  aria-label={
-                                    getIngredientLink(
-                                      "ungrouped",
-                                      ingredient.tempId
-                                    )
-                                      ? t("unlink_recipe")
-                                      : t("link_to_recipe")
-                                  }
-                                  disabled={isEditingTranslation}
-                                >
-                                  <Link size={16} className="link-default" />
-                                  <X size={16} className="link-hover" />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    removeIngredient(
-                                      "ungrouped",
-                                      ingredient.tempId
-                                    )
-                                  }
-                                  className={`btn btn-icon btn-icon-remove ${
-                                    isEditingTranslation
-                                      ? "translation-disabled"
-                                      : ""
-                                  }`}
-                                  aria-label={t("remove_ingredient")}
-                                  disabled={isEditingTranslation}
-                                >
-                                  <Trash2
-                                    size={16}
-                                    data-testid="remove-ingredient-btn"
-                                  />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                          <IngredientRow
+                            ingredient={ingredient}
+                            index={index}
+                            sectionId="ungrouped"
+                            validationErrors={validationErrors}
+                            isEditingTranslation={isEditingTranslation}
+                            provided={provided}
+                            snapshot={snapshot}
+                            handleIngredientChange={handleIngredientChange}
+                            handleIngredientFieldEnter={
+                              handleIngredientFieldEnter
+                            }
+                            handleOpenLinkDropdown={handleOpenLinkDropdown}
+                            removeIngredient={removeIngredient}
+                            getIngredientLink={getIngredientLink}
+                            removeIngredientLink={removeIngredientLink}
+                          />
                         )}
                       </Draggable>
                     ))}
@@ -693,288 +457,37 @@ const RecipeForm = ({
                                           type="ingredient"
                                         >
                                           {(provided, snapshot) => (
-                                            <div
-                                              ref={provided.innerRef}
-                                              {...provided.draggableProps}
-                                              className={`ingredient-row ${
-                                                snapshot.isDragging
-                                                  ? "dragging"
-                                                  : ""
-                                              }`}
-                                            >
-                                              {/* Ingredient Drag Handle */}
-                                              <div
-                                                {...provided.dragHandleProps}
-                                                className={`drag-handle ${
-                                                  isEditingTranslation
-                                                    ? "translation-disabled"
-                                                    : ""
-                                                }`}
-                                                style={{
-                                                  pointerEvents:
-                                                    isEditingTranslation
-                                                      ? "none"
-                                                      : "auto",
-                                                }}
-                                              >
-                                                <GripVertical size={16} />
-                                              </div>
-
-                                              <div className="ingredient-content">
-                                                {/* Ingredient Name */}
-                                                <input
-                                                  id={`ingredient-name-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                  type="text"
-                                                  value={ingredient.name || ""}
-                                                  onChange={(e) => {
-                                                    handleIngredientChange(
-                                                      section.id,
-                                                      ingredient.tempId,
-                                                      "name",
-                                                      e.target.value,
-                                                      validationErrors.ingredients
-                                                        ? "ingredients"
-                                                        : null
-                                                    );
-                                                  }}
-                                                  onKeyDown={(e) =>
-                                                    handleIngredientFieldEnter(
-                                                      e,
-                                                      "name",
-                                                      section.id,
-                                                      ingredient.tempId,
-                                                      ingredientIndex
-                                                    )
-                                                  }
-                                                  onBlur={(e) => {
-                                                    const value =
-                                                      i18n.language === "de"
-                                                        ? e.target.value
-                                                            .split(" ")
-                                                            .map(
-                                                              (word) =>
-                                                                word
-                                                                  .charAt(0)
-                                                                  .toUpperCase() +
-                                                                word
-                                                                  .slice(1)
-                                                                  .toLowerCase()
-                                                            )
-                                                            .join(" ")
-                                                        : e.target.value.toLowerCase();
-
-                                                    handleIngredientChange(
-                                                      section.id,
-                                                      ingredient.tempId,
-                                                      "name",
-                                                      value,
-                                                      validationErrors.ingredients
-                                                        ? "ingredients"
-                                                        : null
-                                                    );
-                                                  }}
-                                                  className={`input input--full-width input--edit ${
-                                                    validationErrors.ingredients
-                                                      ? "input--error"
-                                                      : ""
-                                                  } `}
-                                                  placeholder={t(
-                                                    "ingredient_name"
-                                                  )}
-                                                />
-
-                                                {/* Ingredient Details */}
-                                                <div className="ingredient-details">
-                                                  <div
-                                                    className={
-                                                      isEditingTranslation
-                                                        ? "translation-disabled"
-                                                        : ""
-                                                    }
-                                                  >
-                                                    <input
-                                                      id={`ingredient-quantity-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                      type="text"
-                                                      value={formatQuantityForUnit(
-                                                        ingredient.quantity
-                                                      )}
-                                                      onChange={(e) =>
-                                                        handleIngredientChange(
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          "quantity",
-                                                          e.target.value.toLowerCase()
-                                                        )
-                                                      }
-                                                      className="input input--full-width input--edit"
-                                                      placeholder={t(
-                                                        "quantity"
-                                                      )}
-                                                      disabled={
-                                                        isEditingTranslation
-                                                      }
-                                                      onKeyDown={(e) =>
-                                                        handleIngredientFieldEnter(
-                                                          e,
-                                                          "quantity",
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          ingredientIndex
-                                                        )
-                                                      }
-                                                      onWheel={(e) =>
-                                                        e.target.blur()
-                                                      }
-                                                    />
-                                                  </div>
-
-                                                  <div
-                                                    className={
-                                                      isEditingTranslation
-                                                        ? "translation-disabled"
-                                                        : ""
-                                                    }
-                                                  >
-                                                    <Selector
-                                                      id={`ingredient-unit-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                      value={
-                                                        ingredient.unit || ""
-                                                      }
-                                                      onChange={(unitValue) =>
-                                                        handleIngredientChange(
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          "unit",
-                                                          unitValue
-                                                        )
-                                                      }
-                                                      type="unit"
-                                                      onKeyDown={(e) =>
-                                                        handleIngredientFieldEnter(
-                                                          e,
-                                                          "unit",
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          ingredientIndex
-                                                        )
-                                                      }
-                                                      className="input--full-width"
-                                                      disabled={
-                                                        isEditingTranslation
-                                                      }
-                                                    />
-                                                  </div>
-
-                                                  <input
-                                                    id={`ingredient-notes-${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                                    type="text"
-                                                    value={
-                                                      ingredient.notes || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      handleIngredientChange(
-                                                        section.id,
-                                                        ingredient.tempId,
-                                                        "notes",
-                                                        e.target.value.toLowerCase()
-                                                      )
-                                                    }
-                                                    onKeyDown={(e) =>
-                                                      handleIngredientFieldEnter(
-                                                        e,
-                                                        "notes",
-                                                        section.id,
-                                                        ingredient.tempId,
-                                                        ingredientIndex
-                                                      )
-                                                    }
-                                                    className="input input--full-width input--edit"
-                                                    placeholder={t("notes")}
-                                                  />
-                                                </div>
-
-                                                <div className="flex-row">
-                                                  <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                      const linkedRecipe =
-                                                        getIngredientLink(
-                                                          section.id,
-                                                          ingredient.tempId
-                                                        );
-                                                      if (linkedRecipe) {
-                                                        removeIngredientLink(
-                                                          section.id,
-                                                          ingredient.tempId
-                                                        );
-                                                      } else {
-                                                        handleOpenLinkDropdown(
-                                                          section.id,
-                                                          ingredient.tempId,
-                                                          ingredient
-                                                        );
-                                                      }
-                                                    }}
-                                                    className={`btn btn-icon ${
-                                                      getIngredientLink(
-                                                        section.id,
-                                                        ingredient.tempId
-                                                      )
-                                                        ? "btn-icon-link linked"
-                                                        : "btn-icon-link"
-                                                    } ${
-                                                      isEditingTranslation
-                                                        ? "translation-disabled"
-                                                        : ""
-                                                    }`}
-                                                    aria-label={
-                                                      getIngredientLink(
-                                                        section.id,
-                                                        ingredient.tempId
-                                                      )
-                                                        ? t("unlink_recipe")
-                                                        : t("link_to_recipe")
-                                                    }
-                                                    disabled={
-                                                      isEditingTranslation
-                                                    }
-                                                  >
-                                                    <Link
-                                                      size={16}
-                                                      className="link-default"
-                                                    />
-                                                    <X
-                                                      size={16}
-                                                      className="link-hover"
-                                                    />
-                                                  </button>
-
-                                                  <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                      removeIngredient(
-                                                        section.id,
-                                                        ingredient.tempId
-                                                      )
-                                                    }
-                                                    className={`btn btn-icon btn-icon-remove ${
-                                                      isEditingTranslation
-                                                        ? "translation-disabled"
-                                                        : ""
-                                                    }`}
-                                                    aria-label={t(
-                                                      "remove_ingredient"
-                                                    )}
-                                                    disabled={
-                                                      isEditingTranslation
-                                                    }
-                                                    data-testid={`remove-section-ingredient-btn-${section.id}-${ingredient.tempId}`}
-                                                  >
-                                                    <Trash2 size={16} />
-                                                  </button>
-                                                </div>
-                                              </div>
-                                            </div>
+                                            <IngredientRow
+                                              ingredient={ingredient}
+                                              index={ingredientIndex}
+                                              sectionId={section.id}
+                                              validationErrors={
+                                                validationErrors
+                                              }
+                                              isEditingTranslation={
+                                                isEditingTranslation
+                                              }
+                                              provided={provided}
+                                              snapshot={snapshot}
+                                              handleIngredientChange={
+                                                handleIngredientChange
+                                              }
+                                              handleIngredientFieldEnter={
+                                                handleIngredientFieldEnter
+                                              }
+                                              handleOpenLinkDropdown={
+                                                handleOpenLinkDropdown
+                                              }
+                                              removeIngredient={
+                                                removeIngredient
+                                              }
+                                              getIngredientLink={
+                                                getIngredientLink
+                                              }
+                                              removeIngredientLink={
+                                                removeIngredientLink
+                                              }
+                                            />
                                           )}
                                         </Draggable>
                                       )
@@ -1022,105 +535,14 @@ const RecipeForm = ({
           </div>
 
           {/* Instructions */}
-          <div className="form-group">
-            <label className="form-header ">
-              <h3>{t("instructions")}</h3>
-            </label>
-
-            <Droppable droppableId="instructions" type="instruction">
-              {(provided, snapshot) => (
-                <div
-                  className={`flex-column instructions-list ${
-                    snapshot.isDraggingOver ? "drag-over" : ""
-                  }`}
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {formData.instructions.map((instruction, index) => (
-                    <Draggable
-                      key={index}
-                      draggableId={`instruction-${index}`}
-                      index={index}
-                      type="instruction"
-                      isDragDisabled={isEditingTranslation}
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className={`instruction-row ${
-                            snapshot.isDragging ? "dragging" : ""
-                          }`}
-                        >
-                          <div className="flex-column">
-                            {/* Step Number */}
-                            <span className="step-number">{index + 1}.</span>
-
-                            {/* Instruction Drag Handle */}
-                            <div
-                              {...provided.dragHandleProps}
-                              className={`drag-handle ${
-                                isEditingTranslation
-                                  ? "translation-disabled"
-                                  : ""
-                              }`}
-                              style={{
-                                pointerEvents: isEditingTranslation
-                                  ? "none"
-                                  : "auto",
-                              }}
-                            >
-                              <GripVertical size={16} />
-                            </div>
-                          </div>
-                          <AutoResizeTextArea
-                            value={instruction}
-                            onChange={(e) =>
-                              handleInstructionChange(index, e.target.value)
-                            }
-                            onKeyDown={handleEnter}
-                            className="input input--full-width input--textarea input--edit "
-                          />
-
-                          <button
-                            type="button"
-                            onClick={() => removeInstruction(index)}
-                            className={`btn btn-icon btn-icon-remove ${
-                              isEditingTranslation ? "translation-disabled" : ""
-                            }`}
-                            aria-label={t("remove_instruction")}
-                            disabled={isEditingTranslation}
-                          >
-                            <Trash2
-                              size={16}
-                              data-testid="remove-instruction-btn"
-                            />
-                          </button>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-            <div className="action-buttons-icon">
-              <button
-                type="button"
-                onClick={addInstruction}
-                className={`btn btn-icon btn-icon-green ${
-                  isEditingTranslation ? "translation-disabled" : ""
-                }`}
-                disabled={isEditingTranslation}
-              >
-                <Plus
-                  size={16}
-                  data-testid="add-instruction-btn"
-                  aria-label={t("add_instruction")}
-                />
-              </button>
-            </div>
-          </div>
+          <InstructionsSection
+            instructions={formData.instructions}
+            isEditingTranslation={isEditingTranslation}
+            handleInstructionChange={handleInstructionChange}
+            handleEnter={handleEnter}
+            removeInstruction={removeInstruction}
+            addInstruction={addInstruction}
+          />
         </DragDropContext>
 
         {/* Recipe Images */}

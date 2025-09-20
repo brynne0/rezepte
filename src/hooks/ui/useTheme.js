@@ -25,7 +25,7 @@ export const useTheme = () => {
 
     // Update theme-color meta tag for mobile browsers
     const updateThemeColor = () => {
-      const themeColor = theme === "dark" ? "#55443c" : "#f2e7d2";
+      const themeColor = theme === "dark" ? "#342a24" : "#f2e7d2";
 
       // Remove existing theme-color meta tags
       const existingTags = document.querySelectorAll(

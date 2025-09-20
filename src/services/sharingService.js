@@ -145,7 +145,7 @@ export const fetchSharedRecipe = async (shareToken) => {
       .from("recipes")
       .select(
         `*, 
-         recipe_ingredients(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural, name_overrides),
+         recipe_ingredients!recipe_ingredients_recipe_id_fkey(id, quantity, unit, ingredients(id, singular_name, plural_name, translated_names), notes, subheading, order_index, is_plural, name_overrides, linked_recipe_id, linked_recipe:recipes!linked_recipe_id(id, title, slug)),
          recipe_categories(categoriy_id, categories(name, translated_category))`
       )
       .eq("share_token", shareToken)
@@ -177,6 +177,8 @@ export const fetchSharedRecipe = async (shareToken) => {
             subheading: item.subheading,
             order_index: item.order_index,
             is_plural: item.is_plural,
+            linked_recipe_id: item.linked_recipe_id,
+            linked_recipe: item.linked_recipe,
           };
         }) || [];
 
