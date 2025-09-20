@@ -426,7 +426,7 @@ const RecipeForm = ({
                                         "ungrouped",
                                         ingredient.tempId,
                                         "quantity",
-                                        e.target.value
+                                        e.target.value.toLowerCase()
                                       )
                                     }
                                     onKeyDown={(e) =>
@@ -803,7 +803,7 @@ const RecipeForm = ({
                                                           section.id,
                                                           ingredient.tempId,
                                                           "quantity",
-                                                          e.target.value
+                                                          e.target.value.toLowerCase()
                                                         )
                                                       }
                                                       className="input input--full-width input--edit"
