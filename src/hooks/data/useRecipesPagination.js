@@ -34,7 +34,8 @@ export const useRecipesPagination = (
               name,
               translated_category
             )
-          )
+          ),
+          recipe_ingredients!recipe_ingredients_recipe_id_fkey(id)
         `
         )
         .order("created_at", { ascending: false });
@@ -52,11 +53,12 @@ export const useRecipesPagination = (
 
       if (error) throw error;
 
-      // Transform the data to include category names
+      // Transform the data to include category names and ingredient flag
       return recipes.map((recipe) => ({
         ...recipe,
         categories:
           recipe.recipe_categories?.map((rc) => rc.categories?.name) || [],
+        hasIngredients: recipe.recipe_ingredients?.length > 0,
       }));
     } catch (error) {
       console.error("Error fetching recipes with categories:", error);

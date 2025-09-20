@@ -5,6 +5,13 @@ import RecipeCard from "./RecipeCard";
 // Mock the CSS import
 vi.mock("./RecipeCard.css", () => ({}));
 
+// Mock useAuth hook
+vi.mock("../../hooks/data/useAuth", () => ({
+  useAuth: () => ({
+    isLoggedIn: true, // Default to logged in for tests
+  }),
+}));
+
 describe("RecipeCard", () => {
   const mockRecipe = {
     id: 1,
@@ -203,6 +210,7 @@ describe("RecipeCard", () => {
         id: 1,
         title: "Empty Recipe",
         source: "https://example.com",
+        hasIngredients: false,
       };
 
       render(<RecipeCard recipe={emptyRecipeWithLink} onClick={mockOnClick} />);
@@ -212,61 +220,16 @@ describe("RecipeCard", () => {
       ).toBeInTheDocument();
     });
 
-    it("does not show link when recipe has ingredients (legacy format)", () => {
+    it("does not show link when recipe has ingredients", () => {
       const recipeWithIngredients = {
         id: 1,
         title: "Recipe with Ingredients",
         source: "https://example.com",
-        ingredients: [{ id: 1, name: "flour" }],
+        hasIngredients: true,
       };
 
       render(
         <RecipeCard recipe={recipeWithIngredients} onClick={mockOnClick} />
-      );
-
-      expect(
-        screen.queryByRole("link", { name: "open_recipe_source_link" })
-      ).not.toBeInTheDocument();
-    });
-
-    it("does not show link when recipe has ungrouped ingredients", () => {
-      const recipeWithUngroupedIngredients = {
-        id: 1,
-        title: "Recipe with Ungrouped Ingredients",
-        source: "https://example.com",
-        ungroupedIngredients: [{ id: 1, name: "sugar" }],
-      };
-
-      render(
-        <RecipeCard
-          recipe={recipeWithUngroupedIngredients}
-          onClick={mockOnClick}
-        />
-      );
-
-      expect(
-        screen.queryByRole("link", { name: "open_recipe_source_link" })
-      ).not.toBeInTheDocument();
-    });
-
-    it("does not show link when recipe has ingredient sections", () => {
-      const recipeWithIngredientSections = {
-        id: 1,
-        title: "Recipe with Ingredient Sections",
-        source: "https://example.com",
-        ingredientSections: [
-          {
-            subheading: "Dry ingredients",
-            ingredients: [{ id: 1, name: "flour" }],
-          },
-        ],
-      };
-
-      render(
-        <RecipeCard
-          recipe={recipeWithIngredientSections}
-          onClick={mockOnClick}
-        />
       );
 
       expect(
@@ -296,7 +259,7 @@ describe("RecipeCard", () => {
         id: 1,
         title: "Complete Recipe",
         source: "https://example.com",
-        ingredients: [{ id: 1, name: "flour" }],
+        hasIngredients: true,
         instructions: ["Mix ingredients", "Bake for 20 minutes"],
       };
 
@@ -307,18 +270,16 @@ describe("RecipeCard", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("shows link when recipe has empty arrays for ingredients and instructions", () => {
-      const emptyArraysRecipe = {
+    it("shows link when recipe has no ingredients and no instructions", () => {
+      const emptyRecipe = {
         id: 1,
-        title: "Recipe with Empty Arrays",
+        title: "Empty Recipe",
         source: "https://example.com",
-        ingredients: [],
-        ungroupedIngredients: [],
-        ingredientSections: [],
+        hasIngredients: false,
         instructions: [],
       };
 
-      render(<RecipeCard recipe={emptyArraysRecipe} onClick={mockOnClick} />);
+      render(<RecipeCard recipe={emptyRecipe} onClick={mockOnClick} />);
 
       expect(
         screen.getByRole("link", { name: "open_recipe_source_link" })

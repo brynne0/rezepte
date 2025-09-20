@@ -85,6 +85,7 @@
   "loading_recipes": "Lade Rezepte...",
   "welcome_add_recipe": "Willkommen! Klicken Sie auf das +, um Ihr erstes Rezept hinzuzufügen",
   "logged_in_note": "Meine Rezepte sind beim Anmelden nicht verfügbar, loggen Sie sich aus, um sie zu sehen",
+  "no_internet_connection": "Keine Internetverbindung",
 
   "servings": "Portionen",
   "ingredients": "Zutaten",

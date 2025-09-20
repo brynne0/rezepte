@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Share2, Copy, Check, Trash2 } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import {
   createShareLink,
   stopSharing,

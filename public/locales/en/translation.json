@@ -85,6 +85,7 @@
   "loading_recipes": "Loading recipes...",
   "welcome_add_recipe": "Welcome! Click the + to add your first recipe",
   "logged_in_note": "My recipes aren't available when logged in, log out to see them",
+  "no_internet_connection": "No internet connection",
 
   "servings": "Servings",
   "ingredients": "Ingredients",

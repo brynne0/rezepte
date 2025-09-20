@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
+import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 import "./RecipeList.css";
 
 const RecipeList = ({
@@ -13,6 +14,7 @@ const RecipeList = ({
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const isOnline = useOnlineStatus();
 
   // If using pagination, recipes are already filtered on the server side
   // Otherwise, apply client-side filtering for backward compatibility
@@ -55,10 +57,16 @@ const RecipeList = ({
       {totalRecipeCount === 0 && !searchTerm && (
         <div className="page-centered no-gap">
           <div className="card welcome-card">
-            <p>{t("welcome_add_recipe")}</p>
-            <p className="grey-small">
-              <strong>{t("note")}:</strong> {t("logged_in_note")}
-            </p>
+            {!isOnline ? (
+              <p>{t("no_internet_connection")}</p>
+            ) : (
+              <>
+                <p>{t("welcome_add_recipe")}</p>
+                <p className="grey-small">
+                  <strong>{t("note")}:</strong> {t("logged_in_note")}
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}
