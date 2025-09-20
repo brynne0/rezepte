@@ -44,8 +44,12 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title_asc");
   const [showImages, setShowImages] = useState(() => {
-    const stored = localStorage.getItem("showImages");
-    return stored !== null ? JSON.parse(stored) : true;
+    try {
+      const stored = localStorage.getItem("showImages");
+      return stored !== null ? JSON.parse(stored) : true;
+    } catch {
+      return true;
+    }
   });
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
@@ -166,7 +170,11 @@ function AppRoutes(props) {
 
   // Persist showImages preference to localStorage
   useEffect(() => {
-    localStorage.setItem("showImages", JSON.stringify(showImages));
+    try {
+      localStorage.setItem("showImages", JSON.stringify(showImages));
+    } catch {
+      // localStorage not available
+    }
   }, [showImages]);
 
   // Scroll to top on all navigation

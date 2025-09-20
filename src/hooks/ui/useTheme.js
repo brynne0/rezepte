@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 
 export const useTheme = () => {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved) return saved;
+    try {
+      const saved = localStorage.getItem("theme");
+      if (saved) return saved;
+    } catch {
+      // localStorage not available (private browsing, file:// protocol, etc.)
+    }
 
     // Default to system preference on first visit
     return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -12,7 +16,11 @@ export const useTheme = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem("theme", theme);
+    try {
+      localStorage.setItem("theme", theme);
+    } catch {
+      // localStorage not available (private browsing, file:// protocol, etc.)
+    }
     document.documentElement.setAttribute("data-theme", theme);
 
     // Update theme-color meta tag for mobile browsers

@@ -260,8 +260,12 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
       setLoading(false);
 
       // Clear any local storage or session data
-      localStorage.clear();
-      sessionStorage.clear();
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch {
+        // Storage not available
+      }
     } catch (err) {
       console.error("Failed to delete account:", err);
       setError(t("delete_account_error"));
