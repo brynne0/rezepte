@@ -19,6 +19,9 @@ import {
 // i18n
 import { useTranslation } from "react-i18next";
 
+// Hooks
+import { useOnlineStatus } from "./hooks/ui/useOnlineStatus";
+
 // Components
 import Header from "./components/Header/Header";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
@@ -45,8 +48,12 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title_asc");
   const [showImages, setShowImages] = useState(() => {
-    const stored = localStorage.getItem("showImages");
-    return stored !== null ? JSON.parse(stored) : true;
+    try {
+      const stored = localStorage.getItem("showImages");
+      return stored !== null ? JSON.parse(stored) : false;
+    } catch {
+      return false;
+    }
   });
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
@@ -137,6 +144,7 @@ function AppRoutes(props) {
     isLoggedIn,
   } = props;
   const isGroceryListPage = location.pathname === "/grocery-list";
+  const isOnline = useOnlineStatus();
 
   // Reset grocery list editing state when leaving the grocery list page
   useEffect(() => {
@@ -167,7 +175,11 @@ function AppRoutes(props) {
 
   // Persist showImages preference to localStorage
   useEffect(() => {
-    localStorage.setItem("showImages", JSON.stringify(showImages));
+    try {
+      localStorage.setItem("showImages", JSON.stringify(showImages));
+    } catch {
+      // localStorage not available
+    }
   }, [showImages]);
 
   // Scroll to top on all navigation
@@ -196,12 +208,14 @@ function AppRoutes(props) {
           path="/"
           element={
             <>
-              <CategoryFilter
-                categories={props.categories}
-                selectedCategory={props.selectedCategory}
-                setSelectedCategory={props.setSelectedCategory}
-                setSearchTerm={props.setSearchTerm}
-              />
+              {isOnline && (
+                <CategoryFilter
+                  categories={props.categories}
+                  selectedCategory={props.selectedCategory}
+                  setSelectedCategory={props.setSelectedCategory}
+                  setSearchTerm={props.setSearchTerm}
+                />
+              )}
               <RecipeList
                 selectedCategory={props.selectedCategory}
                 recipes={props.recipes}
@@ -210,13 +224,15 @@ function AppRoutes(props) {
                 totalRecipeCount={props.totalRecipeCount}
                 isPaginated={true}
               />
-              <Pagination
-                currentPage={props.paginationInfo.currentPage}
-                totalPages={props.paginationInfo.totalPages}
-                onPageChange={props.onPageChange}
-                hasNextPage={props.paginationInfo.hasNextPage}
-                hasPrevPage={props.paginationInfo.hasPrevPage}
-              />
+              {isOnline && (
+                <Pagination
+                  currentPage={props.paginationInfo.currentPage}
+                  totalPages={props.paginationInfo.totalPages}
+                  onPageChange={props.onPageChange}
+                  hasNextPage={props.paginationInfo.hasNextPage}
+                  hasPrevPage={props.paginationInfo.hasPrevPage}
+                />
+              )}
             </>
           }
         />

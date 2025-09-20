@@ -220,9 +220,10 @@ describe("useTheme Hook", () => {
     });
     mockMatchMedia.mockReturnValue({ matches: false });
 
-    expect(() => {
-      renderHook(() => useTheme());
-    }).toThrow("localStorage error");
+    const { result } = renderHook(() => useTheme());
+
+    // Should not throw and should fall back to system preference
+    expect(result.current.theme).toBe("light");
   });
 
   test("theme state updates trigger useEffect", () => {

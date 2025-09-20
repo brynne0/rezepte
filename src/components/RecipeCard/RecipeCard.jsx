@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../hooks/data/useAuth";
 import {
   getMainImage,
   getOptimizedImageUrl,
@@ -10,20 +11,24 @@ import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
-  const [imageLoading, setImageLoading] = useState(true);
+  const { isLoggedIn } = useAuth();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Get main image
   const mainImage = getMainImage(recipe.images);
 
+  // Only show images if user is logged in AND showImages is true
+  const shouldShowImages = isLoggedIn && showImages;
+
   const handleImageLoad = () => {
-    // Add a minimum loading time so users can see the loading state
-    setTimeout(() => {
-      setImageLoading(false);
-    }, 300); // Minimum 300ms loading display
+    setImageLoaded(true);
+    setImageError(false);
   };
 
   const handleImageError = () => {
-    setImageLoading(false);
+    setImageLoaded(false);
+    setImageError(true);
   };
 
   // Check if recipe has a source link
@@ -34,15 +39,9 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
       recipe.source.startsWith("www."));
 
   // Check if recipe has no content (no ingredients and no instructions)
-  const hasNoIngredients =
-    (!recipe.ingredients || recipe.ingredients.length === 0) &&
-    (!recipe.ungroupedIngredients ||
-      recipe.ungroupedIngredients.length === 0) &&
-    (!recipe.ingredientSections || recipe.ingredientSections.length === 0);
-
+  const hasNoIngredients = !recipe.hasIngredients;
   const hasNoInstructions =
     !recipe.instructions || recipe.instructions.length === 0;
-
   const hasNoContent = hasNoIngredients && hasNoInstructions;
 
   return (
@@ -66,20 +65,22 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           </a>
         )}
       </div>
-      {showImages && mainImage && (
+      {shouldShowImages && mainImage && !imageError && (
         <div className="recipe-image-container">
           <img
-            className={`recipe-image ${imageLoading ? "loading" : ""}`}
+            className={`recipe-image ${imageLoaded ? "loaded" : "loading"}`}
             src={getOptimizedImageUrl(mainImage.url, {
               width: 300,
               height: 200,
+              quality: 75,
             })}
             alt={recipe.title}
             loading="lazy"
             onLoad={handleImageLoad}
             onError={handleImageError}
+            key={mainImage.id}
           />
-          {imageLoading && (
+          {!imageLoaded && (
             <div className="recipe-image-loading">
               <LoadingAcorn size={20} className="loading-acorn-small" />
             </div>

@@ -11,13 +11,27 @@ i18n
   .init({
     fallbackLng: "en",
     detection: {
-      order: ["localStorage", "navigator", "htmlTag"],
+      order: ["localStorage", "htmlTag", "navigator"],
       caches: ["localStorage"],
       lookupLocalStorage: "i18nextLng",
+      convertDetectedLanguage: (lng) => {
+        // Normalize language codes: en-AU, en-US -> en, de-DE -> de
+        if (lng && lng.includes("-")) {
+          return lng.split("-")[0];
+        }
+        return lng;
+      },
     },
     interpolation: {
       escapeValue: false,
     },
   });
+
+// Manually update HTML lang attribute on language change
+i18n.on("languageChanged", (lng) => {
+  if (typeof document !== "undefined") {
+    document.documentElement.lang = lng;
+  }
+});
 
 export default i18n;
