@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import RecipeList from "./RecipeList";
+import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 
 // Mock dependencies
 vi.mock("react-router-dom", async () => {
@@ -24,6 +25,10 @@ vi.mock("../RecipeCard/RecipeCard", () => ({
 }));
 
 vi.mock("./RecipeList.css", () => ({}));
+
+vi.mock("../../hooks/ui/useOnlineStatus", () => ({
+  useOnlineStatus: vi.fn(),
+}));
 
 const mockNavigate = vi.fn();
 
@@ -51,6 +56,8 @@ describe("RecipeList", () => {
 
   beforeEach(() => {
     mockNavigate.mockClear();
+    // Default to online unless specifically testing offline
+    useOnlineStatus.mockReturnValue(true);
   });
 
   const renderComponent = (props = {}) => {
@@ -114,5 +121,100 @@ describe("RecipeList", () => {
     fireEvent.click(recipeCard);
 
     expect(mockNavigate).toHaveBeenCalledWith("/1/chocolate-cookies");
+  });
+
+  describe("Offline functionality", () => {
+    it("shows welcome message when online and no recipes", () => {
+      useOnlineStatus.mockReturnValue(true);
+
+      renderComponent({
+        recipes: [],
+        totalRecipeCount: 0,
+        searchTerm: "",
+      });
+
+      expect(screen.getByText("welcome_add_recipe")).toBeInTheDocument();
+      expect(screen.getByText("logged_in_note")).toBeInTheDocument();
+      expect(
+        screen.queryByText("no_internet_connection")
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows no internet connection message when offline and no recipes", () => {
+      useOnlineStatus.mockReturnValue(false);
+
+      renderComponent({
+        recipes: [],
+        totalRecipeCount: 0,
+        searchTerm: "",
+      });
+
+      expect(screen.getByText("no_internet_connection")).toBeInTheDocument();
+      expect(screen.queryByText("welcome_add_recipe")).not.toBeInTheDocument();
+      expect(screen.queryByText("logged_in_note")).not.toBeInTheDocument();
+    });
+
+    it("does not show offline message when there are recipes", () => {
+      useOnlineStatus.mockReturnValue(false);
+
+      renderComponent({
+        recipes: mockRecipes,
+        totalRecipeCount: 3,
+        searchTerm: "",
+      });
+
+      expect(
+        screen.queryByText("no_internet_connection")
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("welcome_add_recipe")).not.toBeInTheDocument();
+      // Should still show recipes
+      expect(screen.getByTestId("recipe-card-1")).toBeInTheDocument();
+    });
+
+    it("does not show offline message when searching", () => {
+      useOnlineStatus.mockReturnValue(false);
+
+      renderComponent({
+        recipes: [],
+        totalRecipeCount: 0,
+        searchTerm: "test",
+      });
+
+      expect(
+        screen.queryByText("no_internet_connection")
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("welcome_add_recipe")).not.toBeInTheDocument();
+      // Should show search no results message instead
+      expect(screen.getByText("no_recipes_found")).toBeInTheDocument();
+    });
+
+    it("shows appropriate message when going from online to offline", () => {
+      useOnlineStatus.mockReturnValue(true);
+
+      const { rerender } = renderComponent({
+        recipes: [],
+        totalRecipeCount: 0,
+        searchTerm: "",
+      });
+
+      expect(screen.getByText("welcome_add_recipe")).toBeInTheDocument();
+
+      // Switch to offline
+      useOnlineStatus.mockReturnValue(false);
+
+      rerender(
+        <MemoryRouter>
+          <RecipeList
+            selectedCategory="all"
+            recipes={[]}
+            searchTerm=""
+            totalRecipeCount={0}
+          />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByText("no_internet_connection")).toBeInTheDocument();
+      expect(screen.queryByText("welcome_add_recipe")).not.toBeInTheDocument();
+    });
   });
 });
