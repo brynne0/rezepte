@@ -53,7 +53,7 @@
 }
 
 .recipe-image.loading {
-  opacity: 0;
+  opacity: 0.3;
 }
 
 .recipe-image.loaded {
