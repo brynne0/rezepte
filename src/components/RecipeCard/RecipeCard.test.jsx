@@ -5,6 +5,13 @@ import RecipeCard from "./RecipeCard";
 // Mock the CSS import
 vi.mock("./RecipeCard.css", () => ({}));
 
+// Mock useAuth hook
+vi.mock("../../hooks/data/useAuth", () => ({
+  useAuth: () => ({
+    isLoggedIn: true, // Default to logged in for tests
+  }),
+}));
+
 describe("RecipeCard", () => {
   const mockRecipe = {
     id: 1,

@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../hooks/data/useAuth";
 import {
   getMainImage,
   getOptimizedImageUrl,
@@ -10,10 +11,14 @@ import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
+  const { isLoggedIn } = useAuth();
   const [imageLoading, setImageLoading] = useState(true);
 
   // Get main image
   const mainImage = getMainImage(recipe.images);
+
+  // Only show images if user is logged in AND showImages is true
+  const shouldShowImages = isLoggedIn && showImages;
 
   const handleImageLoad = () => {
     // Add a minimum loading time so users can see the loading state
@@ -66,7 +71,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           </a>
         )}
       </div>
-      {showImages && mainImage && (
+      {shouldShowImages && mainImage && (
         <div className="recipe-image-container">
           <img
             className={`recipe-image ${imageLoading ? "loading" : ""}`}
