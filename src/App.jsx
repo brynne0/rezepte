@@ -46,9 +46,9 @@ function App() {
   const [showImages, setShowImages] = useState(() => {
     try {
       const stored = localStorage.getItem("showImages");
-      return stored !== null ? JSON.parse(stored) : true;
+      return stored !== null ? JSON.parse(stored) : false;
     } catch {
-      return true;
+      return false;
     }
   });
   const [loginMessage, setLoginMessage] = useState("");
