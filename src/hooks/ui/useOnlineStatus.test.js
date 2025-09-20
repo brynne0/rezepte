@@ -14,12 +14,12 @@ describe("useOnlineStatus Hook", () => {
     // Mock event listeners
     mockAddEventListener = vi.fn();
     mockRemoveEventListener = vi.fn();
-    
+
     Object.defineProperty(window, "addEventListener", {
       value: mockAddEventListener,
       writable: true,
     });
-    
+
     Object.defineProperty(window, "removeEventListener", {
       value: mockRemoveEventListener,
       writable: true,
@@ -61,8 +61,14 @@ describe("useOnlineStatus Hook", () => {
     renderHook(() => useOnlineStatus());
 
     expect(mockAddEventListener).toHaveBeenCalledTimes(2);
-    expect(mockAddEventListener).toHaveBeenCalledWith("online", expect.any(Function));
-    expect(mockAddEventListener).toHaveBeenCalledWith("offline", expect.any(Function));
+    expect(mockAddEventListener).toHaveBeenCalledWith(
+      "online",
+      expect.any(Function)
+    );
+    expect(mockAddEventListener).toHaveBeenCalledWith(
+      "offline",
+      expect.any(Function)
+    );
   });
 
   test("removes event listeners on unmount", () => {
@@ -71,8 +77,14 @@ describe("useOnlineStatus Hook", () => {
     unmount();
 
     expect(mockRemoveEventListener).toHaveBeenCalledTimes(2);
-    expect(mockRemoveEventListener).toHaveBeenCalledWith("online", expect.any(Function));
-    expect(mockRemoveEventListener).toHaveBeenCalledWith("offline", expect.any(Function));
+    expect(mockRemoveEventListener).toHaveBeenCalledWith(
+      "online",
+      expect.any(Function)
+    );
+    expect(mockRemoveEventListener).toHaveBeenCalledWith(
+      "offline",
+      expect.any(Function)
+    );
   });
 
   test("updates state when online event is fired", () => {
@@ -82,12 +94,12 @@ describe("useOnlineStatus Hook", () => {
     });
 
     const { result } = renderHook(() => useOnlineStatus());
-    
+
     expect(result.current).toBe(false);
 
     // Get the online event handler
     const onlineHandler = mockAddEventListener.mock.calls.find(
-      call => call[0] === "online"
+      (call) => call[0] === "online"
     )[1];
 
     act(() => {
@@ -104,12 +116,12 @@ describe("useOnlineStatus Hook", () => {
     });
 
     const { result } = renderHook(() => useOnlineStatus());
-    
+
     expect(result.current).toBe(true);
 
     // Get the offline event handler
     const offlineHandler = mockAddEventListener.mock.calls.find(
-      call => call[0] === "offline"
+      (call) => call[0] === "offline"
     )[1];
 
     act(() => {
@@ -126,15 +138,15 @@ describe("useOnlineStatus Hook", () => {
     });
 
     const { result } = renderHook(() => useOnlineStatus());
-    
+
     expect(result.current).toBe(true);
 
     // Get the event handlers
     const onlineHandler = mockAddEventListener.mock.calls.find(
-      call => call[0] === "online"
+      (call) => call[0] === "online"
     )[1];
     const offlineHandler = mockAddEventListener.mock.calls.find(
-      call => call[0] === "offline"
+      (call) => call[0] === "offline"
     )[1];
 
     // Go offline
