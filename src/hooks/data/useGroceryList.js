@@ -7,6 +7,7 @@ import {
   removeFromGroceryList,
 } from "../../services/groceryListService";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "./useAuth";
 
 export const useGroceryList = () => {
   const [groceryList, setGroceryList] = useState([]);
@@ -16,6 +17,7 @@ export const useGroceryList = () => {
   const [addingToGroceryList, setAddingToGroceryList] = useState(false);
   const [error, setError] = useState(null);
   const { i18n } = useTranslation();
+  const { isLoggedIn } = useAuth();
 
   // Handle checkbox change
   const handleCheckboxChange = (ingredientId) => {
@@ -27,6 +29,11 @@ export const useGroceryList = () => {
 
   // Load grocery list from database on mount
   useEffect(() => {
+    // Only load grocery list if user is authenticated
+    if (!isLoggedIn) {
+      return;
+    }
+
     const loadGroceryList = async () => {
       try {
         setLoading(true);
@@ -43,7 +50,7 @@ export const useGroceryList = () => {
     };
 
     loadGroceryList();
-  }, [i18n.language]);
+  }, [i18n.language, isLoggedIn]);
 
   // Update grocery list
   const handleUpdateGroceryList = async (updatedList) => {
