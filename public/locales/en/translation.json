@@ -190,6 +190,12 @@
   "add_instruction": "Add instruction",
   "remove_instruction": "Remove instruction",
 
+  "autofill_recipe": "Autofill Recipe",
+  "paste_recipe_placeholder": "Paste recipe here in any format",
+  "parsing": "Parsing",
+  "paste_text_required": "Please paste recipe text first",
+  "parse_error": "Failed to parse recipe. Please check the format and try again.",
+
   "link_to_recipe": "Link to Recipe",
   "unlink_recipe": "Remove link",
   "search_recipes": "Search recipes...",

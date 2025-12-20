@@ -6,6 +6,7 @@ import {
   GripVertical,
   Link,
   NotepadText,
+  Clipboard,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
@@ -17,6 +18,7 @@ import RecipeLinkDropdown from "../RecipeLinkDropdown/RecipeLinkDropdown";
 import IngredientRow from "./IngredientRow";
 import InstructionsSection from "./InstructionsSection";
 import "./RecipeForm.css";
+import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 
 const RecipeForm = ({
   categories,
@@ -25,6 +27,128 @@ const RecipeForm = ({
   isEditingTranslation = false,
 }) => {
   const { t } = useTranslation();
+
+  // Paste text
+  const [pastedText, setPastedText] = useState("");
+  const [isParsing, setIsParsing] = useState(false);
+  const [showPasteArea, setShowPasteArea] = useState(false);
+  const [parseError, setParseError] = useState("");
+
+  const parseRecipeWithAI = async () => {
+    if (!pastedText.trim()) {
+      setParseError(t("paste_text_required"));
+      return;
+    }
+
+    setIsParsing(true);
+    setParseError("");
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [
+            {
+              role: "user",
+              content: `Parse this recipe and extract the information in JSON format. Return ONLY valid JSON with no markdown formatting or explanation.
+
+Recipe text:
+${pastedText}
+
+Return JSON with this exact structure:
+{
+  "title": "recipe title",
+  "servings": "number of servings",
+  "ingredients": [
+    {"name": "ingredient 1", "notes": "optional preparation notes like 'chopped' or 'diced'"},
+    {"name": "ingredient 2", "notes": ""}
+  ],
+  "instructions": ["step 1", "step 2"]
+}`,
+            },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      const textContent =
+        data.content.find((item) => item.type === "text")?.text || "";
+
+      // Clean up response (remove any markdown code blocks if present)
+      const cleanedText = textContent.replace(/```json\n?|\n?```/g, "").trim();
+      const parsed = JSON.parse(cleanedText);
+
+      // Auto-fill  form fields
+      if (parsed.title) {
+        handleInputChange("title", parsed.title);
+      }
+      if (parsed.servings) {
+        handleInputChange("servings", parsed.servings);
+      }
+
+      // Handle ingredients - add to ungrouped section
+      if (
+        parsed.ingredients &&
+        Array.isArray(parsed.ingredients) &&
+        parsed.ingredients.length > 0
+      ) {
+        parsed.ingredients.forEach((ing) => {
+          addIngredient("ungrouped");
+          const lastIndex = formData.ungroupedIngredients.length;
+
+          // Handle both string format and object format
+          const ingredientName = typeof ing === "string" ? ing : ing.name;
+          const ingredientNotes = typeof ing === "object" ? ing.notes : "";
+
+          handleIngredientChange(
+            "ungrouped",
+            lastIndex,
+            "ingredient",
+            ingredientName
+          );
+
+          if (ingredientNotes) {
+            handleIngredientChange(
+              "ungrouped",
+              lastIndex,
+              "notes",
+              ingredientNotes
+            );
+          }
+        });
+      }
+
+      // Handle instructions
+      if (
+        parsed.instructions &&
+        Array.isArray(parsed.instructions) &&
+        parsed.instructions.length > 0
+      ) {
+        // Add each instruction
+        parsed.instructions.forEach((instruction) => {
+          addInstruction();
+          // Get the index of the newly added instruction
+          const lastIndex = formData.instructions.length;
+          handleInstructionChange(lastIndex, instruction);
+        });
+      }
+
+      // Clear and hide paste area
+      setPastedText("");
+      setShowPasteArea(false);
+      setParseError("");
+    } catch (error) {
+      console.error("Error parsing recipe:", error);
+      setParseError(t("parse_error"));
+    } finally {
+      setIsParsing(false);
+    }
+  };
 
   const {
     formData,
@@ -128,9 +252,9 @@ const RecipeForm = ({
 
   return (
     <div className="card card-form">
-      <header className="page-header flex-center">
+      <header className="page-header flex-between">
         <button
-          className="btn-unstyled back-arrow-left"
+          className="btn-unstyled back-arrow"
           onClick={() => {
             navigateWithConfirmation(-1);
           }}
@@ -140,6 +264,18 @@ const RecipeForm = ({
           <ArrowBigLeft size={28} />
         </button>
         <h1 className="forta">{title}</h1>
+
+        {/* Recipe Autofill Toggle Button */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowPasteArea(!showPasteArea)}
+            className="btn btn-secondary"
+            aria-label={t("paste_recipe")}
+          >
+            <Clipboard />
+          </button>
+        </div>
       </header>
 
       {/* Translation Editing Notice */}
@@ -164,6 +300,46 @@ const RecipeForm = ({
         className="recipe-form"
         role="form"
       >
+        {/*  Recipe Paste Area  */}
+        <div className="form-group">
+          {showPasteArea && (
+            <div className="paste-recipe-container">
+              <h3 className="form-header">{t("paste_recipe")}</h3>
+              <AutoResizeTextArea
+                className={`input input--full-width input--textarea input--edit ${parseError ? "input--error" : ""}`}
+                value={pastedText}
+                onChange={(e) => {
+                  setPastedText(e.target.value);
+                  if (parseError) setParseError("");
+                }}
+                placeholder={t("paste_recipe_placeholder")}
+              />
+              {parseError && (
+                <span className="error-message-small">{parseError}</span>
+              )}
+              <div className="action-buttons-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasteArea(false);
+                    setPastedText("");
+                  }}
+                  className="btn btn-action btn-secondary"
+                >
+                  {t("cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={parseRecipeWithAI}
+                  className="btn btn-action btn-primary"
+                >
+                  {isParsing ? t("parsing") : t("autofill_recipe")}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Recipe Title and Servings */}
         <div className="form-group">
           <div className="title-servings-row">
