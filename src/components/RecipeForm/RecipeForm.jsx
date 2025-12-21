@@ -339,6 +339,11 @@ const RecipeForm = ({
                   setPastedText(e.target.value);
                   if (parseError) setParseError("");
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.stopPropagation();
+                  }
+                }}
                 placeholder={t("paste_recipe_placeholder")}
               />
               {parseError && (
@@ -815,12 +820,16 @@ const RecipeForm = ({
           <label htmlFor="extra-notes" className="form-header flex-between">
             <h3> {t("notes")}</h3>
           </label>
-          <input
+          <AutoResizeTextArea
             id="extra-notes"
-            type="text"
             value={formData.notes || ""}
             onChange={(e) => handleInputChange("notes", e.target.value)}
-            className="input input--full-width input--edit "
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.stopPropagation();
+              }
+            }}
+            className="input input--full-width input--textarea input--edit"
             placeholder={t("notes")}
           />
         </div>
