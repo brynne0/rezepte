@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
+import { useAuth } from "../../hooks/data/useAuth";
 import "./RecipeList.css";
 
 const RecipeList = ({
@@ -15,6 +16,7 @@ const RecipeList = ({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const isOnline = useOnlineStatus();
+  const { isLoggedIn } = useAuth();
 
   // If using pagination, recipes are already filtered on the server side
   // Otherwise, apply client-side filtering for backward compatibility
@@ -59,13 +61,10 @@ const RecipeList = ({
           <div className="card welcome-card">
             {!isOnline ? (
               <p>{t("no_internet_connection")}</p>
+            ) : isLoggedIn ? (
+              <p>{t("welcome_add_recipe")}</p>
             ) : (
-              <>
-                <p>{t("welcome_add_recipe")}</p>
-                <p className="grey-small">
-                  <strong>{t("note")}:</strong> {t("logged_in_note")}
-                </p>
-              </>
+              <p className="grey-small">{t("logged_in_note")}</p>
             )}
           </div>
         </div>

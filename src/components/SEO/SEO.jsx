@@ -23,9 +23,7 @@ const SEO = ({
       if (!content) return;
 
       const attribute = isProperty ? "property" : "name";
-      let element = document.querySelector(
-        `meta[${attribute}="${name}"]`
-      );
+      let element = document.querySelector(`meta[${attribute}="${name}"]`);
 
       if (!element) {
         element = document.createElement("meta");
