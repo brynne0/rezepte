@@ -22,6 +22,31 @@
   opacity: 0.3 !important;
 }
 
+.paste-recipe-container {
+  border: var(--border-width) dashed var(--color-border-light);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  background: var(--color-background-secondary);
+}
+
+.char-counter-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
+.char-counter {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.char-counter--error {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
 /* Title and Servings Layout */
 .title-servings-row {
   display: flex;
