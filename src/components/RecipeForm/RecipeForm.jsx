@@ -68,6 +68,7 @@ const RecipeForm = ({
       }
 
       const parsed = data.recipe;
+      console.log("Parsed recipe:", parsed); // Debug log
 
       // Auto-fill  form fields
       if (parsed.title) {
@@ -77,36 +78,42 @@ const RecipeForm = ({
         handleInputChange("servings", parsed.servings);
       }
 
+      // Handle category prediction
+      if (parsed.categories && Array.isArray(parsed.categories)) {
+        handleInputChange("categories", parsed.categories);
+      }
+
       // Handle ingredients - add to ungrouped section
       if (
         parsed.ingredients &&
         Array.isArray(parsed.ingredients) &&
         parsed.ingredients.length > 0
       ) {
-        parsed.ingredients.forEach((ing) => {
-          addIngredient("ungrouped");
-          const lastIndex = formData.ungroupedIngredients.length;
+        console.log("Adding ingredients:", parsed.ingredients); // Debug log
 
-          // Handle both string format and object format
-          const ingredientName = typeof ing === "string" ? ing : ing.name;
-          const ingredientNotes = typeof ing === "object" ? ing.notes : "";
+        // Build new ingredients with proper structure
+        const newIngredients = parsed.ingredients.map((ing) => ({
+          tempId: generateUniqueId(),
+          ingredient_id: "",
+          recipe_ingredient_id: "",
+          name: ing.name || "",
+          quantity: ing.quantity || "",
+          unit: ing.unit || "",
+          notes: ing.notes || "",
+        }));
 
-          handleIngredientChange(
-            "ungrouped",
-            lastIndex,
-            "ingredient",
-            ingredientName
-          );
+        console.log("New ingredients:", newIngredients); // Debug log
 
-          if (ingredientNotes) {
-            handleIngredientChange(
-              "ungrouped",
-              lastIndex,
-              "notes",
-              ingredientNotes
-            );
-          }
-        });
+        // Replace initial blank ingredient with parsed ingredients
+        setFormData((prev) => ({
+          ...prev,
+          ungroupedIngredients:
+            prev.ungroupedIngredients.length === 1 &&
+            !prev.ungroupedIngredients[0].name &&
+            !prev.ungroupedIngredients[0].quantity
+              ? newIngredients // Replace the single blank ingredient
+              : [...prev.ungroupedIngredients, ...newIngredients], // Append to existing
+        }));
       }
 
       // Handle instructions
@@ -115,13 +122,14 @@ const RecipeForm = ({
         Array.isArray(parsed.instructions) &&
         parsed.instructions.length > 0
       ) {
-        // Add each instruction
-        parsed.instructions.forEach((instruction) => {
-          addInstruction();
-          // Get the index of the newly added instruction
-          const lastIndex = formData.instructions.length;
-          handleInstructionChange(lastIndex, instruction);
-        });
+        // Replace initial blank instruction with parsed instructions
+        setFormData((prev) => ({
+          ...prev,
+          instructions:
+            prev.instructions.length === 1 && !prev.instructions[0]
+              ? parsed.instructions // Replace the single blank instruction
+              : [...prev.instructions, ...parsed.instructions], // Append to existing
+        }));
       }
 
       // Clear and hide paste area
@@ -138,6 +146,7 @@ const RecipeForm = ({
 
   const {
     formData,
+    setFormData,
     validationErrors,
     submissionError,
     loading,
@@ -167,6 +176,7 @@ const RecipeForm = ({
     handleIngredientLink,
     removeIngredientLink,
     getIngredientLink,
+    generateUniqueId,
   } = useRecipeForm({ initialRecipe, isEditingTranslation });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
