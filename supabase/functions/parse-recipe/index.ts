@@ -46,17 +46,58 @@ serve(async (req) => {
     }
 
     let textToProcess = pastedText;
+    let sourceUrl = null;
 
     // If URL provided, fetch and extract recipe
     if (recipeUrl) {
       console.log(`Fetching recipe from URL: ${recipeUrl}`);
 
       try {
-        const urlResponse = await fetch(recipeUrl, {
+        // Security: Validate and sanitize URL
+        let validatedUrl: URL;
+        try {
+          // Add protocol if missing (for www. URLs)
+          const urlToValidate = recipeUrl.trim().startsWith("www.")
+            ? `https://${recipeUrl.trim()}`
+            : recipeUrl.trim();
+          validatedUrl = new URL(urlToValidate);
+        } catch {
+          throw new Error("Invalid URL format");
+        }
+
+        // Security: Block private/internal network addresses (SSRF protection)
+        const hostname = validatedUrl.hostname.toLowerCase();
+        const blockedPatterns = [
+          /^localhost$/i,
+          /^127\./,
+          /^10\./,
+          /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+          /^192\.168\./,
+          /^169\.254\./, // Link-local
+          /^0\.0\.0\.0$/,
+          /^\[?::1\]?$/, // IPv6 localhost
+          /^\[?fe80:/i, // IPv6 link-local
+        ];
+
+        if (blockedPatterns.some((pattern) => pattern.test(hostname))) {
+          throw new Error("Access to private/internal URLs is not allowed");
+        }
+
+        // Security: Only allow http/https protocols
+        if (!["http:", "https:"].includes(validatedUrl.protocol)) {
+          throw new Error("Only HTTP and HTTPS protocols are allowed");
+        }
+
+        // Store the validated URL for the source field
+        sourceUrl = validatedUrl.toString();
+
+        const urlResponse = await fetch(sourceUrl, {
           headers: {
             "User-Agent":
               "Mozilla/5.0 (compatible; RecipeBot/1.0; +https://rezepte.app)",
           },
+          // Security: Add timeout to prevent hanging requests
+          signal: AbortSignal.timeout(10000), // 10 second timeout
         });
 
         if (!urlResponse.ok) {
@@ -235,6 +276,11 @@ Important rules:
 
     const recipe = JSON.parse(text);
     console.log("Successfully parsed recipe:", recipe.title);
+
+    // Add source URL if it was provided
+    if (sourceUrl) {
+      recipe.source = sourceUrl;
+    }
 
     return new Response(JSON.stringify({ success: true, recipe }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

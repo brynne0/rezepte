@@ -121,6 +121,11 @@ const RecipeForm = ({
       }));
     }
 
+    // Handle source URL (if provided)
+    if (parsed.source) {
+      handleInputChange("source", parsed.source);
+    }
+
     // Hide paste area after successful autofill
     setShowPasteArea(false);
   };
