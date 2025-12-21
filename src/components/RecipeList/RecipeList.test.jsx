@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import RecipeList from "./RecipeList";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
+import { useAuth } from "../../hooks/data/useAuth";
 
 // Mock dependencies
 vi.mock("react-router-dom", async () => {
@@ -28,6 +29,10 @@ vi.mock("./RecipeList.css", () => ({}));
 
 vi.mock("../../hooks/ui/useOnlineStatus", () => ({
   useOnlineStatus: vi.fn(),
+}));
+
+vi.mock("../../hooks/data/useAuth", () => ({
+  useAuth: vi.fn(),
 }));
 
 const mockNavigate = vi.fn();
@@ -58,6 +63,8 @@ describe("RecipeList", () => {
     mockNavigate.mockClear();
     // Default to online unless specifically testing offline
     useOnlineStatus.mockReturnValue(true);
+    // Default to logged in unless specifically testing logged out
+    useAuth.mockReturnValue({ isLoggedIn: true });
   });
 
   const renderComponent = (props = {}) => {
@@ -124,8 +131,9 @@ describe("RecipeList", () => {
   });
 
   describe("Offline functionality", () => {
-    it("shows welcome message when online and no recipes", () => {
+    it("shows welcome message when logged in with no recipes", () => {
       useOnlineStatus.mockReturnValue(true);
+      useAuth.mockReturnValue({ isLoggedIn: true });
 
       renderComponent({
         recipes: [],
@@ -134,7 +142,7 @@ describe("RecipeList", () => {
       });
 
       expect(screen.getByText("welcome_add_recipe")).toBeInTheDocument();
-      expect(screen.getByText("logged_in_note")).toBeInTheDocument();
+      expect(screen.queryByText("logged_in_note")).not.toBeInTheDocument();
       expect(
         screen.queryByText("no_internet_connection")
       ).not.toBeInTheDocument();

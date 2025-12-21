@@ -421,17 +421,17 @@ export const fetchRecipes = async () => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let query = supabase.from("recipes").select("*");
-
-  if (user) {
-    // Logged in: only show user's own recipes
-    query = query.eq("user_id", user.id);
-  } else {
-    // Not logged in: show default recipes
-    query = query.eq("user_id", import.meta.env.VITE_DEFAULT_USER_ID);
+  // Not logged in: don't show any recipes (recipes are private)
+  if (!user) {
+    return [];
   }
 
-  const { data, error } = await query;
+  // Logged in: only show user's own recipes
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("*")
+    .eq("user_id", user.id);
+
   if (error) {
     throw error;
   }
@@ -451,19 +451,23 @@ export const fetchRecipesPaginated = async (
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Not logged in: don't show any recipes (recipes are private)
+  if (!user) {
+    return {
+      recipes: [],
+      totalCount: 0,
+      totalPages: 0,
+      currentPage: page,
+      hasNextPage: false,
+      hasPrevPage: false,
+    };
+  }
+
   let query = supabase
     .from("recipes")
     .select("*", { count: "exact" })
-    .order("created_at", { ascending: false });
-
-  // Apply user filtering first
-  if (user) {
-    // Logged in: only show user's own recipes
-    query = query.eq("user_id", user.id);
-  } else {
-    // Not logged in: show default recipes
-    query = query.eq("user_id", import.meta.env.VITE_DEFAULT_USER_ID);
-  }
+    .order("created_at", { ascending: false })
+    .eq("user_id", user.id); // Only show user's own recipes
 
   // Apply filters
   if (filters.category && filters.category !== "all") {

@@ -3,8 +3,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin: 2rem 0;
-  padding: 1rem;
+  margin: 2.5rem 0;
 }
 
 .page-numbers {
@@ -41,8 +40,6 @@
 
 @media (max-width: 768px) {
   .pagination {
-    gap: 0.25rem;
-    margin: 1rem 0;
-    padding: 0.5rem;
+    margin: 2rem 0;
   }
 }

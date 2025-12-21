@@ -26,17 +26,17 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
         main: getOptimizedImageUrl(image.url, {
           width: 400,
           height: 300,
-          quality: 70,
+          quality: 55,
         }),
         thumb: getOptimizedImageUrl(image.url, {
           width: 80,
           height: 60,
-          quality: 60,
+          quality: 45,
         }),
         full: getOptimizedImageUrl(image.url, {
           width: 800,
           height: 600,
-          quality: 80,
+          quality: 65,
         }),
       };
       return acc;
