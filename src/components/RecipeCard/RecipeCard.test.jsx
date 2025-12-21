@@ -12,6 +12,19 @@ vi.mock("../../hooks/data/useAuth", () => ({
   }),
 }));
 
+// Mock IntersectionObserver
+globalThis.IntersectionObserver = class IntersectionObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  observe() {
+    // Immediately trigger the callback with isIntersecting: true
+    this.callback([{ isIntersecting: true }]);
+  }
+  unobserve() {}
+  disconnect() {}
+};
+
 describe("RecipeCard", () => {
   const mockRecipe = {
     id: 1,
