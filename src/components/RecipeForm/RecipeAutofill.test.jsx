@@ -369,4 +369,38 @@ describe("RecipeAutofill", () => {
       );
     });
   });
+
+  it("includes source URL in parsed recipe when URL is provided", async () => {
+    const mockRecipeWithSource = {
+      title: "Recipe from URL",
+      servings: "4",
+      categories: ["dinner"],
+      ingredients: [{ quantity: "1", unit: "kg", name: "chicken", notes: "" }],
+      instructions: ["Cook it"],
+      source: "https://example.com/recipe",
+    };
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true, recipe: mockRecipeWithSource }),
+    });
+
+    render(<RecipeAutofill onAutofill={mockOnAutofill} />);
+
+    const textarea = screen.getByPlaceholderText(/paste_recipe_placeholder/i);
+    fireEvent.change(textarea, {
+      target: { value: "https://example.com/recipe" },
+    });
+
+    const submitButton = screen.getByRole("button", { name: /autofill/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockOnAutofill).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: "https://example.com/recipe",
+        })
+      );
+    });
+  });
 });
