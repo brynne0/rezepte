@@ -278,7 +278,10 @@ export const useRecipeFormActions = ({
             );
           }
         } else {
-          // Create mode
+          // Create mode - set original_language based on current UI language
+          const currentLanguage = i18n.language?.split("-")[0] || "en";
+          recipeData.original_language = currentLanguage;
+
           result = await createRecipe(
             recipeData,
             hasLocalImages ? handleImageUploadProgress : null
