@@ -232,5 +232,8 @@
   "image_upload_hint": "PNG, JPEG, WebP up to 10MB",
   "main": "Main",
   "set_as_main_image": "Set as main image",
-  "delete_image": "Delete image"
+  "delete_image": "Delete image",
+
+  "recipe_with_ingredients": "Recipe with",
+  "view_recipe_details": "View recipe details"
 }

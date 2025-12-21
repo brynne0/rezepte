@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Allow: /shared/*
+Disallow: /settings
+Disallow: /edit/*
+Disallow: /new
+
+# Sitemap
+Sitemap: https://acorn-rezepte.com/sitemap.xml
