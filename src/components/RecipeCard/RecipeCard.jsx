@@ -8,6 +8,7 @@ import {
   getOptimizedImageUrl,
 } from "../../services/imageService";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
+import useIntersectionObserver from "../../hooks/ui/useIntersectionObserver";
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
@@ -15,11 +16,16 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  // Use intersection observer to only load images when card is visible
+  const { ref: cardRef, hasBeenVisible } = useIntersectionObserver({
+    rootMargin: "100px", // Start loading 100px before entering viewport
+  });
+
   // Get main image
   const mainImage = getMainImage(recipe.images);
 
-  // Only show images if user is logged in AND showImages is true
-  const shouldShowImages = isLoggedIn && showImages;
+  // Only show images if user is logged in AND showImages is true AND card has been visible
+  const shouldShowImages = isLoggedIn && showImages && hasBeenVisible;
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -45,7 +51,11 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const hasNoContent = hasNoIngredients && hasNoInstructions;
 
   return (
-    <div className="recipe-card" onClick={() => onClick && onClick(recipe)}>
+    <div
+      ref={cardRef}
+      className="recipe-card"
+      onClick={() => onClick && onClick(recipe)}
+    >
       <div className="flex-center">
         <h4 className="recipe-card-title">{recipe.title}</h4>
 
@@ -70,9 +80,9 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           <img
             className={`recipe-image ${imageLoaded ? "loaded" : "loading"}`}
             src={getOptimizedImageUrl(mainImage.url, {
-              width: 300,
-              height: 200,
-              quality: 75,
+              width: 240,
+              height: 160,
+              quality: 50,
             })}
             alt={recipe.title}
             loading="lazy"

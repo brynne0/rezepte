@@ -121,7 +121,7 @@ export const getOptimizedImageUrl = (originalUrl, options = {}) => {
     if (width) params.set("width", width);
     if (height) params.set("height", height);
     params.set("quality", quality);
-    params.set("format", "webp"); // Use WebP for better compression
+    params.set("format", "origin"); // Use original format instead of WebP to preserve brightness consistency
 
     if (params.toString()) {
       url.search = params.toString();
