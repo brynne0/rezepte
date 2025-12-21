@@ -403,4 +403,45 @@ describe("RecipeAutofill", () => {
       );
     });
   });
+
+  it("shows error when text exceeds character limit", async () => {
+    render(<RecipeAutofill onAutofill={mockOnAutofill} />);
+
+    const textarea = screen.getByPlaceholderText(/paste_recipe_placeholder/i);
+    const longText = "a".repeat(15001);
+    fireEvent.change(textarea, { target: { value: longText } });
+
+    const submitButton = screen.getByRole("button", { name: /autofill/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/paste_text_too_long/i)).toBeInTheDocument();
+    });
+
+    expect(mockOnAutofill).not.toHaveBeenCalled();
+  });
+
+  it("does not enforce character limit on URLs", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        recipe: { title: "Long URL Recipe" },
+      }),
+    });
+
+    render(<RecipeAutofill onAutofill={mockOnAutofill} />);
+
+    const textarea = screen.getByPlaceholderText(/paste_recipe_placeholder/i);
+    // Very long URL should still be accepted
+    const longUrl = "https://example.com/recipe?" + "a".repeat(20000);
+    fireEvent.change(textarea, { target: { value: longUrl } });
+
+    const submitButton = screen.getByRole("button", { name: /autofill/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalled();
+    });
+  });
 });

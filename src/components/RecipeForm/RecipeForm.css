@@ -31,6 +31,22 @@
   background: var(--color-background-secondary);
 }
 
+.char-counter-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
+.char-counter {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.char-counter--error {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
 /* Title and Servings Layout */
 .title-servings-row {
   display: flex;

@@ -8,6 +8,8 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState("");
 
+  const MAX_CHARS = 15000;
+
   // Detect if input is a URL
   const isUrl = (text) => {
     try {
@@ -22,9 +24,22 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
     }
   };
 
+  // Check if character limit is exceeded (live validation)
+  const isOverLimit = !isUrl(pastedText) && pastedText.length > MAX_CHARS;
+
   const parseRecipeWithAI = async () => {
     if (!pastedText.trim()) {
       setParseError(t("paste_text_required"));
+      return;
+    }
+
+    // Check character limit for pasted text (not URLs)
+    const trimmedText = pastedText.trim();
+    const isUrlInput = isUrl(trimmedText);
+    if (!isUrlInput && trimmedText.length > MAX_CHARS) {
+      setParseError(
+        t("paste_text_too_long", { max: MAX_CHARS.toLocaleString() })
+      );
       return;
     }
 
@@ -87,7 +102,7 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
     <div className="paste-recipe-container">
       <h3 className="form-header">{t("autofill_recipe")}</h3>
       <AutoResizeTextArea
-        className={`input input--full-width input--textarea input--edit ${parseError ? "input--error" : ""}`}
+        className={`input input--full-width input--textarea input--edit ${parseError || isOverLimit ? "input--error" : ""}`}
         value={pastedText}
         onChange={(e) => {
           setPastedText(e.target.value);
@@ -101,7 +116,21 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
         }}
         placeholder={t("paste_recipe_placeholder")}
       />
+      {isOverLimit && !parseError && (
+        <span className="error-message-small">
+          {t("paste_text_too_long", { max: MAX_CHARS.toLocaleString() })}
+        </span>
+      )}
       {parseError && <span className="error-message-small">{parseError}</span>}
+      <div className="char-counter-container">
+        {!isUrl(pastedText) && pastedText.length > 10000 && (
+          <span
+            className={`char-counter ${pastedText.length > MAX_CHARS ? "char-counter--error" : ""}`}
+          >
+            {pastedText.length.toLocaleString()} / {MAX_CHARS.toLocaleString()}
+          </span>
+        )}
+      </div>
       <div className="action-buttons-end">
         <button
           type="button"
