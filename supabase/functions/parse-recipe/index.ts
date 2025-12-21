@@ -59,9 +59,16 @@ JSON format:
 {
   "title": "recipe name",
   "servings": "number",
-  "ingredients": [{"name": "ingredient", "notes": "prep notes"}],
+  "ingredients": [{"quantity": "amount", "unit": "unit_value", "name": "ingredient name", "notes": "prep notes"}],
   "instructions": ["step 1", "step 2"]
-}`,
+}
+
+Important rules:
+- Extract quantity as a number or fraction string (e.g., "2", "1/2", "1.5")
+- Extract unit using ONLY these values: "", "ml", "l", "g", "kg", "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"
+- If no specific unit, use "" (empty string)
+- name is the ingredient name only (e.g., "flour", "chicken breast")
+- notes are for preparation details like "chopped", "diced", "at room temperature" (can be empty string if not applicable)`,
                 },
               ],
             },
