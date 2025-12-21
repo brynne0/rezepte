@@ -17,6 +17,7 @@ import ImageUpload from "../ImageUpload/ImageUpload";
 import RecipeLinkDropdown from "../RecipeLinkDropdown/RecipeLinkDropdown";
 import IngredientRow from "./IngredientRow";
 import InstructionsSection from "./InstructionsSection";
+import RecipeAutofill from "./RecipeAutofill";
 import "./RecipeForm.css";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 
@@ -28,110 +29,46 @@ const RecipeForm = ({
 }) => {
   const { t } = useTranslation();
 
-  // Paste text
-  const [pastedText, setPastedText] = useState("");
-  const [isParsing, setIsParsing] = useState(false);
+  // Autofill state
   const [showPasteArea, setShowPasteArea] = useState(false);
-  const [parseError, setParseError] = useState("");
 
-  const parseRecipeWithAI = async () => {
-    if (!pastedText.trim()) {
-      setParseError(t("paste_text_required"));
-      return;
+  // Handle autofill callback from RecipeAutofill component
+  const handleAutofill = (parsed) => {
+    // Clear existing form data first
+    setFormData((prev) => ({
+      ...prev,
+      title: "",
+      servings: "",
+      categories: [],
+      ungroupedIngredients: [],
+      ingredientSections: [],
+      instructions: [],
+    }));
+
+    // Auto-fill form fields
+    if (parsed.title) {
+      handleInputChange("title", parsed.title);
+    }
+    if (parsed.servings) {
+      handleInputChange("servings", parsed.servings);
     }
 
-    setIsParsing(true);
-    setParseError("");
+    // Handle category prediction
+    if (parsed.categories && Array.isArray(parsed.categories)) {
+      handleInputChange("categories", parsed.categories);
+    }
 
-    try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      console.log("Sending to edge function:", pastedText.substring(0, 50)); // Debug log
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/parse-recipe`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${supabaseAnonKey}`,
-        },
-        body: JSON.stringify({
-          pastedText: pastedText,
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Response data:", data); // Debug log
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to parse recipe");
-      }
-
-      const parsed = data.recipe;
-      console.log("Parsed recipe:", parsed); // Debug log
-
-      // Clear existing form data first
-      setFormData((prev) => ({
-        ...prev,
-        title: "",
-        servings: "",
-        categories: [],
-        ungroupedIngredients: [],
-        ingredientSections: [],
-        instructions: [],
-      }));
-
-      // Auto-fill  form fields
-      if (parsed.title) {
-        handleInputChange("title", parsed.title);
-      }
-      if (parsed.servings) {
-        handleInputChange("servings", parsed.servings);
-      }
-
-      // Handle category prediction
-      if (parsed.categories && Array.isArray(parsed.categories)) {
-        handleInputChange("categories", parsed.categories);
-      }
-
-      // Handle ingredient sections (if present)
-      if (
-        parsed.ingredientSections &&
-        Array.isArray(parsed.ingredientSections) &&
-        parsed.ingredientSections.length > 0
-      ) {
-        console.log("Adding ingredient sections:", parsed.ingredientSections); // Debug log
-
-        // Build new sections with proper structure
-        const newSections = parsed.ingredientSections.map((section) => ({
-          id: `section-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-          subheading: section.subheading || "",
-          ingredients: section.ingredients.map((ing) => ({
-            tempId: generateUniqueId(),
-            ingredient_id: "",
-            recipe_ingredient_id: "",
-            name: ing.name || "",
-            quantity: ing.quantity || "",
-            unit: ing.unit || "",
-            notes: ing.notes || "",
-          })),
-        }));
-
-        // Add sections (form is already cleared)
-        setFormData((prev) => ({
-          ...prev,
-          ingredientSections: newSections,
-        }));
-      } else if (
-        parsed.ingredients &&
-        Array.isArray(parsed.ingredients) &&
-        parsed.ingredients.length > 0
-      ) {
-        // Handle flat ingredients (no sections)
-        console.log("Adding ingredients:", parsed.ingredients); // Debug log
-
-        // Build new ingredients with proper structure
-        const newIngredients = parsed.ingredients.map((ing) => ({
+    // Handle ingredient sections (if present)
+    if (
+      parsed.ingredientSections &&
+      Array.isArray(parsed.ingredientSections) &&
+      parsed.ingredientSections.length > 0
+    ) {
+      // Build new sections with proper structure
+      const newSections = parsed.ingredientSections.map((section) => ({
+        id: `section-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        subheading: section.subheading || "",
+        ingredients: section.ingredients.map((ing) => ({
           tempId: generateUniqueId(),
           ingredient_id: "",
           recipe_ingredient_id: "",
@@ -139,40 +76,53 @@ const RecipeForm = ({
           quantity: ing.quantity || "",
           unit: ing.unit || "",
           notes: ing.notes || "",
-        }));
+        })),
+      }));
 
-        console.log("New ingredients:", newIngredients); // Debug log
+      // Add sections (form is already cleared)
+      setFormData((prev) => ({
+        ...prev,
+        ingredientSections: newSections,
+      }));
+    } else if (
+      parsed.ingredients &&
+      Array.isArray(parsed.ingredients) &&
+      parsed.ingredients.length > 0
+    ) {
+      // Handle flat ingredients (no sections)
+      // Build new ingredients with proper structure
+      const newIngredients = parsed.ingredients.map((ing) => ({
+        tempId: generateUniqueId(),
+        ingredient_id: "",
+        recipe_ingredient_id: "",
+        name: ing.name || "",
+        quantity: ing.quantity || "",
+        unit: ing.unit || "",
+        notes: ing.notes || "",
+      }));
 
-        // Add ingredients (form is already cleared)
-        setFormData((prev) => ({
-          ...prev,
-          ungroupedIngredients: newIngredients,
-        }));
-      }
-
-      // Handle instructions
-      if (
-        parsed.instructions &&
-        Array.isArray(parsed.instructions) &&
-        parsed.instructions.length > 0
-      ) {
-        // Add instructions (form is already cleared)
-        setFormData((prev) => ({
-          ...prev,
-          instructions: parsed.instructions,
-        }));
-      }
-
-      // Clear and hide paste area
-      setPastedText("");
-      setShowPasteArea(false);
-      setParseError("");
-    } catch (error) {
-      console.error("Error parsing recipe:", error);
-      setParseError(t("parse_error"));
-    } finally {
-      setIsParsing(false);
+      // Add ingredients (form is already cleared)
+      setFormData((prev) => ({
+        ...prev,
+        ungroupedIngredients: newIngredients,
+      }));
     }
+
+    // Handle instructions
+    if (
+      parsed.instructions &&
+      Array.isArray(parsed.instructions) &&
+      parsed.instructions.length > 0
+    ) {
+      // Add instructions (form is already cleared)
+      setFormData((prev) => ({
+        ...prev,
+        instructions: parsed.instructions,
+      }));
+    }
+
+    // Hide paste area after successful autofill
+    setShowPasteArea(false);
   };
 
   const {
@@ -330,46 +280,10 @@ const RecipeForm = ({
         {/*  Recipe Paste Area  */}
         <div className="form-group">
           {showPasteArea && (
-            <div className="paste-recipe-container">
-              <h3 className="form-header">{t("autofill_recipe")}</h3>
-              <AutoResizeTextArea
-                className={`input input--full-width input--textarea input--edit ${parseError ? "input--error" : ""}`}
-                value={pastedText}
-                onChange={(e) => {
-                  setPastedText(e.target.value);
-                  if (parseError) setParseError("");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.stopPropagation();
-                  }
-                }}
-                placeholder={t("paste_recipe_placeholder")}
-              />
-              {parseError && (
-                <span className="error-message-small">{parseError}</span>
-              )}
-              <div className="action-buttons-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowPasteArea(false);
-                    setPastedText("");
-                  }}
-                  className="btn btn-action btn-secondary"
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={parseRecipeWithAI}
-                  className="btn btn-action btn-primary"
-                  disabled={isParsing}
-                >
-                  {isParsing ? t("autofilling") : t("autofill")}
-                </button>
-              </div>
-            </div>
+            <RecipeAutofill
+              onAutofill={handleAutofill}
+              categories={categories}
+            />
           )}
         </div>
 

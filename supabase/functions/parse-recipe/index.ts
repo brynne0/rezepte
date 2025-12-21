@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { pastedText } = await req.json();
+    const { pastedText, availableCategories = [] } = await req.json();
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
     if (!GEMINI_API_KEY) {
@@ -39,6 +39,7 @@ serve(async (req) => {
     }
 
     console.log(`Parsing recipe text of length: ${pastedText.length}`);
+    console.log(`Available categories: ${availableCategories.join(", ")}`);
 
     // Use gemini-2.5-flash (the stable model your API key has access to)
     const response = await fetch(
@@ -58,7 +59,7 @@ ${pastedText.trim()}
 JSON format for recipes WITHOUT ingredient sections:
 {
   "title": "recipe name",
-  "servings": "number",
+  "servings": "4",
   "categories": ["category1", "category2"],
   "ingredients": [{"quantity": "amount", "unit": "unit_value", "name": "ingredient name", "notes": "prep notes"}],
   "instructions": ["step 1", "step 2"]
@@ -67,7 +68,7 @@ JSON format for recipes WITHOUT ingredient sections:
 JSON format for recipes WITH ingredient sections (only use if original text has clear sections like "For the dough:", "For the filling:", etc.):
 {
   "title": "recipe name",
-  "servings": "number",
+  "servings": "4",
   "categories": ["category1", "category2"],
   "ingredientSections": [
     {
@@ -79,12 +80,13 @@ JSON format for recipes WITH ingredient sections (only use if original text has 
 }
 
 Important rules:
+- servings: Extract the actual number of servings as a string (e.g., "4", "6-8"). If no servings mentioned, use "" (empty string). DO NOT use the word "number".
 - Extract quantity as a number or fraction string (e.g., "2", "1/2", "1.5")
 - Extract unit using ONLY these values: "", "ml", "l", "g", "kg", "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"
 - If no specific unit, use "" (empty string)
 - name is the ingredient name only (e.g., "flour", "chicken breast")
 - notes are for preparation details like "chopped", "diced", "at room temperature" (can be empty string if not applicable)
-- categories should be predicted based on the recipe type. Use lowercase. Common categories: "breakfast", "lunch", "dinner", "dessert", "snack", "appetizer", "soup", "salad", "bread", "pasta", "vegetarian", "vegan", "meat", "fish", "baking"
+- categories: ONLY use categories from this list: ${availableCategories.length > 0 ? availableCategories.join(", ") : "breakfast, lunch, dinner, dessert, snack"}. Select 1-3 most relevant categories. Use exact category names from the list.
 - Only use ingredientSections if the original recipe explicitly has sections (like "For the dough:", "For the topping:", etc.). Otherwise use flat ingredients array.`,
                 },
               ],
