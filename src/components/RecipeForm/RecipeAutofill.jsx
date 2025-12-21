@@ -8,6 +8,20 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState("");
 
+  // Detect if input is a URL
+  const isUrl = (text) => {
+    try {
+      new URL(text.trim());
+      return true;
+    } catch {
+      return (
+        text.trim().startsWith("http://") ||
+        text.trim().startsWith("https://") ||
+        text.trim().startsWith("www.")
+      );
+    }
+  };
+
   const parseRecipeWithAI = async () => {
     if (!pastedText.trim()) {
       setParseError(t("paste_text_required"));
@@ -21,7 +35,13 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-      console.log("Sending to edge function:", pastedText.substring(0, 50)); // Debug log
+      const trimmedText = pastedText.trim();
+      const isUrlInput = isUrl(trimmedText);
+
+      console.log(
+        "Sending to edge function:",
+        isUrlInput ? `URL: ${trimmedText}` : trimmedText.substring(0, 50)
+      );
 
       // Extract category values (excluding "all")
       const availableCategories = categories
@@ -35,7 +55,8 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
           Authorization: `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify({
-          pastedText: pastedText,
+          pastedText: isUrlInput ? null : trimmedText,
+          recipeUrl: isUrlInput ? trimmedText : null,
           availableCategories: availableCategories,
         }),
       });

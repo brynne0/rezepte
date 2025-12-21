@@ -191,7 +191,7 @@
   "remove_instruction": "Remove instruction",
 
   "autofill_recipe": "Autofill Recipe",
-  "paste_recipe_placeholder": "Paste recipe here in any format",
+  "paste_recipe_placeholder": "Paste a recipe or url here",
   "paste_text_required": "Please paste recipe text first",
   "parse_error": "Failed to parse recipe. Please try again.",
   "autofill": "Autofill",

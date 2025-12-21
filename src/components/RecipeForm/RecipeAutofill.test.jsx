@@ -120,6 +120,7 @@ describe("RecipeAutofill", () => {
           },
           body: JSON.stringify({
             pastedText: "Test recipe text",
+            recipeUrl: null,
             availableCategories: ["breakfast", "lunch", "dinner", "dessert"],
           }),
         })
@@ -257,7 +258,111 @@ describe("RecipeAutofill", () => {
           body: expect.stringContaining(
             JSON.stringify({
               pastedText: "Test recipe text",
+              recipeUrl: null,
               availableCategories: ["breakfast", "lunch", "dinner", "dessert"],
+            })
+          ),
+        })
+      );
+    });
+  });
+
+  it("detects URL and sends it to API correctly", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        recipe: { title: "URL Recipe" },
+      }),
+    });
+
+    render(<RecipeAutofill onAutofill={mockOnAutofill} />);
+
+    const textarea = screen.getByPlaceholderText(/paste_recipe_placeholder/i);
+    fireEvent.change(textarea, {
+      target: { value: "https://example.com/recipe" },
+    });
+
+    const submitButton = screen.getByRole("button", { name: /autofill/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringContaining(
+            JSON.stringify({
+              pastedText: null,
+              recipeUrl: "https://example.com/recipe",
+              availableCategories: [],
+            })
+          ),
+        })
+      );
+    });
+  });
+
+  it("detects www URLs without protocol", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        recipe: { title: "WWW Recipe" },
+      }),
+    });
+
+    render(<RecipeAutofill onAutofill={mockOnAutofill} />);
+
+    const textarea = screen.getByPlaceholderText(/paste_recipe_placeholder/i);
+    fireEvent.change(textarea, { target: { value: "www.example.com/recipe" } });
+
+    const submitButton = screen.getByRole("button", { name: /autofill/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringContaining(
+            JSON.stringify({
+              pastedText: null,
+              recipeUrl: "www.example.com/recipe",
+              availableCategories: [],
+            })
+          ),
+        })
+      );
+    });
+  });
+
+  it("treats non-URL text as recipe text", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        recipe: { title: "Text Recipe" },
+      }),
+    });
+
+    render(<RecipeAutofill onAutofill={mockOnAutofill} />);
+
+    const textarea = screen.getByPlaceholderText(/paste_recipe_placeholder/i);
+    fireEvent.change(textarea, {
+      target: { value: "Just some recipe text" },
+    });
+
+    const submitButton = screen.getByRole("button", { name: /autofill/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringContaining(
+            JSON.stringify({
+              pastedText: "Just some recipe text",
+              recipeUrl: null,
+              availableCategories: [],
             })
           ),
         })
