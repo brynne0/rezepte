@@ -44,44 +44,30 @@ const RecipeForm = ({
     setParseError("");
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      console.log("Sending to edge function:", pastedText.substring(0, 50)); // Debug log
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/parse-recipe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [
-            {
-              role: "user",
-              content: `Parse this recipe and extract the information in JSON format. Return ONLY valid JSON with no markdown formatting or explanation.
-
-Recipe text:
-${pastedText}
-
-Return JSON with this exact structure:
-{
-  "title": "recipe title",
-  "servings": "number of servings",
-  "ingredients": [
-    {"name": "ingredient 1", "notes": "optional preparation notes like 'chopped' or 'diced'"},
-    {"name": "ingredient 2", "notes": ""}
-  ],
-  "instructions": ["step 1", "step 2"]
-}`,
-            },
-          ],
+          pastedText: pastedText,
         }),
       });
 
       const data = await response.json();
-      const textContent =
-        data.content.find((item) => item.type === "text")?.text || "";
+      console.log("Response data:", data); // Debug log
 
-      // Clean up response (remove any markdown code blocks if present)
-      const cleanedText = textContent.replace(/```json\n?|\n?```/g, "").trim();
-      const parsed = JSON.parse(cleanedText);
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to parse recipe");
+      }
+
+      const parsed = data.recipe;
 
       // Auto-fill  form fields
       if (parsed.title) {
@@ -271,7 +257,7 @@ Return JSON with this exact structure:
             type="button"
             onClick={() => setShowPasteArea(!showPasteArea)}
             className="btn btn-secondary"
-            aria-label={t("paste_recipe")}
+            aria-label={t("autofill_recipe")}
           >
             <Clipboard />
           </button>
@@ -304,7 +290,7 @@ Return JSON with this exact structure:
         <div className="form-group">
           {showPasteArea && (
             <div className="paste-recipe-container">
-              <h3 className="form-header">{t("paste_recipe")}</h3>
+              <h3 className="form-header">{t("autofill_recipe")}</h3>
               <AutoResizeTextArea
                 className={`input input--full-width input--textarea input--edit ${parseError ? "input--error" : ""}`}
                 value={pastedText}
@@ -333,7 +319,7 @@ Return JSON with this exact structure:
                   onClick={parseRecipeWithAI}
                   className="btn btn-action btn-primary"
                 >
-                  {isParsing ? t("parsing") : t("autofill_recipe")}
+                  {isParsing ? t("parsing") : t("submit")}
                 </button>
               </div>
             </div>
