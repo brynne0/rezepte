@@ -55,11 +55,26 @@ serve(async (req) => {
 
 ${pastedText.trim()}
 
-JSON format:
+JSON format for recipes WITHOUT ingredient sections:
 {
   "title": "recipe name",
   "servings": "number",
+  "categories": ["category1", "category2"],
   "ingredients": [{"quantity": "amount", "unit": "unit_value", "name": "ingredient name", "notes": "prep notes"}],
+  "instructions": ["step 1", "step 2"]
+}
+
+JSON format for recipes WITH ingredient sections (only use if original text has clear sections like "For the dough:", "For the filling:", etc.):
+{
+  "title": "recipe name",
+  "servings": "number",
+  "categories": ["category1", "category2"],
+  "ingredientSections": [
+    {
+      "subheading": "section name",
+      "ingredients": [{"quantity": "amount", "unit": "unit_value", "name": "ingredient name", "notes": "prep notes"}]
+    }
+  ],
   "instructions": ["step 1", "step 2"]
 }
 
@@ -68,7 +83,9 @@ Important rules:
 - Extract unit using ONLY these values: "", "ml", "l", "g", "kg", "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"
 - If no specific unit, use "" (empty string)
 - name is the ingredient name only (e.g., "flour", "chicken breast")
-- notes are for preparation details like "chopped", "diced", "at room temperature" (can be empty string if not applicable)`,
+- notes are for preparation details like "chopped", "diced", "at room temperature" (can be empty string if not applicable)
+- categories should be predicted based on the recipe type. Use lowercase. Common categories: "breakfast", "lunch", "dinner", "dessert", "snack", "appetizer", "soup", "salad", "bread", "pasta", "vegetarian", "vegan", "meat", "fish", "baking"
+- Only use ingredientSections if the original recipe explicitly has sections (like "For the dough:", "For the topping:", etc.). Otherwise use flat ingredients array.`,
                 },
               ],
             },

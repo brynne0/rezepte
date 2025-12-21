@@ -70,6 +70,17 @@ const RecipeForm = ({
       const parsed = data.recipe;
       console.log("Parsed recipe:", parsed); // Debug log
 
+      // Clear existing form data first
+      setFormData((prev) => ({
+        ...prev,
+        title: "",
+        servings: "",
+        categories: [],
+        ungroupedIngredients: [],
+        ingredientSections: [],
+        instructions: [],
+      }));
+
       // Auto-fill  form fields
       if (parsed.title) {
         handleInputChange("title", parsed.title);
@@ -83,12 +94,40 @@ const RecipeForm = ({
         handleInputChange("categories", parsed.categories);
       }
 
-      // Handle ingredients - add to ungrouped section
+      // Handle ingredient sections (if present)
       if (
+        parsed.ingredientSections &&
+        Array.isArray(parsed.ingredientSections) &&
+        parsed.ingredientSections.length > 0
+      ) {
+        console.log("Adding ingredient sections:", parsed.ingredientSections); // Debug log
+
+        // Build new sections with proper structure
+        const newSections = parsed.ingredientSections.map((section) => ({
+          id: `section-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          subheading: section.subheading || "",
+          ingredients: section.ingredients.map((ing) => ({
+            tempId: generateUniqueId(),
+            ingredient_id: "",
+            recipe_ingredient_id: "",
+            name: ing.name || "",
+            quantity: ing.quantity || "",
+            unit: ing.unit || "",
+            notes: ing.notes || "",
+          })),
+        }));
+
+        // Add sections (form is already cleared)
+        setFormData((prev) => ({
+          ...prev,
+          ingredientSections: newSections,
+        }));
+      } else if (
         parsed.ingredients &&
         Array.isArray(parsed.ingredients) &&
         parsed.ingredients.length > 0
       ) {
+        // Handle flat ingredients (no sections)
         console.log("Adding ingredients:", parsed.ingredients); // Debug log
 
         // Build new ingredients with proper structure
@@ -104,15 +143,10 @@ const RecipeForm = ({
 
         console.log("New ingredients:", newIngredients); // Debug log
 
-        // Replace initial blank ingredient with parsed ingredients
+        // Add ingredients (form is already cleared)
         setFormData((prev) => ({
           ...prev,
-          ungroupedIngredients:
-            prev.ungroupedIngredients.length === 1 &&
-            !prev.ungroupedIngredients[0].name &&
-            !prev.ungroupedIngredients[0].quantity
-              ? newIngredients // Replace the single blank ingredient
-              : [...prev.ungroupedIngredients, ...newIngredients], // Append to existing
+          ungroupedIngredients: newIngredients,
         }));
       }
 
@@ -122,13 +156,10 @@ const RecipeForm = ({
         Array.isArray(parsed.instructions) &&
         parsed.instructions.length > 0
       ) {
-        // Replace initial blank instruction with parsed instructions
+        // Add instructions (form is already cleared)
         setFormData((prev) => ({
           ...prev,
-          instructions:
-            prev.instructions.length === 1 && !prev.instructions[0]
-              ? parsed.instructions // Replace the single blank instruction
-              : [...prev.instructions, ...parsed.instructions], // Append to existing
+          instructions: parsed.instructions,
         }));
       }
 
@@ -328,8 +359,9 @@ const RecipeForm = ({
                   type="button"
                   onClick={parseRecipeWithAI}
                   className="btn btn-action btn-primary"
+                  disabled={isParsing}
                 >
-                  {isParsing ? t("parsing") : t("submit")}
+                  {isParsing ? t("autofilling") : t("autofill")}
                 </button>
               </div>
             </div>

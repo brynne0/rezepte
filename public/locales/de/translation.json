@@ -192,10 +192,11 @@
  
   "autofill_recipe": "Rezept automatisch ausfüllen",
   "paste_recipe_placeholder": "Hier das Rezept in einem beliebigen Format einfügen",
-  "parsing": "Parsing...",
   "paste_text_required": "Bitte fügen Sie zuerst den Rezepttext ein.",
   "parse_error": "Fehler beim Parsen des Rezepts. Bitte erneut versuchen.",
-  "submit": "Abschicken",
+  "autofill": "Automatisches Ausfüllen",
+  "autofilling": "Automatisches Ausfüllen...",
+
 
   "link_to_recipe": "Mit Rezept verknüpfen",
   "unlink_recipe": "Verknüpfung entfernen",
