@@ -8,8 +8,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log("SUPABASE EDGE FUNCTION - Recipe Parser");
-
   if (req.method === "OPTIONS") {
     return new Response("ok", { status: 200, headers: corsHeaders });
   }
@@ -50,8 +48,6 @@ serve(async (req) => {
 
     // If URL provided, fetch and extract recipe
     if (recipeUrl) {
-      console.log(`Fetching recipe from URL: ${recipeUrl}`);
-
       try {
         // Security: Validate and sanitize URL
         let validatedUrl: URL;
@@ -123,8 +119,6 @@ serve(async (req) => {
                   );
 
             if (recipeData) {
-              console.log("Found Schema.org Recipe data");
-
               // Extract structured data
               const extractedRecipe = {
                 title: recipeData.name || "",
@@ -148,21 +142,15 @@ serve(async (req) => {
 
               // Convert structured ingredients to text for AI processing
               textToProcess = `Title: ${extractedRecipe.title}\nServings: ${extractedRecipe.servings}\n\nIngredients:\n${extractedRecipe.ingredients.join("\n")}\n\nInstructions:\n${extractedRecipe.instructions.join("\n")}`;
-              console.log(
-                "Converted structured data to text for AI processing"
-              );
               break;
             }
           } catch (e) {
-            console.log("Error parsing JSON-LD, continuing...", e.message);
             continue;
           }
         }
 
         // If no structured data found, convert HTML to text
         if (!textToProcess) {
-          console.log("No structured data found, extracting text from HTML");
-
           // Simple HTML to text conversion
           textToProcess = html
             .replace(/<script[^>]*>.*?<\/script>/gis, "")
@@ -174,14 +162,10 @@ serve(async (req) => {
           // Limit text size to prevent excessive API usage
           const MAX_CHARS = 10000;
           if (textToProcess.length > MAX_CHARS) {
-            console.log(
-              `Text too long (${textToProcess.length} chars), truncating to ${MAX_CHARS}`
-            );
             textToProcess = textToProcess.substring(0, MAX_CHARS);
           }
         }
       } catch (error) {
-        console.error("Error fetching URL:", error);
         return new Response(
           JSON.stringify({
             success: false,
@@ -195,10 +179,6 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Processing recipe text of length: ${textToProcess.length}`);
-    console.log(`Available categories: ${availableCategories.join(", ")}`);
-
-    // Use gemini-2.5-flash (the stable model your API key has access to)
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
@@ -254,8 +234,6 @@ Important rules:
     );
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("Gemini error:", error);
       return new Response(
         JSON.stringify({ success: false, error: "AI service error" }),
         {
@@ -275,7 +253,6 @@ Important rules:
       .trim();
 
     const recipe = JSON.parse(text);
-    console.log("Successfully parsed recipe:", recipe.title);
 
     // Add source URL if it was provided
     if (sourceUrl) {
@@ -286,7 +263,6 @@ Important rules:
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error:", error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       {

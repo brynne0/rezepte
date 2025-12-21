@@ -38,11 +38,6 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
       const trimmedText = pastedText.trim();
       const isUrlInput = isUrl(trimmedText);
 
-      console.log(
-        "Sending to edge function:",
-        isUrlInput ? `URL: ${trimmedText}` : trimmedText.substring(0, 50)
-      );
-
       // Extract category values (excluding "all")
       const availableCategories = categories
         .filter((cat) => cat.value !== "all")
@@ -62,14 +57,12 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
       });
 
       const data = await response.json();
-      console.log("Response data:", data); // Debug log
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || "Failed to parse recipe");
       }
 
       const parsed = data.recipe;
-      console.log("Parsed recipe:", parsed); // Debug log
 
       // Pass the parsed recipe to the parent component
       onAutofill(parsed);
