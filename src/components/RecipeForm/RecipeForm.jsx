@@ -248,16 +248,22 @@ const RecipeForm = ({
         <h1 className="forta">{title}</h1>
 
         {/* Recipe Autofill Toggle Button */}
-        <div>
-          <button
-            type="button"
-            onClick={() => setShowPasteArea(!showPasteArea)}
-            className="btn btn-secondary"
-            aria-label={t("autofill_recipe")}
-          >
-            <Clipboard />
-          </button>
-        </div>
+       {!isEditMode ? (
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowPasteArea(!showPasteArea)}
+              className="btn btn-secondary"
+              aria-label={t("autofill_recipe")}
+            >
+              <Clipboard />
+            </button>
+          </div>
+        ) : (
+          <div style={{ visibility: 'hidden' }}>
+           <Clipboard size={28} />
+          </div>
+        )}
       </header>
 
       {/* Translation Editing Notice */}
