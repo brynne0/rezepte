@@ -179,21 +179,11 @@ serve(async (req) => {
       }
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `Extract recipe data and return valid JSON only.
+    const promptText = `Extract recipe data and return valid JSON only.
 
-                  ${textToProcess.trim()}
+${textToProcess.trim()}
 
-                  Format (use ingredientSections ONLY if original has explicit sections like "For the dough:"):
+Format (use ingredientSections ONLY if original has explicit sections like "For the dough:"):
 {"title":"","servings":"","categories":[],"ingredients":[{"quantity":"","unit":"","name":"","notes":""}],"instructions":[]}
 
 OR with sections:
@@ -205,7 +195,19 @@ Rules:
 - unit: ONLY "", "ml", "l", "g", "kg", "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"
 - name: ingredient only (e.g., "flour")
 - notes: prep details ("chopped", "diced") or "". Do not wrap in brackets.
-- categories: ONLY from: ${availableCategories.length > 0 ? availableCategories.join(", ") : "[]"}`,
+- categories: ONLY from: ${availableCategories.length > 0 ? availableCategories.join(", ") : []}`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: promptText,
                 },
               ],
             },
@@ -215,6 +217,17 @@ Rules:
     );
 
     if (!response.ok) {
+      // Pass through rate limit errors (429) to frontend
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Rate limit exceeded" }),
+          {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
       return new Response(
         JSON.stringify({ success: false, error: "AI service error" }),
         {
@@ -244,8 +257,9 @@ Rules:
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: errorMessage }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
