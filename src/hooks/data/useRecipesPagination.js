@@ -45,8 +45,8 @@ export const useRecipesPagination = (
         // Logged in: only show user's own recipes
         query = query.eq("user_id", user.id);
       } else {
-        // Not logged in: show default recipes
-        query = query.eq("user_id", import.meta.env.VITE_DEFAULT_USER_ID);
+        // Not logged in: show nothing
+        return [];
       }
 
       const { data: recipes, error } = await query;
