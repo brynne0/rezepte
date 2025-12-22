@@ -189,42 +189,23 @@ serve(async (req) => {
             {
               parts: [
                 {
-                  text: `Parse this recipe text and return ONLY a JSON object (no markdown, no explanation):
+                  text: `Extract recipe data and return valid JSON only.
 
-${textToProcess.trim()}
+                  ${textToProcess.trim()}
 
-JSON format for recipes WITHOUT ingredient sections:
-{
-  "title": "recipe name",
-  "servings": "4",
-  "categories": ["category1", "category2"],
-  "ingredients": [{"quantity": "amount", "unit": "unit_value", "name": "ingredient name", "notes": "prep notes"}],
-  "instructions": ["step 1", "step 2"]
-}
+                  Format (use ingredientSections ONLY if original has explicit sections like "For the dough:"):
+{"title":"","servings":"","categories":[],"ingredients":[{"quantity":"","unit":"","name":"","notes":""}],"instructions":[]}
 
-JSON format for recipes WITH ingredient sections (only use if original text has clear sections like "For the dough:", "For the filling:", etc.):
-{
-  "title": "recipe name",
-  "servings": "4",
-  "categories": ["category1", "category2"],
-  "ingredientSections": [
-    {
-      "subheading": "section name",
-      "ingredients": [{"quantity": "amount", "unit": "unit_value", "name": "ingredient name", "notes": "prep notes"}]
-    }
-  ],
-  "instructions": ["step 1", "step 2"]
-}
+OR with sections:
+{"title":"","servings":"","categories":[],"ingredientSections":[{"subheading":"","ingredients":[]}],"instructions":[]}
 
-Important rules:
-- servings: Extract the actual number of servings as a string (e.g., "4", "6-8"). If no servings mentioned, use "" (empty string). DO NOT use the word "number".
-- Extract quantity as a number or fraction string (e.g., "2", "1/2", "1.5")
-- Extract unit using ONLY these values: "", "ml", "l", "g", "kg", "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"
-- If no specific unit, use "" (empty string)
-- name is the ingredient name only (e.g., "flour", "chicken breast")
-- notes are for preparation details like "chopped", "diced", "at room temperature" (can be empty string if not applicable)
-- categories: ONLY use categories from this list: ${availableCategories.length > 0 ? availableCategories.join(", ") : "breakfast, lunch, dinner, dessert, snack"}. Select 1-3 most relevant categories. Use exact category names from the list.
-- Only use ingredientSections if the original recipe explicitly has sections (like "For the dough:", "For the topping:", etc.). Otherwise use flat ingredients array.`,
+Rules:
+- servings: number as string ("4", "6-8") or "" if none
+- quantity: number/fraction ("2", "1/2", "1.5")
+- unit: ONLY "", "ml", "l", "g", "kg", "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"
+- name: ingredient only (e.g., "flour")
+- notes: prep details ("chopped", "diced") or "". Do not wrap in brackets.
+- categories: ONLY from: ${availableCategories.length > 0 ? availableCategories.join(", ") : "[]"}`,
                 },
               ],
             },
