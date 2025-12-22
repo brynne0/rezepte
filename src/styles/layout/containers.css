@@ -43,8 +43,8 @@
   gap: 1rem;
 }
 
-.page-centered.no-gap {
-  gap: 0;
+.page-centered.high {
+  min-height: 50vh;
 }
 
 .welcome-card {

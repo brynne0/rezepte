@@ -74,7 +74,6 @@ describe("Header Component", () => {
     setSelectedCategory: vi.fn(),
     setSearchTerm: vi.fn(),
     searchTerm: "",
-    setLoginMessage: vi.fn(),
     loginMessage: "",
     disableLanguageSwitch: false,
   };
@@ -239,20 +238,9 @@ describe("Header Component", () => {
 
     await waitFor(() => {
       expect(mockSignOut).toHaveBeenCalled();
-      expect(defaultProps.setLoginMessage).toHaveBeenCalledWith("Logged Out");
       expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("");
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
-  });
-
-  test("displays login message when provided", () => {
-    render(
-      <TestWrapper>
-        <Header {...defaultProps} loginMessage="Welcome back!" />
-      </TestWrapper>
-    );
-
-    expect(screen.getByText("Welcome back!")).toBeInTheDocument();
   });
 
   test("displays user display name when logged in", async () => {

@@ -23,8 +23,6 @@ const Header = ({
   setSelectedCategory,
   setSearchTerm,
   searchTerm,
-  setLoginMessage,
-  loginMessage,
   disableLanguageSwitch = false,
   sortBy,
   setSortBy,
@@ -85,14 +83,9 @@ const Header = ({
   const handleLogout = async () => {
     await signOut();
 
-    setLoginMessage(t("logged_out"));
     setFirstName("");
     setSearchTerm("");
     navigate("/");
-
-    setTimeout(() => {
-      setLoginMessage("");
-    }, 3000);
   };
 
   // Reusable Language Selector Component
@@ -234,8 +227,7 @@ const Header = ({
           {/* Title */}
           <div className="title-wrapper">
             {/* Display user's first name above header or login message */}
-            {loginMessage && <span className="red-small">{loginMessage}</span>}
-            {!loginMessage && firstName && (
+            {firstName && (
               <span className="first-name"> {`${firstName}'s`}</span>
             )}
             <button
