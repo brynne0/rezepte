@@ -451,7 +451,7 @@ const Recipe = ({ isSharedView = false }) => {
           {recipe.notes && recipe.notes.length > 0 && (
             <div className="recipe-subheading">
               <h2>{t("notes")}:</h2>
-              {recipe.notes}
+              <div className="recipe-notes-content">{recipe.notes}</div>
             </div>
           )}
         </div>
