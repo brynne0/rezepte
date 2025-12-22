@@ -134,7 +134,15 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
           section.ingredients,
           targetLanguage
         );
-        return { ...section, ingredients: translatedIngredients };
+        // Translate the section subheading
+        const translatedSubheading = section.subheading
+          ? await translateText(section.subheading, targetLanguage)
+          : section.subheading;
+        return {
+          ...section,
+          subheading: translatedSubheading,
+          ingredients: translatedIngredients,
+        };
       })
     );
   }
