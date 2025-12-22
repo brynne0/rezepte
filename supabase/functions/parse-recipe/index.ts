@@ -229,9 +229,12 @@ Rules:
       }
 
       return new Response(
-        JSON.stringify({ success: false, error: "AI service error" }),
+        JSON.stringify({
+          success: false,
+          error: `All AI models failed. Last error: ${lastError || "Unknown error"}. Please try again later.`,
+        }),
         {
-          status: 500,
+          status: 503,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
