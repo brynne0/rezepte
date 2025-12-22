@@ -248,7 +248,7 @@ const RecipeForm = ({
         <h1 className="forta">{title}</h1>
 
         {/* Recipe Autofill Toggle Button */}
-        {!isEditMode ? (
+        {!isEditingTranslation ? (
           <div>
             <button
               type="button"
