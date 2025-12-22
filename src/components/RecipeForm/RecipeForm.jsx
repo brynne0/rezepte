@@ -248,7 +248,7 @@ const RecipeForm = ({
         <h1 className="forta">{title}</h1>
 
         {/* Recipe Autofill Toggle Button */}
-       {!isEditMode ? (
+        {!isEditMode ? (
           <div>
             <button
               type="button"
@@ -260,8 +260,8 @@ const RecipeForm = ({
             </button>
           </div>
         ) : (
-          <div style={{ visibility: 'hidden' }}>
-           <Clipboard size={28} />
+          <div style={{ visibility: "hidden" }}>
+            <Clipboard size={28} />
           </div>
         )}
       </header>
