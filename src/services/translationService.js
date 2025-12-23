@@ -274,7 +274,11 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
 };
 
 // Helper function to get the correct ingredient name for display
-const getIngredientDisplayName = async (ingredient, targetLanguage, sourceLanguage = 'en') => {
+const getIngredientDisplayName = async (
+  ingredient,
+  targetLanguage,
+  sourceLanguage = "en"
+) => {
   const usePlural = ingredient.is_plural || false;
 
   // Check for recipe-specific name overrides
@@ -385,22 +389,20 @@ const getIngredientDisplayName = async (ingredient, targetLanguage, sourceLangua
     const result = usePlural ? finalPlural : finalSingular;
     return result;
   } catch (error) {
-    console.error(
-      `Failed to create translation for ${sourceSingular}:`,
-      error
-    );
+    console.error(`Failed to create translation for ${sourceSingular}:`, error);
 
     // Fallback to source text if translation fails
-    const result =
-      usePlural && sourcePlural
-        ? sourcePlural
-        : sourceSingular;
+    const result = usePlural && sourcePlural ? sourcePlural : sourceSingular;
     return result;
   }
 };
 
 // Get translated ingredients
-const getTranslatedIngredients = async (ingredients, targetLanguage, sourceLanguage = 'en') => {
+const getTranslatedIngredients = async (
+  ingredients,
+  targetLanguage,
+  sourceLanguage = "en"
+) => {
   if (!ingredients || ingredients.length === 0) return ingredients;
 
   try {

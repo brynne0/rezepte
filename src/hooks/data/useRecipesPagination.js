@@ -9,7 +9,8 @@ export const useRecipesPagination = (
   limit = 12,
   category = "all",
   searchTerm = "",
-  sortBy = "created_at_desc"
+  sortBy = "created_at_desc",
+  enabled = true
 ) => {
   const [allRecipes, setAllRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +68,12 @@ export const useRecipesPagination = (
   };
 
   const loadRecipes = useCallback(async () => {
+    if (!enabled) {
+      setAllRecipes([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       const data = await fetchRecipesWithCategories();
 
@@ -82,10 +89,16 @@ export const useRecipesPagination = (
     } finally {
       setLoading(false);
     }
-  }, [i18n.language]);
+  }, [enabled, i18n.language]);
 
   const refreshRecipes = useCallback(
     async (showLoading = false) => {
+      if (!enabled) {
+        setAllRecipes([]);
+        setLoading(false);
+        return;
+      }
+
       if (showLoading) setLoading(true);
       try {
         const data = await fetchRecipesWithCategories();
@@ -105,7 +118,7 @@ export const useRecipesPagination = (
         if (showLoading) setLoading(false);
       }
     },
-    [i18n.language]
+    [enabled, i18n.language]
   );
 
   useEffect(() => {
