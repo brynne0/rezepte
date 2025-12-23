@@ -41,10 +41,6 @@
   font-size: 0.9rem;
 }
 
-.add-section-wrapper {
-  margin: 1.5rem 0rem 1rem 0;
-}
-
 .conversion-description {
   font-weight: 500;
   color: var(--text-primary);

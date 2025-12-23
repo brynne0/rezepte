@@ -727,12 +727,20 @@ const CookingTimes = () => {
     return <LoadingAcorn />;
   }
 
+  const handleBackNavigation = () => {
+    if (activeTab === "conversions") {
+      setActiveTab("cooking-times");
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <div className="card card-form">
       <div className="flex-column-center relative">
         <button
           className="btn-unstyled back-arrow-left"
-          onClick={() => navigate(-1)}
+          onClick={handleBackNavigation}
           aria-label={t("go_back", "Go Back")}
         >
           <ArrowBigLeft size={28} />
@@ -826,7 +834,7 @@ const CookingTimes = () => {
                     ) : (
                       <>
                         {/* Form header */}
-                        <div className="add-section-wrapper flex-between">
+                        <div className="flex-between">
                           {isEditMode && (
                             <button
                               type="button"
