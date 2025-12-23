@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -21,8 +21,20 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
     rootMargin: "100px", // Start loading 100px before entering viewport
   });
 
-  // Get main image
+  // Get main image - extract stable values for memoization
   const mainImage = getMainImage(recipe.images);
+  const mainImageId = mainImage?.id;
+  const mainImageUrl = mainImage?.url;
+
+  // Memoize optimized URL using stable primitive values to enable proper caching
+  const optimizedImageUrl = useMemo(() => {
+    if (!mainImageUrl) return null;
+    return getOptimizedImageUrl(mainImageUrl, {
+      width: 240,
+      height: 160,
+      quality: 50,
+    });
+  }, [mainImageUrl]);
 
   // Only show images if user is logged in AND showImages is true AND card has been visible
   const shouldShowImages = isLoggedIn && showImages && hasBeenVisible;
@@ -75,20 +87,16 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           </a>
         )}
       </div>
-      {shouldShowImages && mainImage && !imageError && (
+      {shouldShowImages && mainImage && !imageError && optimizedImageUrl && (
         <div className="recipe-image-container">
           <img
             className={`recipe-image ${imageLoaded ? "loaded" : "loading"}`}
-            src={getOptimizedImageUrl(mainImage.url, {
-              width: 240,
-              height: 160,
-              quality: 50,
-            })}
+            src={optimizedImageUrl}
             alt={recipe.title}
             loading="lazy"
             onLoad={handleImageLoad}
             onError={handleImageError}
-            key={mainImage.id}
+            key={mainImageId}
           />
           {!imageLoaded && (
             <div className="recipe-image-loading">
