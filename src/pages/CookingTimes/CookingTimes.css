@@ -19,6 +19,13 @@
   gap: 1rem;
   color: var(--color-text-primary);
   padding-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .cookingtime-tabs-wrapper {
+    padding-top: 2rem;
+  }
 }
 
 .cookingtime-section-subheading {

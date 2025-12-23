@@ -1,13 +1,11 @@
 /* Conversions Tab Styles */
-
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
   overflow: hidden;
+  padding-bottom: 2rem;
 }
 
 @media (max-width: 768px) {

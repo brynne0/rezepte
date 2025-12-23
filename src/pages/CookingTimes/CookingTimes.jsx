@@ -732,14 +732,14 @@ const CookingTimes = () => {
   return (
     <div className="card card-form">
       <div className="flex-column-center relative">
+        <button
+          className="btn-unstyled back-arrow-left"
+          onClick={() => navigate(-1)}
+          aria-label={t("go_back", "Go Back")}
+        >
+          <ArrowBigLeft size={28} />
+        </button>
         <div className="cookingtime-tabs-wrapper flex-center ">
-          <button
-            className="btn-unstyled back-arrow-left"
-            onClick={() => navigate(-1)}
-            aria-label={t("go_back", "Go Back")}
-          >
-            <ArrowBigLeft size={28} />
-          </button>
           <button
             className={`tab-button ${activeTab === "cooking-times" ? "active" : ""}`}
             onClick={() => setActiveTab("cooking-times")}
