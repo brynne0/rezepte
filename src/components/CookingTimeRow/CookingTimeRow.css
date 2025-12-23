@@ -8,6 +8,9 @@
   display: flex;
   gap: 1rem;
   align-items: flex-start;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .cooking-time-header {
@@ -30,7 +33,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 0.5rem 0;
   background-color: var(--color-background-card);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -40,7 +43,7 @@
 .cooking-time-content {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex: 1;
 }
 
@@ -54,7 +57,7 @@
 .cooking-time-edit-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex: 1;
 }
 
@@ -65,7 +68,8 @@
 
 .edit-row-2col input {
   flex: 1;
-  min-width: 80px;
+  min-width: 0;
+  width: 100%;
 }
 
 .edit-row-1col {

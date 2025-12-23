@@ -41,6 +41,10 @@
   font-size: 0.9rem;
 }
 
+.add-section-wrapper {
+  padding-bottom: 1rem;
+}
+
 .conversion-description {
   font-weight: 500;
   color: var(--text-primary);
@@ -158,10 +162,6 @@
     flex-direction: column;
     gap: 0.5rem;
     align-items: flex-start;
-  }
-
-  .drag-handle {
-    align-self: flex-start;
   }
 
   .item-actions {

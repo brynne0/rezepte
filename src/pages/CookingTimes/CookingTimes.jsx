@@ -728,7 +728,9 @@ const CookingTimes = () => {
   }
 
   const handleBackNavigation = () => {
-    if (activeTab === "conversions") {
+    if (isEditMode) {
+      setIsEditMode(false);
+    } else if (activeTab === "conversions") {
       setActiveTab("cooking-times");
     } else {
       navigate(-1);
@@ -834,7 +836,7 @@ const CookingTimes = () => {
                     ) : (
                       <>
                         {/* Form header */}
-                        <div className="flex-between">
+                        <div className="flex-between add-section-wrapper">
                           {isEditMode && (
                             <button
                               type="button"
@@ -856,7 +858,7 @@ const CookingTimes = () => {
                               >
                                 {(provided, snapshot) => (
                                   <div
-                                    className={`flex-column cooking-time-list ${
+                                    className={`flex-column ${
                                       snapshot.isDraggingOver ? "drag-over" : ""
                                     }`}
                                     {...provided.droppableProps}
