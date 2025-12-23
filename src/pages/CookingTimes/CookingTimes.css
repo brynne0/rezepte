@@ -18,6 +18,7 @@
 .cookingtime-tabs-wrapper {
   gap: 1rem;
   color: var(--color-text-primary);
+  padding-bottom: 2rem;
 }
 
 .cookingtime-section-subheading {
@@ -31,10 +32,6 @@
   color: var(--text-secondary);
   border-radius: calc(var(--border-radius) / 2);
   font-size: 0.9rem;
-}
-
-.cooking-times-search-bar {
-  margin: 1.5rem 0rem 2rem 0;
 }
 
 .add-section-wrapper {

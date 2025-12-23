@@ -20,21 +20,15 @@ import {
   updateCookingTime,
   deleteCookingTime,
 } from "../../services/cookingTimesService";
-import {
-  getConversionsForCategory,
-  getConversionCategories,
-  searchConversions,
-} from "../../data/conversions";
+import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
 import "./CookingTimes.css";
 
 const CookingTimes = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [staticConversions, setStaticConversions] = useState([]);
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredConversions, setFilteredConversions] = useState([]);
 
   // Form data structure (matching RecipeForm pattern exactly)
   const [formData, setFormData] = useState({
@@ -107,16 +101,6 @@ const CookingTimes = () => {
 
       // Organize data into sections exactly like RecipeForm
       organizeCookingTimesIntoSections(cookingTimesData);
-
-      // Load static conversions
-      const allConversions = [];
-      getConversionCategories().forEach((category) => {
-        getConversionsForCategory(category).forEach((conversion) => {
-          allConversions.push({ ...conversion, category });
-        });
-      });
-      setStaticConversions(allConversions);
-      setFilteredConversions(allConversions);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -128,11 +112,10 @@ const CookingTimes = () => {
     loadData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filter data based on search query
+  // Filter data based on search query (cooking times only)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredData(formData);
-      setFilteredConversions(staticConversions);
       return;
     }
 
@@ -161,10 +144,7 @@ const CookingTimes = () => {
       ungroupedCookingTimes: filteredUngrouped,
       cookingTimeSections: filteredSections,
     });
-
-    // Use the search function from conversions data
-    setFilteredConversions(searchConversions(query));
-  }, [searchQuery, formData, staticConversions]);
+  }, [searchQuery, formData]);
 
   // Add cooking time function (matches RecipeForm addIngredient pattern)
   const addCookingTime = useCallback(
@@ -745,35 +725,21 @@ const CookingTimes = () => {
     />
   );
 
-  const renderConversionItem = (item) => (
-    <div
-      key={`${item.from}-${item.to}-${item.category}`}
-      className="conversion-item"
-    >
-      <div className="item-header">
-        <h3 className="item-title">
-          {item.from} → {item.to}
-        </h3>
-      </div>
-
-      <div className="item-details">
-        <div className="conversion-description">{item.description}</div>
-
-        <span className="category-badge">
-          {t(item.category, item.category)}
-        </span>
-      </div>
-    </div>
-  );
-
   if (loading) {
     return <LoadingAcorn />;
   }
 
   return (
-    <div className="card card-grocery">
-      <div className="flex-column-center">
-        <div className="cookingtime-tabs-wrapper flex-center">
+    <div className="card card-form">
+      <div className="flex-column-center relative">
+        <div className="cookingtime-tabs-wrapper flex-center ">
+          <button
+            className="btn-unstyled back-arrow-left"
+            onClick={() => navigate(-1)}
+            aria-label={t("go_back", "Go Back")}
+          >
+            <ArrowBigLeft size={28} />
+          </button>
           <button
             className={`tab-button ${activeTab === "cooking-times" ? "active" : ""}`}
             onClick={() => setActiveTab("cooking-times")}
@@ -792,28 +758,12 @@ const CookingTimes = () => {
 
         {/* Cooking Times Tab Content */}
         <div className={`${isEditMode ? "flex-column-center" : ""}`}>
-          {/* Search Bar and Controls - Hidden in edit mode and when no cooking times */}
-          {!isEditMode &&
+          {/* Search Bar and Controls - Only for cooking times tab */}
+          {activeTab === "cooking-times" &&
+            !isEditMode &&
             (formData.ungroupedCookingTimes.length > 0 ||
               formData.cookingTimeSections.length > 0) && (
-              <div className="cooking-times-search-bar flex-between">
-                <button
-                  className="btn-unstyled back-arrow"
-                  onClick={() => {
-                    if (isEditMode) {
-                      setIsEditMode(false);
-                    } else {
-                      navigate(-1);
-                    }
-                  }}
-                  aria-label={
-                    isEditMode
-                      ? t("view_mode", "View Mode")
-                      : t("go_back", "Go Back")
-                  }
-                >
-                  <ArrowBigLeft size={28} />
-                </button>
+              <div className="flex-between">
                 <form
                   className="search-bar"
                   onSubmit={(e) => {
@@ -839,17 +789,13 @@ const CookingTimes = () => {
                   </div>
                 </form>
 
-                {activeTab === "cooking-times" &&
-                  (formData.ungroupedCookingTimes.length > 0 ||
-                    formData.cookingTimeSections.length > 0) && (
-                    <button
-                      className="btn btn-unstyled"
-                      onClick={() => setIsEditMode(!isEditMode)}
-                      aria-label={t("edit_mode", "Edit Mode")}
-                    >
-                      <Pencil size={20} />
-                    </button>
-                  )}
+                <button
+                  className="btn btn-unstyled"
+                  onClick={() => setIsEditMode(!isEditMode)}
+                  aria-label={t("edit_mode", "Edit Mode")}
+                >
+                  <Pencil size={20} />
+                </button>
               </div>
             )}
 
@@ -1155,27 +1101,9 @@ const CookingTimes = () => {
                 )}
               </>
             )}
-
-            {activeTab === "conversions" && (
-              <>
-                {filteredConversions.length === 0 && searchQuery ? (
-                  <div className="no-results">
-                    <p>
-                      {t(
-                        "no_search_results",
-                        "No results found for your search."
-                      )}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="items-grid">
-                    {filteredConversions.map(renderConversionItem)}
-                  </div>
-                )}
-              </>
-            )}
           </DragDropContext>
         </div>
+        {activeTab === "conversions" && <ConversionsTab />}
       </div>
     </div>
   );

@@ -239,5 +239,11 @@
   "delete_image": "Delete image",
 
   "recipe_with_ingredients": "Recipe with",
-  "view_recipe_details": "View recipe details"
+  "view_recipe_details": "View recipe details",
+
+  "conversions_tab": "Conversions",
+  "cooking_times_tab": "Cooking Times",
+  "volume": "Volume",
+  "weight": "Weight",
+  "temperature": "Temperature"
 }

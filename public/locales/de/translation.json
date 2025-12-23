@@ -240,5 +240,11 @@
   "delete_image": "Bild löschen",
 
   "recipe_with_ingredients": "Rezept mit",
-  "view_recipe_details": "Rezeptdetails anzeigen"
+  "view_recipe_details": "Rezeptdetails anzeigen",
+
+  "conversions_tab": "Umrechnungen",
+  "cooking_times_tab": "Garzeiten",
+  "volume": "Volumen",
+  "weight": "Gewicht",
+  "temperature": "Temperatur"
 }
