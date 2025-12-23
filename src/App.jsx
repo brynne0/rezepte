@@ -1,4 +1,5 @@
 import "../src/styles/App.css";
+import SEO from "./components/SEO/SEO";
 
 // React & hooks
 import { useState, useEffect } from "react";
@@ -214,6 +215,11 @@ function AppRoutes(props) {
           path="/"
           element={
             <>
+              <SEO
+                title="Rezepte"
+                description="Organise, save, and share your recipes."
+                url="https://acorn-rezepte.com/"
+              />
               {isOnline && (
                 <CategoryFilter
                   categories={props.categories}
