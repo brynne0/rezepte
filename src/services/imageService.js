@@ -44,7 +44,7 @@ export const uploadRecipeImage = async (file, recipeId) => {
     const { error } = await supabase.storage
       .from(STORAGE_BUCKET)
       .upload(filePath, file, {
-        cacheControl: "3600",
+        cacheControl: "public, max-age=31536000, immutable", // Cache for 1 year (images are immutable due to unique filenames)
         upsert: false,
       });
 
