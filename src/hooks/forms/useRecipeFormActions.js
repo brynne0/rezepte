@@ -8,6 +8,7 @@ export const useRecipeFormActions = ({
   formData,
   setFormData,
   setSubmissionError,
+  setValidationErrors,
   setIsUploadingImages,
   setUploadProgress,
   setUploadingImageIds,
@@ -132,9 +133,13 @@ export const useRecipeFormActions = ({
       // Validate form
       const errors = validateForm();
       if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
         window.scrollTo(0, 0);
         return;
       }
+
+      // Clear validation errors if form is valid
+      setValidationErrors({});
 
       const recipeData = transformFormDataForSubmission();
       const hasLocalImages = formData.images?.some((img) => img.file);
