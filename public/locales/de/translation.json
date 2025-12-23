@@ -198,6 +198,7 @@
   "parse_error_rate_limit": "Zu viele Anfragen. Bitte einen Moment warten und erneut versuchen.",
   "parse_error_server": "Der Autofill-Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
   "parse_error_network": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+  "parse_error_blocked": "Die Website blockiert den automatisierten Zugriff. Bitte stattdessen versuchen, den Rezepttext direkt zu kopieren und einzufügen.",
   "autofill": "Automatisches Ausfüllen",
   "autofilling": "Automatisches Ausfüllen...",
 
