@@ -100,6 +100,8 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
         setParseError(t("parse_error_rate_limit"));
       } else if (error.message === "SERVER_ERROR") {
         setParseError(t("parse_error_server"));
+      } else if (error.message?.includes("blocking automated access")) {
+        setParseError(t("parse_error_blocked"));
       } else if (error.message?.includes("fetch")) {
         setParseError(t("parse_error_network"));
       } else {

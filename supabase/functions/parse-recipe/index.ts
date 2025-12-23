@@ -97,6 +97,12 @@ serve(async (req) => {
         });
 
         if (!urlResponse.ok) {
+          // Specific error message for 403 Forbidden
+          if (urlResponse.status === 403) {
+            throw new Error(
+              "The website is blocking automated access. Please try copying and pasting the recipe text directly instead."
+            );
+          }
           throw new Error(`Failed to fetch URL: ${urlResponse.statusText}`);
         }
 
@@ -166,10 +172,25 @@ serve(async (req) => {
           }
         }
       } catch (error) {
+        const errorMsg =
+          error instanceof Error ? error.message : "Unknown error";
+        // If it's the 403 blocking error, return it directly without wrapping
+        if (errorMsg.includes("blocking automated access")) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: errorMsg,
+            }),
+            {
+              status: 403,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
         return new Response(
           JSON.stringify({
             success: false,
-            error: `Failed to fetch recipe from URL: ${error.message}`,
+            error: `Failed to fetch recipe from URL: ${errorMsg}`,
           }),
           {
             status: 500,
