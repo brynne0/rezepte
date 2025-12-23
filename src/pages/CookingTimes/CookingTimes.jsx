@@ -696,9 +696,7 @@ const CookingTimes = () => {
       </h3>
       <button className="btn btn-tertiary" onClick={onAddClick}>
         <Plus size={20} />
-        {type === "cooking-times"
-          ? t("add_first_cooking_time", "Add your first cooking time")
-          : t("add_first_conversion", "Add your first conversion")}
+        t("add_first_cooking_time")
       </button>
     </div>
   );
@@ -777,7 +775,7 @@ const CookingTimes = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="input input--secondary search-input-with-icon"
-                      placeholder={t("search_placeholder", "Search...")}
+                      placeholder={t("search")}
                     />
                     <button
                       className="btn btn-icon btn-icon-neutral btn-search"

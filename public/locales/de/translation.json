@@ -246,5 +246,11 @@
   "cooking_times_tab": "Garzeiten",
   "volume": "Volumen",
   "weight": "Gewicht",
-  "temperature": "Temperatur"
+  "temperature": "Temperatur",
+
+  "no_cooking_times_title": "Noch keine Garzeiten",
+  "add_first_cooking_time": "Fügen Sie Ihre erste Garzeit hinzu",
+  "edit_mode": "Bearbeitungsmodus",
+  "add_cooking_time": "Garzeit hinzufügen",
+  "no_search_results": "Keine Ergebnisse für Ihre Suche gefunden."
 }
