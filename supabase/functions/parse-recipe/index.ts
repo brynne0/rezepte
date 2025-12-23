@@ -97,6 +97,12 @@ serve(async (req) => {
         });
 
         if (!urlResponse.ok) {
+          // Specific error message for 403 Forbidden
+          if (urlResponse.status === 403) {
+            throw new Error(
+              "The website is blocking automated access. Please try copying and pasting the recipe text directly instead."
+            );
+          }
           throw new Error(`Failed to fetch URL: ${urlResponse.statusText}`);
         }
 
@@ -166,10 +172,25 @@ serve(async (req) => {
           }
         }
       } catch (error) {
+        const errorMsg =
+          error instanceof Error ? error.message : "Unknown error";
+        // If it's the 403 blocking error, return it directly without wrapping
+        if (errorMsg.includes("blocking automated access")) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: errorMsg,
+            }),
+            {
+              status: 403,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
         return new Response(
           JSON.stringify({
             success: false,
-            error: `Failed to fetch recipe from URL: ${error.message}`,
+            error: `Failed to fetch recipe from URL: ${errorMsg}`,
           }),
           {
             status: 500,
@@ -179,17 +200,16 @@ serve(async (req) => {
       }
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `Parse this recipe text and return ONLY a JSON object (no markdown, no explanation):
+    // Model fallback configuration: try models in order until one succeeds
+    const models = [
+      "gemini-2.5-flash", // Current stable model - try first
+      "gemini-2.5-flash-lite", // Lighter fallback
+      "gemini-1.5-flash", // Older stable version
+      "gemini-1.5-flash-latest", // Latest 1.5 variant
+      "gemini-1.5-pro", // More capable but slower fallback
+    ];
+
+    const promptText = `Parse this recipe text and return ONLY a JSON object (no markdown, no explanation):
 
 ${textToProcess.trim()}
 
@@ -224,20 +244,67 @@ Important rules:
 - name is the ingredient name only (e.g., "flour", "chicken breast")
 - notes are for preparation details like "chopped", "diced", "at room temperature" (can be empty string if not applicable)
 - categories: ONLY use categories from this list: ${availableCategories.length > 0 ? availableCategories.join(", ") : "breakfast, lunch, dinner, dessert, snack"}. Select 1-3 most relevant categories. Use exact category names from the list.
-- Only use ingredientSections if the original recipe explicitly has sections (like "For the dough:", "For the topping:", etc.). Otherwise use flat ingredients array.`,
+- Only use ingredientSections if the original recipe explicitly has sections (like "For the dough:", "For the topping:", etc.). Otherwise use flat ingredients array.`;
+
+    let response;
+    let lastError = null;
+    let usedModel = null;
+
+    // Try each model in sequence until one works
+    for (const model of models) {
+      try {
+        console.log(`Attempting to use model: ${model}`);
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [{ text: promptText }],
                 },
               ],
-            },
-          ],
-        }),
-      }
-    );
+            }),
+          }
+        );
 
-    if (!response.ok) {
+        // Check if we got a rate limit error (429) or resource exhausted
+        if (response.status === 429) {
+          const errorData = await response.json();
+          console.log(
+            `Model ${model} rate limited: ${JSON.stringify(errorData)}`
+          );
+          lastError = `Rate limit exceeded for ${model}`;
+          continue; // Try next model
+        }
+
+        if (response.ok) {
+          usedModel = model;
+          console.log(`Successfully used model: ${model}`);
+          break; // Success! Exit the loop
+        }
+
+        // Other error - try next model
+        const errorData = await response.json();
+        console.log(`Model ${model} failed: ${JSON.stringify(errorData)}`);
+        lastError = `${model} failed: ${errorData.error?.message || "Unknown error"}`;
+      } catch (error) {
+        console.log(`Exception with model ${model}: ${error.message}`);
+        lastError = `${model} exception: ${error.message}`;
+        continue; // Try next model
+      }
+    }
+
+    // If all models failed, return error
+    if (!response || !response.ok) {
       return new Response(
-        JSON.stringify({ success: false, error: "AI service error" }),
+        JSON.stringify({
+          success: false,
+          error: `All AI models failed. Last error: ${lastError || "Unknown error"}. Please try again later.`,
+        }),
         {
-          status: 500,
+          status: 503,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );

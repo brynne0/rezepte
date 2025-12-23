@@ -77,7 +77,8 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
         recipe.ungroupedIngredients.map(async (ingredient) => {
           const displayName = await getIngredientDisplayName(
             ingredient,
-            targetLanguage
+            targetLanguage,
+            recipe.original_language
           );
           return { ...ingredient, name: displayName };
         })
@@ -92,7 +93,8 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
             section.ingredients.map(async (ingredient) => {
               const displayName = await getIngredientDisplayName(
                 ingredient,
-                targetLanguage
+                targetLanguage,
+                recipe.original_language
               );
               return { ...ingredient, name: displayName };
             })
@@ -122,7 +124,8 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
   if (recipe.ungroupedIngredients) {
     translatedResult.ungroupedIngredients = await getTranslatedIngredients(
       recipe.ungroupedIngredients,
-      targetLanguage
+      targetLanguage,
+      recipe.original_language
     );
   }
 
@@ -132,9 +135,18 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
       recipe.ingredientSections.map(async (section) => {
         const translatedIngredients = await getTranslatedIngredients(
           section.ingredients,
-          targetLanguage
+          targetLanguage,
+          recipe.original_language
         );
-        return { ...section, ingredients: translatedIngredients };
+        // Translate the section subheading
+        const translatedSubheading = section.subheading
+          ? await translateText(section.subheading, targetLanguage)
+          : section.subheading;
+        return {
+          ...section,
+          subheading: translatedSubheading,
+          ingredients: translatedIngredients,
+        };
       })
     );
   }
@@ -262,7 +274,11 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
 };
 
 // Helper function to get the correct ingredient name for display
-const getIngredientDisplayName = async (ingredient, targetLanguage) => {
+const getIngredientDisplayName = async (
+  ingredient,
+  targetLanguage,
+  sourceLanguage = "en"
+) => {
   const usePlural = ingredient.is_plural || false;
 
   // Check for recipe-specific name overrides
@@ -270,8 +286,26 @@ const getIngredientDisplayName = async (ingredient, targetLanguage) => {
     return ingredient.name_overrides[targetLanguage];
   }
 
-  // If target language is English, use database columns
-  if (targetLanguage === "en") {
+  // If target language matches source language, use the appropriate source
+  if (targetLanguage === sourceLanguage) {
+    // If source is English, use database columns
+    if (sourceLanguage === "en") {
+      const result =
+        usePlural && ingredient.plural_name
+          ? ingredient.plural_name
+          : ingredient.singular_name;
+      return result;
+    }
+    // If source is another language, use translations
+    const translation = ingredient.translated_names?.[sourceLanguage];
+    if (translation && typeof translation === "object") {
+      const result =
+        usePlural && translation.plural_name
+          ? translation.plural_name
+          : translation.singular_name;
+      return result;
+    }
+    // Fallback to database columns if translation not found
     const result =
       usePlural && ingredient.plural_name
         ? ingredient.plural_name
@@ -279,24 +313,46 @@ const getIngredientDisplayName = async (ingredient, targetLanguage) => {
     return result;
   }
 
-  // For other languages, check translations
-  const translation = ingredient.translated_names?.[targetLanguage];
-  if (translation && typeof translation === "object") {
+  // Translation needed: sourceLanguage → targetLanguage
+  // First check if the target translation already exists
+  const targetTranslation = ingredient.translated_names?.[targetLanguage];
+  if (targetTranslation && typeof targetTranslation === "object") {
     const result =
-      usePlural && translation.plural_name
-        ? translation.plural_name
-        : translation.singular_name;
+      usePlural && targetTranslation.plural_name
+        ? targetTranslation.plural_name
+        : targetTranslation.singular_name;
     return result;
   }
 
+  // Need to translate from source to target
+  // Get the source text
+  let sourceSingular, sourcePlural;
+
+  if (sourceLanguage === "en") {
+    // Source is English, use database columns
+    sourceSingular = ingredient.singular_name;
+    sourcePlural = ingredient.plural_name;
+  } else {
+    // Source is another language, use translations
+    const sourceTranslation = ingredient.translated_names?.[sourceLanguage];
+    if (sourceTranslation && typeof sourceTranslation === "object") {
+      sourceSingular = sourceTranslation.singular_name;
+      sourcePlural = sourceTranslation.plural_name;
+    } else {
+      // Fallback to English if source translation not found
+      sourceSingular = ingredient.singular_name;
+      sourcePlural = ingredient.plural_name;
+    }
+  }
+
   try {
-    // Translate both singular and plural forms
+    // Translate both singular and plural forms from source to target
     const translatedSingular = await translateText(
-      ingredient.singular_name,
+      sourceSingular,
       targetLanguage
     );
-    const translatedPlural = ingredient.plural_name
-      ? await translateText(ingredient.plural_name, targetLanguage)
+    const translatedPlural = sourcePlural
+      ? await translateText(sourcePlural, targetLanguage)
       : translatedSingular;
 
     // Only lowercase if not German
@@ -333,22 +389,20 @@ const getIngredientDisplayName = async (ingredient, targetLanguage) => {
     const result = usePlural ? finalPlural : finalSingular;
     return result;
   } catch (error) {
-    console.error(
-      `Failed to create translation for ${ingredient.singular_name}:`,
-      error
-    );
+    console.error(`Failed to create translation for ${sourceSingular}:`, error);
 
-    // Fallback to English if translation fails
-    const result =
-      usePlural && ingredient.plural_name
-        ? ingredient.plural_name
-        : ingredient.singular_name;
+    // Fallback to source text if translation fails
+    const result = usePlural && sourcePlural ? sourcePlural : sourceSingular;
     return result;
   }
 };
 
 // Get translated ingredients
-const getTranslatedIngredients = async (ingredients, targetLanguage) => {
+const getTranslatedIngredients = async (
+  ingredients,
+  targetLanguage,
+  sourceLanguage = "en"
+) => {
   if (!ingredients || ingredients.length === 0) return ingredients;
 
   try {
@@ -357,7 +411,8 @@ const getTranslatedIngredients = async (ingredients, targetLanguage) => {
         // Get translated ingredient name (with plural consideration)
         const translatedName = await getIngredientDisplayName(
           ingredient,
-          targetLanguage
+          targetLanguage,
+          sourceLanguage
         );
 
         // Get translated ingredient notes (cached in recipe_ingredients table)

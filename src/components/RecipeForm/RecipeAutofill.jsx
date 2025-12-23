@@ -74,7 +74,14 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to parse recipe");
+        // Handle specific error cases
+        if (response.status === 429) {
+          throw new Error("RATE_LIMIT");
+        } else if (response.status >= 500) {
+          throw new Error("SERVER_ERROR");
+        } else {
+          throw new Error(data.error || "PARSE_FAILED");
+        }
       }
 
       const parsed = data.recipe;
@@ -87,7 +94,19 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
       setParseError("");
     } catch (error) {
       console.error("Error parsing recipe:", error);
-      setParseError(t("parse_error"));
+
+      // Map error types to translation keys
+      if (error.message === "RATE_LIMIT") {
+        setParseError(t("parse_error_rate_limit"));
+      } else if (error.message === "SERVER_ERROR") {
+        setParseError(t("parse_error_server"));
+      } else if (error.message?.includes("blocking automated access")) {
+        setParseError(t("parse_error_blocked"));
+      } else if (error.message?.includes("fetch")) {
+        setParseError(t("parse_error_network"));
+      } else {
+        setParseError(t("parse_error"));
+      }
     } finally {
       setIsParsing(false);
     }

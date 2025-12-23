@@ -34,6 +34,7 @@ export const useRecipeForm = (options) => {
     formData: formState.formData,
     setFormData: formState.setFormData,
     setSubmissionError: formState.setSubmissionError,
+    setValidationErrors: formState.setValidationErrors,
     setIsUploadingImages: formState.setIsUploadingImages,
     setUploadProgress: formState.setUploadProgress,
     setUploadingImageIds: formState.setUploadingImageIds,

@@ -1,4 +1,5 @@
 import "../src/styles/App.css";
+import SEO from "./components/SEO/SEO";
 
 // React & hooks
 import { useState, useEffect } from "react";
@@ -58,7 +59,14 @@ function App() {
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const { recipes, loading, refreshRecipes, totalRecipeCount, paginationInfo } =
-    useRecipesPagination(currentPage, 36, selectedCategory, searchTerm, sortBy);
+    useRecipesPagination(
+      currentPage,
+      36,
+      selectedCategory,
+      searchTerm,
+      sortBy,
+      isLoggedIn
+    );
 
   // Categories from database
   const {
@@ -207,6 +215,11 @@ function AppRoutes(props) {
           path="/"
           element={
             <>
+              <SEO
+                title="Rezepte"
+                description="Organise, save, and share your recipes."
+                url="https://acorn-rezepte.com/"
+              />
               {isOnline && (
                 <CategoryFilter
                   categories={props.categories}

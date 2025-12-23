@@ -57,7 +57,7 @@ const RecipeList = ({
         <span>{t("no_recipes_found", { searchTerm })}</span>
       )}
       {totalRecipeCount === 0 && !searchTerm && (
-        <div className="page-centered no-gap">
+        <div className="page-centered high">
           <div className="card welcome-card">
             {!isOnline ? (
               <p>{t("no_internet_connection")}</p>

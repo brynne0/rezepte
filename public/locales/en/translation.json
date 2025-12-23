@@ -195,6 +195,10 @@
   "paste_text_required": "Please paste recipe text first",
   "paste_text_too_long": "Recipe text is too long. Please shorten to {{max}} characters or less.",
   "parse_error": "Failed to parse recipe. Please try again.",
+  "parse_error_rate_limit": "Too many requests. Please wait a moment and try again.",
+  "parse_error_server": "The autofill service is temporarily unavailable. Please try again later.",
+  "parse_error_network": "Network error. Please check your connection and try again.",
+  "parse_error_blocked": "The website is blocking automated access. Please try copying and pasting the recipe text directly instead.",
   "autofill": "Autofill",
   "autofilling": "Autofilling...",
 
