@@ -1,12 +1,5 @@
 import { useTranslation } from "react-i18next";
-import {
-  Trash2,
-  GripVertical,
-  Timer,
-  ChefHat,
-  Scale,
-  ArrowRight,
-} from "lucide-react";
+import { Trash2, GripVertical } from "lucide-react";
 
 const CookingTimeRow = ({
   item,
@@ -43,51 +36,46 @@ const CookingTimeRow = ({
   };
 
   if (!isEditMode) {
-    // View mode - improved card layout
+    // View mode - compact inline layout
+    const timeParts = [];
+    let weightText = null;
+
+    // Soaking time (shown first)
+    if (item.soaking_time > 0) {
+      timeParts.push(`${formatTime(item.soaking_time)} ${t("soak", "soak")}`);
+    }
+
+    // Cooking time
+    if (item.cooking_time > 0) {
+      timeParts.push(`${formatTime(item.cooking_time)} ${t("cook", "cook")}`);
+    }
+
+    // Weight conversion (separate line)
+    if (item.dry_weight || item.cooked_weight) {
+      const weightPart = [];
+      if (item.dry_weight) weightPart.push(formatWeight(item.dry_weight));
+      if (item.cooked_weight) weightPart.push(formatWeight(item.cooked_weight));
+      const ratio = getConversionRatio(item.dry_weight, item.cooked_weight);
+      weightText = weightPart.join(" → ") + (ratio ? ` (${ratio})` : "");
+    }
+
     return (
       <div className="cooking-time-card">
-        <div className="cooking-time-header">
-          <h4 className="cooking-time-title bold-small">
-            {item.ingredient_name}
-          </h4>
-        </div>
-
-        <div className="cooking-time-details">
-          <div className="time-info">
-            {item.soaking_time > 0 && (
-              <span className="time-badge soaking">
-                <Timer size={14} />
-                {formatTime(item.soaking_time)} {t("soaking", "soaking")}
-              </span>
-            )}
-            {item.cooking_time > 0 && (
-              <span className="time-badge cooking">
-                <ChefHat size={14} />
-                {formatTime(item.cooking_time)} {t("cooking", "cooking")}
-              </span>
-            )}
-          </div>
-
-          {(item.dry_weight || item.cooked_weight) && (
-            <div className="weight-info">
-              <span className="weight-badge">
-                <Scale size={14} />
-                {item.dry_weight && formatWeight(item.dry_weight)}
-                {item.dry_weight && item.cooked_weight && (
-                  <ArrowRight size={12} className="weight-conversion-arrow" />
-                )}
-                {item.cooked_weight && formatWeight(item.cooked_weight)}
-                {getConversionRatio(item.dry_weight, item.cooked_weight) && (
-                  <span className="conversion-ratio">
-                    ({getConversionRatio(item.dry_weight, item.cooked_weight)})
-                  </span>
-                )}
-              </span>
-            </div>
+        <div className="cooking-time-compact">
+          <span className="cooking-time-name">{item.ingredient_name}</span>
+          {timeParts.length > 0 && (
+            <span className="cooking-time-info">
+              {timeParts.map((part, idx) => (
+                <span key={idx}>
+                  {idx > 0 && " • "}
+                  {part}
+                </span>
+              ))}
+            </span>
           )}
-
-          {item.notes && <p className="item-notes">{item.notes}</p>}
         </div>
+        {weightText && <div className="cooking-time-weight">{weightText}</div>}
+        {item.notes && <div className="cooking-time-notes">{item.notes}</div>}
       </div>
     );
   }

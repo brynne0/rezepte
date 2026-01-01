@@ -771,7 +771,7 @@ const CookingTimes = () => {
             !isEditMode &&
             (formData.ungroupedCookingTimes.length > 0 ||
               formData.cookingTimeSections.length > 0) && (
-              <div className="flex-between">
+              <div className="flex-center">
                 <form
                   className="search-bar"
                   onSubmit={(e) => {

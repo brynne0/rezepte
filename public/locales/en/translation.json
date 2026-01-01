@@ -251,5 +251,7 @@
   "add_first_cooking_time": "Add your first cooking time",
   "edit_mode": "Edit Mode",
   "add_cooking_time": "Add cooking time",
-  "no_search_results": "No results found for your search."
+  "no_search_results": "No results found for your search.",
+  "cook": "cook",
+  "soak": "soak"
 }

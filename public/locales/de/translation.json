@@ -252,5 +252,7 @@
   "add_first_cooking_time": "Fügen Sie Ihre erste Garzeit hinzu",
   "edit_mode": "Bearbeitungsmodus",
   "add_cooking_time": "Garzeit hinzufügen",
-  "no_search_results": "Keine Ergebnisse für Ihre Suche gefunden."
+  "no_search_results": "Keine Ergebnisse für Ihre Suche gefunden.",
+  "cook": "kochen",
+  "soak": "einweichen"
 }
