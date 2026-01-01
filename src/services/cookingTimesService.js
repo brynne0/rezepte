@@ -362,7 +362,8 @@ const saveCookingTimeTranslation = async (
     }
 
     // Merge new translation with existing translations
-    const existingTranslations = currentCookingTime.translated_cooking_time || {};
+    const existingTranslations =
+      currentCookingTime.translated_cooking_time || {};
     const updatedTranslations = {
       ...existingTranslations,
       [language]: translatedData,
@@ -405,7 +406,9 @@ export const updateCookingTimeTranslations = async (
     const updatedTranslations = { ...existingTranslations };
 
     // Check each language and update only changed fields
-    for (const [language, translation] of Object.entries(existingTranslations)) {
+    for (const [language, translation] of Object.entries(
+      existingTranslations
+    )) {
       const fieldsToUpdate = {};
       let needsUpdate = false;
 

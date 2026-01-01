@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -21,15 +21,17 @@ import {
   getTranslatedCookingTimes,
   updateCookingTimeTranslations,
 } from "../../services/cookingTimesService";
+import { getUserPreferredLanguage } from "../../services/userService";
 import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
 import "./CookingTimes.css";
 
-const CookingTimes = () => {
+const CookingTimes = ({ isEditMode: externalIsEditMode, setIsEditMode: externalSetIsEditMode }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const originalUserLanguage = useRef(null);
 
   // Form data structure (matching RecipeForm pattern exactly)
   const [formData, setFormData] = useState({
@@ -49,8 +51,11 @@ const CookingTimes = () => {
     cookingTimeSections: [],
   });
 
-  // Edit/View mode state
-  const [isEditMode, setIsEditMode] = useState(false);
+  // Use external edit mode state from App.jsx (for disabling language switching)
+  // or internal state if not provided (for standalone usage)
+  const [internalIsEditMode, setInternalIsEditMode] = useState(false);
+  const isEditMode = externalIsEditMode !== undefined ? externalIsEditMode : internalIsEditMode;
+  const setIsEditMode = externalSetIsEditMode || setInternalIsEditMode;
 
   // Generate unique IDs like RecipeForm
   const generateTempId = useCallback(() => {
@@ -103,7 +108,7 @@ const CookingTimes = () => {
       // Fetch cooking times with translations
       const cookingTimesData = await getTranslatedCookingTimes(
         currentLanguage,
-        "en" // Original language is English
+        "en" // Original language - translations will handle it
       );
 
       // Organize data into sections exactly like RecipeForm
@@ -118,6 +123,35 @@ const CookingTimes = () => {
   useEffect(() => {
     loadData();
   }, [loadData]); // Reload when language changes
+
+  // Switch to preferred language when entering edit mode
+  useEffect(() => {
+    const switchToPreferredLanguage = async () => {
+      if (isEditMode) {
+        const preferredLanguage = await getUserPreferredLanguage();
+        if (i18n.language !== preferredLanguage) {
+          // Store current language before switching
+          originalUserLanguage.current = i18n.language;
+          i18n.changeLanguage(preferredLanguage);
+        }
+      }
+    };
+    switchToPreferredLanguage();
+  }, [isEditMode, i18n]);
+
+  // Restore original language when exiting edit mode
+  useEffect(() => {
+    return () => {
+      // On unmount, restore original language if it was changed
+      if (
+        originalUserLanguage.current &&
+        originalUserLanguage.current !== i18n.language
+      ) {
+        i18n.changeLanguage(originalUserLanguage.current);
+        originalUserLanguage.current = null; // Clear the stored language
+      }
+    };
+  }, [i18n]);
 
   // Filter data based on search query (cooking times only)
   useEffect(() => {
