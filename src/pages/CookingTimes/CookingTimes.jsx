@@ -323,7 +323,31 @@ const CookingTimes = () => {
   // Save all changes when Save Changes is clicked (like RecipeForm submit)
   const saveAllChanges = useCallback(async () => {
     try {
-      // Step 1: Identify items to delete (were in original but not in current)
+      // Step 1: Build a complete list of all current items with their positions
+      let globalOrderIndex = 0;
+      const allCurrentItems = [];
+
+      // Add ungrouped items with order indices
+      formData.ungroupedCookingTimes.forEach((item) => {
+        allCurrentItems.push({
+          ...item,
+          section_name: null,
+          order_index: globalOrderIndex++,
+        });
+      });
+
+      // Add sectioned items with order indices
+      formData.cookingTimeSections.forEach((section) => {
+        section.cookingTimes.forEach((item) => {
+          allCurrentItems.push({
+            ...item,
+            section_name: section.subheading,
+            order_index: globalOrderIndex++,
+          });
+        });
+      });
+
+      // Step 2: Identify items to delete (were in original but not in current)
       const originalItems = new Map();
 
       // Build map of original items by their real ID
@@ -338,13 +362,8 @@ const CookingTimes = () => {
 
       // Build set of current items by their real ID
       const currentIds = new Set();
-      formData.ungroupedCookingTimes.forEach((item) => {
+      allCurrentItems.forEach((item) => {
         if (item.id) currentIds.add(item.id);
-      });
-      formData.cookingTimeSections.forEach((section) => {
-        section.cookingTimes.forEach((item) => {
-          if (item.id) currentIds.add(item.id);
-        });
       });
 
       // Delete items that were removed
@@ -359,37 +378,41 @@ const CookingTimes = () => {
         }
       }
 
-      // Step 2: Create new items (items without real ID)
+      // Step 3: Create new items and update existing items
       const itemsToCreate = [];
+      const itemsToUpdate = [];
 
-      // Process ungrouped items
-      formData.ungroupedCookingTimes.forEach((item) => {
-        if (item.ingredient_name?.trim() && !item.id) {
-          itemsToCreate.push({
-            ...item,
-            section_name: null, // ungrouped
-          });
-        }
-      });
+      allCurrentItems.forEach((item) => {
+        if (item.ingredient_name?.trim()) {
+          if (!item.id) {
+            // New item - needs to be created
+            itemsToCreate.push(item);
+          } else {
+            // Existing item - always update to ensure order_index and section are correct
+            const originalItem = originalItems.get(item.id);
 
-      // Process sectioned items
-      formData.cookingTimeSections.forEach((section) => {
-        if (section.subheading?.trim()) {
-          section.cookingTimes.forEach((item) => {
-            if (item.ingredient_name?.trim() && !item.id) {
-              itemsToCreate.push({
-                ...item,
-                section_name: section.subheading,
-              });
+            // Check if any field has changed (including order and section)
+            const hasChanges = originalItem && (
+              item.ingredient_name !== originalItem.ingredient_name ||
+              item.cooking_time !== originalItem.cooking_time ||
+              item.soaking_time !== originalItem.soaking_time ||
+              item.dry_weight !== originalItem.dry_weight ||
+              item.cooked_weight !== originalItem.cooked_weight ||
+              item.notes !== originalItem.notes ||
+              item.order_index !== originalItem.order_index ||
+              item.section_name !== originalItem.section_name
+            );
+
+            if (hasChanges) {
+              itemsToUpdate.push(item);
             }
-          });
+          }
         }
       });
 
       // Create new items
       console.log("Items to create:", itemsToCreate);
-      for (let i = 0; i < itemsToCreate.length; i++) {
-        const item = itemsToCreate[i];
+      for (const item of itemsToCreate) {
         const cookingTimeData = {
           ingredient_name: item.ingredient_name.trim(),
           cooking_time: item.cooking_time ? parseInt(item.cooking_time) : null,
@@ -401,96 +424,16 @@ const CookingTimes = () => {
           notes: item.notes?.trim() || null,
         };
 
-        // Calculate order index - get the highest existing order index and increment
-        const existingItems = await fetchUserCookingTimes();
-        const maxOrderIndex =
-          existingItems.length > 0
-            ? Math.max(...existingItems.map((item) => item.order_index || 0))
-            : -1;
-        const orderIndex = maxOrderIndex + 1 + i;
-
         console.log(
           "Creating cooking time:",
           cookingTimeData,
           "in section:",
           item.section_name,
           "with order_index:",
-          orderIndex
+          item.order_index
         );
-        await createCookingTime(cookingTimeData, item.section_name, orderIndex);
+        await createCookingTime(cookingTimeData, item.section_name, item.order_index);
       }
-
-      // Step 3: Handle updates for existing items
-      const itemsToUpdate = [];
-
-      // Process ungrouped items for updates
-      formData.ungroupedCookingTimes.forEach((item) => {
-        if (item.ingredient_name?.trim() && item.id) {
-          // Find the original item to compare
-          const originalItem =
-            originalData.ungroupedCookingTimes.find(
-              (orig) => orig.id === item.id
-            ) ||
-            originalData.cookingTimeSections
-              .flatMap((s) => s.cookingTimes)
-              .find((orig) => orig.id === item.id);
-
-          if (originalItem) {
-            // Check if any field has changed
-            const hasChanges =
-              item.ingredient_name !== originalItem.ingredient_name ||
-              item.cooking_time !== originalItem.cooking_time ||
-              item.soaking_time !== originalItem.soaking_time ||
-              item.dry_weight !== originalItem.dry_weight ||
-              item.cooked_weight !== originalItem.cooked_weight ||
-              item.notes !== originalItem.notes;
-
-            if (hasChanges) {
-              itemsToUpdate.push({
-                ...item,
-                section_name: null, // ungrouped
-              });
-            }
-          }
-        }
-      });
-
-      // Process sectioned items for updates
-      formData.cookingTimeSections.forEach((section) => {
-        if (section.subheading?.trim()) {
-          section.cookingTimes.forEach((item) => {
-            if (item.ingredient_name?.trim() && item.id) {
-              // Find the original item to compare
-              const originalItem =
-                originalData.ungroupedCookingTimes.find(
-                  (orig) => orig.id === item.id
-                ) ||
-                originalData.cookingTimeSections
-                  .flatMap((s) => s.cookingTimes)
-                  .find((orig) => orig.id === item.id);
-
-              if (originalItem) {
-                // Check if any field has changed
-                const hasChanges =
-                  item.ingredient_name !== originalItem.ingredient_name ||
-                  item.cooking_time !== originalItem.cooking_time ||
-                  item.soaking_time !== originalItem.soaking_time ||
-                  item.dry_weight !== originalItem.dry_weight ||
-                  item.cooked_weight !== originalItem.cooked_weight ||
-                  item.notes !== originalItem.notes ||
-                  section.subheading !== originalItem.section_name;
-
-                if (hasChanges) {
-                  itemsToUpdate.push({
-                    ...item,
-                    section_name: section.subheading,
-                  });
-                }
-              }
-            }
-          });
-        }
-      });
 
       // Update existing items
       console.log("Items to update:", itemsToUpdate);
@@ -505,7 +448,7 @@ const CookingTimes = () => {
             : null,
           notes: item.notes?.trim() || null,
           section_name: item.section_name,
-          order_index: item.order_index || 0,
+          order_index: item.order_index,
         };
 
         console.log("Updating cooking time:", item.id, cookingTimeData);
