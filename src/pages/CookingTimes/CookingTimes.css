@@ -64,6 +64,7 @@
   text-align: center;
   padding: 2rem;
   color: var(--text-secondary);
+  max-width: 25rem;
 }
 
 .ungrouped-section {
@@ -177,5 +178,9 @@
 
   .time-info {
     justify-content: flex-start;
+  }
+
+  .no-results {
+    width: auto;
   }
 }
