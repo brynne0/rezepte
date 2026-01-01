@@ -25,7 +25,10 @@ import { getUserPreferredLanguage } from "../../services/userService";
 import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
 import "./CookingTimes.css";
 
-const CookingTimes = ({ isEditMode: externalIsEditMode, setIsEditMode: externalSetIsEditMode }) => {
+const CookingTimes = ({
+  isEditMode: externalIsEditMode,
+  setIsEditMode: externalSetIsEditMode,
+}) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cooking-times");
@@ -54,7 +57,8 @@ const CookingTimes = ({ isEditMode: externalIsEditMode, setIsEditMode: externalS
   // Use external edit mode state from App.jsx (for disabling language switching)
   // or internal state if not provided (for standalone usage)
   const [internalIsEditMode, setInternalIsEditMode] = useState(false);
-  const isEditMode = externalIsEditMode !== undefined ? externalIsEditMode : internalIsEditMode;
+  const isEditMode =
+    externalIsEditMode !== undefined ? externalIsEditMode : internalIsEditMode;
   const setIsEditMode = externalSetIsEditMode || setInternalIsEditMode;
 
   // Generate unique IDs like RecipeForm
@@ -104,11 +108,12 @@ const CookingTimes = ({ isEditMode: externalIsEditMode, setIsEditMode: externalS
     try {
       setLoading(true);
       const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
+      const preferredLanguage = await getUserPreferredLanguage();
 
       // Fetch cooking times with translations
       const cookingTimesData = await getTranslatedCookingTimes(
         currentLanguage,
-        "en" // Original language - translations will handle it
+        preferredLanguage // Use preferred language as fallback for items without original_language
       );
 
       // Organize data into sections exactly like RecipeForm
@@ -364,6 +369,9 @@ const CookingTimes = ({ isEditMode: externalIsEditMode, setIsEditMode: externalS
   // Save all changes when Save Changes is clicked (like RecipeForm submit)
   const saveAllChanges = useCallback(async () => {
     try {
+      // Get user's preferred language for new items
+      const preferredLanguage = await getUserPreferredLanguage();
+
       // Step 1: Build a complete list of all current items with their positions
       let globalOrderIndex = 0;
       const allCurrentItems = [];
@@ -476,7 +484,8 @@ const CookingTimes = ({ isEditMode: externalIsEditMode, setIsEditMode: externalS
         await createCookingTime(
           cookingTimeData,
           item.section_name,
-          item.order_index
+          item.order_index,
+          preferredLanguage
         );
       }
 

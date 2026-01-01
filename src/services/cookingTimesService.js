@@ -56,7 +56,8 @@ export const fetchUserCookingTimes = async () => {
 export const createCookingTime = async (
   cookingTimeData,
   sectionName = null,
-  orderIndex = 0
+  orderIndex = 0,
+  originalLanguage = "en"
 ) => {
   const {
     data: { user },
@@ -76,6 +77,7 @@ export const createCookingTime = async (
     notes: cookingTimeData.notes?.trim() || null,
     section_name: sectionName,
     order_index: orderIndex,
+    original_language: originalLanguage,
   };
 
   const { data, error } = await supabase
@@ -265,8 +267,11 @@ export const removeSection = async (sectionName) => {
 export const getTranslatedCookingTime = async (
   cookingTime,
   targetLanguage,
-  originalLanguage = "en"
+  fallbackOriginalLanguage = "en"
 ) => {
+  // Use the stored original_language if available, otherwise use fallback
+  const originalLanguage = cookingTime.original_language || fallbackOriginalLanguage;
+
   // If target language is the same as original, return as-is
   if (originalLanguage === targetLanguage) {
     return cookingTime;
@@ -325,18 +330,14 @@ export const getTranslatedCookingTime = async (
 // Get all translated cooking times for the current user
 export const getTranslatedCookingTimes = async (
   targetLanguage,
-  originalLanguage = "en"
+  fallbackOriginalLanguage = "en"
 ) => {
   const cookingTimes = await fetchUserCookingTimes();
 
-  if (originalLanguage === targetLanguage) {
-    return cookingTimes;
-  }
-
-  // Translate all cooking times
+  // Translate all cooking times (each item uses its own original_language)
   const translatedCookingTimes = await Promise.all(
     cookingTimes.map((item) =>
-      getTranslatedCookingTime(item, targetLanguage, originalLanguage)
+      getTranslatedCookingTime(item, targetLanguage, fallbackOriginalLanguage)
     )
   );
 
