@@ -32,7 +32,9 @@ const CookingTimeRow = ({
   const getConversionRatio = (dryWeight, cookedWeight) => {
     if (!dryWeight || !cookedWeight || dryWeight === 0) return null;
     const ratio = cookedWeight / dryWeight;
-    return `1:${ratio.toFixed(1)}`;
+    const formatted = ratio.toFixed(1);
+    // Remove trailing .0 (e.g., 10.0 becomes 10)
+    return `×${formatted.endsWith('.0') ? formatted.slice(0, -2) : formatted}`;
   };
 
   if (!isEditMode) {
@@ -53,8 +55,8 @@ const CookingTimeRow = ({
     // Weight conversion (separate line)
     if (item.dry_weight || item.cooked_weight) {
       const weightPart = [];
-      if (item.dry_weight) weightPart.push(formatWeight(item.dry_weight));
-      if (item.cooked_weight) weightPart.push(formatWeight(item.cooked_weight));
+      if (item.dry_weight) weightPart.push(`${formatWeight(item.dry_weight)} ${t("dry", "dry")}`);
+      if (item.cooked_weight) weightPart.push(`${formatWeight(item.cooked_weight)} ${t("cooked", "cooked")}`);
       const ratio = getConversionRatio(item.dry_weight, item.cooked_weight);
       weightText = weightPart.join(" → ") + (ratio ? ` (${ratio})` : "");
     }

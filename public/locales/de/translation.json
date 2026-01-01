@@ -254,5 +254,7 @@
   "add_cooking_time": "Garzeit hinzufügen",
   "no_search_results": "Keine Ergebnisse für Ihre Suche gefunden.",
   "cook": "kochen",
-  "soak": "einweichen"
+  "soak": "einweichen",
+  "dry": "trocken",
+  "cooked": "gekocht"
 }
