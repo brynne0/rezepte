@@ -15,16 +15,17 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import CookingTimeRow from "../../components/CookingTimeRow/CookingTimeRow";
 import "../../components/CookingTimeRow/CookingTimeRow.css";
 import {
-  fetchUserCookingTimes,
   createCookingTime,
   updateCookingTime,
   deleteCookingTime,
+  getTranslatedCookingTimes,
+  updateCookingTimeTranslations,
 } from "../../services/cookingTimesService";
 import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
 import "./CookingTimes.css";
 
 const CookingTimes = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [loading, setLoading] = useState(true);
@@ -97,7 +98,13 @@ const CookingTimes = () => {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const cookingTimesData = await fetchUserCookingTimes();
+      const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
+
+      // Fetch cooking times with translations
+      const cookingTimesData = await getTranslatedCookingTimes(
+        currentLanguage,
+        "en" // Original language is English
+      );
 
       // Organize data into sections exactly like RecipeForm
       organizeCookingTimesIntoSections(cookingTimesData);
@@ -106,11 +113,11 @@ const CookingTimes = () => {
     } finally {
       setLoading(false);
     }
-  }, [organizeCookingTimesIntoSections]);
+  }, [organizeCookingTimesIntoSections, i18n.language]);
 
   useEffect(() => {
     loadData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadData]); // Reload when language changes
 
   // Filter data based on search query (cooking times only)
   useEffect(() => {
@@ -392,16 +399,16 @@ const CookingTimes = () => {
             const originalItem = originalItems.get(item.id);
 
             // Check if any field has changed (including order and section)
-            const hasChanges = originalItem && (
-              item.ingredient_name !== originalItem.ingredient_name ||
-              item.cooking_time !== originalItem.cooking_time ||
-              item.soaking_time !== originalItem.soaking_time ||
-              item.dry_weight !== originalItem.dry_weight ||
-              item.cooked_weight !== originalItem.cooked_weight ||
-              item.notes !== originalItem.notes ||
-              item.order_index !== originalItem.order_index ||
-              item.section_name !== originalItem.section_name
-            );
+            const hasChanges =
+              originalItem &&
+              (item.ingredient_name !== originalItem.ingredient_name ||
+                item.cooking_time !== originalItem.cooking_time ||
+                item.soaking_time !== originalItem.soaking_time ||
+                item.dry_weight !== originalItem.dry_weight ||
+                item.cooked_weight !== originalItem.cooked_weight ||
+                item.notes !== originalItem.notes ||
+                item.order_index !== originalItem.order_index ||
+                item.section_name !== originalItem.section_name);
 
             if (hasChanges) {
               itemsToUpdate.push(item);
@@ -432,12 +439,18 @@ const CookingTimes = () => {
           "with order_index:",
           item.order_index
         );
-        await createCookingTime(cookingTimeData, item.section_name, item.order_index);
+        await createCookingTime(
+          cookingTimeData,
+          item.section_name,
+          item.order_index
+        );
       }
 
       // Update existing items
       console.log("Items to update:", itemsToUpdate);
       for (const item of itemsToUpdate) {
+        const originalItem = originalItems.get(item.id);
+
         const cookingTimeData = {
           ingredient_name: item.ingredient_name.trim(),
           cooking_time: item.cooking_time ? parseInt(item.cooking_time) : null,
@@ -453,6 +466,16 @@ const CookingTimes = () => {
 
         console.log("Updating cooking time:", item.id, cookingTimeData);
         await updateCookingTime(item.id, cookingTimeData);
+
+        // Update translations if any translatable field changed
+        if (
+          originalItem &&
+          (item.ingredient_name !== originalItem.ingredient_name ||
+            item.notes !== originalItem.notes ||
+            item.section_name !== originalItem.section_name)
+        ) {
+          await updateCookingTimeTranslations(item.id, originalItem, item);
+        }
       }
 
       // Reload data after saving
