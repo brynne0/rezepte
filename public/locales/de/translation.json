@@ -256,5 +256,10 @@
   "cook": "kochen",
   "soak": "einweichen",
   "dry": "trocken",
-  "cooked": "gekocht"
+  "cooked": "gekocht",
+  "cooking_time_minutes": "Garzeit (Min.)",
+  "soaking_time_minutes": "Einweichen (Min.)",
+  "dry_weight": "Trocken (g)",
+  "cooked_weight": "Gekocht (g)",
+  "optional_notes": "Notizen (optional)"
 }

@@ -255,5 +255,10 @@
   "cook": "cook",
   "soak": "soak",
   "dry": "dry",
-  "cooked": "cooked"
+  "cooked": "cooked",
+  "cooking_time_minutes": "Cooking (min)",
+  "soaking_time_minutes": "Soaking (min)",
+  "dry_weight": "Dry weight (g)",
+  "cooked_weight": "Cooked weight (g)",
+  "optional_notes": "Optional notes"
 }
