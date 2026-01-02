@@ -248,11 +248,6 @@
     justify-content: center;
   }
 
-  .settings-tabs .tab-button {
-    flex: 1;
-    text-align: center;
-  }
-
   /* On mobile, only wrap edit actions to new line */
   .category-item {
     flex-wrap: wrap;

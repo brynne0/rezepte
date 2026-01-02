@@ -15,12 +15,16 @@
   gap: 1rem;
 }
 
-.cookingtime-tabs-wrapper {
+.cookingtimes-header {
   gap: 1rem;
-  color: var(--color-text-primary);
-  padding-bottom: 2rem;
+  padding-bottom: 1rem;
   flex-wrap: wrap;
   width: 100%;
+}
+
+/* Cooking Times Header */
+.cookingtime-tabs-wrapper {
+  gap: 2rem;
 }
 
 .pencil-placeholder {
@@ -33,7 +37,11 @@
 }
 
 @media (max-width: 640px) {
-  .cookingtime-tabs-wrapper.flex-between {
+  .cookingtime-tabs-wrapper {
+    gap: 0.5rem;
+  }
+
+  .cookingtimes-header.flex-between {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto;
@@ -41,20 +49,20 @@
     padding-bottom: 2rem;
   }
 
-  .cookingtime-tabs-wrapper.flex-between .back-arrow {
+  .cookingtimes-header.flex-between .back-arrow {
     grid-column: 1;
     grid-row: 1;
     justify-self: start;
   }
 
-  .cookingtime-tabs-wrapper.flex-between .pencil-icon-right,
-  .cookingtime-tabs-wrapper.flex-between .pencil-placeholder {
+  .cookingtimes-header.flex-between .pencil-icon-right,
+  .cookingtimes-header.flex-between .pencil-placeholder {
     grid-column: 2;
     grid-row: 1;
     justify-self: end;
   }
 
-  .cookingtime-tabs-wrapper.flex-between > .flex-row {
+  .cookingtimes-header.flex-between > .flex-row {
     grid-column: 1 / -1;
     grid-row: 2;
     justify-self: center;
@@ -172,15 +180,6 @@
 
 .ungrouped-section {
   margin-bottom: 2rem;
-}
-
-/* Cooking Times Header */
-.cooking-times-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 0 0.5rem;
 }
 
 /* Mobile responsiveness */

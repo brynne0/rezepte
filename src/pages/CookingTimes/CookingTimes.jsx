@@ -738,7 +738,7 @@ const CookingTimes = ({
   return (
     <div className="card card-form">
       <div className="flex-column-center">
-        <div className="cookingtime-tabs-wrapper flex-between ">
+        <div className="cookingtimes-header flex-between ">
           <button
             className="btn-unstyled back-arrow"
             onClick={handleBackNavigation}
@@ -746,7 +746,7 @@ const CookingTimes = ({
           >
             <ArrowBigLeft size={28} />
           </button>
-          <div className="flex-row gap-xs">
+          <div className="flex-row cookingtime-tabs-wrapper">
             <button
               className={`tab-button ${activeTab === "cooking-times" ? "active" : ""}`}
               onClick={() => setActiveTab("cooking-times")}
@@ -948,140 +948,135 @@ const CookingTimes = ({
                                   ? formData.cookingTimeSections
                                   : filteredData.cookingTimeSections
                                 ).map((section, sectionIndex) => (
-                                    <Draggable
-                                      key={section.id}
-                                      draggableId={section.id}
-                                      index={sectionIndex}
-                                      type="cooking-time-section"
-                                    >
-                                      {(provided, snapshot) => (
-                                        <div
-                                          ref={provided.innerRef}
-                                          {...provided.draggableProps}
-                                          className={`cooking-time-section ${
-                                            snapshot.isDragging
-                                              ? "dragging"
-                                              : ""
-                                          }`}
-                                        >
-                                          {/* Section Header */}
-                                          {isEditMode ? (
-                                            <div className="flex-row">
-                                              <div
-                                                {...provided.dragHandleProps}
-                                                className="drag-handle"
-                                              >
-                                                <GripVertical size={16} />
-                                              </div>
-                                              <input
-                                                type="text"
-                                                value={section.subheading}
-                                                onChange={(e) =>
-                                                  handleSectionChange(
-                                                    section.id,
-                                                    "subheading",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="input input--borderless section-title-input"
-                                                placeholder={t("section_title")}
-                                              />
-                                              <button
-                                                type="button"
-                                                onClick={() =>
-                                                  removeSection(section.id)
-                                                }
-                                                className="btn btn-section"
-                                              >
-                                                {t("remove_section")}
-                                              </button>
-                                            </div>
-                                          ) : (
-                                            <div className="cookingtime-section-subheading">
-                                              <h3>{section.subheading}</h3>
-                                            </div>
-                                          )}
-
-                                          {/* Section Cooking Times */}
-                                          {isEditMode ? (
-                                            <Droppable
-                                              droppableId={section.id}
-                                              type="cooking-time-item"
+                                  <Draggable
+                                    key={section.id}
+                                    draggableId={section.id}
+                                    index={sectionIndex}
+                                    type="cooking-time-section"
+                                  >
+                                    {(provided, snapshot) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        className={`cooking-time-section ${
+                                          snapshot.isDragging ? "dragging" : ""
+                                        }`}
+                                      >
+                                        {/* Section Header */}
+                                        {isEditMode ? (
+                                          <div className="flex-row">
+                                            <div
+                                              {...provided.dragHandleProps}
+                                              className="drag-handle"
                                             >
-                                              {(provided, snapshot) => (
-                                                <div
-                                                  className={`flex-column cooking-time-list ${
-                                                    snapshot.isDraggingOver
-                                                      ? "drag-over"
-                                                      : ""
-                                                  }`}
-                                                  {...provided.droppableProps}
-                                                  ref={provided.innerRef}
-                                                >
-                                                  {section.cookingTimes.map(
-                                                    (item, itemIndex) => (
-                                                      <Draggable
-                                                        key={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
-                                                        draggableId={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
-                                                        index={itemIndex}
-                                                        type="cooking-time-item"
-                                                      >
-                                                        {(provided, snapshot) =>
-                                                          renderCookingTimeItem(
-                                                            item,
-                                                            itemIndex,
-                                                            section.id,
-                                                            provided,
-                                                            snapshot
-                                                          )
-                                                        }
-                                                      </Draggable>
-                                                    )
-                                                  )}
-                                                  {provided.placeholder}
-                                                </div>
-                                              )}
-                                            </Droppable>
-                                          ) : (
-                                            <div className="flex-column cooking-time-list">
-                                              {section.cookingTimes.map(
-                                                (item, itemIndex) =>
-                                                  renderCookingTimeItem(
-                                                    item,
-                                                    itemIndex,
-                                                    section.id,
-                                                    null,
-                                                    null
-                                                  )
-                                              )}
+                                              <GripVertical size={16} />
                                             </div>
-                                          )}
+                                            <input
+                                              type="text"
+                                              value={section.subheading}
+                                              onChange={(e) =>
+                                                handleSectionChange(
+                                                  section.id,
+                                                  "subheading",
+                                                  e.target.value
+                                                )
+                                              }
+                                              className="input input--borderless section-title-input"
+                                              placeholder={t("section_title")}
+                                            />
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                removeSection(section.id)
+                                              }
+                                              className="btn btn-section"
+                                            >
+                                              {t("remove_section")}
+                                            </button>
+                                          </div>
+                                        ) : (
+                                          <div className="cookingtime-section-subheading">
+                                            <h3>{section.subheading}</h3>
+                                          </div>
+                                        )}
 
-                                          {/* Add Cooking Time Button (like RecipeForm) */}
-                                          {isEditMode && (
-                                            <div className="flex-center">
-                                              <button
-                                                type="button"
-                                                onClick={() =>
-                                                  addCookingTime(section.id)
-                                                }
-                                                className="btn btn-icon btn-icon-green"
-                                                aria-label={t(
-                                                  "add_cooking_time"
-                                                )}
+                                        {/* Section Cooking Times */}
+                                        {isEditMode ? (
+                                          <Droppable
+                                            droppableId={section.id}
+                                            type="cooking-time-item"
+                                          >
+                                            {(provided, snapshot) => (
+                                              <div
+                                                className={`flex-column cooking-time-list ${
+                                                  snapshot.isDraggingOver
+                                                    ? "drag-over"
+                                                    : ""
+                                                }`}
+                                                {...provided.droppableProps}
+                                                ref={provided.innerRef}
                                               >
-                                                <Plus
-                                                  size={16}
-                                                  data-testid="add-section-cooking-time-btn"
-                                                />
-                                              </button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                    </Draggable>
-                                  )
-                                )}
+                                                {section.cookingTimes.map(
+                                                  (item, itemIndex) => (
+                                                    <Draggable
+                                                      key={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
+                                                      draggableId={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
+                                                      index={itemIndex}
+                                                      type="cooking-time-item"
+                                                    >
+                                                      {(provided, snapshot) =>
+                                                        renderCookingTimeItem(
+                                                          item,
+                                                          itemIndex,
+                                                          section.id,
+                                                          provided,
+                                                          snapshot
+                                                        )
+                                                      }
+                                                    </Draggable>
+                                                  )
+                                                )}
+                                                {provided.placeholder}
+                                              </div>
+                                            )}
+                                          </Droppable>
+                                        ) : (
+                                          <div className="flex-column cooking-time-list">
+                                            {section.cookingTimes.map(
+                                              (item, itemIndex) =>
+                                                renderCookingTimeItem(
+                                                  item,
+                                                  itemIndex,
+                                                  section.id,
+                                                  null,
+                                                  null
+                                                )
+                                            )}
+                                          </div>
+                                        )}
+
+                                        {/* Add Cooking Time Button (like RecipeForm) */}
+                                        {isEditMode && (
+                                          <div className="flex-center">
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                addCookingTime(section.id)
+                                              }
+                                              className="btn btn-icon btn-icon-green"
+                                              aria-label={t("add_cooking_time")}
+                                            >
+                                              <Plus
+                                                size={16}
+                                                data-testid="add-section-cooking-time-btn"
+                                              />
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
                                 {provided.placeholder}
                               </div>
                             )}
