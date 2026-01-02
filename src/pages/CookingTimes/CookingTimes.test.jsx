@@ -231,7 +231,7 @@ describe("CookingTimes", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('t("add_first_cooking_time")')
+          screen.getByText('add_first_cooking_time')
         ).toBeInTheDocument();
       });
     });

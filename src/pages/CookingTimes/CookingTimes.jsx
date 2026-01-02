@@ -711,7 +711,7 @@ const CookingTimes = ({
       </h3>
       <button className="btn btn-tertiary" onClick={onAddClick}>
         <Plus size={20} />
-        t("add_first_cooking_time")
+        {t("add_first_cooking_time")}
       </button>
     </div>
   );
