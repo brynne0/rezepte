@@ -248,7 +248,7 @@
     justify-content: center;
   }
 
-  .tab-button {
+  .settings-tabs .tab-button {
     flex: 1;
     text-align: center;
   }

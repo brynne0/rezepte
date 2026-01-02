@@ -6,10 +6,9 @@ import {
   Plus,
   Timer,
   ArrowLeftRight,
-  Search,
   GripVertical,
-  Pencil,
   ArrowBigLeft,
+  Pencil,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import CookingTimeRow from "../../components/CookingTimeRow/CookingTimeRow";
@@ -33,7 +32,7 @@ const CookingTimes = ({
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSection, setSelectedSection] = useState("all");
   const originalUserLanguage = useRef(null);
 
   // Form data structure (matching RecipeForm pattern exactly)
@@ -158,39 +157,29 @@ const CookingTimes = ({
     };
   }, [i18n]);
 
-  // Filter data based on search query (cooking times only)
+  // Filter data based on selected section
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    if (selectedSection === "all") {
       setFilteredData(formData);
       return;
     }
 
-    const query = searchQuery.toLowerCase();
-
-    // Filter ungrouped items
-    const filteredUngrouped = formData.ungroupedCookingTimes.filter(
-      (item) =>
-        item.ingredient_name.toLowerCase().includes(query) ||
-        (item.notes && item.notes.toLowerCase().includes(query))
-    );
-
-    // Filter section items
-    const filteredSections = formData.cookingTimeSections
-      .map((section) => ({
-        ...section,
-        cookingTimes: section.cookingTimes.filter(
-          (item) =>
-            item.ingredient_name.toLowerCase().includes(query) ||
-            (item.notes && item.notes.toLowerCase().includes(query))
-        ),
-      }))
-      .filter((section) => section.cookingTimes.length > 0);
-
-    setFilteredData({
-      ungroupedCookingTimes: filteredUngrouped,
-      cookingTimeSections: filteredSections,
-    });
-  }, [searchQuery, formData]);
+    // Filter by selected section
+    if (selectedSection === "ungrouped") {
+      setFilteredData({
+        ungroupedCookingTimes: formData.ungroupedCookingTimes,
+        cookingTimeSections: [],
+      });
+    } else {
+      const selectedSectionData = formData.cookingTimeSections.find(
+        (section) => section.subheading === selectedSection
+      );
+      setFilteredData({
+        ungroupedCookingTimes: [],
+        cookingTimeSections: selectedSectionData ? [selectedSectionData] : [],
+      });
+    }
+  }, [selectedSection, formData]);
 
   // Add cooking time function (matches RecipeForm addIngredient pattern)
   const addCookingTime = useCallback(
@@ -748,71 +737,79 @@ const CookingTimes = ({
 
   return (
     <div className="card card-form">
-      <div className="flex-column-center relative">
-        <button
-          className="btn-unstyled back-arrow-left"
-          onClick={handleBackNavigation}
-          aria-label={t("go_back", "Go Back")}
-        >
-          <ArrowBigLeft size={28} />
-        </button>
-        <div className="cookingtime-tabs-wrapper flex-center ">
+      <div className="flex-column-center">
+        <div className="cookingtime-tabs-wrapper flex-between ">
           <button
-            className={`tab-button ${activeTab === "cooking-times" ? "active" : ""}`}
-            onClick={() => setActiveTab("cooking-times")}
+            className="btn-unstyled back-arrow"
+            onClick={handleBackNavigation}
+            aria-label={t("go_back", "Go Back")}
           >
-            <Timer size={20} />
-            {t("cooking_times_tab")}
+            <ArrowBigLeft size={28} />
           </button>
-          <button
-            className={`tab-button ${activeTab === "conversions" ? "active" : ""}`}
-            onClick={() => setActiveTab("conversions")}
-          >
-            <ArrowLeftRight size={20} />
-            {t("conversions_tab")}
-          </button>
+          <div className="flex-row gap-xs">
+            <button
+              className={`tab-button ${activeTab === "cooking-times" ? "active" : ""}`}
+              onClick={() => setActiveTab("cooking-times")}
+            >
+              <Timer size={20} />
+              {t("cooking_times_tab")}
+            </button>
+            <button
+              className={`tab-button ${activeTab === "conversions" ? "active" : ""}`}
+              onClick={() => setActiveTab("conversions")}
+            >
+              <ArrowLeftRight size={20} />
+              {t("conversions_tab")}
+            </button>
+          </div>
+          {/* Edit button - Only show on cooking times tab when not in edit mode */}
+          {activeTab === "cooking-times" &&
+          !isEditMode &&
+          (formData.ungroupedCookingTimes.length > 0 ||
+            formData.cookingTimeSections.length > 0) ? (
+            <button
+              className="btn-unstyled pencil-icon-right"
+              onClick={() => setIsEditMode(true)}
+              aria-label={t("edit_mode", "Edit Mode")}
+            >
+              <Pencil size={20} />
+            </button>
+          ) : (
+            <div className="pencil-placeholder" />
+          )}
         </div>
 
         {/* Cooking Times Tab Content */}
         <div className={`${isEditMode ? "flex-column-center" : ""}`}>
-          {/* Search Bar and Controls - Only for cooking times tab */}
+          {/* Category Filter Chips - Only for cooking times tab */}
           {activeTab === "cooking-times" &&
             !isEditMode &&
             (formData.ungroupedCookingTimes.length > 0 ||
               formData.cookingTimeSections.length > 0) && (
-              <div className="flex-center">
-                <form
-                  className="search-bar"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                  }}
-                >
-                  <div className="search-input-wrapper">
-                    <input
-                      id="cooking-times-search"
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="input input--secondary search-input-with-icon"
-                      placeholder={t("search")}
-                    />
-                    <button
-                      className="btn btn-icon btn-icon-neutral btn-search"
-                      type="submit"
-                      aria-label={t("search")}
-                    >
-                      <Search size={20} />
-                    </button>
-                  </div>
-                </form>
-
+              <div className="categories-wrapper">
                 <button
-                  className="btn btn-unstyled"
-                  onClick={() => setIsEditMode(!isEditMode)}
-                  aria-label={t("edit_mode", "Edit Mode")}
+                  className={`subheading-wrapper${selectedSection === "all" ? " selected" : ""}`}
+                  onClick={() => setSelectedSection("all")}
                 >
-                  <Pencil size={20} />
+                  <h3 className="forta">{t("all", "All")}</h3>
                 </button>
+                {formData.ungroupedCookingTimes.length > 0 && (
+                  <button
+                    className={`subheading-wrapper${selectedSection === "ungrouped" ? " selected" : ""}`}
+                    onClick={() => setSelectedSection("ungrouped")}
+                  >
+                    <h3 className="forta">{t("ungrouped", "Ungrouped")}</h3>
+                  </button>
+                )}
+                {formData.cookingTimeSections.map((section) => (
+                  <button
+                    key={section.id}
+                    className={`subheading-wrapper${selectedSection === section.subheading ? " selected" : ""}`}
+                    onClick={() => setSelectedSection(section.subheading)}
+                  >
+                    <h3 className="forta">{section.subheading}</h3>
+                  </button>
+                ))}
               </div>
             )}
 
@@ -833,12 +830,12 @@ const CookingTimes = ({
                   <>
                     {filteredData.ungroupedCookingTimes.length === 0 &&
                     filteredData.cookingTimeSections.length === 0 &&
-                    searchQuery ? (
+                    selectedSection !== "all" ? (
                       <div className="no-results">
                         <p>
                           {t(
-                            "no_search_results",
-                            "No results found for your search."
+                            "no_items_in_category",
+                            "No items in this category."
                           )}
                         </p>
                       </div>

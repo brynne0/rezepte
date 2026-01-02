@@ -270,7 +270,8 @@ export const getTranslatedCookingTime = async (
   fallbackOriginalLanguage = "en"
 ) => {
   // Use the stored original_language if available, otherwise use fallback
-  const originalLanguage = cookingTime.original_language || fallbackOriginalLanguage;
+  const originalLanguage =
+    cookingTime.original_language || fallbackOriginalLanguage;
 
   // If target language is the same as original, return as-is
   if (originalLanguage === targetLanguage) {

@@ -20,11 +20,40 @@
   color: var(--color-text-primary);
   padding-bottom: 2rem;
   flex-wrap: wrap;
+  width: 100%;
+}
+
+.pencil-placeholder {
+  width: 20px;
+  height: 20px;
 }
 
 @media (max-width: 640px) {
-  .cookingtime-tabs-wrapper {
-    padding-top: 2rem;
+  .cookingtime-tabs-wrapper.flex-between {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1rem;
+    padding-bottom: 2rem;
+  }
+
+  .cookingtime-tabs-wrapper.flex-between .back-arrow {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .cookingtime-tabs-wrapper.flex-between .pencil-icon-right,
+  .cookingtime-tabs-wrapper.flex-between .pencil-placeholder {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .cookingtime-tabs-wrapper.flex-between > .flex-row {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
   }
 }
 
