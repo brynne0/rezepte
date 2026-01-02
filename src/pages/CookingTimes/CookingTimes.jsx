@@ -786,7 +786,7 @@ const CookingTimes = ({
             !isEditMode &&
             (formData.ungroupedCookingTimes.length > 0 ||
               formData.cookingTimeSections.length > 0) && (
-              <div className="categories-wrapper">
+              <div className="cookingtime-categories-wrapper">
                 <button
                   className={`subheading-wrapper${selectedSection === "all" ? " selected" : ""}`}
                   onClick={() => setSelectedSection("all")}
@@ -855,7 +855,9 @@ const CookingTimes = ({
                         </div>
 
                         {/* Ungrouped Cooking Times */}
-                        {filteredData.ungroupedCookingTimes.length > 0 && (
+                        {(isEditMode
+                          ? formData.ungroupedCookingTimes.length > 0
+                          : filteredData.ungroupedCookingTimes.length > 0) && (
                           <>
                             {isEditMode ? (
                               <Droppable
@@ -870,7 +872,7 @@ const CookingTimes = ({
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
                                   >
-                                    {filteredData.ungroupedCookingTimes.map(
+                                    {formData.ungroupedCookingTimes.map(
                                       (item, index) => (
                                         <Draggable
                                           key={`ungrouped-${index}-${item.tempId || item.id}`}
@@ -929,7 +931,9 @@ const CookingTimes = ({
                         )}
 
                         {/* Cooking Time Sections */}
-                        {filteredData.cookingTimeSections.length > 0 && (
+                        {(isEditMode
+                          ? formData.cookingTimeSections.length > 0
+                          : filteredData.cookingTimeSections.length > 0) && (
                           <Droppable
                             droppableId="sections"
                             type="cooking-time-section"
@@ -940,8 +944,10 @@ const CookingTimes = ({
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
                               >
-                                {filteredData.cookingTimeSections.map(
-                                  (section, sectionIndex) => (
+                                {(isEditMode
+                                  ? formData.cookingTimeSections
+                                  : filteredData.cookingTimeSections
+                                ).map((section, sectionIndex) => (
                                     <Draggable
                                       key={section.id}
                                       draggableId={section.id}

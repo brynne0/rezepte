@@ -28,6 +28,10 @@
   height: 20px;
 }
 
+.cookingtime-categories-wrapper {
+  padding: 0.5rem;
+}
+
 @media (max-width: 640px) {
   .cookingtime-tabs-wrapper.flex-between {
     display: grid !important;
