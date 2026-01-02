@@ -55,7 +55,9 @@ describe("CookingTimeRow", () => {
 
     it("should display notes when present", () => {
       render(<CookingTimeRow {...defaultProps} />);
-      expect(screen.getByText("Simmer covered until tender")).toBeInTheDocument();
+      expect(
+        screen.getByText("Simmer covered until tender")
+      ).toBeInTheDocument();
     });
 
     it("should not display soaking time when not provided", () => {
@@ -70,7 +72,9 @@ describe("CookingTimeRow", () => {
       const itemWithoutNotes = { ...mockItem, notes: null };
       render(<CookingTimeRow {...defaultProps} item={itemWithoutNotes} />);
 
-      expect(screen.queryByText("Simmer covered until tender")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Simmer covered until tender")
+      ).not.toBeInTheDocument();
     });
 
     it("should not show delete button in view mode", () => {
@@ -93,18 +97,25 @@ describe("CookingTimeRow", () => {
     it("should show input fields for all editable properties", () => {
       render(<CookingTimeRow {...editModeProps} />);
 
-      expect(screen.getByPlaceholderText("Ingredient name")).toHaveValue("Brown Rice");
+      expect(screen.getByPlaceholderText("Ingredient name")).toHaveValue(
+        "Brown Rice"
+      );
       expect(screen.getByPlaceholderText("Cooking (min)")).toHaveValue(45);
       expect(screen.getByPlaceholderText("Soaking (min)")).toHaveValue(30);
       expect(screen.getByPlaceholderText("Dry weight (g)")).toHaveValue(100);
       expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue(300);
-      expect(screen.getByPlaceholderText("Optional notes")).toHaveValue("Simmer covered until tender");
+      expect(screen.getByPlaceholderText("Optional notes")).toHaveValue(
+        "Simmer covered until tender"
+      );
     });
 
     it("should call handleItemChange when ingredient name is updated", () => {
       const handleItemChange = vi.fn();
       render(
-        <CookingTimeRow {...editModeProps} handleItemChange={handleItemChange} />
+        <CookingTimeRow
+          {...editModeProps}
+          handleItemChange={handleItemChange}
+        />
       );
 
       const ingredientInput = screen.getByPlaceholderText("Ingredient name");
@@ -121,7 +132,10 @@ describe("CookingTimeRow", () => {
     it("should call handleItemChange when cooking time is updated", () => {
       const handleItemChange = vi.fn();
       render(
-        <CookingTimeRow {...editModeProps} handleItemChange={handleItemChange} />
+        <CookingTimeRow
+          {...editModeProps}
+          handleItemChange={handleItemChange}
+        />
       );
 
       const cookingTimeInput = screen.getByPlaceholderText("Cooking (min)");
@@ -138,7 +152,10 @@ describe("CookingTimeRow", () => {
     it("should call handleItemChange when soaking time is updated", () => {
       const handleItemChange = vi.fn();
       render(
-        <CookingTimeRow {...editModeProps} handleItemChange={handleItemChange} />
+        <CookingTimeRow
+          {...editModeProps}
+          handleItemChange={handleItemChange}
+        />
       );
 
       const soakingTimeInput = screen.getByPlaceholderText("Soaking (min)");
@@ -155,7 +172,10 @@ describe("CookingTimeRow", () => {
     it("should call handleItemChange when notes are updated", () => {
       const handleItemChange = vi.fn();
       render(
-        <CookingTimeRow {...editModeProps} handleItemChange={handleItemChange} />
+        <CookingTimeRow
+          {...editModeProps}
+          handleItemChange={handleItemChange}
+        />
       );
 
       const notesInput = screen.getByPlaceholderText("Optional notes");
@@ -203,7 +223,9 @@ describe("CookingTimeRow", () => {
       expect(screen.getByPlaceholderText("Cooking (min)")).toHaveValue(null);
       expect(screen.getByPlaceholderText("Soaking (min)")).toHaveValue(null);
       expect(screen.getByPlaceholderText("Dry weight (g)")).toHaveValue(null);
-      expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue(null);
+      expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue(
+        null
+      );
     });
   });
 
@@ -232,7 +254,11 @@ describe("CookingTimeRow", () => {
 
   describe("Time Formatting", () => {
     it("should format time correctly for hours", () => {
-      const itemWithHours = { ...mockItem, cooking_time: 120, soaking_time: 90 };
+      const itemWithHours = {
+        ...mockItem,
+        cooking_time: 120,
+        soaking_time: 90,
+      };
       render(<CookingTimeRow {...defaultProps} item={itemWithHours} />);
 
       expect(screen.getByText(/2h cook/)).toBeInTheDocument();
@@ -240,7 +266,12 @@ describe("CookingTimeRow", () => {
     });
 
     it("should handle zero cooking time", () => {
-      const itemWithZeroCooking = { ...mockItem, cooking_time: 0, dry_weight: 0, cooked_weight: 0 };
+      const itemWithZeroCooking = {
+        ...mockItem,
+        cooking_time: 0,
+        dry_weight: 0,
+        cooked_weight: 0,
+      };
       render(<CookingTimeRow {...defaultProps} item={itemWithZeroCooking} />);
 
       // Should not display cooking time but should display soaking time
@@ -256,7 +287,11 @@ describe("CookingTimeRow", () => {
     });
 
     it("should handle decimal ratios without trailing zeros", () => {
-      const itemWithDecimal = { ...mockItem, dry_weight: 100, cooked_weight: 250 };
+      const itemWithDecimal = {
+        ...mockItem,
+        dry_weight: 100,
+        cooked_weight: 250,
+      };
       render(<CookingTimeRow {...defaultProps} item={itemWithDecimal} />);
 
       expect(screen.getByText(/×2\.5\)/)).toBeInTheDocument();

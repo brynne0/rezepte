@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import {
   Plus,
@@ -22,6 +21,8 @@ import {
 } from "../../services/cookingTimesService";
 import { getUserPreferredLanguage } from "../../services/userService";
 import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
+import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import "./CookingTimes.css";
 
 const CookingTimes = ({
@@ -29,7 +30,6 @@ const CookingTimes = ({
   setIsEditMode: externalSetIsEditMode,
 }) => {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState("all");
@@ -59,6 +59,23 @@ const CookingTimes = ({
   const isEditMode =
     externalIsEditMode !== undefined ? externalIsEditMode : internalIsEditMode;
   const setIsEditMode = externalSetIsEditMode || setInternalIsEditMode;
+
+  // Unsaved changes detection
+  const hasUnsavedChanges = useCallback(() => {
+    if (!isEditMode) return false;
+    const currentData = JSON.stringify(formData);
+    const initial = JSON.stringify(originalData);
+    return currentData !== initial;
+  }, [formData, originalData, isEditMode]);
+
+  // Unsaved changes hook
+  const {
+    isModalOpen: isUnsavedChangesModalOpen,
+    navigate: navigateWithConfirmation,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedChangesMessage,
+  } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
 
   // Generate unique IDs like RecipeForm
   const generateTempId = useCallback(() => {
@@ -731,7 +748,7 @@ const CookingTimes = ({
     } else if (activeTab === "conversions") {
       setActiveTab("cooking-times");
     } else {
-      navigate(-1);
+      navigateWithConfirmation(-1);
     }
   };
 
@@ -1120,6 +1137,17 @@ const CookingTimes = ({
         </div>
         {activeTab === "conversions" && <ConversionsTab />}
       </div>
+
+      {/* Unsaved Changes Modal */}
+      <ConfirmationModal
+        isOpen={isUnsavedChangesModalOpen}
+        onClose={cancelNavigation}
+        onConfirm={confirmNavigation}
+        message={unsavedChangesMessage}
+        confirmText={t("leave_page")}
+        cancelText={t("stay")}
+        confirmButtonType="danger"
+      />
     </div>
   );
 };

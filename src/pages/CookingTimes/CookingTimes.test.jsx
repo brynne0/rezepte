@@ -1,9 +1,4 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import CookingTimes from "./CookingTimes";
@@ -126,11 +121,7 @@ describe("CookingTimes", () => {
   const renderComponent = (props = {}) => {
     return render(
       <MemoryRouter>
-        <CookingTimes
-          isEditMode={false}
-          setIsEditMode={vi.fn()}
-          {...props}
-        />
+        <CookingTimes isEditMode={false} setIsEditMode={vi.fn()} {...props} />
       </MemoryRouter>
     );
   };
@@ -239,7 +230,9 @@ describe("CookingTimes", () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByText("t(\"add_first_cooking_time\")")).toBeInTheDocument();
+        expect(
+          screen.getByText('t("add_first_cooking_time")')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -255,7 +248,6 @@ describe("CookingTimes", () => {
   });
 
   describe("Back Navigation", () => {
-
     it("should switch to cooking times tab when back is clicked on conversions tab", async () => {
       renderComponent();
 

@@ -43,7 +43,7 @@ const ConversionsTab = () => {
 
         return (
           <div key={category}>
-            <div className="cookingtime-section-subheading">
+            <div className="mb-05">
               <h3>
                 {t(
                   category,
