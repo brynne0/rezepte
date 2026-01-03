@@ -36,12 +36,20 @@ vi.mock("../../components/ConversionsTab/ConversionsTab", () => ({
 }));
 
 vi.mock("../../components/CookingTimeRow/CookingTimeRow", () => ({
-  default: ({ item, isEditMode }) => (
+  default: ({ item, isEditMode, handleItemChange, sectionId }) => (
     <div data-testid={`cooking-time-${item.tempId || item.id}`}>
       {isEditMode ? (
         <input
           data-testid={`ingredient-name-${item.tempId || item.id}`}
-          defaultValue={item.ingredient_name}
+          value={item.ingredient_name}
+          onChange={(e) =>
+            handleItemChange?.(
+              sectionId,
+              item.tempId,
+              "ingredient_name",
+              e.target.value
+            )
+          }
         />
       ) : (
         <span>{item.ingredient_name}</span>
@@ -316,6 +324,169 @@ describe("CookingTimes", () => {
       });
 
       expect(screen.queryByLabelText("Edit Mode")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Unsaved Changes Warning", () => {
+    it("should not show warning when exiting edit mode without changes", async () => {
+      const setIsEditMode = vi.fn();
+      renderComponent({ isEditMode: true, setIsEditMode });
+
+      // Wait for data to load - look for add section button instead
+      await waitFor(() => {
+        expect(screen.getByText("add_section")).toBeInTheDocument();
+      });
+
+      // Click back button
+      const backButton = screen.getByLabelText("Go Back");
+      fireEvent.click(backButton);
+
+      // Should exit edit mode immediately without showing modal
+      await waitFor(() => {
+        expect(setIsEditMode).toHaveBeenCalledWith(false);
+      });
+
+      // Modal should not appear
+      expect(screen.queryByText("unsaved_changes_warning")).not.toBeInTheDocument();
+    });
+
+    it("should show warning when clicking back with unsaved changes", async () => {
+      const setIsEditMode = vi.fn();
+      renderComponent({ isEditMode: true, setIsEditMode });
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText("add_section")).toBeInTheDocument();
+      });
+
+      // Find first ingredient input
+      const ingredientInputs = screen.getAllByTestId(/ingredient-name-/);
+      fireEvent.change(ingredientInputs[0], { target: { value: "White Rice" } });
+
+      // Click back button
+      const backButton = screen.getByLabelText("Go Back");
+      fireEvent.click(backButton);
+
+      // Should show confirmation modal
+      await waitFor(() => {
+        expect(screen.getByText("unsaved_changes_warning")).toBeInTheDocument();
+      });
+
+      // Should not have exited edit mode yet
+      expect(setIsEditMode).not.toHaveBeenCalled();
+    });
+
+    it("should exit edit mode when confirming unsaved changes warning", async () => {
+      const setIsEditMode = vi.fn();
+      renderComponent({ isEditMode: true, setIsEditMode });
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText("add_section")).toBeInTheDocument();
+      });
+
+      // Find first ingredient input and make a change
+      const ingredientInputs = screen.getAllByTestId(/ingredient-name-/);
+      fireEvent.change(ingredientInputs[0], { target: { value: "White Rice" } });
+
+      // Click back button
+      const backButton = screen.getByLabelText("Go Back");
+      fireEvent.click(backButton);
+
+      // Wait for modal to appear
+      await waitFor(() => {
+        expect(screen.getByText("unsaved_changes_warning")).toBeInTheDocument();
+      });
+
+      // Click confirm button
+      const confirmButton = screen.getByText("leave_page");
+      fireEvent.click(confirmButton);
+
+      // Should exit edit mode
+      await waitFor(() => {
+        expect(setIsEditMode).toHaveBeenCalledWith(false);
+      });
+    });
+
+    it("should stay in edit mode when canceling unsaved changes warning", async () => {
+      const setIsEditMode = vi.fn();
+      renderComponent({ isEditMode: true, setIsEditMode });
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText("add_section")).toBeInTheDocument();
+      });
+
+      // Find first ingredient input and make a change
+      const ingredientInputs = screen.getAllByTestId(/ingredient-name-/);
+      fireEvent.change(ingredientInputs[0], { target: { value: "White Rice" } });
+
+      // Click back button
+      const backButton = screen.getByLabelText("Go Back");
+      fireEvent.click(backButton);
+
+      // Wait for modal to appear
+      await waitFor(() => {
+        expect(screen.getByText("unsaved_changes_warning")).toBeInTheDocument();
+      });
+
+      // Click cancel button
+      const cancelButton = screen.getByText("stay");
+      fireEvent.click(cancelButton);
+
+      // Should NOT exit edit mode
+      await waitFor(() => {
+        expect(screen.queryByText("unsaved_changes_warning")).not.toBeInTheDocument();
+      });
+      expect(setIsEditMode).not.toHaveBeenCalled();
+    });
+
+    it("should show warning when clicking cancel button with unsaved changes", async () => {
+      const setIsEditMode = vi.fn();
+      renderComponent({ isEditMode: true, setIsEditMode });
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText("add_section")).toBeInTheDocument();
+      });
+
+      // Find first ingredient input and make a change
+      const ingredientInputs = screen.getAllByTestId(/ingredient-name-/);
+      fireEvent.change(ingredientInputs[0], { target: { value: "White Rice" } });
+
+      // Click cancel button
+      const cancelButton = screen.getByText("cancel");
+      fireEvent.click(cancelButton);
+
+      // Should show confirmation modal
+      await waitFor(() => {
+        expect(screen.getByText("unsaved_changes_warning")).toBeInTheDocument();
+      });
+
+      // Should not have exited edit mode yet
+      expect(setIsEditMode).not.toHaveBeenCalled();
+    });
+
+    it("should not show warning when clicking cancel button without changes", async () => {
+      const setIsEditMode = vi.fn();
+      renderComponent({ isEditMode: true, setIsEditMode });
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText("add_section")).toBeInTheDocument();
+      });
+
+      // Click cancel button without making changes
+      const cancelButton = screen.getByText("cancel");
+      fireEvent.click(cancelButton);
+
+      // Should exit edit mode immediately without showing modal
+      await waitFor(() => {
+        expect(setIsEditMode).toHaveBeenCalledWith(false);
+      });
+
+      // Modal should not appear
+      expect(screen.queryByText("unsaved_changes_warning")).not.toBeInTheDocument();
     });
   });
 });
