@@ -53,9 +53,9 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
       const trimmedText = pastedText.trim();
       const isUrlInput = isUrl(trimmedText);
 
-      // Extract category values (excluding "all")
+      // Extract category values (excluding "all_recipes")
       const availableCategories = categories
-        .filter((cat) => cat.value !== "all")
+        .filter((cat) => cat.value !== "all_recipes")
         .map((cat) => cat.value);
 
       const response = await fetch(`${supabaseUrl}/functions/v1/parse-recipe`, {

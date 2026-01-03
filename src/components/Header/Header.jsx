@@ -387,7 +387,7 @@ const Header = ({
                       setCurrentSearchInput(e.target.value);
                       setSearchTerm(e.target.value);
                       if (e.target.value.length > 0) {
-                        setSelectedCategory("all");
+                        setSelectedCategory("all_recipes");
                       }
                     }}
                     className="input input--secondary search-input-with-icon"

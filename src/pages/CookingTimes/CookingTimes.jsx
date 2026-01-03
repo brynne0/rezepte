@@ -35,7 +35,7 @@ const CookingTimes = ({
   const [selectedSection, setSelectedSection] = useState("all");
   const [showExitEditModeModal, setShowExitEditModeModal] = useState(false);
   const originalUserLanguage = useRef(null);
-  const IS_ENTERING_EDIT_MODE = useRef(false);
+  const HAS_LOADED_ONCE = useRef(false);
 
   // Form data structure (matching RecipeForm pattern exactly)
   const [formData, setFormData] = useState({
@@ -144,14 +144,12 @@ const CookingTimes = ({
   }, [organizeCookingTimesIntoSections, i18n.language]);
 
   useEffect(() => {
-    // Don't reload if we're in the middle of entering edit mode
-    if (!IS_ENTERING_EDIT_MODE.current) {
+    // Always load data on first render, then don't reload when in edit mode to preserve user's edits
+    if (!HAS_LOADED_ONCE.current || !isEditMode) {
       loadData();
-    } else {
-      // Reset the flag after the language change completes
-      IS_ENTERING_EDIT_MODE.current = false;
+      HAS_LOADED_ONCE.current = true;
     }
-  }, [loadData]); // Reload when language changes
+  }, [loadData, isEditMode]); // Reload when language changes (unless in edit mode)
 
   // Restore original language when exiting edit mode
   useEffect(() => {
@@ -793,8 +791,9 @@ const CookingTimes = ({
                 const preferredLanguage = await getUserPreferredLanguage();
                 if (i18n.language !== preferredLanguage) {
                   originalUserLanguage.current = i18n.language;
-                  IS_ENTERING_EDIT_MODE.current = true;
                   await i18n.changeLanguage(preferredLanguage);
+                  // Wait for data to reload in new language before entering edit mode
+                  await new Promise(resolve => setTimeout(resolve, 100));
                 }
                 setIsEditMode(true);
               }}
@@ -842,15 +841,18 @@ const CookingTimes = ({
                     type="cooking-times"
                     icon={Timer}
                     onAddClick={async () => {
-                      // Switch to preferred language first, then enter edit mode
+                      // Enter edit mode first
+                      setIsEditMode(true);
+                      // Switch to preferred language
                       const preferredLanguage =
                         await getUserPreferredLanguage();
                       if (i18n.language !== preferredLanguage) {
                         originalUserLanguage.current = i18n.language;
-                        IS_ENTERING_EDIT_MODE.current = true;
                         await i18n.changeLanguage(preferredLanguage);
+                        // Wait a bit for state to settle
+                        await new Promise(resolve => setTimeout(resolve, 50));
                       }
-                      setIsEditMode(true);
+                      // Now add the empty cooking time
                       addCookingTime("ungrouped");
                     }}
                   />

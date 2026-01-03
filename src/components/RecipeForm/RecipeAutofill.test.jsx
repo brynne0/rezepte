@@ -30,7 +30,7 @@ describe("RecipeAutofill", () => {
   });
 
   const mockCategories = [
-    { value: "all", label: "All Recipes" },
+    { value: "all_recipes", label: "All Recipes" },
     { value: "breakfast", label: "Breakfast" },
     { value: "lunch", label: "Lunch" },
     { value: "dinner", label: "Dinner" },

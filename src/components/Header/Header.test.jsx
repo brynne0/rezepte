@@ -1038,7 +1038,9 @@ describe("Header Component", () => {
       // Start typing - should reset category
       fireEvent.change(searchInput, { target: { value: "tofu" } });
 
-      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith("all");
+      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith(
+        "all_recipes"
+      );
       expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("tofu");
     });
 
@@ -1055,7 +1057,9 @@ describe("Header Component", () => {
       fireEvent.change(searchInput, { target: { value: "test" } });
 
       // Verify the category was reset when typing
-      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith("all");
+      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith(
+        "all_recipes"
+      );
       expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("test");
 
       // Reset the mocks to check the next behavior
@@ -1155,7 +1159,9 @@ describe("Header Component", () => {
       expect(defaultProps.setSelectedCategory).toHaveBeenCalledTimes(
         searchTerm.length
       );
-      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith("all");
+      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith(
+        "all_recipes"
+      );
     });
   });
 

@@ -33,7 +33,7 @@ const RecipeList = ({
         // Then filter by category (only if not searching or if all recipes are selected)
         return searchTerm
           ? searchFilteredRecipes // When searching, show all search results regardless of category
-          : selectedCategory === "all"
+          : selectedCategory === "all_recipes"
             ? recipes
             : recipes.filter((r) => r.category === selectedCategory);
       })();

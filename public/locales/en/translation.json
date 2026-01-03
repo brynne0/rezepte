@@ -1,5 +1,6 @@
 {
-  "all": "All Recipes",
+  "all": "All",
+  "all_recipes": "All Recipes",
 
   "login_failed": "Login failed. Please try again.",
   "login_success": "Logged in!",

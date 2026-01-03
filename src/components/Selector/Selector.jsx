@@ -28,9 +28,10 @@ const Selector = ({
       case "unit":
         return t("units", { returnObjects: true }) || [];
       case "category":
-        // Filter out "all" category for category selector
+        // Filter out "all_recipes" category for category selector
         return (
-          options?.filter((cat) => cat.value.toLowerCase() !== "all") || []
+          options?.filter((cat) => cat.value.toLowerCase() !== "all_recipes") ||
+          []
         );
       default:
         return options || [];

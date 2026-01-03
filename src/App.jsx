@@ -45,7 +45,7 @@ import Settings from "./pages/Settings/Settings";
 function App() {
   const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title_asc");
   const [showImages, setShowImages] = useState(() => {

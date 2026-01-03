@@ -1,5 +1,6 @@
 {
-  "all": "Alle Rezepte",
+  "all": "Alle",
+  "all_recipes": "Alle Rezepte",
 
   "login_failed": "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
   "login_success": "Eingeloggt!",

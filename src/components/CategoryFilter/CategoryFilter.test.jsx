@@ -5,7 +5,7 @@ import "@testing-library/jest-dom";
 
 describe("CategoryFilter Component", () => {
   const mockCategories = [
-    { value: "all", label: "All Recipes" },
+    { value: "all_recipes", label: "All Recipes" },
     { value: "brunch", label: "Brunch" },
     { value: "dinner", label: "Dinner" },
     { value: "sides", label: "Sides" },
@@ -21,7 +21,7 @@ describe("CategoryFilter Component", () => {
 
   const defaultProps = {
     categories: mockCategories,
-    selectedCategory: "all",
+    selectedCategory: "all_recipes",
     setSelectedCategory: mockSetSelectedCategory,
     setSearchTerm: mockSetSearchTerm,
   };

@@ -470,7 +470,7 @@ export const fetchRecipesPaginated = async (
     .eq("user_id", user.id); // Only show user's own recipes
 
   // Apply filters
-  if (filters.category && filters.category !== "all") {
+  if (filters.category && filters.category !== "all_recipes") {
     query = query.eq("category", filters.category);
   }
 
@@ -620,7 +620,7 @@ export const fetchRecipe = async (id) => {
 
 // Helper function to add recipe to category using many-to-many relationship
 const addRecipeToCategory = async (recipeId, categoryName) => {
-  if (!categoryName || categoryName === "all") return;
+  if (!categoryName || categoryName === "all_recipes") return;
 
   try {
     // Get category by name
@@ -654,7 +654,7 @@ const addRecipeToCategory = async (recipeId, categoryName) => {
 
 // Helper function to create category if it doesn't exist (with translations)
 const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
-  if (!categoryName || categoryName === "all") return null;
+  if (!categoryName || categoryName === "all_recipes") return null;
 
   const normalizedName = categoryName.toLowerCase();
 
@@ -931,7 +931,7 @@ export const createRecipe = async (
   // Handle category assignment using new many-to-many system
   if (recipeData.categories && recipeData.categories.length > 0) {
     for (const categoryName of recipeData.categories) {
-      if (categoryName && categoryName !== "all") {
+      if (categoryName && categoryName !== "all_recipes") {
         // First, try to get or create the category
         const category = await getOrCreateCategory(
           categoryName,
@@ -1239,7 +1239,7 @@ export const updateRecipe = async (
         .single();
 
       for (const categoryName of recipeData.categories) {
-        if (categoryName && categoryName !== "all") {
+        if (categoryName && categoryName !== "all_recipes") {
           const category = await getOrCreateCategory(
             categoryName,
             recipeLanguage?.original_language || "en"

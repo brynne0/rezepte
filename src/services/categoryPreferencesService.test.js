@@ -165,7 +165,7 @@ describe("categoryPreferencesService", () => {
 
       expect(supabase.from).toHaveBeenCalledWith("user_category_preferences");
       expect(result).toEqual([
-        { value: "all", label: "All Recipes", isSystem: true },
+        { value: "all_recipes", label: "All Recipes", isSystem: true },
         {
           value: "brunch",
           label: "brunch",
@@ -197,7 +197,7 @@ describe("categoryPreferencesService", () => {
       const result = await getCategoriesWithPreferences("en");
 
       expect(result).toEqual([
-        { value: "all", label: "All Recipes", isSystem: true },
+        { value: "all_recipes", label: "All Recipes", isSystem: true },
       ]);
     });
 
@@ -230,7 +230,7 @@ describe("categoryPreferencesService", () => {
       const result = await getCategoriesWithPreferences("de");
 
       expect(result).toEqual([
-        { value: "all", label: "Alle Rezepte", isSystem: true },
+        { value: "all_recipes", label: "Alle Rezepte", isSystem: true },
         {
           value: "dinner",
           label: "Abendessen",
@@ -274,7 +274,7 @@ describe("categoryPreferencesService", () => {
       const result = await getCategoriesWithPreferences("en");
 
       expect(result).toEqual([
-        { value: "all", label: "All Recipes", isSystem: true },
+        { value: "all_recipes", label: "All Recipes", isSystem: true },
         {
           value: "breakfast",
           label: "Breakfast",
@@ -318,7 +318,7 @@ describe("categoryPreferencesService", () => {
       const result = await getCategoriesWithPreferences("en");
 
       expect(result).toEqual([
-        { value: "all", label: "All Recipes", isSystem: true },
+        { value: "all_recipes", label: "All Recipes", isSystem: true },
         {
           value: "brunch",
           label: "brunch",
@@ -368,7 +368,7 @@ describe("categoryPreferencesService", () => {
       const result = await getCategoriesWithPreferences("en");
 
       expect(result).toEqual([
-        { value: "all", label: "All Recipes", isSystem: true },
+        { value: "all_recipes", label: "All Recipes", isSystem: true },
         {
           value: "brunch",
           label: "brunch",
