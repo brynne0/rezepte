@@ -793,7 +793,7 @@ const CookingTimes = ({
                   originalUserLanguage.current = i18n.language;
                   await i18n.changeLanguage(preferredLanguage);
                   // Wait for data to reload in new language before entering edit mode
-                  await new Promise(resolve => setTimeout(resolve, 100));
+                  await new Promise((resolve) => setTimeout(resolve, 100));
                 }
                 setIsEditMode(true);
               }}
@@ -850,7 +850,7 @@ const CookingTimes = ({
                         originalUserLanguage.current = i18n.language;
                         await i18n.changeLanguage(preferredLanguage);
                         // Wait a bit for state to settle
-                        await new Promise(resolve => setTimeout(resolve, 50));
+                        await new Promise((resolve) => setTimeout(resolve, 50));
                       }
                       // Now add the empty cooking time
                       addCookingTime("ungrouped");

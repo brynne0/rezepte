@@ -259,7 +259,7 @@
   "dry": "dry",
   "cooked": "cooked",
   "cooking_time_minutes": "Cooking (min)",
-  "soaking_time_minutes": "Soaking (min)",
+  "soaking_time_minutes": "Soaking (hrs)",
   "dry_weight": "Dry weight (g)",
   "cooked_weight": "Cooked weight (g)",
   "optional_notes": "Optional notes"
