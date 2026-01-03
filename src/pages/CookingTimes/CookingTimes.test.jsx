@@ -347,7 +347,9 @@ describe("CookingTimes", () => {
       });
 
       // Modal should not appear
-      expect(screen.queryByText("unsaved_changes_warning")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("unsaved_changes_warning")
+      ).not.toBeInTheDocument();
     });
 
     it("should show warning when clicking back with unsaved changes", async () => {
@@ -361,7 +363,9 @@ describe("CookingTimes", () => {
 
       // Find first ingredient input
       const ingredientInputs = screen.getAllByTestId(/ingredient-name-/);
-      fireEvent.change(ingredientInputs[0], { target: { value: "White Rice" } });
+      fireEvent.change(ingredientInputs[0], {
+        target: { value: "White Rice" },
+      });
 
       // Click back button
       const backButton = screen.getByLabelText("Go Back");
@@ -387,7 +391,9 @@ describe("CookingTimes", () => {
 
       // Find first ingredient input and make a change
       const ingredientInputs = screen.getAllByTestId(/ingredient-name-/);
-      fireEvent.change(ingredientInputs[0], { target: { value: "White Rice" } });
+      fireEvent.change(ingredientInputs[0], {
+        target: { value: "White Rice" },
+      });
 
       // Click back button
       const backButton = screen.getByLabelText("Go Back");
@@ -419,7 +425,9 @@ describe("CookingTimes", () => {
 
       // Find first ingredient input and make a change
       const ingredientInputs = screen.getAllByTestId(/ingredient-name-/);
-      fireEvent.change(ingredientInputs[0], { target: { value: "White Rice" } });
+      fireEvent.change(ingredientInputs[0], {
+        target: { value: "White Rice" },
+      });
 
       // Click back button
       const backButton = screen.getByLabelText("Go Back");
@@ -436,7 +444,9 @@ describe("CookingTimes", () => {
 
       // Should NOT exit edit mode
       await waitFor(() => {
-        expect(screen.queryByText("unsaved_changes_warning")).not.toBeInTheDocument();
+        expect(
+          screen.queryByText("unsaved_changes_warning")
+        ).not.toBeInTheDocument();
       });
       expect(setIsEditMode).not.toHaveBeenCalled();
     });
@@ -452,7 +462,9 @@ describe("CookingTimes", () => {
 
       // Find first ingredient input and make a change
       const ingredientInputs = screen.getAllByTestId(/ingredient-name-/);
-      fireEvent.change(ingredientInputs[0], { target: { value: "White Rice" } });
+      fireEvent.change(ingredientInputs[0], {
+        target: { value: "White Rice" },
+      });
 
       // Click cancel button
       const cancelButton = screen.getByText("cancel");
@@ -486,7 +498,9 @@ describe("CookingTimes", () => {
       });
 
       // Modal should not appear
-      expect(screen.queryByText("unsaved_changes_warning")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("unsaved_changes_warning")
+      ).not.toBeInTheDocument();
     });
   });
 });

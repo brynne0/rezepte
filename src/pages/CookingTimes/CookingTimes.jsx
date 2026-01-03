@@ -35,6 +35,7 @@ const CookingTimes = ({
   const [selectedSection, setSelectedSection] = useState("all");
   const [showExitEditModeModal, setShowExitEditModeModal] = useState(false);
   const originalUserLanguage = useRef(null);
+  const IS_ENTERING_EDIT_MODE = useRef(false);
 
   // Form data structure (matching RecipeForm pattern exactly)
   const [formData, setFormData] = useState({
@@ -143,23 +144,14 @@ const CookingTimes = ({
   }, [organizeCookingTimesIntoSections, i18n.language]);
 
   useEffect(() => {
-    loadData();
+    // Don't reload if we're in the middle of entering edit mode
+    if (!IS_ENTERING_EDIT_MODE.current) {
+      loadData();
+    } else {
+      // Reset the flag after the language change completes
+      IS_ENTERING_EDIT_MODE.current = false;
+    }
   }, [loadData]); // Reload when language changes
-
-  // Switch to preferred language when entering edit mode
-  useEffect(() => {
-    const switchToPreferredLanguage = async () => {
-      if (isEditMode) {
-        const preferredLanguage = await getUserPreferredLanguage();
-        if (i18n.language !== preferredLanguage) {
-          // Store current language before switching
-          originalUserLanguage.current = i18n.language;
-          i18n.changeLanguage(preferredLanguage);
-        }
-      }
-    };
-    switchToPreferredLanguage();
-  }, [isEditMode, i18n]);
 
   // Restore original language when exiting edit mode
   useEffect(() => {
@@ -796,7 +788,16 @@ const CookingTimes = ({
             formData.cookingTimeSections.length > 0) ? (
             <button
               className="btn-unstyled pencil-icon-right"
-              onClick={() => setIsEditMode(true)}
+              onClick={async () => {
+                // Switch to preferred language first, then enter edit mode
+                const preferredLanguage = await getUserPreferredLanguage();
+                if (i18n.language !== preferredLanguage) {
+                  originalUserLanguage.current = i18n.language;
+                  IS_ENTERING_EDIT_MODE.current = true;
+                  await i18n.changeLanguage(preferredLanguage);
+                }
+                setIsEditMode(true);
+              }}
               aria-label={t("edit_mode", "Edit Mode")}
             >
               <Pencil size={20} />
@@ -840,7 +841,15 @@ const CookingTimes = ({
                   <EmptyState
                     type="cooking-times"
                     icon={Timer}
-                    onAddClick={() => {
+                    onAddClick={async () => {
+                      // Switch to preferred language first, then enter edit mode
+                      const preferredLanguage =
+                        await getUserPreferredLanguage();
+                      if (i18n.language !== preferredLanguage) {
+                        originalUserLanguage.current = i18n.language;
+                        IS_ENTERING_EDIT_MODE.current = true;
+                        await i18n.changeLanguage(preferredLanguage);
+                      }
                       setIsEditMode(true);
                       addCookingTime("ungrouped");
                     }}
