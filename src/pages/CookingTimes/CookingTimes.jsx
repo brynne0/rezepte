@@ -944,23 +944,21 @@ const CookingTimes = ({
                         )}
 
                         {/* Add Cooking Time Button for Ungrouped */}
-                        {isEditMode &&
-                          (formData.ungroupedCookingTimes.length > 0 ||
-                            formData.cookingTimeSections.length === 0) && (
-                            <div className="flex-center">
-                              <button
-                                type="button"
-                                onClick={() => addCookingTime("ungrouped")}
-                                className="btn btn-icon btn-icon-green"
-                              >
-                                <Plus
-                                  size={16}
-                                  data-testid="add-cooking-time-btn"
-                                  aria-label={t("add_cooking_time")}
-                                />
-                              </button>
-                            </div>
-                          )}
+                        {isEditMode && (
+                          <div className="flex-center">
+                            <button
+                              type="button"
+                              onClick={() => addCookingTime("ungrouped")}
+                              className="btn btn-icon btn-icon-green"
+                            >
+                              <Plus
+                                size={16}
+                                data-testid="add-cooking-time-btn"
+                                aria-label={t("add_cooking_time")}
+                              />
+                            </button>
+                          </div>
+                        )}
 
                         {/* Cooking Time Sections */}
                         {(isEditMode
