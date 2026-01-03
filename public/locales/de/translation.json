@@ -247,6 +247,7 @@
   "volume": "Volumen",
   "weight": "Gewicht",
   "temperature": "Temperatur",
+  "canned_translation": "400g Dose = 240g gekocht",
 
   "no_cooking_times_title": "Noch keine Garzeiten",
   "add_first_cooking_time": "Fügen Sie Ihre erste Garzeit hinzu",

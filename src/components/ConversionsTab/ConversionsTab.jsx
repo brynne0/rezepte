@@ -19,6 +19,8 @@ const conversions = {
     // Ounces & Pounds
     "1 oz = 28 g",
     "1 lb = 454 g",
+
+    "canned_translation",
   ],
 
   temperature: [
@@ -53,7 +55,11 @@ const ConversionsTab = () => {
             </div>
             <div>
               {categoryConversions.map((conversion, index) => (
-                <div key={index}>{conversion}</div>
+                <div key={index}>
+                  {conversion.includes("=") && !conversion.includes("°")
+                    ? conversion
+                    : t(conversion, conversion)}
+                </div>
               ))}
             </div>
           </div>

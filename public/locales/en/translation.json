@@ -246,6 +246,7 @@
   "volume": "Volume",
   "weight": "Weight",
   "temperature": "Temperature",
+  "canned_translation": "400g can = 240g cooked",
 
   "no_cooking_times_title": "No cooking times yet",
   "add_first_cooking_time": "Add your first cooking time",
