@@ -183,20 +183,13 @@ const CookingTimes = ({
     }
 
     // Filter by selected section
-    if (selectedSection === "ungrouped") {
-      setFilteredData({
-        ungroupedCookingTimes: formData.ungroupedCookingTimes,
-        cookingTimeSections: [],
-      });
-    } else {
-      const selectedSectionData = formData.cookingTimeSections.find(
-        (section) => section.subheading === selectedSection
-      );
-      setFilteredData({
-        ungroupedCookingTimes: [],
-        cookingTimeSections: selectedSectionData ? [selectedSectionData] : [],
-      });
-    }
+    const selectedSectionData = formData.cookingTimeSections.find(
+      (section) => section.subheading === selectedSection
+    );
+    setFilteredData({
+      ungroupedCookingTimes: [],
+      cookingTimeSections: selectedSectionData ? [selectedSectionData] : [],
+    });
   }, [selectedSection, formData]);
 
   // Add cooking time function (matches RecipeForm addIngredient pattern)
@@ -827,14 +820,6 @@ const CookingTimes = ({
                 >
                   <h3 className="forta">{t("all", "All")}</h3>
                 </button>
-                {formData.ungroupedCookingTimes.length > 0 && (
-                  <button
-                    className={`subheading-wrapper${selectedSection === "ungrouped" ? " selected" : ""}`}
-                    onClick={() => setSelectedSection("ungrouped")}
-                  >
-                    <h3 className="forta">{t("ungrouped", "Ungrouped")}</h3>
-                  </button>
-                )}
                 {formData.cookingTimeSections.map((section) => (
                   <button
                     key={section.id}

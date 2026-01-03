@@ -164,7 +164,6 @@ describe("CookingTimes", () => {
         expect(screen.getByText("All")).toBeInTheDocument();
       });
 
-      expect(screen.getByText("Ungrouped")).toBeInTheDocument();
       expect(screen.getAllByText("Grains").length).toBeGreaterThan(0);
       expect(screen.getAllByText("Legumes").length).toBeGreaterThan(0);
     });
@@ -182,17 +181,16 @@ describe("CookingTimes", () => {
       expect(screen.queryByText("Red Lentils")).not.toBeInTheDocument();
     });
 
-    it("should show ungrouped items when ungrouped filter is selected", async () => {
+    it("should show all items including ungrouped when All is selected", async () => {
       renderComponent();
       await waitFor(() => {
         expect(screen.getByText("Brown Rice")).toBeInTheDocument();
       });
 
-      const ungroupedChip = screen.getByText("Ungrouped");
-      fireEvent.click(ungroupedChip);
-
+      // All items should be visible including ungrouped
+      expect(screen.getByText("Brown Rice")).toBeInTheDocument();
+      expect(screen.getByText("Red Lentils")).toBeInTheDocument();
       expect(screen.getByText("Quinoa")).toBeInTheDocument();
-      expect(screen.queryByText("Brown Rice")).not.toBeInTheDocument();
     });
   });
 
