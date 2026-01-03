@@ -33,6 +33,7 @@ const CookingTimes = ({
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState("all");
+  const [showExitEditModeModal, setShowExitEditModeModal] = useState(false);
   const originalUserLanguage = useRef(null);
 
   // Form data structure (matching RecipeForm pattern exactly)
@@ -743,13 +744,29 @@ const CookingTimes = ({
   }
 
   const handleBackNavigation = () => {
-    if (isEditMode) {
-      setIsEditMode(false);
-    } else if (activeTab === "conversions") {
+    if (activeTab === "conversions") {
       setActiveTab("cooking-times");
+    } else if (isEditMode) {
+      // Check for unsaved changes before exiting edit mode
+      if (hasUnsavedChanges()) {
+        setShowExitEditModeModal(true);
+      } else {
+        setIsEditMode(false);
+      }
     } else {
       navigateWithConfirmation(-1);
     }
+  };
+
+  const handleConfirmExitEditMode = () => {
+    setShowExitEditModeModal(false);
+    setIsEditMode(false);
+    // Reset to original data
+    setFormData(originalData);
+  };
+
+  const handleCancelExitEditMode = () => {
+    setShowExitEditModeModal(false);
   };
 
   return (
@@ -931,21 +948,23 @@ const CookingTimes = ({
                         )}
 
                         {/* Add Cooking Time Button for Ungrouped */}
-                        {isEditMode && (
-                          <div className="flex-center">
-                            <button
-                              type="button"
-                              onClick={() => addCookingTime("ungrouped")}
-                              className="btn btn-icon btn-icon-green"
-                            >
-                              <Plus
-                                size={16}
-                                data-testid="add-cooking-time-btn"
-                                aria-label={t("add_cooking_time")}
-                              />
-                            </button>
-                          </div>
-                        )}
+                        {isEditMode &&
+                          (formData.ungroupedCookingTimes.length > 0 ||
+                            formData.cookingTimeSections.length === 0) && (
+                            <div className="flex-center">
+                              <button
+                                type="button"
+                                onClick={() => addCookingTime("ungrouped")}
+                                className="btn btn-icon btn-icon-green"
+                              >
+                                <Plus
+                                  size={16}
+                                  data-testid="add-cooking-time-btn"
+                                  aria-label={t("add_cooking_time")}
+                                />
+                              </button>
+                            </div>
+                          )}
 
                         {/* Cooking Time Sections */}
                         {(isEditMode
@@ -1110,9 +1129,12 @@ const CookingTimes = ({
                     <button
                       type="button"
                       onClick={() => {
-                        // Cancel changes - reload original data and exit edit mode
-                        loadData();
-                        setIsEditMode(false);
+                        // Check for unsaved changes before canceling
+                        if (hasUnsavedChanges()) {
+                          setShowExitEditModeModal(true);
+                        } else {
+                          setIsEditMode(false);
+                        }
                       }}
                       className="btn btn-action btn-secondary"
                     >
@@ -1138,12 +1160,23 @@ const CookingTimes = ({
         {activeTab === "conversions" && <ConversionsTab />}
       </div>
 
-      {/* Unsaved Changes Modal */}
+      {/* Unsaved Changes Modal - for page navigation */}
       <ConfirmationModal
         isOpen={isUnsavedChangesModalOpen}
         onClose={cancelNavigation}
         onConfirm={confirmNavigation}
         message={unsavedChangesMessage}
+        confirmText={t("leave_page")}
+        cancelText={t("stay")}
+        confirmButtonType="danger"
+      />
+
+      {/* Exit Edit Mode Modal - for exiting edit mode with unsaved changes */}
+      <ConfirmationModal
+        isOpen={showExitEditModeModal}
+        onClose={handleCancelExitEditMode}
+        onConfirm={handleConfirmExitEditMode}
+        message={t("unsaved_changes_warning")}
         confirmText={t("leave_page")}
         cancelText={t("stay")}
         confirmButtonType="danger"

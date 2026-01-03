@@ -230,9 +230,7 @@ describe("CookingTimes", () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(
-          screen.getByText('add_first_cooking_time')
-        ).toBeInTheDocument();
+        expect(screen.getByText("add_first_cooking_time")).toBeInTheDocument();
       });
     });
   });
