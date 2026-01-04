@@ -287,6 +287,8 @@ export const getTranslatedCookingTime = async (
       ingredient_name: cachedTranslation.ingredient_name,
       notes: cachedTranslation.notes,
       section_name: cachedTranslation.section_name,
+      cooking_time: cachedTranslation.cooking_time ?? cookingTime.cooking_time,
+      soaking_time: cachedTranslation.soaking_time ?? cookingTime.soaking_time,
       isTranslated: true,
       translatedFrom: originalLanguage,
     };
@@ -294,17 +296,49 @@ export const getTranslatedCookingTime = async (
 
   // Translation not cached, translate now
   try {
+    // Helper function to check if a time value is text (needs translation) vs numeric (no translation)
+    const isTextTime = (value) => {
+      if (!value) return false;
+      const timeStr = String(value).trim();
+      const numericValue = Number(timeStr);
+      // If it's a pure number or range like "40-50", don't translate
+      return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
+    };
+
+    // Helper function to capitalise all words (title case)
+    const toTitleCase = (str) => {
+      if (!str) return str;
+      return str
+        .split(" ")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ");
+    };
+
+    // Translate all fields
+    const rawIngredientName = await translateText(
+      cookingTime.ingredient_name,
+      targetLanguage
+    );
+    const rawSectionName = cookingTime.section_name
+      ? await translateText(cookingTime.section_name, targetLanguage)
+      : null;
+
     const translatedData = {
-      ingredient_name: await translateText(
-        cookingTime.ingredient_name,
-        targetLanguage
-      ),
+      ingredient_name: toTitleCase(rawIngredientName),
       notes: cookingTime.notes
         ? await translateText(cookingTime.notes, targetLanguage)
         : null,
-      section_name: cookingTime.section_name
-        ? await translateText(cookingTime.section_name, targetLanguage)
-        : null,
+      section_name: rawSectionName ? toTitleCase(rawSectionName) : null,
+      cooking_time:
+        cookingTime.cooking_time && isTextTime(cookingTime.cooking_time)
+          ? await translateText(cookingTime.cooking_time, targetLanguage)
+          : cookingTime.cooking_time,
+      soaking_time:
+        cookingTime.soaking_time && isTextTime(cookingTime.soaking_time)
+          ? await translateText(cookingTime.soaking_time, targetLanguage)
+          : cookingTime.soaking_time,
     };
 
     // Save translation to database
@@ -319,6 +353,8 @@ export const getTranslatedCookingTime = async (
       ingredient_name: translatedData.ingredient_name,
       notes: translatedData.notes,
       section_name: translatedData.section_name,
+      cooking_time: translatedData.cooking_time,
+      soaking_time: translatedData.soaking_time,
       isTranslated: true,
       translatedFrom: originalLanguage,
     };
@@ -393,40 +429,76 @@ export const updateCookingTimeTranslations = async (
   newData
 ) => {
   try {
-    // Get current translations
+    // Get current translations and original language
     const { data: currentCookingTime, error: fetchError } = await supabase
       .from("user_cooking_times")
-      .select("translated_cooking_time")
+      .select("translated_cooking_time, original_language")
       .eq("id", cookingTimeId)
       .single();
 
-    if (fetchError || !currentCookingTime.translated_cooking_time) {
-      return; // No existing translations to update
+    if (fetchError) {
+      console.error(
+        "Failed to fetch cooking time for translation update:",
+        fetchError
+      );
+      return;
     }
 
-    const existingTranslations = currentCookingTime.translated_cooking_time;
+    const existingTranslations =
+      currentCookingTime.translated_cooking_time || {};
     const updatedTranslations = { ...existingTranslations };
+    const originalLanguage = currentCookingTime.original_language || "en";
+
+    // Determine which languages to translate to
+    // If no translations exist yet, create one for the opposite language
+    const languagesToTranslate =
+      Object.keys(existingTranslations).length > 0
+        ? Object.keys(existingTranslations)
+        : [originalLanguage === "en" ? "de" : "en"];
+
+    // Helper function to check if a time value is text (needs translation) vs numeric (no translation)
+    const isTextTime = (value) => {
+      if (!value) return false;
+      const timeStr = String(value).trim();
+      const numericValue = Number(timeStr);
+      // If it's a pure number or range like "40-50", don't translate
+      return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
+    };
+
+    // Helper function to capitalise all words (title case)
+    const toTitleCase = (str) => {
+      if (!str) return str;
+      return str
+        .split(" ")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ");
+    };
 
     // Check each language and update only changed fields
-    for (const [language, translation] of Object.entries(
-      existingTranslations
-    )) {
+    for (const language of languagesToTranslate) {
+      const translation = existingTranslations[language] || {};
       const fieldsToUpdate = {};
       let needsUpdate = false;
 
-      // Check ingredient_name for changes
-      if (oldData.ingredient_name !== newData.ingredient_name) {
-        fieldsToUpdate.ingredient_name = await translateText(
+      // Check ingredient_name for changes (or if translation doesn't exist yet)
+      if (
+        translation.ingredient_name === undefined ||
+        oldData.ingredient_name !== newData.ingredient_name
+      ) {
+        const rawIngredientName = await translateText(
           newData.ingredient_name,
           language
         );
+        fieldsToUpdate.ingredient_name = toTitleCase(rawIngredientName);
         needsUpdate = true;
       } else {
         fieldsToUpdate.ingredient_name = translation.ingredient_name;
       }
 
-      // Check notes for changes
-      if (oldData.notes !== newData.notes) {
+      // Check notes for changes (or if translation doesn't exist yet)
+      if (translation.notes === undefined || oldData.notes !== newData.notes) {
         fieldsToUpdate.notes = newData.notes
           ? await translateText(newData.notes, language)
           : null;
@@ -435,14 +507,51 @@ export const updateCookingTimeTranslations = async (
         fieldsToUpdate.notes = translation.notes;
       }
 
-      // Check section_name for changes
-      if (oldData.section_name !== newData.section_name) {
-        fieldsToUpdate.section_name = newData.section_name
-          ? await translateText(newData.section_name, language)
-          : null;
+      // Check section_name for changes (or if translation doesn't exist yet)
+      if (
+        translation.section_name === undefined ||
+        oldData.section_name !== newData.section_name
+      ) {
+        if (newData.section_name) {
+          const rawSectionName = await translateText(
+            newData.section_name,
+            language
+          );
+          fieldsToUpdate.section_name = toTitleCase(rawSectionName);
+        } else {
+          fieldsToUpdate.section_name = null;
+        }
         needsUpdate = true;
       } else {
         fieldsToUpdate.section_name = translation.section_name;
+      }
+
+      // Check cooking_time for changes (or if translation doesn't exist yet)
+      if (
+        translation.cooking_time === undefined ||
+        oldData.cooking_time !== newData.cooking_time
+      ) {
+        fieldsToUpdate.cooking_time =
+          newData.cooking_time && isTextTime(newData.cooking_time)
+            ? await translateText(newData.cooking_time, language)
+            : newData.cooking_time;
+        needsUpdate = true;
+      } else {
+        fieldsToUpdate.cooking_time = translation.cooking_time;
+      }
+
+      // Check soaking_time for changes (or if translation doesn't exist yet)
+      if (
+        translation.soaking_time === undefined ||
+        oldData.soaking_time !== newData.soaking_time
+      ) {
+        fieldsToUpdate.soaking_time =
+          newData.soaking_time && isTextTime(newData.soaking_time)
+            ? await translateText(newData.soaking_time, language)
+            : newData.soaking_time;
+        needsUpdate = true;
+      } else {
+        fieldsToUpdate.soaking_time = translation.soaking_time;
       }
 
       // Update translation if any field changed

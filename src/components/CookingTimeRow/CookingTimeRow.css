@@ -91,6 +91,6 @@
 
 @media (max-width: 768px) {
   .cooking-time-card {
-    min-width: 0;
+    min-width: 100%;
   }
 }

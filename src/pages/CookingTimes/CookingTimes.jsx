@@ -147,6 +147,10 @@ const CookingTimes = ({
     // Always load data on first render, then don't reload when in edit mode to preserve user's edits
     if (!HAS_LOADED_ONCE.current || !isEditMode) {
       loadData();
+      // Reset selected section when language changes to avoid mismatched section names
+      if (HAS_LOADED_ONCE.current) {
+        setSelectedSection("all");
+      }
       HAS_LOADED_ONCE.current = true;
     }
   }, [loadData, isEditMode]); // Reload when language changes (unless in edit mode)
@@ -505,7 +509,9 @@ const CookingTimes = ({
           originalItem &&
           (item.ingredient_name !== originalItem.ingredient_name ||
             item.notes !== originalItem.notes ||
-            item.section_name !== originalItem.section_name)
+            item.section_name !== originalItem.section_name ||
+            item.cooking_time !== originalItem.cooking_time ||
+            item.soaking_time !== originalItem.soaking_time)
         ) {
           await updateCookingTimeTranslations(item.id, originalItem, item);
         }
@@ -796,6 +802,7 @@ const CookingTimes = ({
                   await new Promise((resolve) => setTimeout(resolve, 100));
                 }
                 setIsEditMode(true);
+                setSelectedSection("all");
               }}
               aria-label={t("edit_mode", "Edit Mode")}
             >
@@ -831,7 +838,9 @@ const CookingTimes = ({
           )}
 
         {/* Cooking Times Tab Content */}
-        <div className={`${isEditMode ? "flex-column-center" : ""}`}>
+        <div
+          className={`${isEditMode ? "flex-column-center" : "w-100-mobile"}`}
+        >
           <DragDropContext onDragEnd={handleDragEnd}>
             {activeTab === "cooking-times" && (
               <>
@@ -854,6 +863,7 @@ const CookingTimes = ({
                       }
                       // Now add the empty cooking time
                       addCookingTime("ungrouped");
+                      setSelectedSection("all");
                     }}
                   />
                 ) : (
