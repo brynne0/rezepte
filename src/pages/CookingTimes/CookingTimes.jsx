@@ -509,7 +509,9 @@ const CookingTimes = ({
           originalItem &&
           (item.ingredient_name !== originalItem.ingredient_name ||
             item.notes !== originalItem.notes ||
-            item.section_name !== originalItem.section_name)
+            item.section_name !== originalItem.section_name ||
+            item.cooking_time !== originalItem.cooking_time ||
+            item.soaking_time !== originalItem.soaking_time)
         ) {
           await updateCookingTimeTranslations(item.id, originalItem, item);
         }
