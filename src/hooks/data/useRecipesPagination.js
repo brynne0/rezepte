@@ -7,7 +7,7 @@ import { getTranslatedRecipeTitle } from "../../services/translationService";
 export const useRecipesPagination = (
   page = 1,
   limit = 12,
-  category = "all",
+  category = "all_recipes",
   searchTerm = "",
   sortBy = "created_at_desc",
   enabled = true
@@ -149,7 +149,7 @@ export const useRecipesPagination = (
     // Then filter by category (only if not searching or if all recipes are selected)
     const filteredRecipes = searchTerm
       ? searchFilteredRecipes // When searching, show all search results regardless of category
-      : category === "all"
+      : category === "all_recipes"
         ? allRecipes
         : allRecipes.filter(
             (r) => r.categories && r.categories.includes(category)

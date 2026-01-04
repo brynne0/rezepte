@@ -14,7 +14,7 @@ const mockUnits = [
 ];
 
 const mockCategories = [
-  { value: "all", label: "All" },
+  { value: "all_recipes", label: "all_recipes" },
   { value: "appetizers", label: "Appetizers" },
   { value: "mains", label: "Main Dishes" },
   { value: "desserts", label: "Desserts" },
@@ -107,7 +107,7 @@ describe("Selector", () => {
       const input = screen.getByPlaceholderText("Select category");
       fireEvent.focus(input);
 
-      expect(screen.queryByText("All")).not.toBeInTheDocument();
+      expect(screen.queryByText("all_recipes")).not.toBeInTheDocument();
       expect(screen.getByText("Appetizers")).toBeInTheDocument();
       expect(screen.getByText("Main Dishes")).toBeInTheDocument();
       expect(screen.getByText("Desserts")).toBeInTheDocument();

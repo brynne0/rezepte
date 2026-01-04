@@ -35,6 +35,7 @@ import { Squirrel } from "lucide-react";
 import AddRecipePage from "./pages/AddRecipe/AddRecipe";
 import EditRecipePage from "./pages/EditRecipe/EditRecipe";
 import GroceryList from "./pages/GroceryList/GroceryList";
+import CookingTimes from "./pages/CookingTimes/CookingTimes";
 import AuthPage from "./pages/AuthPage/AuthPage";
 import Recipe from "./pages/Recipe/Recipe";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
@@ -44,7 +45,7 @@ import Settings from "./pages/Settings/Settings";
 function App() {
   const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title_asc");
   const [showImages, setShowImages] = useState(() => {
@@ -57,6 +58,7 @@ function App() {
   });
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
+  const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const { recipes, loading, refreshRecipes, totalRecipeCount, paginationInfo } =
     useRecipesPagination(
@@ -127,6 +129,8 @@ function App() {
           loading={loading}
           isGroceryListEditing={isGroceryListEditing}
           setIsGroceryListEditing={setIsGroceryListEditing}
+          isCookingTimesEditing={isCookingTimesEditing}
+          setIsCookingTimesEditing={setIsCookingTimesEditing}
           currentPage={currentPage}
           paginationInfo={paginationInfo}
           onPageChange={handlePageChange}
@@ -147,10 +151,13 @@ function AppRoutes(props) {
     refreshCategories,
     isGroceryListEditing,
     setIsGroceryListEditing,
+    isCookingTimesEditing,
+    setIsCookingTimesEditing,
     showImages,
     isLoggedIn,
   } = props;
   const isGroceryListPage = location.pathname === "/grocery-list";
+  const isCookingTimesPage = location.pathname === "/cooking-times";
   const isOnline = useOnlineStatus();
 
   // Reset grocery list editing state when leaving the grocery list page
@@ -159,6 +166,13 @@ function AppRoutes(props) {
       setIsGroceryListEditing(false);
     }
   }, [isGroceryListPage, isGroceryListEditing, setIsGroceryListEditing]);
+
+  // Reset cooking times editing state when leaving the cooking times page
+  useEffect(() => {
+    if (!isCookingTimesPage && isCookingTimesEditing) {
+      setIsCookingTimesEditing(false);
+    }
+  }, [isCookingTimesPage, isCookingTimesEditing, setIsCookingTimesEditing]);
 
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
@@ -203,7 +217,7 @@ function AppRoutes(props) {
         setLoginMessage={props.setLoginMessage}
         loginMessage={props.loginMessage}
         t={props.t}
-        disableLanguageSwitch={isGroceryListEditing}
+        disableLanguageSwitch={isGroceryListEditing || isCookingTimesEditing}
         sortBy={props.sortBy}
         setSortBy={props.setSortBy}
         showImages={props.showImages}
@@ -276,6 +290,17 @@ function AppRoutes(props) {
               <GroceryList
                 isEditing={isGroceryListEditing}
                 setIsEditing={setIsGroceryListEditing}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cooking-times"
+          element={
+            <ProtectedRoute>
+              <CookingTimes
+                isEditMode={isCookingTimesEditing}
+                setIsEditMode={setIsCookingTimesEditing}
               />
             </ProtectedRoute>
           }

@@ -18,10 +18,10 @@ export const fetchCategories = async () => {
 export const getCategoriesForUI = async (currentLanguage = "en") => {
   const categories = await fetchCategories();
 
-  // Always include "all" as the first option
+  // Always include "all_recipes" as the first option
   const formattedCategories = [
     {
-      value: "all",
+      value: "all_recipes",
       label: currentLanguage === "de" ? "Alle Rezepte" : "All Recipes",
       isSystem: true,
     },
@@ -300,7 +300,7 @@ export const getRecipesByCategory = async (
   page = 1,
   limit = 12
 ) => {
-  if (categoryName === "all") {
+  if (categoryName === "all_recipes") {
     // Return all recipes
     return await supabase
       .from("recipes")

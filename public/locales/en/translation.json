@@ -1,5 +1,6 @@
 {
-  "all": "All Recipes",
+  "all": "All",
+  "all_recipes": "All Recipes",
 
   "login_failed": "Login failed. Please try again.",
   "login_success": "Logged in!",
@@ -239,5 +240,29 @@
   "delete_image": "Delete image",
 
   "recipe_with_ingredients": "Recipe with",
-  "view_recipe_details": "View recipe details"
+  "view_recipe_details": "View recipe details",
+
+  "conversions_tab": "Conversions",
+  "cooking_times_tab": "Cooking Times",
+  "volume": "Volume",
+  "weight": "Weight",
+  "temperature": "Temperature",
+  "canned_translation": "400g can = 240g cooked",
+
+  "no_cooking_times_title": "No cooking times yet",
+  "add_first_cooking_time": "Add your first cooking time",
+  "edit_mode": "Edit Mode",
+  "add_cooking_time": "Add cooking time",
+  "no_search_results": "No results found for your search.",
+  "cook": "cook",
+  "soak": "soak",
+  "dry": "dry",
+  "cooked": "cooked",
+  "cooking_time_minutes": "Cooking (min)",
+  "soaking_time_minutes": "Soaking (hrs)",
+  "dry_weight": "Dry weight (g)",
+  "cooked_weight": "Cooked weight (g)",
+  "optional_notes": "Optional notes",
+  "minutes_short": "min",
+  "hours_short": "h"
 }

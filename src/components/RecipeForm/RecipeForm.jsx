@@ -383,7 +383,7 @@ const RecipeForm = ({
             aria-labelledby="category-label"
           >
             {categories
-              ?.filter((category) => category.value !== "all")
+              ?.filter((category) => category.value !== "all_recipes")
               .map((category) => (
                 <button
                   key={category.value}

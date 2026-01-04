@@ -1,0 +1,96 @@
+/* View Mode - Compact Layout */
+.cooking-time-card {
+  background: var(--card-background);
+  border: 1px solid;
+  border-radius: var(--border-radius);
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 25rem;
+  min-width: 25rem;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.cooking-time-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+  line-height: 1.5;
+}
+
+.cooking-time-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.cooking-time-info {
+  margin-top: 0.25rem;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+.cooking-time-notes {
+  margin-top: 0.25rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Edit Mode - Row Layout */
+.cooking-time-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  background-color: var(--color-background-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+}
+
+.cooking-time-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.cooking-time-name-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Edit Mode Grid Layout */
+.cooking-time-edit-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.edit-row-2col {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-row-2col input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.edit-row-1col {
+  display: flex;
+}
+
+.edit-row-1col input {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .cooking-time-card {
+    min-width: 0;
+  }
+}

@@ -182,7 +182,7 @@ const CategoriesTab = ({
         refreshCategories();
       }
 
-      // Reset selected category to "all" so user sees all recipes when going back
+      // Reset selected category to "all_recipes" so user sees all recipes when going back
       if (resetCategoryFilter) {
         resetCategoryFilter();
       }

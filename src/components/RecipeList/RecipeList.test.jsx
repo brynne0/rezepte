@@ -69,7 +69,7 @@ describe("RecipeList", () => {
 
   const renderComponent = (props = {}) => {
     const defaultProps = {
-      selectedCategory: "all",
+      selectedCategory: "all_recipes",
       recipes: mockRecipes,
       searchTerm: "",
     };
@@ -81,8 +81,8 @@ describe("RecipeList", () => {
     );
   };
 
-  it('renders all recipes when category is "all"', () => {
-    renderComponent({ selectedCategory: "all" });
+  it('renders all recipes when category is "all_recipes"', () => {
+    renderComponent({ selectedCategory: "all_recipes" });
 
     expect(screen.getByTestId("recipe-card-1")).toBeInTheDocument();
     expect(screen.getByTestId("recipe-card-2")).toBeInTheDocument();
@@ -213,7 +213,7 @@ describe("RecipeList", () => {
       rerender(
         <MemoryRouter>
           <RecipeList
-            selectedCategory="all"
+            selectedCategory="all_recipes"
             recipes={[]}
             searchTerm=""
             totalRecipeCount={0}

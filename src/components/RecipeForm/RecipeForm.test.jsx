@@ -97,7 +97,7 @@ import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 
 describe("RecipeForm", () => {
   const mockCategories = [
-    { value: "all", label: "All Recipes" },
+    { value: "all_recipes", label: "All Recipes" },
     { value: "desserts", label: "Desserts" },
     { value: "main-dishes", label: "Main Dishes" },
   ];
@@ -196,7 +196,7 @@ describe("RecipeForm", () => {
     it("renders category buttons correctly", () => {
       renderComponent();
 
-      // Check that category buttons are rendered (excluding "all")
+      // Check that category buttons are rendered (excluding "all_recipes")
       expect(screen.queryByText("All Recipes")).not.toBeInTheDocument();
       expect(screen.getByText("Desserts")).toBeInTheDocument();
       expect(screen.getByText("Main Dishes")).toBeInTheDocument();

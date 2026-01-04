@@ -42,7 +42,7 @@ describe("useCategories", () => {
 
   test("loads categories with preferences successfully", async () => {
     const mockCategories = [
-      { value: "all", label: "All Recipes", isSystem: true },
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
       {
         value: "dinner",
         label: "Dinner",
@@ -78,7 +78,7 @@ describe("useCategories", () => {
 
   test("falls back to basic categories when preferences fail", async () => {
     const mockBasicCategories = [
-      { value: "all", label: "All Recipes" },
+      { value: "all_recipes", label: "All Recipes" },
       { value: "dinner", label: "Dinner" },
     ];
 
@@ -117,11 +117,11 @@ describe("useCategories", () => {
 
   test("refreshes categories when language changes", async () => {
     const mockEnglishCategories = [
-      { value: "all", label: "All Recipes", isSystem: true },
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
       { value: "dinner", label: "Dinner", isSystem: false },
     ];
     const mockGermanCategories = [
-      { value: "all", label: "Alle Rezepte", isSystem: true },
+      { value: "all_recipes", label: "Alle Rezepte", isSystem: true },
       { value: "dinner", label: "Abendessen", isSystem: false },
     ];
 
@@ -166,10 +166,10 @@ describe("useCategories", () => {
 
   test("provides refresh function that reloads categories", async () => {
     const initialCategories = [
-      { value: "all", label: "All Recipes", isSystem: true },
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
     ];
     const refreshedCategories = [
-      { value: "all", label: "All Recipes", isSystem: true },
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
       { value: "dinner", label: "Dinner", isSystem: false },
     ];
 
@@ -197,7 +197,7 @@ describe("useCategories", () => {
 
   test("maintains stable reference for categories to prevent re-renders", async () => {
     const mockCategories = [
-      { value: "all", label: "All Recipes", isSystem: true },
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
     ];
 
     getCategoriesWithPreferences.mockResolvedValue(mockCategories);
@@ -218,7 +218,7 @@ describe("useCategories", () => {
 
   test("memoizes categories to prevent unnecessary re-renders", async () => {
     const mockCategories = [
-      { value: "all", label: "All Recipes", isSystem: true },
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
     ];
 
     getCategoriesWithPreferences.mockResolvedValue(mockCategories);

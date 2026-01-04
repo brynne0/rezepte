@@ -1,5 +1,6 @@
 {
-  "all": "Alle Rezepte",
+  "all": "Alle",
+  "all_recipes": "Alle Rezepte",
 
   "login_failed": "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
   "login_success": "Eingeloggt!",
@@ -240,5 +241,29 @@
   "delete_image": "Bild löschen",
 
   "recipe_with_ingredients": "Rezept mit",
-  "view_recipe_details": "Rezeptdetails anzeigen"
+  "view_recipe_details": "Rezeptdetails anzeigen",
+
+  "conversions_tab": "Umrechnungen",
+  "cooking_times_tab": "Garzeiten",
+  "volume": "Volumen",
+  "weight": "Gewicht",
+  "temperature": "Temperatur",
+  "canned_translation": "400g Dose = 240g gekocht",
+
+  "no_cooking_times_title": "Noch keine Garzeiten",
+  "add_first_cooking_time": "Fügen Sie Ihre erste Garzeit hinzu",
+  "edit_mode": "Bearbeitungsmodus",
+  "add_cooking_time": "Garzeit hinzufügen",
+  "no_search_results": "Keine Ergebnisse für Ihre Suche gefunden.",
+  "cook": "kochen",
+  "soak": "einweichen",
+  "dry": "trocken",
+  "cooked": "gekocht",
+  "cooking_time_minutes": "Garzeit (Min.)",
+  "soaking_time_minutes": "Einweichen (Std.)",
+  "dry_weight": "Trocken (g)",
+  "cooked_weight": "Gekocht (g)",
+  "optional_notes": "Notizen (optional)",
+  "minutes_short": "Min.",
+  "hours_short": "Std."
 }

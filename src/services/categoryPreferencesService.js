@@ -65,10 +65,10 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Always include "all" as the first option
+  // Always include "all_recipes" as the first option
   const formattedCategories = [
     {
-      value: "all",
+      value: "all_recipes",
       label: currentLanguage === "de" ? "Alle Rezepte" : "All Recipes",
       isSystem: true,
     },
