@@ -802,6 +802,7 @@ const CookingTimes = ({
                   await new Promise((resolve) => setTimeout(resolve, 100));
                 }
                 setIsEditMode(true);
+                setSelectedSection("all");
               }}
               aria-label={t("edit_mode", "Edit Mode")}
             >
@@ -837,7 +838,9 @@ const CookingTimes = ({
           )}
 
         {/* Cooking Times Tab Content */}
-        <div className={`${isEditMode ? "flex-column-center" : ""}`}>
+        <div
+          className={`${isEditMode ? "flex-column-center" : "w-100-mobile"}`}
+        >
           <DragDropContext onDragEnd={handleDragEnd}>
             {activeTab === "cooking-times" && (
               <>
@@ -860,6 +863,7 @@ const CookingTimes = ({
                       }
                       // Now add the empty cooking time
                       addCookingTime("ungrouped");
+                      setSelectedSection("all");
                     }}
                   />
                 ) : (

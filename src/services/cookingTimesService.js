@@ -309,9 +309,11 @@ export const getTranslatedCookingTime = async (
     const toTitleCase = (str) => {
       if (!str) return str;
       return str
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+        .split(" ")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ");
     };
 
     // Translate all fields
@@ -467,9 +469,11 @@ export const updateCookingTimeTranslations = async (
     const toTitleCase = (str) => {
       if (!str) return str;
       return str
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+        .split(" ")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ");
     };
 
     // Check each language and update only changed fields

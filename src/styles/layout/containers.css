@@ -235,4 +235,8 @@
     padding: 2rem;
     width: -webkit-fill-available;
   }
+
+  .w-100-mobile {
+    width: 100%;
+  }
 }
