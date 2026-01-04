@@ -806,32 +806,32 @@ const CookingTimes = ({
           )}
         </div>
 
+        {/* Category Filter Chips - Only for cooking times tab */}
+        {activeTab === "cooking-times" &&
+          !isEditMode &&
+          (formData.ungroupedCookingTimes.length > 0 ||
+            formData.cookingTimeSections.length > 0) && (
+            <div className="cookingtime-categories-wrapper">
+              <button
+                className={`subheading-wrapper${selectedSection === "all" ? " selected" : ""}`}
+                onClick={() => setSelectedSection("all")}
+              >
+                <h3 className="forta">{t("all", "All")}</h3>
+              </button>
+              {formData.cookingTimeSections.map((section) => (
+                <button
+                  key={section.id}
+                  className={`subheading-wrapper${selectedSection === section.subheading ? " selected" : ""}`}
+                  onClick={() => setSelectedSection(section.subheading)}
+                >
+                  <h3 className="forta">{section.subheading}</h3>
+                </button>
+              ))}
+            </div>
+          )}
+
         {/* Cooking Times Tab Content */}
         <div className={`${isEditMode ? "flex-column-center" : ""}`}>
-          {/* Category Filter Chips - Only for cooking times tab */}
-          {activeTab === "cooking-times" &&
-            !isEditMode &&
-            (formData.ungroupedCookingTimes.length > 0 ||
-              formData.cookingTimeSections.length > 0) && (
-              <div className="cookingtime-categories-wrapper">
-                <button
-                  className={`subheading-wrapper${selectedSection === "all" ? " selected" : ""}`}
-                  onClick={() => setSelectedSection("all")}
-                >
-                  <h3 className="forta">{t("all", "All")}</h3>
-                </button>
-                {formData.cookingTimeSections.map((section) => (
-                  <button
-                    key={section.id}
-                    className={`subheading-wrapper${selectedSection === section.subheading ? " selected" : ""}`}
-                    onClick={() => setSelectedSection(section.subheading)}
-                  >
-                    <h3 className="forta">{section.subheading}</h3>
-                  </button>
-                ))}
-              </div>
-            )}
-
           <DragDropContext onDragEnd={handleDragEnd}>
             {activeTab === "cooking-times" && (
               <>
