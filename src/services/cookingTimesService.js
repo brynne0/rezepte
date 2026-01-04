@@ -305,17 +305,30 @@ export const getTranslatedCookingTime = async (
       return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
     };
 
+    // Helper function to capitalise all words (title case)
+    const toTitleCase = (str) => {
+      if (!str) return str;
+      return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    };
+
+    // Translate all fields
+    const rawIngredientName = await translateText(
+      cookingTime.ingredient_name,
+      targetLanguage
+    );
+    const rawSectionName = cookingTime.section_name
+      ? await translateText(cookingTime.section_name, targetLanguage)
+      : null;
+
     const translatedData = {
-      ingredient_name: await translateText(
-        cookingTime.ingredient_name,
-        targetLanguage
-      ),
+      ingredient_name: toTitleCase(rawIngredientName),
       notes: cookingTime.notes
         ? await translateText(cookingTime.notes, targetLanguage)
         : null,
-      section_name: cookingTime.section_name
-        ? await translateText(cookingTime.section_name, targetLanguage)
-        : null,
+      section_name: rawSectionName ? toTitleCase(rawSectionName) : null,
       cooking_time:
         cookingTime.cooking_time && isTextTime(cookingTime.cooking_time)
           ? await translateText(cookingTime.cooking_time, targetLanguage)
@@ -422,19 +435,24 @@ export const updateCookingTimeTranslations = async (
       .single();
 
     if (fetchError) {
-      console.error("Failed to fetch cooking time for translation update:", fetchError);
+      console.error(
+        "Failed to fetch cooking time for translation update:",
+        fetchError
+      );
       return;
     }
 
-    const existingTranslations = currentCookingTime.translated_cooking_time || {};
+    const existingTranslations =
+      currentCookingTime.translated_cooking_time || {};
     const updatedTranslations = { ...existingTranslations };
     const originalLanguage = currentCookingTime.original_language || "en";
 
     // Determine which languages to translate to
     // If no translations exist yet, create one for the opposite language
-    const languagesToTranslate = Object.keys(existingTranslations).length > 0
-      ? Object.keys(existingTranslations)
-      : [originalLanguage === "en" ? "de" : "en"];
+    const languagesToTranslate =
+      Object.keys(existingTranslations).length > 0
+        ? Object.keys(existingTranslations)
+        : [originalLanguage === "en" ? "de" : "en"];
 
     // Helper function to check if a time value is text (needs translation) vs numeric (no translation)
     const isTextTime = (value) => {
@@ -445,6 +463,15 @@ export const updateCookingTimeTranslations = async (
       return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
     };
 
+    // Helper function to capitalise all words (title case)
+    const toTitleCase = (str) => {
+      if (!str) return str;
+      return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    };
+
     // Check each language and update only changed fields
     for (const language of languagesToTranslate) {
       const translation = existingTranslations[language] || {};
@@ -452,11 +479,15 @@ export const updateCookingTimeTranslations = async (
       let needsUpdate = false;
 
       // Check ingredient_name for changes (or if translation doesn't exist yet)
-      if (translation.ingredient_name === undefined || oldData.ingredient_name !== newData.ingredient_name) {
-        fieldsToUpdate.ingredient_name = await translateText(
+      if (
+        translation.ingredient_name === undefined ||
+        oldData.ingredient_name !== newData.ingredient_name
+      ) {
+        const rawIngredientName = await translateText(
           newData.ingredient_name,
           language
         );
+        fieldsToUpdate.ingredient_name = toTitleCase(rawIngredientName);
         needsUpdate = true;
       } else {
         fieldsToUpdate.ingredient_name = translation.ingredient_name;
@@ -473,17 +504,29 @@ export const updateCookingTimeTranslations = async (
       }
 
       // Check section_name for changes (or if translation doesn't exist yet)
-      if (translation.section_name === undefined || oldData.section_name !== newData.section_name) {
-        fieldsToUpdate.section_name = newData.section_name
-          ? await translateText(newData.section_name, language)
-          : null;
+      if (
+        translation.section_name === undefined ||
+        oldData.section_name !== newData.section_name
+      ) {
+        if (newData.section_name) {
+          const rawSectionName = await translateText(
+            newData.section_name,
+            language
+          );
+          fieldsToUpdate.section_name = toTitleCase(rawSectionName);
+        } else {
+          fieldsToUpdate.section_name = null;
+        }
         needsUpdate = true;
       } else {
         fieldsToUpdate.section_name = translation.section_name;
       }
 
       // Check cooking_time for changes (or if translation doesn't exist yet)
-      if (translation.cooking_time === undefined || oldData.cooking_time !== newData.cooking_time) {
+      if (
+        translation.cooking_time === undefined ||
+        oldData.cooking_time !== newData.cooking_time
+      ) {
         fieldsToUpdate.cooking_time =
           newData.cooking_time && isTextTime(newData.cooking_time)
             ? await translateText(newData.cooking_time, language)
@@ -494,7 +537,10 @@ export const updateCookingTimeTranslations = async (
       }
 
       // Check soaking_time for changes (or if translation doesn't exist yet)
-      if (translation.soaking_time === undefined || oldData.soaking_time !== newData.soaking_time) {
+      if (
+        translation.soaking_time === undefined ||
+        oldData.soaking_time !== newData.soaking_time
+      ) {
         fieldsToUpdate.soaking_time =
           newData.soaking_time && isTextTime(newData.soaking_time)
             ? await translateText(newData.soaking_time, language)
