@@ -16,12 +16,30 @@ const CookingTimeRow = ({
 
   const formatTime = (minutes) => {
     if (!minutes) return "";
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0
-      ? `${hours}h ${remainingMinutes}m`
-      : `${hours}h`;
+
+    // Convert to string for processing
+    const timeStr = String(minutes).trim();
+
+    // If it's a pure number, format it with hours/minutes
+    const numericValue = Number(timeStr);
+    if (!isNaN(numericValue)) {
+      if (numericValue < 60) {
+        return `${numericValue} ${t("minutes_short", "min")}`;
+      }
+      const hours = Math.floor(numericValue / 60);
+      const remainingMinutes = numericValue % 60;
+      return remainingMinutes > 0
+        ? `${hours} ${t("hours_short", "h")} ${remainingMinutes} ${t("minutes_short", "min")}`
+        : `${hours} ${t("hours_short", "h")}`;
+    }
+
+    if (/^\d+(-\d+)?$/.test(timeStr)) {
+      // For text values, check if it's a range (contains digits and dash)
+      return `${timeStr} ${t("minutes_short", "min")}`;
+    }
+
+    // For other text (like "overnight"), return as-is
+    return timeStr;
   };
 
   const formatWeight = (weight) => {
@@ -43,12 +61,12 @@ const CookingTimeRow = ({
     let weightText = null;
 
     // Soaking time (shown first)
-    if (item.soaking_time > 0) {
+    if (item.soaking_time) {
       timeParts.push(`${formatTime(item.soaking_time)} ${t("soak", "soak")}`);
     }
 
     // Cooking time
-    if (item.cooking_time > 0) {
+    if (item.cooking_time) {
       timeParts.push(`${formatTime(item.cooking_time)} ${t("cook", "cook")}`);
     }
 
@@ -142,9 +160,8 @@ const CookingTimeRow = ({
           <div className="edit-row-2col">
             <input
               id={`cooking-time-cooking-time-${sectionId}-${index}-${item.tempId}`}
-              type="number"
-              min="0"
-              value={item.cooking_time > 0 ? item.cooking_time : ""}
+              type="text"
+              value={item.cooking_time || ""}
               onChange={(e) =>
                 handleItemChange(
                   sectionId,
@@ -164,13 +181,11 @@ const CookingTimeRow = ({
               }
               className="input input--edit"
               placeholder={t("cooking_time_minutes", "Cooking (min)")}
-              onWheel={(e) => e.target.blur()}
             />
             <input
               id={`cooking-time-soaking-time-${sectionId}-${index}-${item.tempId}`}
-              type="number"
-              min="0"
-              value={item.soaking_time > 0 ? item.soaking_time : ""}
+              type="text"
+              value={item.soaking_time || ""}
               onChange={(e) =>
                 handleItemChange(
                   sectionId,
@@ -190,7 +205,6 @@ const CookingTimeRow = ({
               }
               className="input input--edit"
               placeholder={t("soaking_time_minutes", "Soaking (min)")}
-              onWheel={(e) => e.target.blur()}
             />
           </div>
 

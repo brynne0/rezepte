@@ -263,5 +263,7 @@
   "soaking_time_minutes": "Einweichen (Std.)",
   "dry_weight": "Trocken (g)",
   "cooked_weight": "Gekocht (g)",
-  "optional_notes": "Notizen (optional)"
+  "optional_notes": "Notizen (optional)",
+  "minutes_short": "Min.",
+  "hours_short": "Std."
 }

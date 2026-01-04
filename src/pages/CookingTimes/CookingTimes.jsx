@@ -454,8 +454,8 @@ const CookingTimes = ({
       for (const item of itemsToCreate) {
         const cookingTimeData = {
           ingredient_name: item.ingredient_name.trim(),
-          cooking_time: item.cooking_time ? parseInt(item.cooking_time) : null,
-          soaking_time: item.soaking_time ? parseInt(item.soaking_time) : null,
+          cooking_time: item.cooking_time || null,
+          soaking_time: item.soaking_time || null,
           dry_weight: item.dry_weight ? parseInt(item.dry_weight) : null,
           cooked_weight: item.cooked_weight
             ? parseInt(item.cooked_weight)
@@ -486,8 +486,8 @@ const CookingTimes = ({
 
         const cookingTimeData = {
           ingredient_name: item.ingredient_name.trim(),
-          cooking_time: item.cooking_time ? parseInt(item.cooking_time) : null,
-          soaking_time: item.soaking_time ? parseInt(item.soaking_time) : null,
+          cooking_time: item.cooking_time || null,
+          soaking_time: item.soaking_time || null,
           dry_weight: item.dry_weight ? parseInt(item.dry_weight) : null,
           cooked_weight: item.cooked_weight
             ? parseInt(item.cooked_weight)
@@ -1025,9 +1025,12 @@ const CookingTimes = ({
                                             </button>
                                           </div>
                                         ) : (
-                                          <div className="cookingtime-section-subheading">
-                                            <h3>{section.subheading}</h3>
-                                          </div>
+                                          // Only show section header in view mode if showing all sections
+                                          selectedSection === "all" && (
+                                            <div className="cookingtime-section-subheading">
+                                              <h3>{section.subheading}</h3>
+                                            </div>
+                                          )
                                         )}
 
                                         {/* Section Cooking Times */}

@@ -262,5 +262,7 @@
   "soaking_time_minutes": "Soaking (hrs)",
   "dry_weight": "Dry weight (g)",
   "cooked_weight": "Cooked weight (g)",
-  "optional_notes": "Optional notes"
+  "optional_notes": "Optional notes",
+  "minutes_short": "min",
+  "hours_short": "h"
 }

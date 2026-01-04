@@ -43,8 +43,8 @@ describe("CookingTimeRow", () => {
 
     it("should display cooking time and soaking time", () => {
       render(<CookingTimeRow {...defaultProps} />);
-      expect(screen.getByText(/45m cook/)).toBeInTheDocument();
-      expect(screen.getByText(/30m soak/)).toBeInTheDocument();
+      expect(screen.getByText(/45 min cook/)).toBeInTheDocument();
+      expect(screen.getByText(/30 min soak/)).toBeInTheDocument();
     });
 
     it("should display weight conversion with ratio", () => {
@@ -65,7 +65,7 @@ describe("CookingTimeRow", () => {
       render(<CookingTimeRow {...defaultProps} item={itemWithoutSoaking} />);
 
       expect(screen.queryByText(/soak/)).not.toBeInTheDocument();
-      expect(screen.getByText(/45m cook/)).toBeInTheDocument();
+      expect(screen.getByText(/45 min cook/)).toBeInTheDocument();
     });
 
     it("should not display notes when not provided", () => {
@@ -100,8 +100,8 @@ describe("CookingTimeRow", () => {
       expect(screen.getByPlaceholderText("Ingredient name")).toHaveValue(
         "Brown Rice"
       );
-      expect(screen.getByPlaceholderText("Cooking (min)")).toHaveValue(45);
-      expect(screen.getByPlaceholderText("Soaking (min)")).toHaveValue(30);
+      expect(screen.getByPlaceholderText("Cooking (min)")).toHaveValue("45");
+      expect(screen.getByPlaceholderText("Soaking (min)")).toHaveValue("30");
       expect(screen.getByPlaceholderText("Dry weight (g)")).toHaveValue(100);
       expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue(300);
       expect(screen.getByPlaceholderText("Optional notes")).toHaveValue(
@@ -210,8 +210,8 @@ describe("CookingTimeRow", () => {
         id: 2,
         tempId: "temp-456",
         ingredient_name: "",
-        cooking_time: 0,
-        soaking_time: 0,
+        cooking_time: "",
+        soaking_time: "",
         dry_weight: 0,
         cooked_weight: 0,
         notes: "",
@@ -220,8 +220,8 @@ describe("CookingTimeRow", () => {
       render(<CookingTimeRow {...editModeProps} item={emptyItem} />);
 
       expect(screen.getByPlaceholderText("Ingredient name")).toHaveValue("");
-      expect(screen.getByPlaceholderText("Cooking (min)")).toHaveValue(null);
-      expect(screen.getByPlaceholderText("Soaking (min)")).toHaveValue(null);
+      expect(screen.getByPlaceholderText("Cooking (min)")).toHaveValue("");
+      expect(screen.getByPlaceholderText("Soaking (min)")).toHaveValue("");
       expect(screen.getByPlaceholderText("Dry weight (g)")).toHaveValue(null);
       expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue(
         null
@@ -261,8 +261,8 @@ describe("CookingTimeRow", () => {
       };
       render(<CookingTimeRow {...defaultProps} item={itemWithHours} />);
 
-      expect(screen.getByText(/2h cook/)).toBeInTheDocument();
-      expect(screen.getByText(/1h 30m soak/)).toBeInTheDocument();
+      expect(screen.getByText(/2 h cook/)).toBeInTheDocument();
+      expect(screen.getByText(/1 h 30 min soak/)).toBeInTheDocument();
     });
 
     it("should handle zero cooking time", () => {
@@ -275,8 +275,32 @@ describe("CookingTimeRow", () => {
       render(<CookingTimeRow {...defaultProps} item={itemWithZeroCooking} />);
 
       // Should not display cooking time but should display soaking time
-      expect(screen.queryByText(/45m cook/)).not.toBeInTheDocument();
-      expect(screen.getByText(/30m soak/)).toBeInTheDocument();
+      expect(screen.queryByText(/45 min cook/)).not.toBeInTheDocument();
+      expect(screen.getByText(/30 min soak/)).toBeInTheDocument();
+    });
+
+    it("should format numeric ranges with minutes suffix", () => {
+      const itemWithRange = {
+        ...mockItem,
+        cooking_time: "40-50",
+        soaking_time: "8-12",
+      };
+      render(<CookingTimeRow {...defaultProps} item={itemWithRange} />);
+
+      expect(screen.getByText(/40-50 min cook/)).toBeInTheDocument();
+      expect(screen.getByText(/8-12 min soak/)).toBeInTheDocument();
+    });
+
+    it("should display text values as-is without modification", () => {
+      const itemWithText = {
+        ...mockItem,
+        cooking_time: "until tender",
+        soaking_time: "overnight",
+      };
+      render(<CookingTimeRow {...defaultProps} item={itemWithText} />);
+
+      expect(screen.getByText(/until tender cook/)).toBeInTheDocument();
+      expect(screen.getByText(/overnight soak/)).toBeInTheDocument();
     });
   });
 
