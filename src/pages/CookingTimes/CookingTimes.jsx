@@ -147,6 +147,10 @@ const CookingTimes = ({
     // Always load data on first render, then don't reload when in edit mode to preserve user's edits
     if (!HAS_LOADED_ONCE.current || !isEditMode) {
       loadData();
+      // Reset selected section when language changes to avoid mismatched section names
+      if (HAS_LOADED_ONCE.current) {
+        setSelectedSection("all");
+      }
       HAS_LOADED_ONCE.current = true;
     }
   }, [loadData, isEditMode]); // Reload when language changes (unless in edit mode)
