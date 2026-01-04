@@ -927,7 +927,7 @@ const CookingTimes = ({
                                 )}
                               </Droppable>
                             ) : (
-                              <div className="flex-column cooking-time-list">
+                              <div className="flex-column gap-xs">
                                 {filteredData.ungroupedCookingTimes.map(
                                   (item, index) =>
                                     renderCookingTimeItem(
@@ -1041,7 +1041,7 @@ const CookingTimes = ({
                                           >
                                             {(provided, snapshot) => (
                                               <div
-                                                className={`flex-column cooking-time-list ${
+                                                className={`flex-column gap-xs ${
                                                   snapshot.isDraggingOver
                                                     ? "drag-over"
                                                     : ""
@@ -1074,7 +1074,7 @@ const CookingTimes = ({
                                             )}
                                           </Droppable>
                                         ) : (
-                                          <div className="flex-column cooking-time-list">
+                                          <div className="flex-column gap-xs">
                                             {section.cookingTimes.map(
                                               (item, itemIndex) =>
                                                 renderCookingTimeItem(

@@ -1,13 +1,15 @@
 /* View Mode - Compact Layout */
 .cooking-time-card {
   background: var(--card-background);
-  border: 1px solid var(--border-color);
+  border: 1px solid;
   border-radius: var(--border-radius);
   padding: 0.5rem 0.75rem;
   transition: all 0.2s ease;
   width: 100%;
   max-width: 25rem;
+  min-width: 25rem;
   box-sizing: border-box;
+  text-align: left;
 }
 
 .cooking-time-compact {
@@ -24,25 +26,15 @@
 }
 
 .cooking-time-info {
-  color: var(--color-text-secondary);
-  font-size: 0.95rem;
-}
-
-.cooking-time-weight {
   margin-top: 0.25rem;
   color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  text-align: left;
+  font-size: 1rem;
 }
 
 .cooking-time-notes {
   margin-top: 0.25rem;
-  padding-top: 0.25rem;
-  border-top: 1px solid var(--border-color);
   color: var(--color-text-secondary);
   font-size: 0.9rem;
-  font-style: italic;
-  text-align: left;
 }
 
 /* Edit Mode - Row Layout */
@@ -95,4 +87,10 @@
 
 .edit-row-1col input {
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  .cooking-time-card {
+    min-width: 0;
+  }
 }

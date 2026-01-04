@@ -14,31 +14,17 @@ const CookingTimeRow = ({
 }) => {
   const { t } = useTranslation();
 
-  const formatTime = (minutes) => {
-    if (!minutes) return "";
+  const formatTime = (value, unit) => {
+    if (!value) return "";
+    const timeStr = String(value).trim();
 
-    // Convert to string for processing
-    const timeStr = String(minutes).trim();
-
-    // If it's a pure number, format it with hours/minutes
+    // Check if it's a pure number or range like "40-50"
     const numericValue = Number(timeStr);
-    if (!isNaN(numericValue)) {
-      if (numericValue < 60) {
-        return `${numericValue} ${t("minutes_short", "min")}`;
-      }
-      const hours = Math.floor(numericValue / 60);
-      const remainingMinutes = numericValue % 60;
-      return remainingMinutes > 0
-        ? `${hours} ${t("hours_short", "h")} ${remainingMinutes} ${t("minutes_short", "min")}`
-        : `${hours} ${t("hours_short", "h")}`;
+    if (!isNaN(numericValue) || /^\d+\s*-\s*\d+$/.test(timeStr)) {
+      return `${timeStr} ${unit}`;
     }
 
-    if (/^\d+(-\d+)?$/.test(timeStr)) {
-      // For text values, check if it's a range (contains digits and dash)
-      return `${timeStr} ${t("minutes_short", "min")}`;
-    }
-
-    // For other text (like "overnight"), return as-is
+    // For text like "overnight" or "until tender", return as-is
     return timeStr;
   };
 
@@ -62,12 +48,16 @@ const CookingTimeRow = ({
 
     // Soaking time (shown first)
     if (item.soaking_time) {
-      timeParts.push(`${formatTime(item.soaking_time)} ${t("soak", "soak")}`);
+      timeParts.push(
+        `${formatTime(item.soaking_time, t("hours_short", "h"))} ${t("soak", "soak")}`
+      );
     }
 
     // Cooking time
     if (item.cooking_time) {
-      timeParts.push(`${formatTime(item.cooking_time)} ${t("cook", "cook")}`);
+      timeParts.push(
+        `${formatTime(item.cooking_time, t("minutes_short", "min"))} ${t("cook", "cook")}`
+      );
     }
 
     // Weight conversion (separate line)
@@ -85,20 +75,18 @@ const CookingTimeRow = ({
 
     return (
       <div className="cooking-time-card">
-        <div className="cooking-time-compact">
-          <span className="cooking-time-name">{item.ingredient_name}</span>
-          {timeParts.length > 0 && (
-            <span className="cooking-time-info">
-              {timeParts.map((part, idx) => (
-                <span key={idx}>
-                  {idx > 0 && " • "}
-                  {part}
-                </span>
-              ))}
-            </span>
-          )}
-        </div>
-        {weightText && <div className="cooking-time-weight">{weightText}</div>}
+        <div className="cooking-time-name">{item.ingredient_name}</div>
+        {timeParts.length > 0 && (
+          <div className="cooking-time-info">
+            {timeParts.map((part, idx) => (
+              <span key={idx}>
+                {idx > 0 && " • "}
+                {part}
+              </span>
+            ))}
+          </div>
+        )}
+        {weightText && <div className="cooking-time-info">{weightText}</div>}
         {item.notes && <div className="cooking-time-notes">{item.notes}</div>}
       </div>
     );
@@ -204,7 +192,7 @@ const CookingTimeRow = ({
                 )
               }
               className="input input--edit"
-              placeholder={t("soaking_time_minutes", "Soaking (min)")}
+              placeholder={t("soaking_time_minutes", "Soaking (hrs)")}
             />
           </div>
 
