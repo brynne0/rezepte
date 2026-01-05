@@ -132,6 +132,11 @@ h3.forta {
   font-size: 1rem;
 }
 
+.small {
+  color: var(--color-text-strong);
+  font-size: 1rem;
+}
+
 @media (max-width: 768px) {
   h1 {
     font-size: 1.5rem;
