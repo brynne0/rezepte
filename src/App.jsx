@@ -53,7 +53,7 @@ function App() {
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const { recipes, loading, refreshRecipes, totalRecipeCount, paginationInfo } =
+  const { recipes, loading, isFetchingRecipes, refreshRecipes, totalRecipeCount, paginationInfo } =
     useRecipesPagination(
       currentPage,
       36,
@@ -120,6 +120,7 @@ function App() {
           totalRecipeCount={totalRecipeCount}
           searchTerm={searchTerm}
           loading={loading}
+          isFetchingRecipes={isFetchingRecipes}
           isGroceryListEditing={isGroceryListEditing}
           setIsGroceryListEditing={setIsGroceryListEditing}
           isCookingTimesEditing={isCookingTimesEditing}
@@ -232,6 +233,7 @@ function AppRoutes(props) {
                 showImages={isLoggedIn ? props.showImages : false}
                 totalRecipeCount={props.totalRecipeCount}
                 isPaginated={true}
+                loading={props.isFetchingRecipes}
               />
               {isOnline && (
                 <Pagination

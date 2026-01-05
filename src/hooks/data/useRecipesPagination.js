@@ -14,6 +14,7 @@ export const useRecipesPagination = (
 ) => {
   const [allRecipes, setAllRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFetchingRecipes, setIsFetchingRecipes] = useState(false);
   const { i18n } = useTranslation();
 
   // Fetch recipes with category information
@@ -71,9 +72,11 @@ export const useRecipesPagination = (
     if (!enabled) {
       setAllRecipes([]);
       setLoading(false);
+      setIsFetchingRecipes(false);
       return;
     }
 
+    setIsFetchingRecipes(true);
     try {
       const data = await fetchRecipesWithCategories();
 
@@ -88,6 +91,7 @@ export const useRecipesPagination = (
       setAllRecipes([]);
     } finally {
       setLoading(false);
+      setIsFetchingRecipes(false);
     }
   }, [enabled, i18n.language]);
 
@@ -96,10 +100,12 @@ export const useRecipesPagination = (
       if (!enabled) {
         setAllRecipes([]);
         setLoading(false);
+        setIsFetchingRecipes(false);
         return;
       }
 
       if (showLoading) setLoading(true);
+      setIsFetchingRecipes(true);
       try {
         const data = await fetchRecipesWithCategories();
 
@@ -116,6 +122,7 @@ export const useRecipesPagination = (
         setAllRecipes([]);
       } finally {
         if (showLoading) setLoading(false);
+        setIsFetchingRecipes(false);
       }
     },
     [enabled, i18n.language]
@@ -188,6 +195,7 @@ export const useRecipesPagination = (
   return {
     recipes: paginatedData.recipes,
     loading,
+    isFetchingRecipes,
     refreshRecipes,
     totalRecipeCount: allRecipes.length,
     paginationInfo: {

@@ -12,6 +12,7 @@ const RecipeList = ({
   showImages = true,
   totalRecipeCount = 0,
   isPaginated = false,
+  loading = false,
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -56,7 +57,7 @@ const RecipeList = ({
       {filteredRecipes.length === 0 && searchTerm && (
         <span>{t("no_recipes_found", { searchTerm })}</span>
       )}
-      {totalRecipeCount === 0 && !searchTerm && (
+      {totalRecipeCount === 0 && !searchTerm && !loading && (
         <div className="page-centered high">
           <div className="card welcome-card">
             {!isOnline ? (

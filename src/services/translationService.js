@@ -192,8 +192,14 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
 
   // Title not cached, translate only the title
   try {
-    const rawTranslatedTitle = await translateText(recipe.title, targetLanguage);
-    const translatedTitle = targetLanguage === "en" ? toTitleCase(rawTranslatedTitle) : rawTranslatedTitle;
+    const rawTranslatedTitle = await translateText(
+      recipe.title,
+      targetLanguage
+    );
+    const translatedTitle =
+      targetLanguage === "en"
+        ? toTitleCase(rawTranslatedTitle)
+        : rawTranslatedTitle;
 
     // Save just the title translation (don't overwrite other fields)
     await saveRecipeTitleTranslation(
@@ -266,7 +272,10 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
     );
 
     const translatedData = {
-      title: targetLanguage === "en" ? toTitleCase(translatedTexts[0]) : translatedTexts[0],
+      title:
+        targetLanguage === "en"
+          ? toTitleCase(translatedTexts[0])
+          : translatedTexts[0],
       category: translatedCategory,
       notes: translatedTexts[2] || null,
       source: isSourceUrl ? sourceText : translatedTexts[3] || null,
