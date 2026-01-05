@@ -53,15 +53,21 @@ function App() {
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const { recipes, loading, isFetchingRecipes, refreshRecipes, totalRecipeCount, paginationInfo } =
-    useRecipesPagination(
-      currentPage,
-      36,
-      selectedCategory,
-      searchTerm,
-      sortBy,
-      isLoggedIn
-    );
+  const {
+    recipes,
+    loading,
+    isFetchingRecipes,
+    refreshRecipes,
+    totalRecipeCount,
+    paginationInfo,
+  } = useRecipesPagination(
+    currentPage,
+    36,
+    selectedCategory,
+    searchTerm,
+    sortBy,
+    isLoggedIn
+  );
 
   // Categories from database
   const {
