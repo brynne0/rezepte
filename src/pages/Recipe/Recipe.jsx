@@ -20,6 +20,36 @@ import {
   getIngredientDisplayName,
 } from "../../utils/ingredientFormatting";
 
+// Helper function to parse text and convert URLs to clickable links
+const renderTextWithLinks = (text) => {
+  if (!text) return null;
+
+  // Regex to match URLs (http, https, www)
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    // Check if this part is a URL
+    if (part.match(urlRegex)) {
+      // Add protocol if missing (for www. links)
+      const href = part.startsWith("www.") ? `https://${part}` : part;
+      return (
+        <a
+          key={index}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link-red break-all"
+        >
+          {part}
+        </a>
+      );
+    }
+    // Return plain text
+    return part;
+  });
+};
+
 const Recipe = ({ isSharedView = false }) => {
   const { id, shareToken } = useParams();
   const {
@@ -429,21 +459,7 @@ const Recipe = ({ isSharedView = false }) => {
           {recipe.source && (
             <div className="recipe-subheading">
               <h2>{t("source")}:</h2>
-
-              {recipe.source.startsWith("http://") ||
-              recipe.source.startsWith("https://") ||
-              recipe.source.startsWith("www.") ? (
-                <a
-                  href={recipe.source}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-red"
-                >
-                  {recipe.source}
-                </a>
-              ) : (
-                <span>{recipe.source}</span>
-              )}
+              <span className="wrap">{renderTextWithLinks(recipe.source)}</span>
             </div>
           )}
 

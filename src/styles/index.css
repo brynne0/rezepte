@@ -9,6 +9,7 @@
 /* Globals */
 @import "./globals/typography.css";
 @import "./globals/variables.css";
+@import "./globals/utilities.css";
 
 /* Layout */
 @import "./layout/containers.css";
