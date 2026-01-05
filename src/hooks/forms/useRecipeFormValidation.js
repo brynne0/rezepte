@@ -4,6 +4,7 @@ import {
   validateRecipeForm,
   validateRecipeTitleUnique,
 } from "../../utils/validation";
+import { toTitleCase } from "../../utils/stringUtils";
 
 export const useRecipeFormValidation = ({
   formData,
@@ -11,15 +12,6 @@ export const useRecipeFormValidation = ({
   initialRecipe,
 }) => {
   const { t } = useTranslation();
-
-  // Title case conversion utility
-  const toTitleCase = useCallback((str) => {
-    if (!str) return str;
-    return str
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }, []);
 
   // Handle title blur validation
   const handleTitleBlur = useCallback(async () => {

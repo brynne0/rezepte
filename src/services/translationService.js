@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { toTitleCase } from "../utils/stringUtils";
 
 // Normalise instruction text to always end with exactly one full stop
 const normaliseInstruction = (instruction) => {
@@ -191,7 +192,8 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
 
   // Title not cached, translate only the title
   try {
-    const translatedTitle = await translateText(recipe.title, targetLanguage);
+    const rawTranslatedTitle = await translateText(recipe.title, targetLanguage);
+    const translatedTitle = targetLanguage === "en" ? toTitleCase(rawTranslatedTitle) : rawTranslatedTitle;
 
     // Save just the title translation (don't overwrite other fields)
     await saveRecipeTitleTranslation(
@@ -264,7 +266,7 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
     );
 
     const translatedData = {
-      title: translatedTexts[0],
+      title: targetLanguage === "en" ? toTitleCase(translatedTexts[0]) : translatedTexts[0],
       category: translatedCategory,
       notes: translatedTexts[2] || null,
       source: isSourceUrl ? sourceText : translatedTexts[3] || null,

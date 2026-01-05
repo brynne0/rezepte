@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { toTitleCase } from "../utils/stringUtils";
 
 // DeepL translation function using Supabase Edge Function
 const translateText = async (text, targetLanguage, context = null) => {
@@ -312,17 +313,6 @@ export const getTranslatedCookingTime = async (
       return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
     };
 
-    // Helper function to capitalise all words (title case)
-    const toTitleCase = (str) => {
-      if (!str) return str;
-      return str
-        .split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
-    };
-
     // Translate all fields with cooking/food context to avoid mistranslations (e.g., "linsen" -> "lentils" not "lenses")
     const rawIngredientName = await translateText(
       cookingTime.ingredient_name,
@@ -475,17 +465,6 @@ export const updateCookingTimeTranslations = async (
       const numericValue = Number(timeStr);
       // If it's a pure number or range like "40-50", don't translate
       return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
-    };
-
-    // Helper function to capitalise all words (title case)
-    const toTitleCase = (str) => {
-      if (!str) return str;
-      return str
-        .split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
     };
 
     // Check each language and update only changed fields
