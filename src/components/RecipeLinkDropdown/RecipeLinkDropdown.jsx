@@ -159,7 +159,7 @@ const RecipeLinkDropdown = ({
                   className="recipe-item"
                   onClick={() => handleRecipeSelect(recipe)}
                 >
-                  <span className="bold-small">{recipe.title}</span>
+                  <span className="small">{recipe.title}</span>
                 </button>
               ))}
             </div>

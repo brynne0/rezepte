@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { toTitleCase } from "../utils/stringUtils";
 
 // Normalise instruction text to always end with exactly one full stop
 const normaliseInstruction = (instruction) => {
@@ -13,16 +14,23 @@ const normaliseInstruction = (instruction) => {
 };
 
 // DeepL translation function using Supabase Edge Function
-const translateText = async (text, targetLanguage) => {
+const translateText = async (text, targetLanguage, context = null) => {
   if (!text || text.trim() === "") return text;
 
   try {
+    const requestBody = {
+      text: text,
+      target_lang: targetLanguage,
+      source_lang: "auto",
+    };
+
+    // Add context if provided to help with disambiguation (e.g., food vs. other meanings)
+    if (context) {
+      requestBody.context = context;
+    }
+
     const { data, error } = await supabase.functions.invoke("translate", {
-      body: {
-        text: text,
-        target_lang: targetLanguage,
-        source_lang: "auto",
-      },
+      body: requestBody,
     });
 
     if (error) {
@@ -138,9 +146,13 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
           targetLanguage,
           recipe.original_language
         );
-        // Translate the section subheading
+        // Translate the section subheading with food context
         const translatedSubheading = section.subheading
-          ? await translateText(section.subheading, targetLanguage)
+          ? await translateText(
+              section.subheading,
+              targetLanguage,
+              "Food section"
+            )
           : section.subheading;
         return {
           ...section,
@@ -180,7 +192,14 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
 
   // Title not cached, translate only the title
   try {
-    const translatedTitle = await translateText(recipe.title, targetLanguage);
+    const rawTranslatedTitle = await translateText(
+      recipe.title,
+      targetLanguage
+    );
+    const translatedTitle =
+      targetLanguage === "en"
+        ? toTitleCase(rawTranslatedTitle)
+        : rawTranslatedTitle;
 
     // Save just the title translation (don't overwrite other fields)
     await saveRecipeTitleTranslation(
@@ -245,9 +264,19 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
       targetLanguage
     );
 
+    // Translate category separately with food context for better accuracy
+    const translatedCategory = await translateText(
+      recipe.category,
+      targetLanguage,
+      "Food category"
+    );
+
     const translatedData = {
-      title: translatedTexts[0],
-      category: translatedTexts[1],
+      title:
+        targetLanguage === "en"
+          ? toTitleCase(translatedTexts[0])
+          : translatedTexts[0],
+      category: translatedCategory,
       notes: translatedTexts[2] || null,
       source: isSourceUrl ? sourceText : translatedTexts[3] || null,
       instructions: translatedTexts.slice(4).map(normaliseInstruction),
@@ -346,13 +375,14 @@ const getIngredientDisplayName = async (
   }
 
   try {
-    // Translate both singular and plural forms from source to target
+    // Translate both singular and plural forms from source to target with food context
     const translatedSingular = await translateText(
       sourceSingular,
-      targetLanguage
+      targetLanguage,
+      "Food ingredient"
     );
     const translatedPlural = sourcePlural
-      ? await translateText(sourcePlural, targetLanguage)
+      ? await translateText(sourcePlural, targetLanguage, "Food ingredient")
       : translatedSingular;
 
     // Only lowercase if not German
@@ -703,7 +733,8 @@ export const updateRecipeTranslations = async (
       if (oldRecipeData.category !== newRecipeData.category) {
         fieldsToUpdate.category = await translateText(
           newRecipeData.category,
-          language
+          language,
+          "Food category"
         );
         needsUpdate = true;
       } else {

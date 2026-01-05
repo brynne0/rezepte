@@ -87,7 +87,7 @@
 
 .ingredient-section.dragging,
 .ingredient-row.dragging {
-  background-color: var(--color-background-secondary);
+  background-color: var(--color-background-tertiary);
 }
 
 /* Ingredient rows */

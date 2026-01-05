@@ -47,7 +47,7 @@ const RecipeForm = ({
 
     // Auto-fill form fields
     if (parsed.title) {
-      handleInputChange("title", parsed.title);
+      handleInputChange("title", toTitleCase(parsed.title));
     }
     if (parsed.servings) {
       handleInputChange("servings", parsed.servings);

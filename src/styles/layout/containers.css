@@ -56,66 +56,14 @@
   gap: 0.5rem;
   padding-bottom: 1rem;
   position: relative;
-  justify-content: center;
+
   align-items: center;
   color: var(--color-text-primary);
-}
-
-/* Flex utilities */
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.flex-column {
-  display: flex;
-  flex-direction: column;
-}
-
-.flex-column-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.flex-row {
-  display: flex;
-  align-items: center;
-}
-
-.relative-center {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.relative {
-  position: relative;
 }
 
 /* Form wrappers */
 .form-group {
   margin-bottom: 1rem;
-}
-
-/* Spacing utilities */
-.mt-1 {
-  margin-top: 1rem;
-}
-
-.mb-05 {
-  margin-bottom: 0.5rem;
-}
-
-.gap-xs {
-  gap: 0.5rem;
 }
 
 .auth-form,
@@ -234,9 +182,5 @@
   .card-settings {
     padding: 2rem;
     width: -webkit-fill-available;
-  }
-
-  .w-100-mobile {
-    width: 100%;
   }
 }

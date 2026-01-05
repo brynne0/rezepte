@@ -1,16 +1,24 @@
 import supabase from "../lib/supabase";
+import { toTitleCase } from "../utils/stringUtils";
 
 // DeepL translation function using Supabase Edge Function
-const translateText = async (text, targetLanguage) => {
+const translateText = async (text, targetLanguage, context = null) => {
   if (!text || text.trim() === "") return text;
 
   try {
+    const requestBody = {
+      text: text,
+      target_lang: targetLanguage,
+      source_lang: "auto",
+    };
+
+    // Add context if provided to help with disambiguation (e.g., food vs. other meanings)
+    if (context) {
+      requestBody.context = context;
+    }
+
     const { data, error } = await supabase.functions.invoke("translate", {
-      body: {
-        text: text,
-        target_lang: targetLanguage,
-        source_lang: "auto",
-      },
+      body: requestBody,
     });
 
     if (error) {
@@ -305,24 +313,18 @@ export const getTranslatedCookingTime = async (
       return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
     };
 
-    // Helper function to capitalise all words (title case)
-    const toTitleCase = (str) => {
-      if (!str) return str;
-      return str
-        .split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
-    };
-
-    // Translate all fields
+    // Translate all fields with cooking/food context to avoid mistranslations (e.g., "linsen" -> "lentils" not "lenses")
     const rawIngredientName = await translateText(
       cookingTime.ingredient_name,
-      targetLanguage
+      targetLanguage,
+      "Cooking ingredient"
     );
     const rawSectionName = cookingTime.section_name
-      ? await translateText(cookingTime.section_name, targetLanguage)
+      ? await translateText(
+          cookingTime.section_name,
+          targetLanguage,
+          "Food category"
+        )
       : null;
 
     const translatedData = {
@@ -465,17 +467,6 @@ export const updateCookingTimeTranslations = async (
       return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
     };
 
-    // Helper function to capitalise all words (title case)
-    const toTitleCase = (str) => {
-      if (!str) return str;
-      return str
-        .split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
-    };
-
     // Check each language and update only changed fields
     for (const language of languagesToTranslate) {
       const translation = existingTranslations[language] || {};
@@ -489,7 +480,8 @@ export const updateCookingTimeTranslations = async (
       ) {
         const rawIngredientName = await translateText(
           newData.ingredient_name,
-          language
+          language,
+          "Cooking ingredient"
         );
         fieldsToUpdate.ingredient_name = toTitleCase(rawIngredientName);
         needsUpdate = true;
@@ -515,7 +507,8 @@ export const updateCookingTimeTranslations = async (
         if (newData.section_name) {
           const rawSectionName = await translateText(
             newData.section_name,
-            language
+            language,
+            "Food category"
           );
           fieldsToUpdate.section_name = toTitleCase(rawSectionName);
         } else {

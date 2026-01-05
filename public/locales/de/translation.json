@@ -192,7 +192,7 @@
   "remove_instruction": "Anweisung entfernen",
  
   "autofill_recipe": "Rezept automatisch ausfüllen",
-  "paste_recipe_placeholder": "Fügen Sie hier ein Rezept oder eine URL ein",
+  "paste_recipe_placeholder": "Hier ein Rezept oder einen Link einfügen (Text bevorzugt)",
   "paste_text_required": "Bitte fügen Sie zuerst den Rezepttext ein.",
   "paste_text_too_long": "Rezepttext ist zu lang. Bitte auf {{max}} Zeichen oder weniger kürzen.",
   "parse_error": "Fehler beim Parsen des Rezepts. Bitte erneut versuchen.",
