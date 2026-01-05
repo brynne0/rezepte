@@ -1,16 +1,23 @@
 import supabase from "../lib/supabase";
 
 // DeepL translation function using Supabase Edge Function
-const translateText = async (text, targetLanguage) => {
+const translateText = async (text, targetLanguage, context = null) => {
   if (!text || text.trim() === "") return text;
 
   try {
+    const requestBody = {
+      text: text,
+      target_lang: targetLanguage,
+      source_lang: "auto",
+    };
+
+    // Add context if provided to help with disambiguation (e.g., food vs. other meanings)
+    if (context) {
+      requestBody.context = context;
+    }
+
     const { data, error } = await supabase.functions.invoke("translate", {
-      body: {
-        text: text,
-        target_lang: targetLanguage,
-        source_lang: "auto",
-      },
+      body: requestBody,
     });
 
     if (error) {
@@ -316,13 +323,18 @@ export const getTranslatedCookingTime = async (
         .join(" ");
     };
 
-    // Translate all fields
+    // Translate all fields with cooking/food context to avoid mistranslations (e.g., "linsen" -> "lentils" not "lenses")
     const rawIngredientName = await translateText(
       cookingTime.ingredient_name,
-      targetLanguage
+      targetLanguage,
+      "Cooking ingredient"
     );
     const rawSectionName = cookingTime.section_name
-      ? await translateText(cookingTime.section_name, targetLanguage)
+      ? await translateText(
+          cookingTime.section_name,
+          targetLanguage,
+          "Food category"
+        )
       : null;
 
     const translatedData = {
@@ -489,7 +501,8 @@ export const updateCookingTimeTranslations = async (
       ) {
         const rawIngredientName = await translateText(
           newData.ingredient_name,
-          language
+          language,
+          "Cooking ingredient"
         );
         fieldsToUpdate.ingredient_name = toTitleCase(rawIngredientName);
         needsUpdate = true;
@@ -515,7 +528,8 @@ export const updateCookingTimeTranslations = async (
         if (newData.section_name) {
           const rawSectionName = await translateText(
             newData.section_name,
-            language
+            language,
+            "Food category"
           );
           fieldsToUpdate.section_name = toTitleCase(rawSectionName);
         } else {
