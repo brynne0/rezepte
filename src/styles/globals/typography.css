@@ -55,7 +55,7 @@ h3 {
 h1.forta-red {
   font-family: var(--font-forta);
   color: var(--color-danger-dark);
-  line-height: 1;
+  line-height: 1.2;
 }
 
 h1.forta {

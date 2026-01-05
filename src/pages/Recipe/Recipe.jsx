@@ -276,7 +276,7 @@ const Recipe = ({ isSharedView = false }) => {
       )}
 
       <div className="flex-between gap-xs">
-        <h1 className="forta-red">{recipe.title}</h1>
+        <h1 className="forta-red wrap">{recipe.title}</h1>
 
         {/* Only show actions for owned recipes */}
         {!isSharedView && (
