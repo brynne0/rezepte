@@ -48,14 +48,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("title_asc");
-  const [showImages, setShowImages] = useState(() => {
-    try {
-      const stored = localStorage.getItem("showImages");
-      return stored !== null ? JSON.parse(stored) : false;
-    } catch {
-      return false;
-    }
-  });
+  const [showImages, setShowImages] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
@@ -153,7 +146,6 @@ function AppRoutes(props) {
     setIsGroceryListEditing,
     isCookingTimesEditing,
     setIsCookingTimesEditing,
-    showImages,
     isLoggedIn,
   } = props;
   const isGroceryListPage = location.pathname === "/grocery-list";
@@ -193,15 +185,6 @@ function AppRoutes(props) {
   useEffect(() => {
     refreshRecipes();
   }, [currentLanguage, refreshRecipes]);
-
-  // Persist showImages preference to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("showImages", JSON.stringify(showImages));
-    } catch {
-      // localStorage not available
-    }
-  }, [showImages]);
 
   // Scroll to top on all navigation
   useEffect(() => {
