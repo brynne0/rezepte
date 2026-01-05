@@ -253,7 +253,14 @@ function AppRoutes(props) {
             </>
           }
         />
-        <Route path="/:id/:slug" element={<Recipe />} />
+        <Route
+          path="/:id/:slug"
+          element={
+            <ProtectedRoute>
+              <Recipe />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/shared/:shareToken/:slug?"
           element={<Recipe isSharedView={true} />}
