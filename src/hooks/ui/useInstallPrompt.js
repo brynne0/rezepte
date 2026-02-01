@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 
+const detectIOS = () =>
+  /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (/MacIntel/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
 export const useInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     // Already installed if running in standalone mode
@@ -10,6 +15,8 @@ export const useInstallPrompt = () => {
       setIsInstalled(true);
       return;
     }
+
+    setIsIOS(detectIOS());
 
     if (window.__pwaInstallPrompt) {
       setInstallPrompt(window.__pwaInstallPrompt);
@@ -47,5 +54,5 @@ export const useInstallPrompt = () => {
     }
   };
 
-  return { installPrompt, isInstalled, triggerInstall };
+  return { installPrompt, isInstalled, isIOS, triggerInstall };
 };
