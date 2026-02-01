@@ -269,6 +269,6 @@
   "install_app": "App installieren",
   "install_app_prompt": "Installiere Rezepte auf deinem Gerät, um es wie eine App zu verwenden, auch ohne Internet.",
   "maybe_later": "Vielleicht später",
-  "install_app_ios": "Um Rezepte zu installieren, tippe auf das Teilen-Symbol (↑) unten auf deinem Bildschirm und wähle dann \"Zum Startbildschirm hinzufügen\".",
+  "install_app_ios": "Um Rezepte zu installieren, tippe auf das Teilen-Symbol unten auf deinem Bildschirm und wähle dann \"Zum Startbildschirm hinzufügen\".",
   "got_it": "Verstanden"
 }
