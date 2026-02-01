@@ -267,5 +267,7 @@
   "hours_short": "h",
   "install_app": "Install app",
   "install_app_prompt": "Install Rezepte on your device to use it like an app, even without internet.",
-  "maybe_later": "Maybe later"
+  "maybe_later": "Maybe later",
+  "install_app_ios": "To install Rezepte, tap the share button (↑) at the bottom of your screen, then select \"Add to Home Screen\".",
+  "got_it": "Got it"
 }

@@ -37,21 +37,21 @@ const Header = ({
 
   const { isLoggedIn } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { installPrompt, triggerInstall } = useInstallPrompt();
+  const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
 
   const [showInstallModal, setShowInstallModal] = useState(false);
 
-  // Show install modal once when prompt is available and user is logged in,
-  // unless previously dismissed
+  // Show install modal once when prompt is available (or on iOS), and user is
+  // logged in, unless previously dismissed
   useEffect(() => {
     if (
-      installPrompt &&
+      (installPrompt || isIOS) &&
       isLoggedIn &&
       localStorage.getItem("pwa-install-dismissed") !== "true"
     ) {
       setShowInstallModal(true);
     }
-  }, [installPrompt, isLoggedIn]);
+  }, [installPrompt, isIOS, isLoggedIn]);
 
   const handleDismissInstall = () => {
     setShowInstallModal(false);
@@ -459,10 +459,10 @@ const Header = ({
       <ConfirmationModal
         isOpen={showInstallModal}
         onClose={handleDismissInstall}
-        onConfirm={handleConfirmInstall}
+        onConfirm={isIOS ? handleDismissInstall : handleConfirmInstall}
         title={t("install_app")}
-        message={t("install_app_prompt")}
-        confirmText={t("install_app")}
+        message={isIOS ? t("install_app_ios") : t("install_app_prompt")}
+        confirmText={isIOS ? t("got_it") : t("install_app")}
         cancelText={t("maybe_later")}
         confirmButtonType="primary"
       />
