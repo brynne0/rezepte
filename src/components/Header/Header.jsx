@@ -16,6 +16,7 @@ import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import useClickOutside from "../../hooks/ui/useClickOutside";
 import { useTheme } from "../../hooks/ui/useTheme";
+import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
 import SortButtons from "../SortButtons/SortButtons";
 import "./Header.css";
 
@@ -35,6 +36,7 @@ const Header = ({
 
   const { isLoggedIn } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { installPrompt, triggerInstall } = useInstallPrompt();
 
   // Hide search bar on all pages except home
   const isHomePage = location.pathname === "/";
@@ -164,6 +166,18 @@ const Header = ({
             >
               {getThemeIcon()}
             </button>
+            {installPrompt && (
+              <button
+                className="dropdown-item"
+                onClick={() => {
+                  triggerInstall();
+                  setShowUserDropdown(false);
+                }}
+                aria-label={t("install_app")}
+              >
+                {t("install_app")}
+              </button>
+            )}
             {isLoggedIn ? (
               <>
                 <button

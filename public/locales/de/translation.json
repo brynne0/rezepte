@@ -265,5 +265,6 @@
   "cooked_weight": "Gekocht (g)",
   "optional_notes": "Notizen (optional)",
   "minutes_short": "Min.",
-  "hours_short": "Std."
+  "hours_short": "Std.",
+  "install_app": "App installieren"
 }
