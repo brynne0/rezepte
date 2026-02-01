@@ -11,6 +11,11 @@ export const useInstallPrompt = () => {
       return;
     }
 
+    if (window.__pwaInstallPrompt) {
+      setInstallPrompt(window.__pwaInstallPrompt);
+      window.__pwaInstallPrompt = null;
+    }
+
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setInstallPrompt(e);

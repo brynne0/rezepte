@@ -266,5 +266,7 @@
   "optional_notes": "Notizen (optional)",
   "minutes_short": "Min.",
   "hours_short": "Std.",
-  "install_app": "App installieren"
+  "install_app": "App installieren",
+  "install_app_prompt": "Installiere Rezepte auf deinem Gerät, um es wie eine App zu verwenden, auch ohne Internet.",
+  "maybe_later": "Vielleicht später"
 }

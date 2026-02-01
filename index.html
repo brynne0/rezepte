@@ -75,6 +75,12 @@
       rel="stylesheet"
     />
     <script>
+      window.addEventListener("beforeinstallprompt", function (e) {
+        e.preventDefault();
+        window.__pwaInstallPrompt = e;
+      });
+    </script>
+    <script>
       // Set theme immediately to prevent flash
       (function () {
         let savedTheme = null;
