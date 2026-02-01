@@ -140,9 +140,7 @@ const Header = ({
             toggleTheme();
             setShowUserDropdown(false);
           }}
-          aria-label={
-            theme === "light" ? t("theme_dark") : t("theme_light")
-          }
+          aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
         >
           {getThemeIcon()}
         </button>
