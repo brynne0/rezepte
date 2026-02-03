@@ -22,7 +22,6 @@ i18n
         return lng;
       },
     },
-    keySeparator: false,
     interpolation: {
       escapeValue: false,
     },
