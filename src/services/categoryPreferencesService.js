@@ -92,7 +92,8 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
 
     if (systemCategories && systemCategories.length > 0) {
       systemCategories.forEach((category) => {
-        let label = category.name;
+        let label =
+          category.name.charAt(0).toUpperCase() + category.name.slice(1);
 
         // Use translation if available for the current language
         if (
@@ -170,7 +171,8 @@ export const getCategoriesWithPreferences = async (currentLanguage = "en") => {
       const category = pref.categories;
       if (!category) return;
 
-      let label = category.name;
+      let label =
+        category.name.charAt(0).toUpperCase() + category.name.slice(1);
 
       // Use translation if available for the current language
       if (
@@ -307,7 +309,8 @@ export const getAllCategoriesForManagement = async (currentLanguage = "en") => {
       const category = pref.categories;
       if (!category) return;
 
-      let label = category.name;
+      let label =
+        category.name.charAt(0).toUpperCase() + category.name.slice(1);
 
       // Use translation if available for the current language
       if (

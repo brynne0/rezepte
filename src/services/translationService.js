@@ -14,7 +14,7 @@ const normaliseInstruction = (instruction) => {
 };
 
 // DeepL translation function using Supabase Edge Function
-const translateText = async (text, targetLanguage, context = null) => {
+export const translateText = async (text, targetLanguage, context = null) => {
   if (!text || text.trim() === "") return text;
 
   try {
