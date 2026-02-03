@@ -199,9 +199,9 @@
   "paste_text_too_long": "Rezepttext ist zu lang. Bitte auf {{max}} Zeichen oder weniger kürzen.",
   "parse_error": "Fehler beim Parsen des Rezepts. Bitte erneut versuchen.",
   "parse_error_rate_limit": "Zu viele Anfragen. Bitte einen Moment warten und erneut versuchen.",
-  "parse_error_server": "Der Autofill-Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
-  "parse_error_network": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
-  "parse_error_blocked": "Die Website blockiert den automatisierten Zugriff. Bitte stattdessen versuchen, den Rezepttext direkt zu kopieren und einzufügen.",
+  "parse_error_server": "Der Autofill-Dienst ist vorübergehend nicht verfügbar. Bitte später erneut versuchen.",
+  "parse_error_network": "Netzwerkfehler. Bitte deine Verbindung überprüfen und erneut versuchen.",
+  "parse_error_blocked": "Die Website blockiert den automatisierten Zugriff. Bitte den Rezepttext direkt kopieren und einfügen.",
   "autofill": "Automatisches Ausfüllen",
   "autofilling": "Automatisches Ausfüllen...",
 
@@ -228,7 +228,7 @@
   "remove_item": "Artikel entfernen",
   "clear_list": "Liste löschen",
   "remove_all_checked": "Ausgewählte entfernen",
-  "grocery_list_clear_confirmation": "Möchten Sie die Einkaufsliste wirklich löschen?",
+  "grocery_list_clear_confirmation": "Möchtest du die Einkaufsliste wirklich löschen?",
 
   "unsaved_changes_warning": "Du hast ungespeicherte Änderungen. Möchtest du diese Seite wirklich verlassen?",
   "leave_page": "Seite verlassen",
