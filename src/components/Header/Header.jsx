@@ -16,6 +16,8 @@ import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import useClickOutside from "../../hooks/ui/useClickOutside";
 import { useTheme } from "../../hooks/ui/useTheme";
+import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
+import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import SortButtons from "../SortButtons/SortButtons";
 import "./Header.css";
 
@@ -35,6 +37,31 @@ const Header = ({
 
   const { isLoggedIn } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
+
+  const [showInstallModal, setShowInstallModal] = useState(false);
+
+  // Show install modal once when prompt is available (or on iOS), and user is
+  // logged in, unless previously dismissed
+  useEffect(() => {
+    if (
+      (installPrompt || isIOS) &&
+      isLoggedIn &&
+      localStorage.getItem("pwa-install-dismissed") !== "true"
+    ) {
+      setShowInstallModal(true);
+    }
+  }, [installPrompt, isIOS, isLoggedIn]);
+
+  const handleDismissInstall = () => {
+    setShowInstallModal(false);
+    localStorage.setItem("pwa-install-dismissed", "true");
+  };
+
+  const handleConfirmInstall = () => {
+    setShowInstallModal(false);
+    triggerInstall();
+  };
 
   // Hide search bar on all pages except home
   const isHomePage = location.pathname === "/";
@@ -437,6 +464,17 @@ const Header = ({
           </div>
         )}
       </header>
+
+      <ConfirmationModal
+        isOpen={showInstallModal}
+        onClose={handleDismissInstall}
+        onConfirm={isIOS ? handleDismissInstall : handleConfirmInstall}
+        title={t("install_app")}
+        message={isIOS ? t("install_app_ios") : t("install_app_prompt")}
+        confirmText={isIOS ? t("got_it") : t("install_app")}
+        cancelText={t("maybe_later")}
+        confirmButtonType="primary"
+      />
     </>
   );
 };
