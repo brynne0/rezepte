@@ -4,4 +4,3 @@ build
 .git
 *.min.js
 *.min.css
-public
