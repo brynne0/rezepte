@@ -157,89 +157,55 @@ const Header = ({
     return theme === "light" ? <Moon size={20} /> : <Sun size={20} />;
   };
 
-  // Reusable User Dropdown Component
-  const UserDropdown = () => (
-    <div className={"user-icon-wrapper"} ref={userDropdownRef}>
-      <button
-        className={`btn btn-icon btn-icon-neutral ${
-          showUserDropdown || location.pathname === "/settings"
-            ? "selected"
-            : ""
-        }`}
-        onClick={() => {
-          if (location.pathname === "/auth-page") return;
-          setShowUserDropdown((prev) => !prev);
-        }}
-        aria-label={isLoggedIn ? t("user_menu") : t("login")}
-      >
-        <User size={28} />
-      </button>
-
-      {/* User Dropdown */}
-      {showUserDropdown && (
-        <div className="dropdown user-menu">
-          <div className="dropdown-content">
+  // Shared user dropdown menu content
+  const userDropdownMenu = showUserDropdown && (
+    <div className="dropdown user-menu">
+      <div className="dropdown-content">
+        <button
+          className="dropdown-item"
+          onClick={() => {
+            toggleTheme();
+            setShowUserDropdown(false);
+          }}
+          aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
+        >
+          {getThemeIcon()}
+        </button>
+        {isLoggedIn ? (
+          <>
+            <button
+              className={`dropdown-item ${
+                location.pathname === "/settings" ? "selected" : ""
+              }`}
+              onClick={() => {
+                setShowUserDropdown(false);
+                navigate("/settings");
+              }}
+            >
+              {t("settings")}
+            </button>
             <button
               className="dropdown-item"
               onClick={() => {
-                toggleTheme();
+                handleLogout();
                 setShowUserDropdown(false);
               }}
-              aria-label={
-                theme === "light" ? t("theme_dark") : t("theme_light")
-              }
             >
-              {getThemeIcon()}
+              {t("logout")}
             </button>
-            {installPrompt && (
-              <button
-                className="dropdown-item"
-                onClick={() => {
-                  triggerInstall();
-                  setShowUserDropdown(false);
-                }}
-                aria-label={t("install_app")}
-              >
-                {t("install_app")}
-              </button>
-            )}
-            {isLoggedIn ? (
-              <>
-                <button
-                  className={`dropdown-item ${
-                    location.pathname === "/settings" ? "selected" : ""
-                  }`}
-                  onClick={() => {
-                    setShowUserDropdown(false);
-                    navigate("/settings");
-                  }}
-                >
-                  {t("settings")}
-                </button>
-                <button
-                  className="dropdown-item"
-                  onClick={() => {
-                    handleLogout();
-                    setShowUserDropdown(false);
-                  }}
-                >
-                  {t("logout")}
-                </button>
-              </>
-            ) : (
-              <button
-                className="dropdown-item"
-                onClick={() => {
-                  setShowUserDropdown(false);
-                  navigate("/auth-page");
-                }}
-              >
-                {t("login")}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+          </>
+        ) : (
+          <button
+            className="dropdown-item"
+            onClick={() => {
+              setShowUserDropdown(false);
+              navigate("/auth-page");
+            }}
+          >
+            {t("login")}
+          </button>
+        )}
+      </div>
     </div>
   );
 
@@ -283,7 +249,26 @@ const Header = ({
           {/* Desktop Navigation */}
           <nav className="header-nav desktop-nav">
             {/* Desktop User Icon */}
-            <UserDropdown />
+            <div className="user-icon-wrapper">
+              <button
+                className={`btn btn-icon btn-icon-neutral ${
+                  showUserDropdown || location.pathname === "/settings"
+                    ? "selected"
+                    : ""
+                }`}
+                onMouseDown={() => {
+                  setShowNavMenu(false);
+                }}
+                onClick={() => {
+                  if (location.pathname === "/auth-page") return;
+                  setShowUserDropdown((prev) => !prev);
+                }}
+                aria-label={isLoggedIn ? t("user_menu") : t("login")}
+              >
+                <User size={28} />
+              </button>
+              {userDropdownMenu}
+            </div>
 
             {/* Only display if user logged in */}
             {isLoggedIn && (
@@ -327,7 +312,26 @@ const Header = ({
           {/* Mobile User and Menu Icons */}
           <div className="mobile-nav">
             {/* Mobile User Icon */}
-            <UserDropdown className="mobile-user" />
+            <div className="user-icon-wrapper" ref={userDropdownRef}>
+              <button
+                className={`btn btn-icon btn-icon-neutral ${
+                  showUserDropdown || location.pathname === "/settings"
+                    ? "selected"
+                    : ""
+                }`}
+                onMouseDown={() => {
+                  setShowNavMenu(false);
+                }}
+                onClick={() => {
+                  if (location.pathname === "/auth-page") return;
+                  setShowUserDropdown((prev) => !prev);
+                }}
+                aria-label={isLoggedIn ? t("user_menu") : t("login")}
+              >
+                <User size={28} />
+              </button>
+              {userDropdownMenu}
+            </div>
 
             {/* Hamburger Menu */}
             <div className="nav-menu-wrapper" ref={navMenuRef}>
@@ -335,7 +339,12 @@ const Header = ({
                 className={`btn btn-icon btn-icon-neutral ${
                   showNavMenu ? "selected" : ""
                 }`}
-                onClick={() => setShowNavMenu((prev) => !prev)}
+                onMouseDown={() => {
+                  setShowUserDropdown(false);
+                }}
+                onClick={() => {
+                  setShowNavMenu((prev) => !prev);
+                }}
                 aria-label="Menu"
               >
                 <Menu size={28} />

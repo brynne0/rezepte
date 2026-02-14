@@ -20,6 +20,7 @@ import {
   createCategory,
   updateCategoryName,
 } from "../../services/categoriesService";
+import { getUserPreferredLanguage } from "../../services/userService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 
@@ -44,6 +45,7 @@ const CategoriesTab = ({
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
   const [deleteCategoryName, setDeleteCategoryName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [preferredLanguage, setPreferredLanguage] = useState(null);
   const { i18n } = useTranslation();
 
   // Load all categories for management (including hidden ones)
@@ -64,6 +66,19 @@ const CategoriesTab = ({
 
     loadAllCategories();
   }, [i18n.language]);
+
+  useEffect(() => {
+    const loadPreferredLanguage = async () => {
+      try {
+        const lang = await getUserPreferredLanguage();
+        setPreferredLanguage(lang);
+      } catch (error) {
+        console.error("Error loading preferred language:", error);
+      }
+    };
+
+    loadPreferredLanguage();
+  }, []);
 
   useEffect(() => {
     // Categories already come with preference data from getAllCategoriesForManagement
@@ -579,17 +594,18 @@ const CategoriesTab = ({
                                 </span>
                               )}
 
-                              {!category.isSystem && (
-                                <button
-                                  type="button"
-                                  className="btn-unstyled  btn-icon-neutral"
-                                  onClick={() => handleEditCategory(category)}
-                                  aria-label={t("edit_category_name")}
-                                  style={{ marginLeft: "0.5rem" }}
-                                >
-                                  <Pencil size={14} />
-                                </button>
-                              )}
+                              {!category.isSystem &&
+                                i18n.language === preferredLanguage && (
+                                  <button
+                                    type="button"
+                                    className="btn-unstyled  btn-icon-neutral"
+                                    onClick={() => handleEditCategory(category)}
+                                    aria-label={t("edit_category_name")}
+                                    style={{ marginLeft: "0.5rem" }}
+                                  >
+                                    <Pencil size={14} />
+                                  </button>
+                                )}
                             </>
                           )}
                         </div>
@@ -667,7 +683,7 @@ const CategoriesTab = ({
       </DragDropContext>
 
       {/* Add New Category Button */}
-      {!isAddingCategory && (
+      {!isAddingCategory && i18n.language === preferredLanguage && (
         <div className="add-category-section flex-center">
           <button
             type="button"
@@ -679,6 +695,13 @@ const CategoriesTab = ({
             {t("add_category")}
           </button>
         </div>
+      )}
+
+      {/* Preferred language hint */}
+      {i18n.language !== preferredLanguage && (
+        <p className="grey-small" style={{ textAlign: "center" }}>
+          {t("category_edit_preferred_language_hint")}
+        </p>
       )}
 
       <div className="success-message-wrapper">
@@ -696,7 +719,11 @@ const CategoriesTab = ({
           type="button"
           className="btn btn-action btn-primary"
           onClick={handleSavePreferences}
-          disabled={preferencesLoading}
+          disabled={
+            preferencesLoading ||
+            i18n.language !== preferredLanguage ||
+            !hasUnsavedChanges()
+          }
         >
           {preferencesLoading ? t("saving") : t("save_category_preferences")}
         </button>

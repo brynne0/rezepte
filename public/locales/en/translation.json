@@ -85,7 +85,8 @@
   "no_recipes_available": "No recipes available.",
   "loading_recipes": "Loading recipes...",
   "welcome_add_recipe": "Welcome! Click the + to add your first recipe",
-  "logged_in_note": "Log in to view and manage your recipes",
+  "logged_in_note_link": "Log in",
+  "logged_in_note_suffix": " to view and manage your recipes",
   "no_internet_connection": "No internet connection",
 
   "servings": "Servings",
@@ -170,6 +171,7 @@
   "delete_category": "Delete category",
   "delete_category_confirmation": "Are you sure you want to delete '{{categoryName}}'?",
   "delete_category_warning": "All recipes in this category will no longer belong to a category and can only be found in All Recipes.",
+  "category_edit_preferred_language_hint": "Please switch to your preferred language to add or edit categories.",
   "category_name_required": "Category name is required",
   "category_name_already_exists": "This category already exists",
   "select_category": "Select a Category",

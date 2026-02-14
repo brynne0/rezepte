@@ -168,7 +168,7 @@ describe("categoryPreferencesService", () => {
         { value: "all_recipes", label: "All Recipes", isSystem: true },
         {
           value: "brunch",
-          label: "brunch",
+          label: "Brunch",
           isSystem: false,
           id: 2,
           isVisible: true,
@@ -176,7 +176,7 @@ describe("categoryPreferencesService", () => {
         },
         {
           value: "dinner",
-          label: "dinner",
+          label: "Dinner",
           isSystem: false,
           id: 1,
           isVisible: true,
@@ -321,7 +321,7 @@ describe("categoryPreferencesService", () => {
         { value: "all_recipes", label: "All Recipes", isSystem: true },
         {
           value: "brunch",
-          label: "brunch",
+          label: "Brunch",
           isSystem: false,
           id: 2,
           isVisible: true,
@@ -371,7 +371,7 @@ describe("categoryPreferencesService", () => {
         { value: "all_recipes", label: "All Recipes", isSystem: true },
         {
           value: "brunch",
-          label: "brunch",
+          label: "Brunch",
           isSystem: false,
           id: 2,
           isVisible: true,
@@ -379,7 +379,7 @@ describe("categoryPreferencesService", () => {
         },
         {
           value: "baking",
-          label: "baking",
+          label: "Baking",
           isSystem: false,
           id: 3,
           isVisible: true,
@@ -387,7 +387,7 @@ describe("categoryPreferencesService", () => {
         },
         {
           value: "dinner",
-          label: "dinner",
+          label: "Dinner",
           isSystem: false,
           id: 1,
           isVisible: true,
