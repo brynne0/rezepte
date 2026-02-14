@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { translateText } from "./translationService";
 
 // Fetch all categories with their translations
 export const fetchCategories = async () => {
@@ -29,7 +30,7 @@ export const getCategoriesForUI = async (currentLanguage = "en") => {
 
   // Add database categories
   categories.forEach((category) => {
-    let label = category.name;
+    let label = category.name.charAt(0).toUpperCase() + category.name.slice(1);
 
     // Use translation if available for the current language
     if (
@@ -79,6 +80,23 @@ export const createCategory = async (name, translations = {}) => {
       );
     } else {
       throw error;
+    }
+  }
+
+  // Translate to the other language via DeepL
+  if (Object.keys(translations).length > 0) {
+    const sourceLanguage = Object.keys(translations)[0];
+    const targetLanguage = sourceLanguage === "en" ? "de" : "en";
+
+    try {
+      const translatedName = await translateText(
+        translations[sourceLanguage],
+        targetLanguage,
+        "Food category"
+      );
+      translations[targetLanguage] = translatedName;
+    } catch (error) {
+      console.warn("Failed to translate category name:", error);
     }
   }
 
@@ -136,7 +154,7 @@ export const updateCategoryName = async (
   // Check if category exists and user can edit it
   const { data: category } = await supabase
     .from("categories")
-    .select("is_system, created_by, name")
+    .select("is_system, created_by, name, translated_category")
     .eq("id", categoryId)
     .single();
 
@@ -165,10 +183,33 @@ export const updateCategoryName = async (
     }
   }
 
+  // Translate to the other language via DeepL and merge with existing translations
+  let mergedTranslations = { ...(category.translated_category || {}) };
+
+  if (Object.keys(newTranslations).length > 0) {
+    const sourceLanguage = Object.keys(newTranslations)[0];
+    const targetLanguage = sourceLanguage === "en" ? "de" : "en";
+
+    // Update the edited language
+    mergedTranslations[sourceLanguage] = newTranslations[sourceLanguage];
+
+    // Re-translate to the other language
+    try {
+      const translatedName = await translateText(
+        newTranslations[sourceLanguage],
+        targetLanguage,
+        "Food category"
+      );
+      mergedTranslations[targetLanguage] = translatedName;
+    } catch (error) {
+      console.warn("Failed to translate category name:", error);
+    }
+  }
+
   const updateData = {
     name: newName.toLowerCase(),
     translated_category:
-      Object.keys(newTranslations).length > 0 ? newTranslations : null,
+      Object.keys(mergedTranslations).length > 0 ? mergedTranslations : null,
   };
 
   const { data, error } = await supabase

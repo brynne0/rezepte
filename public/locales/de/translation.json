@@ -8,7 +8,7 @@
   "signup_success": "Konto erstellt! Bitte E-Mail bestätigen.",
   "user_not_found": "Benutzername oder E-Mail nicht gefunden",
   "invalid_password": "Falsches Passwort",
-  "email_not_confirmed": "Bitte bestätigen Sie Ihre E-Mail-Adresse",
+  "email_not_confirmed": "Bitte bestätige deine E-Mail-Adresse",
   "too_many_requests": "Zu viele Anmeldeversuche. Bitte später erneut versuchen",
   "logged_out": "Abgemeldet",
   "login": "Anmelden",
@@ -70,9 +70,9 @@
   "successfully_updated_first_name": "Vorname erfolgreich aktualisiert",
   "successfully_updated_language": "Bevorzugte Sprache erfolgreich aktualisiert",
   "delete_account": "Konto löschen",
-  "delete_account_confirmation": "Möchten Sie Ihr Konto wirklich löschen?",
+  "delete_account_confirmation": "Möchtest du dein Konto wirklich löschen?",
   "delete_account_warning": "Ich verstehe, dass dieser Vorgang nicht rückgängig gemacht werden kann und alle meine Rezepte gelöscht werden",
-  "account_deleted_goodbye": "Auf Wiedersehen, {{name}}! Ihr Konto wurde erfolgreich gelöscht.",
+  "account_deleted_goodbye": "Auf Wiedersehen, {{name}}! Dein Konto wurde erfolgreich gelöscht.",
   "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
 
   "search": "Suchen",
@@ -84,8 +84,9 @@
   "no_recipes_found": "Keine Rezepte für \"{{searchTerm}}\" gefunden",
   "no_recipes_available": "Keine Rezepte verfügbar",
   "loading_recipes": "Lade Rezepte...",
-  "welcome_add_recipe": "Willkommen! Klicken Sie auf das +, um Ihr erstes Rezept hinzuzufügen",
-  "logged_in_note": "Melden Sie sich an, um Ihre Rezepte anzuzeigen und zu verwalten",
+  "welcome_add_recipe": "Willkommen! Klick auf das +, um dein erstes Rezept hinzuzufügen",
+  "logged_in_note_link": "Melde dich an",
+  "logged_in_note_suffix": ", um deine Rezepte anzuzeigen und zu verwalten",
   "no_internet_connection": "Keine Internetverbindung",
 
   "servings": "Portionen",
@@ -111,7 +112,7 @@
     { "value": "pinch/es", "label": "Prise/n" }
   ],
 
-  "recipe_delete_confirmation": "Möchten Sie dieses Rezept wirklich löschen?",
+  "recipe_delete_confirmation": "Möchtest du dieses Rezept wirklich löschen?",
   "save": "Speichern",
   "cancel": "Stornieren",
   "delete": "Löschen",
@@ -128,7 +129,7 @@
   "open_recipe_source_link": "Rezeptquelle öffnen",
 
   "share_recipe": "Rezept Teilen",
-  "share_recipe_description": "Erstellen Sie einen öffentlichen Link, um dieses Rezept mit anderen zu teilen.",
+  "share_recipe_description": "Erstelle einen öffentlichen Link, um dieses Rezept mit anderen zu teilen.",
   "create_share_link": "Teilen-Link Erstellen",
   "generating": "Wird generiert...",
   "copy_link": "Link Kopieren",
@@ -168,12 +169,13 @@
   "add_category": "Kategorie hinzufügen",
   "edit_category_name": "Kategoriename bearbeiten",
   "delete_category": "Kategorie löschen",
-  "delete_category_confirmation": "Sind Sie sicher, dass Sie '{{categoryName}}' löschen möchten?",
+  "delete_category_confirmation": "Bist du sicher, dass du '{{categoryName}}' löschen möchtest?",
   "delete_category_warning": "Alle Rezepte in dieser Kategorie gehören dann zu keiner Kategorie mehr und sind nur noch unter 'Alle Rezepte' zu finden.",
+  "category_edit_preferred_language_hint": "Bitte wechsle zur bevorzugten Sprache, um Kategorien hinzuzufügen oder zu bearbeiten.",
   "category_name_required": "Kategoriename ist erforderlich",
   "category_name_already_exists": "Diese Kategorie existiert bereits",
-  "select_category": "Wählen Sie eine Kategorie",
-  "select_option": "Wählen Sie eine Option",
+  "select_category": "Wähle eine Kategorie",
+  "select_option": "Wähle eine Option",
   "open_options": "Optionen öffnen",
   "close_options": "Optionen schließen",
 
@@ -193,13 +195,13 @@
  
   "autofill_recipe": "Rezept automatisch ausfüllen",
   "paste_recipe_placeholder": "Hier ein Rezept oder einen Link einfügen (Text bevorzugt)",
-  "paste_text_required": "Bitte fügen Sie zuerst den Rezepttext ein.",
+  "paste_text_required": "Bitte füge zuerst den Rezepttext ein.",
   "paste_text_too_long": "Rezepttext ist zu lang. Bitte auf {{max}} Zeichen oder weniger kürzen.",
   "parse_error": "Fehler beim Parsen des Rezepts. Bitte erneut versuchen.",
   "parse_error_rate_limit": "Zu viele Anfragen. Bitte einen Moment warten und erneut versuchen.",
-  "parse_error_server": "Der Autofill-Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
-  "parse_error_network": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
-  "parse_error_blocked": "Die Website blockiert den automatisierten Zugriff. Bitte stattdessen versuchen, den Rezepttext direkt zu kopieren und einzufügen.",
+  "parse_error_server": "Der Autofill-Dienst ist vorübergehend nicht verfügbar. Bitte später erneut versuchen.",
+  "parse_error_network": "Netzwerkfehler. Bitte deine Verbindung überprüfen und erneut versuchen.",
+  "parse_error_blocked": "Die Website blockiert den automatisierten Zugriff. Bitte den Rezepttext direkt kopieren und einfügen.",
   "autofill": "Automatisches Ausfüllen",
   "autofilling": "Automatisches Ausfüllen...",
 
@@ -226,9 +228,9 @@
   "remove_item": "Artikel entfernen",
   "clear_list": "Liste löschen",
   "remove_all_checked": "Ausgewählte entfernen",
-  "grocery_list_clear_confirmation": "Möchten Sie die Einkaufsliste wirklich löschen?",
+  "grocery_list_clear_confirmation": "Möchtest du die Einkaufsliste wirklich löschen?",
 
-  "unsaved_changes_warning": "Sie haben ungespeicherte Änderungen. Möchten Sie diese Seite wirklich verlassen?",
+  "unsaved_changes_warning": "Du hast ungespeicherte Änderungen. Möchtest du diese Seite wirklich verlassen?",
   "leave_page": "Seite verlassen",
   "stay": "Bleiben",
 
@@ -251,10 +253,10 @@
   "canned_translation": "400g Dose = 240g gekocht",
 
   "no_cooking_times_title": "Noch keine Garzeiten",
-  "add_first_cooking_time": "Fügen Sie Ihre erste Garzeit hinzu",
+  "add_first_cooking_time": "Füge deine erste Garzeit hinzu",
   "edit_mode": "Bearbeitungsmodus",
   "add_cooking_time": "Garzeit hinzufügen",
-  "no_search_results": "Keine Ergebnisse für Ihre Suche gefunden.",
+  "no_search_results": "Keine Ergebnisse für deine Suche gefunden.",
   "cook": "kochen",
   "soak": "einweichen",
   "dry": "trocken",
@@ -265,5 +267,10 @@
   "cooked_weight": "Gekocht (g)",
   "optional_notes": "Notizen (optional)",
   "minutes_short": "Min.",
-  "hours_short": "Std."
+  "hours_short": "Std.",
+  "install_app": "App installieren",
+  "install_app_prompt": "Installiere Rezepte auf deinem Gerät, um es wie eine App zu verwenden, auch ohne Internet.",
+  "maybe_later": "Vielleicht später",
+  "install_app_ios": "Um Rezepte zu installieren, tippe auf das Teilen-Symbol (↑) unten auf deinem Bildschirm und wähle dann \"Zum Startbildschirm hinzufügen\".",
+  "got_it": "Verstanden"
 }

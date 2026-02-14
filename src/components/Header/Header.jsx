@@ -16,6 +16,8 @@ import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import useClickOutside from "../../hooks/ui/useClickOutside";
 import { useTheme } from "../../hooks/ui/useTheme";
+import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
+import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import SortButtons from "../SortButtons/SortButtons";
 import "./Header.css";
 
@@ -35,6 +37,31 @@ const Header = ({
 
   const { isLoggedIn } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
+
+  const [showInstallModal, setShowInstallModal] = useState(false);
+
+  // Show install modal once when prompt is available (or on iOS), and user is
+  // logged in, unless previously dismissed
+  useEffect(() => {
+    if (
+      (installPrompt || isIOS) &&
+      isLoggedIn &&
+      localStorage.getItem("pwa-install-dismissed") !== "true"
+    ) {
+      setShowInstallModal(true);
+    }
+  }, [installPrompt, isIOS, isLoggedIn]);
+
+  const handleDismissInstall = () => {
+    setShowInstallModal(false);
+    localStorage.setItem("pwa-install-dismissed", "true");
+  };
+
+  const handleConfirmInstall = () => {
+    setShowInstallModal(false);
+    triggerInstall();
+  };
 
   // Hide search bar on all pages except home
   const isHomePage = location.pathname === "/";
@@ -130,77 +157,55 @@ const Header = ({
     return theme === "light" ? <Moon size={20} /> : <Sun size={20} />;
   };
 
-  // Reusable User Dropdown Component
-  const UserDropdown = () => (
-    <div className={"user-icon-wrapper"} ref={userDropdownRef}>
-      <button
-        className={`btn btn-icon btn-icon-neutral ${
-          showUserDropdown || location.pathname === "/settings"
-            ? "selected"
-            : ""
-        }`}
-        onClick={() => {
-          if (location.pathname === "/auth-page") return;
-          setShowUserDropdown((prev) => !prev);
-        }}
-        aria-label={isLoggedIn ? t("user_menu") : t("login")}
-      >
-        <User size={28} />
-      </button>
-
-      {/* User Dropdown */}
-      {showUserDropdown && (
-        <div className="dropdown user-menu">
-          <div className="dropdown-content">
+  // Shared user dropdown menu content
+  const userDropdownMenu = showUserDropdown && (
+    <div className="dropdown user-menu">
+      <div className="dropdown-content">
+        <button
+          className="dropdown-item"
+          onClick={() => {
+            toggleTheme();
+            setShowUserDropdown(false);
+          }}
+          aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
+        >
+          {getThemeIcon()}
+        </button>
+        {isLoggedIn ? (
+          <>
+            <button
+              className={`dropdown-item ${
+                location.pathname === "/settings" ? "selected" : ""
+              }`}
+              onClick={() => {
+                setShowUserDropdown(false);
+                navigate("/settings");
+              }}
+            >
+              {t("settings")}
+            </button>
             <button
               className="dropdown-item"
               onClick={() => {
-                toggleTheme();
+                handleLogout();
                 setShowUserDropdown(false);
               }}
-              aria-label={
-                theme === "light" ? t("theme_dark") : t("theme_light")
-              }
             >
-              {getThemeIcon()}
+              {t("logout")}
             </button>
-            {isLoggedIn ? (
-              <>
-                <button
-                  className={`dropdown-item ${
-                    location.pathname === "/settings" ? "selected" : ""
-                  }`}
-                  onClick={() => {
-                    setShowUserDropdown(false);
-                    navigate("/settings");
-                  }}
-                >
-                  {t("settings")}
-                </button>
-                <button
-                  className="dropdown-item"
-                  onClick={() => {
-                    handleLogout();
-                    setShowUserDropdown(false);
-                  }}
-                >
-                  {t("logout")}
-                </button>
-              </>
-            ) : (
-              <button
-                className="dropdown-item"
-                onClick={() => {
-                  setShowUserDropdown(false);
-                  navigate("/auth-page");
-                }}
-              >
-                {t("login")}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+          </>
+        ) : (
+          <button
+            className="dropdown-item"
+            onClick={() => {
+              setShowUserDropdown(false);
+              navigate("/auth-page");
+            }}
+          >
+            {t("login")}
+          </button>
+        )}
+      </div>
     </div>
   );
 
@@ -244,7 +249,26 @@ const Header = ({
           {/* Desktop Navigation */}
           <nav className="header-nav desktop-nav">
             {/* Desktop User Icon */}
-            <UserDropdown />
+            <div className="user-icon-wrapper">
+              <button
+                className={`btn btn-icon btn-icon-neutral ${
+                  showUserDropdown || location.pathname === "/settings"
+                    ? "selected"
+                    : ""
+                }`}
+                onMouseDown={() => {
+                  setShowNavMenu(false);
+                }}
+                onClick={() => {
+                  if (location.pathname === "/auth-page") return;
+                  setShowUserDropdown((prev) => !prev);
+                }}
+                aria-label={isLoggedIn ? t("user_menu") : t("login")}
+              >
+                <User size={28} />
+              </button>
+              {userDropdownMenu}
+            </div>
 
             {/* Only display if user logged in */}
             {isLoggedIn && (
@@ -288,7 +312,26 @@ const Header = ({
           {/* Mobile User and Menu Icons */}
           <div className="mobile-nav">
             {/* Mobile User Icon */}
-            <UserDropdown className="mobile-user" />
+            <div className="user-icon-wrapper" ref={userDropdownRef}>
+              <button
+                className={`btn btn-icon btn-icon-neutral ${
+                  showUserDropdown || location.pathname === "/settings"
+                    ? "selected"
+                    : ""
+                }`}
+                onMouseDown={() => {
+                  setShowNavMenu(false);
+                }}
+                onClick={() => {
+                  if (location.pathname === "/auth-page") return;
+                  setShowUserDropdown((prev) => !prev);
+                }}
+                aria-label={isLoggedIn ? t("user_menu") : t("login")}
+              >
+                <User size={28} />
+              </button>
+              {userDropdownMenu}
+            </div>
 
             {/* Hamburger Menu */}
             <div className="nav-menu-wrapper" ref={navMenuRef}>
@@ -296,7 +339,12 @@ const Header = ({
                 className={`btn btn-icon btn-icon-neutral ${
                   showNavMenu ? "selected" : ""
                 }`}
-                onClick={() => setShowNavMenu((prev) => !prev)}
+                onMouseDown={() => {
+                  setShowUserDropdown(false);
+                }}
+                onClick={() => {
+                  setShowNavMenu((prev) => !prev);
+                }}
                 aria-label="Menu"
               >
                 <Menu size={28} />
@@ -416,6 +464,17 @@ const Header = ({
           </div>
         )}
       </header>
+
+      <ConfirmationModal
+        isOpen={showInstallModal}
+        onClose={handleDismissInstall}
+        onConfirm={isIOS ? handleDismissInstall : handleConfirmInstall}
+        title={t("install_app")}
+        message={isIOS ? t("install_app_ios") : t("install_app_prompt")}
+        confirmText={isIOS ? t("got_it") : t("install_app")}
+        cancelText={t("maybe_later")}
+        confirmButtonType="primary"
+      />
     </>
   );
 };

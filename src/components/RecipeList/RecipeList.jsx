@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
@@ -65,7 +65,12 @@ const RecipeList = ({
             ) : isLoggedIn ? (
               <p>{t("welcome_add_recipe")}</p>
             ) : (
-              <p className="grey-small">{t("logged_in_note")}</p>
+              <p className="grey-small">
+                <Link to="/auth-page" className="link-red">
+                  {t("logged_in_note_link")}
+                </Link>
+                {t("logged_in_note_suffix")}
+              </p>
             )}
           </div>
         </div>
