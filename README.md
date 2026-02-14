@@ -26,6 +26,7 @@ Built to have all my recipes in one place and add ingredients to a grocery list.
 - Category Management - add, remove and reorder recipe categories
 
 ### In Progress/Future functionality:
+
 - Friend system - add friends and browse their recipes
 - Shared link management - bulk select and alter if recipes are public
 - Imaging cropping - crop and reposition recipe images
@@ -42,9 +43,6 @@ Built to have all my recipes in one place and add ingredients to a grocery list.
 <img width="400" alt="Conversion Page" src="https://github.com/user-attachments/assets/a29e3b7b-bbd0-4c65-b470-11703f5ea9f6" />
 <img width="400" alt="Category Management" src="https://github.com/user-attachments/assets/189a0dc0-5c61-4104-970f-a1cbba6af73d" />
 <img width="400" alt="Add Recipe Page" src="https://github.com/user-attachments/assets/0a59b9e5-9138-4833-a754-7a03cebaa4a4" />
-
-
-
 
 ### Deployment:
 

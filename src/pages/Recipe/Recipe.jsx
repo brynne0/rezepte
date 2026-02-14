@@ -10,6 +10,7 @@ import { getTranslatedRecipe } from "../../services/translationService";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
+import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ShareModal from "../../components/ShareModal/ShareModal";
 import ImageGallery from "../../components/ImageGallery/ImageGallery";
@@ -103,6 +104,12 @@ const Recipe = ({ isSharedView = false }) => {
   const recipe = isSharedView ? sharedRecipe : ownedRecipe;
   const loading = isSharedView ? sharedLoading : ownedLoading;
   const error = isSharedView ? sharedError : ownedError;
+
+  // Generate signed URLs for recipe images
+  const { signedImages } = useSignedImageUrls(
+    recipe?.images,
+    isSharedView // 7-day expiration for shared recipes
+  );
 
   // Check if user is viewing the site in their preferred language
   const currentLanguage = i18n.language.split("-")[0]; // Normalise region codes
@@ -205,8 +212,8 @@ const Recipe = ({ isSharedView = false }) => {
   }
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
-  // Generate SEO data
-  const mainImage = getMainImage(recipe.images);
+  // Generate SEO data using signed URLs
+  const mainImage = getMainImage(signedImages);
   const recipeImageUrl =
     mainImage?.url || "https://acorn-rezepte.com/eichhörnchen/og-image.png";
   const recipeUrl = isSharedView
@@ -313,7 +320,7 @@ const Recipe = ({ isSharedView = false }) => {
       <div className="recipe-layout">
         <div className="recipe-content">
           {/* Recipe Images - floating within content - only show when logged in */}
-          {isLoggedIn && recipe.images && recipe.images.length > 0 && (
+          {isLoggedIn && signedImages && signedImages.length > 0 && (
             <div className="recipe-images-float">
               {imagesLoading && (
                 <div className="images-loading-overlay">
@@ -321,7 +328,7 @@ const Recipe = ({ isSharedView = false }) => {
                 </div>
               )}
               <ImageGallery
-                images={recipe.images}
+                images={signedImages}
                 onAllImagesLoaded={() => setImagesLoading(false)}
               />
             </div>

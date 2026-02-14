@@ -4,6 +4,48 @@ import supabase from "../lib/supabase";
 const STORAGE_BUCKET = "recipe-images";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const SIGNED_URL_EXPIRY = 3600; // 1 hour for regular views
+const SHARED_SIGNED_URL_EXPIRY = 604800; // 7 days for shared recipes
+
+// Generate signed URL for single image
+export const getSignedImageUrl = async (
+  imagePath,
+  expiresIn = SIGNED_URL_EXPIRY
+) => {
+  try {
+    const { data, error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .createSignedUrl(imagePath, expiresIn);
+
+    if (error) {
+      console.error("Failed to create signed URL:", error);
+      return null;
+    }
+
+    return data.signedUrl;
+  } catch (error) {
+    console.error("Error generating signed URL:", error);
+    return null;
+  }
+};
+
+// Generate signed URLs for multiple images (batched)
+export const getSignedImageUrls = async (
+  images,
+  expiresIn = SIGNED_URL_EXPIRY
+) => {
+  if (!images || images.length === 0) return [];
+
+  const urlPromises = images.map(async (image) => {
+    const signedUrl = await getSignedImageUrl(image.path, expiresIn);
+    return {
+      ...image,
+      url: signedUrl || image.url, // Fallback to existing URL
+    };
+  });
+
+  return Promise.all(urlPromises);
+};
 
 // Helper to validate image file
 export const validateImageFile = (file) => {
@@ -33,12 +75,12 @@ const generateFileName = (originalName) => {
 };
 
 // Upload image to Supabase Storage
-export const uploadRecipeImage = async (file, recipeId) => {
+export const uploadRecipeImage = async (file, userId, recipeId) => {
   try {
     validateImageFile(file);
 
     const fileName = generateFileName(file.name);
-    const filePath = `recipes/${recipeId}/${fileName}`;
+    const filePath = `${userId}/${recipeId}/${fileName}`;
 
     // Upload file to storage
     const { error } = await supabase.storage
@@ -52,15 +94,11 @@ export const uploadRecipeImage = async (file, recipeId) => {
       throw new Error(`Upload failed: ${error.message}`);
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from(STORAGE_BUCKET)
-      .getPublicUrl(filePath);
-
+    // URL will be generated on-demand via signed URLs
     return {
       id: crypto.randomUUID(),
       path: filePath,
-      url: urlData.publicUrl,
+      url: "", // Empty - generated on-demand
       filename: file.name,
       size: file.size,
       type: file.type,
@@ -108,29 +146,27 @@ export const updateRecipeImages = async (recipeId, images) => {
 };
 
 // Get optimized image URL (for thumbnails, etc.)
-export const getOptimizedImageUrl = (originalUrl, options = {}) => {
-  if (!originalUrl) return null;
+// Works with both public and signed URLs
+export const getOptimizedImageUrl = (signedUrl, options = {}) => {
+  if (!signedUrl) return null;
 
   const { width, height, quality = 60 } = options; // Lower default quality for better performance
 
   // If using Supabase storage, we can add transform parameters
-  if (originalUrl.includes("supabase")) {
-    const url = new URL(originalUrl);
-    const params = new URLSearchParams();
+  if (signedUrl.includes("supabase")) {
+    const url = new URL(signedUrl);
 
-    if (width) params.set("width", width);
-    if (height) params.set("height", height);
-    params.set("quality", quality);
-    params.set("format", "origin"); // Use original format instead of WebP to preserve brightness consistency
-
-    if (params.toString()) {
-      url.search = params.toString();
-    }
+    // Add transform parameters to the URL
+    // For signed URLs, these get appended to existing query params (including the token)
+    if (width) url.searchParams.set("width", width);
+    if (height) url.searchParams.set("height", height);
+    url.searchParams.set("quality", quality);
+    url.searchParams.set("format", "origin"); // Use original format instead of WebP to preserve brightness consistency
 
     return url.toString();
   }
 
-  return originalUrl;
+  return signedUrl;
 };
 
 // Helper to get main image from images array
@@ -161,6 +197,7 @@ export const setMainImage = (images, imageId) => {
 // Upload all local images when recipe is saved
 export const uploadLocalImages = async (
   images,
+  userId,
   recipeId,
   onProgress = null
 ) => {
@@ -183,7 +220,11 @@ export const uploadLocalImages = async (
         }
 
         // Upload the local file
-        const uploadedImage = await uploadRecipeImage(image.file, recipeId);
+        const uploadedImage = await uploadRecipeImage(
+          image.file,
+          userId,
+          recipeId
+        );
 
         // Keep the same ID and main status
         uploadedImages.push({

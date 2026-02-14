@@ -12,6 +12,14 @@ vi.mock("../../hooks/data/useAuth", () => ({
   }),
 }));
 
+// Mock useSignedImageUrls hook
+vi.mock("../../hooks/data/useSignedImageUrls", () => ({
+  useSignedImageUrls: (images) => ({
+    signedImages: images || [],
+    error: null,
+  }),
+}));
+
 // Mock IntersectionObserver
 globalThis.IntersectionObserver = class IntersectionObserver {
   constructor(callback) {
