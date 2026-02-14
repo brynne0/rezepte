@@ -40,7 +40,7 @@ export const getSignedImageUrls = async (
     const signedUrl = await getSignedImageUrl(image.path, expiresIn);
     return {
       ...image,
-      url: signedUrl || image.url, // Fallback to existing URL
+      url: signedUrl,
     };
   });
 
