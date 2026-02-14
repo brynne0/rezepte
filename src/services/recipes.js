@@ -948,6 +948,7 @@ export const createRecipe = async (
     try {
       const uploadedImages = await uploadLocalImages(
         recipeData.images,
+        user.id,
         recipe.id,
         onImageUploadProgress
       );
@@ -975,6 +976,14 @@ export const updateRecipe = async (
   recipeData,
   onImageUploadProgress = null
 ) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
   // First fetch the original recipe for smart translation updates and image cleanup
   const { data: originalRecipe, error: fetchError } = await supabase
     .from("recipes")
@@ -1267,6 +1276,7 @@ export const updateRecipe = async (
       if (recipeData.images && recipeData.images.length > 0) {
         const uploadedImages = await uploadLocalImages(
           recipeData.images,
+          user.id,
           id,
           onImageUploadProgress
         );

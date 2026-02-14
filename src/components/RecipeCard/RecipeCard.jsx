@@ -3,6 +3,7 @@ import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/data/useAuth";
+import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import {
   getMainImage,
   getOptimizedImageUrl,
@@ -21,20 +22,23 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
     rootMargin: "100px", // Start loading 100px before entering viewport
   });
 
-  // Get main image - extract stable values for memoization
+  // Generate signed URL for main image only (performance optimization)
   const mainImage = getMainImage(recipe.images);
-  const mainImageId = mainImage?.id;
-  const mainImageUrl = mainImage?.url;
+  const { signedImages } = useSignedImageUrls(
+    mainImage ? [mainImage] : [],
+    false // 1-hour expiration for recipe cards
+  );
+  const signedMainImage = signedImages[0];
 
-  // Memoize optimized URL using stable primitive values to enable proper caching
+  // Memoize optimised URL using stable primitive values to enable proper caching
   const optimizedImageUrl = useMemo(() => {
-    if (!mainImageUrl) return null;
-    return getOptimizedImageUrl(mainImageUrl, {
+    if (!signedMainImage?.url) return null;
+    return getOptimizedImageUrl(signedMainImage.url, {
       width: 240,
       height: 160,
       quality: 50,
     });
-  }, [mainImageUrl]);
+  }, [signedMainImage?.url]);
 
   // Only show images if user is logged in AND showImages is true AND card has been visible
   const shouldShowImages = isLoggedIn && showImages && hasBeenVisible;
@@ -87,24 +91,27 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           </a>
         )}
       </div>
-      {shouldShowImages && mainImage && !imageError && optimizedImageUrl && (
-        <div className="recipe-image-container">
-          <img
-            className={`recipe-image ${imageLoaded ? "loaded" : "loading"}`}
-            src={optimizedImageUrl}
-            alt={recipe.title}
-            loading="lazy"
-            onLoad={handleImageLoad}
-            onError={handleImageError}
-            key={mainImageId}
-          />
-          {!imageLoaded && (
-            <div className="recipe-image-loading">
-              <LoadingAcorn size={20} className="loading-acorn-small" />
-            </div>
-          )}
-        </div>
-      )}
+      {shouldShowImages &&
+        signedMainImage &&
+        !imageError &&
+        optimizedImageUrl && (
+          <div className="recipe-image-container">
+            <img
+              className={`recipe-image ${imageLoaded ? "loaded" : "loading"}`}
+              src={optimizedImageUrl}
+              alt={recipe.title}
+              loading="lazy"
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              key={signedMainImage?.id}
+            />
+            {!imageLoaded && (
+              <div className="recipe-image-loading">
+                <LoadingAcorn size={20} className="loading-acorn-small" />
+              </div>
+            )}
+          </div>
+        )}
     </div>
   );
 };

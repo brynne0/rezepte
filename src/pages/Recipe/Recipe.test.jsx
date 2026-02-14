@@ -50,6 +50,14 @@ vi.mock("../../hooks/data/useAuth", () => ({
   useAuth: () => mockAuth,
 }));
 
+vi.mock("../../hooks/data/useSignedImageUrls", () => ({
+  useSignedImageUrls: (images) => ({
+    signedImages: images || [],
+    loading: false,
+    error: null,
+  }),
+}));
+
 vi.mock("../../hooks/data/useGroceryList", () => ({
   useGroceryList: () => mockGroceryListHook,
 }));
