@@ -281,7 +281,7 @@ function AppRoutes(props) {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/grocery-list"
           element={
             <ProtectedRoute>
@@ -291,7 +291,7 @@ function AppRoutes(props) {
               />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/cooking-times"
           element={

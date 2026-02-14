@@ -295,7 +295,7 @@ const Header = ({
                   <Clock size={28} />
                 </button>
                 {/* Grocery List */}
-                <button
+                {/* <button
                   data-testid="lucide-shopping-basket"
                   className={`btn btn-icon btn-icon-neutral ${
                     location.pathname === "/grocery-list" ? "selected" : ""
@@ -304,7 +304,7 @@ const Header = ({
                   aria-label={t("grocery_list")}
                 >
                   <ShoppingBasket size={28} />
-                </button>
+                </button> */}
               </>
             )}
           </nav>
@@ -385,7 +385,7 @@ const Header = ({
                         >
                           <Clock size={20} />
                         </button>
-                        <button
+                        {/* <button
                           className={`dropdown-item ${
                             location.pathname === "/grocery-list"
                               ? "selected"
@@ -398,7 +398,7 @@ const Header = ({
                           aria-label={t("grocery_list")}
                         >
                           <ShoppingBasket size={20} />
-                        </button>
+                        </button> */}
                       </>
                     )}
 
