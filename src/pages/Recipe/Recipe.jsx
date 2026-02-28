@@ -7,7 +7,7 @@ import { Pencil, ShoppingBasket, Loader2, Share2 } from "lucide-react";
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { fetchSharedRecipe } from "../../services/sharingService";
 import { getTranslatedRecipe } from "../../services/translationService";
-import { getUserPreferredLanguage } from "../../services/userService";
+// import { getUserPreferredLanguage } from "../../services/userService";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useGroceryList } from "../../hooks/data/useGroceryList";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
@@ -66,14 +66,14 @@ const Recipe = ({ isSharedView = false }) => {
   const { t, i18n } = useTranslation();
   const [showShareModal, setShowShareModal] = useState(false);
   const [imagesLoading, setImagesLoading] = useState(true);
-  const [userPreferredLanguage, setUserPreferredLanguage] = useState(null);
+  // const [userPreferredLanguage, setUserPreferredLanguage] = useState(null);
 
   // Load user's preferred language
-  useEffect(() => {
-    if (isLoggedIn) {
-      getUserPreferredLanguage().then(setUserPreferredLanguage);
-    }
-  }, [isLoggedIn]);
+  // useEffect(() => {
+  //   if (isLoggedIn) {
+  //     getUserPreferredLanguage().then(setUserPreferredLanguage);
+  //   }
+  // }, [isLoggedIn]);
 
   // Load shared recipe if in shared view
   useEffect(() => {
@@ -112,48 +112,48 @@ const Recipe = ({ isSharedView = false }) => {
   );
 
   // Check if user is viewing the site in their preferred language
-  const currentLanguage = i18n.language.split("-")[0]; // Normalise region codes
-  const isViewingInPreferredLanguage =
-    currentLanguage === userPreferredLanguage;
+  // const currentLanguage = i18n.language.split("-")[0]; // Normalise region codes
+  // const isViewingInPreferredLanguage =
+  //   currentLanguage === userPreferredLanguage;
 
   // Use the grocery list hook
   const {
     checkedIngredients,
-    addingToGroceryList,
-    showSuccess,
+    // addingToGroceryList,
+    // showSuccess,
     handleCheckboxChange,
-    addToGroceryList,
+    // addToGroceryList,
   } = useGroceryList();
 
   // Helper function to get all ingredients as a flat array
-  const getAllIngredients = () => {
-    const allIngredients = [];
+  // const getAllIngredients = () => {
+  //   const allIngredients = [];
 
-    // Add ungrouped ingredients
-    if (recipe.ungroupedIngredients) {
-      allIngredients.push(...recipe.ungroupedIngredients);
-    }
+  //   // Add ungrouped ingredients
+  //   if (recipe.ungroupedIngredients) {
+  //     allIngredients.push(...recipe.ungroupedIngredients);
+  //   }
 
-    // Add ingredients from sections
-    if (recipe.ingredientSections) {
-      recipe.ingredientSections.forEach((section) => {
-        if (section.ingredients) {
-          allIngredients.push(...section.ingredients);
-        }
-      });
-    }
+  //   // Add ingredients from sections
+  //   if (recipe.ingredientSections) {
+  //     recipe.ingredientSections.forEach((section) => {
+  //       if (section.ingredients) {
+  //         allIngredients.push(...section.ingredients);
+  //       }
+  //     });
+  //   }
 
-    // Fallback to old flat structure
-    if (
-      !recipe.ungroupedIngredients &&
-      !recipe.ingredientSections &&
-      recipe.ingredients
-    ) {
-      allIngredients.push(...recipe.ingredients);
-    }
+  //   // Fallback to old flat structure
+  //   if (
+  //     !recipe.ungroupedIngredients &&
+  //     !recipe.ingredientSections &&
+  //     recipe.ingredients
+  //   ) {
+  //     allIngredients.push(...recipe.ingredients);
+  //   }
 
-    return allIngredients;
-  };
+  //   return allIngredients;
+  // };
 
   // Helper to render an ingredient item
   const renderIngredientItem = (ingredient, keyPrefix, index) => {
@@ -352,7 +352,7 @@ const Recipe = ({ isSharedView = false }) => {
               <div className="flex-row recipe-subheading">
                 <h2>{t("ingredients")}:</h2>
                 {/* Grocery Cart - only show for owned recipes and when viewing in preferred language */}
-                {!isSharedView &&
+                {/* {!isSharedView &&
                   isLoggedIn &&
                   isViewingInPreferredLanguage && (
                     <div className="cart-container">
@@ -369,9 +369,9 @@ const Recipe = ({ isSharedView = false }) => {
                         data-testid="lucide-shopping-basket"
                         aria-label={t("add_to_grocery_list")}
                       >
-                        <ShoppingBasket />
-                        {/* Selected ingredients counter or loading spinner */}
-                        {addingToGroceryList ? (
+                        <ShoppingBasket /> */}
+                {/* Selected ingredients counter or loading spinner */}
+                {/* {addingToGroceryList ? (
                           <span className="cart-counter flex-center">
                             <Loader2
                               size={12}
@@ -393,11 +393,11 @@ const Recipe = ({ isSharedView = false }) => {
                         )}
                       </button>
                     </div>
-                  )}
-                {!isSharedView &&
+                  )}  */}
+                {/* {!isSharedView &&
                   isViewingInPreferredLanguage &&
                   showSuccess &&
-                  t("added_to_groceries")}
+                  t("added_to_groceries")} */}
               </div>
 
               {/* Ungrouped Ingredients */}
