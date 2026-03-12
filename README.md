@@ -1,7 +1,7 @@
 # Rezepte Website 🐿️
 
 A recipe website to store and manage recipes.
-Built to have all my recipes in one place and add ingredients to a grocery list.
+Built to have all my recipes in one place.
 
 ## Tech Stack
 
@@ -13,7 +13,6 @@ Built to have all my recipes in one place and add ingredients to a grocery list.
 
 ### Current functionality:
 
-- Display my recipes as default when users not logged in
 - Login/signup and account management functionality
 - Filter, search and sort recipes
 - Users can view, add, edit and delete their own recipes
@@ -21,16 +20,15 @@ Built to have all my recipes in one place and add ingredients to a grocery list.
 - Users can share recipe using individual shared links
 - Responsive design for mobiles (drop down menu)
 - Multi-language interface (German and English)
-- Grocery list (cart icon) - ingredients can be added from recipes
 - Cooking times page to display common cooking times and conversions (e.g. cup to tbsp)
 - Category Management - add, remove and reorder recipe categories
+- Light and dark mode 
 
 ### In Progress/Future functionality:
 
 - Friend system - add friends and browse their recipes
 - Shared link management - bulk select and alter if recipes are public
 - Imaging cropping - crop and reposition recipe images
-- Export grocery list ingredients to external Reminders app grocery list or pdf
 
 ### Screenshots:
 
