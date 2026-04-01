@@ -15,6 +15,7 @@ vi.mock("../lib/supabase", () => ({
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     single: vi.fn(),
+    rpc: vi.fn(),
   },
 }));
 
@@ -100,11 +101,10 @@ describe("Auth Service", () => {
 
   describe("signIn", () => {
     test("successfully signs in with valid username and password", async () => {
-      const mockUser = { email: "test@example.com" };
       const mockAuthData = { user: { id: "123" }, session: {} };
 
-      supabase.single.mockResolvedValue({
-        data: mockUser,
+      supabase.rpc.mockResolvedValue({
+        data: "test@example.com",
         error: null,
       });
 
@@ -115,10 +115,9 @@ describe("Auth Service", () => {
 
       const result = await signIn("johndoe", "password123");
 
-      expect(supabase.from).toHaveBeenCalledWith("users");
-      expect(supabase.select).toHaveBeenCalledWith("email");
-      expect(supabase.eq).toHaveBeenCalledWith("username", "johndoe");
-      expect(supabase.single).toHaveBeenCalled();
+      expect(supabase.rpc).toHaveBeenCalledWith("get_email_by_username", {
+        p_username: "johndoe",
+      });
 
       expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
         email: "test@example.com",
@@ -133,7 +132,7 @@ describe("Auth Service", () => {
 
     test("returns error when username lookup fails", async () => {
       const mockError = { message: "User not found" };
-      supabase.single.mockResolvedValue({
+      supabase.rpc.mockResolvedValue({
         data: null,
         error: mockError,
       });
@@ -149,11 +148,10 @@ describe("Auth Service", () => {
     });
 
     test("returns error when sign in fails", async () => {
-      const mockUser = { email: "test@example.com" };
       const mockError = { message: "Invalid password" };
 
-      supabase.single.mockResolvedValue({
-        data: mockUser,
+      supabase.rpc.mockResolvedValue({
+        data: "test@example.com",
         error: null,
       });
 

@@ -28,21 +28,20 @@ export const signIn = async (usernameOrEmail, password) => {
       // Input is an email, use it directly
       email = usernameOrEmail;
     } else {
-      // Input is a username, look up email
-      const { data: user, error: userError } = await supabase
-        .from("users")
-        .select("email")
-        .eq("username", usernameOrEmail)
-        .single();
+      // Input is a username, look up email via RPC (bypasses RLS for unauthenticated users)
+      const { data: foundEmail, error: userError } = await supabase.rpc(
+        "get_email_by_username",
+        { p_username: usernameOrEmail }
+      );
 
-      if (userError) {
+      if (userError || !foundEmail) {
         // Username not found
         return {
           data: null,
           error: { type: "USER_NOT_FOUND", translationKey: "user_not_found" },
         };
       }
-      email = user.email;
+      email = foundEmail;
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
