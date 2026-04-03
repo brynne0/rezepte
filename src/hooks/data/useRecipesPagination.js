@@ -169,11 +169,11 @@ export const useRecipesPagination = (
           return (a.title || "").localeCompare(b.title || "");
         case "title_desc":
           return (b.title || "").localeCompare(a.title || "");
-        case "created_at_asc":
-          return new Date(a.created_at) - new Date(b.created_at);
-        case "created_at_desc":
+        case "last_viewed_at_asc":
+          return new Date(a.last_viewed_at) - new Date(b.last_viewed_at);
+        case "last_viewed_at_desc":
         default:
-          return new Date(b.created_at) - new Date(a.created_at);
+          return new Date(b.last_viewed_at) - new Date(a.last_viewed_at);
       }
     });
 

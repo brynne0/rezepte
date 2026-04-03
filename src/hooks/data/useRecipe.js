@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { fetchRecipe } from "../../services/recipes";
 import { getTranslatedRecipe } from "../../services/translationService";
 import { useAuth } from "./useAuth";
+import supabase from "../../lib/supabase";
 
 // Fetches a single recipe and all associated data with translation
 export const useRecipe = (id) => {
@@ -47,6 +48,13 @@ export const useRecipe = (id) => {
         );
 
         setRecipe(translatedRecipe);
+
+        // Track when this recipe was last viewed (fire and forget)
+        supabase
+          .from("recipes")
+          .update({ last_viewed_at: new Date().toISOString() })
+          .eq("id", id)
+          .then();
       } catch (err) {
         console.error("Error fetching recipe:", err);
         setError(err.message || "Failed to fetch recipe");

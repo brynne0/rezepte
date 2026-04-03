@@ -47,7 +47,7 @@ function App() {
   const { isLoggedIn } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("title_asc");
+  const [sortBy, setSortBy] = useState("last_viewed_at_desc");
   const [showImages, setShowImages] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
