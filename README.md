@@ -22,7 +22,7 @@ Built to have all my recipes in one place.
 - Multi-language interface (German and English)
 - Cooking times page to display common cooking times and conversions (e.g. cup to tbsp)
 - Category Management - add, remove and reorder recipe categories
-- Light and dark mode 
+- Light and dark mode
 
 ### In Progress/Future functionality:
 
