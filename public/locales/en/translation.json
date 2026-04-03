@@ -77,7 +77,7 @@
 
   "search": "Search",
   "sort_by_title": "Sort by title",
-  "sort_by_date": "Sort by date",
+  "sort_by_recently_used": "Sort by recently used",
   "show_images": "Show images",
   "hide_images": "Hide images",
   "recipe_not_found": "Recipe not found.",

@@ -5,6 +5,11 @@
   justify-content: center;
 }
 
+.sort-buttons button {
+  width: 20px;
+  height: 20px;
+}
+
 @media (min-width: 769px) {
   .sort-buttons {
     position: absolute;

@@ -42,6 +42,7 @@ a.btn-unstyled {
   color: var(--color-text-strong);
   border: var(--border-width) solid var(--color-text-primary);
   box-shadow: 0 0.125rem 0.5rem var(--color-shadow);
+  width: -webkit-fill-available;
 }
 
 /* Action buttons (primary, secondary, danger) */

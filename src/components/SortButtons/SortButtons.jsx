@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import {
-  Calendar,
+  Clock,
   ArrowDownAZ,
   ArrowDownZA,
-  CalendarArrowDown,
-  CalendarArrowUp,
+  ClockArrowDown,
+  ClockArrowUp,
   Image,
   ImageOff,
 } from "lucide-react";
@@ -29,11 +29,11 @@ const SortButtons = ({
     onPageReset && onPageReset();
   };
 
-  const handleDateSort = () => {
-    if (sortBy === "created_at_desc") {
-      onSortChange("created_at_asc");
+  const handleRecentSort = () => {
+    if (sortBy === "last_viewed_at_desc") {
+      onSortChange("last_viewed_at_asc");
     } else {
-      onSortChange("created_at_desc");
+      onSortChange("last_viewed_at_desc");
     }
     onPageReset && onPageReset();
   };
@@ -44,10 +44,10 @@ const SortButtons = ({
     return <ArrowDownAZ size={20} />;
   };
 
-  const getDateIcon = () => {
-    if (sortBy === "created_at_asc") return <CalendarArrowUp size={20} />;
-    if (sortBy === "created_at_desc") return <CalendarArrowDown size={20} />;
-    return <Calendar size={20} />;
+  const getRecentIcon = () => {
+    if (sortBy === "last_viewed_at_asc") return <ClockArrowUp size={20} />;
+    if (sortBy === "last_viewed_at_desc") return <ClockArrowDown size={20} />;
+    return <Clock size={20} />;
   };
 
   const handleImageToggle = () => {
@@ -60,11 +60,21 @@ const SortButtons = ({
   };
 
   const isTitleActive = sortBy === "title_asc" || sortBy === "title_desc";
-  const isDateActive =
-    sortBy === "created_at_asc" || sortBy === "created_at_desc";
+  const isRecentActive =
+    sortBy === "last_viewed_at_asc" || sortBy === "last_viewed_at_desc";
 
   return (
     <div className="sort-buttons">
+      <button
+        className={`btn-unstyled btn-icon-neutral ${
+          isRecentActive ? "selected" : ""
+        }`}
+        onClick={handleRecentSort}
+        aria-label={t("sort_by_recently_used")}
+        title={t("sort_by_recently_used")}
+      >
+        {getRecentIcon()}
+      </button>
       <button
         className={`btn-unstyled btn-icon-neutral ${
           isTitleActive ? "selected" : ""
@@ -74,16 +84,6 @@ const SortButtons = ({
         title={t("sort_by_title")}
       >
         {getTitleIcon()}
-      </button>
-      <button
-        className={`btn-unstyled btn-icon-neutral ${
-          isDateActive ? "selected" : ""
-        }`}
-        onClick={handleDateSort}
-        aria-label={t("sort_by_date")}
-        title={t("sort_by_date")}
-      >
-        {getDateIcon()}
       </button>
       {isLoggedIn && (
         <button
