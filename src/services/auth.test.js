@@ -10,6 +10,8 @@ vi.mock("../lib/supabase", () => ({
       resetPasswordForEmail: vi.fn(),
       updateUser: vi.fn(),
       getUser: vi.fn(),
+      signInWithOAuth: vi.fn(),
+      linkIdentity: vi.fn(),
     },
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
@@ -26,6 +28,7 @@ import {
   forgotPassword,
   changePassword,
   getFirstName,
+  signInWithGoogle,
 } from "./auth";
 import supabase from "../lib/supabase";
 
@@ -452,6 +455,38 @@ describe("Auth Service", () => {
       const result = await getFirstName();
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe("signInWithGoogle", () => {
+    test("calls signInWithOAuth with google provider and redirectTo", async () => {
+      supabase.auth.signInWithOAuth.mockResolvedValue({
+        data: { url: "https://accounts.google.com/..." },
+        error: null,
+      });
+
+      const result = await signInWithGoogle();
+
+      expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
+        provider: "google",
+        options: { redirectTo: "https://example.com" },
+      });
+      expect(result).toEqual({
+        data: { url: "https://accounts.google.com/..." },
+        error: null,
+      });
+    });
+
+    test("returns error when OAuth fails", async () => {
+      const mockError = { message: "OAuth error" };
+      supabase.auth.signInWithOAuth.mockResolvedValue({
+        data: null,
+        error: mockError,
+      });
+
+      const result = await signInWithGoogle();
+
+      expect(result).toEqual({ data: null, error: mockError });
     });
   });
 });

@@ -199,6 +199,26 @@ a.btn-unstyled {
   color: var(--color-text-primary);
 }
 
+/* Google OAuth button */
+.btn-google {
+  padding: 0.5rem;
+  background: var(--color-background-secondary);
+  color: var(--color-text-strong);
+  border: var(--border-width) solid var(--color-text-primary);
+  box-shadow: 0 0.125rem 0.5rem var(--color-shadow);
+  width: -webkit-fill-available;
+  gap: 0.5rem;
+}
+
+.btn-google:hover {
+  background: var(--color-background-primary);
+}
+
+.auth-divider {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .btn-action {
