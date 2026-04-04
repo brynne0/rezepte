@@ -25,6 +25,7 @@ vi.mock("react-router-dom", async () => {
 vi.mock("../../services/auth", () => ({
   signUp: vi.fn(),
   signIn: vi.fn(),
+  signInWithGoogle: vi.fn(),
 }));
 
 vi.mock("../../utils/validation", () => ({
