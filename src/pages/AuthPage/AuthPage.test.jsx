@@ -829,7 +829,7 @@ describe("AuthPage", () => {
       });
     });
 
-    it("navigates on successful sign up", async () => {
+    it("shows confirmation message on successful sign up", async () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignUp.mockResolvedValue({ error: null });
 
@@ -841,12 +841,16 @@ describe("AuthPage", () => {
       });
       fireEvent.click(signUpHeaderButton);
 
+      const emailInput = screen.getByLabelText("email");
+      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
 
       await waitFor(() => {
-        expect(mockSetLoginMessage).toHaveBeenCalledWith("signup_success");
-        expect(mockNavigate).toHaveBeenCalledWith("/");
+        expect(screen.getByText("signup_success")).toBeInTheDocument();
+        expect(screen.getByText("test@example.com")).toBeInTheDocument();
+        expect(screen.queryByTestId("auth-form")).not.toBeInTheDocument();
       });
     });
 
@@ -870,7 +874,7 @@ describe("AuthPage", () => {
       });
     });
 
-    it("clears all form fields after sign up attempt", async () => {
+    it("hides form and shows confirmation after successful sign up", async () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignUp.mockResolvedValue({ error: null });
 
@@ -882,28 +886,25 @@ describe("AuthPage", () => {
       });
       fireEvent.click(signUpHeaderButton);
 
-      const emailInput = screen.getByLabelText("email");
-      const firstNameInput = screen.getByLabelText("first_name");
-      const usernameInput = screen.getByLabelText("username");
-      const passwordInput = screen.getByTestId("password-input");
+      fireEvent.change(screen.getByLabelText("email"), {
+        target: { value: "test@example.com" },
+      });
+      fireEvent.change(screen.getByLabelText("first_name"), {
+        target: { value: "John" },
+      });
+      fireEvent.change(screen.getByLabelText("username"), {
+        target: { value: "testuser" },
+      });
+      fireEvent.change(screen.getByTestId("password-input"), {
+        target: { value: "testpass" },
+      });
 
-      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
-      fireEvent.change(firstNameInput, { target: { value: "John" } });
-      fireEvent.change(usernameInput, { target: { value: "testuser" } });
-      fireEvent.change(passwordInput, { target: { value: "testpass" } });
+      fireEvent.submit(screen.getByTestId("auth-form"));
 
-      const form = screen.getByTestId("auth-form");
-      fireEvent.submit(form);
-
-      await waitFor(
-        () => {
-          expect(emailInput.value).toBe("");
-          expect(firstNameInput.value).toBe("");
-          expect(usernameInput.value).toBe("");
-          expect(passwordInput.value).toBe("");
-        },
-        { timeout: 2000 }
-      );
+      await waitFor(() => {
+        expect(screen.queryByTestId("auth-form")).not.toBeInTheDocument();
+        expect(screen.getByText("signup_success")).toBeInTheDocument();
+      });
     });
   });
 

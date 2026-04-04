@@ -5,7 +5,7 @@
   "login_failed": "Login failed. Please try again.",
   "login_success": "Logged in!",
   "signup_failed": "Sign up failed. Please try again.",
-  "signup_success": "Account created! Please confirm your email.",
+  "signup_success": "Account created! Please check your email app to confirm your address.",
   "user_not_found": "Username or email not found",
   "invalid_password": "Incorrect password",
   "email_not_confirmed": "Please confirm your email address",

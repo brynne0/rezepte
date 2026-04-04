@@ -26,6 +26,8 @@ const AuthPage = ({ setLoginMessage }) => {
   // Toggle between different modes
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+  const [sentToEmail, setSentToEmail] = useState("");
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -129,24 +131,14 @@ const AuthPage = ({ setLoginMessage }) => {
       setIsLoading(false);
       setErrorMessage(t("signup_failed"));
     } else {
-      setLoginMessage(t("signup_success"));
-
-      // Wait for recipes to load before navigating
-      setTimeout(() => {
-        // Clear form fields and navigate
-        setEmail("");
-        setFirstName("");
-        setUsername("");
-        setPassword("");
-        navigate("/");
-      }, 1000);
+      setIsLoading(false);
+      setSentToEmail(email);
+      setEmail("");
+      setFirstName("");
+      setUsername("");
+      setPassword("");
+      setAwaitingConfirmation(true);
     }
-
-    setTimeout(() => {
-      // Reset login message
-      setLoginMessage("");
-      setErrorMessage("");
-    }, 3000);
   };
 
   // Clear form when switching modes
@@ -177,176 +169,196 @@ const AuthPage = ({ setLoginMessage }) => {
   return (
     <div className="page-centered">
       <div className="auth-container">
-        {/* Headers to toggle between modes */}
-        <header className="flex-row">
-          <button
-            className="btn-unstyled back-arrow"
-            onClick={() => navigate(-1)}
-            aria-label={t("go_back")}
-          >
-            <ArrowBigLeft size={28} />
-          </button>
-          <button
-            className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
-            type="button"
-            onClick={switchToLogin}
-            aria-label={t("login")}
-          >
-            <h1 className="forta-small"> {t("login")}</h1>
-          </button>
-          <button
-            className={`subheading-wrapper ${isSignUpMode ? "selected" : ""}`}
-            type="button"
-            onClick={switchToSignUp}
-            aria-label={t("signup")}
-          >
-            <h1 className="forta-small"> {t("signup")}</h1>
-          </button>
-        </header>
+        {awaitingConfirmation ? (
+          <div className="flex-column">
+            <span>{t("signup_success")}</span>
+            <strong>{sentToEmail}</strong>
+          </div>
+        ) : (
+          <>
+            {/* Headers to toggle between modes */}
+            <header className="flex-row">
+              <button
+                className="btn-unstyled back-arrow"
+                onClick={() => navigate(-1)}
+                aria-label={t("go_back")}
+              >
+                <ArrowBigLeft size={28} />
+              </button>
+              <button
+                className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
+                type="button"
+                onClick={switchToLogin}
+                aria-label={t("login")}
+              >
+                <h1 className="forta-small"> {t("login")}</h1>
+              </button>
+              <button
+                className={`subheading-wrapper ${isSignUpMode ? "selected" : ""}`}
+                type="button"
+                onClick={switchToSignUp}
+                aria-label={t("signup")}
+              >
+                <h1 className="forta-small"> {t("signup")}</h1>
+              </button>
+            </header>
 
-        {errorMessage && <span className="error-message">{errorMessage}</span>}
+            {errorMessage && (
+              <span className="error-message">{errorMessage}</span>
+            )}
 
-        <form
-          className="auth-form"
-          onSubmit={isSignUpMode ? handleSignUp : handleLogin}
-          data-testid="auth-form"
-        >
-          {isSignUpMode && (
-            <>
-              {/* Email */}
+            <form
+              className="auth-form"
+              onSubmit={isSignUpMode ? handleSignUp : handleLogin}
+              data-testid="auth-form"
+            >
+              {isSignUpMode && (
+                <>
+                  {/* Email */}
+                  <div className="input-validation-wrapper">
+                    <div className="input-with-icon floating-label-input">
+                      <Mail size={20} />
+                      <input
+                        id="email"
+                        type="text"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            email: "",
+                          }));
+                        }}
+                        placeholder=" "
+                        className={`input input--secondary input--with-icon ${
+                          validationErrors.email ? "input--error" : ""
+                        }`}
+                      />
+                      <label htmlFor="email">{t("email")}</label>
+                    </div>
+                    {validationErrors.email && (
+                      <span className="error-message-small">
+                        {validationErrors.email}
+                      </span>
+                    )}
+                  </div>
+                  {/* First Name */}
+                  <div className="input-validation-wrapper">
+                    <div className="input-with-icon floating-label-input">
+                      <User size={20} />
+                      <input
+                        id="name"
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => {
+                          setFirstName(e.target.value);
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            firstName: "",
+                          }));
+                        }}
+                        placeholder=" "
+                        className={`input input--secondary input--with-icon ${
+                          validationErrors.firstName ? "input--error" : ""
+                        }`}
+                      />
+                      <label htmlFor="name">{t("first_name")}</label>
+                    </div>
+                    {validationErrors.firstName && (
+                      <span className="error-message-small">
+                        {validationErrors.firstName}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Username */}
               <div className="input-validation-wrapper">
                 <div className="input-with-icon floating-label-input">
-                  <Mail size={20} />
+                  <ChefHat size={20} />
                   <input
-                    id="email"
+                    id="username"
                     type="text"
-                    value={email}
+                    value={username}
                     onChange={(e) => {
-                      setEmail(e.target.value);
-                      setValidationErrors((prev) => ({ ...prev, email: "" }));
-                    }}
-                    placeholder=" "
-                    className={`input input--secondary input--with-icon ${
-                      validationErrors.email ? "input--error" : ""
-                    }`}
-                  />
-                  <label htmlFor="email">{t("email")}</label>
-                </div>
-                {validationErrors.email && (
-                  <span className="error-message-small">
-                    {validationErrors.email}
-                  </span>
-                )}
-              </div>
-              {/* First Name */}
-              <div className="input-validation-wrapper">
-                <div className="input-with-icon floating-label-input">
-                  <User size={20} />
-                  <input
-                    id="name"
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => {
-                      setFirstName(e.target.value);
+                      setUsername(e.target.value);
                       setValidationErrors((prev) => ({
                         ...prev,
-                        firstName: "",
+                        username: "",
                       }));
                     }}
                     placeholder=" "
                     className={`input input--secondary input--with-icon ${
-                      validationErrors.firstName ? "input--error" : ""
+                      validationErrors.username ? "input--error" : ""
                     }`}
                   />
-                  <label htmlFor="name">{t("first_name")}</label>
+                  <label htmlFor="username">
+                    {isSignUpMode ? t("username") : t("username_or_email")}
+                  </label>
                 </div>
-                {validationErrors.firstName && (
+                {validationErrors.username && (
                   <span className="error-message-small">
-                    {validationErrors.firstName}
+                    {validationErrors.username}
                   </span>
                 )}
               </div>
-            </>
-          )}
+              {/* Password */}
+              <div className="input-validation-wrapper">
+                <div className="input-with-icon floating-label-input">
+                  <Lock size={20} />
+                  <PasswordInput
+                    id="password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setValidationErrors((prev) => ({
+                        ...prev,
+                        password: "",
+                      }));
+                    }}
+                    placeholder=" "
+                    className={`input input--secondary input--with-icon ${
+                      validationErrors.password ? "input--error" : ""
+                    }`}
+                  />
+                  <label htmlFor="password">{t("password")}</label>
+                </div>
+                {validationErrors.password && (
+                  <span className="error-message-small">
+                    {validationErrors.password}
+                  </span>
+                )}
+                {isSignUpMode && password && (
+                  <PasswordRequirements password={password} />
+                )}
+              </div>
 
-          {/* Username */}
-          <div className="input-validation-wrapper">
-            <div className="input-with-icon floating-label-input">
-              <ChefHat size={20} />
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  setValidationErrors((prev) => ({ ...prev, username: "" }));
-                }}
-                placeholder=" "
-                className={`input input--secondary input--with-icon ${
-                  validationErrors.username ? "input--error" : ""
-                }`}
-              />
-              <label htmlFor="username">
-                {isSignUpMode ? t("username") : t("username_or_email")}
-              </label>
-            </div>
-            {validationErrors.username && (
-              <span className="error-message-small">
-                {validationErrors.username}
-              </span>
-            )}
-          </div>
-          {/* Password */}
-          <div className="input-validation-wrapper">
-            <div className="input-with-icon floating-label-input">
-              <Lock size={20} />
-              <PasswordInput
-                id="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setValidationErrors((prev) => ({ ...prev, password: "" }));
-                }}
-                placeholder=" "
-                className={`input input--secondary input--with-icon ${
-                  validationErrors.password ? "input--error" : ""
-                }`}
-              />
-              <label htmlFor="password">{t("password")}</label>
-            </div>
-            {validationErrors.password && (
-              <span className="error-message-small">
-                {validationErrors.password}
-              </span>
-            )}
-            {isSignUpMode && password && (
-              <PasswordRequirements password={password} />
-            )}
-          </div>
+              {/* Forgot Password  */}
+              {!isSignUpMode && (
+                <span onClick={switchToForgotPassword} className="link">
+                  {t("forgot_password")}
+                </span>
+              )}
 
-          {/* Forgot Password  */}
-          {!isSignUpMode && (
-            <span onClick={switchToForgotPassword} className="link">
-              {t("forgot_password")}
-            </span>
-          )}
-
-          {/* Submit button */}
-          <button
-            type="submit"
-            aria-label="submit-button"
-            className={"btn btn-standard"}
-            disabled={isLoading}
-          >
-            {isLoading
-              ? isSignUpMode
-                ? t("signing_up")
-                : t("logging_in")
-              : isSignUpMode
-                ? t("signup")
-                : t("login")}
-          </button>
-        </form>
+              {/* Submit button */}
+              <button
+                type="submit"
+                aria-label="submit-button"
+                className={"btn btn-standard"}
+                disabled={isLoading}
+              >
+                {isLoading
+                  ? isSignUpMode
+                    ? t("signing_up")
+                    : t("logging_in")
+                  : isSignUpMode
+                    ? t("signup")
+                    : t("login")}
+              </button>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

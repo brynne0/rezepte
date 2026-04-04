@@ -5,7 +5,7 @@
   "login_failed": "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
   "login_success": "Eingeloggt!",
   "signup_failed": "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
-  "signup_success": "Konto erstellt! Bitte E-Mail bestätigen.",
+  "signup_success": "Konto erstellt! Bitte öffne deine E-Mail-App und bestätige deine Adresse.",
   "user_not_found": "Benutzername oder E-Mail nicht gefunden",
   "invalid_password": "Falsches Passwort",
   "email_not_confirmed": "Bitte bestätige deine E-Mail-Adresse",
