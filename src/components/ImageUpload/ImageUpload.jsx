@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import "./ImageUpload.css";
 import { validateImageFile, setMainImage } from "../../services/imageService";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
+import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 
 const ImageUpload = ({
   images = [],
@@ -14,6 +15,15 @@ const ImageUpload = ({
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
+
+  // Fetch signed URLs for existing (already uploaded) images
+  const existingImages = images.filter((img) => !img.isLocal && img.path);
+  const { signedImages } = useSignedImageUrls(existingImages);
+  const signedUrlMap = new Map(signedImages.map((img) => [img.id, img.url]));
+
+  // Get the display URL for an image: use signed URL for existing, blob URL for local
+  const getDisplayUrl = (image) =>
+    image.isLocal ? image.url : signedUrlMap.get(image.id) || image.url;
   const [error, setError] = useState("");
   const [loadingImages, setLoadingImages] = useState(() => {
     // Set initial loading state for existing images immediately
@@ -188,7 +198,7 @@ const ImageUpload = ({
             >
               <div className="image-loading-container">
                 <img
-                  src={image.url}
+                  src={getDisplayUrl(image)}
                   alt={image.filename}
                   className={`image-preview ${
                     loadingImages.has(image.id) ||
