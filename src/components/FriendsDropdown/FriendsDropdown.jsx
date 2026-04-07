@@ -48,7 +48,7 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
   useEffect(() => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
-    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+    if (!searchQuery.trim() || searchQuery.trim().length < 3) {
       setSearchResults([]);
       return;
     }
@@ -166,7 +166,7 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
                 </div>
               )}
               {!isSearching &&
-                searchQuery.trim().length >= 2 &&
+                searchQuery.trim().length >= 3 &&
                 searchResults.length === 0 && (
                   <div className="friends-search-status">
                     {t("friends_no_users_found")}
@@ -215,9 +215,9 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
             {/* Pending requests */}
             {pendingRequests.length > 0 && (
               <div className="friends-section flex-column">
-                <div className="friends-section-header">
+                <span className="friends-search-status">
                   {t("friends_requests", { count: pendingRequests.length })}
-                </div>
+                </span>
                 {pendingRequests.map((req) => (
                   <div
                     key={req.id}

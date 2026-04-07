@@ -48,6 +48,7 @@
 
   "firstname_required": "Vorname ist erforderlich",
   "username_required": "Benutzername ist erforderlich",
+  "username_too_short": "Benutzername muss mindestens 3 Zeichen lang sein",
   "email_required": "E-Mail ist erforderlich",
   "email_invalid": "E-Mail ist ungültig",
   "email_already_exists": "E-Mail existiert bereits",

@@ -48,6 +48,7 @@
 
   "firstname_required": "First name is required",
   "username_required": "Username is required",
+  "username_too_short": "Username must be at least 3 characters",
   "email_required": "Email is required",
   "email_invalid": "Email is invalid",
   "email_already_exists": "Email already exists",
