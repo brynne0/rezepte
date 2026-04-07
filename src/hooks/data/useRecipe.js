@@ -11,7 +11,7 @@ export const useRecipe = (id) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { i18n } = useTranslation();
-  const { isLoggedIn, loading: authLoading } = useAuth();
+  const { isLoggedIn, loading: authLoading, user } = useAuth();
 
   useEffect(() => {
     const loadRecipe = async () => {
@@ -49,12 +49,14 @@ export const useRecipe = (id) => {
 
         setRecipe(translatedRecipe);
 
-        // Track when this recipe was last viewed (fire and forget)
-        supabase
-          .from("recipes")
-          .update({ last_viewed_at: new Date().toISOString() })
-          .eq("id", id)
-          .then();
+        // Track when this recipe was last viewed — only for owned recipes (fire and forget)
+        if (originalRecipe.user_id === user?.id) {
+          supabase
+            .from("recipes")
+            .update({ last_viewed_at: new Date().toISOString() })
+            .eq("id", id)
+            .then();
+        }
       } catch (err) {
         console.error("Error fetching recipe:", err);
         setError(err.message || "Failed to fetch recipe");
@@ -65,7 +67,7 @@ export const useRecipe = (id) => {
     };
 
     loadRecipe();
-  }, [id, i18n.language, isLoggedIn, authLoading]); // Re-fetch when language or auth changes
+  }, [id, i18n.language, isLoggedIn, authLoading, user]); // Re-fetch when language or auth changes
 
   return { recipe, loading, error };
 };

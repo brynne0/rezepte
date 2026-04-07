@@ -11,6 +11,7 @@ import {
   Moon,
   Clock,
 } from "lucide-react";
+import FriendsDropdown from "../FriendsDropdown/FriendsDropdown";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
@@ -273,6 +274,7 @@ const Header = ({
             {/* Only display if user logged in */}
             {isLoggedIn && (
               <>
+                <FriendsDropdown />
                 <button
                   data-testid="lucide-plus"
                   className={`btn btn-icon btn-icon-neutral ${
@@ -357,6 +359,9 @@ const Header = ({
                     {/* Navigation options for logged in users */}
                     {isLoggedIn && (
                       <>
+                        <div className="dropdown-item">
+                          <FriendsDropdown />
+                        </div>
                         <button
                           className={`dropdown-item ${
                             location.pathname === "/add-recipe"
