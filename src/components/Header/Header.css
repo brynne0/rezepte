@@ -256,6 +256,11 @@
     display: flex;
   }
 
+  /* Allow nested friends dropdown to escape the hamburger menu's overflow clipping */
+  .nav-menu-dropdown {
+    overflow: visible;
+  }
+
   /* Stack search and sort vertically on mobile */
   .search-and-sort-container {
     flex-direction: column;
@@ -308,5 +313,11 @@
   /* Reduce spacing between nav icons on mobile */
   .header .btn-icon {
     padding: 0.3rem;
+  }
+
+  /* Match friends icon size to other hamburger menu icons */
+  .nav-menu-dropdown .friends-icon-btn svg {
+    width: 20px;
+    height: 20px;
   }
 }

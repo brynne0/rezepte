@@ -354,13 +354,15 @@ const Header = ({
 
               {/* Mobile Menu Dropdown */}
               {showNavMenu && (
-                <div className="dropdown">
+                <div className="dropdown nav-menu-dropdown">
                   <div className="dropdown-content">
                     {/* Navigation options for logged in users */}
                     {isLoggedIn && (
                       <>
                         <div className="dropdown-item">
-                          <FriendsDropdown />
+                          <FriendsDropdown
+                            onNavigate={() => setShowNavMenu(false)}
+                          />
                         </div>
                         <button
                           className={`dropdown-item ${
