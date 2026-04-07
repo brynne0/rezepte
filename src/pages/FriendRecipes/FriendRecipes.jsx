@@ -148,9 +148,9 @@ const FriendRecipes = () => {
         >
           <ArrowBigLeft size={28} />
         </button>
-        <h2 className="friend-recipes-title">
+        <h1 className="forta">
           {t("friends_recipes_title", { name: friend?.first_name })}
-        </h2>
+        </h1>
       </div>
 
       <div className="search-bar-wrapper">
