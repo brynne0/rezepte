@@ -14,7 +14,6 @@ import { useCategories } from "../../hooks/data/useCategories";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
 import CategoryFilter from "../../components/CategoryFilter/CategoryFilter";
-import "./FriendRecipes.css";
 
 const PAGE_SIZE = 36;
 
