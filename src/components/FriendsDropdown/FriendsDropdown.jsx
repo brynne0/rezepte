@@ -257,9 +257,14 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
                   key={req.id}
                   className="friends-list-item flex-between gap-xs"
                 >
-                  <span className="flex-column" style={{ minWidth: 0, alignItems: "flex-start" }}>
+                  <span
+                    className="flex-column"
+                    style={{ minWidth: 0, alignItems: "flex-start" }}
+                  >
                     <span className="friends-item-name">@{req.username}</span>
-                    <span className="friends-status-label">{t("friends_pending")}</span>
+                    <span className="friends-status-label">
+                      {t("friends_pending")}
+                    </span>
                   </span>
                   <div className="friends-item-actions flex-row gap-xs">
                     <button
@@ -287,9 +292,14 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
                   key={req.id}
                   className="friends-list-item flex-between gap-xs"
                 >
-                  <span className="flex-column" style={{ minWidth: 0, alignItems: "flex-start" }}>
+                  <span
+                    className="flex-column"
+                    style={{ minWidth: 0, alignItems: "flex-start" }}
+                  >
                     <span className="friends-item-name">@{req.username}</span>
-                    <span className="friends-status-label">{t("friends_pending")}</span>
+                    <span className="friends-status-label">
+                      {t("friends_pending")}
+                    </span>
                   </span>
                   <button
                     className="btn btn-icon btn-icon-neutral"
