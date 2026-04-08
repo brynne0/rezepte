@@ -9,6 +9,7 @@ import {
   removeFriendship,
   getFriends,
   getPendingRequests,
+  getSentRequests,
 } from "../../services/friendsService";
 import useClickOutside from "../../hooks/ui/useClickOutside";
 import "./FriendsDropdown.css";
@@ -19,6 +20,7 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -29,12 +31,14 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
 
   const loadData = async () => {
     try {
-      const [friendsList, requests] = await Promise.all([
+      const [friendsList, requests, sent] = await Promise.all([
         getFriends(),
         getPendingRequests(),
+        getSentRequests(),
       ]);
       setFriends(friendsList);
       setPendingRequests(requests);
+      setSentRequests(sent);
     } catch (err) {
       console.error("Error loading friends data:", err);
     }
@@ -212,78 +216,91 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
               ))}
             </div>
 
-            {/* Pending requests */}
-            {pendingRequests.length > 0 && (
-              <div className="friends-section flex-column">
-                <span className="friends-search-status">
-                  {t("friends_requests", { count: pendingRequests.length })}
-                </span>
-                {pendingRequests.map((req) => (
-                  <div
-                    key={req.id}
-                    className="friends-list-item flex-between gap-xs"
-                  >
-                    <span className="friends-item-name">@{req.username}</span>
-                    <div className="friends-item-actions flex-row gap-xs">
-                      <button
-                        className="btn btn-icon btn-icon-red"
-                        onClick={() => handleAccept(req.id)}
-                        disabled={loadingAction === req.id}
-                        aria-label={t("friends_accept")}
-                      >
-                        <Check size={14} />
-                      </button>
-                      <button
-                        className="btn btn-icon btn-icon-neutral"
-                        onClick={() => handleDecline(req.id)}
-                        disabled={loadingAction === req.id}
-                        aria-label={t("friends_decline")}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Friends list */}
+            {/* Unified friends + requests list */}
             <div className="friends-section flex-column">
-              {friends.length > 0 ? (
-                <>
-                  {friends.map((friend) => (
-                    <div
-                      key={friend.id}
-                      className="friends-list-item flex-between gap-xs"
-                    >
-                      <button
-                        className="friends-item-link"
-                        onClick={() => handleFriendClick(friend.username)}
-                      >
-                        {friend.first_name}{" "}
-                        <span className="friends-result-username">
-                          @{friend.username}
-                        </span>
-                      </button>
-                      <button
-                        className="btn btn-icon btn-icon-neutral"
-                        onClick={() => handleRemoveFriend(friend.id)}
-                        disabled={loadingAction === friend.id}
-                        aria-label={t("friends_remove")}
-                      >
-                        <UserMinus size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </>
-              ) : (
+              {friends.length === 0 &&
                 pendingRequests.length === 0 &&
+                sentRequests.length === 0 &&
                 searchResults.length === 0 && (
                   <div className="friends-empty">
                     {t("friends_search_above")}
                   </div>
-                )
-              )}
+                )}
+
+              {friends.map((friend) => (
+                <div
+                  key={friend.id}
+                  className="friends-list-item flex-between gap-xs"
+                >
+                  <button
+                    className="friends-item-link"
+                    onClick={() => handleFriendClick(friend.username)}
+                  >
+                    {friend.first_name}{" "}
+                    <span className="friends-result-username">
+                      @{friend.username}
+                    </span>
+                  </button>
+                  <button
+                    className="btn btn-icon btn-icon-neutral"
+                    onClick={() => handleRemoveFriend(friend.id)}
+                    disabled={loadingAction === friend.id}
+                    aria-label={t("friends_remove")}
+                  >
+                    <UserMinus size={14} />
+                  </button>
+                </div>
+              ))}
+
+              {pendingRequests.map((req) => (
+                <div
+                  key={req.id}
+                  className="friends-list-item flex-between gap-xs"
+                >
+                  <span className="flex-column" style={{ minWidth: 0, alignItems: "flex-start" }}>
+                    <span className="friends-item-name">@{req.username}</span>
+                    <span className="friends-status-label">{t("friends_pending")}</span>
+                  </span>
+                  <div className="friends-item-actions flex-row gap-xs">
+                    <button
+                      className="btn btn-icon btn-icon-red"
+                      onClick={() => handleAccept(req.id)}
+                      disabled={loadingAction === req.id}
+                      aria-label={t("friends_accept")}
+                    >
+                      <Check size={14} />
+                    </button>
+                    <button
+                      className="btn btn-icon btn-icon-neutral"
+                      onClick={() => handleDecline(req.id)}
+                      disabled={loadingAction === req.id}
+                      aria-label={t("friends_decline")}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {sentRequests.map((req) => (
+                <div
+                  key={req.id}
+                  className="friends-list-item flex-between gap-xs"
+                >
+                  <span className="flex-column" style={{ minWidth: 0, alignItems: "flex-start" }}>
+                    <span className="friends-item-name">@{req.username}</span>
+                    <span className="friends-status-label">{t("friends_pending")}</span>
+                  </span>
+                  <button
+                    className="btn btn-icon btn-icon-neutral"
+                    onClick={() => handleDecline(req.id)}
+                    disabled={loadingAction === req.id}
+                    aria-label={t("friends_decline")}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>

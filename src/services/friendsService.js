@@ -161,6 +161,33 @@ export const getPendingRequests = async () => {
   return profiles || [];
 };
 
+// Get pending outgoing requests — returns (id, username) only, no first_name.
+export const getSentRequests = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data: pending, error } = await supabase
+    .from("friendships")
+    .select("addressee_id")
+    .eq("requester_id", user.id)
+    .eq("status", "pending");
+
+  if (error) throw error;
+  if (!pending || pending.length === 0) return [];
+
+  const addresseeIds = pending.map((f) => f.addressee_id);
+
+  const { data: profiles, error: profilesError } = await supabase.rpc(
+    "get_profiles_by_ids",
+    { user_ids: addresseeIds }
+  );
+
+  if (profilesError) throw profilesError;
+  return profiles || [];
+};
+
 // Exact username lookup — returns (id, username) only, used for page routing.
 export const getUserByUsername = async (username) => {
   const { data, error } = await supabase.rpc("get_user_by_username", {

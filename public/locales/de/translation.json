@@ -287,7 +287,6 @@
   "friends_decline": "Ablehnen",
   "friends_remove": "Freund entfernen",
   "friends_accepted": "Befreundet",
-  "friends_requests": "Anfragen ({{count}})",
   "friends_search_above": "Freunde hinzufügen, um ihre Rezepte zu sehen.",
   "friends_no_recipes": "Noch keine Rezepte.",
   "friends_not_friends": "Du bist nicht mit @{{username}} befreundet.",
