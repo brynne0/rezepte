@@ -277,7 +277,8 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
                   ))}
                 </>
               ) : (
-                pendingRequests.length === 0 && (
+                pendingRequests.length === 0 &&
+                searchResults.length === 0 && (
                   <div className="friends-empty">
                     {t("friends_search_above")}
                   </div>
