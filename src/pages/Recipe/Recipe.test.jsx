@@ -102,6 +102,7 @@ describe("Recipe Component", () => {
     mockAuth = {
       isLoggedIn: false,
       isGuest: false,
+      user: { id: "user-1" },
     };
     mockGroceryListHook = {
       checkedIngredients: {},
@@ -130,6 +131,7 @@ describe("Recipe Component", () => {
     id: "recipe-1",
     slug: "test-recipe",
     title: "Test Recipe",
+    user_id: "user-1",
     servings: 4,
     instructions: ["Step 1", "Step 2", "Step 3"],
     source: "https://example.com/recipe",

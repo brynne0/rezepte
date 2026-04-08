@@ -41,6 +41,7 @@ import Recipe from "./pages/Recipe/Recipe";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
 import Settings from "./pages/Settings/Settings";
+import FriendRecipes from "./pages/FriendRecipes/FriendRecipes";
 
 function App() {
   const { t } = useTranslation();
@@ -314,6 +315,14 @@ function AppRoutes(props) {
           element={
             <ProtectedRoute>
               <Settings refreshCategories={refreshCategories} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/friends/:username"
+          element={
+            <ProtectedRoute>
+              <FriendRecipes />
             </ProtectedRoute>
           }
         />

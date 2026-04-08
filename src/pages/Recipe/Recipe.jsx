@@ -62,7 +62,7 @@ const Recipe = ({ isSharedView = false }) => {
   const [sharedLoading, setSharedLoading] = useState(false);
   const [sharedError, setSharedError] = useState("");
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const { t, i18n } = useTranslation();
   const [showShareModal, setShowShareModal] = useState(false);
   const [imagesLoading, setImagesLoading] = useState(true);
@@ -105,9 +105,12 @@ const Recipe = ({ isSharedView = false }) => {
   const loading = isSharedView ? sharedLoading : ownedLoading;
   const error = isSharedView ? sharedError : ownedError;
 
-  // Generate signed URLs for recipe images
+  const isOwner = isLoggedIn && !!user?.id && recipe?.user_id === user?.id;
+
+  // Generate signed URLs for recipe images — only for owner and shared views.
+  // Friends cannot generate signed URLs for another user's storage bucket path.
   const { signedImages } = useSignedImageUrls(
-    recipe?.images,
+    isOwner || isSharedView ? recipe?.images : [],
     isSharedView // 7-day expiration for shared recipes
   );
 
@@ -286,7 +289,7 @@ const Recipe = ({ isSharedView = false }) => {
         <h1 className="forta-red wrap">{recipe.title}</h1>
 
         {/* Only show actions for owned recipes */}
-        {!isSharedView && (
+        {!isSharedView && recipe?.user_id === user?.id && (
           <>
             {/* Show share button when logged in and user owns the recipe */}
             {isLoggedIn && (
@@ -320,7 +323,7 @@ const Recipe = ({ isSharedView = false }) => {
       <div className="recipe-layout">
         <div className="recipe-content">
           {/* Recipe Images - floating within content - only show when logged in */}
-          {isLoggedIn && signedImages && signedImages.length > 0 && (
+          {isOwner && signedImages && signedImages.length > 0 && (
             <div className="recipe-images-float">
               {imagesLoading && (
                 <div className="images-loading-overlay">
@@ -481,7 +484,7 @@ const Recipe = ({ isSharedView = false }) => {
       </div>
 
       {/* Share Modal - only for owned recipes */}
-      {!isSharedView && (
+      {!isSharedView && recipe?.user_id === user?.id && (
         <ShareModal
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}

@@ -48,6 +48,7 @@
 
   "firstname_required": "Vorname ist erforderlich",
   "username_required": "Benutzername ist erforderlich",
+  "username_too_short": "Benutzername muss mindestens 3 Zeichen lang sein",
   "email_required": "E-Mail ist erforderlich",
   "email_invalid": "E-Mail ist ungültig",
   "email_already_exists": "E-Mail existiert bereits",
@@ -274,5 +275,21 @@
   "install_app_prompt": "Installiere Rezepte auf deinem Gerät, um es wie eine App zu verwenden, auch ohne Internet.",
   "maybe_later": "Vielleicht später",
   "install_app_ios": "Um Rezepte zu installieren, tippe auf das Teilen-Symbol unten auf deinem Bildschirm und wähle dann \"Zum Startbildschirm hinzufügen\".",
-  "got_it": "Verstanden"
+  "got_it": "Verstanden",
+
+  "friends": "Freunde",
+  "friends_search_placeholder": "Nach Benutzername suchen...",
+  "friends_searching": "Suche...",
+  "friends_no_users_found": "Keine Benutzer gefunden",
+  "friends_add": "Freund hinzufügen",
+  "friends_pending": "Ausstehend",
+  "friends_accept": "Annehmen",
+  "friends_decline": "Ablehnen",
+  "friends_remove": "Freund entfernen",
+  "friends_accepted": "Befreundet",
+  "friends_requests": "Anfragen ({{count}})",
+  "friends_search_above": "Oben nach Freunden suchen",
+  "friends_no_recipes": "Noch keine Rezepte.",
+  "friends_not_friends": "Du bist nicht mit @{{username}} befreundet.",
+  "friends_recipes_title": "{{name}}s Rezepte"
 }

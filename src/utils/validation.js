@@ -12,6 +12,9 @@ export const validateUsername = (username, t) => {
   if (!username.trim()) {
     return t("username_required");
   }
+  if (username.trim().length < 3) {
+    return t("username_too_short");
+  }
   return null;
 };
 

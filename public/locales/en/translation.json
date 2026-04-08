@@ -48,6 +48,7 @@
 
   "firstname_required": "First name is required",
   "username_required": "Username is required",
+  "username_too_short": "Username must be at least 3 characters",
   "email_required": "Email is required",
   "email_invalid": "Email is invalid",
   "email_already_exists": "Email already exists",
@@ -273,5 +274,21 @@
   "install_app_prompt": "Install Rezepte on your device to use it like an app, even without internet.",
   "maybe_later": "Maybe later",
   "install_app_ios": "To install Rezepte, tap the share button at the bottom of your screen, then select \"Add to Home Screen\".",
-  "got_it": "Got it"
+  "got_it": "Got it",
+
+  "friends": "Friends",
+  "friends_search_placeholder": "Search by username...",
+  "friends_searching": "Searching...",
+  "friends_no_users_found": "No users found",
+  "friends_add": "Add friend",
+  "friends_pending": "Pending",
+  "friends_accept": "Accept",
+  "friends_decline": "Decline",
+  "friends_remove": "Remove friend",
+  "friends_accepted": "Friends",
+  "friends_requests": "Requests ({{count}})",
+  "friends_search_above": "Search for friends above",
+  "friends_no_recipes": "No recipes yet.",
+  "friends_not_friends": "You are not friends with @{{username}}.",
+  "friends_recipes_title": "{{name}}'s Recipes"
 }

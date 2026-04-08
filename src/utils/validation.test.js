@@ -85,6 +85,16 @@ describe("Validation Utilities", () => {
       expect(mockT).toHaveBeenCalledWith("username_required");
     });
 
+    test("returns error when username is shorter than 3 characters", () => {
+      expect(validateUsername("a", mockT)).toBe("username_too_short");
+      expect(validateUsername("ab", mockT)).toBe("username_too_short");
+      expect(mockT).toHaveBeenCalledWith("username_too_short");
+    });
+
+    test("returns null for username with exactly 3 characters", () => {
+      expect(validateUsername("abc", mockT)).toBeNull();
+    });
+
     test("returns null for valid username", () => {
       expect(validateUsername("validuser", mockT)).toBeNull();
       expect(validateUsername("user123", mockT)).toBeNull();
@@ -142,6 +152,12 @@ describe("Validation Utilities", () => {
       const formData = { ...validFormData, username: "" };
       const errors = validateAuthForm(formData, false, mockT);
       expect(errors.username).toBe("username_required");
+    });
+
+    test("returns username error when username is too short", () => {
+      const formData = { ...validFormData, username: "ab" };
+      const errors = validateAuthForm(formData, false, mockT);
+      expect(errors.username).toBe("username_too_short");
     });
 
     test("returns password error when password is missing", () => {
