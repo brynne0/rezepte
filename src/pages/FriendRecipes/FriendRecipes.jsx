@@ -65,7 +65,7 @@ const FriendRecipes = () => {
     load();
   }, [username, i18n.language, t]); // re-fetch when language changes
 
-  const { recipes, filteredCount, totalPages } = useMemo(() => {
+  const { recipes, totalPages } = useMemo(() => {
     const searched = searchTerm
       ? allRecipes.filter((r) =>
           r.title?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -80,7 +80,6 @@ const FriendRecipes = () => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return {
       recipes: filtered.slice(start, start + PAGE_SIZE),
-      filteredCount: filtered.length,
       totalPages: Math.ceil(filtered.length / PAGE_SIZE),
     };
   }, [allRecipes, searchTerm, selectedCategory, currentPage]);
@@ -182,15 +181,17 @@ const FriendRecipes = () => {
 
       {allRecipes.length === 0 ? (
         <div className="page-centered high">
-          <div className="card welcome-card">
-            <p>{t("friends_no_recipes")}</p>
-          </div>
+          <p>{t("friends_no_recipes")}</p>
+        </div>
+      ) : recipes.length === 0 ? (
+        <div className="page-centered high">
+          <p>{t("no_recipes_available")}</p>
         </div>
       ) : (
         <>
           <RecipeList
             recipes={recipes}
-            totalRecipeCount={filteredCount}
+            totalRecipeCount={allRecipes.length}
             searchTerm={searchTerm}
             isPaginated={true}
             loading={loading}
