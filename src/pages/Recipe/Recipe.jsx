@@ -32,6 +32,7 @@ import {
   formatMultiplierLabel,
 } from "../../utils/scaleUtils";
 import { shouldUsePlural } from "../../utils/fractionUtils";
+import { useWakeLock } from "../../hooks/ui/useWakeLock";
 
 // Helper function to parse text and convert URLs to clickable links
 const renderTextWithLinks = (text) => {
@@ -73,6 +74,11 @@ const Recipe = ({ isSharedView = false }) => {
   const [sharedRecipe, setSharedRecipe] = useState(null);
   const [sharedLoading, setSharedLoading] = useState(false);
   const [sharedError, setSharedError] = useState("");
+  const {
+    active: wakeLockActive,
+    supported: wakeLockSupported,
+    toggle: toggleWakeLock,
+  } = useWakeLock();
   const [multiplier, setMultiplier] = useState(1);
 
   // Reset scale when navigating to a different recipe
@@ -370,36 +376,44 @@ const Recipe = ({ isSharedView = false }) => {
       <div className="flex-between gap-xs">
         <h1 className="forta-red wrap">{recipe.title}</h1>
 
-        {/* Only show actions for owned recipes */}
-        {!isSharedView && recipe?.user_id === user?.id && (
-          <>
-            {/* Show share button when logged in and user owns the recipe */}
-            {isLoggedIn && (
-              <div className="action-buttons-bordered">
-                <button
-                  className="btn btn-icon-red"
-                  onClick={() => {
-                    navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`);
-                  }}
-                  data-testid="edit-recipe-btn"
-                  aria-label={t("edit_recipe")}
-                >
-                  <Pencil />
-                </button>
-                <button
-                  className="btn btn-icon-red"
-                  onClick={() => setShowShareModal(true)}
-                  data-testid="share-recipe-btn"
-                  aria-label={t("share_recipe")}
-                  title={t("share_recipe")}
-                >
-                  <Share2 />
-                </button>
-              </div>
-            )}
-          </>
+        {!isSharedView && isLoggedIn && recipe?.user_id === user?.id && (
+          <div className="action-buttons-bordered">
+            <button
+              className="btn btn-icon-red"
+              onClick={() =>
+                navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+              }
+              data-testid="edit-recipe-btn"
+              aria-label={t("edit_recipe")}
+            >
+              <Pencil />
+            </button>
+            <button
+              className="btn btn-icon-red"
+              onClick={() => setShowShareModal(true)}
+              data-testid="share-recipe-btn"
+              aria-label={t("share_recipe")}
+              title={t("share_recipe")}
+            >
+              <Share2 />
+            </button>
+          </div>
         )}
       </div>
+
+      {wakeLockSupported && (
+        <button
+          className="wake-lock-toggle"
+          onClick={toggleWakeLock}
+          role="switch"
+          aria-checked={wakeLockActive}
+        >
+          <span className={`wake-lock-pill${wakeLockActive ? " on" : ""}`}>
+            <span className="wake-lock-thumb" />
+          </span>
+          <span>{t("keep_screen_on")}</span>
+        </button>
+      )}
 
       {/* Single column layout with floating images */}
       <div className="recipe-layout">
