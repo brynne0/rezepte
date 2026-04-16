@@ -2,7 +2,13 @@ import "./Recipe.css";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Pencil, ShoppingBasket, Loader2, Share2 } from "lucide-react";
+import {
+  Pencil,
+  ShoppingBasket,
+  Loader2,
+  Share2,
+  RotateCcw,
+} from "lucide-react";
 
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { fetchSharedRecipe } from "../../services/sharingService";
@@ -20,6 +26,12 @@ import {
   formatIngredientMeasurement,
   getIngredientDisplayName,
 } from "../../utils/ingredientFormatting";
+import {
+  scaleIngredient,
+  getNextMultiplierStep,
+  formatMultiplierLabel,
+} from "../../utils/scaleUtils";
+import { shouldUsePlural } from "../../utils/fractionUtils";
 
 // Helper function to parse text and convert URLs to clickable links
 const renderTextWithLinks = (text) => {
@@ -61,6 +73,12 @@ const Recipe = ({ isSharedView = false }) => {
   const [sharedRecipe, setSharedRecipe] = useState(null);
   const [sharedLoading, setSharedLoading] = useState(false);
   const [sharedError, setSharedError] = useState("");
+  const [multiplier, setMultiplier] = useState(1);
+
+  // Reset scale when navigating to a different recipe
+  useEffect(() => {
+    setMultiplier(1);
+  }, [id, shareToken]);
   const navigate = useNavigate();
   const { isLoggedIn, user } = useAuth();
   const { t, i18n } = useTranslation();
@@ -158,8 +176,77 @@ const Recipe = ({ isSharedView = false }) => {
   //   return allIngredients;
   // };
 
+  // Parse servings — plain integer, numeric range, or freetext
+  const servingsInfo = (() => {
+    if (!recipe?.servings) return null;
+    const str = recipe.servings.toString().trim();
+    const plain = parseInt(str, 10);
+    if (plain > 0 && plain.toString() === str) {
+      return { type: "plain", base: plain };
+    }
+    const rangeMatch = str.match(/^(\d+(?:\.\d+)?)\s*[-–—]\s*(\d+(?:\.\d+)?)$/);
+    if (rangeMatch) {
+      return {
+        type: "range",
+        base: parseFloat(rangeMatch[1]),
+        end: parseFloat(rangeMatch[2]),
+      };
+    }
+    return { type: "text", label: str };
+  })();
+
+  // Scaled display value for the servings row
+  const scaledServingsLabel = !servingsInfo
+    ? null
+    : servingsInfo.type === "plain"
+      ? Math.round(servingsInfo.base * multiplier)
+      : servingsInfo.type === "range"
+        ? `${Math.round(servingsInfo.base * multiplier)}–${Math.round(servingsInfo.end * multiplier)}`
+        : servingsInfo.label;
+
+  // Scale handlers
+  const handleServingsChange = (delta) => {
+    if (servingsInfo?.base) {
+      const next = Math.max(
+        1,
+        Math.round(servingsInfo.base * multiplier) + delta
+      );
+      setMultiplier(next / servingsInfo.base);
+    } else {
+      handleMultiplierChange(delta > 0 ? 1 : -1);
+    }
+  };
+
+  const handleMultiplierChange = (direction) => {
+    setMultiplier((prev) => getNextMultiplierStep(prev, direction));
+  };
+
+  // Apply scale to an ingredient before rendering
+  const getScaledIngredient = (ingredient) => {
+    if (multiplier === 1) return ingredient;
+    const { quantity, unit } = scaleIngredient(
+      ingredient.quantity,
+      ingredient.unit,
+      multiplier
+    );
+    // Drop the pre-resolved `name` string so getIngredientDisplayName
+    // re-evaluates singular vs plural using the updated is_plural flag.
+    // singular_name/plural_name are available directly on the ingredient object.
+    const { name: _dropped, ...rest } = ingredient;
+    // With a unit ("¾ can kidney beans"), the name stays plural regardless of quantity.
+    // Without a unit ("½ banana"), recalculate from the scaled quantity.
+    const is_plural = unit ? ingredient.is_plural : shouldUsePlural(quantity);
+    return { ...rest, quantity, unit, is_plural };
+  };
+
   // Helper to render an ingredient item
   const renderIngredientItem = (ingredient, keyPrefix, index) => {
+    const scaled = getScaledIngredient(ingredient);
+    const measurement = formatIngredientMeasurement(
+      scaled.quantity,
+      scaled.unit,
+      t("units", { returnObjects: true })
+    );
     return (
       <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
         <input
@@ -169,18 +256,8 @@ const Recipe = ({ isSharedView = false }) => {
           id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
         />
         <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
-          <span className="ingredient-measurement">
-            {formatIngredientMeasurement(
-              ingredient.quantity,
-              ingredient.unit,
-              t("units", { returnObjects: true })
-            )}
-          </span>
-          {formatIngredientMeasurement(
-            ingredient.quantity,
-            ingredient.unit,
-            t("units", { returnObjects: true })
-          ) && " "}
+          <span className="ingredient-measurement">{measurement}</span>
+          {measurement && " "}
 
           {ingredient.linked_recipe ? (
             <a
@@ -188,10 +265,10 @@ const Recipe = ({ isSharedView = false }) => {
               href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
               onClick={(e) => e.stopPropagation()}
             >
-              {getIngredientDisplayName(ingredient, i18n.language)}
+              {getIngredientDisplayName(scaled, i18n.language)}
             </a>
           ) : (
-            getIngredientDisplayName(ingredient, i18n.language)
+            getIngredientDisplayName(scaled, i18n.language)
           )}
 
           {ingredient.notes && (
@@ -237,6 +314,11 @@ const Recipe = ({ isSharedView = false }) => {
     }
     return `${recipe.title} - ${t("view_recipe_details")}`;
   };
+
+  const hasIngredients =
+    (recipe.ungroupedIngredients && recipe.ungroupedIngredients.length > 0) ||
+    (recipe.ingredientSections && recipe.ingredientSections.length > 0) ||
+    (recipe.ingredients && recipe.ingredients.length > 0);
 
   // Generate structured data for Google (Recipe schema)
   const structuredData = {
@@ -341,19 +423,89 @@ const Recipe = ({ isSharedView = false }) => {
           {recipe.servings && (
             <div className="recipe-subheading">
               <h2>{t("servings")}:</h2>
-              {recipe.servings}
+              {hasIngredients ? (
+                <>
+                  <div className="scale-control">
+                    <button
+                      className="scale-btn"
+                      onClick={() => handleServingsChange(-1)}
+                      disabled={
+                        servingsInfo?.base
+                          ? Math.round(servingsInfo.base * multiplier) <= 1
+                          : multiplier <= 0.25
+                      }
+                      aria-label="decrease servings"
+                    >
+                      -
+                    </button>
+                    <span className="scale-value">{scaledServingsLabel}</span>
+                    <button
+                      className="scale-btn"
+                      onClick={() => handleServingsChange(1)}
+                      disabled={!servingsInfo?.base && multiplier >= 8}
+                      aria-label="increase servings"
+                    >
+                      +
+                    </button>
+                    {servingsInfo?.type === "text" && multiplier !== 1 && (
+                      <span className="scale-multiplier">
+                        {formatMultiplierLabel(multiplier)}
+                      </span>
+                    )}
+                  </div>
+                  {multiplier !== 1 && (
+                    <button
+                      className="btn btn-unstyled scale-reset"
+                      onClick={() => setMultiplier(1)}
+                      aria-label="reset servings"
+                    >
+                      <RotateCcw size={14} />
+                    </button>
+                  )}
+                </>
+              ) : (
+                recipe.servings
+              )}
             </div>
           )}
 
           {/* Ingredients */}
-          {((recipe.ungroupedIngredients &&
-            recipe.ungroupedIngredients.length > 0) ||
-            (recipe.ingredientSections &&
-              recipe.ingredientSections.length > 0) ||
-            (recipe.ingredients && recipe.ingredients.length > 0)) && (
+          {hasIngredients && (
             <>
               <div className="flex-row recipe-subheading">
                 <h2>{t("ingredients")}:</h2>
+                {!recipe.servings && (
+                  <div className="scale-control">
+                    <button
+                      className="scale-btn"
+                      onClick={() => handleMultiplierChange(-1)}
+                      disabled={multiplier <= 0.25}
+                      aria-label="decrease scale"
+                    >
+                      -
+                    </button>
+                    <span className="scale-value">
+                      {formatMultiplierLabel(multiplier)}
+                    </span>
+                    <button
+                      className="scale-btn"
+                      onClick={() => handleMultiplierChange(1)}
+                      disabled={multiplier >= 8}
+                      aria-label="increase scale"
+                    >
+                      +
+                    </button>
+                    {multiplier !== 1 && (
+                      <button
+                        className="btn btn-unstyled scale-reset"
+                        onClick={() => setMultiplier(1)}
+                        aria-label="reset scale"
+                      >
+                        <RotateCcw size={14} />
+                      </button>
+                    )}
+                  </div>
+                )}
                 {/* Grocery Cart - only show for owned recipes and when viewing in preferred language */}
                 {/* {!isSharedView &&
                   isLoggedIn &&
