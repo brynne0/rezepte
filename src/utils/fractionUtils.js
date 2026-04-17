@@ -176,8 +176,37 @@ export const formatQuantity = (decimal) => {
     return num.toString();
   }
 
-  // Return original decimal for uncommon fractions
-  return decimal.toString();
+  // Generic mixed number formatter: snap to nearest common fraction if close enough
+  const whole = Math.floor(num);
+  const frac = num - whole;
+  if (frac > 0.02) {
+    const FRAC_PARTS = [
+      [1 / 8, "1/8"],
+      [1 / 4, "1/4"],
+      [1 / 3, "1/3"],
+      [3 / 8, "3/8"],
+      [1 / 2, "1/2"],
+      [5 / 8, "5/8"],
+      [2 / 3, "2/3"],
+      [3 / 4, "3/4"],
+      [7 / 8, "7/8"],
+    ];
+    let bestStr = null,
+      bestDist = Infinity;
+    for (const [val, str] of FRAC_PARTS) {
+      const dist = Math.abs(frac - val);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestStr = str;
+      }
+    }
+    if (bestDist <= 0.015) {
+      return whole > 0 ? `${whole} ${bestStr}` : bestStr;
+    }
+  }
+
+  // Fall back to a clean decimal (2dp max, trailing zeros stripped)
+  return parseFloat(num.toFixed(2)).toString();
 };
 
 // Helper function to determine if quantity should use plural form

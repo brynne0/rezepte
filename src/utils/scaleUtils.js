@@ -68,8 +68,9 @@ export function scaleIngredient(quantity, unit, multiplier) {
   const parsed = parseFraction(valueStr);
   if (typeof parsed !== "number") return { quantity, unit };
 
+  const rawValue = parsed * multiplier;
   const { value, unit: convertedUnit } = convertUnit(
-    parsed * multiplier,
+    Math.round(rawValue * 10000) / 10000,
     unit || ""
   );
 

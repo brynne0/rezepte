@@ -128,7 +128,7 @@ describe("fractionUtils", () => {
       expect(formatQuantity(0.1)).toBe("0.1");
       expect(formatQuantity(0.7)).toBe("0.7");
       expect(formatQuantity(1.23)).toBe("1.23");
-      expect(formatQuantity(3.14159)).toBe("3.14159");
+      expect(formatQuantity(3.14159)).toBe("3.14");
     });
 
     test("handles floating point precision", () => {
@@ -170,7 +170,7 @@ describe("fractionUtils", () => {
       // Test fractions that don't have common equivalents
       const parsed = parseFraction("1/7"); // ≈ 0.143
       const formatted = formatQuantity(parsed);
-      expect(formatted).toBe(parsed.toString()); // Should show the decimal
+      expect(formatted).toBe("0.14"); // Rounded to 2dp
     });
   });
 

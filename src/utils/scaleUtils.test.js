@@ -70,9 +70,8 @@ describe("scaleUtils", () => {
           quantity: "3",
           unit: "",
         });
-        // 2.25 × 2 = 4.5, not in the common fractions lookup so returns as decimal
         expect(scaleIngredient("2 1/4", "", 2)).toEqual({
-          quantity: "4.5",
+          quantity: "4 1/2",
           unit: "",
         });
         // 1.25 × 4 = 5 — clean whole number
