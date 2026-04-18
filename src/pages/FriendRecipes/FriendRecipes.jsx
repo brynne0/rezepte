@@ -9,8 +9,8 @@ import {
   fetchFriendRecipes,
 } from "../../services/friendsService";
 import { getTranslatedRecipeTitle } from "../../services/translationService";
+import { getCategoriesForUI } from "../../services/categoriesService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import { useCategories } from "../../hooks/data/useCategories";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
 import CategoryFilter from "../../components/CategoryFilter/CategoryFilter";
@@ -30,13 +30,15 @@ const FriendRecipes = () => {
   const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  const { categories } = useCategories();
+  const [friendCategories, setFriendCategories] = useState([]);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setError("");
+      setSelectedCategory("all_recipes");
+      setSearchTerm("");
+      setCurrentPage(1);
       try {
         const user = await getUserByUsername(username);
         const areFriends = await checkFriendship(user.id);
@@ -44,18 +46,27 @@ const FriendRecipes = () => {
           setError("not_friends");
           return;
         }
-        const [profile, recipes] = await Promise.all([
+        const currentLanguage = i18n.language.split("-")[0];
+        const [profile, recipes, allCategories] = await Promise.all([
           getFriendProfile(user.id),
           fetchFriendRecipes(user.id),
+          getCategoriesForUI(currentLanguage),
         ]);
         setFriend(profile || user);
 
-        // Translate titles — same pattern as home page
-        const currentLanguage = i18n.language.split("-")[0];
         const translated = await Promise.all(
           recipes.map((r) => getTranslatedRecipeTitle(r, currentLanguage))
         );
         setAllRecipes(translated);
+
+        const usedNames = new Set(
+          translated.flatMap((r) => r.categories ?? [])
+        );
+        setFriendCategories(
+          allCategories.filter(
+            (c) => c.value === "all_recipes" || usedNames.has(c.value)
+          )
+        );
       } catch (err) {
         setError(err.message || t("recipe_not_found"));
       } finally {
@@ -63,7 +74,7 @@ const FriendRecipes = () => {
       }
     };
     load();
-  }, [username, i18n.language, t]); // re-fetch when language changes
+  }, [username, i18n.language, t]);
 
   const { recipes, totalPages } = useMemo(() => {
     const searched = searchTerm
@@ -173,7 +184,7 @@ const FriendRecipes = () => {
       </div>
 
       <CategoryFilter
-        categories={categories}
+        categories={friendCategories}
         selectedCategory={selectedCategory}
         setSelectedCategory={handleCategoryChange}
         setSearchTerm={handleSearchChange}
