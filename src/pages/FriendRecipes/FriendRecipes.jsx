@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowBigLeft, Search } from "lucide-react";
 import {
@@ -27,7 +27,8 @@ const FriendRecipes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [selectedCategory, setSelectedCategory] = useState("all_recipes");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category") ?? "all_recipes";
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [friendCategories, setFriendCategories] = useState([]);
@@ -36,7 +37,6 @@ const FriendRecipes = () => {
     const load = async () => {
       setLoading(true);
       setError("");
-      setSelectedCategory("all_recipes");
       setSearchTerm("");
       setCurrentPage(1);
       try {
@@ -96,7 +96,9 @@ const FriendRecipes = () => {
   }, [allRecipes, searchTerm, selectedCategory, currentPage]);
 
   const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
+    setSearchParams(category === "all_recipes" ? {} : { category }, {
+      replace: true,
+    });
     setCurrentPage(1);
   };
 
