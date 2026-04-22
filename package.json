@@ -21,7 +21,7 @@
     "@supabase/supabase-js": "^2.50.0",
     "@vercel/speed-insights": "^1.2.0",
     "i18next-browser-languagedetector": "^8.2.0",
-    "i18next-http-backend": "^3.0.2",
+    "i18next-http-backend": "^3.0.5",
     "lucide-react": "^0.515.0",
     "pluralize": "^8.0.0",
     "react": "^19.1.0",
