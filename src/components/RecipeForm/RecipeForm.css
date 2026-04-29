@@ -209,7 +209,7 @@
 }
 
 .nutrition-form-field label {
-  min-width: 8rem;
+  min-width: 7rem;
   flex-shrink: 0;
   text-align: left;
 }
@@ -294,8 +294,16 @@
     display: grid;
     grid-template-columns: 1.5fr 2fr 2fr;
   }
+}
 
+@media (max-width: 600px) {
   .nutrition-form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    column-gap: 0.5rem;
+  }
+
+  .nutrition-form-field {
+    display: contents;
   }
 }
