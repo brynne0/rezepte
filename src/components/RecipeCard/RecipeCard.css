@@ -19,6 +19,8 @@
 
 .recipe-card-title {
   margin: 0.3rem 1.5rem;
+  text-transform: uppercase;
+  font-size: smaller;
 }
 
 .recipe-card-link {
