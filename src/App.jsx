@@ -91,7 +91,7 @@ function App() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    window.scrollTo(0, 0);
+    document.getElementById("main-content")?.scrollTo(0, 0);
   };
 
   const handleCategoryChange = (category) => {
@@ -196,7 +196,7 @@ function AppRoutes(props) {
 
   // Scroll to top on all navigation
   useEffect(() => {
-    window.scrollTo(0, 0);
+    document.getElementById("main-content")?.scrollTo(0, 0);
   }, [location.pathname]);
 
   return (
@@ -215,74 +215,75 @@ function AppRoutes(props) {
         setShowImages={props.setShowImages}
         onPageReset={props.onPageReset}
       />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <SEO
-                title="Rezepte"
-                description="Organise, save, and share your recipes."
-                url="https://acorn-rezepte.com/"
-              />
-              {isOnline && (
-                <CategoryFilter
-                  categories={props.categories}
+      <div className="main-content" id="main-content">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <SEO
+                  title="Rezepte"
+                  description="Organise, save, and share your recipes."
+                  url="https://acorn-rezepte.com/"
+                />
+                {isOnline && (
+                  <CategoryFilter
+                    categories={props.categories}
+                    selectedCategory={props.selectedCategory}
+                    setSelectedCategory={props.setSelectedCategory}
+                    setSearchTerm={props.setSearchTerm}
+                  />
+                )}
+                <RecipeList
                   selectedCategory={props.selectedCategory}
-                  setSelectedCategory={props.setSelectedCategory}
-                  setSearchTerm={props.setSearchTerm}
+                  recipes={props.recipes}
+                  searchTerm={props.searchTerm}
+                  showImages={isLoggedIn ? props.showImages : false}
+                  totalRecipeCount={props.totalRecipeCount}
+                  isPaginated={true}
+                  loading={props.isFetchingRecipes}
                 />
-              )}
-              <RecipeList
-                selectedCategory={props.selectedCategory}
-                recipes={props.recipes}
-                searchTerm={props.searchTerm}
-                showImages={isLoggedIn ? props.showImages : false}
-                totalRecipeCount={props.totalRecipeCount}
-                isPaginated={true}
-                loading={props.isFetchingRecipes}
-              />
-              {isOnline && (
-                <Pagination
-                  currentPage={props.paginationInfo.currentPage}
-                  totalPages={props.paginationInfo.totalPages}
-                  onPageChange={props.onPageChange}
-                  hasNextPage={props.paginationInfo.hasNextPage}
-                  hasPrevPage={props.paginationInfo.hasPrevPage}
-                />
-              )}
-            </>
-          }
-        />
-        <Route
-          path="/:id/:slug"
-          element={
-            <ProtectedRoute>
-              <Recipe />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/shared/:shareToken/:slug?"
-          element={<Recipe isSharedView={true} />}
-        />
-        <Route
-          path="/add-recipe"
-          element={
-            <ProtectedRoute>
-              <AddRecipePage categories={props.categories} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/edit-recipe/:id/:slug"
-          element={
-            <ProtectedRoute>
-              <EditRecipePage categories={props.categories} />
-            </ProtectedRoute>
-          }
-        />
-        {/* <Route
+                {isOnline && (
+                  <Pagination
+                    currentPage={props.paginationInfo.currentPage}
+                    totalPages={props.paginationInfo.totalPages}
+                    onPageChange={props.onPageChange}
+                    hasNextPage={props.paginationInfo.hasNextPage}
+                    hasPrevPage={props.paginationInfo.hasPrevPage}
+                  />
+                )}
+              </>
+            }
+          />
+          <Route
+            path="/:id/:slug"
+            element={
+              <ProtectedRoute>
+                <Recipe />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shared/:shareToken/:slug?"
+            element={<Recipe isSharedView={true} />}
+          />
+          <Route
+            path="/add-recipe"
+            element={
+              <ProtectedRoute>
+                <AddRecipePage categories={props.categories} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-recipe/:id/:slug"
+            element={
+              <ProtectedRoute>
+                <EditRecipePage categories={props.categories} />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route
           path="/grocery-list"
           element={
             <ProtectedRoute>
@@ -293,40 +294,41 @@ function AppRoutes(props) {
             </ProtectedRoute>
           }
         /> */}
-        <Route
-          path="/cooking-times"
-          element={
-            <ProtectedRoute>
-              <CookingTimes
-                isEditMode={isCookingTimesEditing}
-                setIsEditMode={setIsCookingTimesEditing}
-              />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/auth-page"
-          element={<AuthPage setLoginMessage={props.setLoginMessage} />}
-        />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/change-password" element={<ChangePasswordPage />} />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings refreshCategories={refreshCategories} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/friends/:username"
-          element={
-            <ProtectedRoute>
-              <FriendRecipes />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+          <Route
+            path="/cooking-times"
+            element={
+              <ProtectedRoute>
+                <CookingTimes
+                  isEditMode={isCookingTimesEditing}
+                  setIsEditMode={setIsCookingTimesEditing}
+                />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/auth-page"
+            element={<AuthPage setLoginMessage={props.setLoginMessage} />}
+          />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings refreshCategories={refreshCategories} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/friends/:username"
+            element={
+              <ProtectedRoute>
+                <FriendRecipes />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </div>
     </>
   );
 }

@@ -215,7 +215,7 @@ const FriendRecipes = () => {
             totalPages={totalPages}
             onPageChange={(page) => {
               setCurrentPage(page);
-              window.scrollTo(0, 0);
+              document.getElementById("main-content")?.scrollTo(0, 0);
             }}
           />
         </>

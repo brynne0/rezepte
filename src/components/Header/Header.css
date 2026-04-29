@@ -1,8 +1,6 @@
 /* Header Layout */
 .header {
   margin: 0;
-  top: 0;
-  position: sticky;
   background-color: var(--color-background-primary);
   z-index: var(--z-header);
 }
