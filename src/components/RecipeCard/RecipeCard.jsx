@@ -25,7 +25,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   // Generate signed URL for main image only (performance optimization)
   const mainImage = getMainImage(recipe.images);
   const { signedImages } = useSignedImageUrls(
-    mainImage ? [mainImage] : [],
+    mainImage && showImages ? [mainImage] : [],
     false // 1-hour expiration for recipe cards
   );
   const signedMainImage = signedImages[0];
