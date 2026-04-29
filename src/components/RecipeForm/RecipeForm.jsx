@@ -759,6 +759,90 @@ const RecipeForm = ({
           />
         </div>
 
+        {/* Nutrition (per serving) */}
+        <div
+          className={`form-group${isEditingTranslation ? " translation-disabled" : ""}`}
+        >
+          <label className="form-header flex-between">
+            <h3>
+              {t("nutritional_info")}{" "}
+              <span className="grey-small nutrition-form-subtitle">
+                ({t("nutrition_per_serving")})
+              </span>
+            </h3>
+          </label>
+          <div className="nutrition-form-grid">
+            {[
+              {
+                key: "nutrition_calories",
+                labelKey: "nutrition_calories",
+                unit: "kcal",
+                step: "1",
+              },
+              {
+                key: "nutrition_fiber",
+                labelKey: "nutrition_fiber",
+                unit: "g",
+                step: "0.1",
+              },
+
+              {
+                key: "nutrition_protein",
+                labelKey: "nutrition_protein",
+                unit: "g",
+                step: "0.1",
+              },
+              {
+                key: "nutrition_sodium",
+                labelKey: "nutrition_sodium",
+                unit: "mg",
+                step: "1",
+              },
+
+              {
+                key: "nutrition_carbs",
+                labelKey: "nutrition_carbs",
+                unit: "g",
+                step: "0.1",
+              },
+              {
+                key: "nutrition_sugar",
+                labelKey: "nutrition_sugar",
+                unit: "g",
+                step: "0.1",
+              },
+              {
+                key: "nutrition_fat",
+                labelKey: "nutrition_fat",
+                unit: "g",
+                step: "0.1",
+              },
+            ].map(({ key, labelKey, unit, step }) => (
+              <div key={key} className="nutrition-form-field">
+                <label htmlFor={key}>{t(labelKey)}</label>
+                <input
+                  id={key}
+                  type="number"
+                  min="0"
+                  step={step}
+                  value={formData[key] ?? ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      key,
+                      e.target.value === "" ? null : e.target.value
+                    )
+                  }
+                  className="input input--edit"
+                  placeholder="–"
+                  disabled={isEditingTranslation}
+                  onWheel={(e) => e.target.blur()}
+                />
+                <span className="grey-small">{unit}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className={`action-buttons-end ${isEditMode ? "edit" : ""}`}>
           {/* Delete Button */}
           {isEditMode && (

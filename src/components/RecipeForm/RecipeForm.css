@@ -194,6 +194,45 @@
   display: block;
 }
 
+/* Nutrition form */
+.nutrition-form-grid {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  gap: 0.4rem 2rem;
+}
+
+.nutrition-form-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nutrition-form-field label {
+  min-width: 6rem;
+  flex-shrink: 0;
+  text-align: left;
+}
+
+.nutrition-form-field input {
+  width: 6rem;
+}
+
+.nutrition-form-subtitle {
+  font-weight: normal;
+}
+
+.nutrition-form-field input::-webkit-inner-spin-button,
+.nutrition-form-field input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.nutrition-form-field input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   /* Title and servings stack on mobile */
@@ -254,5 +293,17 @@
     align-items: center;
     display: grid;
     grid-template-columns: 1.5fr 2fr 2fr;
+  }
+}
+
+@media (max-width: 540px) {
+  .nutrition-form-grid {
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    column-gap: 0.5rem;
+  }
+
+  .nutrition-form-field {
+    display: contents;
   }
 }

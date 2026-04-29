@@ -108,6 +108,9 @@ export const useRecipeFormActions = ({
           .map((ing) => prepareIngredientData(ing, section.id)),
       }));
 
+    const toNutritionValue = (v) =>
+      v !== "" && v !== null && v !== undefined ? parseFloat(v) : null;
+
     return {
       title: formData.title.trim(),
       categories: formData.categories,
@@ -119,6 +122,13 @@ export const useRecipeFormActions = ({
       notes: formData.notes?.trim() || "",
       images: formData.images || [],
       ingredientLinks: formData.ingredientLinks || {},
+      nutrition_calories: toNutritionValue(formData.nutrition_calories),
+      nutrition_protein: toNutritionValue(formData.nutrition_protein),
+      nutrition_fat: toNutritionValue(formData.nutrition_fat),
+      nutrition_carbs: toNutritionValue(formData.nutrition_carbs),
+      nutrition_fiber: toNutritionValue(formData.nutrition_fiber),
+      nutrition_sugar: toNutritionValue(formData.nutrition_sugar),
+      nutrition_sodium: toNutritionValue(formData.nutrition_sodium),
     };
   }, [formData]);
 
@@ -322,6 +332,7 @@ export const useRecipeFormActions = ({
       transformFormDataForSubmission,
       handleImageUploadProgress,
       setSubmissionError,
+      setValidationErrors,
       setIsUploadingImages,
       setUploadProgress,
       setUploadingImageIds,

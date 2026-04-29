@@ -3,6 +3,33 @@ import pluralize from "pluralize";
 import { updateRecipeTranslations } from "./translationService";
 import { uploadLocalImages, cleanupOrphanedImages } from "./imageService";
 
+// Build the nutrition JSONB object from flat recipe data fields, returns null if no values set
+const buildNutritionJson = (recipeData) => {
+  const fields = [
+    "nutrition_calories",
+    "nutrition_protein",
+    "nutrition_fat",
+    "nutrition_carbs",
+    "nutrition_fiber",
+    "nutrition_sugar",
+    "nutrition_sodium",
+  ];
+  const keys = [
+    "calories",
+    "protein",
+    "fat",
+    "carbs",
+    "fiber",
+    "sugar",
+    "sodium",
+  ];
+  const obj = {};
+  fields.forEach((field, i) => {
+    if (recipeData[field] != null) obj[keys[i]] = recipeData[field];
+  });
+  return Object.keys(obj).length > 0 ? obj : null;
+};
+
 // Helper function to determine if an ingredient name was entered as plural
 const determineIngredientPlurality = async (inputName, language = "en") => {
   if (!inputName) {
@@ -759,6 +786,7 @@ export const createRecipe = async (
       notes: recipeData.notes,
       original_language: recipeData.original_language,
       images: recipeData.images || [],
+      nutrition: buildNutritionJson(recipeData),
     }).filter(([, v]) => v !== undefined)
   );
 
@@ -1003,6 +1031,7 @@ export const updateRecipe = async (
       source: recipeData.source,
       notes: recipeData.notes,
       images: recipeData.images,
+      nutrition: buildNutritionJson(recipeData),
     }).filter(([, v]) => v !== undefined)
   );
 
