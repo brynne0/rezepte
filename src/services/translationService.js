@@ -14,14 +14,19 @@ const normaliseInstruction = (instruction) => {
 };
 
 // DeepL translation function using Supabase Edge Function
-export const translateText = async (text, targetLanguage, context = null) => {
+export const translateText = async (
+  text,
+  targetLanguage,
+  context = null,
+  sourceLang = "auto"
+) => {
   if (!text || text.trim() === "") return text;
 
   try {
     const requestBody = {
       text: text,
       target_lang: targetLanguage,
-      source_lang: "auto",
+      source_lang: sourceLang,
     };
 
     // Add context if provided to help with disambiguation (e.g., food vs. other meanings)
@@ -51,10 +56,10 @@ export const translateText = async (text, targetLanguage, context = null) => {
 };
 
 // Translate an array of texts
-const translateTexts = async (texts, targetLanguage) => {
+const translateTexts = async (texts, targetLanguage, sourceLang = "auto") => {
   const nonEmptyTexts = texts.filter((text) => text && text.trim() !== "");
   const promises = nonEmptyTexts.map((text) =>
-    translateText(text, targetLanguage)
+    translateText(text, targetLanguage, null, sourceLang)
   );
   const translatedResults = await Promise.all(promises);
 
@@ -68,8 +73,8 @@ const translateTexts = async (texts, targetLanguage) => {
 
 // Get translated recipe with ingredients (for full recipe view)
 export const getTranslatedRecipe = async (recipe, targetLanguage) => {
-  // If target language is the same as original, still need to process ingredients for display
-  if (recipe.original_language === targetLanguage) {
+  // If original language is same as target (default to "en" if unknown), process without translating
+  if ((recipe.original_language || "en") === targetLanguage) {
     // Process ingredients to add the 'name' field even for English
     const processedResult = { ...recipe };
 
@@ -168,8 +173,8 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
 
 // Get translated recipe title only (for recipe lists)
 export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
-  // If target language is the same as original, normalise instructions and return
-  if (recipe.original_language === targetLanguage) {
+  // If original language is same as target (default to "en" if unknown), return without translating
+  if ((recipe.original_language || "en") === targetLanguage) {
     const processedResult = { ...recipe };
     // Normalise original instructions to ensure they end with full stop
     if (recipe.instructions && Array.isArray(recipe.instructions)) {
@@ -191,10 +196,13 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
   }
 
   // Title not cached, translate only the title
+  const sourceLang = recipe.original_language || "en";
   try {
     const rawTranslatedTitle = await translateText(
       recipe.title,
-      targetLanguage
+      targetLanguage,
+      null,
+      sourceLang
     );
     const translatedTitle =
       targetLanguage === "en"
@@ -258,17 +266,20 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
     ...recipe.instructions,
   ];
 
+  const sourceLang = recipe.original_language || "en";
   try {
     const translatedTexts = await translateTexts(
       textsToTranslate,
-      targetLanguage
+      targetLanguage,
+      sourceLang
     );
 
     // Translate category separately with food context for better accuracy
     const translatedCategory = await translateText(
       recipe.category,
       targetLanguage,
-      "Food category"
+      "Food category",
+      sourceLang
     );
 
     const translatedData = {
