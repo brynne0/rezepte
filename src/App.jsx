@@ -159,7 +159,6 @@ function AppRoutes(props) {
   const isGroceryListPage = location.pathname === "/grocery-list";
   const isCookingTimesPage = location.pathname === "/cooking-times";
   const isOnline = useOnlineStatus();
-
   // Reset grocery list editing state when leaving the grocery list page
   useEffect(() => {
     if (!isGroceryListPage && isGroceryListEditing) {
@@ -193,11 +192,6 @@ function AppRoutes(props) {
   useEffect(() => {
     refreshRecipes();
   }, [currentLanguage, refreshRecipes]);
-
-  // Scroll to top on all navigation
-  useEffect(() => {
-    document.getElementById("main-content")?.scrollTo(0, 0);
-  }, [location.pathname]);
 
   return (
     <>
