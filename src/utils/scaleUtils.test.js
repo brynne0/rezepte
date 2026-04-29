@@ -263,7 +263,7 @@ describe("scaleUtils", () => {
     test("steps up correctly", () => {
       expect(getNextMultiplierStep(1, 1)).toBe(1.5);
       expect(getNextMultiplierStep(1.5, 1)).toBe(2);
-      expect(getNextMultiplierStep(2, 1)).toBe(3);
+      expect(getNextMultiplierStep(2, 1)).toBe(2.5);
       expect(getNextMultiplierStep(0.25, 1)).toBe(0.5);
     });
 

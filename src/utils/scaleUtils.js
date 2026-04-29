@@ -81,7 +81,7 @@ export function scaleIngredient(quantity, unit, multiplier) {
 }
 
 // Common multiplier steps for recipes without a servings count
-const MULTIPLIER_STEPS = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 6, 8];
+const MULTIPLIER_STEPS = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 6, 8];
 
 export function getNextMultiplierStep(current, direction) {
   if (direction === 1) {
@@ -101,6 +101,7 @@ export function formatMultiplierLabel(multiplier) {
     1: "1x",
     1.5: "1.5x",
     2: "2x",
+    2.5: "2.5x",
     3: "3x",
     4: "4x",
     6: "6x",
