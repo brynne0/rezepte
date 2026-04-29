@@ -649,7 +649,7 @@ const Recipe = ({ isSharedView = false }) => {
           )}
 
           {/* Nutrition */}
-          <NutritionPanel recipe={recipe} multiplier={multiplier} />
+          <NutritionPanel recipe={recipe} />
         </div>
       </div>
 

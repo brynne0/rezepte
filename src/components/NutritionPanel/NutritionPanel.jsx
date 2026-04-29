@@ -11,31 +11,22 @@ const NUTRITION_FIELDS = [
   { key: "sodium", labelKey: "nutrition_sodium", unit: "mg" },
 ];
 
-const NutritionPanel = ({ recipe, multiplier }) => {
+const NutritionPanel = ({ recipe }) => {
   const { t } = useTranslation();
 
   if (!recipe.nutrition) return null;
-
-  const scaledValue = (raw) => {
-    if (raw == null) return null;
-    return parseFloat((raw * multiplier).toFixed(1));
-  };
-
-  const servingLabel =
-    multiplier === 1
-      ? t("nutrition_per_serving")
-      : `${t("nutrition_per_serving")} x${multiplier}`;
 
   return (
     <>
       <div className="recipe-subheading">
         <h2>{t("nutritional_info")}:</h2>
-        <span className="grey-small">({servingLabel})</span>
+        <span className="grey-small">({t("nutrition_per_serving")})</span>
       </div>
       <div className="nutrition-table">
         {NUTRITION_FIELDS.map(({ key, labelKey, unit }) => {
-          const value = scaledValue(recipe.nutrition[key]);
-          if (value == null) return null;
+          const raw = recipe.nutrition[key];
+          if (raw == null) return null;
+          const value = parseFloat(raw);
           return (
             <div key={key} className="nutrition-row ">
               <span className="grey-small">{t(labelKey)}</span>

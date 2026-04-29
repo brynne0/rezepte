@@ -298,7 +298,7 @@
 
 @media (max-width: 540px) {
   .nutrition-form-grid {
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: auto auto auto;
     align-items: center;
     column-gap: 0.5rem;
   }

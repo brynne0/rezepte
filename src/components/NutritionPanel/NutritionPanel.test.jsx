@@ -27,19 +27,19 @@ vi.mock("./NutritionPanel.css", () => ({}));
 describe("NutritionPanel", () => {
   test("renders nothing when recipe.nutrition is null", () => {
     const { container } = render(
-      <NutritionPanel recipe={{ nutrition: null }} multiplier={1} />
+      <NutritionPanel recipe={{ nutrition: null }} />
     );
     expect(container.firstChild).toBeNull();
   });
 
   test("renders nothing when recipe.nutrition is undefined", () => {
-    const { container } = render(<NutritionPanel recipe={{}} multiplier={1} />);
+    const { container } = render(<NutritionPanel recipe={{}} />);
     expect(container.firstChild).toBeNull();
   });
 
   test("renders only fields that are present in nutrition", () => {
     const recipe = { nutrition: { calories: 300, protein: 20 } };
-    render(<NutritionPanel recipe={recipe} multiplier={1} />);
+    render(<NutritionPanel recipe={recipe} />);
 
     expect(screen.getByText("Calories")).toBeInTheDocument();
     expect(screen.getByText("Protein")).toBeInTheDocument();
@@ -47,43 +47,21 @@ describe("NutritionPanel", () => {
     expect(screen.queryByText("Carbs")).not.toBeInTheDocument();
   });
 
-  test("displays values with units at multiplier 1", () => {
+  test("displays values with correct units", () => {
     const recipe = {
       nutrition: { calories: 350, protein: 25, sodium: 600 },
     };
-    render(<NutritionPanel recipe={recipe} multiplier={1} />);
+    render(<NutritionPanel recipe={recipe} />);
 
     expect(screen.getByText("350 kcal")).toBeInTheDocument();
     expect(screen.getByText("25 g")).toBeInTheDocument();
     expect(screen.getByText("600 mg")).toBeInTheDocument();
   });
 
-  test("scales values correctly by multiplier", () => {
-    const recipe = { nutrition: { calories: 350, protein: 25 } };
-    render(<NutritionPanel recipe={recipe} multiplier={2} />);
-
-    expect(screen.getByText("700 kcal")).toBeInTheDocument();
-    expect(screen.getByText("50 g")).toBeInTheDocument();
-  });
-
-  test("rounds scaled values to 1 decimal place", () => {
-    const recipe = { nutrition: { protein: 10 } };
-    render(<NutritionPanel recipe={recipe} multiplier={1.5} />);
-
-    expect(screen.getByText("15 g")).toBeInTheDocument();
-  });
-
-  test("shows 'per serving' label at multiplier 1", () => {
+  test("always shows 'per serving' label regardless of recipe multiplier", () => {
     const recipe = { nutrition: { calories: 100 } };
-    render(<NutritionPanel recipe={recipe} multiplier={1} />);
+    render(<NutritionPanel recipe={recipe} />);
 
     expect(screen.getByText("(per serving)")).toBeInTheDocument();
-  });
-
-  test("shows scaled serving label at multiplier > 1", () => {
-    const recipe = { nutrition: { calories: 100 } };
-    render(<NutritionPanel recipe={recipe} multiplier={3} />);
-
-    expect(screen.getByText("(per serving x3)")).toBeInTheDocument();
   });
 });
