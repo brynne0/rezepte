@@ -290,5 +290,16 @@
   "friends_search_above": "Add friends to see their recipes.",
   "friends_no_recipes": "No recipes yet.",
   "friends_not_friends": "You are not friends with @{{username}}.",
-  "friends_recipes_title": "{{name}}'s Recipes"
+  "friends_recipes_title": "{{name}}'s Recipes",
+
+  "nutrition": "Nutrition",
+  "nutritional_info": "Nutritional info",
+  "nutrition_per_serving": "per serving",
+  "nutrition_calories": "Calories",
+  "nutrition_protein": "Protein",
+  "nutrition_fat": "Fat",
+  "nutrition_carbs": "Carbohydrates",
+  "nutrition_fiber": "Fiber",
+  "nutrition_sugar": "Sugar",
+  "nutrition_sodium": "Sodium"
 }

@@ -124,6 +124,13 @@ export const useRecipeFormState = ({ initialRecipe = null }) => {
         notes: initialRecipe.notes || "",
         images: initialRecipe.images || [],
         ingredientLinks,
+        nutrition_calories: initialRecipe.nutrition?.calories ?? null,
+        nutrition_protein: initialRecipe.nutrition?.protein ?? null,
+        nutrition_fat: initialRecipe.nutrition?.fat ?? null,
+        nutrition_carbs: initialRecipe.nutrition?.carbs ?? null,
+        nutrition_fiber: initialRecipe.nutrition?.fiber ?? null,
+        nutrition_sugar: initialRecipe.nutrition?.sugar ?? null,
+        nutrition_sodium: initialRecipe.nutrition?.sodium ?? null,
       };
     }
 
@@ -149,6 +156,13 @@ export const useRecipeFormState = ({ initialRecipe = null }) => {
       notes: "",
       images: [],
       ingredientLinks: {},
+      nutrition_calories: null,
+      nutrition_protein: null,
+      nutrition_fat: null,
+      nutrition_carbs: null,
+      nutrition_fiber: null,
+      nutrition_sugar: null,
+      nutrition_sodium: null,
     };
   }, [initialRecipe]);
 
