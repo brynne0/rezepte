@@ -49,7 +49,7 @@ describe("CookingTimeRow", () => {
 
     it("should display weight conversion with ratio", () => {
       render(<CookingTimeRow {...defaultProps} />);
-      const weightText = screen.getByText(/100g dry → 300g cooked \(×3\)/);
+      const weightText = screen.getByText(/100g dry → 300g cooked \(x3\)/);
       expect(weightText).toBeInTheDocument();
     });
 
@@ -307,7 +307,7 @@ describe("CookingTimeRow", () => {
   describe("Weight Ratio Calculation", () => {
     it("should display correct ratio for 1:3 conversion", () => {
       render(<CookingTimeRow {...defaultProps} />);
-      expect(screen.getByText(/×3\)/)).toBeInTheDocument();
+      expect(screen.getByText(/x3\)/)).toBeInTheDocument();
     });
 
     it("should handle decimal ratios without trailing zeros", () => {
@@ -318,7 +318,7 @@ describe("CookingTimeRow", () => {
       };
       render(<CookingTimeRow {...defaultProps} item={itemWithDecimal} />);
 
-      expect(screen.getByText(/×2\.5\)/)).toBeInTheDocument();
+      expect(screen.getByText(/x2\.5\)/)).toBeInTheDocument();
     });
 
     it("should not display weight info when weights are missing", () => {
@@ -329,7 +329,7 @@ describe("CookingTimeRow", () => {
       };
       render(<CookingTimeRow {...defaultProps} item={itemWithoutWeights} />);
 
-      expect(screen.queryByText(/×/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/x/)).not.toBeInTheDocument();
     });
   });
 

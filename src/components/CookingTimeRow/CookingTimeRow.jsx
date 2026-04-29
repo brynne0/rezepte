@@ -38,7 +38,7 @@ const CookingTimeRow = ({
     const ratio = cookedWeight / dryWeight;
     const formatted = ratio.toFixed(1);
     // Remove trailing .0 (e.g., 10.0 becomes 10)
-    return `×${formatted.endsWith(".0") ? formatted.slice(0, -2) : formatted}`;
+    return `x${formatted.endsWith(".0") ? formatted.slice(0, -2) : formatted}`;
   };
 
   if (!isEditMode) {

@@ -74,7 +74,7 @@ describe("scaleUtils", () => {
           quantity: "4 1/2",
           unit: "",
         });
-        // 1.25 × 4 = 5 — clean whole number
+        // 1.25 x 4 = 5 — clean whole number
         expect(scaleIngredient("1 1/4", "", 4)).toEqual({
           quantity: "5",
           unit: "",
@@ -95,12 +95,12 @@ describe("scaleUtils", () => {
 
     describe("~ prefix (approximate quantities)", () => {
       test("preserves ~ prefix after scaling", () => {
-        // 400ml × 2 = 800ml — below the 1000ml threshold, stays as ml
+        // 400ml x 2 = 800ml — below the 1000ml threshold, stays as ml
         expect(scaleIngredient("~400", "ml", 2)).toEqual({
           quantity: "~800",
           unit: "ml",
         });
-        // 400ml × 3 = 1200ml — over threshold, converts to l
+        // 400ml x 3 = 1200ml — over threshold, converts to l
         expect(scaleIngredient("~400", "ml", 3)).toEqual({
           quantity: "~1.2",
           unit: "l",
@@ -201,7 +201,7 @@ describe("scaleUtils", () => {
       });
 
       test("tsp chains through tbsp → cup/s", () => {
-        // 1 tsp × 48 = 48 tsp = 16 tbsp = 1 cup
+        // 1 tsp x 48 = 48 tsp = 16 tbsp = 1 cup
         expect(scaleIngredient("1", "tsp", 48)).toEqual({
           quantity: "1",
           unit: "cup/s",
@@ -211,12 +211,12 @@ describe("scaleUtils", () => {
 
     describe("unit conversions — scale down", () => {
       test("cup/s → tbsp below 1/4 cup", () => {
-        // 1 × 0.25 = 0.25 cups, exactly at threshold — strict < so stays as cups
+        // 1 x 0.25 = 0.25 cups, exactly at threshold — strict < so stays as cups
         expect(scaleIngredient("1", "cup/s", 0.25)).toEqual({
           quantity: "1/4",
           unit: "cup/s",
         });
-        // 0.5 × 0.25 = 0.125 cups — below threshold, converts to tbsp
+        // 0.5 x 0.25 = 0.125 cups — below threshold, converts to tbsp
         expect(scaleIngredient("1/2", "cup/s", 0.25)).toEqual({
           quantity: "2",
           unit: "tbsp",

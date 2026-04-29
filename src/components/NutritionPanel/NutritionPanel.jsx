@@ -24,7 +24,7 @@ const NutritionPanel = ({ recipe, multiplier }) => {
   const servingLabel =
     multiplier === 1
       ? t("nutrition_per_serving")
-      : `${t("nutrition_per_serving")} ×${multiplier}`;
+      : `${t("nutrition_per_serving")} x${multiplier}`;
 
   return (
     <>
