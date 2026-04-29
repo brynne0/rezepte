@@ -766,7 +766,7 @@ const RecipeForm = ({
           <label className="form-header flex-between">
             <h3>
               {t("nutritional_info")}{" "}
-              <span className="form-subheading">
+              <span className="grey-small nutrition-form-subtitle">
                 ({t("nutrition_per_serving")})
               </span>
             </h3>
@@ -837,7 +837,7 @@ const RecipeForm = ({
                   disabled={isEditingTranslation}
                   onWheel={(e) => e.target.blur()}
                 />
-                <span className="nutrition-unit">{unit}</span>
+                <span className="grey-small">{unit}</span>
               </div>
             ))}
           </div>

@@ -33,6 +33,7 @@ import {
 } from "../../utils/scaleUtils";
 import { shouldUsePlural } from "../../utils/fractionUtils";
 import { useWakeLock } from "../../hooks/ui/useWakeLock";
+import NutritionPanel from "../../components/NutritionPanel/NutritionPanel";
 
 // Helper function to parse text and convert URLs to clickable links
 const renderTextWithLinks = (text) => {
@@ -646,6 +647,9 @@ const Recipe = ({ isSharedView = false }) => {
               <div className="recipe-notes-content">{recipe.notes}</div>
             </div>
           )}
+
+          {/* Nutrition */}
+          <NutritionPanel recipe={recipe} multiplier={multiplier} />
         </div>
       </div>
 

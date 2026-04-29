@@ -209,20 +209,17 @@
 }
 
 .nutrition-form-field label {
-  width: 8rem;
+  min-width: 8rem;
   flex-shrink: 0;
-  font-size: var(--font-size-small);
-  color: var(--color-text-secondary);
+  text-align: left;
 }
 
 .nutrition-form-field input {
   width: 6rem;
 }
 
-.nutrition-unit {
-  font-size: var(--font-size-small);
-  color: var(--color-text-secondary);
-  min-width: 2.5rem;
+.nutrition-form-subtitle {
+  font-weight: normal;
 }
 
 .nutrition-form-field input::-webkit-inner-spin-button,
@@ -234,12 +231,6 @@
 .nutrition-form-field input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
-}
-
-.form-subheading {
-  font-size: var(--font-size-small);
-  font-weight: normal;
-  color: var(--color-text-secondary);
 }
 
 /* Responsive */

@@ -1,0 +1,27 @@
+.nutrition-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  max-width: 12rem;
+  width: 100%;
+}
+
+.nutrition-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.1rem 0;
+}
+
+@media (max-width: 480px) {
+  .nutrition-table {
+    max-width: 100%;
+  }
+}
+
+.nutrition-value {
+  font-size: var(--font-size-small);
+  font-weight: 500;
+  white-space: nowrap;
+}
