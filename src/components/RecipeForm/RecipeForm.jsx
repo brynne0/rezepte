@@ -7,6 +7,8 @@ import {
   Link,
   NotepadText,
   Clipboard,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
@@ -179,6 +181,13 @@ const RecipeForm = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
   const [linkingIngredient, setLinkingIngredient] = useState(null);
+  const [showNutrition, setShowNutrition] = useState(() =>
+    formData.nutrition_columns.some((col) =>
+      ["calories", "protein", "fat", "carbs", "fiber", "sugar", "sodium"].some(
+        (k) => col[k] != null
+      )
+    )
+  );
 
   // Unsaved changes detection
   const {
@@ -775,93 +784,110 @@ const RecipeForm = ({
           className={`form-group${isEditingTranslation ? " translation-disabled" : ""}`}
         >
           <div className="form-header flex-between">
-            <h3>{t("nutritional_info")}</h3>
-            {formData.nutrition_columns.length < 2 ? (
-              <button
-                type="button"
-                onClick={() =>
-                  handleInputChange("nutrition_columns", [
-                    ...formData.nutrition_columns,
-                    emptyNutritionColumn(),
-                  ])
-                }
-                className={`btn btn-section ${isEditingTranslation ? "translation-disabled" : ""}`}
-                disabled={isEditingTranslation}
-              >
-                + {t("nutrition_add_column")}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() =>
-                  handleInputChange("nutrition_columns", [
-                    formData.nutrition_columns[0],
-                  ])
-                }
-                className={`btn btn-section ${isEditingTranslation ? "translation-disabled" : ""}`}
-                disabled={isEditingTranslation}
-              >
-                {t("nutrition_remove_column")}
-              </button>
-            )}
+            <button
+              type="button"
+              className="btn-unstyled flex-row"
+              onClick={() => setShowNutrition((v) => !v)}
+            >
+              {showNutrition ? (
+                <ChevronDown size={18} />
+              ) : (
+                <ChevronRight size={18} />
+              )}
+              <h3>{t("nutritional_info")}</h3>
+            </button>
+            {showNutrition &&
+              (formData.nutrition_columns.length < 2 ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleInputChange("nutrition_columns", [
+                      ...formData.nutrition_columns,
+                      emptyNutritionColumn(),
+                    ])
+                  }
+                  className={`btn btn-section ${isEditingTranslation ? "translation-disabled" : ""}`}
+                  disabled={isEditingTranslation}
+                >
+                  + {t("nutrition_add_column")}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleInputChange("nutrition_columns", [
+                      formData.nutrition_columns[0],
+                    ])
+                  }
+                  className={`btn btn-section ${isEditingTranslation ? "translation-disabled" : ""}`}
+                  disabled={isEditingTranslation}
+                >
+                  {t("nutrition_remove_column")}
+                </button>
+              ))}
           </div>
-          <div
-            className={`nutrition-fields-grid${formData.nutrition_columns.length > 1 ? " nutrition-fields-grid--dual" : ""}`}
-          >
-            {/* Label inputs row — aligned with the columns below */}
-            <span />
-            {formData.nutrition_columns.map((col, colIdx) => (
-              <input
-                key={colIdx}
-                type="text"
-                value={col.label}
-                onChange={(e) => {
-                  const updated = formData.nutrition_columns.map((c, i) =>
-                    i === colIdx ? { ...c, label: e.target.value } : c
-                  );
-                  handleInputChange("nutrition_columns", updated);
-                }}
-                className="input input--borderless section-title-input grey-small"
-                placeholder={
-                  colIdx === 0 ? t("nutrition_per_serving") : "per 100g"
-                }
-                disabled={isEditingTranslation}
-              />
-            ))}
-            <span />
-            {/* Data rows */}
-            {NUTRITION_FORM_FIELDS.map(({ key, labelKey, unit, step }) => (
-              <div key={key} className="nutrition-field-row">
-                <span className="grey-small">{t(labelKey)}</span>
-                {formData.nutrition_columns.map((col, colIdx) => (
-                  <input
-                    key={colIdx}
-                    type="number"
-                    min="0"
-                    step={step}
-                    value={col[key] ?? ""}
-                    onChange={(e) => {
-                      const updated = formData.nutrition_columns.map((c, i) =>
-                        i === colIdx
-                          ? {
-                              ...c,
-                              [key]:
-                                e.target.value === "" ? null : e.target.value,
-                            }
-                          : c
-                      );
-                      handleInputChange("nutrition_columns", updated);
-                    }}
-                    className="input input--edit"
-                    placeholder="–"
-                    disabled={isEditingTranslation}
-                    onWheel={(e) => e.target.blur()}
-                  />
-                ))}
-                <span className="grey-small">{unit}</span>
-              </div>
-            ))}
-          </div>
+          {showNutrition && (
+            <div
+              className={`nutrition-fields-grid${formData.nutrition_columns.length > 1 ? " nutrition-fields-grid--dual" : ""}`}
+            >
+              {/* Label inputs row — aligned with the columns below */}
+              <span />
+              {formData.nutrition_columns.map((col, colIdx) => (
+                <input
+                  key={colIdx}
+                  type="text"
+                  value={col.label}
+                  onChange={(e) => {
+                    const updated = formData.nutrition_columns.map((c, i) =>
+                      i === colIdx ? { ...c, label: e.target.value } : c
+                    );
+                    handleInputChange("nutrition_columns", updated);
+                  }}
+                  className="input input--borderless section-title-input grey-small"
+                  placeholder={
+                    colIdx === 0 ? t("nutrition_per_serving") : "per 100g"
+                  }
+                  disabled={isEditingTranslation}
+                />
+              ))}
+              <span />
+              {/* Data rows */}
+              {NUTRITION_FORM_FIELDS.map(({ key, labelKey, unit, step }) => (
+                <div key={key} className="nutrition-field-row">
+                  <span className="grey-small">{t(labelKey)}</span>
+                  {formData.nutrition_columns.map((col, colIdx) => (
+                    <input
+                      key={colIdx}
+                      type="number"
+                      min="0"
+                      step={step}
+                      value={col[key] ?? ""}
+                      onChange={(e) => {
+                        const updated = formData.nutrition_columns.map(
+                          (c, i) =>
+                            i === colIdx
+                              ? {
+                                  ...c,
+                                  [key]:
+                                    e.target.value === ""
+                                      ? null
+                                      : e.target.value,
+                                }
+                              : c
+                        );
+                        handleInputChange("nutrition_columns", updated);
+                      }}
+                      className="input input--edit"
+                      placeholder="–"
+                      disabled={isEditingTranslation}
+                      onWheel={(e) => e.target.blur()}
+                    />
+                  ))}
+                  <span className="grey-small">{unit}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className={`action-buttons-end ${isEditMode ? "edit" : ""}`}>
