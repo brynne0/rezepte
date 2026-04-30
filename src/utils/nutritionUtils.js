@@ -52,21 +52,20 @@ export const parseNutritionColumns = (nutrition) => {
   ];
 };
 
-// Build nutrition JSONB to store, or null if all columns are empty
+// Build nutrition JSONB to store, or null if all columns are empty.
+// Columns with no data are dropped so blank second columns don't persist.
 export const buildNutritionColumns = (columns) => {
   if (!columns || columns.length === 0) return null;
 
-  const built = columns.map(({ label, ...fields }) => {
-    const obj = { label: label || "" };
-    NUTRITION_KEYS.forEach((key) => {
-      if (fields[key] != null) obj[key] = fields[key];
+  const built = columns
+    .filter((col) => NUTRITION_KEYS.some((key) => col[key] != null))
+    .map(({ label, ...fields }) => {
+      const obj = { label: label || "" };
+      NUTRITION_KEYS.forEach((key) => {
+        if (fields[key] != null) obj[key] = fields[key];
+      });
+      return obj;
     });
-    return obj;
-  });
 
-  const hasData = built.some((col) =>
-    NUTRITION_KEYS.some((key) => col[key] != null)
-  );
-
-  return hasData ? { columns: built } : null;
+  return built.length > 0 ? { columns: built } : null;
 };

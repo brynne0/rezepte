@@ -63,6 +63,34 @@ describe("buildNutritionColumns", () => {
     });
   });
 
+  test("drops blank second column when first column has data", () => {
+    const columns = [
+      {
+        label: "Per Serving",
+        calories: 350,
+        protein: null,
+        fat: null,
+        carbs: null,
+        fiber: null,
+        sugar: null,
+        sodium: null,
+      },
+      {
+        label: "",
+        calories: null,
+        protein: null,
+        fat: null,
+        carbs: null,
+        fiber: null,
+        sugar: null,
+        sodium: null,
+      },
+    ];
+    expect(buildNutritionColumns(columns)).toEqual({
+      columns: [{ label: "Per Serving", calories: 350 }],
+    });
+  });
+
   test("returns null when no column has any data", () => {
     const columns = [emptyNutritionColumn(), emptyNutritionColumn()];
     expect(buildNutritionColumns(columns)).toBeNull();
