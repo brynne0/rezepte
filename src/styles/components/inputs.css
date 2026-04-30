@@ -1,6 +1,6 @@
 /* Base input styles - all inputs inherit from this */
 .input {
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem;
   border-radius: var(--border-radius);
   font-size: 1rem;
   font-family: inherit;
@@ -206,11 +206,4 @@
   .relative-center:has(input:not(:placeholder-shown))
   + label {
   left: 2.5rem; /* Keep label positioned after icon when floating */
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .input {
-    padding: 0.5rem;
-  }
 }

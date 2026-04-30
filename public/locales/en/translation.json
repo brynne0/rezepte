@@ -301,5 +301,7 @@
   "nutrition_carbs": "Carbs",
   "nutrition_fiber": "Fiber",
   "nutrition_sugar": "Sugar",
-  "nutrition_sodium": "Sodium"
+  "nutrition_sodium": "Sodium",
+  "nutrition_add_column": "Add column",
+  "nutrition_remove_column": "Remove column"
 }

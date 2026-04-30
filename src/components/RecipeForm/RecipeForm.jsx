@@ -11,6 +11,7 @@ import {
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
+import { emptyNutritionColumn } from "../../utils/nutritionUtils";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import ImageUpload from "../ImageUpload/ImageUpload";
@@ -20,6 +21,16 @@ import InstructionsSection from "./InstructionsSection";
 import RecipeAutofill from "./RecipeAutofill";
 import "./RecipeForm.css";
 import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
+
+const NUTRITION_FORM_FIELDS = [
+  { key: "calories", labelKey: "nutrition_calories", unit: "kcal", step: "1" },
+  { key: "fiber", labelKey: "nutrition_fiber", unit: "g", step: "0.1" },
+  { key: "protein", labelKey: "nutrition_protein", unit: "g", step: "0.1" },
+  { key: "sodium", labelKey: "nutrition_sodium", unit: "mg", step: "1" },
+  { key: "carbs", labelKey: "nutrition_carbs", unit: "g", step: "0.1" },
+  { key: "sugar", labelKey: "nutrition_sugar", unit: "g", step: "0.1" },
+  { key: "fat", labelKey: "nutrition_fat", unit: "g", step: "0.1" },
+];
 
 const RecipeForm = ({
   categories,
@@ -552,7 +563,7 @@ const RecipeForm = ({
                                       e.target.value
                                     )
                                   }
-                                  className="input input--borderless section-title-input"
+                                  className="input input--borderless section-title-input grey-small"
                                   placeholder={t("section_title")}
                                 />
                                 <button
@@ -759,84 +770,94 @@ const RecipeForm = ({
           />
         </div>
 
-        {/* Nutrition (per serving) */}
+        {/* Nutrition */}
         <div
           className={`form-group${isEditingTranslation ? " translation-disabled" : ""}`}
         >
-          <label className="form-header flex-between">
-            <h3>
-              {t("nutritional_info")}{" "}
-              <span className="grey-small nutrition-form-subtitle">
-                ({t("nutrition_per_serving")})
-              </span>
-            </h3>
-          </label>
-          <div className="nutrition-form-grid">
-            {[
-              {
-                key: "nutrition_calories",
-                labelKey: "nutrition_calories",
-                unit: "kcal",
-                step: "1",
-              },
-              {
-                key: "nutrition_fiber",
-                labelKey: "nutrition_fiber",
-                unit: "g",
-                step: "0.1",
-              },
-
-              {
-                key: "nutrition_protein",
-                labelKey: "nutrition_protein",
-                unit: "g",
-                step: "0.1",
-              },
-              {
-                key: "nutrition_sodium",
-                labelKey: "nutrition_sodium",
-                unit: "mg",
-                step: "1",
-              },
-
-              {
-                key: "nutrition_carbs",
-                labelKey: "nutrition_carbs",
-                unit: "g",
-                step: "0.1",
-              },
-              {
-                key: "nutrition_sugar",
-                labelKey: "nutrition_sugar",
-                unit: "g",
-                step: "0.1",
-              },
-              {
-                key: "nutrition_fat",
-                labelKey: "nutrition_fat",
-                unit: "g",
-                step: "0.1",
-              },
-            ].map(({ key, labelKey, unit, step }) => (
-              <div key={key} className="nutrition-form-field">
-                <label htmlFor={key}>{t(labelKey)}</label>
-                <input
-                  id={key}
-                  type="number"
-                  min="0"
-                  step={step}
-                  value={formData[key] ?? ""}
-                  onChange={(e) =>
-                    handleInputChange(
-                      key,
-                      e.target.value === "" ? null : e.target.value
-                    )
-                  }
-                  className="input input--edit"
-                  placeholder="–"
-                  disabled={isEditingTranslation}
-                  onWheel={(e) => e.target.blur()}
-                />
+          <div className="form-header flex-between">
+            <h3>{t("nutritional_info")}</h3>
+            {formData.nutrition_columns.length < 2 ? (
+              <button
+                type="button"
+                onClick={() =>
+                  handleInputChange("nutrition_columns", [
+                    ...formData.nutrition_columns,
+                    emptyNutritionColumn(),
+                  ])
+                }
+                className={`btn btn-section ${isEditingTranslation ? "translation-disabled" : ""}`}
+                disabled={isEditingTranslation}
+              >
+                + {t("nutrition_add_column")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() =>
+                  handleInputChange("nutrition_columns", [
+                    formData.nutrition_columns[0],
+                  ])
+                }
+                className={`btn btn-section ${isEditingTranslation ? "translation-disabled" : ""}`}
+                disabled={isEditingTranslation}
+              >
+                {t("nutrition_remove_column")}
+              </button>
+            )}
+          </div>
+          <div
+            className={`nutrition-fields-grid${formData.nutrition_columns.length > 1 ? " nutrition-fields-grid--dual" : ""}`}
+          >
+            {/* Label inputs row — aligned with the columns below */}
+            <span />
+            {formData.nutrition_columns.map((col, colIdx) => (
+              <input
+                key={colIdx}
+                type="text"
+                value={col.label}
+                onChange={(e) => {
+                  const updated = formData.nutrition_columns.map((c, i) =>
+                    i === colIdx ? { ...c, label: e.target.value } : c
+                  );
+                  handleInputChange("nutrition_columns", updated);
+                }}
+                className="input input--borderless section-title-input grey-small"
+                placeholder={
+                  colIdx === 0 ? t("nutrition_per_serving") : "per 100g"
+                }
+                disabled={isEditingTranslation}
+              />
+            ))}
+            <span />
+            {/* Data rows */}
+            {NUTRITION_FORM_FIELDS.map(({ key, labelKey, unit, step }) => (
+              <div key={key} className="nutrition-field-row">
+                <span className="grey-small">{t(labelKey)}</span>
+                {formData.nutrition_columns.map((col, colIdx) => (
+                  <input
+                    key={colIdx}
+                    type="number"
+                    min="0"
+                    step={step}
+                    value={col[key] ?? ""}
+                    onChange={(e) => {
+                      const updated = formData.nutrition_columns.map((c, i) =>
+                        i === colIdx
+                          ? {
+                              ...c,
+                              [key]:
+                                e.target.value === "" ? null : e.target.value,
+                            }
+                          : c
+                      );
+                      handleInputChange("nutrition_columns", updated);
+                    }}
+                    className="input input--edit"
+                    placeholder="–"
+                    disabled={isEditingTranslation}
+                    onWheel={(e) => e.target.blur()}
+                  />
+                ))}
                 <span className="grey-small">{unit}</span>
               </div>
             ))}

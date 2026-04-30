@@ -25,3 +25,40 @@
   font-weight: 500;
   white-space: nowrap;
 }
+
+/* Single-column header label */
+.nutrition-col-header-single {
+  font-weight: 500;
+  padding-bottom: 0.1rem;
+}
+
+/* Two-column nutrition display */
+.nutrition-dual-table {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 0.25rem 0.75rem;
+  margin-top: 0.35rem;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.nutrition-dual-header {
+  display: contents;
+}
+
+.nutrition-col-title {
+  text-align: right;
+  font-weight: 500;
+}
+
+.nutrition-dual-row {
+  display: contents;
+}
+
+.nutrition-dual-row span:first-child {
+  align-self: center;
+}
+
+.nutrition-dual-row .nutrition-value {
+  text-align: right;
+}

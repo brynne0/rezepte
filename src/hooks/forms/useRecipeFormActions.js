@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { buildNutritionColumns } from "../../utils/nutritionUtils";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "../data/useRecipeActions";
@@ -111,6 +112,17 @@ export const useRecipeFormActions = ({
     const toNutritionValue = (v) =>
       v !== "" && v !== null && v !== undefined ? parseFloat(v) : null;
 
+    const parsedColumns = (formData.nutrition_columns || []).map((col) => ({
+      label: col.label || "",
+      calories: toNutritionValue(col.calories),
+      protein: toNutritionValue(col.protein),
+      fat: toNutritionValue(col.fat),
+      carbs: toNutritionValue(col.carbs),
+      fiber: toNutritionValue(col.fiber),
+      sugar: toNutritionValue(col.sugar),
+      sodium: toNutritionValue(col.sodium),
+    }));
+
     return {
       title: formData.title.trim(),
       categories: formData.categories,
@@ -122,13 +134,7 @@ export const useRecipeFormActions = ({
       notes: formData.notes?.trim() || "",
       images: formData.images || [],
       ingredientLinks: formData.ingredientLinks || {},
-      nutrition_calories: toNutritionValue(formData.nutrition_calories),
-      nutrition_protein: toNutritionValue(formData.nutrition_protein),
-      nutrition_fat: toNutritionValue(formData.nutrition_fat),
-      nutrition_carbs: toNutritionValue(formData.nutrition_carbs),
-      nutrition_fiber: toNutritionValue(formData.nutrition_fiber),
-      nutrition_sugar: toNutritionValue(formData.nutrition_sugar),
-      nutrition_sodium: toNutritionValue(formData.nutrition_sodium),
+      nutrition: buildNutritionColumns(parsedColumns),
     };
   }, [formData]);
 

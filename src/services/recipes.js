@@ -2,7 +2,6 @@ import supabase from "../lib/supabase";
 import pluralize from "pluralize";
 import { updateRecipeTranslations } from "./translationService";
 import { uploadLocalImages, cleanupOrphanedImages } from "./imageService";
-import { buildNutritionJson } from "../utils/nutritionUtils";
 
 // Helper function to determine if an ingredient name was entered as plural
 const determineIngredientPlurality = async (inputName, language = "en") => {
@@ -760,7 +759,7 @@ export const createRecipe = async (
       notes: recipeData.notes,
       original_language: recipeData.original_language,
       images: recipeData.images || [],
-      nutrition: buildNutritionJson(recipeData),
+      nutrition: recipeData.nutrition,
     }).filter(([, v]) => v !== undefined)
   );
 
@@ -1005,7 +1004,7 @@ export const updateRecipe = async (
       source: recipeData.source,
       notes: recipeData.notes,
       images: recipeData.images,
-      nutrition: buildNutritionJson(recipeData),
+      nutrition: recipeData.nutrition,
     }).filter(([, v]) => v !== undefined)
   );
 

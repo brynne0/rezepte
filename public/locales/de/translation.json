@@ -302,5 +302,7 @@
   "nutrition_carbs": "KH",
   "nutrition_fiber": "Ballaststoffe",
   "nutrition_sugar": "Zucker",
-  "nutrition_sodium": "Natrium"
+  "nutrition_sodium": "Natrium",
+  "nutrition_add_column": "Spalte hinzufügen",
+  "nutrition_remove_column": "Spalte entfernen"
 }

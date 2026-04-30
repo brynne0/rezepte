@@ -115,6 +115,18 @@ describe("RecipeForm", () => {
     notes: "Test notes",
     images: [],
     ingredientLinks: {},
+    nutrition_columns: [
+      {
+        label: "",
+        calories: null,
+        protein: null,
+        fat: null,
+        carbs: null,
+        fiber: null,
+        sugar: null,
+        sodium: null,
+      },
+    ],
   };
 
   const mockHookReturn = {
@@ -1357,6 +1369,18 @@ describe("RecipeForm", () => {
           ungroupedIngredients: [],
           ingredientSections: [],
           instructions: [],
+          nutrition_columns: [
+            {
+              label: "",
+              calories: null,
+              protein: null,
+              fat: null,
+              carbs: null,
+              fiber: null,
+              sugar: null,
+              sodium: null,
+            },
+          ],
         },
       });
 
