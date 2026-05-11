@@ -6,7 +6,6 @@ import { signUp, signIn, signInWithGoogle } from "../../services/auth";
 import {
   validateAuthForm,
   validateUsernameUnique,
-  validateEmailUnique,
   isPasswordStrong,
 } from "../../utils/validation";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
@@ -104,15 +103,10 @@ const AuthPage = ({ setLoginMessage }) => {
       errors.password = t("password_requirements_not_met");
     }
 
-    // Check for username and email uniqueness
+    // Check for username uniqueness
     const usernameError = await validateUsernameUnique(username, t);
-    const emailError = await validateEmailUnique(email, t);
-
     if (usernameError) {
       errors.username = usernameError;
-    }
-    if (emailError) {
-      errors.email = emailError;
     }
 
     // If there are any validation errors, show them all and return
@@ -129,7 +123,14 @@ const AuthPage = ({ setLoginMessage }) => {
 
     if (error) {
       setIsLoading(false);
-      setErrorMessage(t("signup_failed"));
+      if (error.type === "EMAIL_EXISTS") {
+        setValidationErrors((prev) => ({
+          ...prev,
+          email: t("email_already_exists"),
+        }));
+      } else {
+        setErrorMessage(t("signup_failed"));
+      }
     } else {
       setIsLoading(false);
       setSentToEmail(email);

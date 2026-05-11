@@ -12,6 +12,10 @@ export const signUp = async (email, first_name, username, password) => {
     },
   });
 
+  if (!error && data.user?.identities?.length === 0) {
+    return { data: null, error: { type: "EMAIL_EXISTS" } };
+  }
+
   return { data, error };
 };
 

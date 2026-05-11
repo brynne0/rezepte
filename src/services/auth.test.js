@@ -51,7 +51,13 @@ describe("Auth Service", () => {
 
   describe("signUp", () => {
     test("calls supabase auth.signUp with correct parameters", async () => {
-      const mockData = { user: { id: "123", email: "test@example.com" } };
+      const mockData = {
+        user: {
+          id: "123",
+          email: "test@example.com",
+          identities: [{ id: "identity-1" }],
+        },
+      };
       supabase.auth.signUp.mockResolvedValue({
         data: mockData,
         error: null,
@@ -81,8 +87,29 @@ describe("Auth Service", () => {
       });
     });
 
+    test("returns EMAIL_EXISTS error when Supabase signals duplicate via empty identities", async () => {
+      supabase.auth.signUp.mockResolvedValue({
+        data: {
+          user: { id: "123", email: "test@example.com", identities: [] },
+        },
+        error: null,
+      });
+
+      const result = await signUp(
+        "test@example.com",
+        "John",
+        "johndoe",
+        "password123"
+      );
+
+      expect(result).toEqual({
+        data: null,
+        error: { type: "EMAIL_EXISTS" },
+      });
+    });
+
     test("handles signup errors", async () => {
-      const mockError = { message: "Email already exists" };
+      const mockError = { message: "Signup failed" };
       supabase.auth.signUp.mockResolvedValue({
         data: null,
         error: mockError,
