@@ -16,6 +16,7 @@
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-body: var(--body-text);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
 
@@ -65,13 +66,12 @@
   --card-foreground: oklch(0.147 0.004 49.25);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.147 0.004 49.25);
-  --primary: #ccb3a3;
-  /* TODO - below is the button primary colour and the above is text primary */
-  --temp: #55443c;
+  --primary: #55443c;
   --primary-foreground: oklch(0.985 0.001 106.423);
+  --body-text: #ccb3a3;
   --secondary: oklch(0.97 0.001 106.424);
   --secondary-foreground: oklch(0.216 0.006 56.043);
-  --muted: oklch(0.97 0.001 106.424);
+  --muted: #f8f2e6;
   --muted-foreground: oklch(0.553 0.013 58.071);
   --accent: oklch(0.97 0.001 106.424);
   --accent-foreground: oklch(0.216 0.006 56.043);
@@ -79,9 +79,9 @@
   --accent-red: #933c1f;
   --destructive: #c03636;
   --destructive-foreground: oklch(0.985 0.001 106.423);
-  --border: oklch(0.923 0.003 48.717);
-  --input: oklch(0.923 0.003 48.717);
-  --ring: oklch(0.709 0.01 56.259);
+  --border: #523f1955;
+  --input: #523f1955;
+  --ring: #523f1955;
   --chart-1: oklch(0.869 0.005 56.366);
   --chart-2: oklch(0.553 0.013 58.071);
   --chart-3: oklch(0.444 0.011 73.639);
@@ -107,6 +107,7 @@
   --popover-foreground: oklch(0.985 0.001 106.423);
   --primary: #ccb3a3;
   --primary-foreground: oklch(0.216 0.006 56.043);
+  --body-text: #ccb3a3;
   --secondary: oklch(0.268 0.007 34.298);
   --secondary-foreground: oklch(0.985 0.001 106.423);
   --muted: oklch(0.268 0.007 34.298);
