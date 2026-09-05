@@ -24,52 +24,12 @@
   justify-content: center;
 }
 
-.search-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-input-with-icon {
-  padding-right: 2rem !important;
-  flex: 1;
-}
-
-.btn-search {
-  position: absolute;
-  right: 0;
-}
-
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
   /* Stack search and sort vertically on mobile */
   .search-and-sort-container {
     flex-direction: column;
     gap: 0.75rem;
-  }
-
-  /* Logo styling for mobile */
-  .header-logo,
-  .header-logo-2 {
-    width: 2rem;
-    height: 2rem;
-  }
-
-  /* Show login wrapper on mobile but only logo */
-  .login-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  /* Hide login/logout buttons on mobile (moved to hamburger) */
-  .login-wrapper button {
-    display: none;
-  }
-
-  /* Keep only the logo visible */
-  .login-wrapper > div:first-child {
-    display: flex;
   }
 
   .search-bar-wrapper {

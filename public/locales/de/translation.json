@@ -76,7 +76,7 @@
   "account_deleted_goodbye": "Auf Wiedersehen, {{name}}! Dein Konto wurde erfolgreich gelöscht.",
   "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
 
-  "search": "Suchen",
+  "search": "Rezepte suchen",
   "sort_by_title": "Nach Titel sortieren",
   "sort_by_recently_used": "Zuletzt verwendet sortieren",
   "show_images": "Bilder anzeigen",

@@ -35,8 +35,8 @@ describe("SortButtons Component", () => {
     const recentButton = screen.getByLabelText("sort_by_recently_used");
     const titleButton = screen.getByLabelText("sort_by_title");
 
-    expect(recentButton).toHaveClass("selected");
-    expect(titleButton).not.toHaveClass("selected");
+    expect(recentButton).toHaveAttribute("aria-pressed", "true");
+    expect(titleButton).toHaveAttribute("aria-pressed", "false");
   });
 
   test("shows correct active state for title sorting", () => {
@@ -45,8 +45,8 @@ describe("SortButtons Component", () => {
     const titleButton = screen.getByLabelText("sort_by_title");
     const recentButton = screen.getByLabelText("sort_by_recently_used");
 
-    expect(titleButton).toHaveClass("selected");
-    expect(recentButton).not.toHaveClass("selected");
+    expect(titleButton).toHaveAttribute("aria-pressed", "true");
+    expect(recentButton).toHaveAttribute("aria-pressed", "false");
   });
 
   test("handles title sort click - from unselected to asc", () => {
@@ -145,21 +145,6 @@ describe("SortButtons Component", () => {
     expect(titleButton).toHaveAttribute("aria-label", "sort_by_title");
     expect(recentButton).toHaveAttribute("title", "sort_by_recently_used");
     expect(recentButton).toHaveAttribute("aria-label", "sort_by_recently_used");
-  });
-
-  test("buttons have correct CSS classes", () => {
-    render(<SortButtons {...defaultProps} sortBy="title_asc" />);
-
-    const titleButton = screen.getByLabelText("sort_by_title");
-    const recentButton = screen.getByLabelText("sort_by_recently_used");
-
-    expect(titleButton).toHaveClass(
-      "btn-unstyled",
-      "btn-icon-neutral",
-      "selected"
-    );
-    expect(recentButton).toHaveClass("btn-unstyled", "btn-icon-neutral");
-    expect(recentButton).not.toHaveClass("selected");
   });
 
   test("translation function is called with correct keys", () => {

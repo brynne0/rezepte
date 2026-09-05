@@ -21,6 +21,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import FriendsPanel from "../FriendsPanel/FriendsPanel";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -115,7 +120,7 @@ const Header = ({
   };
 
   // Language toggle
-  const LanguageSelector = ({ className = "", onLanguageChange = null }) => {
+  const LanguageSelector = ({ onLanguageChange = null }) => {
     const nextLanguage = i18n.language === "en" ? "de" : "en";
     return (
       <Button
@@ -127,7 +132,6 @@ const Header = ({
           }
         }}
         disabled={disableLanguageSwitch}
-        className={`language ${className}`}
         aria-label={
           nextLanguage === "en" ? t("switch_to_english") : t("switch_to_german")
         }
@@ -338,15 +342,20 @@ const Header = ({
         <div className="search-bar-wrapper">
           <div className="search-and-sort-container">
             <form
-              className="search-bar"
               onSubmit={(e) => {
                 e.preventDefault();
                 setSearchTerm(currentSearchInput);
                 navigate("/");
               }}
             >
-              <div className="search-input-wrapper">
-                <input
+              <InputGroup>
+                <InputGroupAddon
+                  align="inline-start"
+                  className="text-foreground"
+                >
+                  <Search />
+                </InputGroupAddon>
+                <InputGroupInput
                   id="search"
                   type="text"
                   value={currentSearchInput}
@@ -357,19 +366,9 @@ const Header = ({
                       setSelectedCategory("all_recipes");
                     }
                   }}
-                  className="input input--secondary search-input-with-icon"
                   placeholder={t("search")}
                 />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="btn-search"
-                  type="submit"
-                  aria-label={t("search")}
-                >
-                  <Search />
-                </Button>
-              </div>
+              </InputGroup>
             </form>
             {setSortBy && (
               <SortButtons

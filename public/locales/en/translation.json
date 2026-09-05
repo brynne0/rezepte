@@ -76,7 +76,7 @@
   "account_deleted_goodbye": "Goodbye, {{name}}! Your account has been successfully deleted.",
   "delete_account_error": "Failed to delete account. Please try again.",
 
-  "search": "Search",
+  "search": "Search recipes",
   "sort_by_title": "Sort by title",
   "sort_by_recently_used": "Sort by recently used",
   "show_images": "Show images",

@@ -8,7 +8,8 @@ import {
   Image,
   ImageOff,
 } from "lucide-react";
-import "./SortButtons.css";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Toggle } from "@/components/ui/toggle";
 
 const SortButtons = ({
   sortBy,
@@ -39,24 +40,20 @@ const SortButtons = ({
   };
 
   const getTitleIcon = () => {
-    if (sortBy === "title_asc") return <ArrowDownAZ size={20} />;
-    if (sortBy === "title_desc") return <ArrowDownZA size={20} />;
-    return <ArrowDownAZ size={20} />;
+    if (sortBy === "title_asc") return <ArrowDownAZ />;
+    if (sortBy === "title_desc") return <ArrowDownZA />;
+    return <ArrowDownAZ />;
   };
 
   const getRecentIcon = () => {
-    if (sortBy === "last_viewed_at_asc") return <ClockArrowUp size={20} />;
-    if (sortBy === "last_viewed_at_desc") return <ClockArrowDown size={20} />;
-    return <Clock size={20} />;
-  };
-
-  const handleImageToggle = () => {
-    onShowImagesChange(!showImages);
+    if (sortBy === "last_viewed_at_asc") return <ClockArrowUp />;
+    if (sortBy === "last_viewed_at_desc") return <ClockArrowDown />;
+    return <Clock />;
   };
 
   const getImageIcon = () => {
-    if (showImages) return <Image size={20} />;
-    else return <ImageOff size={20} />;
+    if (showImages) return <Image />;
+    else return <ImageOff />;
   };
 
   const isTitleActive = sortBy === "title_asc" || sortBy === "title_desc";
@@ -64,38 +61,38 @@ const SortButtons = ({
     sortBy === "last_viewed_at_asc" || sortBy === "last_viewed_at_desc";
 
   return (
-    <div className="sort-buttons">
-      <button
-        className={`btn-unstyled btn-icon-neutral ${
-          isRecentActive ? "selected" : ""
-        }`}
-        onClick={handleRecentSort}
-        aria-label={t("sort_by_recently_used")}
-        title={t("sort_by_recently_used")}
+    <div className="flex items-center justify-center gap-2 md:absolute md:top-1/2 md:left-0 md:-ml-4 md:-translate-x-full md:-translate-y-1/2">
+      <ToggleGroup
+        value={isRecentActive ? ["recent"] : isTitleActive ? ["title"] : []}
+        variant="outline"
       >
-        {getRecentIcon()}
-      </button>
-      <button
-        className={`btn-unstyled btn-icon-neutral ${
-          isTitleActive ? "selected" : ""
-        }`}
-        onClick={handleTitleSort}
-        aria-label={t("sort_by_title")}
-        title={t("sort_by_title")}
-      >
-        {getTitleIcon()}
-      </button>
+        <ToggleGroupItem
+          value="recent"
+          onClick={handleRecentSort}
+          aria-label={t("sort_by_recently_used")}
+          title={t("sort_by_recently_used")}
+        >
+          {getRecentIcon()}
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="title"
+          onClick={handleTitleSort}
+          aria-label={t("sort_by_title")}
+          title={t("sort_by_title")}
+        >
+          {getTitleIcon()}
+        </ToggleGroupItem>
+      </ToggleGroup>
       {isLoggedIn && (
-        <button
-          className={`btn-unstyled btn-icon-neutral ${
-            showImages ? "selected" : ""
-          }`}
-          onClick={handleImageToggle}
+        <Toggle
+          variant="outline"
+          pressed={showImages}
+          onPressedChange={onShowImagesChange}
           aria-label={showImages ? t("hide_images") : t("show_images")}
           title={showImages ? t("hide_images") : t("show_images")}
         >
           {getImageIcon()}
-        </button>
+        </Toggle>
       )}
     </div>
   );
