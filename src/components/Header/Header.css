@@ -1,34 +1,3 @@
-/* Language Selection - TODO  */
-.language-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.language:hover,
-.language.selected {
-  color: var(--color-danger-dark);
-}
-
-.language.disabled {
-  color: var(--color-border-medium);
-  opacity: 0.5;
-}
-
-.language.disabled:hover {
-  color: var(--color-border-medium);
-}
-
-/* Keep selected language red even when disabled */
-.language.selected.disabled {
-  color: var(--color-danger-dark);
-  opacity: 0.7;
-}
-
-.language.selected.disabled:hover {
-  color: var(--color-danger-dark);
-}
-
 .nav-menu-wrapper {
   position: relative;
   display: flex;
@@ -141,16 +110,6 @@
 
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
-  /* Hide desktop navigation on mobile */
-  .language-wrapper {
-    display: none;
-  }
-
-  /* Show language-wrapper when inside dropdown */
-  .dropdown .language-wrapper {
-    display: flex;
-  }
-
   /* Allow nested friends dropdown to escape the hamburger menu's overflow clipping */
   .nav-menu-dropdown {
     overflow: visible;
@@ -176,8 +135,7 @@
     gap: 1rem;
   }
 
-  /* Hide language and login/logout buttons on mobile (moved to hamburger) */
-  .login-wrapper .language-wrapper,
+  /* Hide login/logout buttons on mobile (moved to hamburger) */
   .login-wrapper button {
     display: none;
   }
@@ -189,11 +147,6 @@
 
   .search-bar-wrapper {
     margin: 0;
-  }
-
-  /* Mobile typography */
-  .first-name {
-    font-size: 0.8rem;
   }
 
   /* Reduce spacing between nav icons on mobile */

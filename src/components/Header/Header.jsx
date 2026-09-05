@@ -203,10 +203,10 @@ const Header = ({
 
   return (
     <>
-      <header className="relative flex-between h-auto bg-background py-4 z-50">
+      <header className="relative flex-between py-2 bg-background z-50">
         {/* Language and Theme Selection */}
-        <div className="flex shrink-0 items-center ">
-          <Squirrel className="pr-4 size-16" />
+        <div className="flex shrink-0 items-center">
+          <Squirrel className="pr-4 size-14" />
           <LanguageSelector />
           <ThemeToggle />
         </div>
@@ -214,10 +214,12 @@ const Header = ({
         {/* Title */}
         <div className="absolute inset-0 m-auto flex h-max w-max flex-col items-center">
           {/* Display user's first name above header */}
-          {firstName && <span> {`${firstName}'s`}</span>}
+          {firstName && (
+            <span className="text-sm leading-none md:text-base">{`${firstName}'s`}</span>
+          )}
           <Button
             variant="ghost"
-            className="select-none p-0 font-forta text-3xl leading-none text-foreground transition-none hover:bg-transparent active:translate-y-0 md:text-5xl"
+            className="h-auto select-none p-0 font-forta text-3xl leading-none text-foreground transition-none hover:bg-transparent active:translate-y-0 md:text-5xl"
             onClick={() => {
               navigate("/");
             }}
