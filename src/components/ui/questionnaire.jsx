@@ -1,28 +1,23 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Questionnaire as QuestionnairePrimitive } from "@shadcn/react/questionnaire"
-import { cn } from "cn"
+import * as React from "react";
+import { Questionnaire as QuestionnairePrimitive } from "@shadcn/react/questionnaire";
+import { cn } from "cn";
 
 import { buttonVariants } from "@/components/ui/button";
-import { CheckIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react";
 
-function Questionnaire({
-  className,
-  ...props
-}) {
+function Questionnaire({ className, ...props }) {
   return (
     <QuestionnairePrimitive.Root
       data-slot="questionnaire"
       className={cn("flex w-full min-w-0 flex-col gap-4", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function QuestionnaireProgress({
-  className,
-  ...props
-}) {
+function QuestionnaireProgress({ className, ...props }) {
   return (
     <QuestionnairePrimitive.Progress
       data-slot="questionnaire-progress"
@@ -30,26 +25,25 @@ function QuestionnaireProgress({
         "min-h-[1lh] w-fit min-w-[14ch] text-xs font-medium text-muted-foreground tabular-nums",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function QuestionnaireItem({
-  className,
-  ...props
-}) {
+function QuestionnaireItem({ className, ...props }) {
   return (
     <QuestionnairePrimitive.Item
       data-slot="questionnaire-item"
-      className={cn("flex min-w-0 flex-col gap-4 border-0 p-0 outline-none", className)}
-      {...props} />
+      className={cn(
+        "flex min-w-0 flex-col gap-4 border-0 p-0 outline-none",
+        className
+      )}
+      {...props}
+    />
   );
 }
 
-function QuestionnaireTitle({
-  className,
-  ...props
-}) {
+function QuestionnaireTitle({ className, ...props }) {
   return (
     <QuestionnairePrimitive.Title
       data-slot="questionnaire-title"
@@ -57,39 +51,35 @@ function QuestionnaireTitle({
         "font-heading text-base leading-snug font-medium text-pretty [&:not(:has(~[data-slot=questionnaire-description]))]:mb-4",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function QuestionnaireDescription({
-  className,
-  ...props
-}) {
+function QuestionnaireDescription({ className, ...props }) {
   return (
     <QuestionnairePrimitive.Description
       data-slot="questionnaire-description"
       className={cn("text-sm text-pretty text-muted-foreground", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function QuestionnaireChoices({
-  className,
-  ...props
-}) {
+function QuestionnaireChoices({ className, ...props }) {
   return (
     <QuestionnairePrimitive.Choices
       data-slot="questionnaire-choices"
-      className={cn("group/questionnaire-choices grid min-w-0 gap-2", className)}
-      {...props} />
+      className={cn(
+        "group/questionnaire-choices grid min-w-0 gap-2",
+        className
+      )}
+      {...props}
+    />
   );
 }
 
-function QuestionnaireChoice({
-  children,
-  className,
-  ...props
-}) {
+function QuestionnaireChoice({ children, className, ...props }) {
   return (
     <QuestionnairePrimitive.Choice
       data-slot="questionnaire-choice"
@@ -98,53 +88,56 @@ function QuestionnaireChoice({
         "data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50",
         className
       )}
-      {...props}>
+      {...props}
+    >
       <QuestionnairePrimitive.ChoiceInput
         data-slot="questionnaire-choice-input"
-        className="absolute inset-0 z-10 size-full cursor-pointer opacity-0" />
+        className="absolute inset-0 z-10 size-full cursor-pointer opacity-0"
+      />
       <span
         aria-hidden="true"
         data-slot="questionnaire-choice-indicator"
-        className="pointer-events-none relative flex size-4 shrink-0 translate-y-[--spacing(0.45)] items-center justify-center rounded-[4px] border border-input group-has-data-[slot=questionnaire-choice-description]/questionnaire-choice:translate-y-0.5 group-data-[type=radio]/questionnaire-choice:rounded-full group-data-checked/questionnaire-choice:border-primary group-data-checked/questionnaire-choice:bg-primary group-data-checked/questionnaire-choice:text-primary-foreground dark:bg-input/30 dark:group-data-checked/questionnaire-choice:bg-primary">
+        className="pointer-events-none relative flex size-4 shrink-0 translate-y-[--spacing(0.45)] items-center justify-center rounded-[4px] border border-input group-has-data-[slot=questionnaire-choice-description]/questionnaire-choice:translate-y-0.5 group-data-[type=radio]/questionnaire-choice:rounded-full group-data-checked/questionnaire-choice:border-primary group-data-checked/questionnaire-choice:bg-primary group-data-checked/questionnaire-choice:text-primary-foreground dark:bg-input/30 dark:group-data-checked/questionnaire-choice:bg-primary"
+      >
         <span
           data-slot="questionnaire-choice-indicator-dot"
-          className="hidden size-2 rounded-full bg-primary-foreground group-data-[type=checkbox]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block" />
+          className="hidden size-2 rounded-full bg-primary-foreground group-data-[type=checkbox]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block"
+        />
         <CheckIcon
           data-slot="questionnaire-choice-indicator-check"
-          className="hidden size-3.5 group-data-[type=radio]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block" />
+          className="hidden size-3.5 group-data-[type=radio]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block"
+        />
       </span>
       <QuestionnairePrimitive.ChoiceLabel
         data-slot="questionnaire-choice-label"
-        className="flex min-w-0 flex-1 flex-col gap-0.5 leading-snug">
+        className="flex min-w-0 flex-1 flex-col gap-0.5 leading-snug"
+      >
         {children}
       </QuestionnairePrimitive.ChoiceLabel>
       <QuestionnairePrimitive.ChoiceShortcut
         data-slot="questionnaire-choice-shortcut"
-        className="pointer-events-none ms-auto hidden size-5 shrink-0 translate-y-[--spacing(0.45)] items-center justify-center rounded-md border border-input bg-background font-mono text-[0.625rem] leading-none font-medium text-muted-foreground group-has-data-[slot=questionnaire-choice-description]/questionnaire-choice:translate-y-0.5 group-data-[shortcut]/questionnaire-choice:inline-flex" />
+        className="pointer-events-none ms-auto hidden size-5 shrink-0 translate-y-[--spacing(0.45)] items-center justify-center rounded-md border border-input bg-background font-mono text-[0.625rem] leading-none font-medium text-muted-foreground group-has-data-[slot=questionnaire-choice-description]/questionnaire-choice:translate-y-0.5 group-data-[shortcut]/questionnaire-choice:inline-flex"
+      />
     </QuestionnairePrimitive.Choice>
   );
 }
 
-function QuestionnaireChoiceDescription({
-  className,
-  ...props
-}) {
+function QuestionnaireChoiceDescription({ className, ...props }) {
   return (
     <span
       data-slot="questionnaire-choice-description"
       className={cn("text-muted-foreground", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function QuestionnaireInput({
-  className,
-  ...props
-}) {
+function QuestionnaireInput({ className, ...props }) {
   return (
     <div
       data-slot="questionnaire-input-wrapper"
-      className="group/questionnaire-input relative w-full min-w-0">
+      className="group/questionnaire-input relative w-full min-w-0"
+    >
       <QuestionnairePrimitive.Input
         data-slot="questionnaire-input"
         className={cn(
@@ -152,27 +145,23 @@ function QuestionnaireInput({
           "selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground",
           className
         )}
-        {...props} />
+        {...props}
+      />
     </div>
   );
 }
 
-function QuestionnaireError({
-  className,
-  ...props
-}) {
+function QuestionnaireError({ className, ...props }) {
   return (
     <QuestionnairePrimitive.Error
       data-slot="questionnaire-error"
       className={cn("mt-2 text-sm text-destructive", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function QuestionnaireActions({
-  className,
-  ...props
-}) {
+function QuestionnaireActions({ className, ...props }) {
   return (
     <div
       data-slot="questionnaire-actions"
@@ -180,7 +169,8 @@ function QuestionnaireActions({
         "grid min-h-11 w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:min-h-8",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -201,7 +191,8 @@ function QuestionnairePrevious({
         "col-start-1 row-start-1 min-h-11 justify-self-start sm:min-h-0",
         className
       )}
-      {...props}>
+      {...props}
+    >
       {children ?? "Previous"}
     </QuestionnairePrimitive.Previous>
   );
@@ -224,7 +215,8 @@ function QuestionnaireSkip({
         "col-start-2 row-start-1 min-h-11 justify-self-end sm:min-h-0",
         className
       )}
-      {...props}>
+      {...props}
+    >
       {children ?? "Skip"}
     </QuestionnairePrimitive.Skip>
   );
@@ -247,7 +239,8 @@ function QuestionnaireNext({
         "col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0",
         className
       )}
-      {...props}>
+      {...props}
+    >
       {children ?? "Next"}
     </QuestionnairePrimitive.Next>
   );
@@ -270,7 +263,8 @@ function QuestionnaireSubmit({
         "col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0",
         className
       )}
-      {...props}>
+      {...props}
+    >
       {children ?? "Submit"}
     </QuestionnairePrimitive.Submit>
   );
@@ -292,4 +286,4 @@ export {
   QuestionnaireSkip,
   QuestionnaireSubmit,
   QuestionnaireTitle,
-}
+};

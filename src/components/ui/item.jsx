@@ -1,15 +1,12 @@
-import * as React from "react"
-import { mergeProps } from "@base-ui/react/merge-props"
-import { useRender } from "@base-ui/react/use-render"
+import * as React from "react";
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cva } from "class-variance-authority";
-import { cn } from "cn"
+import { cn } from "cn";
 
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/separator";
 
-function ItemGroup({
-  className,
-  ...props
-}) {
+function ItemGroup({ className, ...props }) {
   return (
     <div
       role="list"
@@ -18,20 +15,19 @@ function ItemGroup({
         "group/item-group flex w-full flex-col gap-4 has-data-[size=sm]:gap-2.5 has-data-[size=xs]:gap-2",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function ItemSeparator({
-  className,
-  ...props
-}) {
+function ItemSeparator({ className, ...props }) {
   return (
     <Separator
       data-slot="item-separator"
       orientation="horizontal"
       className={cn("my-2", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -55,7 +51,7 @@ const itemVariants = cva(
       size: "default",
     },
   }
-)
+);
 
 function Item({
   className,
@@ -66,9 +62,12 @@ function Item({
 }) {
   return useRender({
     defaultTagName: "div",
-    props: mergeProps({
-      className: cn(itemVariants({ variant, size, className })),
-    }, props),
+    props: mergeProps(
+      {
+        className: cn(itemVariants({ variant, size, className })),
+      },
+      props
+    ),
     render,
     state: {
       slot: "item",
@@ -93,26 +92,20 @@ const itemMediaVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
-function ItemMedia({
-  className,
-  variant = "default",
-  ...props
-}) {
+function ItemMedia({ className, variant = "default", ...props }) {
   return (
     <div
       data-slot="item-media"
       data-variant={variant}
       className={cn(itemMediaVariants({ variant, className }))}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function ItemContent({
-  className,
-  ...props
-}) {
+function ItemContent({ className, ...props }) {
   return (
     <div
       data-slot="item-content"
@@ -120,14 +113,12 @@ function ItemContent({
         "flex flex-1 flex-col gap-1 group-data-[size=xs]/item:gap-0 [&+[data-slot=item-content]]:flex-none",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function ItemTitle({
-  className,
-  ...props
-}) {
+function ItemTitle({ className, ...props }) {
   return (
     <div
       data-slot="item-title"
@@ -135,14 +126,12 @@ function ItemTitle({
         "line-clamp-1 flex w-fit items-center gap-2 text-sm leading-snug font-medium underline-offset-4",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function ItemDescription({
-  className,
-  ...props
-}) {
+function ItemDescription({ className, ...props }) {
   return (
     <p
       data-slot="item-description"
@@ -150,43 +139,44 @@ function ItemDescription({
         "line-clamp-2 text-left text-sm leading-normal font-normal text-muted-foreground group-data-[size=xs]/item:text-xs [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function ItemActions({
-  className,
-  ...props
-}) {
+function ItemActions({ className, ...props }) {
   return (
     <div
       data-slot="item-actions"
       className={cn("flex items-center gap-2", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function ItemHeader({
-  className,
-  ...props
-}) {
+function ItemHeader({ className, ...props }) {
   return (
     <div
       data-slot="item-header"
-      className={cn("flex basis-full items-center justify-between gap-2", className)}
-      {...props} />
+      className={cn(
+        "flex basis-full items-center justify-between gap-2",
+        className
+      )}
+      {...props}
+    />
   );
 }
 
-function ItemFooter({
-  className,
-  ...props
-}) {
+function ItemFooter({ className, ...props }) {
   return (
     <div
       data-slot="item-footer"
-      className={cn("flex basis-full items-center justify-between gap-2", className)}
-      {...props} />
+      className={cn(
+        "flex basis-full items-center justify-between gap-2",
+        className
+      )}
+      {...props}
+    />
   );
 }
 
@@ -201,4 +191,4 @@ export {
   ItemDescription,
   ItemHeader,
   ItemFooter,
-}
+};

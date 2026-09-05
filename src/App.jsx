@@ -42,6 +42,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
 import Settings from "./pages/Settings/Settings";
 import FriendRecipes from "./pages/FriendRecipes/FriendRecipes";
+import ShowcasePage from "./pages/ShowcasePage/ShowcasePage";
 
 function App() {
   const { t } = useTranslation();
@@ -299,6 +300,7 @@ function AppRoutes(props) {
               </ProtectedRoute>
             }
           />
+          <Route path="/showcase" element={<ShowcasePage />} />
           <Route
             path="/auth-page"
             element={<AuthPage setLoginMessage={props.setLoginMessage} />}

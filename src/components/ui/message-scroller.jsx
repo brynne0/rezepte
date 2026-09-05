@@ -1,25 +1,20 @@
-import * as React from "react"
+import * as React from "react";
 import {
   MessageScroller as MessageScrollerPrimitive,
   useMessageScroller,
   useMessageScrollerScrollable,
   useMessageScrollerVisibility,
-} from "@shadcn/react/message-scroller"
-import { cn } from "cn"
+} from "@shadcn/react/message-scroller";
+import { cn } from "cn";
 
-import { Button } from "@/components/ui/button"
-import { ArrowDownIcon } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { ArrowDownIcon } from "lucide-react";
 
-function MessageScrollerProvider(
-  props
-) {
+function MessageScrollerProvider(props) {
   return <MessageScrollerPrimitive.Provider {...props} />;
 }
 
-function MessageScroller({
-  className,
-  ...props
-}) {
+function MessageScroller({ className, ...props }) {
   return (
     <MessageScrollerPrimitive.Root
       data-slot="message-scroller"
@@ -27,14 +22,12 @@ function MessageScroller({
         "group/message-scroller relative flex size-full min-h-0 flex-col overflow-hidden",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function MessageScrollerViewport({
-  className,
-  ...props
-}) {
+function MessageScrollerViewport({ className, ...props }) {
   return (
     <MessageScrollerPrimitive.Viewport
       data-slot="message-scroller-viewport"
@@ -42,27 +35,22 @@ function MessageScrollerViewport({
         "size-full min-h-0 min-w-0 scroll-fade-b scrollbar-thin scrollbar-gutter-stable overflow-y-auto overscroll-contain contain-content data-autoscrolling:scrollbar-thumb-transparent data-autoscrolling:scrollbar-track-transparent data-pending-scroll:invisible",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function MessageScrollerContent({
-  className,
-  ...props
-}) {
+function MessageScrollerContent({ className, ...props }) {
   return (
     <MessageScrollerPrimitive.Content
       data-slot="message-scroller-content"
       className={cn("flex h-max min-h-full flex-col gap-6", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function MessageScrollerItem({
-  className,
-  scrollAnchor = false,
-  ...props
-}) {
+function MessageScrollerItem({ className, scrollAnchor = false, ...props }) {
   return (
     <MessageScrollerPrimitive.Item
       data-slot="message-scroller-item"
@@ -71,7 +59,8 @@ function MessageScrollerItem({
         "min-w-0 shrink-0 [contain-intrinsic-size:auto_10rem] [content-visibility:auto]",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -96,7 +85,8 @@ function MessageScrollerButton({
         className
       )}
       render={render ?? <Button variant={variant} size={size} />}
-      {...props}>
+      {...props}
+    >
       {children ?? (
         <>
           <ArrowDownIcon />
@@ -119,4 +109,4 @@ export {
   useMessageScroller,
   useMessageScrollerScrollable,
   useMessageScrollerVisibility,
-}
+};

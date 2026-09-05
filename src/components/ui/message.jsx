@@ -1,23 +1,17 @@
-import * as React from "react"
-import { cn } from "cn"
+import * as React from "react";
+import { cn } from "cn";
 
-function MessageGroup({
-  className,
-  ...props
-}) {
+function MessageGroup({ className, ...props }) {
   return (
     <div
       data-slot="message-group"
       className={cn("flex min-w-0 flex-col gap-2", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function Message({
-  className,
-  align = "start",
-  ...props
-}) {
+function Message({ className, align = "start", ...props }) {
   return (
     <div
       data-slot="message"
@@ -26,14 +20,12 @@ function Message({
         "group/message relative flex w-full min-w-0 gap-2 text-sm data-[align=end]:flex-row-reverse",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function MessageAvatar({
-  className,
-  ...props
-}) {
+function MessageAvatar({ className, ...props }) {
   return (
     <div
       data-slot="message-avatar"
@@ -41,14 +33,12 @@ function MessageAvatar({
         "flex w-fit min-w-8 shrink-0 items-center justify-center self-end overflow-hidden rounded-full bg-muted group-has-data-[slot=message-footer]/message:-translate-y-8",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function MessageContent({
-  className,
-  ...props
-}) {
+function MessageContent({ className, ...props }) {
   return (
     <div
       data-slot="message-content"
@@ -56,14 +46,12 @@ function MessageContent({
         "flex w-full min-w-0 flex-col gap-2.5 wrap-break-word group-data-[align=end]/message:*:data-slot:self-end",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function MessageHeader({
-  className,
-  ...props
-}) {
+function MessageHeader({ className, ...props }) {
   return (
     <div
       data-slot="message-header"
@@ -71,14 +59,12 @@ function MessageHeader({
         "flex max-w-full min-w-0 items-center px-3 text-xs font-medium text-muted-foreground group-has-data-[variant=ghost]/message:px-0",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function MessageFooter({
-  className,
-  ...props
-}) {
+function MessageFooter({ className, ...props }) {
   return (
     <div
       data-slot="message-footer"
@@ -86,7 +72,8 @@ function MessageFooter({
         "flex max-w-full min-w-0 items-center px-3 text-xs font-medium text-muted-foreground group-has-data-[variant=ghost]/message:px-0 group-data-[align=end]/message:justify-end",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -97,4 +84,4 @@ export {
   MessageContent,
   MessageFooter,
   MessageHeader,
-}
+};
