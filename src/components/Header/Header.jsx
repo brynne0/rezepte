@@ -199,7 +199,7 @@ const Header = ({
 
   return (
     <>
-      <header className="relative flex-between py-2 bg-background z-50">
+      <header className="relative flex items-center justify-between py-2 bg-background z-50">
         {/* Language and Theme Selection */}
         <div className="flex shrink-0 items-center">
           <Squirrel className="hidden md:block md:size-14 md:pr-4" />

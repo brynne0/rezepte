@@ -74,7 +74,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
       onClick={() => onClick && onClick(recipe)}
     >
       <CardHeader className="py-2">
-        <CardTitle className="text-xs font-medium uppercase group-hover/card:text-accent-red">
+        <CardTitle className="text-xs font-semibold uppercase group-hover/card:text-accent-red">
           {recipe.title}
         </CardTitle>
 
