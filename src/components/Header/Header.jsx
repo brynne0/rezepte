@@ -6,6 +6,7 @@ import {
   Squirrel,
   Menu,
   User,
+  Users,
   Sun,
   Moon,
   Clock,
@@ -13,13 +14,14 @@ import {
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import FriendsDropdown from "../FriendsDropdown/FriendsDropdown";
+import FriendsPanel from "../FriendsPanel/FriendsPanel";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
@@ -222,7 +224,26 @@ const Header = ({
           {/* Only display if user logged in */}
           {isLoggedIn && (
             <>
-              <FriendsDropdown />
+              <FriendsPanel
+                renderTrigger={(pendingCount) => (
+                  <Button
+                    variant="ghost"
+                    size="icon-lg"
+                    className="relative"
+                    aria-label={t("friends")}
+                  >
+                    <Users className="size-7" />
+                    {pendingCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                      >
+                        {pendingCount}
+                      </Badge>
+                    )}
+                  </Button>
+                )}
+              />
               <Button
                 data-testid="lucide-plus"
                 variant="ghost"
@@ -275,18 +296,35 @@ const Header = ({
               {/* Navigation options for logged in users */}
               {isLoggedIn && (
                 <>
-                  <FriendsDropdown onNavigate={() => setShowNavMenu(false)} />
-                  <DropdownMenuItem
-                    onClick={() => navigate("/add-recipe")}
-                    aria-label={t("add_new_recipe")}
-                  >
-                    <Plus className="size-5" />
+                  <FriendsPanel
+                    onNavigate={() => setShowNavMenu(false)}
+                    renderTrigger={(pendingCount) => (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start gap-1.5"
+                        aria-label={t("friends")}
+                      >
+                        <Users className="size-4" />
+                        {t("friends")}
+                        {pendingCount > 0 && (
+                          <Badge
+                            variant="destructive"
+                            className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                          >
+                            {pendingCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    )}
+                  />
+                  <DropdownMenuItem onClick={() => navigate("/add-recipe")}>
+                    <Plus className="size-4" />
+                    {t("add_new_recipe")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => navigate("/cooking-times")}
-                    aria-label={t("cooking_times", "Cooking Times")}
-                  >
-                    <Clock className="size-5" />
+                  <DropdownMenuItem onClick={() => navigate("/cooking-times")}>
+                    <Clock className="size-4" />
+                    {t("cooking_times", "Cooking Times")}
                   </DropdownMenuItem>
                 </>
               )}

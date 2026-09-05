@@ -112,6 +112,8 @@ describe("Header Component", () => {
         matches: false,
         addListener: vi.fn(),
         removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
       })),
     });
   });
