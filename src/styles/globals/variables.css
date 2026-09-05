@@ -7,7 +7,7 @@
   --color-background-tertiary: #fdf8f0;
   --color-border-light: #523f1955;
   --color-border-medium: #523f19bf;
-  --color-text-primary: #55443c;
+  --color-text-primary: #55443c; /* done */
   --color-text-strong: #342a24;
   --color-danger: #933c1f;
   --color-danger-dark: #7e341b;
@@ -36,7 +36,7 @@
 /* Dark mode */
 .dark {
   /* Dark mode semantic color overrides */
-  --color-text-primary: #ccb3a3;
+  --color-text-primary: #ccb3a3; /* done */
   --color-placeholder: #b6a991;
   --color-background-secondary: #342a24;
   --color-text-strong: #d4c2b3;

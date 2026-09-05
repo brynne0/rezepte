@@ -43,6 +43,7 @@ import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
 import Settings from "./pages/Settings/Settings";
 import FriendRecipes from "./pages/FriendRecipes/FriendRecipes";
 import ShowcasePage from "./pages/ShowcasePage/ShowcasePage";
+import ShowcaseLegacyPage from "./pages/ShowcaseLegacyPage/ShowcaseLegacyPage";
 
 function App() {
   const { t } = useTranslation();
@@ -301,6 +302,7 @@ function AppRoutes(props) {
             }
           />
           <Route path="/showcase" element={<ShowcasePage />} />
+          <Route path="/showcase-legacy" element={<ShowcaseLegacyPage />} />
           <Route
             path="/auth-page"
             element={<AuthPage setLoginMessage={props.setLoginMessage} />}
