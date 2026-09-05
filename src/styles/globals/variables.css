@@ -2,7 +2,6 @@
   --color-surface-primary: white;
   --color-text-secondary: grey;
   --color-placeholder: #999;
-  --color-background-primary: #f2e7d2;
   --color-background-secondary: #fffbf4;
   --color-background-overlay: #fffbf4da;
   --color-background-tertiary: #fdf8f0;
@@ -37,7 +36,6 @@
 /* Dark mode */
 .dark {
   /* Dark mode semantic color overrides */
-  --color-background-primary: #342a24;
   --color-text-primary: #ccb3a3;
   --color-placeholder: #b6a991;
   --color-background-secondary: #342a24;
