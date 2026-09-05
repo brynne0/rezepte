@@ -124,6 +124,7 @@ const Header = ({
     return (
       <Button
         variant="ghost"
+        className="text-base"
         onClick={() => {
           if (!disableLanguageSwitch) {
             i18n.changeLanguage(nextLanguage);
@@ -142,12 +143,17 @@ const Header = ({
 
   // Theme toggle
   const getThemeIcon = () => {
-    return theme === "light" ? <Moon /> : <Sun />;
+    return theme === "light" ? (
+      <Moon className="size-5" />
+    ) : (
+      <Sun className="size-5" />
+    );
   };
 
   const ThemeToggle = () => (
     <Button
       variant="ghost"
+      size="icon"
       onClick={() => toggleTheme()}
       aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
     >
