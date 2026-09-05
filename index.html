@@ -96,7 +96,7 @@
         const isDark = savedTheme ? savedTheme === "dark" : systemPrefersDark;
 
         if (isDark) {
-          document.documentElement.setAttribute("data-theme", "dark");
+          document.documentElement.classList.add("dark");
         }
       })();
     </script>

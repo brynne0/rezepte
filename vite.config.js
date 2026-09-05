@@ -1,11 +1,21 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-// https://vite.dev/config/
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
       manifest: {

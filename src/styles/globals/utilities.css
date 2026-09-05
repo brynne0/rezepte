@@ -29,6 +29,11 @@
   align-items: center;
 }
 
+/* NOTE: .flex-row and .relative below share their names with real Tailwind
+   utility classes. They stay correct only because these rules are unlayered
+   and Tailwind's output in src/styles/tailwind.css is wrapped in named
+   layers — unlayered rules always win over layered ones. Don't move these
+   into a @layer block. */
 .flex-row {
   display: flex;
   align-items: center;

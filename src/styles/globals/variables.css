@@ -18,6 +18,7 @@
   --color-success: #2a905d;
   --color-shadow: #0000000d;
   --color-error-shadow: #ef444411;
+  --color-ring: var(--color-danger-dark);
 
   --font-size-small: 0.8rem;
   --font-size-base: 1rem;
@@ -34,7 +35,7 @@
 }
 
 /* Dark mode */
-[data-theme="dark"] {
+.dark {
   /* Dark mode semantic color overrides */
   --color-background-primary: #342a24;
   --color-text-primary: #ccb3a3;
