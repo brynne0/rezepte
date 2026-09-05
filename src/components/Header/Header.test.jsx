@@ -107,6 +107,9 @@ describe("Header Component", () => {
     // Reset function mocks
     vi.clearAllMocks();
 
+    // Reset shared i18n mock state (mutated by individual tests)
+    mockI18n.language = "en";
+
     // Mock window.matchMedia
     Object.defineProperty(window, "matchMedia", {
       writable: true,
@@ -139,25 +142,27 @@ describe("Header Component", () => {
       </TestWrapper>
     );
 
-    const logo = document.querySelector(".header-logo");
+    const logo = document.querySelector(".lucide-squirrel");
     expect(logo).toBeInTheDocument();
   });
 
-  // Removed double logo functionality
-  // test("shows double squirrel logo when user is 'me'", () => {});
+  test("shows language toggle for switching to the other language", () => {
+    mockI18n.language = "en";
 
-  test("shows language selection with EN and DE options", () => {
     render(
       <TestWrapper>
         <Header {...defaultProps} />
       </TestWrapper>
     );
 
-    expect(screen.getByText("EN")).toBeInTheDocument();
+    // Single toggle shows the language you'd switch TO, not the current one
     expect(screen.getByText("DE")).toBeInTheDocument();
+    expect(screen.queryByText("EN")).not.toBeInTheDocument();
   });
 
-  test("changes language when clicking on language options", () => {
+  test("changes language when clicking the language toggle", () => {
+    mockI18n.language = "en";
+
     render(
       <TestWrapper>
         <Header {...defaultProps} />
@@ -166,9 +171,6 @@ describe("Header Component", () => {
 
     fireEvent.click(screen.getByText("DE"));
     expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
-
-    fireEvent.click(screen.getByText("EN"));
-    expect(mockI18n.changeLanguage).toHaveBeenCalledWith("en");
   });
 
   test("does not change language when disableLanguageSwitch is true", () => {
@@ -429,22 +431,6 @@ describe("Header Component", () => {
   });
 
   describe("Language Switching", () => {
-    test("shows current language as selected", () => {
-      mockI18n.language = "en";
-
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const enButton = screen.getByText("EN");
-      const deButton = screen.getByText("DE");
-
-      expect(enButton).toHaveClass("selected");
-      expect(deButton).not.toHaveClass("selected");
-    });
-
     test("calls changeLanguage when language button clicked", () => {
       mockI18n.language = "en";
 
@@ -460,41 +446,24 @@ describe("Header Component", () => {
       expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
     });
 
-    test("shows German as selected when language is German", () => {
-      mockI18n.language = "de";
-
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const enButton = screen.getByText("EN");
-      const deButton = screen.getByText("DE");
-
-      expect(deButton).toHaveClass("selected");
-      expect(enButton).not.toHaveClass("selected");
-    });
-
     test("disables language switching when disableLanguageSwitch is true", () => {
+      mockI18n.language = "en";
+
       render(
         <TestWrapper>
           <Header {...defaultProps} disableLanguageSwitch={true} />
         </TestWrapper>
       );
 
-      const enButton = screen.getByText("EN");
-      const deButton = screen.getByText("DE");
-
-      expect(enButton).toHaveClass("disabled");
-      expect(deButton).toHaveClass("disabled");
+      const toggle = screen.getByText("DE");
+      expect(toggle).toBeDisabled();
 
       // Language change should not be called when disabled
-      fireEvent.click(deButton);
+      fireEvent.click(toggle);
       expect(mockI18n.changeLanguage).not.toHaveBeenCalled();
     });
 
-    test("maintains selected state even when disabled", () => {
+    test("shows correct target language label even when disabled", () => {
       mockI18n.language = "de";
 
       render(
@@ -503,10 +472,9 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      const deButton = screen.getByText("DE");
+      const toggle = screen.getByText("EN");
 
-      expect(deButton).toHaveClass("selected");
-      expect(deButton).toHaveClass("disabled");
+      expect(toggle).toBeDisabled();
     });
   });
 
@@ -533,7 +501,7 @@ describe("Header Component", () => {
       // 4. Ingredients get translated and displayed in German
     });
 
-    test("language button state reflects i18n current language", () => {
+    test("language toggle label reflects i18n current language", () => {
       // Test that the UI correctly shows the current language state for German
       mockI18n.language = "de";
 
@@ -543,9 +511,9 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      // German should be selected
-      expect(screen.getByText("DE")).toHaveClass("selected");
-      expect(screen.getByText("EN")).not.toHaveClass("selected");
+      // Currently German, so the toggle offers to switch to English
+      expect(screen.getByText("EN")).toBeInTheDocument();
+      expect(screen.queryByText("DE")).not.toBeInTheDocument();
 
       // Clean up first render
       unmount();
@@ -560,9 +528,9 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      // English should now be selected
-      expect(screen.getByText("EN")).toHaveClass("selected");
-      expect(screen.getByText("DE")).not.toHaveClass("selected");
+      // Currently English, so the toggle offers to switch to German
+      expect(screen.getByText("DE")).toBeInTheDocument();
+      expect(screen.queryByText("EN")).not.toBeInTheDocument();
     });
   });
 
@@ -643,27 +611,6 @@ describe("Header Component", () => {
       fireEvent.click(screen.getAllByText("Settings")[0]);
 
       expect(mockNavigate).toHaveBeenCalledWith("/settings");
-    });
-
-    test("chef hat button has selected class when dropdown is open", async () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const chefHatButtons = screen.getAllByLabelText("Login");
-      const firstButton = chefHatButtons[0];
-
-      // Initially should not have selected class
-      expect(firstButton.className).not.toContain("selected");
-
-      // After clicking should have selected class
-      fireEvent.click(firstButton);
-      await waitFor(() => {
-        const updatedButton = screen.getAllByLabelText("Login")[0];
-        expect(updatedButton.className).toContain("selected");
-      });
     });
 
     test("does not open dropdown when on auth page", () => {
@@ -781,26 +728,9 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      // Should show language options in the dropdown
+      // Should show the language toggle in the dropdown
       const dropdown = document.querySelector(".dropdown");
-      expect(dropdown.querySelector(".language-wrapper")).toBeInTheDocument();
-    });
-
-    test("hamburger menu button has selected class when open", () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const menuButton = screen.getByLabelText("Menu");
-
-      // Initially should not have selected class
-      expect(menuButton).not.toHaveClass("selected");
-
-      // After clicking should have selected class
-      fireEvent.click(menuButton);
-      expect(menuButton).toHaveClass("selected");
+      expect(dropdown.querySelector(".language")).toBeInTheDocument();
     });
 
     test("navigates to add recipe from hamburger menu", () => {
@@ -852,6 +782,8 @@ describe("Header Component", () => {
     // });
 
     test("changes language from hamburger menu", () => {
+      mockI18n.language = "en";
+
       render(
         <TestWrapper>
           <Header {...defaultProps} />
@@ -862,10 +794,8 @@ describe("Header Component", () => {
       fireEvent.click(menuButton);
 
       const dropdown = document.querySelector(".dropdown");
-      const deButton = dropdown.querySelector(
-        ".language-wrapper .language:last-child"
-      );
-      fireEvent.click(deButton);
+      const languageToggle = dropdown.querySelector(".language");
+      fireEvent.click(languageToggle);
 
       expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
     });
@@ -912,27 +842,6 @@ describe("Header Component", () => {
   });
 
   describe("Navigation Button Selected States", () => {
-    test("add recipe button has selected class when on add-recipe page", () => {
-      mockUseAuth.mockReturnValue({
-        isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
-      });
-
-      useLocation.mockReturnValue({
-        pathname: "/add-recipe",
-      });
-
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const addButton = screen.getByTestId("lucide-plus");
-      expect(addButton.className).toContain("selected");
-    });
-
     // test("grocery list button has selected class when on grocery-list page", () => {
     //   mockUseAuth.mockReturnValue({
     //     isLoggedIn: true,
@@ -1166,6 +1075,10 @@ describe("Header Component", () => {
   });
 
   describe("Dark Mode Toggle Functionality", () => {
+    // The theme toggle now lives in the header's top bar (next to the
+    // language toggle) rather than inside the user dropdown, and is a single
+    // always-visible control rather than duplicated desktop/mobile buttons.
+
     test("shows moon icon when theme is light", () => {
       useTheme.mockReturnValue({
         theme: "light",
@@ -1178,13 +1091,8 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      // Open user dropdown
-      const chefHatButton = screen.getAllByLabelText("Login")[0];
-      fireEvent.click(chefHatButton);
-
-      // Should show moon icon for switching to dark mode (desktop and mobile versions)
       const themeButtons = screen.getAllByLabelText("Switch to dark mode");
-      expect(themeButtons).toHaveLength(2); // Desktop and mobile versions
+      expect(themeButtons).toHaveLength(1);
       expect(themeButtons[0]).toBeInTheDocument();
     });
 
@@ -1200,13 +1108,8 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      // Open user dropdown
-      const chefHatButton = screen.getAllByLabelText("Login")[0];
-      fireEvent.click(chefHatButton);
-
-      // Should show sun icon for switching to light mode (desktop and mobile versions)
       const themeButtons = screen.getAllByLabelText("Switch to light mode");
-      expect(themeButtons).toHaveLength(2); // Desktop and mobile versions
+      expect(themeButtons).toHaveLength(1);
       expect(themeButtons[0]).toBeInTheDocument();
     });
 
@@ -1222,18 +1125,13 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      // Open user dropdown
-      const chefHatButton = screen.getAllByLabelText("Login")[0];
-      fireEvent.click(chefHatButton);
-
-      // Click theme toggle button
-      const themeButtons = screen.getAllByLabelText("Switch to dark mode");
-      fireEvent.click(themeButtons[0]);
+      const themeButton = screen.getByLabelText("Switch to dark mode");
+      fireEvent.click(themeButton);
 
       expect(mockToggleTheme).toHaveBeenCalled();
     });
 
-    test("closes user dropdown after theme toggle", () => {
+    test("does not affect the user dropdown when toggled", () => {
       useTheme.mockReturnValue({
         theme: "light",
         toggleTheme: mockToggleTheme,
@@ -1245,24 +1143,15 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      // Open user dropdown
+      // Open the (unrelated) user dropdown
       const chefHatButton = screen.getAllByLabelText("Login")[0];
       fireEvent.click(chefHatButton);
+      expect(screen.getAllByText("Login")).toHaveLength(2);
 
-      // Verify dropdown is open
-      const initialThemeButtons = screen.getAllByLabelText(
-        "Switch to dark mode"
-      );
-      expect(initialThemeButtons).toHaveLength(2); // Desktop and mobile versions
-      expect(initialThemeButtons[0]).toBeInTheDocument();
-
-      // Click theme toggle button
-      fireEvent.click(initialThemeButtons[0]);
-
-      // Verify dropdown closes (theme buttons should no longer be visible)
-      expect(
-        screen.queryByLabelText("Switch to dark mode")
-      ).not.toBeInTheDocument();
+      // Toggling theme should not close the user dropdown
+      fireEvent.click(screen.getByLabelText("Switch to dark mode"));
+      expect(mockToggleTheme).toHaveBeenCalled();
+      expect(screen.getAllByText("Login")).toHaveLength(2);
     });
 
     test("theme toggle is available when not logged in", () => {
@@ -1283,14 +1172,7 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      // Open user dropdown
-      const chefHatButton = screen.getAllByLabelText("Login")[0];
-      fireEvent.click(chefHatButton);
-
-      // Theme toggle should still be available (desktop and mobile versions)
-      const themeButtons = screen.getAllByLabelText("Switch to dark mode");
-      expect(themeButtons).toHaveLength(2); // Desktop and mobile versions
-      expect(themeButtons[0]).toBeInTheDocument();
+      expect(screen.getByLabelText("Switch to dark mode")).toBeInTheDocument();
     });
 
     test("theme toggle is available when logged in", () => {
@@ -1311,37 +1193,7 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      // Open user dropdown
-      const chefHatButton = screen.getAllByLabelText("User Menu")[0];
-      fireEvent.click(chefHatButton);
-
-      // Theme toggle should be available (desktop and mobile versions)
-      const themeButtons = screen.getAllByLabelText("Switch to light mode");
-      expect(themeButtons).toHaveLength(2); // Desktop and mobile versions
-      expect(themeButtons[0]).toBeInTheDocument();
-    });
-
-    test("theme toggle works in mobile dropdown", () => {
-      useTheme.mockReturnValue({
-        theme: "light",
-        toggleTheme: mockToggleTheme,
-      });
-
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      // Open user dropdown (both desktop and mobile versions render)
-      const chefHatButtons = screen.getAllByLabelText("Login");
-      fireEvent.click(chefHatButtons[1]); // Click mobile version
-
-      // Theme toggle should work in mobile dropdown too
-      const themeButtons = screen.getAllByLabelText("Switch to dark mode");
-      fireEvent.click(themeButtons[1]); // Click mobile version
-
-      expect(mockToggleTheme).toHaveBeenCalled();
+      expect(screen.getByLabelText("Switch to light mode")).toBeInTheDocument();
     });
   });
 });

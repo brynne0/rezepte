@@ -11,6 +11,7 @@ import {
   Moon,
   Clock,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import FriendsDropdown from "../FriendsDropdown/FriendsDropdown";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -116,66 +117,53 @@ const Header = ({
     navigate("/");
   };
 
-  // Reusable Language Selector Component
-  const LanguageSelector = ({ className = "", onLanguageChange = null }) => (
-    <div className={`language-wrapper ${className}`}>
-      <button
-        className={`btn-unstyled language${
-          i18n.language === "en" ? " selected" : ""
-        }${disableLanguageSwitch ? " disabled" : ""}`}
+  // Language toggle
+  const LanguageSelector = ({ className = "", onLanguageChange = null }) => {
+    const nextLanguage = i18n.language === "en" ? "de" : "en";
+    return (
+      <Button
+        variant="ghost"
         onClick={() => {
           if (!disableLanguageSwitch) {
-            i18n.changeLanguage("en");
+            i18n.changeLanguage(nextLanguage);
             if (onLanguageChange) onLanguageChange();
           }
         }}
         disabled={disableLanguageSwitch}
-        aria-label={t("switch_to_english")}
+        className={`language ${className}`}
+        aria-label={
+          nextLanguage === "en" ? t("switch_to_english") : t("switch_to_german")
+        }
       >
-        EN
-      </button>
-      |
-      <button
-        className={`btn-unstyled language${
-          i18n.language === "de" ? " selected" : ""
-        }${disableLanguageSwitch ? " disabled" : ""}`}
-        onClick={() => {
-          if (!disableLanguageSwitch) {
-            i18n.changeLanguage("de");
-            if (onLanguageChange) onLanguageChange();
-          }
-        }}
-        disabled={disableLanguageSwitch}
-        aria-label={t("switch_to_german")}
-      >
-        DE
-      </button>
-    </div>
-  );
-
-  // Get theme icon
-  const getThemeIcon = () => {
-    return theme === "light" ? <Moon size={20} /> : <Sun size={20} />;
+        {nextLanguage.toUpperCase()}
+      </Button>
+    );
   };
+
+  // Theme toggle
+  const getThemeIcon = () => {
+    return theme === "light" ? <Moon /> : <Sun />;
+  };
+
+  const ThemeToggle = () => (
+    <Button
+      variant="ghost"
+      onClick={() => toggleTheme()}
+      aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
+    >
+      {getThemeIcon()}
+    </Button>
+  );
 
   // Shared user dropdown menu content
   const userDropdownMenu = showUserDropdown && (
     <div className="dropdown user-menu">
       <div className="dropdown-content">
-        <button
-          className="dropdown-item"
-          onClick={() => {
-            toggleTheme();
-            setShowUserDropdown(false);
-          }}
-          aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
-        >
-          {getThemeIcon()}
-        </button>
         {isLoggedIn ? (
           <>
-            <button
-              className={`dropdown-item ${
+            <Button
+              variant="ghost"
+              className={`dropdown-item h-auto ${
                 location.pathname === "/settings" ? "selected" : ""
               }`}
               onClick={() => {
@@ -184,27 +172,30 @@ const Header = ({
               }}
             >
               {t("settings")}
-            </button>
-            <button
-              className="dropdown-item"
+            </Button>
+            <Button
+              variant="ghost"
+              className="dropdown-item h-auto"
               onClick={() => {
                 handleLogout();
                 setShowUserDropdown(false);
               }}
             >
               {t("logout")}
-            </button>
+            </Button>
           </>
         ) : (
-          <button
-            className="dropdown-item"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="dropdown-item h-auto"
             onClick={() => {
               setShowUserDropdown(false);
               navigate("/auth-page");
             }}
           >
             {t("login")}
-          </button>
+          </Button>
         )}
       </div>
     </div>
@@ -212,92 +203,76 @@ const Header = ({
 
   return (
     <>
-      <header className="header">
-        <div className="header-container flex-between">
-          {/* Login and Logout */}
-          <div className="logo-language-wrapper">
-            {/* <button className="btn-unstyled"> */}
-            <Squirrel size={40} className="header-logo" />
+      <header className="relative flex-between h-auto bg-background py-4 z-50">
+        {/* Language and Theme Selection */}
+        <div className="flex shrink-0 items-center ">
+          <Squirrel className="pr-4 size-16" />
+          <LanguageSelector />
+          <ThemeToggle />
+        </div>
 
-            {/* {isMe && (
-                <Squirrel
-                  data-testid="lucide-squirrel"
-                  className="header-logo-2"
-                />
-              )} */}
+        {/* Title */}
+        <div className="absolute inset-0 m-auto flex h-max w-max flex-col items-center">
+          {/* Display user's first name above header */}
+          {firstName && <span> {`${firstName}'s`}</span>}
+          <Button
+            variant="ghost"
+            className="select-none p-0 font-forta text-3xl leading-none text-foreground transition-none hover:bg-transparent active:translate-y-0 md:text-5xl"
+            onClick={() => {
+              navigate("/");
+            }}
+            aria-label={t("go_to_home")}
+          >
+            Rezepte
+          </Button>
+        </div>
 
-            {/* Language Selection */}
-            <LanguageSelector />
-          </div>
-
-          {/* Title */}
-          <div className="title-wrapper">
-            {/* Display user's first name above header or login message */}
-            {firstName && (
-              <span className="first-name"> {`${firstName}'s`}</span>
-            )}
-            <button
-              className="site-title"
-              onClick={() => {
-                navigate("/");
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-2 md:flex">
+          {/* Desktop User Icon */}
+          <div className="user-icon-wrapper">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onMouseDown={() => {
+                setShowNavMenu(false);
               }}
-              aria-label={t("go_to_home")}
+              onClick={() => {
+                if (location.pathname === "/auth-page") return;
+                setShowUserDropdown((prev) => !prev);
+              }}
+              aria-label={isLoggedIn ? t("user_menu") : t("login")}
             >
-              Rezepte
-            </button>
+              <User className="size-7" />
+            </Button>
+            {userDropdownMenu}
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="header-nav desktop-nav">
-            {/* Desktop User Icon */}
-            <div className="user-icon-wrapper">
-              <button
-                className={`btn btn-icon btn-icon-neutral ${
-                  showUserDropdown || location.pathname === "/settings"
-                    ? "selected"
-                    : ""
-                }`}
-                onMouseDown={() => {
-                  setShowNavMenu(false);
-                }}
-                onClick={() => {
-                  if (location.pathname === "/auth-page") return;
-                  setShowUserDropdown((prev) => !prev);
-                }}
-                aria-label={isLoggedIn ? t("user_menu") : t("login")}
+          {/* Only display if user logged in */}
+          {isLoggedIn && (
+            <>
+              <FriendsDropdown />
+              <Button
+                data-testid="lucide-plus"
+                variant="ghost"
+                size="icon-lg"
+                onClick={() => navigate("/add-recipe")}
+                aria-label={t("add_new_recipe")}
               >
-                <User size={28} />
-              </button>
-              {userDropdownMenu}
-            </div>
-
-            {/* Only display if user logged in */}
-            {isLoggedIn && (
-              <>
-                <FriendsDropdown />
-                <button
-                  data-testid="lucide-plus"
-                  className={`btn btn-icon btn-icon-neutral ${
-                    location.pathname === "/add-recipe" ? "selected" : ""
-                  }`}
-                  onClick={() => navigate("/add-recipe")}
-                  aria-label={t("add_new_recipe")}
-                >
-                  <Plus size={28} />
-                </button>
-                {/* Cooking Times */}
-                <button
-                  data-testid="lucide-clock"
-                  className={`btn btn-icon btn-icon-neutral ${
-                    location.pathname === "/cooking-times" ? "selected" : ""
-                  }`}
-                  onClick={() => navigate("/cooking-times")}
-                  aria-label={t("cooking_times", "Cooking Times")}
-                >
-                  <Clock size={28} />
-                </button>
-                {/* Grocery List */}
-                {/* <button
+                <Plus className="size-7" />
+              </Button>
+              {/* Cooking Times */}
+              <Button
+                data-testid="lucide-clock"
+                variant="ghost"
+                size="icon-lg"
+                onClick={() => navigate("/cooking-times")}
+                aria-label={t("cooking_times", "Cooking Times")}
+              >
+                <Clock className="size-7" />
+              </Button>
+              {/* Grocery List */}
+              {/* <button
                   data-testid="lucide-shopping-basket"
                   className={`btn btn-icon btn-icon-neutral ${
                     location.pathname === "/grocery-list" ? "selected" : ""
@@ -307,92 +282,90 @@ const Header = ({
                 >
                   <ShoppingBasket size={28} />
                 </button> */}
-              </>
-            )}
-          </nav>
+            </>
+          )}
+        </nav>
 
-          {/* Mobile User and Menu Icons */}
-          <div className="mobile-nav">
-            {/* Mobile User Icon */}
-            <div className="user-icon-wrapper" ref={userDropdownRef}>
-              <button
-                className={`btn btn-icon btn-icon-neutral ${
-                  showUserDropdown || location.pathname === "/settings"
-                    ? "selected"
-                    : ""
-                }`}
-                onMouseDown={() => {
-                  setShowNavMenu(false);
-                }}
-                onClick={() => {
-                  if (location.pathname === "/auth-page") return;
-                  setShowUserDropdown((prev) => !prev);
-                }}
-                aria-label={isLoggedIn ? t("user_menu") : t("login")}
-              >
-                <User size={28} />
-              </button>
-              {userDropdownMenu}
-            </div>
+        {/* Mobile User and Menu Icons */}
+        <div className="flex items-center md:hidden">
+          {/* Mobile User Icon */}
+          <div className="user-icon-wrapper" ref={userDropdownRef}>
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onMouseDown={() => {
+                setShowNavMenu(false);
+              }}
+              onClick={() => {
+                if (location.pathname === "/auth-page") return;
+                setShowUserDropdown((prev) => !prev);
+              }}
+              aria-label={isLoggedIn ? t("user_menu") : t("login")}
+            >
+              <User className="size-7" />
+            </Button>
+            {userDropdownMenu}
+          </div>
 
-            {/* Hamburger Menu */}
-            <div className="nav-menu-wrapper" ref={navMenuRef}>
-              <button
-                className={`btn btn-icon btn-icon-neutral ${
-                  showNavMenu ? "selected" : ""
-                }`}
-                onMouseDown={() => {
-                  setShowUserDropdown(false);
-                }}
-                onClick={() => {
-                  setShowNavMenu((prev) => !prev);
-                }}
-                aria-label="Menu"
-              >
-                <Menu size={28} />
-              </button>
+          {/* Hamburger Menu */}
+          <div className="nav-menu-wrapper" ref={navMenuRef}>
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onMouseDown={() => {
+                setShowUserDropdown(false);
+              }}
+              onClick={() => {
+                setShowNavMenu((prev) => !prev);
+              }}
+              aria-label="Menu"
+            >
+              <Menu className="size-7" />
+            </Button>
 
-              {/* Mobile Menu Dropdown */}
-              {showNavMenu && (
-                <div className="dropdown nav-menu-dropdown">
-                  <div className="dropdown-content">
-                    {/* Navigation options for logged in users */}
-                    {isLoggedIn && (
-                      <>
-                        <div className="dropdown-item">
-                          <FriendsDropdown
-                            onNavigate={() => setShowNavMenu(false)}
-                          />
-                        </div>
-                        <button
-                          className={`dropdown-item ${
-                            location.pathname === "/add-recipe"
-                              ? "selected"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            navigate("/add-recipe");
-                            setShowNavMenu(false);
-                          }}
-                          aria-label={t("add_new_recipe")}
-                        >
-                          <Plus size={20} />
-                        </button>
-                        <button
-                          className={`dropdown-item ${
-                            location.pathname === "/cooking-times"
-                              ? "selected"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            navigate("/cooking-times");
-                            setShowNavMenu(false);
-                          }}
-                          aria-label={t("cooking_times", "Cooking Times")}
-                        >
-                          <Clock size={20} />
-                        </button>
-                        {/* <button
+            {/* Mobile Menu Dropdown */}
+            {showNavMenu && (
+              <div className="dropdown nav-menu-dropdown">
+                <div className="dropdown-content">
+                  {/* Navigation options for logged in users */}
+                  {isLoggedIn && (
+                    <>
+                      <div className="dropdown-item">
+                        <FriendsDropdown
+                          onNavigate={() => setShowNavMenu(false)}
+                        />
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`dropdown-item h-auto w-auto ${
+                          location.pathname === "/add-recipe" ? "selected" : ""
+                        }`}
+                        onClick={() => {
+                          navigate("/add-recipe");
+                          setShowNavMenu(false);
+                        }}
+                        aria-label={t("add_new_recipe")}
+                      >
+                        <Plus className="size-5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`dropdown-item h-auto w-auto ${
+                          location.pathname === "/cooking-times"
+                            ? "selected"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          navigate("/cooking-times");
+                          setShowNavMenu(false);
+                        }}
+                        aria-label={t("cooking_times", "Cooking Times")}
+                      >
+                        <Clock className="size-5" />
+                      </Button>
+                      {/* <button
                           className={`dropdown-item ${
                             location.pathname === "/grocery-list"
                               ? "selected"
@@ -406,71 +379,72 @@ const Header = ({
                         >
                           <ShoppingBasket size={20} />
                         </button> */}
-                      </>
-                    )}
+                    </>
+                  )}
 
-                    {/* Language selection in mobile menu */}
-                    <LanguageSelector
-                      className="dropdown-item"
-                      onLanguageChange={() => setShowNavMenu(false)}
-                    />
-                  </div>
+                  {/* Language selection in mobile menu */}
+                  <LanguageSelector
+                    className="dropdown-item"
+                    onLanguageChange={() => setShowNavMenu(false)}
+                  />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
-
-        {/*  Search Recipe - Always visible on home page  */}
-        {isHomePage && (
-          <div className="search-bar-wrapper">
-            <div className="search-and-sort-container">
-              <form
-                className="search-bar"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSearchTerm(currentSearchInput);
-                  navigate("/");
-                }}
-              >
-                <div className="search-input-wrapper">
-                  <input
-                    id="search"
-                    type="text"
-                    value={currentSearchInput}
-                    onChange={(e) => {
-                      setCurrentSearchInput(e.target.value);
-                      setSearchTerm(e.target.value);
-                      if (e.target.value.length > 0) {
-                        setSelectedCategory("all_recipes");
-                      }
-                    }}
-                    className="input input--secondary search-input-with-icon"
-                    placeholder={t("search")}
-                  />
-                  <button
-                    className="btn btn-icon btn-icon-neutral btn-search"
-                    type="submit"
-                    aria-label={t("search")}
-                  >
-                    <Search size={20} />
-                  </button>
-                </div>
-              </form>
-              {setSortBy && (
-                <SortButtons
-                  sortBy={sortBy}
-                  onSortChange={setSortBy}
-                  showImages={showImages}
-                  onShowImagesChange={setShowImages}
-                  onPageReset={onPageReset}
-                  isLoggedIn={isLoggedIn}
-                />
-              )}
-            </div>
-          </div>
-        )}
       </header>
+
+      {/*  Search Recipe - Always visible on home page  */}
+      {isHomePage && (
+        <div className="search-bar-wrapper">
+          <div className="search-and-sort-container">
+            <form
+              className="search-bar"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSearchTerm(currentSearchInput);
+                navigate("/");
+              }}
+            >
+              <div className="search-input-wrapper">
+                <input
+                  id="search"
+                  type="text"
+                  value={currentSearchInput}
+                  onChange={(e) => {
+                    setCurrentSearchInput(e.target.value);
+                    setSearchTerm(e.target.value);
+                    if (e.target.value.length > 0) {
+                      setSelectedCategory("all_recipes");
+                    }
+                  }}
+                  className="input input--secondary search-input-with-icon"
+                  placeholder={t("search")}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="btn-search"
+                  type="submit"
+                  aria-label={t("search")}
+                >
+                  <Search />
+                </Button>
+              </div>
+            </form>
+            {setSortBy && (
+              <SortButtons
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                showImages={showImages}
+                onShowImagesChange={setShowImages}
+                onPageReset={onPageReset}
+                isLoggedIn={isLoggedIn}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       <ConfirmationModal
         isOpen={showInstallModal}

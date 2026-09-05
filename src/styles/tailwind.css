@@ -33,6 +33,7 @@
 
   --font-sans: "Geist Variable", sans-serif;
   --font-heading: var(--font-sans);
+  --font-forta: "Forta", sans-serif;
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -57,7 +58,7 @@
 
 :root {
   --background: #f2e7d2;
-  --foreground: oklch(0.147 0.004 49.25);
+  --foreground: #342a24;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.147 0.004 49.25);
   --popover: oklch(1 0 0);
@@ -93,7 +94,7 @@
 
 .dark {
   --background: #342a24;
-  --foreground: oklch(0.985 0.001 106.423);
+  --foreground: #d4c2b3;
   --card: oklch(0.216 0.006 56.043);
   --card-foreground: oklch(0.985 0.001 106.423);
   --popover: oklch(0.216 0.006 56.043);

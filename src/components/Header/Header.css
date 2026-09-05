@@ -1,89 +1,8 @@
-/* Header Layout */
-.header {
-  margin: 0;
-  background-color: var(--color-background-primary);
-  z-index: var(--z-header);
-}
-
-.header-container {
-  height: 5rem;
-  position: relative;
-}
-
-/* Header Typography - Override global heading styles */
-.header h1 {
-  font-family: var(--font-forta);
-  font-size: 3rem;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  font-optical-sizing: auto;
-  user-select: none;
-  -webkit-user-select: none;
-  line-height: 1;
-}
-
-.first-name {
-  font-size: 1rem;
-  color: var(--color-text-primary);
-  line-height: 1;
-  font-family: var(--font-forta);
-}
-
-/* Title Section */
-.title-wrapper {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: max-content;
-  height: max-content;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.site-title {
-  font-family: var(--font-forta);
-  font-size: 3rem;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  font-optical-sizing: auto;
-  user-select: none;
-  -webkit-user-select: none;
-  line-height: 1;
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* Logo Icons */
-.header-logo,
-.header-logo-2 {
-  color: var(--color-text-primary);
-}
-
-.header-logo-2 {
-  color: var(--color-border-medium);
-  transform: scaleX(-1);
-}
-
-/* Login Section */
-.logo-language-wrapper {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-/* Language Selection */
+/* Language Selection - TODO  */
 .language-wrapper {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-}
-
-.language {
-  cursor: pointer;
-  transition: color 0.2s;
 }
 
 .language:hover,
@@ -108,19 +27,6 @@
 
 .language.selected.disabled:hover {
   color: var(--color-danger-dark);
-}
-
-/* Navigation */
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Mobile Navigation */
-.mobile-nav {
-  display: none;
-  align-items: center;
 }
 
 .nav-menu-wrapper {
@@ -235,16 +141,7 @@
 
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
-  .header-container {
-    flex-direction: row;
-    height: auto;
-    padding: 0.75rem 1rem;
-    align-items: center;
-    justify-content: space-between;
-  }
-
   /* Hide desktop navigation on mobile */
-  .desktop-nav,
   .language-wrapper {
     display: none;
   }
@@ -263,11 +160,6 @@
   .search-and-sort-container {
     flex-direction: column;
     gap: 0.75rem;
-  }
-
-  /* Show mobile navigation on mobile */
-  .mobile-nav {
-    display: flex;
   }
 
   /* Logo styling for mobile */
@@ -300,10 +192,6 @@
   }
 
   /* Mobile typography */
-  .site-title {
-    font-size: 2rem;
-  }
-
   .first-name {
     font-size: 0.8rem;
   }
