@@ -1,10 +1,10 @@
-import * as React from "react"
-import { mergeProps } from "@base-ui/react/merge-props"
-import { useRender } from "@base-ui/react/use-render"
+import * as React from "react";
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cva } from "class-variance-authority";
-import { cn } from "cn"
+import { cn } from "cn";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 const attachmentVariants = cva(
   "group/attachment relative flex w-fit max-w-full min-w-0 shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[>a,>button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed",
@@ -22,7 +22,7 @@ const attachmentVariants = cva(
       },
     },
   }
-)
+);
 
 function Attachment({
   className,
@@ -38,7 +38,8 @@ function Attachment({
       data-size={size}
       data-orientation={orientation}
       className={cn(attachmentVariants({ size, orientation }), className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -56,26 +57,20 @@ const attachmentMediaVariants = cva(
       variant: "icon",
     },
   }
-)
+);
 
-function AttachmentMedia({
-  className,
-  variant = "icon",
-  ...props
-}) {
+function AttachmentMedia({ className, variant = "icon", ...props }) {
   return (
     <div
       data-slot="attachment-media"
       data-variant={variant}
       className={cn(attachmentMediaVariants({ variant }), className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function AttachmentContent({
-  className,
-  ...props
-}) {
+function AttachmentContent({ className, ...props }) {
   return (
     <div
       data-slot="attachment-content"
@@ -83,14 +78,12 @@ function AttachmentContent({
         "max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function AttachmentTitle({
-  className,
-  ...props
-}) {
+function AttachmentTitle({ className, ...props }) {
   return (
     <span
       data-slot="attachment-title"
@@ -98,14 +91,12 @@ function AttachmentTitle({
         "block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function AttachmentDescription({
-  className,
-  ...props
-}) {
+function AttachmentDescription({ className, ...props }) {
   return (
     <span
       data-slot="attachment-description"
@@ -114,14 +105,12 @@ function AttachmentDescription({
         "max-w-full",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function AttachmentActions({
-  className,
-  ...props
-}) {
+function AttachmentActions({ className, ...props }) {
   return (
     <div
       data-slot="attachment-actions"
@@ -129,38 +118,33 @@ function AttachmentActions({
         "relative z-20 flex shrink-0 items-center group-data-[orientation=vertical]/attachment:absolute group-data-[orientation=vertical]/attachment:top-3 group-data-[orientation=vertical]/attachment:right-3 group-data-[orientation=vertical]/attachment:gap-1",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function AttachmentAction({
-  className,
-  variant,
-  size = "icon-xs",
-  ...props
-}) {
+function AttachmentAction({ className, variant, size = "icon-xs", ...props }) {
   return (
     <Button
       data-slot="attachment-action"
       variant={variant ?? "ghost"}
       size={size}
       className={cn(className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function AttachmentTrigger({
-  className,
-  render,
-  type,
-  ...props
-}) {
+function AttachmentTrigger({ className, render, type, ...props }) {
   return useRender({
     defaultTagName: "button",
-    props: mergeProps({
-      type: render ? type : (type ?? "button"),
-      className: cn("absolute inset-0 z-10 outline-none", className),
-    }, props),
+    props: mergeProps(
+      {
+        type: render ? type : (type ?? "button"),
+        className: cn("absolute inset-0 z-10 outline-none", className),
+      },
+      props
+    ),
     render,
     state: {
       slot: "attachment-trigger",
@@ -168,10 +152,7 @@ function AttachmentTrigger({
   });
 }
 
-function AttachmentGroup({
-  className,
-  ...props
-}) {
+function AttachmentGroup({ className, ...props }) {
   return (
     <div
       data-slot="attachment-group"
@@ -179,7 +160,8 @@ function AttachmentGroup({
         "flex min-w-0 scroll-fade-x snap-x snap-mandatory scroll-px-1 scrollbar-none gap-3 overflow-x-auto overscroll-x-contain py-1 *:data-[slot=attachment]:flex-none *:data-[slot=attachment]:snap-start",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -193,4 +175,4 @@ export {
   AttachmentActions,
   AttachmentAction,
   AttachmentTrigger,
-}
+};

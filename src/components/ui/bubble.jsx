@@ -1,18 +1,16 @@
-import * as React from "react"
-import { mergeProps } from "@base-ui/react/merge-props"
-import { useRender } from "@base-ui/react/use-render"
+import * as React from "react";
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cva } from "class-variance-authority";
-import { cn } from "cn"
+import { cn } from "cn";
 
-function BubbleGroup({
-  className,
-  ...props
-}) {
+function BubbleGroup({ className, ...props }) {
   return (
     <div
       data-slot="bubble-group"
       className={cn("flex min-w-0 flex-col gap-2", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -41,37 +39,32 @@ const bubbleVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
-function Bubble({
-  variant = "default",
-  align = "start",
-  className,
-  ...props
-}) {
+function Bubble({ variant = "default", align = "start", className, ...props }) {
   return (
     <div
       data-slot="bubble"
       data-variant={variant}
       data-align={align}
       className={cn(bubbleVariants({ variant }), className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function BubbleContent({
-  className,
-  render,
-  ...props
-}) {
+function BubbleContent({ className, render, ...props }) {
   return useRender({
     defaultTagName: "div",
-    props: mergeProps({
-      className: cn(
-        "w-fit max-w-full min-w-0 overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/50",
-        className
-      ),
-    }, props),
+    props: mergeProps(
+      {
+        className: cn(
+          "w-fit max-w-full min-w-0 overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/50",
+          className
+        ),
+      },
+      props
+    ),
     render,
     state: {
       slot: "bubble-content",
@@ -97,7 +90,7 @@ const bubbleReactionsVariants = cva(
       align: "end",
     },
   }
-)
+);
 
 function BubbleReactions({
   side = "bottom",
@@ -111,8 +104,9 @@ function BubbleReactions({
       data-align={align}
       data-side={side}
       className={cn(bubbleReactionsVariants({ side, align }), className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-export { BubbleGroup, Bubble, BubbleContent, BubbleReactions }
+export { BubbleGroup, Bubble, BubbleContent, BubbleReactions };

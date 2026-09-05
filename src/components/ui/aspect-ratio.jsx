@@ -1,21 +1,16 @@
-import { cn } from "cn"
+import { cn } from "cn";
 
-function AspectRatio({
-  ratio,
-  className,
-  ...props
-}) {
+function AspectRatio({ ratio, className, ...props }) {
   return (
     <div
       data-slot="aspect-ratio"
-      style={
-        {
-          "--ratio": ratio
-        }
-      }
+      style={{
+        "--ratio": ratio,
+      }}
       className={cn("relative aspect-(--ratio)", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-export { AspectRatio }
+export { AspectRatio };

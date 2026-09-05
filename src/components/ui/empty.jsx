@@ -1,10 +1,7 @@
 import { cva } from "class-variance-authority";
-import { cn } from "cn"
+import { cn } from "cn";
 
-function Empty({
-  className,
-  ...props
-}) {
+function Empty({ className, ...props }) {
   return (
     <div
       data-slot="empty"
@@ -12,19 +9,18 @@ function Empty({
         "flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-xl border-dashed p-6 text-center text-balance",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function EmptyHeader({
-  className,
-  ...props
-}) {
+function EmptyHeader({ className, ...props }) {
   return (
     <div
       data-slot="empty-header"
       className={cn("flex max-w-sm flex-col items-center gap-2", className)}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -41,38 +37,33 @@ const emptyMediaVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
-function EmptyMedia({
-  className,
-  variant = "default",
-  ...props
-}) {
+function EmptyMedia({ className, variant = "default", ...props }) {
   return (
     <div
       data-slot="empty-icon"
       data-variant={variant}
       className={cn(emptyMediaVariants({ variant, className }))}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function EmptyTitle({
-  className,
-  ...props
-}) {
+function EmptyTitle({ className, ...props }) {
   return (
     <div
       data-slot="empty-title"
-      className={cn("font-heading text-sm font-medium tracking-tight", className)}
-      {...props} />
+      className={cn(
+        "font-heading text-sm font-medium tracking-tight",
+        className
+      )}
+      {...props}
+    />
   );
 }
 
-function EmptyDescription({
-  className,
-  ...props
-}) {
+function EmptyDescription({ className, ...props }) {
   return (
     <div
       data-slot="empty-description"
@@ -80,14 +71,12 @@ function EmptyDescription({
         "text-sm/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-function EmptyContent({
-  className,
-  ...props
-}) {
+function EmptyContent({ className, ...props }) {
   return (
     <div
       data-slot="empty-content"
@@ -95,7 +84,8 @@ function EmptyContent({
         "flex w-full max-w-sm min-w-0 flex-col items-center gap-2.5 text-sm text-balance",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -106,4 +96,4 @@ export {
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
-}
+};
