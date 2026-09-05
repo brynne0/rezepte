@@ -1,11 +1,27 @@
 import { useState } from "react";
-import { SearchIcon, MailIcon, XIcon, PencilIcon, TrashIcon, EyeIcon } from "lucide-react";
+import {
+  SearchIcon,
+  MailIcon,
+  XIcon,
+  PencilIcon,
+  TrashIcon,
+  EyeIcon,
+} from "lucide-react";
 
 function Section({ title, children }) {
   return (
-    <section className="flex-column gap-xs" style={{ borderBottom: "1px solid var(--color-border-light)", paddingBottom: "2rem" }}>
+    <section
+      className="flex-column gap-xs"
+      style={{
+        borderBottom: "1px solid var(--color-border-light)",
+        paddingBottom: "2rem",
+      }}
+    >
       <h2>{title}</h2>
-      <div className="flex-row" style={{ flexWrap: "wrap", alignItems: "flex-start", gap: "0.75rem" }}>
+      <div
+        className="flex-row"
+        style={{ flexWrap: "wrap", alignItems: "flex-start", gap: "0.75rem" }}
+      >
         {children}
       </div>
     </section>
@@ -17,12 +33,21 @@ function ShowcaseLegacyPage() {
   const [selected, setSelected] = useState(false);
 
   return (
-    <div className="flex-column gap-lg" style={{ maxWidth: "56rem", margin: "0 auto", padding: "2rem 1rem", textAlign: "left" }}>
+    <div
+      className="flex-column gap-lg"
+      style={{
+        maxWidth: "56rem",
+        margin: "0 auto",
+        padding: "2rem 1rem",
+        textAlign: "left",
+      }}
+    >
       <header className="flex-column">
         <h1>Legacy Component Showcase</h1>
         <p className="small">
-          Existing hand-rolled styling (buttons.css, inputs.css, modal.css, typography.css,
-          containers.css) — compare against /showcase while migrating.
+          Existing hand-rolled styling (buttons.css, inputs.css, modal.css,
+          typography.css, containers.css) — compare against /showcase while
+          migrating.
         </p>
       </header>
 
@@ -44,7 +69,10 @@ function ShowcaseLegacyPage() {
       </Section>
 
       <Section title="Icon buttons">
-        <button className="btn-unstyled btn-icon btn-icon-neutral" aria-label="Edit">
+        <button
+          className="btn-unstyled btn-icon btn-icon-neutral"
+          aria-label="Edit"
+        >
           <PencilIcon />
         </button>
         <button
@@ -54,19 +82,31 @@ function ShowcaseLegacyPage() {
         >
           <PencilIcon />
         </button>
-        <button className="btn-unstyled btn-icon btn-icon-green" aria-label="Confirm">
+        <button
+          className="btn-unstyled btn-icon btn-icon-green"
+          aria-label="Confirm"
+        >
           <EyeIcon />
         </button>
-        <button className="btn-unstyled btn-icon btn-icon-red" aria-label="Remove">
+        <button
+          className="btn-unstyled btn-icon btn-icon-red"
+          aria-label="Remove"
+        >
           <XIcon />
         </button>
-        <button className="btn-unstyled btn-icon btn-icon-remove" aria-label="Remove">
+        <button
+          className="btn-unstyled btn-icon btn-icon-remove"
+          aria-label="Remove"
+        >
           <TrashIcon />
         </button>
       </Section>
 
       <Section title="Cards">
-        <div className="card" style={{ padding: "1.5rem", minWidth: "16rem", margin: 0 }}>
+        <div
+          className="card"
+          style={{ padding: "1.5rem", minWidth: "16rem", margin: 0 }}
+        >
           <h3>Recipe title</h3>
           <p className="small">A short description of the recipe goes here.</p>
           <div className="action-buttons-end">
@@ -77,18 +117,41 @@ function ShowcaseLegacyPage() {
       </Section>
 
       <Section title="Inputs">
-        <div className="flex-column gap-xs" style={{ maxWidth: "20rem", width: "100%" }}>
-          <input className="input input--full-width" placeholder="Recipe name" />
-          <input className="input input--full-width" placeholder="Disabled" disabled />
-          <textarea className="input input--full-width input--textarea" placeholder="Instructions" rows={3} />
-          <input className="input input--full-width input--error" placeholder="Error state" />
+        <div
+          className="flex-column gap-xs"
+          style={{ maxWidth: "20rem", width: "100%" }}
+        >
+          <input
+            className="input input--full-width"
+            placeholder="Recipe name"
+          />
+          <input
+            className="input input--full-width"
+            placeholder="Disabled"
+            disabled
+          />
+          <textarea
+            className="input input--full-width input--textarea"
+            placeholder="Instructions"
+            rows={3}
+          />
+          <input
+            className="input input--full-width input--error"
+            placeholder="Error state"
+          />
           <div className="input-with-icon">
             <SearchIcon />
-            <input className="input input--full-width" placeholder="Search recipes" />
+            <input
+              className="input input--full-width"
+              placeholder="Search recipes"
+            />
           </div>
           <div className="input-with-icon">
             <MailIcon />
-            <input className="input input--full-width" placeholder="you@example.com" />
+            <input
+              className="input input--full-width"
+              placeholder="you@example.com"
+            />
           </div>
           <div className="floating-label-input">
             <input className="input input--full-width" placeholder=" " />
@@ -120,22 +183,39 @@ function ShowcaseLegacyPage() {
       </Section>
 
       <Section title="Modal">
-        <button className="btn btn-action btn-primary" onClick={() => setShowModal(true)}>
+        <button
+          className="btn btn-action btn-primary"
+          onClick={() => setShowModal(true)}
+        >
           Open confirmation modal
         </button>
         {showModal && (
-          <div className="confirmation-modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="confirmation-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="confirmation-modal-overlay"
+            onClick={() => setShowModal(false)}
+          >
+            <div
+              className="confirmation-modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h2 className="confirmation-modal-title">Delete this recipe?</h2>
-              <p className="confirmation-modal-message">This action cannot be undone.</p>
+              <p className="confirmation-modal-message">
+                This action cannot be undone.
+              </p>
               <p className="confirmation-modal-secondary-message">
                 This will permanently delete the recipe.
               </p>
               <div className="action-buttons-end">
-                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
                   Cancel
                 </button>
-                <button className="btn btn-action btn-danger" onClick={() => setShowModal(false)}>
+                <button
+                  className="btn btn-action btn-danger"
+                  onClick={() => setShowModal(false)}
+                >
                   Delete
                 </button>
               </div>
