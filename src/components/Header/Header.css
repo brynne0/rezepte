@@ -1,38 +1,3 @@
-.nav-menu-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* User Icon */
-.user-icon-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* Shared Dropdown Styles */
-.dropdown {
-  top: 120%;
-  position: absolute;
-  background: var(--color-background-secondary);
-  border: var(--border-width) dashed var(--color-text-strong);
-  border-radius: var(--border-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: var(--z-dropdown);
-  overflow-y: auto;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.dropdown-content {
-  padding: 0.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  align-items: center;
-}
-
 .dropdown-item {
   display: flex;
   align-items: center;
@@ -56,14 +21,6 @@
 .dropdown-item.selected {
   color: var(--color-danger-dark);
   font-weight: 500;
-}
-
-.dropdown-header {
-  padding: 0.5rem 0.75rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  border-bottom: var(--border-width) solid var(--color-text-strong);
-  margin-bottom: 0.25rem;
 }
 
 /* Search Bar */
@@ -110,11 +67,6 @@
 
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
-  /* Allow nested friends dropdown to escape the hamburger menu's overflow clipping */
-  .nav-menu-dropdown {
-    overflow: visible;
-  }
-
   /* Stack search and sort vertically on mobile */
   .search-and-sort-container {
     flex-direction: column;
@@ -155,7 +107,7 @@
   }
 
   /* Match friends icon size to other hamburger menu icons */
-  .nav-menu-dropdown .friends-icon-btn svg {
+  [data-slot="dropdown-menu-content"] .friends-icon-btn svg {
     width: 20px;
     height: 20px;
   }

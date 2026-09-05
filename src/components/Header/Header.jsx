@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
-  ShoppingBasket,
   Plus,
   Squirrel,
   Menu,
@@ -12,11 +11,16 @@ import {
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import FriendsDropdown from "../FriendsDropdown/FriendsDropdown";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
-import useClickOutside from "../../hooks/ui/useClickOutside";
 import { useTheme } from "../../hooks/ui/useTheme";
 import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
@@ -69,7 +73,6 @@ const Header = ({
   const isHomePage = location.pathname === "/";
 
   const [showNavMenu, setShowNavMenu] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [currentSearchInput, setCurrentSearchInput] = useState("");
 
   // Language
@@ -98,16 +101,6 @@ const Header = ({
   useEffect(() => {
     setCurrentSearchInput(searchTerm || "");
   }, [searchTerm]);
-
-  // Refs for click outside detection
-
-  const userDropdownRef = useClickOutside(() => {
-    setShowUserDropdown(false);
-  });
-
-  const navMenuRef = useClickOutside(() => {
-    setShowNavMenu(false);
-  });
 
   const handleLogout = async () => {
     await signOut();
@@ -155,50 +148,38 @@ const Header = ({
     </Button>
   );
 
-  // Shared user dropdown menu content
-  const userDropdownMenu = showUserDropdown && (
-    <div className="dropdown user-menu">
-      <div className="dropdown-content">
-        {isLoggedIn ? (
-          <>
-            <Button
-              variant="ghost"
-              className={`dropdown-item h-auto ${
-                location.pathname === "/settings" ? "selected" : ""
-              }`}
-              onClick={() => {
-                setShowUserDropdown(false);
-                navigate("/settings");
-              }}
-            >
-              {t("settings")}
-            </Button>
-            <Button
-              variant="ghost"
-              className="dropdown-item h-auto"
-              onClick={() => {
-                handleLogout();
-                setShowUserDropdown(false);
-              }}
-            >
-              {t("logout")}
-            </Button>
-          </>
-        ) : (
+  // Shared user dropdown menu
+  const UserMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
           <Button
             variant="ghost"
-            size="sm"
-            className="dropdown-item h-auto"
-            onClick={() => {
-              setShowUserDropdown(false);
-              navigate("/auth-page");
-            }}
+            size="icon-lg"
+            disabled={location.pathname === "/auth-page"}
+            aria-label={isLoggedIn ? t("user_menu") : t("login")}
           >
-            {t("login")}
+            <User className="size-7" />
           </Button>
+        }
+      />
+      <DropdownMenuContent align="center">
+        {isLoggedIn ? (
+          <>
+            <DropdownMenuItem onClick={() => navigate("/settings")}>
+              {t("settings")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              {t("logout")}
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <DropdownMenuItem onClick={() => navigate("/auth-page")}>
+            {t("login")}
+          </DropdownMenuItem>
         )}
-      </div>
-    </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   return (
@@ -206,7 +187,7 @@ const Header = ({
       <header className="relative flex-between py-2 bg-background z-50">
         {/* Language and Theme Selection */}
         <div className="flex shrink-0 items-center">
-          <Squirrel className="pr-4 size-14" />
+          <Squirrel className="hidden md:block md:size-14 md:pr-4" />
           <LanguageSelector />
           <ThemeToggle />
         </div>
@@ -232,23 +213,7 @@ const Header = ({
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-2 md:flex">
           {/* Desktop User Icon */}
-          <div className="user-icon-wrapper">
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              onMouseDown={() => {
-                setShowNavMenu(false);
-              }}
-              onClick={() => {
-                if (location.pathname === "/auth-page") return;
-                setShowUserDropdown((prev) => !prev);
-              }}
-              aria-label={isLoggedIn ? t("user_menu") : t("login")}
-            >
-              <User className="size-7" />
-            </Button>
-            {userDropdownMenu}
-          </div>
+          <UserMenu />
 
           {/* Only display if user logged in */}
           {isLoggedIn && (
@@ -291,108 +256,40 @@ const Header = ({
         {/* Mobile User and Menu Icons */}
         <div className="flex items-center md:hidden">
           {/* Mobile User Icon */}
-          <div className="user-icon-wrapper" ref={userDropdownRef}>
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              onMouseDown={() => {
-                setShowNavMenu(false);
-              }}
-              onClick={() => {
-                if (location.pathname === "/auth-page") return;
-                setShowUserDropdown((prev) => !prev);
-              }}
-              aria-label={isLoggedIn ? t("user_menu") : t("login")}
-            >
-              <User className="size-7" />
-            </Button>
-            {userDropdownMenu}
-          </div>
+          <UserMenu />
 
           {/* Hamburger Menu */}
-          <div className="nav-menu-wrapper" ref={navMenuRef}>
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              onMouseDown={() => {
-                setShowUserDropdown(false);
-              }}
-              onClick={() => {
-                setShowNavMenu((prev) => !prev);
-              }}
-              aria-label="Menu"
-            >
-              <Menu className="size-7" />
-            </Button>
-
-            {/* Mobile Menu Dropdown */}
-            {showNavMenu && (
-              <div className="dropdown nav-menu-dropdown">
-                <div className="dropdown-content">
-                  {/* Navigation options for logged in users */}
-                  {isLoggedIn && (
-                    <>
-                      <div className="dropdown-item">
-                        <FriendsDropdown
-                          onNavigate={() => setShowNavMenu(false)}
-                        />
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`dropdown-item h-auto w-auto ${
-                          location.pathname === "/add-recipe" ? "selected" : ""
-                        }`}
-                        onClick={() => {
-                          navigate("/add-recipe");
-                          setShowNavMenu(false);
-                        }}
-                        aria-label={t("add_new_recipe")}
-                      >
-                        <Plus className="size-5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`dropdown-item h-auto w-auto ${
-                          location.pathname === "/cooking-times"
-                            ? "selected"
-                            : ""
-                        }`}
-                        onClick={() => {
-                          navigate("/cooking-times");
-                          setShowNavMenu(false);
-                        }}
-                        aria-label={t("cooking_times", "Cooking Times")}
-                      >
-                        <Clock className="size-5" />
-                      </Button>
-                      {/* <button
-                          className={`dropdown-item ${
-                            location.pathname === "/grocery-list"
-                              ? "selected"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            navigate("/grocery-list");
-                            setShowNavMenu(false);
-                          }}
-                          aria-label={t("grocery_list")}
-                        >
-                          <ShoppingBasket size={20} />
-                        </button> */}
-                    </>
-                  )}
-
-                  {/* Language selection in mobile menu */}
-                  <LanguageSelector
-                    className="dropdown-item"
-                    onLanguageChange={() => setShowNavMenu(false)}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="ghost" size="icon-lg" aria-label="Menu">
+                  <Menu className="size-7" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="center" className="overflow-visible">
+              {/* Navigation options for logged in users */}
+              {isLoggedIn && (
+                <>
+                  <div className="dropdown-item">
+                    <FriendsDropdown onNavigate={() => setShowNavMenu(false)} />
+                  </div>
+                  <DropdownMenuItem
+                    onClick={() => navigate("/add-recipe")}
+                    aria-label={t("add_new_recipe")}
+                  >
+                    <Plus className="size-5" />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate("/cooking-times")}
+                    aria-label={t("cooking_times", "Cooking Times")}
+                  >
+                    <Clock className="size-5" />
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

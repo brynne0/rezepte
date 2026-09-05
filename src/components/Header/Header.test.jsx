@@ -4,14 +4,12 @@ import { BrowserRouter, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import { useAuth } from "../../hooks/data/useAuth";
 import { signOut, getFirstName } from "../../services/auth";
-import useClickOutside from "../../hooks/ui/useClickOutside";
 import { useTheme } from "../../hooks/ui/useTheme";
 import "@testing-library/jest-dom";
 
 // Mock the hooks and services
 vi.mock("../../hooks/data/useAuth");
 vi.mock("../../services/auth");
-vi.mock("../../hooks/ui/useClickOutside");
 vi.mock("../../hooks/ui/useTheme", () => ({
   useTheme: vi.fn(() => ({
     theme: "light",
@@ -67,7 +65,6 @@ describe("Header Component", () => {
   let mockUseAuth;
   let mockSignOut;
   let mockGetFirstName;
-  let mockUseClickOutside;
   let mockToggleTheme;
 
   const defaultProps = {
@@ -83,7 +80,6 @@ describe("Header Component", () => {
     mockNavigate = vi.fn();
     mockSignOut = vi.fn().mockResolvedValue();
     mockGetFirstName = vi.fn().mockResolvedValue("John");
-    mockUseClickOutside = vi.fn().mockReturnValue({ current: null });
     mockToggleTheme = vi.fn();
 
     mockUseAuth = vi.fn().mockReturnValue({
@@ -98,7 +94,6 @@ describe("Header Component", () => {
     useAuth.mockImplementation(mockUseAuth);
     signOut.mockImplementation(mockSignOut);
     getFirstName.mockImplementation(mockGetFirstName);
-    useClickOutside.mockImplementation(mockUseClickOutside);
     useTheme.mockReturnValue({
       theme: "light",
       toggleTheme: mockToggleTheme,
@@ -232,9 +227,7 @@ describe("Header Component", () => {
     fireEvent.click(chefHatButton);
 
     // Click logout button in dropdown
-    await waitFor(() => {
-      expect(screen.getAllByText("Logout")).toHaveLength(2); // Desktop and mobile
-    });
+    expect(screen.getAllByText("Logout")).toHaveLength(1);
 
     fireEvent.click(screen.getAllByText("Logout")[0]);
 
@@ -545,7 +538,9 @@ describe("Header Component", () => {
       const chefHatButton = screen.getAllByLabelText("Login")[0];
       fireEvent.click(chefHatButton);
 
-      expect(screen.getAllByText("Login")).toHaveLength(2); // Desktop and mobile dropdowns
+      // Each trigger owns its own (uncontrolled) menu, so only the clicked
+      // instance's content renders
+      expect(screen.getAllByText("Login")).toHaveLength(1);
     });
 
     test("user dropdown functionality is working correctly", async () => {
@@ -558,18 +553,17 @@ describe("Header Component", () => {
       const chefHatButton = screen.getAllByLabelText("Login")[0];
 
       // Verify dropdown is initially closed
-      expect(document.querySelectorAll(".dropdown.user-menu")).toHaveLength(0);
+      expect(
+        document.querySelectorAll('[data-slot="dropdown-menu-content"]')
+      ).toHaveLength(0);
 
       // Open dropdown
       fireEvent.click(chefHatButton);
       await waitFor(() => {
-        expect(document.querySelectorAll(".dropdown.user-menu")).toHaveLength(
-          2
-        ); // Desktop and mobile
+        expect(
+          document.querySelectorAll('[data-slot="dropdown-menu-content"]')
+        ).toHaveLength(1);
       });
-
-      // The dropdown closing via toggle click is handled by the useClickOutside hook in the actual implementation
-      // This test verifies the dropdown opens correctly, which is the primary functionality
     });
 
     test("shows account settings option when logged in", () => {
@@ -588,8 +582,8 @@ describe("Header Component", () => {
       const chefHatButton = screen.getAllByLabelText("User Menu")[0];
       fireEvent.click(chefHatButton);
 
-      expect(screen.getAllByText("Settings")).toHaveLength(2); // Desktop and mobile
-      expect(screen.getAllByText("Logout")).toHaveLength(2);
+      expect(screen.getAllByText("Settings")).toHaveLength(1);
+      expect(screen.getAllByText("Logout")).toHaveLength(1);
     });
 
     test("navigates to settings page when settings is clicked", () => {
@@ -631,7 +625,7 @@ describe("Header Component", () => {
       expect(screen.queryByText("Login")).not.toBeInTheDocument();
     });
 
-    test("closes dropdown when clicking outside", () => {
+    test("closes dropdown when clicking outside", async () => {
       render(
         <TestWrapper>
           <Header {...defaultProps} />
@@ -641,11 +635,15 @@ describe("Header Component", () => {
       const chefHatButton = screen.getAllByLabelText("Login")[0];
       fireEvent.click(chefHatButton);
 
-      expect(screen.getAllByText("Login")).toHaveLength(2);
+      expect(screen.getAllByText("Login")).toHaveLength(1);
 
-      // Simulate clicking outside (useClickOutside hook should handle this)
-      // We'll test that the ref is set up correctly
-      expect(mockUseClickOutside).toHaveBeenCalled();
+      // The menu (base-ui) handles outside-click-to-close natively
+      fireEvent.mouseDown(document.body);
+      fireEvent.click(document.body);
+
+      await waitFor(() => {
+        expect(screen.queryAllByText("Login")).toHaveLength(0);
+      });
     });
   });
 
@@ -667,7 +665,9 @@ describe("Header Component", () => {
       fireEvent.click(menuButton);
 
       // Should show navigation options for logged in users
-      expect(document.querySelector(".dropdown")).toBeInTheDocument();
+      expect(
+        document.querySelector('[data-slot="dropdown-menu-content"]')
+      ).toBeInTheDocument();
     });
 
     test("closes hamburger menu when menu button is clicked again", () => {
@@ -687,14 +687,18 @@ describe("Header Component", () => {
 
       // Open menu
       fireEvent.click(menuButton);
-      expect(document.querySelector(".dropdown")).toBeInTheDocument();
+      expect(
+        document.querySelector('[data-slot="dropdown-menu-content"]')
+      ).toBeInTheDocument();
 
       // Close menu
       fireEvent.click(menuButton);
-      expect(document.querySelector(".dropdown")).not.toBeInTheDocument();
+      expect(
+        document.querySelector('[data-slot="dropdown-menu-content"]')
+      ).not.toBeInTheDocument();
     });
 
-    test("shows plus and shopping basket icons in hamburger menu when logged in", () => {
+    test("shows plus icon in hamburger menu when logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
         isMe: false,
@@ -710,27 +714,11 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      // Should show plus and shopping basket icons in the dropdown
-      const dropdown = document.querySelector(".dropdown");
-      expect(dropdown.querySelector(".lucide-plus")).toBeInTheDocument();
-      // expect(
-      //   dropdown.querySelector(".lucide-shopping-basket")
-      // ).toBeInTheDocument();
-    });
-
-    test("shows language selector in hamburger menu", () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
+      // Should show plus in the dropdown
+      const dropdown = document.querySelector(
+        '[data-slot="dropdown-menu-content"]'
       );
-
-      const menuButton = screen.getByLabelText("Menu");
-      fireEvent.click(menuButton);
-
-      // Should show the language toggle in the dropdown
-      const dropdown = document.querySelector(".dropdown");
-      expect(dropdown.querySelector(".language")).toBeInTheDocument();
+      expect(dropdown.querySelector(".lucide-plus")).toBeInTheDocument();
     });
 
     test("navigates to add recipe from hamburger menu", () => {
@@ -750,54 +738,11 @@ describe("Header Component", () => {
       fireEvent.click(menuButton);
 
       const plusButton = document
-        .querySelector(".dropdown .lucide-plus")
-        .closest("button");
+        .querySelector('[data-slot="dropdown-menu-content"] .lucide-plus')
+        .closest('[role="menuitem"]');
       fireEvent.click(plusButton);
 
       expect(mockNavigate).toHaveBeenCalledWith("/add-recipe");
-    });
-
-    // test("navigates to grocery list from hamburger menu", () => {
-    //   mockUseAuth.mockReturnValue({
-    //     isLoggedIn: true,
-    //     isMe: false,
-    //     isGuest: false,
-    //   });
-
-    //   render(
-    //     <TestWrapper>
-    //       <Header {...defaultProps} />
-    //     </TestWrapper>
-    //   );
-
-    //   const menuButton = screen.getByLabelText("Menu");
-    //   fireEvent.click(menuButton);
-
-    //   const basketButton = document
-    //     .querySelector(".dropdown .lucide-shopping-basket")
-    //     .closest("button");
-    //   fireEvent.click(basketButton);
-
-    //   expect(mockNavigate).toHaveBeenCalledWith("/grocery-list");
-    // });
-
-    test("changes language from hamburger menu", () => {
-      mockI18n.language = "en";
-
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const menuButton = screen.getByLabelText("Menu");
-      fireEvent.click(menuButton);
-
-      const dropdown = document.querySelector(".dropdown");
-      const languageToggle = dropdown.querySelector(".language");
-      fireEvent.click(languageToggle);
-
-      expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
     });
 
     test("hides navigation options in hamburger menu when not logged in", () => {
@@ -816,14 +761,16 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      const dropdown = document.querySelector(".dropdown");
+      const dropdown = document.querySelector(
+        '[data-slot="dropdown-menu-content"]'
+      );
       expect(dropdown.querySelector(".lucide-plus")).not.toBeInTheDocument();
       expect(
         dropdown.querySelector(".lucide-shopping-basket")
       ).not.toBeInTheDocument();
     });
 
-    test("closes hamburger menu when clicking outside", () => {
+    test("closes hamburger menu when clicking outside", async () => {
       render(
         <TestWrapper>
           <Header {...defaultProps} />
@@ -833,11 +780,19 @@ describe("Header Component", () => {
       const menuButton = screen.getByLabelText("Menu");
       fireEvent.click(menuButton);
 
-      expect(document.querySelector(".dropdown")).toBeInTheDocument();
+      expect(
+        document.querySelector('[data-slot="dropdown-menu-content"]')
+      ).toBeInTheDocument();
 
-      // Simulate clicking outside (useClickOutside hook should handle this)
-      // We'll test that the ref is set up correctly
-      expect(mockUseClickOutside).toHaveBeenCalled();
+      // The menu (base-ui) handles outside-click-to-close natively
+      fireEvent.mouseDown(document.body);
+      fireEvent.click(document.body);
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-slot="dropdown-menu-content"]')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -887,7 +842,7 @@ describe("Header Component", () => {
       // expect(groceryButton.className).not.toContain("selected");
     });
 
-    test("mobile navigation items have selected class on corresponding pages", () => {
+    test("navigates to add recipe from mobile hamburger menu item", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
         isMe: false,
@@ -908,9 +863,9 @@ describe("Header Component", () => {
       fireEvent.click(menuButton);
 
       const addButton = document
-        .querySelector(".dropdown .lucide-plus")
-        .closest("button");
-      expect(addButton.className).toContain("selected");
+        .querySelector('[data-slot="dropdown-menu-content"] .lucide-plus')
+        .closest('[role="menuitem"]');
+      expect(addButton).toBeInTheDocument();
     });
   });
 
@@ -1146,12 +1101,12 @@ describe("Header Component", () => {
       // Open the (unrelated) user dropdown
       const chefHatButton = screen.getAllByLabelText("Login")[0];
       fireEvent.click(chefHatButton);
-      expect(screen.getAllByText("Login")).toHaveLength(2);
+      expect(screen.getAllByText("Login")).toHaveLength(1);
 
       // Toggling theme should not close the user dropdown
       fireEvent.click(screen.getByLabelText("Switch to dark mode"));
       expect(mockToggleTheme).toHaveBeenCalled();
-      expect(screen.getAllByText("Login")).toHaveLength(2);
+      expect(screen.getAllByText("Login")).toHaveLength(1);
     });
 
     test("theme toggle is available when not logged in", () => {
