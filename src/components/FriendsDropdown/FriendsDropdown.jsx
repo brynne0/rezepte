@@ -11,8 +11,21 @@ import {
   getPendingRequests,
   getSentRequests,
 } from "../../services/friendsService";
-import useClickOutside from "../../hooks/ui/useClickOutside";
-import "./FriendsDropdown.css";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 const FriendsDropdown = ({ onNavigate } = {}) => {
   const navigate = useNavigate();
@@ -25,11 +38,12 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [loadingAction, setLoadingAction] = useState(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
-  const dropdownRef = useClickOutside(() => setIsOpen(false));
   const searchTimeoutRef = useRef(null);
 
   const loadData = async () => {
+    setIsLoadingData(true);
     try {
       const [friendsList, requests, sent] = await Promise.all([
         getFriends(),
@@ -41,6 +55,8 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
       setSentRequests(sent);
     } catch (err) {
       console.error("Error loading friends data:", err);
+    } finally {
+      setIsLoadingData(false);
     }
   };
 
@@ -130,192 +146,226 @@ const FriendsDropdown = ({ onNavigate } = {}) => {
     navigate(`/friends/${username}`);
   };
 
-  const handleToggle = () => {
-    if (!isOpen) loadData();
-    setIsOpen((prev) => !prev);
-  };
-
   return (
-    <div className="flex-row relative" ref={dropdownRef}>
-      <button
-        className={`btn btn-icon btn-icon-neutral friends-icon-btn relative ${isOpen ? "selected" : ""}`}
-        onClick={handleToggle}
-        aria-label={t("friends")}
-      >
-        <Users size={28} />
-        {pendingRequests.length > 0 && (
-          <span className="friends-badge">{pendingRequests.length}</span>
+    <Popover
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (open) loadData();
+        setIsOpen(open);
+      }}
+    >
+      <PopoverTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            className="relative"
+            aria-label={t("friends")}
+          >
+            <Users className="size-7" />
+            {pendingRequests.length > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.625rem]"
+              >
+                {pendingRequests.length}
+              </Badge>
+            )}
+          </Button>
+        }
+      />
+      <PopoverContent align="end" className="max-h-105 w-72 overflow-y-auto">
+        {/* Search section */}
+        <InputGroup>
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder={t("friends_search_placeholder")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoFocus
+          />
+        </InputGroup>
+        {isSearching && (
+          <div className="text-xs px-1 text-muted-foreground">
+            {t("friends_searching")}
+          </div>
         )}
-      </button>
-
-      {isOpen && (
-        <div className="friends-dropdown">
-          <div className="friends-dropdown-content">
-            {/* Search section */}
-            <div className="friends-search-wrapper flex-column">
-              <div className="friends-search-input-wrapper relative-center">
-                <Search size={14} className="friends-search-icon" />
-                <input
-                  type="text"
-                  className="friends-search-input"
-                  placeholder={t("friends_search_placeholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              {isSearching && (
-                <div className="friends-search-status">
-                  {t("friends_searching")}
-                </div>
-              )}
-              {!isSearching &&
-                searchQuery.trim().length >= 3 &&
-                searchResults.length === 0 && (
-                  <div className="friends-search-status">
-                    {t("friends_no_users_found")}
-                  </div>
-                )}
-              {searchResults.map((user) => (
-                <div
-                  key={user.id}
-                  className="friends-search-result flex-between gap-xs"
-                >
-                  <span className="friends-result-name">@{user.username}</span>
-                  {user.friendshipStatus === "none" && (
-                    <button
-                      className="btn btn-icon btn-icon-red"
-                      onClick={() => handleSendRequest(user.id)}
-                      disabled={loadingAction === user.id}
-                      aria-label={t("friends_add")}
-                    >
-                      <UserPlus size={14} />
-                    </button>
-                  )}
-                  {user.friendshipStatus === "pending_sent" && (
-                    <span className="friends-status-label">
-                      {t("friends_pending")}
-                    </span>
-                  )}
-                  {user.friendshipStatus === "pending_received" && (
-                    <button
-                      className="btn btn-icon btn-icon-red"
-                      onClick={() => handleAccept(user.id)}
-                      disabled={loadingAction === user.id}
-                      aria-label={t("friends_accept")}
-                    >
-                      <Check size={14} />
-                    </button>
-                  )}
-                  {user.friendshipStatus === "accepted" && (
-                    <span className="friends-status-label friends-status-label--accepted flex-row">
-                      <Check size={12} /> {t("friends_accepted")}
-                    </span>
-                  )}
-                </div>
-              ))}
+        {!isSearching &&
+          searchQuery.trim().length >= 3 &&
+          searchResults.length === 0 && (
+            <div className="text-xs px-1 text-muted-foreground">
+              {t("friends_no_users_found")}
             </div>
+          )}
+        {searchResults.map((user) => (
+          <div
+            key={user.id}
+            className="flex items-center justify-between gap-2 rounded-md px-1 py-1.5"
+          >
+            <span className="truncate text-sm">@{user.username}</span>
+            {user.friendshipStatus === "none" && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => handleSendRequest(user.id)}
+                disabled={loadingAction === user.id}
+                aria-label={t("friends_add")}
+              >
+                <UserPlus className="size-3.5" />
+              </Button>
+            )}
+            {user.friendshipStatus === "pending_sent" && (
+              <span className="shrink-0 text-xs text-muted-foreground">
+                {t("friends_pending")}
+              </span>
+            )}
+            {user.friendshipStatus === "pending_received" && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="text-success hover:text-success"
+                onClick={() => handleAccept(user.id)}
+                disabled={loadingAction === user.id}
+                aria-label={t("friends_accept")}
+              >
+                <Check className="size-3.5" />
+              </Button>
+            )}
+            {user.friendshipStatus === "accepted" && (
+              <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+                <Check className="size-3" /> {t("friends_accepted")}
+              </span>
+            )}
+          </div>
+        ))}
 
-            {/* Unified friends + requests list */}
-            <div className="friends-section flex-column">
-              {friends.length === 0 &&
-                pendingRequests.length === 0 &&
-                sentRequests.length === 0 &&
-                searchResults.length === 0 && (
-                  <div className="friends-empty">
-                    {t("friends_search_above")}
-                  </div>
-                )}
+        <Separator />
 
+        {/* Unified friends + requests list */}
+        {isLoadingData ? (
+          <div className="flex items-center justify-center gap-2 px-1 py-4 text-sm text-muted-foreground">
+            <Spinner className="size-4" />
+            {t("friends_loading", "Loading...")}
+          </div>
+        ) : friends.length === 0 &&
+          pendingRequests.length === 0 &&
+          sentRequests.length === 0 &&
+          searchResults.length === 0 ? (
+          <div className="px-1 py-2 text-center text-sm text-muted-foreground">
+            {t("friends_search_above")}
+          </div>
+        ) : (
+          <Table>
+            <TableBody>
               {friends.map((friend) => (
-                <div
+                <TableRow
                   key={friend.id}
-                  className="friends-list-item flex-between gap-xs"
+                  className="cursor-pointer border-none"
+                  onClick={() => handleFriendClick(friend.username)}
                 >
-                  <button
-                    className="friends-item-link"
-                    onClick={() => handleFriendClick(friend.username)}
-                  >
-                    {friend.first_name}{" "}
-                    <span className="friends-result-username">
-                      @{friend.username}
+                  <TableCell className="p-1">
+                    <span className="min-w-0 truncate text-sm">
+                      {friend.first_name}{" "}
+                      <span className="text-muted-foreground">
+                        @{friend.username}
+                      </span>
                     </span>
-                  </button>
-                  <button
-                    className="btn btn-icon btn-icon-neutral"
-                    onClick={() => handleRemoveFriend(friend.id)}
-                    disabled={loadingAction === friend.id}
-                    aria-label={t("friends_remove")}
-                  >
-                    <UserMinus size={14} />
-                  </button>
-                </div>
+                  </TableCell>
+                  <TableCell className="w-px p-1 text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveFriend(friend.id);
+                      }}
+                      disabled={loadingAction === friend.id}
+                      aria-label={t("friends_remove")}
+                    >
+                      <UserMinus className="size-3.5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
+
+              {friends.length > 0 &&
+                (pendingRequests.length > 0 || sentRequests.length > 0) && (
+                  <TableRow className="border-none hover:bg-transparent">
+                    <TableCell colSpan={2} className="p-0">
+                      <Separator className="my-1" />
+                    </TableCell>
+                  </TableRow>
+                )}
 
               {pendingRequests.map((req) => (
-                <div
-                  key={req.id}
-                  className="friends-list-item flex-between gap-xs"
-                >
-                  <span
-                    className="flex-column"
-                    style={{ minWidth: 0, alignItems: "flex-start" }}
-                  >
-                    <span className="friends-item-name">@{req.username}</span>
-                    <span className="friends-status-label">
-                      {t("friends_pending")}
-                    </span>
-                  </span>
-                  <div className="friends-item-actions flex-row gap-xs">
-                    <button
-                      className="btn btn-icon btn-icon-red"
-                      onClick={() => handleAccept(req.id)}
-                      disabled={loadingAction === req.id}
-                      aria-label={t("friends_accept")}
-                    >
-                      <Check size={14} />
-                    </button>
-                    <button
-                      className="btn btn-icon btn-icon-neutral"
+                <TableRow key={req.id} className="border-none">
+                  <TableCell className="p-1">
+                    <div className="flex flex-col items-start">
+                      <span className="truncate text-sm">@{req.username}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t("friends_pending")}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="w-px p-1 text-right">
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-success hover:text-success"
+                        onClick={() => handleAccept(req.id)}
+                        disabled={loadingAction === req.id}
+                        aria-label={t("friends_accept")}
+                      >
+                        <Check className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => handleDecline(req.id)}
+                        disabled={loadingAction === req.id}
+                        aria-label={t("friends_decline")}
+                      >
+                        <X className="size-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+
+              {sentRequests.map((req) => (
+                <TableRow key={req.id} className="border-none">
+                  <TableCell className="p-1">
+                    <div className="flex flex-col items-start">
+                      <span className="truncate text-sm">@{req.username}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t("friends_pending")}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="w-px p-1 text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-destructive hover:text-destructive"
                       onClick={() => handleDecline(req.id)}
                       disabled={loadingAction === req.id}
                       aria-label={t("friends_decline")}
                     >
-                      <X size={14} />
-                    </button>
-                  </div>
-                </div>
+                      <X className="size-3.5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-
-              {sentRequests.map((req) => (
-                <div
-                  key={req.id}
-                  className="friends-list-item flex-between gap-xs"
-                >
-                  <span
-                    className="flex-column"
-                    style={{ minWidth: 0, alignItems: "flex-start" }}
-                  >
-                    <span className="friends-item-name">@{req.username}</span>
-                    <span className="friends-status-label">
-                      {t("friends_pending")}
-                    </span>
-                  </span>
-                  <button
-                    className="btn btn-icon btn-icon-neutral"
-                    onClick={() => handleDecline(req.id)}
-                    disabled={loadingAction === req.id}
-                    aria-label={t("friends_decline")}
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+            </TableBody>
+          </Table>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 };
 

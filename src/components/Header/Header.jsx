@@ -9,6 +9,8 @@ import {
   Sun,
   Moon,
   Clock,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -167,9 +169,11 @@ const Header = ({
         {isLoggedIn ? (
           <>
             <DropdownMenuItem onClick={() => navigate("/settings")}>
+              <Settings className="size-4" />
               {t("settings")}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+              <LogOut className="size-4" />
               {t("logout")}
             </DropdownMenuItem>
           </>
@@ -267,13 +271,11 @@ const Header = ({
                 </Button>
               }
             />
-            <DropdownMenuContent align="center" className="overflow-visible">
+            <DropdownMenuContent align="center">
               {/* Navigation options for logged in users */}
               {isLoggedIn && (
                 <>
-                  <div className="dropdown-item">
-                    <FriendsDropdown onNavigate={() => setShowNavMenu(false)} />
-                  </div>
+                  <FriendsDropdown onNavigate={() => setShowNavMenu(false)} />
                   <DropdownMenuItem
                     onClick={() => navigate("/add-recipe")}
                     aria-label={t("add_new_recipe")}

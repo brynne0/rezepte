@@ -1,3 +1,5 @@
+/* NOTE - done means its added to tailwind.css */
+
 :root {
   --color-surface-primary: white;
   --color-text-secondary: grey;
@@ -14,7 +16,7 @@
   --color-error: #c03636;
   --color-error-background: #f8e8e8;
   --color-accent: #c58293a4;
-  --color-success: #2a905d;
+  --color-success: #2a905d; /* done */
   --color-shadow: #0000000d;
   --color-error-shadow: #ef444411;
   --color-ring: var(--color-danger-dark);
@@ -51,7 +53,7 @@
   --color-error: #d66666;
   --color-error-background: #3a302e2f;
   --color-accent: #8b6b7aa4;
-  --color-success: #4db380;
+  --color-success: #4db380; /* done */
   --color-shadow: #00000033;
   --color-error-shadow: #e5737322;
 }

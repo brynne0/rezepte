@@ -1,28 +1,3 @@
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  color: var(--color-text-strong);
-  border-radius: var(--border-radius);
-  transition: all 0.15s ease;
-  text-align: center;
-  font-family: inherit;
-}
-
-.dropdown-item:hover {
-  color: var(--color-danger-dark);
-  font-weight: 500;
-}
-
-.dropdown-item.selected {
-  color: var(--color-danger-dark);
-  font-weight: 500;
-}
-
 /* Search Bar */
 .search-bar-wrapper {
   display: flex;
@@ -99,16 +74,5 @@
 
   .search-bar-wrapper {
     margin: 0;
-  }
-
-  /* Reduce spacing between nav icons on mobile */
-  .header .btn-icon {
-    padding: 0.3rem;
-  }
-
-  /* Match friends icon size to other hamburger menu icons */
-  [data-slot="dropdown-menu-content"] .friends-icon-btn svg {
-    width: 20px;
-    height: 20px;
   }
 }

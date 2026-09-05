@@ -26,6 +26,7 @@
 
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
 
   --color-border: var(--border);
   --color-input: var(--input);
@@ -64,6 +65,8 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.147 0.004 49.25);
   --primary: #ccb3a3;
+  /* TODO - below is the button primary colour and the above is text primary */
+  --temp: #55443c;
   --primary-foreground: oklch(0.985 0.001 106.423);
   --secondary: oklch(0.97 0.001 106.424);
   --secondary-foreground: oklch(0.216 0.006 56.043);
@@ -71,6 +74,7 @@
   --muted-foreground: oklch(0.553 0.013 58.071);
   --accent: oklch(0.97 0.001 106.424);
   --accent-foreground: oklch(0.216 0.006 56.043);
+  --success: #2a905d;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0.001 106.423);
   --border: oklch(0.923 0.003 48.717);
@@ -107,6 +111,7 @@
   --muted-foreground: oklch(0.709 0.01 56.259);
   --accent: oklch(0.268 0.007 34.298);
   --accent-foreground: oklch(0.985 0.001 106.423);
+  --success: #4db380;
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0.001 106.423);
   --border: oklch(1 0 0 / 10%);
