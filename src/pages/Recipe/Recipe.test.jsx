@@ -82,8 +82,6 @@ vi.mock("../../components/ImageGallery/ImageGallery", () => {
   };
 });
 
-vi.mock("./Recipe.css", () => ({}));
-
 // Mock variables
 let mockNavigate;
 let mockRecipeHook;
@@ -95,6 +93,7 @@ describe("Recipe Component", () => {
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
+    localStorage.clear();
 
     // Default mock values
     mockNavigate = vi.fn();
@@ -360,24 +359,43 @@ describe("Recipe Component", () => {
       expect(checkboxes).toHaveLength(2);
     });
 
-    test("handles checkbox changes", () => {
+    test("toggles a checkbox when clicked", () => {
+      renderRecipe();
+
+      const firstCheckbox = screen.getAllByRole("checkbox")[0];
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "false");
+
+      fireEvent.click(firstCheckbox);
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "true");
+
+      fireEvent.click(firstCheckbox);
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "false");
+    });
+
+    test("persists checked ingredients to localStorage", () => {
       renderRecipe();
 
       const firstCheckbox = screen.getAllByRole("checkbox")[0];
       fireEvent.click(firstCheckbox);
 
-      // expect(mockGroceryListHook.handleCheckboxChange).toHaveBeenCalledWith(
-      //   "ri-1"
-      // );
+      const stored = JSON.parse(
+        localStorage.getItem("checked-ingredients-test-recipe-id")
+      );
+      expect(stored).toEqual({ "ri-1": true });
     });
 
-    // test("shows checked state from grocery list hook", () => {
-    // mockGroceryListHook.checkedIngredients = { "ri-1": true };
-    // renderRecipe();
+    test("restores checked ingredients from localStorage on mount", () => {
+      localStorage.setItem(
+        "checked-ingredients-test-recipe-id",
+        JSON.stringify({ "ri-1": true })
+      );
 
-    //   const firstCheckbox = screen.getAllByRole("checkbox")[0];
-    //   expect(firstCheckbox).toBeChecked();
-    // });
+      renderRecipe();
+
+      const [firstCheckbox, secondCheckbox] = screen.getAllByRole("checkbox");
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "true");
+      expect(secondCheckbox).toHaveAttribute("aria-checked", "false");
+    });
   });
 
   describe("Ingredient Sections", () => {
@@ -965,7 +983,7 @@ describe("Recipe Component", () => {
         "/recipe-123/homemade-oat-flour"
       );
       expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
+        "text-accent-red"
       );
 
       // Unlinked ingredient should be plain text
@@ -1042,7 +1060,7 @@ describe("Recipe Component", () => {
         "/recipe-789/coconut-flour-recipe"
       );
       expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
+        "text-accent-red"
       );
 
       // Unlinked sectioned ingredient should be plain text
@@ -1111,7 +1129,7 @@ describe("Recipe Component", () => {
         "/recipe-101/selbstgemachtes-mandelmehl"
       );
       expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
+        "text-accent-red"
       );
 
       // Reset language to English
@@ -1178,7 +1196,7 @@ describe("Recipe Component", () => {
         "/recipe-202/fresh-mushrooms"
       );
       expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
+        "text-accent-red"
       );
     });
 
@@ -1209,7 +1227,7 @@ describe("Recipe Component", () => {
         "/recipe-303/undefined"
       );
       expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
+        "text-accent-red"
       );
     });
   });

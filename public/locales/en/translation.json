@@ -91,6 +91,12 @@
   "no_internet_connection": "No internet connection",
 
   "servings": "Servings",
+  "decrease_servings": "Decrease servings",
+  "increase_servings": "Increase servings",
+  "reset_servings": "Reset servings",
+  "decrease_scale": "Decrease scale",
+  "increase_scale": "Increase scale",
+  "reset_scale": "Reset scale",
   "ingredients": "Ingredients",
   "instructions": "Instructions",
   "source": "Source",

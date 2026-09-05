@@ -91,6 +91,12 @@
   "no_internet_connection": "Keine Internetverbindung",
 
   "servings": "Portionen",
+  "decrease_servings": "Portionen verringern",
+  "increase_servings": "Portionen erhöhen",
+  "reset_servings": "Portionen zurücksetzen",
+  "decrease_scale": "Menge verringern",
+  "increase_scale": "Menge erhöhen",
+  "reset_scale": "Menge zurücksetzen",
   "ingredients": "Zutaten",
   "instructions": "Schritte",
   "source": "Quelle",

@@ -23,7 +23,7 @@ body {
   margin: 0;
   padding: 0;
 }
-
+/* 
 ol,
 ul {
   margin-top: 0.5rem;
@@ -87,7 +87,6 @@ h2.forta-small {
 h3.forta {
   font-family: var(--font-forta);
   font-size: 0.9rem;
-}
 
 .link {
   cursor: pointer;
@@ -145,4 +144,4 @@ h3.forta {
   .bold-small {
     font-size: 0.9rem;
   }
-}
+} */

@@ -29,8 +29,8 @@ const NutritionPanel = ({ recipe }) => {
 
   return (
     <>
-      <div className="recipe-subheading">
-        <h2>{t("nutritional_info")}:</h2>
+      <div className="mt-2 flex flex-wrap items-baseline gap-2">
+        <h2 className="text-lg">{t("nutritional_info")}:</h2>
       </div>
       {isDual ? (
         <div className="nutrition-dual-table">

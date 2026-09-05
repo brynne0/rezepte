@@ -1,21 +1,12 @@
-import "./Recipe.css";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  Pencil,
-  ShoppingBasket,
-  Loader2,
-  Share2,
-  RotateCcw,
-} from "lucide-react";
+import { Pencil, Share2, RotateCcw, Minus, Plus } from "lucide-react";
 
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { fetchSharedRecipe } from "../../services/sharingService";
 import { getTranslatedRecipe } from "../../services/translationService";
-// import { getUserPreferredLanguage } from "../../services/userService";
 import { useAuth } from "../../hooks/data/useAuth";
-import { useGroceryList } from "../../hooks/data/useGroceryList";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ShareModal from "../../components/ShareModal/ShareModal";
@@ -34,6 +25,18 @@ import {
 import { shouldUsePlural } from "../../utils/fractionUtils";
 import { useWakeLock } from "../../hooks/ui/useWakeLock";
 import NutritionPanel from "../../components/NutritionPanel/NutritionPanel";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardAction,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 // Helper function to parse text and convert URLs to clickable links
 const renderTextWithLinks = (text) => {
@@ -54,7 +57,7 @@ const renderTextWithLinks = (text) => {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="link-red break-all"
+          className="text-accent-red break-all underline-offset-2 hover:underline"
         >
           {part}
         </a>
@@ -81,24 +84,52 @@ const Recipe = ({ isSharedView = false }) => {
     toggle: toggleWakeLock,
   } = useWakeLock();
   const [multiplier, setMultiplier] = useState(1);
+  const [checkedIngredients, setCheckedIngredients] = useState({});
+  const recipeStorageKey = isSharedView ? shareToken : id;
 
   // Reset scale when navigating to a different recipe
   useEffect(() => {
     setMultiplier(1);
   }, [id, shareToken]);
+
+  // Restore ticked-off ingredients for this recipe from localStorage
+  useEffect(() => {
+    if (!recipeStorageKey) return;
+    try {
+      const stored = localStorage.getItem(
+        `checked-ingredients-${recipeStorageKey}`
+      );
+      setCheckedIngredients(stored ? JSON.parse(stored) : {});
+    } catch {
+      setCheckedIngredients({});
+    }
+  }, [recipeStorageKey]);
+
+  // Persist ticked-off ingredients as they change
+  useEffect(() => {
+    if (!recipeStorageKey) return;
+    try {
+      localStorage.setItem(
+        `checked-ingredients-${recipeStorageKey}`,
+        JSON.stringify(checkedIngredients)
+      );
+    } catch {
+      // Ignore storage errors (e.g. private browsing with storage disabled)
+    }
+  }, [recipeStorageKey, checkedIngredients]);
+
+  const handleCheckboxChange = (ingredientId) => {
+    setCheckedIngredients((prev) => ({
+      ...prev,
+      [ingredientId]: !prev[ingredientId],
+    }));
+  };
+
   const navigate = useNavigate();
   const { isLoggedIn, user } = useAuth();
   const { t, i18n } = useTranslation();
   const [showShareModal, setShowShareModal] = useState(false);
   const [imagesLoading, setImagesLoading] = useState(true);
-  // const [userPreferredLanguage, setUserPreferredLanguage] = useState(null);
-
-  // Load user's preferred language
-  // useEffect(() => {
-  //   if (isLoggedIn) {
-  //     getUserPreferredLanguage().then(setUserPreferredLanguage);
-  //   }
-  // }, [isLoggedIn]);
 
   // Load shared recipe if in shared view
   useEffect(() => {
@@ -138,50 +169,6 @@ const Recipe = ({ isSharedView = false }) => {
     isOwner || isSharedView ? recipe?.images : [],
     isSharedView // 7-day expiration for shared recipes
   );
-
-  // Check if user is viewing the site in their preferred language
-  // const currentLanguage = i18n.language.split("-")[0]; // Normalise region codes
-  // const isViewingInPreferredLanguage =
-  //   currentLanguage === userPreferredLanguage;
-
-  // Use the grocery list hook
-  const {
-    checkedIngredients,
-    // addingToGroceryList,
-    // showSuccess,
-    handleCheckboxChange,
-    // addToGroceryList,
-  } = useGroceryList();
-
-  // Helper function to get all ingredients as a flat array
-  // const getAllIngredients = () => {
-  //   const allIngredients = [];
-
-  //   // Add ungrouped ingredients
-  //   if (recipe.ungroupedIngredients) {
-  //     allIngredients.push(...recipe.ungroupedIngredients);
-  //   }
-
-  //   // Add ingredients from sections
-  //   if (recipe.ingredientSections) {
-  //     recipe.ingredientSections.forEach((section) => {
-  //       if (section.ingredients) {
-  //         allIngredients.push(...section.ingredients);
-  //       }
-  //     });
-  //   }
-
-  //   // Fallback to old flat structure
-  //   if (
-  //     !recipe.ungroupedIngredients &&
-  //     !recipe.ingredientSections &&
-  //     recipe.ingredients
-  //   ) {
-  //     allIngredients.push(...recipe.ingredients);
-  //   }
-
-  //   return allIngredients;
-  // };
 
   // Parse servings — plain integer, numeric range, or freetext
   const servingsInfo = (() => {
@@ -255,20 +242,27 @@ const Recipe = ({ isSharedView = false }) => {
       t("units", { returnObjects: true })
     );
     return (
-      <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
-        <input
-          type="checkbox"
+      <li
+        key={`${keyPrefix}-${index}-${ingredient.id}`}
+        className="flex items-center gap-2 py-0.5"
+      >
+        <Checkbox
           checked={checkedIngredients[ingredient.recipe_ingredient_id] || false}
-          onChange={() => handleCheckboxChange(ingredient.recipe_ingredient_id)}
+          onCheckedChange={() =>
+            handleCheckboxChange(ingredient.recipe_ingredient_id)
+          }
           id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
         />
-        <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
-          <span className="ingredient-measurement">{measurement}</span>
+        <label
+          htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
+          className="peer-data-checked:text-muted-foreground min-w-0 flex-1 [word-break:break-word] transition-[opacity,text-decoration] duration-200 peer-data-checked:line-through peer-data-checked:opacity-60"
+        >
+          <span className="font-semibold">{measurement}</span>
           {measurement && " "}
 
           {ingredient.linked_recipe ? (
             <a
-              className="ingredient-name-linked"
+              className="text-accent-red inline-flex items-center gap-1 underline decoration-2 underline-offset-2 transition-colors hover:text-destructive"
               href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -279,7 +273,7 @@ const Recipe = ({ isSharedView = false }) => {
           )}
 
           {ingredient.notes && (
-            <span className="ingredient-notes"> {ingredient.notes}</span>
+            <span className="text-muted-foreground"> {ingredient.notes}</span>
           )}
         </label>
       </li>
@@ -295,7 +289,11 @@ const Recipe = ({ isSharedView = false }) => {
       ? t("shared_recipe_not_found")
       : error;
 
-    return <div className="page-centered">{errorMessage}</div>;
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        {errorMessage}
+      </div>
+    );
   }
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
@@ -355,7 +353,7 @@ const Recipe = ({ isSharedView = false }) => {
   };
 
   return (
-    <div className="recipe-container card card-recipe">
+    <Card className="mx-auto max-w-3xl text-left">
       {/* SEO Meta Tags and Structured Data */}
       <SEO
         title={`${recipe.title}`}
@@ -368,290 +366,257 @@ const Recipe = ({ isSharedView = false }) => {
 
       {/* Show shared indicator for shared recipes */}
       {isSharedView && (
-        <div className="shared-indicator">
+        <div className="border-destructive bg-destructive/10 text-destructive mx-(--card-spacing) flex w-fit items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium">
           <Share2 size={16} />
           <span>{t("shared_recipe")}</span>
         </div>
       )}
 
-      <div className="flex-between gap-xs">
-        <h1 className="forta-red wrap">{recipe.title}</h1>
+      <CardHeader>
+        <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+          {recipe.title}
+        </CardTitle>
 
         {!isSharedView && isLoggedIn && recipe?.user_id === user?.id && (
-          <div className="action-buttons-bordered">
-            <button
-              className="btn btn-icon-red"
-              onClick={() =>
-                navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
-              }
-              data-testid="edit-recipe-btn"
-              aria-label={t("edit_recipe")}
-            >
-              <Pencil />
-            </button>
-            <button
-              className="btn btn-icon-red"
-              onClick={() => setShowShareModal(true)}
-              data-testid="share-recipe-btn"
-              aria-label={t("share_recipe")}
-              title={t("share_recipe")}
-            >
-              <Share2 />
-            </button>
+          <CardAction className="self-start">
+            <ButtonGroup>
+              <Button
+                variant="secondary"
+                size="icon-lg"
+                onClick={() =>
+                  navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                }
+                data-testid="edit-recipe-btn"
+                aria-label={t("edit_recipe")}
+              >
+                <Pencil />
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon-lg"
+                onClick={() => setShowShareModal(true)}
+                data-testid="share-recipe-btn"
+                aria-label={t("share_recipe")}
+                title={t("share_recipe")}
+              >
+                <Share2 />
+              </Button>
+            </ButtonGroup>
+          </CardAction>
+        )}
+      </CardHeader>
+
+      <CardContent>
+        {wakeLockSupported && (
+          <Label htmlFor="wake-lock">
+            <Switch
+              id="wake-lock"
+              checked={wakeLockActive}
+              onCheckedChange={toggleWakeLock}
+            />
+            {t("keep_screen_on")}
+          </Label>
+        )}
+
+        {/* Recipe Images - floating within content - only show when logged in */}
+        {isOwner && signedImages && signedImages.length > 0 && (
+          <div className="relative my-4 w-full">
+            {imagesLoading && (
+              <div className="bg-muted absolute -inset-4 z-10 flex items-center justify-center transition-opacity duration-300">
+                <LoadingAcorn size={20} className="loading-acorn-small" />
+              </div>
+            )}
+            <ImageGallery
+              images={signedImages}
+              onAllImagesLoaded={() => setImagesLoading(false)}
+            />
           </div>
         )}
-      </div>
 
-      {wakeLockSupported && (
-        <button
-          className="wake-lock-toggle"
-          onClick={toggleWakeLock}
-          role="switch"
-          aria-checked={wakeLockActive}
-        >
-          <span className={`wake-lock-pill${wakeLockActive ? " on" : ""}`}>
-            <span className="wake-lock-thumb" />
-          </span>
-          <span>{t("keep_screen_on")}</span>
-        </button>
-      )}
-
-      {/* Single column layout with floating images */}
-      <div className="recipe-layout">
-        <div className="recipe-content">
-          {/* Recipe Images - floating within content - only show when logged in */}
-          {isOwner && signedImages && signedImages.length > 0 && (
-            <div className="recipe-images-float">
-              {imagesLoading && (
-                <div className="images-loading-overlay">
-                  <LoadingAcorn size={20} className="loading-acorn-small" />
-                </div>
-              )}
-              <ImageGallery
-                images={signedImages}
-                onAllImagesLoaded={() => setImagesLoading(false)}
-              />
-            </div>
-          )}
-
-          {/* Servings */}
-          {recipe.servings && (
-            <div className="recipe-subheading">
-              <h2>{t("servings")}:</h2>
-              {hasIngredients ? (
-                <>
-                  <div className="scale-control">
-                    <button
-                      className="scale-btn"
-                      onClick={() => handleServingsChange(-1)}
-                      disabled={
-                        servingsInfo?.base
-                          ? Math.round(servingsInfo.base * multiplier) <= 1
-                          : multiplier <= 0.25
-                      }
-                      aria-label="decrease servings"
-                    >
-                      -
-                    </button>
-                    <span className="scale-value">{scaledServingsLabel}</span>
-                    <button
-                      className="scale-btn"
-                      onClick={() => handleServingsChange(1)}
-                      disabled={!servingsInfo?.base && multiplier >= 8}
-                      aria-label="increase servings"
-                    >
-                      +
-                    </button>
-                    {servingsInfo?.type === "text" && multiplier !== 1 && (
-                      <span className="scale-multiplier">
-                        {formatMultiplierLabel(multiplier)}
-                      </span>
-                    )}
-                  </div>
-                  {multiplier !== 1 && (
-                    <button
-                      className="btn btn-unstyled scale-reset"
-                      onClick={() => setMultiplier(1)}
-                      aria-label="reset servings"
-                    >
-                      <RotateCcw size={14} />
-                    </button>
-                  )}
-                </>
-              ) : (
-                recipe.servings
-              )}
-            </div>
-          )}
-
-          {/* Ingredients */}
-          {hasIngredients && (
-            <>
-              <div className="flex-row recipe-subheading">
-                <h2>{t("ingredients")}:</h2>
-                {!recipe.servings && (
-                  <div className="scale-control">
-                    <button
-                      className="scale-btn"
-                      onClick={() => handleMultiplierChange(-1)}
-                      disabled={multiplier <= 0.25}
-                      aria-label="decrease scale"
-                    >
-                      -
-                    </button>
-                    <span className="scale-value">
+        {/* Servings */}
+        {recipe.servings && (
+          <div className="mt-2 flex flex-wrap items-baseline gap-2">
+            <h2 className="text-lg">{t("servings")}:</h2>
+            {hasIngredients ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleServingsChange(-1)}
+                    disabled={
+                      servingsInfo?.base
+                        ? Math.round(servingsInfo.base * multiplier) <= 1
+                        : multiplier <= 0.25
+                    }
+                    aria-label={t("decrease_servings")}
+                  >
+                    <Minus strokeWidth={2} />
+                  </Button>
+                  <span className="text-foreground min-w-8 text-center font-semibold">
+                    {scaledServingsLabel}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleServingsChange(1)}
+                    disabled={!servingsInfo?.base && multiplier >= 8}
+                    aria-label={t("increase_servings")}
+                  >
+                    <Plus strokeWidth={2} />
+                  </Button>
+                  {servingsInfo?.type === "text" && multiplier !== 1 && (
+                    <span className="text-sm font-medium">
                       {formatMultiplierLabel(multiplier)}
                     </span>
-                    <button
-                      className="scale-btn"
-                      onClick={() => handleMultiplierChange(1)}
-                      disabled={multiplier >= 8}
-                      aria-label="increase scale"
+                  )}
+                </div>
+                {multiplier !== 1 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-accent-red"
+                    onClick={() => setMultiplier(1)}
+                    aria-label={t("reset_servings")}
+                  >
+                    <RotateCcw strokeWidth={2} />
+                  </Button>
+                )}
+              </>
+            ) : (
+              recipe.servings
+            )}
+          </div>
+        )}
+
+        {/* Ingredients */}
+        {hasIngredients && (
+          <>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <h2 className="text-lg">{t("ingredients")}:</h2>
+              {!recipe.servings && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleMultiplierChange(-1)}
+                    disabled={multiplier <= 0.25}
+                    aria-label={t("decrease_scale")}
+                  >
+                    <Minus strokeWidth={3} />
+                  </Button>
+                  <span className="text-foreground min-w-8 text-center font-semibold">
+                    {formatMultiplierLabel(multiplier)}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleMultiplierChange(1)}
+                    disabled={multiplier >= 8}
+                    aria-label={t("increase_scale")}
+                  >
+                    <Plus strokeWidth={3} />
+                  </Button>
+                  {multiplier !== 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-accent-red"
+                      onClick={() => setMultiplier(1)}
+                      aria-label={t("reset_scale")}
                     >
-                      +
-                    </button>
-                    {multiplier !== 1 && (
-                      <button
-                        className="btn btn-unstyled scale-reset"
-                        onClick={() => setMultiplier(1)}
-                        aria-label="reset scale"
-                      >
-                        <RotateCcw size={14} />
-                      </button>
-                    )}
-                  </div>
-                )}
-                {/* Grocery Cart - only show for owned recipes and when viewing in preferred language */}
-                {/* {!isSharedView &&
-                  isLoggedIn &&
-                  isViewingInPreferredLanguage && (
-                    <div className="cart-container">
-                      <button
-                        onClick={() =>
-                          addToGroceryList(
-                            getAllIngredients(),
-                            recipe.title,
-                            recipe.id
-                          )
-                        }
-                        className="btn btn-icon-red"
-                        disabled={addingToGroceryList}
-                        data-testid="lucide-shopping-basket"
-                        aria-label={t("add_to_grocery_list")}
-                      >
-                        <ShoppingBasket /> */}
-                {/* Selected ingredients counter or loading spinner */}
-                {/* {addingToGroceryList ? (
-                          <span className="cart-counter flex-center">
-                            <Loader2
-                              size={12}
-                              className="animate-spin"
-                              data-testid="cart-loader"
-                            />
-                          </span>
-                        ) : (
-                          Object.values(checkedIngredients).filter(Boolean)
-                            .length > 0 && (
-                            <span className="cart-counter flex-center">
-                              {
-                                Object.values(checkedIngredients).filter(
-                                  Boolean
-                                ).length
-                              }
-                            </span>
-                          )
+                      <RotateCcw strokeWidth={2.5} />
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Ungrouped Ingredients */}
+            {recipe.ungroupedIngredients &&
+              recipe.ungroupedIngredients.length > 0 && (
+                <ul>
+                  {recipe.ungroupedIngredients.map((ingredient, index) =>
+                    renderIngredientItem(ingredient, "ungrouped", index)
+                  )}
+                </ul>
+              )}
+
+            {/* Ingredient Sections */}
+            {recipe.ingredientSections &&
+              recipe.ingredientSections.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  {recipe.ingredientSections.map((section, sectionIndex) => (
+                    <div key={sectionIndex}>
+                      <h3 className="mt-2 text-base font-semibold [word-break:break-word]">
+                        {section.subheading}
+                      </h3>
+                      <ul>
+                        {section.ingredients.map(
+                          (ingredient, ingredientIndex) =>
+                            renderIngredientItem(
+                              ingredient,
+                              `section-${sectionIndex}`,
+                              ingredientIndex
+                            )
                         )}
-                      </button>
+                      </ul>
                     </div>
-                  )}  */}
-                {/* {!isSharedView &&
-                  isViewingInPreferredLanguage &&
-                  showSuccess &&
-                  t("added_to_groceries")} */}
-              </div>
+                  ))}
+                </div>
+              )}
 
-              {/* Ungrouped Ingredients */}
-              {recipe.ungroupedIngredients &&
-                recipe.ungroupedIngredients.length > 0 && (
-                  <ul>
-                    {recipe.ungroupedIngredients.map((ingredient, index) =>
-                      renderIngredientItem(ingredient, "ungrouped", index)
-                    )}
-                  </ul>
-                )}
+            {/* Fallback for old flat ingredient structure */}
+            {!recipe.ungroupedIngredients &&
+              !recipe.ingredientSections &&
+              recipe.ingredients &&
+              recipe.ingredients.length > 0 && (
+                <ul>
+                  {recipe.ingredients.map((ingredient, index) =>
+                    renderIngredientItem(ingredient, "flat", index)
+                  )}
+                </ul>
+              )}
+          </>
+        )}
 
-              {/* Ingredient Sections */}
-              {recipe.ingredientSections &&
-                recipe.ingredientSections.length > 0 && (
-                  <div className="ingredient-sections">
-                    {recipe.ingredientSections.map((section, sectionIndex) => (
-                      <div key={sectionIndex} className="ingredient-section">
-                        <h3 className="section-subheading">
-                          {section.subheading}
-                        </h3>
-                        <ul>
-                          {section.ingredients.map(
-                            (ingredient, ingredientIndex) =>
-                              renderIngredientItem(
-                                ingredient,
-                                `section-${sectionIndex}`,
-                                ingredientIndex
-                              )
-                          )}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-              {/* Fallback for old flat ingredient structure */}
-              {!recipe.ungroupedIngredients &&
-                !recipe.ingredientSections &&
-                recipe.ingredients &&
-                recipe.ingredients.length > 0 && (
-                  <ul>
-                    {recipe.ingredients.map((ingredient, index) =>
-                      renderIngredientItem(ingredient, "flat", index)
-                    )}
-                  </ul>
-                )}
-            </>
-          )}
-
-          {/* Instructions */}
-          {recipe.instructions && recipe.instructions.length > 0 && (
-            <>
-              <div className="recipe-subheading">
-                <h2>{t("instructions")}:</h2>
-              </div>
-              <ol>
-                {recipe.instructions.map((instruction, i) => (
-                  <li key={i}>{instruction}</li>
-                ))}
-              </ol>
-            </>
-          )}
-
-          {/* Source */}
-          {recipe.source && (
-            <div className="recipe-subheading">
-              <h2>{t("source")}:</h2>
-              <span className="wrap">{renderTextWithLinks(recipe.source)}</span>
+        {/* Instructions */}
+        {recipe.instructions && recipe.instructions.length > 0 && (
+          <>
+            <div className="mt-2">
+              <h2 className="text-lg">{t("instructions")}:</h2>
             </div>
-          )}
+            <ol className="list-decimal space-y-1 pl-5">
+              {recipe.instructions.map((instruction, i) => (
+                <li key={i}>{instruction}</li>
+              ))}
+            </ol>
+          </>
+        )}
 
-          {/* Extra Notes */}
-          {recipe.notes && recipe.notes.length > 0 && (
-            <div className="recipe-subheading">
-              <h2>{t("notes")}:</h2>
-              <div className="recipe-notes-content">{recipe.notes}</div>
+        {/* Source */}
+        {recipe.source && (
+          <div className="mt-2 flex flex-wrap items-baseline gap-2">
+            <h2 className="text-lg">{t("source")}:</h2>
+            <span className="[word-wrap:break-word]">
+              {renderTextWithLinks(recipe.source)}
+            </span>
+          </div>
+        )}
+
+        {/* Extra Notes */}
+        {recipe.notes && recipe.notes.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-baseline gap-2">
+            <h2 className="text-lg">{t("notes")}:</h2>
+            <div className="[word-break:break-word] whitespace-pre-wrap">
+              {recipe.notes}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Nutrition */}
-          <NutritionPanel recipe={recipe} />
-        </div>
-      </div>
+        {/* Nutrition */}
+        <NutritionPanel recipe={recipe} />
+      </CardContent>
 
       {/* Share Modal - only for owned recipes */}
       {!isSharedView && recipe?.user_id === user?.id && (
@@ -661,7 +626,7 @@ const Recipe = ({ isSharedView = false }) => {
           recipe={recipe}
         />
       )}
-    </div>
+    </Card>
   );
 };
 
