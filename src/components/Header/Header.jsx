@@ -34,7 +34,6 @@ import { useTheme } from "../../hooks/ui/useTheme";
 import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import SortButtons from "../SortButtons/SortButtons";
-import "./Header.css";
 
 const Header = ({
   setSelectedCategory,
@@ -339,21 +338,22 @@ const Header = ({
 
       {/*  Search Recipe - Always visible on home page  */}
       {isHomePage && (
-        <div className="search-bar-wrapper">
-          <div className="search-and-sort-container">
+        <div className="flex justify-center px-4 py-3 md:px-6">
+          <div className="flex w-full max-w-2xl flex-col items-stretch gap-3 md:flex-row md:items-center">
             <form
+              className="w-full md:flex-1"
               onSubmit={(e) => {
                 e.preventDefault();
                 setSearchTerm(currentSearchInput);
                 navigate("/");
               }}
             >
-              <InputGroup>
+              <InputGroup className="h-12">
                 <InputGroupAddon
                   align="inline-start"
                   className="text-foreground"
                 >
-                  <Search />
+                  <Search className="size-5" />
                 </InputGroupAddon>
                 <InputGroupInput
                   id="search"
@@ -366,6 +366,7 @@ const Header = ({
                       setSelectedCategory("all_recipes");
                     }
                   }}
+                  className="text-base"
                   placeholder={t("search")}
                 />
               </InputGroup>

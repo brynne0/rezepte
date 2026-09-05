@@ -61,7 +61,7 @@ const SortButtons = ({
     sortBy === "last_viewed_at_asc" || sortBy === "last_viewed_at_desc";
 
   return (
-    <div className="flex items-center justify-center gap-2 md:absolute md:top-1/2 md:left-0 md:-ml-4 md:-translate-x-full md:-translate-y-1/2">
+    <div className="flex shrink-0 items-center justify-center gap-2">
       <ToggleGroup
         value={isRecentActive ? ["recent"] : isTitleActive ? ["title"] : []}
         variant="outline"
