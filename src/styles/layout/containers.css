@@ -1,4 +1,4 @@
-/* Cards */
+/* Cards  */
 .card {
   background: var(--color-background-overlay);
   border-radius: var(--border-radius);
@@ -12,12 +12,6 @@
   padding: 2rem;
   min-width: 40rem;
   width: 50vw;
-}
-
-.card-grocery {
-  padding: 2rem 3rem;
-  min-width: 30vw;
-  max-width: -webkit-fill-available;
 }
 
 .card-form {

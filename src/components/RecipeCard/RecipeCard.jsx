@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -10,6 +9,8 @@ import {
 } from "../../services/imageService";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 import useIntersectionObserver from "../../hooks/ui/useIntersectionObserver";
+import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
+import { cn } from "cn";
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
@@ -67,37 +68,44 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const hasNoContent = hasNoIngredients && hasNoInstructions;
 
   return (
-    <div
+    <Card
       ref={cardRef}
-      className="recipe-card"
+      className="cursor-pointer py-0"
       onClick={() => onClick && onClick(recipe)}
     >
-      <div className="flex-center">
-        <h4 className="recipe-card-title">{recipe.title}</h4>
+      <CardHeader className="py-2">
+        <CardTitle className="text-xs font-medium uppercase group-hover/card:text-accent-red">
+          {recipe.title}
+        </CardTitle>
 
         {hasSourceLink && hasNoContent && (
-          <a
-            href={recipe.source}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-unstyled recipe-card-link"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent triggering the card click
-            }}
-            aria-label={t("open_recipe_source_link")}
-            title={t("open_recipe_source_link")}
-          >
-            <Link size={16} />
-          </a>
+          <CardAction className="row-span-1 self-center">
+            <a
+              href={recipe.source}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-accent-red"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the card click
+              }}
+              aria-label={t("open_recipe_source_link")}
+              title={t("open_recipe_source_link")}
+            >
+              <Link size={16} />
+            </a>
+          </CardAction>
         )}
-      </div>
+      </CardHeader>
       {shouldShowImages &&
         signedMainImage &&
         !imageError &&
         optimizedImageUrl && (
-          <div className="recipe-image-container">
+          <div className="relative mx-2 mb-2 h-[clamp(100px,12vw,150px)] overflow-hidden rounded-lg">
             <img
-              className={`recipe-image ${imageLoaded ? "loaded" : "loading"}`}
+              className={cn(
+                "size-full object-cover transition-opacity duration-200 will-change-[opacity]",
+                imageLoaded ? "opacity-100" : "opacity-30"
+              )}
               src={optimizedImageUrl}
               alt={recipe.title}
               loading="lazy"
@@ -106,13 +114,13 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
               key={signedMainImage?.id}
             />
             {!imageLoaded && (
-              <div className="recipe-image-loading">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-body">
                 <LoadingAcorn size={20} className="loading-acorn-small" />
               </div>
             )}
           </div>
         )}
-    </div>
+    </Card>
   );
 };
 

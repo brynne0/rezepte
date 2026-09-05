@@ -4,7 +4,7 @@
   --color-surface-primary: white;
   --color-text-secondary: grey;
   --color-placeholder: #999;
-  --color-background-secondary: #fffbf4;
+  --color-background-secondary: #fffbf4; /* done */
   --color-background-overlay: #fffbf4da;
   --color-background-tertiary: #fdf8f0;
   --color-border-light: #523f1955;
@@ -40,7 +40,7 @@
   /* Dark mode semantic color overrides */
   --color-text-primary: #ccb3a3; /* done */
   --color-placeholder: #b6a991;
-  --color-background-secondary: #342a24;
+  --color-background-secondary: #342a24; /* done */
   --color-text-strong: #d4c2b3;
   --color-background-overlay: #55443c4c;
   --color-surface-primary: #342a24;

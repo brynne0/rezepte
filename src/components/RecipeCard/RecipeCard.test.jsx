@@ -2,9 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import RecipeCard from "./RecipeCard";
 
-// Mock the CSS import
-vi.mock("./RecipeCard.css", () => ({}));
-
 // Mock useAuth hook
 vi.mock("../../hooks/data/useAuth", () => ({
   useAuth: () => ({
@@ -65,11 +62,14 @@ describe("RecipeCard", () => {
 
   it("handles missing recipe title gracefully", () => {
     const recipeWithoutTitle = { id: 2, image: "test.jpg" };
-    render(<RecipeCard recipe={recipeWithoutTitle} onClick={mockOnClick} />);
+    const { container } = render(
+      <RecipeCard recipe={recipeWithoutTitle} onClick={mockOnClick} />
+    );
 
     // Should render without crashing
-    const cardElement = screen.getByRole("heading", { level: 4 });
-    expect(cardElement).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-slot="card-title"]')
+    ).toBeInTheDocument();
   });
 
   it("renders with different recipe data", () => {
@@ -352,7 +352,6 @@ describe("RecipeCard", () => {
 
       const image = screen.getByRole("img", { name: "Recipe with Image" });
       expect(image).toBeInTheDocument();
-      expect(image).toHaveClass("recipe-image");
     });
 
     it("hides image when showImages is false even if recipe has image", () => {

@@ -1,5 +1,5 @@
 /* Conversions Tab Styles */
-.grid {
+.conversions-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
@@ -9,7 +9,7 @@
 }
 
 @media (max-width: 768px) {
-  .grid {
+  .conversions-grid {
     grid-template-columns: 1fr;
   }
 }

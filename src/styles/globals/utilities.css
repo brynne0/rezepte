@@ -1,12 +1,12 @@
 /* Text wrapping utilities */
-.wrap {
+/* .wrap {
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-word;
-}
+} */
 
 /* Flex utilities */
-.flex-center {
+/* .flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,20 +27,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-}
+} */
 
 /* NOTE: .flex-row and .relative below share their names with real Tailwind
    utility classes. They stay correct only because these rules are unlayered
    and Tailwind's output in src/styles/tailwind.css is wrapped in named
    layers — unlayered rules always win over layered ones. Don't move these
    into a @layer block. */
-.flex-row {
+/* .flex-row {
   display: flex;
   align-items: center;
-}
+} */
 
 /* Position utilities */
-.relative {
+/* .relative {
   position: relative;
 }
 
@@ -48,10 +48,10 @@
   position: relative;
   display: flex;
   align-items: center;
-}
+} */
 
 /* Spacing utilities - Margin */
-.mt-1 {
+/* .mt-1 {
   margin-top: 1rem;
 }
 
@@ -69,10 +69,10 @@
 
 .mb-2 {
   margin-bottom: 2rem;
-}
+} */
 
 /* Spacing utilities - Gap */
-.gap-xs {
+/* .gap-xs {
   gap: 0.5rem;
 }
 
@@ -86,16 +86,16 @@
 
 .gap-lg {
   gap: 2rem;
-}
+} */
 
 /* Width utilities */
-.w-100 {
+/* .w-100 {
   width: 100%;
-}
+} */
 
 /* Mobile-specific utilities */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .w-100-mobile {
     width: 100%;
   }
-}
+} */

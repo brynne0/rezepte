@@ -38,7 +38,7 @@ const ConversionsTab = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="grid">
+    <div className="conversions-grid">
       {Object.keys(conversions).map((category) => {
         const categoryConversions = conversions[category];
         if (categoryConversions.length === 0) return null;
