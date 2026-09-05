@@ -106,6 +106,10 @@ function ShowcasePage() {
         <Button variant="ghost">Ghost</Button>
         <Button variant="destructive">Destructive</Button>
         <Button variant="link">Link</Button>
+        <Button variant="text">Text</Button>
+        <Button variant="text" aria-pressed>
+          Text selected
+        </Button>
         <Button disabled>Disabled</Button>
       </Section>
 

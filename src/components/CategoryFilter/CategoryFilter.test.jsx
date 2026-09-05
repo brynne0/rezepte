@@ -45,15 +45,14 @@ describe("CategoryFilter Component", () => {
     expect(screen.getByText("Staples")).toBeInTheDocument();
   });
 
-  test("applies selected class to currently selected category", () => {
+  test("applies aria-pressed to currently selected category", () => {
     render(<CategoryFilter {...defaultProps} selectedCategory="brunch" />);
 
     const brunchButton = screen.getByText("Brunch").closest("button");
     const breadButton = screen.getByText("Bread").closest("button");
 
-    expect(brunchButton).toHaveClass("subheading-wrapper selected");
-    expect(breadButton).toHaveClass("subheading-wrapper");
-    expect(breadButton).not.toHaveClass("selected");
+    expect(brunchButton).toHaveAttribute("aria-pressed", "true");
+    expect(breadButton).toHaveAttribute("aria-pressed", "false");
   });
 
   test("calls setSelectedCategory and setSearchTerm when category is clicked", () => {
@@ -95,10 +94,10 @@ describe("CategoryFilter Component", () => {
     });
   });
 
-  test("wrapper div has correct CSS class", () => {
+  test("wrapper div is rendered with nosnippet attribute", () => {
     const { container } = render(<CategoryFilter {...defaultProps} />);
 
-    const wrapper = container.querySelector(".categories-wrapper");
+    const wrapper = container.querySelector("[data-nosnippet]");
     expect(wrapper).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import "./CategoryFilter.css";
+import { Button } from "@/components/ui/button";
 
 const CategoryFilter = ({
   categories,
@@ -7,20 +7,20 @@ const CategoryFilter = ({
   setSearchTerm,
 }) => {
   return (
-    <div className="categories-wrapper " data-nosnippet>
+    <div className="block flex-nowrap overflow-x-auto pb-4" data-nosnippet>
       {categories.map((category) => (
-        <button
+        <Button
           key={category.value}
-          className={`subheading-wrapper${
-            category.value === selectedCategory ? " selected" : ""
-          }`}
+          variant="text"
+          aria-pressed={category.value === selectedCategory}
+          className="mx-4 my-2 h-auto rounded-md px-2 py-1"
           onClick={() => {
             setSearchTerm("");
             setSelectedCategory(category.value);
           }}
         >
           <h2 className="forta">{category.label}</h2>
-        </button>
+        </Button>
       ))}
     </div>
   );
