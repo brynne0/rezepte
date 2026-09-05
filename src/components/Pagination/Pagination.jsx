@@ -1,11 +1,18 @@
-import "./Pagination.css";
+import {
+  Pagination as PaginationRoot,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) {
     return null;
   }
 
-  const handlePageClick = (page) => {
+  const handlePageClick = (e, page) => {
+    e.preventDefault();
     onPageChange(page);
   };
 
@@ -31,42 +38,54 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="pagination">
-      <div className="page-numbers">
+    <PaginationRoot className="my-10 md:my-8">
+      <PaginationContent>
         {pageNumbers[0] > 1 && (
           <>
-            <button onClick={() => handlePageClick(1)} className="btn btn-page">
-              1
-            </button>
-            {pageNumbers[0] > 2 && <span className="page-ellipsis">...</span>}
+            <PaginationItem>
+              <PaginationLink href="#" onClick={(e) => handlePageClick(e, 1)}>
+                1
+              </PaginationLink>
+            </PaginationItem>
+            {pageNumbers[0] > 2 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
           </>
         )}
 
         {pageNumbers.map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageClick(page)}
-            className={`btn btn-page ${page === currentPage ? "active" : ""}`}
-          >
-            {page}
-          </button>
+          <PaginationItem key={page}>
+            <PaginationLink
+              href="#"
+              isActive={page === currentPage}
+              onClick={(e) => handlePageClick(e, page)}
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
         ))}
 
         {pageNumbers[pageNumbers.length - 1] < totalPages && (
           <>
             {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
-              <span className="page-ellipsis">...</span>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
             )}
-            <button
-              onClick={() => handlePageClick(totalPages)}
-              className="btn btn-page"
-            >
-              {totalPages}
-            </button>
+            <PaginationItem>
+              <PaginationLink
+                href="#"
+                onClick={(e) => handlePageClick(e, totalPages)}
+              >
+                {totalPages}
+              </PaginationLink>
+            </PaginationItem>
           </>
         )}
-      </div>
-    </div>
+      </PaginationContent>
+    </PaginationRoot>
   );
 };
 
