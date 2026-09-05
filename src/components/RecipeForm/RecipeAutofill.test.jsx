@@ -8,16 +8,13 @@ const mockEnv = {
   VITE_SUPABASE_ANON_KEY: "test-anon-key",
 };
 
-// Store original env
-const originalEnv = import.meta.env;
-
 describe("RecipeAutofill", () => {
   let mockOnAutofill;
   let mockFetch;
 
   beforeEach(() => {
-    // Mock import.meta.env
-    import.meta.env = { ...originalEnv, ...mockEnv };
+    vi.stubEnv("VITE_SUPABASE_URL", mockEnv.VITE_SUPABASE_URL);
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", mockEnv.VITE_SUPABASE_ANON_KEY);
 
     mockOnAutofill = vi.fn();
     mockFetch = vi.fn();
@@ -26,7 +23,7 @@ describe("RecipeAutofill", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
-    import.meta.env = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   const mockCategories = [
