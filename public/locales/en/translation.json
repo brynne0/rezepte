@@ -77,6 +77,7 @@
   "delete_account_error": "Failed to delete account. Please try again.",
 
   "search": "Search recipes",
+  "clear_search": "Clear search",
   "sort_by_title": "Sort by title",
   "sort_by_recently_used": "Sort by recently used",
   "show_images": "Show images",
@@ -85,7 +86,7 @@
   "no_recipes_found": "No recipes for \"{{searchTerm}}\" found",
   "no_recipes_available": "No recipes available.",
   "loading_recipes": "Loading recipes...",
-  "welcome_add_recipe": "Welcome! Click the + to add your first recipe",
+  "welcome_add_recipe": "Welcome! Add your first recipe to get started",
   "logged_in_note_link": "Log in",
   "logged_in_note_suffix": " to view and manage your recipes",
   "no_internet_connection": "No internet connection",

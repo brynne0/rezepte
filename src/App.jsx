@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useOnlineStatus } from "./hooks/ui/useOnlineStatus";
 
 // Components
+import { Toaster, toast } from "@/components/ui/toast";
 import Header from "./components/Header/Header";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import RecipeList from "./components/RecipeList/RecipeList";
@@ -143,6 +144,7 @@ function App() {
           isLoggedIn={isLoggedIn}
         />
       </Router>
+      <Toaster />
     </div>
   );
 }
@@ -161,6 +163,18 @@ function AppRoutes(props) {
   const isGroceryListPage = location.pathname === "/grocery-list";
   const isCookingTimesPage = location.pathname === "/cooking-times";
   const isOnline = useOnlineStatus();
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+
+  // Notify the user via toast when the connection drops
+  useEffect(() => {
+    if (!isOnline) {
+      toast.add({
+        title: t("no_internet_connection"),
+        type: "error",
+      });
+    }
+  }, [isOnline, t]);
   // Reset grocery list editing state when leaving the grocery list page
   useEffect(() => {
     if (!isGroceryListPage && isGroceryListEditing) {
@@ -174,9 +188,6 @@ function AppRoutes(props) {
       setIsCookingTimesEditing(false);
     }
   }, [isCookingTimesPage, isCookingTimesEditing, setIsCookingTimesEditing]);
-
-  const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
 
   // Refresh recipes when navigating to home page
   useEffect(() => {

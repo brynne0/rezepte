@@ -342,7 +342,7 @@ function ShowcasePage() {
       <Section title="Empty state">
         <Empty className="w-full border">
           <EmptyHeader>
-            <EmptyMedia variant="icon">
+            <EmptyMedia>
               <SearchIcon />
             </EmptyMedia>
             <EmptyTitle>No recipes found</EmptyTitle>

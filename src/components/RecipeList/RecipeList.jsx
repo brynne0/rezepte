@@ -1,9 +1,15 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { ChefHat, LogIn } from "lucide-react";
 import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
-import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 import { useAuth } from "../../hooks/data/useAuth";
-import { Empty, EmptyHeader, EmptyDescription } from "@/components/ui/empty";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyContent,
+} from "@/components/ui/empty";
 
 const RecipeList = ({
   selectedCategory,
@@ -16,7 +22,6 @@ const RecipeList = ({
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const isOnline = useOnlineStatus();
   const { isLoggedIn } = useAuth();
 
   // If using pagination, recipes are already filtered on the server side
@@ -55,30 +60,32 @@ const RecipeList = ({
         ))}
       </div>
       {filteredRecipes.length === 0 && searchTerm && (
-        <Empty>
+        <Empty className="border-none">
           <EmptyHeader>
-            <EmptyDescription>
-              {t("no_recipes_found", { searchTerm })}
-            </EmptyDescription>
+            <EmptyTitle>{t("no_recipes_found", { searchTerm })}</EmptyTitle>
           </EmptyHeader>
         </Empty>
       )}
       {totalRecipeCount === 0 && !searchTerm && !loading && (
-        <Empty className="min-h-[50vh]">
+        <Empty className="mx-auto mt-40 w-fit border border-primary bg-card shadow-sm">
           <EmptyHeader>
-            <EmptyDescription>
-              {!isOnline ? (
-                t("no_internet_connection")
-              ) : isLoggedIn ? (
-                t("welcome_add_recipe")
-              ) : (
-                <>
-                  <Link to="/auth-page">{t("logged_in_note_link")}</Link>
-                  {t("logged_in_note_suffix")}
-                </>
-              )}
-            </EmptyDescription>
+            <EmptyTitle>
+              {isLoggedIn
+                ? t("welcome_add_recipe")
+                : `${t("logged_in_note_link")}${t("logged_in_note_suffix")}`}
+            </EmptyTitle>
           </EmptyHeader>
+          <EmptyContent>
+            <Button
+              size="sm"
+              onClick={() =>
+                navigate(isLoggedIn ? "/add-recipe" : "/auth-page")
+              }
+            >
+              {isLoggedIn ? <ChefHat /> : <LogIn />}
+              {isLoggedIn ? t("add_new_recipe") : t("login")}
+            </Button>
+          </EmptyContent>
         </Empty>
       )}
     </>

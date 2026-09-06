@@ -77,6 +77,7 @@
   "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
 
   "search": "Rezepte suchen",
+  "clear_search": "Suche löschen",
   "sort_by_title": "Nach Titel sortieren",
   "sort_by_recently_used": "Zuletzt verwendet sortieren",
   "show_images": "Bilder anzeigen",
@@ -85,7 +86,7 @@
   "no_recipes_found": "Keine Rezepte für \"{{searchTerm}}\" gefunden",
   "no_recipes_available": "Keine Rezepte verfügbar",
   "loading_recipes": "Lade Rezepte...",
-  "welcome_add_recipe": "Willkommen! Klick auf das +, um dein erstes Rezept hinzuzufügen",
+  "welcome_add_recipe": "Willkommen! Füge dein erstes Rezept hinzu, um loszulegen",
   "logged_in_note_link": "Melde dich an",
   "logged_in_note_suffix": ", um deine Rezepte anzuzeigen und zu verwalten",
   "no_internet_connection": "Keine Internetverbindung",
