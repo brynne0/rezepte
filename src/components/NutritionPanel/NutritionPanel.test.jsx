@@ -22,8 +22,6 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-vi.mock("./NutritionPanel.css", () => ({}));
-
 describe("NutritionPanel", () => {
   test("renders nothing when recipe.nutrition is null", () => {
     const { container } = render(

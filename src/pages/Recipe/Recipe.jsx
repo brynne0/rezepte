@@ -602,7 +602,6 @@ const Recipe = ({ isSharedView = false }) => {
         )}
 
         {/* Nutrition */}
-        {/* NOTE here - show the nutrition title and condition here?? but hen make the componet just the table  */}
         <NutritionPanel recipe={recipe} />
       </CardContent>
 
