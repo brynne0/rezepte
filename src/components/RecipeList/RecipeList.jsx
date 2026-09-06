@@ -3,7 +3,7 @@ import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 import { useAuth } from "../../hooks/data/useAuth";
-import "./RecipeList.css";
+import { Empty, EmptyHeader, EmptyDescription } from "@/components/ui/empty";
 
 const RecipeList = ({
   selectedCategory,
@@ -42,7 +42,7 @@ const RecipeList = ({
   return (
     <>
       {/* Display all recipes in selected category */}
-      <div className="recipe-list">
+      <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4">
         {filteredRecipes.map((r) => (
           <RecipeCard
             key={r.id}
@@ -55,25 +55,31 @@ const RecipeList = ({
         ))}
       </div>
       {filteredRecipes.length === 0 && searchTerm && (
-        <span>{t("no_recipes_found", { searchTerm })}</span>
+        <Empty>
+          <EmptyHeader>
+            <EmptyDescription>
+              {t("no_recipes_found", { searchTerm })}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
       {totalRecipeCount === 0 && !searchTerm && !loading && (
-        <div className="page-centered high">
-          <div className="card welcome-card">
-            {!isOnline ? (
-              <p>{t("no_internet_connection")}</p>
-            ) : isLoggedIn ? (
-              <p>{t("welcome_add_recipe")}</p>
-            ) : (
-              <p className="grey-small">
-                <Link to="/auth-page" className="link-red">
-                  {t("logged_in_note_link")}
-                </Link>
-                {t("logged_in_note_suffix")}
-              </p>
-            )}
-          </div>
-        </div>
+        <Empty className="min-h-[50vh]">
+          <EmptyHeader>
+            <EmptyDescription>
+              {!isOnline ? (
+                t("no_internet_connection")
+              ) : isLoggedIn ? (
+                t("welcome_add_recipe")
+              ) : (
+                <>
+                  <Link to="/auth-page">{t("logged_in_note_link")}</Link>
+                  {t("logged_in_note_suffix")}
+                </>
+              )}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
     </>
   );

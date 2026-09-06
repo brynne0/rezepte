@@ -25,8 +25,6 @@ vi.mock("../RecipeCard/RecipeCard", () => ({
   ),
 }));
 
-vi.mock("./RecipeList.css", () => ({}));
-
 vi.mock("../../hooks/ui/useOnlineStatus", () => ({
   useOnlineStatus: vi.fn(),
 }));

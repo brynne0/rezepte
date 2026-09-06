@@ -372,7 +372,13 @@ describe("Header Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 
-  test("shows search bar on home page", () => {
+  test("shows search bar on home page for logged in users", () => {
+    mockUseAuth.mockReturnValue({
+      isLoggedIn: true,
+      isMe: false,
+      isGuest: false,
+    });
+
     render(
       <TestWrapper>
         <Header {...defaultProps} />
@@ -384,10 +390,26 @@ describe("Header Component", () => {
     expect(screen.getByPlaceholderText("Search")).toBeInTheDocument();
   });
 
+  test("hides search bar on home page for logged out users", () => {
+    render(
+      <TestWrapper>
+        <Header {...defaultProps} />
+      </TestWrapper>
+    );
+
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
   // Removed search button functionality
   // test("navigates to home and opens search when search button clicked on non-home page", () => {});
 
   test("submits search form correctly", () => {
+    mockUseAuth.mockReturnValue({
+      isLoggedIn: true,
+      isMe: false,
+      isGuest: false,
+    });
+
     render(
       <TestWrapper>
         <Header {...defaultProps} />
@@ -872,6 +894,14 @@ describe("Header Component", () => {
   });
 
   describe("Real-time Search Functionality", () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        isLoggedIn: true,
+        isMe: false,
+        isGuest: false,
+      });
+    });
+
     test("updates search term in real-time as user types", () => {
       render(
         <TestWrapper>

@@ -12,6 +12,7 @@ import {
   Clock,
   Settings,
   LogOut,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ import {
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
 import FriendsPanel from "../FriendsPanel/FriendsPanel";
@@ -342,8 +344,8 @@ const Header = ({
         </div>
       </header>
 
-      {/*  Search Recipe - Always visible on home page  */}
-      {isHomePage && (
+      {/*  Search Recipe - visible on home page for logged in users  */}
+      {isHomePage && isLoggedIn && (
         <div className="flex justify-center px-4 py-3 md:px-6">
           <div className="flex w-full max-w-2xl flex-col items-stretch gap-3 md:flex-row md:items-center">
             <form
@@ -375,6 +377,21 @@ const Header = ({
                   className="text-base"
                   placeholder={t("search")}
                 />
+                {currentSearchInput && (
+                  <InputGroupAddon align="inline-end">
+                    <InputGroupButton
+                      type="button"
+                      size="icon-xs"
+                      aria-label={t("clear_search")}
+                      onClick={() => {
+                        setCurrentSearchInput("");
+                        setSearchTerm("");
+                      }}
+                    >
+                      <X />
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                )}
               </InputGroup>
             </form>
             {setSortBy && (
