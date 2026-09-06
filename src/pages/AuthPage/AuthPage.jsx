@@ -11,14 +11,15 @@ import {
   EyeOff,
   Squirrel,
 } from "lucide-react";
-import { signUp, signIn } from "../../services/auth";
+import { signUp, signIn, resendConfirmationEmail } from "../../services/auth";
 import {
   validateAuthForm,
   validateUsernameUnique,
   isPasswordStrong,
 } from "../../utils/validation";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -52,6 +53,8 @@ const AuthPage = ({ setLoginMessage }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [sentToEmail, setSentToEmail] = useState("");
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -194,6 +197,20 @@ const AuthPage = ({ setLoginMessage }) => {
     navigate("/forgot-password");
   };
 
+  const handleResendConfirmation = async () => {
+    setIsResending(true);
+    setResendMessage("");
+
+    const { error } = await resendConfirmationEmail(sentToEmail);
+
+    setIsResending(false);
+    setResendMessage(error ? t("resend_email_failed") : t("resend_email_sent"));
+
+    setTimeout(() => {
+      setResendMessage("");
+    }, 3000);
+  };
+
   return (
     <div className="mx-auto mt-20 w-full max-w-sm px-4">
       <Card className="w-full">
@@ -211,10 +228,7 @@ const AuthPage = ({ setLoginMessage }) => {
             <Squirrel className="size-9 justify-self-center text-primary" />
           </div>
 
-          {awaitingConfirmation ? (
-            // TODO - remove this title?
-            <CardTitle className="text-xl">{t("signup_success")}</CardTitle>
-          ) : (
+          {!awaitingConfirmation && (
             <Tabs
               value={isSignUpMode ? "signup" : "login"}
               onValueChange={(value) =>
@@ -235,15 +249,27 @@ const AuthPage = ({ setLoginMessage }) => {
 
         <CardContent>
           {awaitingConfirmation ? (
-            <p className="text-center text-sm text-muted-foreground">
-              <strong className="text-foreground">{sentToEmail}</strong>
-            </p>
+            <div className="flex flex-col items-center gap-4 text-center">
+              <p>{t("signup_success")}</p>
+              <p className="text-muted-foreground">{sentToEmail}</p>
+              <Button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={isResending}
+              >
+                {isResending && <Spinner />}
+                {isResending ? t("resending_email") : t("resend_email")}
+              </Button>
+              {resendMessage && (
+                <p className="text-xs text-muted-foreground">{resendMessage}</p>
+              )}
+            </div>
           ) : (
             <>
               {errorMessage && (
-                <div role="alert" className="mb-4 text-sm text-destructive">
-                  {errorMessage}
-                </div>
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
               )}
 
               <form

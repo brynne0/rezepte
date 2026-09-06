@@ -364,17 +364,13 @@ function ShowcasePage() {
           <Button variant="ghost" size="icon-sm" aria-label="CircleArrowLeft">
             <CircleArrowLeft className="size-5" />
           </Button>
-          <span className="text-xs text-muted-foreground">
-            CircleArrowLeft
-          </span>
+          <span className="text-xs text-muted-foreground">CircleArrowLeft</span>
         </div>
         <div className="flex flex-col items-center gap-2">
           <Button variant="ghost" size="icon-sm" aria-label="ArrowLeftToLine">
             <ArrowLeftToLine className="size-5" />
           </Button>
-          <span className="text-xs text-muted-foreground">
-            ArrowLeftToLine
-          </span>
+          <span className="text-xs text-muted-foreground">ArrowLeftToLine</span>
         </div>
       </Section>
 

@@ -19,6 +19,20 @@ export const signUp = async (email, first_name, username, password) => {
   return { data, error };
 };
 
+export const resendConfirmationEmail = async (email) => {
+  try {
+    const { data, error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+
+    return { data, error };
+  } catch (err) {
+    console.error("Resend confirmation email error:", err);
+    return { error: err };
+  }
+};
+
 export const signIn = async (usernameOrEmail, password) => {
   try {
     // Check if input is an email
