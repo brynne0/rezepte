@@ -64,7 +64,9 @@ const NutritionPanel = ({ recipe }) => {
   return (
     <Accordion defaultValue={["nutrition-info"]}>
       <AccordionItem value="nutrition-info">
-        <AccordionTrigger>{t("nutritional_info")}:</AccordionTrigger>
+        <AccordionTrigger>
+          <h2>{t("nutritional_info")}:</h2>
+        </AccordionTrigger>
         <AccordionContent>
           <Table className="md:w-fit">
             {hasColumnLabels && (

@@ -7,19 +7,21 @@ const CategoryFilter = ({
   setSearchTerm,
 }) => {
   return (
-    <div className="block flex-nowrap overflow-x-auto pb-4" data-nosnippet>
+    <div
+      className="flex flex-wrap justify-center gap-x-2 gap-y-2 pb-4 md:gap-x-4"
+      data-nosnippet
+    >
       {categories.map((category) => (
         <Button
           key={category.value}
           variant="text"
           aria-pressed={category.value === selectedCategory}
-          className="mx-4 my-2 h-auto rounded-md px-2 py-1"
           onClick={() => {
             setSearchTerm("");
             setSelectedCategory(category.value);
           }}
         >
-          <h2 className="forta">{category.label}</h2>
+          <h3 className="font-forta uppercase">{category.label}</h3>
         </Button>
       ))}
     </div>

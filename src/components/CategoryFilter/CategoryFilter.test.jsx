@@ -83,13 +83,13 @@ describe("CategoryFilter Component", () => {
     expect(buttons).toHaveLength(mockCategories.length);
   });
 
-  test("each button has correct structure with h2 element", () => {
+  test("each button has correct structure with h3 element", () => {
     render(<CategoryFilter {...defaultProps} />);
 
     mockCategories.forEach((category) => {
       const h2Element = screen.getByText(category.label);
-      expect(h2Element.tagName).toBe("H2");
-      expect(h2Element).toHaveClass("forta");
+      expect(h2Element.tagName).toBe("H3");
+      expect(h2Element).toHaveClass("font-forta");
       expect(h2Element.closest("button")).toBeInTheDocument();
     });
   });

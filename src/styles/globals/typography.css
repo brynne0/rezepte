@@ -1,5 +1,5 @@
 :root {
-  background-color: var(--color-background-primary);
+  /* background-color: var(--color-background-primary);
   color-scheme: light dark;
 
   font-family: "Gabarito", sans-serif;
@@ -9,20 +9,20 @@
   font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
   line-height: 1.5;
-  color: var(--color-text-strong);
+  color: var(--color-text-strong); */
 
   /* Font rendering */
-  font-synthesis: none;
+  /* font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale; */
 }
 
-html,
+/* html,
 body {
   margin: 0;
   padding: 0;
-}
+} */
 /* 
 ol,
 ul {

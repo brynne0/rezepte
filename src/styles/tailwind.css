@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -34,7 +33,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --font-sans: "Geist Variable", sans-serif;
+  --font-sans: "Gabarito", sans-serif;
   --font-heading: var(--font-sans);
   --font-forta: "Forta", sans-serif;
 
@@ -60,6 +59,8 @@
 }
 
 :root {
+  color-scheme: light dark;
+
   --background: #f2e7d2;
   --foreground: #342a24;
   --card: #fffbf4;
@@ -145,6 +146,12 @@
   }
   html {
     @apply font-sans;
+  }
+  h2 {
+    @apply text-lg font-medium;
+  }
+  h3 {
+    @apply font-medium;
   }
   button:not(:disabled) {
     cursor: pointer;
