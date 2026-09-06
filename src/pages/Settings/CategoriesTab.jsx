@@ -27,6 +27,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "cn";
 
 const CategoriesTab = ({
@@ -39,6 +44,7 @@ const CategoriesTab = ({
 }) => {
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [isEditingCategories, setIsEditingCategories] = useState(false);
   const [categoryPreferences, setCategoryPreferences] = useState([]);
   const [originalCategoryPreferences, setOriginalCategoryPreferences] =
     useState([]);
@@ -209,6 +215,7 @@ const CategoriesTab = ({
 
       setSaveMessage(t("category_preferences_saved"));
       setTimeout(() => setSaveMessage(""), 3000);
+      setIsEditingCategories(false);
     } catch (error) {
       console.error("Error saving category preferences:", error);
       setSaveMessage(t("category_preferences_error"));
@@ -216,6 +223,16 @@ const CategoriesTab = ({
     } finally {
       setPreferencesLoading(false);
     }
+  };
+
+  // Discard any pending reordering, visibility, or add/edit changes
+  const handleCancelPreferences = () => {
+    setCategoryPreferences([...originalCategoryPreferences]);
+    setIsAddingCategory(false);
+    setEditingCategoryId(null);
+    setEditingCategoryName("");
+    setCategoryError("");
+    setIsEditingCategories(false);
   };
 
   // Add new category
@@ -521,22 +538,92 @@ const CategoriesTab = ({
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-6"
       onSubmit={(e) => {
         e.preventDefault();
-        // Only submit if explicitly clicking Save Preferences
       }}
     >
-      <p className="text-center text-sm text-muted-foreground">
-        {t("category_management_description")}
-      </p>
+      {saveMessage && (
+        <Alert
+          variant={saveMessage.includes("Error") ? "destructive" : "success"}
+        >
+          <AlertDescription>{saveMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {isEditingCategories && i18n.language !== preferredLanguage && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {t("category_edit_preferred_language_hint")}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">{t("categories")}</h2>
+        {!isEditingCategories &&
+          (i18n.language !== preferredLanguage ? (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  // A disabled button blocks pointer events entirely, so the
+                  // hover target has to be this wrapping span instead.
+                  <span tabIndex={0} className="inline-flex">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled
+                      className="pointer-events-none"
+                    >
+                      <Pencil />
+                      {t("edit_categories")}
+                    </Button>
+                  </span>
+                }
+              />
+              <TooltipContent>
+                {t("category_edit_preferred_language_hint")}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditingCategories(true)}
+            >
+              <Pencil />
+              {t("edit_categories")}
+            </Button>
+          ))}
+      </div>
+      <div className="-mt-4 flex items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          {t("category_management_description")}
+        </p>
+        {isEditingCategories && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddCategory}
+            disabled={
+              isAddingCategory ||
+              editingCategoryId !== null ||
+              i18n.language !== preferredLanguage
+            }
+          >
+            <Plus size={16} />
+            {t("add_category")}
+          </Button>
+        )}
+      </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="categories">
           {(provided, snapshot) => (
             <div
               className={cn(
-                "flex flex-col gap-2 rounded-lg",
+                "flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2",
                 snapshot.isDraggingOver && "bg-muted/50"
               )}
               {...provided.droppableProps}
@@ -547,6 +634,7 @@ const CategoriesTab = ({
                   key={category.id}
                   draggableId={category.id.toString()}
                   index={index}
+                  isDragDisabled={!isEditingCategories}
                 >
                   {(provided, snapshot) => (
                     <div className="flex flex-col">
@@ -559,12 +647,14 @@ const CategoriesTab = ({
                           snapshot.isDragging && "shadow-md"
                         )}
                       >
-                        <div
-                          {...provided.dragHandleProps}
-                          className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
-                        >
-                          <GripVertical size={16} />
-                        </div>
+                        {isEditingCategories && (
+                          <div
+                            {...provided.dragHandleProps}
+                            className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
+                          >
+                            <GripVertical size={16} />
+                          </div>
+                        )}
 
                         <div className="flex flex-1 items-center gap-2">
                           {editingCategoryId === category.id ? (
@@ -598,7 +688,8 @@ const CategoriesTab = ({
                                 <Badge variant="outline">{t("system")}</Badge>
                               )}
 
-                              {!category.isSystem &&
+                              {isEditingCategories &&
+                                !category.isSystem &&
                                 i18n.language === preferredLanguage && (
                                   <Button
                                     type="button"
@@ -614,67 +705,69 @@ const CategoriesTab = ({
                           )}
                         </div>
 
-                        <div className="flex shrink-0 items-center gap-1">
-                          {editingCategoryId === category.id ? (
-                            <>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={handleSaveEditCategory}
-                                aria-label={t("save_changes")}
-                              >
-                                <Check size={16} className="text-success" />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={handleCancelEditCategory}
-                                aria-label={t("cancel")}
-                              >
-                                <X size={16} className="text-destructive" />
-                              </Button>
-                              {!category.isTemp && !category.isSystem && (
+                        {isEditingCategories && (
+                          <div className="flex shrink-0 items-center gap-1">
+                            {editingCategoryId === category.id ? (
+                              <>
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="icon-sm"
-                                  onClick={() =>
-                                    handleDeleteCategory(
-                                      category.id,
-                                      category.label
-                                    )
-                                  }
-                                  aria-label={t("delete_category")}
+                                  onClick={handleSaveEditCategory}
+                                  aria-label={t("save_changes")}
                                 >
-                                  <Trash2
-                                    size={16}
-                                    className="text-destructive"
-                                  />
+                                  <Check size={16} />
                                 </Button>
-                              )}
-                            </>
-                          ) : (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => toggleVisibility(category.id)}
-                              aria-label={
-                                category.isVisible
-                                  ? t("hide_category")
-                                  : t("show_category")
-                              }
-                            >
-                              {category.isVisible ? (
-                                <Eye size={16} />
-                              ) : (
-                                <EyeOff size={16} />
-                              )}
-                            </Button>
-                          )}
-                        </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  onClick={handleCancelEditCategory}
+                                  aria-label={t("cancel")}
+                                >
+                                  <X size={16} />
+                                </Button>
+                                {!category.isTemp && !category.isSystem && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={() =>
+                                      handleDeleteCategory(
+                                        category.id,
+                                        category.label
+                                      )
+                                    }
+                                    aria-label={t("delete_category")}
+                                  >
+                                    <Trash2
+                                      size={16}
+                                      className="text-destructive"
+                                    />
+                                  </Button>
+                                )}
+                              </>
+                            ) : (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => toggleVisibility(category.id)}
+                                aria-label={
+                                  category.isVisible
+                                    ? t("hide_category")
+                                    : t("show_category")
+                                }
+                              >
+                                {category.isVisible ? (
+                                  <Eye size={16} />
+                                ) : (
+                                  <EyeOff size={16} />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </div>
                       {categoryError && editingCategoryId === category.id && (
                         <span className="mt-1 text-sm text-destructive">
@@ -691,44 +784,29 @@ const CategoriesTab = ({
         </Droppable>
       </DragDropContext>
 
-      {/* Add New Category Button */}
-      {!isAddingCategory && i18n.language === preferredLanguage && (
-        <div className="flex justify-center">
-          <Button type="button" variant="outline" onClick={handleAddCategory}>
-            <Plus size={16} />
-            {t("add_category")}
+      {isEditingCategories && (
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancelPreferences}
+            disabled={preferencesLoading}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSavePreferences}
+            disabled={
+              preferencesLoading ||
+              i18n.language !== preferredLanguage ||
+              !hasUnsavedChanges()
+            }
+          >
+            {preferencesLoading ? t("saving") : t("save_category_preferences")}
           </Button>
         </div>
       )}
-
-      {/* Preferred language hint */}
-      {i18n.language !== preferredLanguage && (
-        <p className="text-center text-sm text-muted-foreground">
-          {t("category_edit_preferred_language_hint")}
-        </p>
-      )}
-
-      {saveMessage && (
-        <Alert
-          variant={saveMessage.includes("Error") ? "destructive" : "success"}
-        >
-          <AlertDescription>{saveMessage}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="flex justify-center">
-        <Button
-          type="button"
-          onClick={handleSavePreferences}
-          disabled={
-            preferencesLoading ||
-            i18n.language !== preferredLanguage ||
-            !hasUnsavedChanges()
-          }
-        >
-          {preferencesLoading ? t("saving") : t("save_category_preferences")}
-        </Button>
-      </div>
 
       {/* Delete Category Confirmation Modal */}
       <ConfirmationModal
