@@ -406,7 +406,7 @@ const Recipe = ({ isSharedView = false }) => {
         )}
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
         {wakeLockSupported && (
           <Label htmlFor="wake-lock">
             <Switch
@@ -420,7 +420,7 @@ const Recipe = ({ isSharedView = false }) => {
 
         {/* Recipe Images - floating within content - only show when logged in */}
         {isOwner && signedImages && signedImages.length > 0 && (
-          <div className="relative my-4 w-full">
+          <div className="relative w-full">
             {imagesLoading && (
               <div className="bg-muted absolute -inset-4 z-10 flex items-center justify-center transition-opacity duration-300">
                 <LoadingAcorn size={20} className="loading-acorn-small" />
@@ -435,8 +435,8 @@ const Recipe = ({ isSharedView = false }) => {
 
         {/* Servings */}
         {recipe.servings && (
-          <div className="mt-2 flex flex-wrap items-baseline gap-2">
-            <h2 className="text-lg">{t("servings")}:</h2>
+          <div className="flex flex-wrap items-center">
+            <h2>{t("servings")}:</h2>
             {hasIngredients ? (
               <>
                 <div className="flex items-center gap-2">
@@ -453,7 +453,7 @@ const Recipe = ({ isSharedView = false }) => {
                   >
                     <Minus strokeWidth={2} />
                   </Button>
-                  <span className="text-foreground min-w-8 text-center font-semibold">
+                  <span className="text-center font-semibold">
                     {scaledServingsLabel}
                   </span>
                   <Button
@@ -491,9 +491,9 @@ const Recipe = ({ isSharedView = false }) => {
 
         {/* Ingredients */}
         {hasIngredients && (
-          <>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <h2 className="text-lg">{t("ingredients")}:</h2>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2>{t("ingredients")}:</h2>
               {!recipe.servings && (
                 <div className="flex items-center gap-2">
                   <Button
@@ -503,9 +503,9 @@ const Recipe = ({ isSharedView = false }) => {
                     disabled={multiplier <= 0.25}
                     aria-label={t("decrease_scale")}
                   >
-                    <Minus strokeWidth={3} />
+                    <Minus strokeWidth={2} />
                   </Button>
-                  <span className="text-foreground min-w-8 text-center font-semibold">
+                  <span className="text-center font-semibold">
                     {formatMultiplierLabel(multiplier)}
                   </span>
                   <Button
@@ -515,7 +515,7 @@ const Recipe = ({ isSharedView = false }) => {
                     disabled={multiplier >= 8}
                     aria-label={t("increase_scale")}
                   >
-                    <Plus strokeWidth={3} />
+                    <Plus strokeWidth={2} />
                   </Button>
                   {multiplier !== 1 && (
                     <Button
@@ -525,7 +525,7 @@ const Recipe = ({ isSharedView = false }) => {
                       onClick={() => setMultiplier(1)}
                       aria-label={t("reset_scale")}
                     >
-                      <RotateCcw strokeWidth={2.5} />
+                      <RotateCcw strokeWidth={2} />
                     </Button>
                   )}
                 </div>
@@ -545,10 +545,10 @@ const Recipe = ({ isSharedView = false }) => {
             {/* Ingredient Sections */}
             {recipe.ingredientSections &&
               recipe.ingredientSections.length > 0 && (
-                <div className="flex flex-col gap-2">
+                <>
                   {recipe.ingredientSections.map((section, sectionIndex) => (
                     <div key={sectionIndex}>
-                      <h3 className="mt-2 text-base font-semibold [word-break:break-word]">
+                      <h3 className="[word-break:break-word]">
                         {section.subheading}
                       </h3>
                       <ul>
@@ -563,41 +563,28 @@ const Recipe = ({ isSharedView = false }) => {
                       </ul>
                     </div>
                   ))}
-                </div>
+                </>
               )}
-
-            {/* Fallback for old flat ingredient structure */}
-            {!recipe.ungroupedIngredients &&
-              !recipe.ingredientSections &&
-              recipe.ingredients &&
-              recipe.ingredients.length > 0 && (
-                <ul>
-                  {recipe.ingredients.map((ingredient, index) =>
-                    renderIngredientItem(ingredient, "flat", index)
-                  )}
-                </ul>
-              )}
-          </>
+          </div>
         )}
 
         {/* Instructions */}
         {recipe.instructions && recipe.instructions.length > 0 && (
-          <>
-            <div className="mt-2">
-              <h2 className="text-lg">{t("instructions")}:</h2>
-            </div>
-            <ol className="list-decimal space-y-1 pl-5">
+          <div>
+            <h2>{t("instructions")}:</h2>
+
+            <ol className="list-decimal space-y-1 pl-8">
               {recipe.instructions.map((instruction, i) => (
                 <li key={i}>{instruction}</li>
               ))}
             </ol>
-          </>
+          </div>
         )}
 
         {/* Source */}
         {recipe.source && (
-          <div className="mt-2 flex flex-wrap items-baseline gap-2">
-            <h2 className="text-lg">{t("source")}:</h2>
+          <div className="flex flex-wrap items-baseline gap-2">
+            <h2>{t("source")}:</h2>
             <span className="[word-wrap:break-word]">
               {renderTextWithLinks(recipe.source)}
             </span>
@@ -606,8 +593,8 @@ const Recipe = ({ isSharedView = false }) => {
 
         {/* Extra Notes */}
         {recipe.notes && recipe.notes.length > 0 && (
-          <div className="mt-2 flex flex-wrap items-baseline gap-2">
-            <h2 className="text-lg">{t("notes")}:</h2>
+          <div className="flex flex-wrap items-baseline gap-2">
+            <h2>{t("notes")}:</h2>
             <div className="[word-break:break-word] whitespace-pre-wrap">
               {recipe.notes}
             </div>
@@ -615,6 +602,7 @@ const Recipe = ({ isSharedView = false }) => {
         )}
 
         {/* Nutrition */}
+        {/* NOTE here - show the nutrition title and condition here?? but hen make the componet just the table  */}
         <NutritionPanel recipe={recipe} />
       </CardContent>
 

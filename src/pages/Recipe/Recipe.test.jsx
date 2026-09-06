@@ -455,33 +455,6 @@ describe("Recipe Component", () => {
     });
   });
 
-  describe("Fallback Ingredient Structure", () => {
-    beforeEach(() => {
-      mockRecipeHook.recipe = {
-        ...mockRecipeData,
-        ungroupedIngredients: undefined,
-        ingredientSections: undefined,
-        ingredients: [
-          {
-            id: "ing-5",
-            recipe_ingredient_id: "ri-5",
-            quantity: "1",
-            unit: "cup/s",
-            singular_name: "sugar",
-            plural_name: "sugars",
-          },
-        ],
-      };
-    });
-
-    test("renders flat ingredient structure as fallback", () => {
-      renderRecipe();
-
-      expect(screen.getByText("1 cup")).toBeInTheDocument();
-      expect(screen.getByText("sugar")).toBeInTheDocument();
-    });
-  });
-
   // describe("Grocery List Integration", () => {
   //   beforeEach(() => {
   //     mockRecipeHook.recipe = mockRecipeData;
