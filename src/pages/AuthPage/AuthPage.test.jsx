@@ -33,20 +33,6 @@ vi.mock("../../utils/validation", () => ({
   isPasswordStrong: vi.fn(),
 }));
 
-vi.mock("../../components/PasswordInput/PasswordInput", () => ({
-  default: ({ id, value, onChange, placeholder, className }) => (
-    <input
-      id={id}
-      type="password"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className={className}
-      data-testid="password-input"
-    />
-  ),
-}));
-
 vi.mock("../../components/PasswordRequirements/PasswordRequirements", () => ({
   default: ({ password }) => (
     <div data-testid="password-requirements">
@@ -108,19 +94,15 @@ describe("AuthPage", () => {
     it("renders login form by default", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      // Check login header is selected
-      const loginHeaderButton = screen.getByRole("button", {
-        name: "login",
-      });
-      expect(loginHeaderButton).toBeInTheDocument();
-      expect(loginHeaderButton.className).toContain("selected");
+      // Check login tab is selected
+      const loginTab = screen.getByRole("tab", { name: "login" });
+      expect(loginTab).toBeInTheDocument();
+      expect(loginTab).toHaveAttribute("aria-selected", "true");
 
-      // Check signup header is not selected
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      expect(signUpHeaderButton).toBeInTheDocument();
-      expect(signUpHeaderButton.className).not.toContain("selected");
+      // Check signup tab is not selected
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      expect(signUpTab).toBeInTheDocument();
+      expect(signUpTab).toHaveAttribute("aria-selected", "false");
 
       expect(screen.getByLabelText("username_or_email")).toBeInTheDocument();
       expect(screen.getByTestId("password-input")).toBeInTheDocument();
@@ -139,28 +121,22 @@ describe("AuthPage", () => {
     it("does not render email and firstName fields in login mode", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      expect(screen.queryByPlaceholderText("email")).not.toBeInTheDocument();
-      expect(
-        screen.queryByPlaceholderText("first_name")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("email")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("first_name")).not.toBeInTheDocument();
     });
   });
 
   describe("Mode Switching", () => {
-    it("switches to sign up mode when sign up button is clicked", () => {
+    it("switches to sign up mode when sign up tab is clicked", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      const loginHeaderButton = screen.getByRole("button", {
-        name: "login",
-      });
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      const loginTab = screen.getByRole("tab", { name: "login" });
 
-      fireEvent.click(signUpHeaderButton);
+      fireEvent.click(signUpTab);
 
-      expect(signUpHeaderButton.className).toContain("selected");
-      expect(loginHeaderButton.className).not.toContain("selected");
+      expect(signUpTab).toHaveAttribute("aria-selected", "true");
+      expect(loginTab).toHaveAttribute("aria-selected", "false");
 
       expect(screen.getByLabelText("email")).toBeInTheDocument();
       expect(screen.getByLabelText("first_name")).toBeInTheDocument();
@@ -173,25 +149,21 @@ describe("AuthPage", () => {
       expect(submitButton).toHaveTextContent(/^(signup|signing_up)$/);
     });
 
-    it("switches back to login mode when login button is clicked", () => {
+    it("switches back to login mode when login tab is clicked", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      const loginHeaderButton = screen.getByRole("button", {
-        name: "login",
-      });
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      const loginTab = screen.getByRole("tab", { name: "login" });
 
       // Switch to sign up first
-      fireEvent.click(signUpHeaderButton);
-      expect(signUpHeaderButton.className).toContain("selected");
-      expect(loginHeaderButton.className).not.toContain("selected");
+      fireEvent.click(signUpTab);
+      expect(signUpTab).toHaveAttribute("aria-selected", "true");
+      expect(loginTab).toHaveAttribute("aria-selected", "false");
 
       // Switch back to login
-      fireEvent.click(loginHeaderButton);
-      expect(signUpHeaderButton.className).not.toContain("selected");
-      expect(loginHeaderButton.className).toContain("selected");
+      fireEvent.click(loginTab);
+      expect(signUpTab).toHaveAttribute("aria-selected", "false");
+      expect(loginTab).toHaveAttribute("aria-selected", "true");
     });
 
     it("clears form fields when switching modes", () => {
@@ -208,10 +180,8 @@ describe("AuthPage", () => {
       expect(passwordInput.value).toBe("testpass");
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       // Fields should be cleared
       expect(screen.getByLabelText("username").value).toBe("");
@@ -222,10 +192,8 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       // Enter password
       const passwordInput = screen.getByTestId("password-input");
@@ -255,15 +223,30 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       // Password is empty by default
       expect(
         screen.queryByTestId("password-requirements")
       ).not.toBeInTheDocument();
+    });
+
+    it("toggles password visibility", () => {
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const passwordInput = screen.getByTestId("password-input");
+      const toggleButton = screen.getByRole("button", {
+        name: "show_password",
+      });
+
+      expect(passwordInput).toHaveAttribute("type", "password");
+
+      fireEvent.click(toggleButton);
+      expect(passwordInput).toHaveAttribute("type", "text");
+      expect(
+        screen.getByRole("button", { name: "hide_password" })
+      ).toBeInTheDocument();
     });
   });
 
@@ -285,10 +268,8 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
@@ -329,10 +310,8 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -395,7 +374,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      fireEvent.click(screen.getByRole("button", { name: "signup" }));
+      fireEvent.click(screen.getByRole("tab", { name: "signup" }));
       fireEvent.change(screen.getByLabelText("username"), {
         target: { value: "existinguser" },
       });
@@ -419,7 +398,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      fireEvent.click(screen.getByRole("button", { name: "signup" }));
+      fireEvent.click(screen.getByRole("tab", { name: "signup" }));
       fireEvent.change(screen.getByLabelText("email"), {
         target: { value: "existing@example.com" },
       });
@@ -439,7 +418,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      fireEvent.click(screen.getByRole("button", { name: "signup" }));
+      fireEvent.click(screen.getByRole("tab", { name: "signup" }));
 
       fireEvent.change(screen.getByLabelText("email"), {
         target: { value: "unique@example.com" },
@@ -477,7 +456,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      fireEvent.click(screen.getByRole("button", { name: "signup" }));
+      fireEvent.click(screen.getByRole("tab", { name: "signup" }));
 
       fireEvent.change(screen.getByLabelText("email"), {
         target: { value: "test@example.com" },
@@ -511,7 +490,7 @@ describe("AuthPage", () => {
 
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
-      fireEvent.click(screen.getByRole("button", { name: "signup" }));
+      fireEvent.click(screen.getByRole("tab", { name: "signup" }));
 
       fireEvent.change(screen.getByLabelText("email"), {
         target: { value: "test@example.com" },
@@ -718,10 +697,8 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       const emailInput = screen.getByLabelText("email");
       const firstNameInput = screen.getByLabelText("first_name");
@@ -753,10 +730,8 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       const emailInput = screen.getByLabelText("email");
       fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -778,10 +753,8 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -798,10 +771,8 @@ describe("AuthPage", () => {
       render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
 
       // Switch to sign up mode
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-      fireEvent.click(signUpHeaderButton);
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
 
       fireEvent.change(screen.getByLabelText("email"), {
         target: { value: "test@example.com" },
@@ -852,28 +823,8 @@ describe("AuthPage", () => {
     });
   });
 
-  describe("CSS Classes and Styling", () => {
-    it("applies selected class to active mode button", () => {
-      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
-
-      const loginHeaderButton = screen.getByRole("button", {
-        name: "login",
-      });
-      const signUpHeaderButton = screen.getByRole("button", {
-        name: "signup",
-      });
-
-      expect(loginHeaderButton.className).toContain("selected");
-      expect(signUpHeaderButton.className).not.toContain("selected");
-
-      // Switch to sign up
-      fireEvent.click(signUpHeaderButton);
-
-      expect(loginHeaderButton.className).not.toContain("selected");
-      expect(signUpHeaderButton.className).toContain("selected");
-    });
-
-    it("applies error classes to inputs with validation errors", async () => {
+  describe("Validation Error Display", () => {
+    it("marks the field with an error as invalid", async () => {
       // Mock validation to return errors
       mockValidateAuthForm.mockReturnValue({
         username: "Username is required",
@@ -887,7 +838,7 @@ describe("AuthPage", () => {
       fireEvent.submit(form);
 
       await waitFor(() => {
-        expect(usernameInput.className).toContain("input--error");
+        expect(usernameInput).toHaveAttribute("aria-invalid", "true");
       });
     });
   });

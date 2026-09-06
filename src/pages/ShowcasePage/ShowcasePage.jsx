@@ -71,7 +71,17 @@ import {
   EmptyContent,
 } from "@/components/ui/empty";
 import { Toaster, toast } from "@/components/ui/toast";
-import { SearchIcon, MailIcon, ImageIcon } from "lucide-react";
+import {
+  SearchIcon,
+  MailIcon,
+  ImageIcon,
+  ArrowBigLeft,
+  ArrowLeft,
+  ChevronLeft,
+  MoveLeft,
+  CircleArrowLeft,
+  ArrowLeftToLine,
+} from "lucide-react";
 
 function Section({ title, children }) {
   return (
@@ -321,6 +331,51 @@ function ShowcasePage() {
             ☰
           </ToggleGroupItem>
         </ToggleGroup>
+      </Section>
+
+      <Section title="Back arrow options">
+        <div className="flex flex-col items-center gap-2">
+          <Button variant="ghost" size="icon-sm" aria-label="ArrowBigLeft">
+            <ArrowBigLeft className="size-5" />
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            ArrowBigLeft (current)
+          </span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Button variant="ghost" size="icon-sm" aria-label="ArrowLeft">
+            <ArrowLeft className="size-5" />
+          </Button>
+          <span className="text-xs text-muted-foreground">ArrowLeft</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Button variant="ghost" size="icon-sm" aria-label="ChevronLeft">
+            <ChevronLeft className="size-5" />
+          </Button>
+          <span className="text-xs text-muted-foreground">ChevronLeft</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Button variant="ghost" size="icon-sm" aria-label="MoveLeft">
+            <MoveLeft className="size-5" />
+          </Button>
+          <span className="text-xs text-muted-foreground">MoveLeft</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Button variant="ghost" size="icon-sm" aria-label="CircleArrowLeft">
+            <CircleArrowLeft className="size-5" />
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            CircleArrowLeft
+          </span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Button variant="ghost" size="icon-sm" aria-label="ArrowLeftToLine">
+            <ArrowLeftToLine className="size-5" />
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            ArrowLeftToLine
+          </span>
+        </div>
       </Section>
 
       <Section title="Spinner">
