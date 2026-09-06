@@ -11,8 +11,6 @@ import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ShareModal from "../../components/ShareModal/ShareModal";
 import ImageGallery from "../../components/ImageGallery/ImageGallery";
-import SEO from "../../components/SEO/SEO";
-import { getMainImage } from "../../services/imageService";
 import {
   formatIngredientMeasurement,
   getIngredientDisplayName,
@@ -297,73 +295,13 @@ const Recipe = ({ isSharedView = false }) => {
   }
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
 
-  // Generate SEO data using signed URLs
-  const mainImage = getMainImage(signedImages);
-  const recipeImageUrl =
-    mainImage?.url || "https://acorn-rezepte.com/eichhörnchen/og-image.png";
-  const recipeUrl = isSharedView
-    ? `https://acorn-rezepte.com/shared/${shareToken}`
-    : `https://acorn-rezepte.com/recipe/${id}`;
-
-  // Create description from ingredients or instructions
-  const createDescription = () => {
-    if (recipe.ungroupedIngredients && recipe.ungroupedIngredients.length > 0) {
-      const firstFewIngredients = recipe.ungroupedIngredients
-        .slice(0, 3)
-        .map((ing) => getIngredientDisplayName(ing, i18n.language))
-        .join(", ");
-      return `${t("recipe_with_ingredients")}: ${firstFewIngredients}...`;
-    }
-    if (recipe.instructions && recipe.instructions.length > 0) {
-      return recipe.instructions[0].substring(0, 155);
-    }
-    return `${recipe.title} - ${t("view_recipe_details")}`;
-  };
-
   const hasIngredients =
     (recipe.ungroupedIngredients && recipe.ungroupedIngredients.length > 0) ||
     (recipe.ingredientSections && recipe.ingredientSections.length > 0) ||
     (recipe.ingredients && recipe.ingredients.length > 0);
 
-  // Generate structured data for Google (Recipe schema)
-  const structuredData = {
-    "@context": "https://schema.org/",
-    "@type": "Recipe",
-    name: recipe.title,
-    image: recipeImageUrl,
-    description: createDescription(),
-    ...(recipe.servings && { recipeYield: recipe.servings.toString() }),
-    ...(recipe.category && { recipeCategory: recipe.category }),
-    ...(recipe.source && { url: recipe.source }),
-    ...(recipe.ungroupedIngredients &&
-      recipe.ungroupedIngredients.length > 0 && {
-        recipeIngredient: recipe.ungroupedIngredients.map(
-          (ing) =>
-            `${formatIngredientMeasurement(ing, i18n.language)} ${getIngredientDisplayName(ing, i18n.language)}`
-        ),
-      }),
-    ...(recipe.instructions &&
-      recipe.instructions.length > 0 && {
-        recipeInstructions: recipe.instructions.map((instruction, index) => ({
-          "@type": "HowToStep",
-          position: index + 1,
-          text: instruction,
-        })),
-      }),
-  };
-
   return (
     <Card size="lg" className="mx-auto max-w-3xl text-left">
-      {/* SEO Meta Tags and Structured Data */}
-      <SEO
-        title={`${recipe.title}`}
-        description={createDescription()}
-        image={recipeImageUrl}
-        url={recipeUrl}
-        type="article"
-        structuredData={structuredData}
-      />
-
       {/* Show shared indicator for shared recipes */}
       {isSharedView && (
         <div className="border-destructive bg-destructive/10 text-destructive mx-(--card-spacing) flex w-fit items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium">

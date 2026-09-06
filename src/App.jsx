@@ -1,8 +1,5 @@
-import "../src/styles/App.css";
-import SEO from "./components/SEO/SEO";
-
 // React & hooks
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Data hooks
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
@@ -25,6 +22,9 @@ import { useOnlineStatus } from "./hooks/ui/useOnlineStatus";
 
 // Components
 import { Toaster, toast } from "@/components/ui/toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MainScrollProvider } from "./contexts/MainScrollContext";
+import { useMainScrollRef } from "./hooks/ui/useMainScrollRef";
 import Header from "./components/Header/Header";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import RecipeList from "./components/RecipeList/RecipeList";
@@ -49,6 +49,7 @@ import ShowcaseLegacyPage from "./pages/ShowcaseLegacyPage/ShowcaseLegacyPage";
 function App() {
   const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
+  const mainScrollRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("last_viewed_at_desc");
@@ -94,7 +95,7 @@ function App() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    document.getElementById("main-content")?.scrollTo(0, 0);
+    mainScrollRef.current?.scrollTo(0, 0);
   };
 
   const handleCategoryChange = (category) => {
@@ -112,38 +113,40 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <Router>
-        <AppRoutes
-          setSelectedCategory={handleCategoryChange}
-          setSearchTerm={handleSearchChange}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          showImages={showImages}
-          setShowImages={setShowImages}
-          setLoginMessage={setLoginMessage}
-          loginMessage={loginMessage}
-          t={t}
-          categories={categories}
-          selectedCategory={selectedCategory}
-          recipes={recipes}
-          totalRecipeCount={totalRecipeCount}
-          searchTerm={searchTerm}
-          loading={loading}
-          isFetchingRecipes={isFetchingRecipes}
-          isGroceryListEditing={isGroceryListEditing}
-          setIsGroceryListEditing={setIsGroceryListEditing}
-          isCookingTimesEditing={isCookingTimesEditing}
-          setIsCookingTimesEditing={setIsCookingTimesEditing}
-          currentPage={currentPage}
-          paginationInfo={paginationInfo}
-          onPageChange={handlePageChange}
-          onPageReset={handlePageReset}
-          refreshRecipes={refreshRecipes}
-          refreshCategories={refreshCategories}
-          isLoggedIn={isLoggedIn}
-        />
-      </Router>
+    <div className="mx-auto flex h-screen max-w-7xl flex-col overflow-hidden px-3 pt-3 md:px-8 md:pt-4">
+      <MainScrollProvider value={mainScrollRef}>
+        <Router>
+          <AppRoutes
+            setSelectedCategory={handleCategoryChange}
+            setSearchTerm={handleSearchChange}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            showImages={showImages}
+            setShowImages={setShowImages}
+            setLoginMessage={setLoginMessage}
+            loginMessage={loginMessage}
+            t={t}
+            categories={categories}
+            selectedCategory={selectedCategory}
+            recipes={recipes}
+            totalRecipeCount={totalRecipeCount}
+            searchTerm={searchTerm}
+            loading={loading}
+            isFetchingRecipes={isFetchingRecipes}
+            isGroceryListEditing={isGroceryListEditing}
+            setIsGroceryListEditing={setIsGroceryListEditing}
+            isCookingTimesEditing={isCookingTimesEditing}
+            setIsCookingTimesEditing={setIsCookingTimesEditing}
+            currentPage={currentPage}
+            paginationInfo={paginationInfo}
+            onPageChange={handlePageChange}
+            onPageReset={handlePageReset}
+            refreshRecipes={refreshRecipes}
+            refreshCategories={refreshCategories}
+            isLoggedIn={isLoggedIn}
+          />
+        </Router>
+      </MainScrollProvider>
       <Toaster />
     </div>
   );
@@ -151,6 +154,7 @@ function App() {
 
 function AppRoutes(props) {
   const location = useLocation();
+  const mainScrollRef = useMainScrollRef();
   const {
     refreshRecipes,
     refreshCategories,
@@ -222,17 +226,16 @@ function AppRoutes(props) {
         setShowImages={props.setShowImages}
         onPageReset={props.onPageReset}
       />
-      <div className="main-content" id="main-content">
+      <ScrollArea
+        className="min-h-0 flex-1"
+        viewportClassName="pb-3 md:pb-8"
+        viewportRef={mainScrollRef}
+      >
         <Routes>
           <Route
             path="/"
             element={
               <>
-                <SEO
-                  title="Rezepte"
-                  description="Organise, save, and share your recipes."
-                  url="https://acorn-rezepte.com/"
-                />
                 {isOnline && (
                   <CategoryFilter
                     categories={props.categories}
@@ -291,17 +294,6 @@ function AppRoutes(props) {
               </ProtectedRoute>
             }
           />
-          {/* <Route
-          path="/grocery-list"
-          element={
-            <ProtectedRoute>
-              <GroceryList
-                isEditing={isGroceryListEditing}
-                setIsEditing={setIsGroceryListEditing}
-              />
-            </ProtectedRoute>
-          }
-        /> */}
           <Route
             path="/cooking-times"
             element={
@@ -338,7 +330,7 @@ function AppRoutes(props) {
             }
           />
         </Routes>
-      </div>
+      </ScrollArea>
     </>
   );
 }

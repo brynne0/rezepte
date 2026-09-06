@@ -10,6 +10,7 @@ import {
 } from "../../services/friendsService";
 import { getTranslatedRecipeTitle } from "../../services/translationService";
 import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
+import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import { getCategoriesForUI } from "../../services/categoriesService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";
@@ -27,7 +28,8 @@ const FriendRecipes = () => {
   const [allRecipes, setAllRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  useScrollRestoration(!loading);
+  const mainScrollRef = useMainScrollRef();
+  useScrollRestoration(mainScrollRef, !loading);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") ?? "all_recipes";
@@ -217,7 +219,7 @@ const FriendRecipes = () => {
             totalPages={totalPages}
             onPageChange={(page) => {
               setCurrentPage(page);
-              document.getElementById("main-content")?.scrollTo(0, 0);
+              mainScrollRef?.current?.scrollTo(0, 0);
             }}
           />
         </>

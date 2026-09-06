@@ -63,7 +63,8 @@
 
   --background: #f2e7d2;
   --foreground: #342a24;
-  --card: #fffbf4;
+  /* TODO - adjust the belwo card to be slightly more white and not transparent?  */
+  --card: #fffbf4da;
   --card-foreground: oklch(0.147 0.004 49.25);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.147 0.004 49.25);
@@ -146,6 +147,10 @@
   }
   html {
     @apply font-sans;
+  }
+  #root {
+    min-height: 100vh;
+    min-width: 22rem;
   }
   h2 {
     @apply text-lg font-medium;
