@@ -132,16 +132,16 @@ describe("Header Component", () => {
     expect(screen.getByText("Rezepte")).toBeInTheDocument();
   });
 
-  test("shows squirrel logo", () => {
-    render(
-      <TestWrapper>
-        <Header {...defaultProps} />
-      </TestWrapper>
-    );
+  // test("shows squirrel logo", () => {
+  //   render(
+  //     <TestWrapper>
+  //       <Header {...defaultProps} />
+  //     </TestWrapper>
+  //   );
 
-    const logo = document.querySelector(".lucide-squirrel");
-    expect(logo).toBeInTheDocument();
-  });
+  //   const logo = document.querySelector(".lucide-squirrel");
+  //   expect(logo).toBeInTheDocument();
+  // });
 
   test("shows language toggle for switching to the other language", () => {
     mockI18n.language = "en";

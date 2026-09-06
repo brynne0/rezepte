@@ -203,8 +203,8 @@ const Header = ({
     <>
       <header className="relative flex items-center justify-between pt-2 pb-4 bg-background">
         {/* Language and Theme Selection */}
-        <div className="flex shrink-0 items-center">
-          <Squirrel className="hidden md:block md:size-14 md:pr-4" />
+        <div className="flex shrink-0 items-center md:gap-2">
+          {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
           <LanguageSelector />
           <ThemeToggle />
         </div>
@@ -228,7 +228,7 @@ const Header = ({
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-2 md:flex">
+        <nav className="hidden items-center gap-2 md:flex md:gap-4">
           {/* Desktop User Icon */}
           <UserMenu />
 

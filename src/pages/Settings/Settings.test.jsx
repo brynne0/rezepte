@@ -208,23 +208,20 @@ describe("Settings", () => {
       });
     });
 
-    it("renders back arrow that navigates to previous page", async () => {
+    it("renders back button that navigates to previous page", async () => {
       render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText("settings")).toBeInTheDocument();
       });
 
-      const backArrow = screen
-        .getByRole("banner")
-        .querySelector(".back-arrow-left");
-      fireEvent.click(backArrow);
+      fireEvent.click(screen.getByRole("button", { name: "go_back" }));
 
       expect(mockNavigateWithConfirmation).toHaveBeenCalledWith(-1);
     });
   });
 
-  describe("First Name Editing", () => {
+  describe("Profile Editing", () => {
     beforeEach(async () => {
       render(<SettingsWrapper />);
       await waitFor(() => {
@@ -232,138 +229,82 @@ describe("Settings", () => {
       });
     });
 
-    it("enables editing when pencil icon is clicked", () => {
+    it("enables editing both fields when edit button is clicked", () => {
       const firstNameInput = screen.getByDisplayValue("John");
-      expect(firstNameInput).toHaveAttribute("readonly");
-
-      const firstNameContainer = firstNameInput.closest(
-        ".floating-label-input"
-      );
-      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
-
-      expect(firstNameInput).not.toHaveAttribute("readonly");
-      expect(firstNameInput.className).toContain("input--edit");
-    });
-
-    it("shows check and cancel buttons when editing", () => {
-      const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest(
-        ".floating-label-input"
-      );
-      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
-
-      expect(
-        firstNameContainer.querySelector(".profile-settings-check")
-      ).toBeInTheDocument();
-      expect(
-        firstNameContainer.querySelector(".profile-settings-cancel")
-      ).toBeInTheDocument();
-    });
-
-    it("updates first name successfully", async () => {
-      const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest(
-        ".floating-label-input"
-      );
-      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
-
-      fireEvent.change(firstNameInput, { target: { value: "Jane" } });
-
-      const checkButton = firstNameContainer.querySelector(
-        ".profile-settings-check"
-      );
-      fireEvent.click(checkButton);
-
-      await waitFor(() => {
-        expect(mockUpdateUserProfile).toHaveBeenCalledWith({
-          first_name: "Jane",
-        });
-        expect(
-          screen.getByText("successfully_updated_first_name")
-        ).toBeInTheDocument();
-      });
-    });
-
-    it("cancels editing when cancel button is clicked", () => {
-      const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest(
-        ".floating-label-input"
-      );
-      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
-
-      fireEvent.change(firstNameInput, { target: { value: "Jane" } });
-
-      const cancelButton = firstNameContainer.querySelector(
-        ".profile-settings-cancel"
-      );
-      fireEvent.click(cancelButton);
-
-      expect(firstNameInput).toHaveValue("John");
-      expect(firstNameInput).toHaveAttribute("readonly");
-    });
-  });
-
-  describe("Username Editing", () => {
-    beforeEach(async () => {
-      render(<SettingsWrapper />);
-      await waitFor(() => {
-        expect(screen.getByDisplayValue("johndoe")).toBeInTheDocument();
-      });
-    });
-
-    it("enables username editing", () => {
       const usernameInput = screen.getByDisplayValue("johndoe");
+      expect(firstNameInput).toHaveAttribute("readonly");
       expect(usernameInput).toHaveAttribute("readonly");
 
-      const usernameContainer = usernameInput.closest(".floating-label-input");
-      const pencilIcon = usernameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
+      expect(firstNameInput).not.toHaveAttribute("readonly");
       expect(usernameInput).not.toHaveAttribute("readonly");
     });
 
-    it("updates username successfully", async () => {
-      const usernameInput = screen.getByDisplayValue("johndoe");
-      const usernameContainer = usernameInput.closest(".floating-label-input");
-      const pencilIcon = usernameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
+    it("shows save and cancel buttons when editing", () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
-      fireEvent.change(usernameInput, { target: { value: "newusername" } });
+      expect(
+        screen.getByRole("button", { name: "save_changes" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "cancel" })
+      ).toBeInTheDocument();
+    });
 
-      const checkButton = usernameContainer.querySelector(
-        ".profile-settings-check"
-      );
-      fireEvent.click(checkButton);
+    it("updates first name and username together", async () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(screen.getByDisplayValue("John"), {
+        target: { value: "Jane" },
+      });
+      fireEvent.change(screen.getByDisplayValue("johndoe"), {
+        target: { value: "newusername" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
         expect(mockCheckUsernameExists).toHaveBeenCalledWith("newusername");
         expect(mockUpdateUserProfile).toHaveBeenCalledWith({
+          first_name: "Jane",
           username: "newusername",
         });
         expect(
-          screen.getByText("successfully_updated_username")
+          screen.getByText("successfully_updated_profile")
         ).toBeInTheDocument();
       });
+    });
+
+    it("does not re-check username when it is unchanged", async () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(screen.getByDisplayValue("John"), {
+        target: { value: "Jane" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+
+      await waitFor(() => {
+        expect(mockUpdateUserProfile).toHaveBeenCalledWith({
+          first_name: "Jane",
+          username: "johndoe",
+        });
+      });
+
+      expect(mockCheckUsernameExists).not.toHaveBeenCalled();
     });
 
     it("shows error when username already exists", async () => {
       mockCheckUsernameExists.mockResolvedValue(true);
 
-      const usernameInput = screen.getByDisplayValue("johndoe");
-      const usernameContainer = usernameInput.closest(".floating-label-input");
-      const pencilIcon = usernameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
-      fireEvent.change(usernameInput, { target: { value: "existinguser" } });
+      fireEvent.change(screen.getByDisplayValue("johndoe"), {
+        target: { value: "existinguser" },
+      });
 
-      const checkButton = usernameContainer.querySelector(
-        ".profile-settings-check"
-      );
-      fireEvent.click(checkButton);
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
         expect(screen.getByText("username_already_exists")).toBeInTheDocument();
@@ -375,17 +316,12 @@ describe("Settings", () => {
     it("clears username error when user types", async () => {
       mockCheckUsernameExists.mockResolvedValue(true);
 
-      const usernameInput = screen.getByDisplayValue("johndoe");
-      const usernameContainer = usernameInput.closest(".floating-label-input");
-      const pencilIcon = usernameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
+      const usernameInput = screen.getByDisplayValue("johndoe");
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
 
-      const checkButton = usernameContainer.querySelector(
-        ".profile-settings-check"
-      );
-      fireEvent.click(checkButton);
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
         expect(screen.getByText("username_already_exists")).toBeInTheDocument();
@@ -398,30 +334,29 @@ describe("Settings", () => {
         screen.queryByText("username_already_exists")
       ).not.toBeInTheDocument();
     });
+
+    it("cancels editing when cancel button is clicked", () => {
+      const firstNameInput = screen.getByDisplayValue("John");
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(firstNameInput, { target: { value: "Jane" } });
+
+      fireEvent.click(screen.getByRole("button", { name: "cancel" }));
+
+      expect(firstNameInput).toHaveValue("John");
+      expect(firstNameInput).toHaveAttribute("readonly");
+    });
   });
 
-  describe("Password Field", () => {
-    it("renders readonly password field with pencil icon", async () => {
+  describe("Password", () => {
+    it("navigates to change password page when clicked", async () => {
       render(<SettingsWrapper />);
 
       await waitFor(() => {
-        const passwordInput = screen.getByDisplayValue("**************");
-        expect(passwordInput).toBeInTheDocument();
-        expect(passwordInput).toHaveAttribute("readonly");
-      });
-    });
-
-    it("navigates to change password page when pencil is clicked", async () => {
-      render(<SettingsWrapper />);
-
-      await waitFor(() => {
-        expect(screen.getByDisplayValue("**************")).toBeInTheDocument();
+        expect(screen.getByText("password")).toBeInTheDocument();
       });
 
-      const passwordInput = screen.getByDisplayValue("**************");
-      const passwordContainer = passwordInput.closest(".floating-label-input");
-      const pencilIcon = passwordContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
+      fireEvent.click(screen.getByRole("button", { name: "change_password" }));
 
       expect(mockNavigate).toHaveBeenCalledWith("/change-password", {
         state: { fromSettings: true },
@@ -433,49 +368,17 @@ describe("Settings", () => {
     beforeEach(async () => {
       render(<SettingsWrapper />);
       await waitFor(() => {
-        expect(screen.getByText("PREFERRED_LANGUAGE")).toBeInTheDocument();
+        expect(screen.getByText("preferred_language")).toBeInTheDocument();
       });
     });
 
     it("displays current language selection", () => {
-      expect(screen.getByText("EN")).toBeInTheDocument();
-      expect(screen.getByText("DE")).toBeInTheDocument();
-
-      // EN should be selected by default (mocked to return "en")
-      const enSpan = screen.getByText("EN");
-      expect(enSpan.className).toContain("selected");
+      expect(screen.getByRole("button", { name: "EN" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DE" })).toBeInTheDocument();
     });
 
-    it("enables language editing when pencil is clicked", () => {
-      const languageContainer = screen
-        .getByText("EN")
-        .closest(".profile-settings-language-container");
-      const pencilIcon = languageContainer.querySelector(".btn");
-      fireEvent.click(pencilIcon);
-
-      // Language options should become clickable
-      const enOption = screen.getByText("EN");
-      const deOption = screen.getByText("DE");
-      expect(enOption).toBeInTheDocument();
-      expect(deOption).toBeInTheDocument();
-    });
-
-    it("updates language preference successfully", async () => {
-      const languageContainer = screen
-        .getByText("EN")
-        .closest(".profile-settings-language-container");
-      const pencilIcon = languageContainer.querySelector(".btn");
-      fireEvent.click(pencilIcon);
-
-      // Click on DE option
-      const deOption = screen.getByText("DE");
-      fireEvent.click(deOption);
-
-      // Click check button
-      const checkButton = languageContainer.querySelector(
-        ".profile-settings-check"
-      );
-      fireEvent.click(checkButton);
+    it("updates language preference immediately when clicked", async () => {
+      fireEvent.click(screen.getByRole("button", { name: "DE" }));
 
       await waitFor(() => {
         expect(mockUpdateUserPreferredLanguage).toHaveBeenCalledWith("de");
@@ -484,30 +387,6 @@ describe("Settings", () => {
           screen.getByText("successfully_updated_language")
         ).toBeInTheDocument();
       });
-    });
-
-    it("cancels language editing", () => {
-      const languageContainer = screen
-        .getByText("EN")
-        .closest(".profile-settings-language-container");
-      const pencilIcon = languageContainer.querySelector(".btn");
-      fireEvent.click(pencilIcon);
-
-      // Click on DE option
-      const deOption = screen.getByText("DE");
-      fireEvent.click(deOption);
-
-      // Click cancel button
-      const cancelButton = languageContainer.querySelector(
-        ".profile-settings-cancel"
-      );
-      fireEvent.click(cancelButton);
-
-      // Should return to non-editing state - pencil icon should be back
-      expect(
-        languageContainer.querySelector(".profile-settings-cancel")
-      ).not.toBeInTheDocument();
-      expect(languageContainer.querySelector(".btn")).toBeInTheDocument();
     });
   });
 
@@ -668,32 +547,17 @@ describe("Settings", () => {
 
       // Trigger a successful update
       const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest(
-        ".floating-label-input"
-      );
-      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
-      const checkButton = firstNameContainer.querySelector(
-        ".profile-settings-check"
-      );
-      fireEvent.click(checkButton);
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
         expect(
-          screen.getByText("successfully_updated_first_name")
+          screen.getByText("successfully_updated_profile")
         ).toBeInTheDocument();
       });
-
-      // Success message should be visible in the unified message area
-      const messageArea = screen
-        .getByText("successfully_updated_first_name")
-        .closest(".success-message-wrapper");
-      expect(messageArea).toContainElement(
-        screen.getByText("successfully_updated_first_name")
-      );
     });
   });
 
@@ -708,18 +572,11 @@ describe("Settings", () => {
       });
 
       const firstNameInput = screen.getByDisplayValue("John");
-      const firstNameContainer = firstNameInput.closest(
-        ".floating-label-input"
-      );
-      const pencilIcon = firstNameContainer.querySelector(".btn-icon-right");
-      fireEvent.click(pencilIcon);
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
-      const checkButton = firstNameContainer.querySelector(
-        ".profile-settings-check"
-      );
-      fireEvent.click(checkButton);
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
         expect(screen.getByText(/Error:/)).toBeInTheDocument();
@@ -734,22 +591,10 @@ describe("Settings", () => {
       render(<SettingsWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("PREFERRED_LANGUAGE")).toBeInTheDocument();
+        expect(screen.getByText("preferred_language")).toBeInTheDocument();
       });
 
-      const languageContainer = screen
-        .getByText("EN")
-        .closest(".profile-settings-language-container");
-      const pencilIcon = languageContainer.querySelector(".btn");
-      fireEvent.click(pencilIcon);
-
-      const deOption = screen.getByText("DE");
-      fireEvent.click(deOption);
-
-      const checkButton = languageContainer.querySelector(
-        ".profile-settings-check"
-      );
-      fireEvent.click(checkButton);
+      fireEvent.click(screen.getByRole("button", { name: "DE" }));
 
       await waitFor(() => {
         expect(screen.getByText(/Error:/)).toBeInTheDocument();
