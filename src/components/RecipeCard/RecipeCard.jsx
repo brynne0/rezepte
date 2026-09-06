@@ -115,7 +115,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
             />
             {!imageLoaded && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-body">
-                <LoadingAcorn size={20} className="loading-acorn-small" />
+                <LoadingAcorn size={20} fullPage={false} />
               </div>
             )}
           </div>

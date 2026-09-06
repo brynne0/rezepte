@@ -9,7 +9,6 @@ describe("LoadingAcorn Component", () => {
 
     const loadingContainer = screen.getByTestId("loading-acorn");
     expect(loadingContainer).toBeInTheDocument();
-    expect(loadingContainer).toHaveClass("loading-acorn");
   });
 
   test("renders three nut icons", () => {
@@ -60,8 +59,7 @@ describe("LoadingAcorn Component", () => {
     render(<LoadingAcorn />);
 
     const loadingContainer = screen.getByTestId("loading-acorn");
-    expect(loadingContainer).toHaveClass("loading-acorn");
-    expect(loadingContainer.className).toBe("loading-acorn ");
+    expect(loadingContainer).toHaveClass("mt-80");
   });
 
   test("applies custom className when className prop is provided", () => {
@@ -69,7 +67,7 @@ describe("LoadingAcorn Component", () => {
     render(<LoadingAcorn className={customClassName} />);
 
     const loadingContainer = screen.getByTestId("loading-acorn");
-    expect(loadingContainer).toHaveClass("loading-acorn", customClassName);
+    expect(loadingContainer).toHaveClass(customClassName);
   });
 
   test("combines default and custom className correctly", () => {
@@ -77,7 +75,6 @@ describe("LoadingAcorn Component", () => {
     render(<LoadingAcorn className={customClassName} />);
 
     const loadingContainer = screen.getByTestId("loading-acorn");
-    expect(loadingContainer).toHaveClass("loading-acorn");
     expect(loadingContainer).toHaveClass("my-custom-class");
     expect(loadingContainer).toHaveClass("another-class");
   });
@@ -92,7 +89,7 @@ describe("LoadingAcorn Component", () => {
     const nutIcons = screen.getAllByTestId("lucide-nut");
 
     // Check container classes
-    expect(loadingContainer).toHaveClass("loading-acorn", customClassName);
+    expect(loadingContainer).toHaveClass(customClassName);
 
     // Check icon sizes
     nutIcons.forEach((icon) => {

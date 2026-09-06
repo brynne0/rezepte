@@ -361,7 +361,7 @@ const Recipe = ({ isSharedView = false }) => {
           <div className="relative w-full">
             {imagesLoading && (
               <div className="bg-muted absolute -inset-4 z-10 flex items-center justify-center transition-opacity duration-300">
-                <LoadingAcorn size={20} className="loading-acorn-small" />
+                <LoadingAcorn size={20} fullPage={false} />
               </div>
             )}
             <ImageGallery

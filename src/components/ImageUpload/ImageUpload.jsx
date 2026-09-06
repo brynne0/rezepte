@@ -214,7 +214,7 @@ const ImageUpload = ({
                 {(loadingImages.has(image.id) ||
                   uploadingImageIds.has(image.id)) && (
                   <div className="loading-spinner">
-                    <LoadingAcorn size={20} className="loading-acorn-small" />
+                    <LoadingAcorn size={20} fullPage={false} />
                   </div>
                 )}
               </div>

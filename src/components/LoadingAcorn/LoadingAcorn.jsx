@@ -1,9 +1,17 @@
 import { Nut } from "lucide-react";
 import "./LoadingAcorn.css";
+import { cn } from "@/lib/utils";
 
-const LoadingAcorn = ({ size = 25, className = "" }) => {
+const LoadingAcorn = ({ size = 25, className = "", fullPage = true }) => {
   return (
-    <div className={`loading-acorn ${className}`} data-testid="loading-acorn">
+    <div
+      className={cn(
+        "flex items-center justify-center gap-2 text-primary",
+        fullPage && "mx-auto mt-80 w-full max-w-sm px-4",
+        className
+      )}
+      data-testid="loading-acorn"
+    >
       <Nut
         size={size}
         className="acorn-icon acorn-1"
