@@ -38,6 +38,8 @@ import { getCategoriesWithPreferences } from "../../services/categoryPreferences
 describe("useCategories", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
+    mockUseTranslation.i18n.language = "en";
   });
 
   test("loads categories with preferences successfully", async () => {
@@ -214,6 +216,66 @@ describe("useCategories", () => {
     rerender();
 
     expect(result.current.categories).toBe(firstCategories); // Same reference
+  });
+
+  test("shows cached categories immediately without a loading state", async () => {
+    const cachedCategories = [
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
+      { value: "dinner", label: "Dinner", isSystem: false },
+    ];
+    localStorage.setItem(
+      "categories-cache-en",
+      JSON.stringify(cachedCategories)
+    );
+
+    getCategoriesWithPreferences.mockResolvedValue(cachedCategories);
+
+    const { result } = renderHook(() => useCategories());
+
+    // No loading flash — cached data is available synchronously on mount
+    expect(result.current.loading).toBe(false);
+    expect(result.current.categories).toEqual(cachedCategories);
+
+    await waitFor(() => {
+      expect(getCategoriesWithPreferences).toHaveBeenCalledWith("en");
+    });
+  });
+
+  test("keeps showing cached categories when a background refresh fails", async () => {
+    const cachedCategories = [
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
+    ];
+    localStorage.setItem(
+      "categories-cache-en",
+      JSON.stringify(cachedCategories)
+    );
+
+    getCategoriesWithPreferences.mockRejectedValue(new Error("offline"));
+    getCategoriesForUI.mockRejectedValue(new Error("offline"));
+
+    const { result } = renderHook(() => useCategories());
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("offline");
+    });
+
+    // The cached list is preserved rather than cleared on failure
+    expect(result.current.categories).toEqual(cachedCategories);
+  });
+
+  test("writes fetched categories to the cache for next time", async () => {
+    const mockCategories = [
+      { value: "all_recipes", label: "All Recipes", isSystem: true },
+    ];
+    getCategoriesWithPreferences.mockResolvedValue(mockCategories);
+
+    renderHook(() => useCategories());
+
+    await waitFor(() => {
+      expect(JSON.parse(localStorage.getItem("categories-cache-en"))).toEqual(
+        mockCategories
+      );
+    });
   });
 
   test("memoizes categories to prevent unnecessary re-renders", async () => {

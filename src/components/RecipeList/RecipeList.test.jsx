@@ -204,5 +204,17 @@ describe("RecipeList", () => {
       // Should show search no results message instead
       expect(screen.getByText("no_recipes_found")).toBeInTheDocument();
     });
+
+    it("shows an offline message instead of the welcome state while offline", () => {
+      renderComponent({
+        recipes: [],
+        totalRecipeCount: 0,
+        searchTerm: "",
+        isOnline: false,
+      });
+
+      expect(screen.queryByText("welcome_add_recipe")).not.toBeInTheDocument();
+      expect(screen.getByText("no_internet_connection")).toBeInTheDocument();
+    });
   });
 });

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ChefHat, LogIn } from "lucide-react";
+import { ChefHat, LogIn, WifiOff } from "lucide-react";
 import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
   EmptyContent,
 } from "@/components/ui/empty";
@@ -19,6 +20,7 @@ const RecipeList = ({
   totalRecipeCount = 0,
   isPaginated = false,
   loading = false,
+  isOnline = true,
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -60,13 +62,23 @@ const RecipeList = ({
         ))}
       </div>
       {filteredRecipes.length === 0 && searchTerm && (
-        <Empty className="border-none">
+        <Empty>
           <EmptyHeader>
             <EmptyTitle>{t("no_recipes_found", { searchTerm })}</EmptyTitle>
           </EmptyHeader>
         </Empty>
       )}
-      {totalRecipeCount === 0 && !searchTerm && !loading && (
+      {!isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
+        <Empty className="mt-40">
+          <EmptyHeader>
+            <EmptyMedia>
+              <WifiOff />
+            </EmptyMedia>
+            <EmptyTitle>{t("no_internet_connection")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      )}
+      {isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
         <Empty className="mx-auto mt-40 w-fit border border-primary bg-card shadow-sm">
           <EmptyHeader>
             <EmptyTitle>

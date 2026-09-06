@@ -249,6 +249,7 @@ function AppRoutes(props) {
                   totalRecipeCount={props.totalRecipeCount}
                   isPaginated={true}
                   loading={props.isFetchingRecipes}
+                  isOnline={isOnline}
                 />
                 {isOnline && (
                   <Pagination
