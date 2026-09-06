@@ -353,7 +353,7 @@ const Recipe = ({ isSharedView = false }) => {
   };
 
   return (
-    <Card className="mx-auto max-w-3xl text-left">
+    <Card size="lg" className="mx-auto max-w-3xl text-left">
       {/* SEO Meta Tags and Structured Data */}
       <SEO
         title={`${recipe.title}`}
@@ -583,7 +583,7 @@ const Recipe = ({ isSharedView = false }) => {
 
         {/* Source */}
         {recipe.source && (
-          <div className="flex flex-wrap items-baseline gap-2">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
             <h2>{t("source")}:</h2>
             <span className="[word-wrap:break-word]">
               {renderTextWithLinks(recipe.source)}
@@ -593,7 +593,7 @@ const Recipe = ({ isSharedView = false }) => {
 
         {/* Extra Notes */}
         {recipe.notes && recipe.notes.length > 0 && (
-          <div className="flex flex-wrap items-baseline gap-2">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
             <h2>{t("notes")}:</h2>
             <div className="[word-break:break-word] whitespace-pre-wrap">
               {recipe.notes}
