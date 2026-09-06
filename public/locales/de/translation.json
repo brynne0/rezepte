@@ -34,6 +34,10 @@
   "send_reset_email": "E-Mail zum Zurücksetzen senden",
   "password_reset_sent": "E-Mail zum Zurücksetzen des Passworts wurde gesendet! Bitte Posteingang überprüfen.",
   "password_reset_failed": "E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden. Bitte erneut versuchen.",
+  "resend_reset_email": "E-Mail erneut senden",
+  "resending_reset_email": "Wird erneut gesendet...",
+  "resend_reset_email_sent": "E-Mail zum Zurücksetzen gesendet",
+  "resend_reset_email_failed": "E-Mail konnte nicht erneut gesendet werden. Bitte versuche es erneut.",
 
   "set_new_password": "Neues Passwort Festlegen",
   "current_password": "Aktuelles Passwort",

@@ -6,6 +6,7 @@ import {
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { BrowserRouter } from "react-router-dom";
 import ForgotPasswordPage from "./ForgotPasswordPage";
 import { forgotPassword } from "../../services/auth";
 import { validateForgotPasswordForm } from "../../utils/validation";
@@ -43,7 +44,7 @@ describe("ForgotPasswordPage", () => {
   });
 
   it("renders the form correctly", () => {
-    render(<ForgotPasswordPage />);
+    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
 
     expect(screen.getByLabelText("email")).toBeInTheDocument();
     expect(
@@ -54,7 +55,7 @@ describe("ForgotPasswordPage", () => {
   it("displays validation errors when form is submitted with invalid email", async () => {
     validateForgotPasswordForm.mockReturnValue({ email: "Invalid email" });
 
-    render(<ForgotPasswordPage />);
+    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
@@ -73,7 +74,7 @@ describe("ForgotPasswordPage", () => {
     validateForgotPasswordForm.mockReturnValue({});
     forgotPassword.mockResolvedValue({ error: null });
 
-    render(<ForgotPasswordPage />);
+    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
@@ -89,11 +90,36 @@ describe("ForgotPasswordPage", () => {
     });
   });
 
+  it("allows resending the reset email to the same address", async () => {
+    validateForgotPasswordForm.mockReturnValue({});
+    forgotPassword.mockResolvedValue({ error: null });
+
+    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
+
+    fireEvent.change(screen.getByLabelText("email"), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "send_reset_email" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("password_reset_sent")).toBeInTheDocument();
+    });
+
+    forgotPassword.mockClear();
+
+    fireEvent.click(screen.getByRole("button", { name: "resend_reset_email" }));
+
+    await waitFor(() => {
+      expect(forgotPassword).toHaveBeenCalledWith("test@example.com");
+      expect(screen.getByText("resend_reset_email_sent")).toBeInTheDocument();
+    });
+  });
+
   it("displays error message when forgotPassword fails", async () => {
     validateForgotPasswordForm.mockReturnValue({});
     forgotPassword.mockResolvedValue({ error: "Error" });
 
-    render(<ForgotPasswordPage />);
+    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
@@ -111,7 +137,7 @@ describe("ForgotPasswordPage", () => {
   it("clears validation errors when user types in the email field", () => {
     validateForgotPasswordForm.mockReturnValue({ email: "Invalid email" });
 
-    render(<ForgotPasswordPage />);
+    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
 
@@ -138,7 +164,7 @@ describe("ForgotPasswordPage", () => {
         )
     );
 
-    render(<ForgotPasswordPage />);
+    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {

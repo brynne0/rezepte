@@ -1,21 +1,38 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ArrowLeft, Lock, Eye, EyeOff } from "lucide-react";
 import supabase from "../../lib/supabase";
 import { changePassword, verifyCurrentPassword } from "../../services/auth";
 import {
   validateChangePasswordForm,
   isPasswordStrong,
 } from "../../utils/validation";
-import PasswordInput from "../../components/PasswordInput/PasswordInput";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import { ArrowBigLeft } from "lucide-react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 const ChangePasswordPage = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showNewPasswordRepeat, setShowNewPasswordRepeat] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -130,16 +147,7 @@ const ChangePasswordPage = () => {
 
         const { error } = await changePassword(newPassword);
 
-        console.error("Password change response error:", error);
-
         if (error) {
-          console.error("Password change error details:", {
-            message: error.message,
-            status: error.status,
-            statusText: error.statusText,
-            name: error.name,
-            stack: error.stack,
-          });
           setErrorMessage(`${t("password_change_failed")}: ${error.message}`);
         } else {
           setShowSuccessMessage(true);
@@ -151,11 +159,7 @@ const ChangePasswordPage = () => {
           setErrorMessage("");
         }, 3000);
       } catch (err) {
-        console.error("Password change exception details:", {
-          message: err.message,
-          name: err.name,
-          stack: err.stack,
-        });
+        console.error("Password change exception:", err);
         setErrorMessage(`${t("password_change_failed")}: ${err.message}`);
 
         setTimeout(() => {
@@ -171,136 +175,186 @@ const ChangePasswordPage = () => {
 
   if (!isValidSession && !showSuccessMessage) {
     return (
-      <div className="page-centered">
-        <h3>{t("invalid_reset_link")}</h3>
-        <button
-          className="btn btn-standard"
-          onClick={() => navigate("/auth-page")}
-        >
+      <div className="mx-auto mt-20 flex w-full max-w-sm flex-col items-center gap-4 px-4 text-center">
+        <h3 className="text-lg font-semibold">{t("invalid_reset_link")}</h3>
+        <Button onClick={() => navigate("/auth-page")}>
           {t("go_to_login")}
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="page-centered">
-      {showSuccessMessage ? (
-        <div className="flex-column-center">
-          <p>{t("password_changed")}</p>
-          <button
-            className={"btn btn-standard"}
-            type="button"
-            onClick={() => navigate("/auth-page")}
-          >
-            {t("login")}
-          </button>
-        </div>
-      ) : (
-        <form onSubmit={handleChangePassword} className="auth-form">
-          <div className="flex-row page-header">
-            <button
-              className="btn-unstyled"
+    <div className="mx-auto mt-20 w-full max-w-sm px-4">
+      <Card className="w-full">
+        <CardHeader className="flex flex-col items-stretch gap-4">
+          <div className="relative flex w-full items-center justify-center">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="absolute left-0"
               onClick={() => navigate(-1)}
               aria-label={t("go_back")}
             >
-              <ArrowBigLeft size={28} />
-            </button>
-            <h1 className="forta-small">
-              {t("set_new_password").toUpperCase()}
-            </h1>
+              <ArrowLeft />
+            </Button>
+            <h1 className="text-lg font-semibold">{t("set_new_password")}</h1>
           </div>
-          {errorMessage && (
-            <span className="error-message">{errorMessage}</span>
-          )}
+        </CardHeader>
 
-          {fromSettings && (
-            <div className="input-validation-wrapper">
-              <div className="floating-label-input">
-                <PasswordInput
-                  id="old-password"
-                  value={oldPassword}
-                  onChange={(e) => {
-                    setOldPassword(e.target.value);
-                    setErrorMessage("");
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      oldPassword: "",
-                    }));
-                  }}
-                  placeholder=" "
-                  className={`input input--secondary ${
-                    validationErrors.oldPassword ? "input--error" : ""
-                  }`}
-                />
-                <label htmlFor="old-password">{t("current_password")}</label>
-              </div>
-              {validationErrors.oldPassword && (
-                <span className="error-message-small">
-                  {validationErrors.oldPassword}
-                </span>
+        <CardContent>
+          {showSuccessMessage ? (
+            <div className="flex flex-col items-center gap-4 text-center">
+              <p>{t("password_changed")}</p>
+              <Button type="button" onClick={() => navigate("/auth-page")}>
+                {t("login")}
+              </Button>
+            </div>
+          ) : (
+            <>
+              {errorMessage && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
               )}
-            </div>
+
+              <form onSubmit={handleChangePassword}>
+                <FieldGroup>
+                  {fromSettings && (
+                    <Field data-invalid={!!validationErrors.oldPassword}>
+                      <FieldLabel htmlFor="old-password">
+                        {t("current_password")}
+                      </FieldLabel>
+                      <InputGroup>
+                        <InputGroupAddon>
+                          <Lock />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          id="old-password"
+                          type={showOldPassword ? "text" : "password"}
+                          value={oldPassword}
+                          onChange={(e) => {
+                            setOldPassword(e.target.value);
+                            setErrorMessage("");
+                            setValidationErrors((prev) => ({
+                              ...prev,
+                              oldPassword: "",
+                            }));
+                          }}
+                          aria-invalid={!!validationErrors.oldPassword}
+                        />
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupButton
+                            type="button"
+                            onClick={() => setShowOldPassword((prev) => !prev)}
+                            aria-label={
+                              showOldPassword
+                                ? t("hide_password")
+                                : t("show_password")
+                            }
+                          >
+                            {showOldPassword ? <EyeOff /> : <Eye />}
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      <FieldError>{validationErrors.oldPassword}</FieldError>
+                    </Field>
+                  )}
+
+                  <Field data-invalid={!!validationErrors.newPassword}>
+                    <FieldLabel htmlFor="new-password">
+                      {t("new_password")}
+                    </FieldLabel>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <Lock />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="new-password"
+                        type={showNewPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value);
+                          setErrorMessage("");
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            newPassword: "",
+                          }));
+                        }}
+                        aria-invalid={!!validationErrors.newPassword}
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupButton
+                          type="button"
+                          onClick={() => setShowNewPassword((prev) => !prev)}
+                          aria-label={
+                            showNewPassword
+                              ? t("hide_password")
+                              : t("show_password")
+                          }
+                        >
+                          {showNewPassword ? <EyeOff /> : <Eye />}
+                        </InputGroupButton>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    <FieldError>{validationErrors.newPassword}</FieldError>
+                    {newPassword && (
+                      <PasswordRequirements password={newPassword} />
+                    )}
+                  </Field>
+
+                  <Field data-invalid={!!validationErrors.newPasswordRepeat}>
+                    <FieldLabel htmlFor="new-password-repeat">
+                      {t("new_password_repeat")}
+                    </FieldLabel>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <Lock />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="new-password-repeat"
+                        type={showNewPasswordRepeat ? "text" : "password"}
+                        value={newPasswordRepeat}
+                        onChange={(e) => {
+                          setNewPasswordRepeat(e.target.value);
+                          setErrorMessage("");
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            newPasswordRepeat: "",
+                          }));
+                        }}
+                        aria-invalid={!!validationErrors.newPasswordRepeat}
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupButton
+                          type="button"
+                          onClick={() =>
+                            setShowNewPasswordRepeat((prev) => !prev)
+                          }
+                          aria-label={
+                            showNewPasswordRepeat
+                              ? t("hide_password")
+                              : t("show_password")
+                          }
+                        >
+                          {showNewPasswordRepeat ? <EyeOff /> : <Eye />}
+                        </InputGroupButton>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    <FieldError>
+                      {validationErrors.newPasswordRepeat}
+                    </FieldError>
+                  </Field>
+
+                  <Button type="submit" size="lg">
+                    {t("confirm")}
+                  </Button>
+                </FieldGroup>
+              </form>
+            </>
           )}
-          <div className="input-validation-wrapper">
-            <div className="floating-label-input">
-              <PasswordInput
-                id="new-password"
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value);
-                  setErrorMessage("");
-                  setValidationErrors((prev) => ({ ...prev, newPassword: "" }));
-                }}
-                placeholder=" "
-                className={`input input--secondary ${
-                  validationErrors.newPassword ? "input--error" : ""
-                }`}
-              />
-              <label htmlFor="new-password">{t("new_password")}</label>
-            </div>
-            {validationErrors.newPassword && (
-              <span className="error-message-small">
-                {validationErrors.newPassword}
-              </span>
-            )}
-          </div>
-          <div className="input-validation-wrapper">
-            <div className="floating-label-input">
-              <PasswordInput
-                id="new-password-repeat"
-                value={newPasswordRepeat}
-                onChange={(e) => {
-                  setNewPasswordRepeat(e.target.value);
-                  setErrorMessage("");
-                  setValidationErrors((prev) => ({
-                    ...prev,
-                    newPasswordRepeat: "",
-                  }));
-                }}
-                placeholder=" "
-                className={`input input--secondary ${
-                  validationErrors.newPasswordRepeat ? "input--error" : ""
-                }`}
-              />
-              <label htmlFor="new-password-repeat">
-                {t("new_password_repeat")}
-              </label>
-            </div>
-            {validationErrors.newPasswordRepeat && (
-              <span className="error-message-small">
-                {validationErrors.newPasswordRepeat}
-              </span>
-            )}
-          </div>
-
-          {newPassword && <PasswordRequirements password={newPassword} />}
-
-          <button className={"btn btn-standard"} type="submit">
-            {t("confirm")}
-          </button>
-        </form>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

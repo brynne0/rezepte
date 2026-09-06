@@ -1,18 +1,36 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Mail, ArrowLeft } from "lucide-react";
 import { forgotPassword } from "../../services/auth";
 import { validateForgotPasswordForm } from "../../utils/validation";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import { Mail, ArrowBigLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 const ForgotPasswordPage = () => {
-  const [email, setEmail] = useState("");
+  const location = useLocation();
+  const [email, setEmail] = useState(location.state?.email || "");
   const [sentToEmail, setSentToEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -48,71 +66,106 @@ const ForgotPasswordPage = () => {
     }
   };
 
+  const handleResendResetEmail = async () => {
+    setIsResending(true);
+    setResendMessage("");
+
+    const { error } = await forgotPassword(sentToEmail);
+
+    setIsResending(false);
+    setResendMessage(
+      error ? t("resend_reset_email_failed") : t("resend_reset_email_sent")
+    );
+
+    setTimeout(() => {
+      setResendMessage("");
+    }, 3000);
+  };
+
   if (loading) {
     return <LoadingAcorn />;
   }
 
   return (
-    <div className="page-centered">
-      {showSuccessMessage ? (
-        <div className="flex-column">
-          <span>{t("password_reset_sent")}</span>
-          <strong>{sentToEmail}</strong>
-        </div>
-      ) : (
-        <form onSubmit={handleForgotPassword} className="auth-form">
-          <header className="flex-row page-header">
-            <button
-              className="btn-unstyled back-arrow"
+    <div className="mx-auto mt-20 w-full max-w-sm px-4">
+      <Card className="w-full">
+        <CardHeader className="flex flex-col items-stretch gap-4">
+          <div className="relative flex w-full items-center justify-center">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="absolute left-0"
               onClick={() => navigate(-1)}
               aria-label={t("go_back")}
             >
-              <ArrowBigLeft size={28} />
-            </button>
-            <h1 className="forta-small">{t("reset_password")}</h1>
-          </header>
-          {/* Error message */}
-          {errorMessage && (
-            <span className="error-message">{errorMessage}</span>
-          )}
-
-          {/* Email input */}
-          <div className="input-validation-wrapper">
-            <div className="input-with-icon floating-label-input">
-              <Mail size={20} />
-              <input
-                className={`input input--secondary ${
-                  validationErrors.email ? "input--error" : ""
-                }`}
-                id="reset-email"
-                type="text"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setValidationErrors((prev) => ({ ...prev, email: "" }));
-                }}
-                placeholder=" "
-              />
-              <label htmlFor="reset-email">{t("email")}</label>
-            </div>
-            {/* Email validation error */}
-            {validationErrors.email && (
-              <span className="error-message-small">
-                {validationErrors.email}
-              </span>
-            )}
+              <ArrowLeft className="size-5" />
+            </Button>
+            <h1 className="text-lg font-semibold">{t("reset_password")}</h1>
           </div>
+        </CardHeader>
 
-          {/* Submit button */}
-          <button
-            className={"btn btn-standard"}
-            type="submit"
-            disabled={loading}
-          >
-            {t("send_reset_email")}
-          </button>
-        </form>
-      )}
+        <CardContent>
+          {showSuccessMessage ? (
+            <div className="flex flex-col items-center gap-4 text-center">
+              <p>{t("password_reset_sent")}</p>
+              <p className="text-muted-foreground">{sentToEmail}</p>
+              <Button
+                type="button"
+                onClick={handleResendResetEmail}
+                disabled={isResending}
+              >
+                {isResending && <Spinner />}
+                {isResending
+                  ? t("resending_reset_email")
+                  : t("resend_reset_email")}
+              </Button>
+              {resendMessage && (
+                <p className="text-xs text-muted-foreground">{resendMessage}</p>
+              )}
+            </div>
+          ) : (
+            <>
+              {errorMessage && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              )}
+
+              <form onSubmit={handleForgotPassword}>
+                <FieldGroup>
+                  <Field data-invalid={!!validationErrors.email}>
+                    <FieldLabel htmlFor="reset-email">{t("email")}</FieldLabel>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <Mail />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="reset-email"
+                        type="text"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            email: "",
+                          }));
+                        }}
+                        aria-invalid={!!validationErrors.email}
+                      />
+                    </InputGroup>
+                    <FieldError>{validationErrors.email}</FieldError>
+                  </Field>
+
+                  <Button type="submit" size="lg" disabled={loading}>
+                    {loading && <Spinner />}
+                    {t("send_reset_email")}
+                  </Button>
+                </FieldGroup>
+              </form>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

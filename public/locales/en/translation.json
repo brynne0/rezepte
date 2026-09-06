@@ -34,6 +34,10 @@
   "send_reset_email": "Send Reset Email",
   "password_reset_sent": "Password reset email sent! Please check your inbox.",
   "password_reset_failed": "Failed to send password reset email. Please try again.",
+  "resend_reset_email": "Resend reset email",
+  "resending_reset_email": "Resending...",
+  "resend_reset_email_sent": "Reset email sent",
+  "resend_reset_email_failed": "Couldn't resend the email. Please try again.",
 
   "set_new_password": "Set New Password",
   "current_password": "Current Password",

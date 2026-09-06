@@ -803,7 +803,25 @@ describe("AuthPage", () => {
       const forgotPasswordLink = screen.getByText("forgot_password");
       fireEvent.click(forgotPasswordLink);
 
-      expect(mockNavigate).toHaveBeenCalledWith("/forgot-password");
+      expect(mockNavigate).toHaveBeenCalledWith("/forgot-password", {
+        state: { email: "" },
+      });
+    });
+
+    it("carries the entered username or email over to the forgot password page", () => {
+      render(<AuthPageWrapper setLoginMessage={mockSetLoginMessage} />);
+
+      const usernameInput = screen.getByLabelText("username_or_email");
+      fireEvent.change(usernameInput, {
+        target: { value: "test@example.com" },
+      });
+
+      const forgotPasswordLink = screen.getByText("forgot_password");
+      fireEvent.click(forgotPasswordLink);
+
+      expect(mockNavigate).toHaveBeenCalledWith("/forgot-password", {
+        state: { email: "test@example.com" },
+      });
     });
 
     it("clears form fields when navigating to forgot password", () => {

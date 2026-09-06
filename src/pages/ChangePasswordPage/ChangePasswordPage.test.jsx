@@ -45,19 +45,6 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-vi.mock("../../components/PasswordInput/PasswordInput", () => ({
-  default: ({ id, value, onChange, placeholder, className }) => (
-    <input
-      id={id}
-      type="password"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className={className}
-    />
-  ),
-}));
-
 vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
@@ -143,7 +130,7 @@ describe("ChangePasswordPage", () => {
       render(<ChangePasswordPageWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("SET_NEW_PASSWORD")).toBeInTheDocument();
+        expect(screen.getByText("set_new_password")).toBeInTheDocument();
       });
 
       expect(screen.getByLabelText("new_password")).toBeInTheDocument();
@@ -711,7 +698,7 @@ describe("ChangePasswordPage", () => {
         expect(screen.getByLabelText("current_password")).toBeInTheDocument();
       });
 
-      expect(screen.getByText("SET_NEW_PASSWORD")).toBeInTheDocument();
+      expect(screen.getByText("set_new_password")).toBeInTheDocument();
       expect(screen.getByLabelText("new_password")).toBeInTheDocument();
       expect(screen.getByLabelText("new_password_repeat")).toBeInTheDocument();
     });
@@ -941,7 +928,7 @@ describe("ChangePasswordPage", () => {
       expect(repeatPasswordInput.value).toBe("password123");
     });
 
-    it("applies error class to inputs when validation fails", async () => {
+    it("marks inputs as invalid when validation fails", async () => {
       mockValidateChangePasswordForm.mockReturnValue({
         newPassword: "Password too short",
         newPasswordRepeat: "Passwords must match",
@@ -958,8 +945,8 @@ describe("ChangePasswordPage", () => {
           "new_password_repeat"
         );
 
-        expect(newPasswordInput.className).toContain("input--error");
-        expect(repeatPasswordInput.className).toContain("input--error");
+        expect(newPasswordInput).toHaveAttribute("aria-invalid", "true");
+        expect(repeatPasswordInput).toHaveAttribute("aria-invalid", "true");
       });
     });
   });

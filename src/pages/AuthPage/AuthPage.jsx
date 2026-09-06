@@ -194,7 +194,7 @@ const AuthPage = ({ setLoginMessage }) => {
     setUsername("");
     setPassword("");
     setValidationErrors({});
-    navigate("/forgot-password");
+    navigate("/forgot-password", { state: { email: username } });
   };
 
   const handleResendConfirmation = async () => {
