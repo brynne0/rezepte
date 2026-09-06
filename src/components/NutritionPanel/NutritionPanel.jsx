@@ -14,15 +14,17 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-const NUTRITION_FIELDS = [
-  { key: "calories", labelKey: "nutrition_calories", unit: "kcal" },
-  { key: "protein", labelKey: "nutrition_protein", unit: "g" },
-  { key: "fat", labelKey: "nutrition_fat", unit: "g" },
-  { key: "carbs", labelKey: "nutrition_carbs", unit: "g" },
-  { key: "fiber", labelKey: "nutrition_fiber", unit: "g" },
-  { key: "sugar", labelKey: "nutrition_sugar", unit: "g" },
-  { key: "sodium", labelKey: "nutrition_sodium", unit: "mg" },
-];
+// Known fields get a translated label and a unit; any other key present in
+// the data still renders, just with its raw name and no unit.
+const KNOWN_NUTRITION_FIELDS = {
+  calories: { labelKey: "nutrition_calories", unit: "kcal" },
+  protein: { labelKey: "nutrition_protein", unit: "g" },
+  fat: { labelKey: "nutrition_fat", unit: "g" },
+  carbs: { labelKey: "nutrition_carbs", unit: "g" },
+  fiber: { labelKey: "nutrition_fiber", unit: "g" },
+  sugar: { labelKey: "nutrition_sugar", unit: "g" },
+  sodium: { labelKey: "nutrition_sodium", unit: "mg" },
+};
 
 // Normalise DB value into an array of column objects
 const toColumns = (nutrition) => {
@@ -32,6 +34,24 @@ const toColumns = (nutrition) => {
   return [{ label: "", ...nutrition }];
 };
 
+// Every key present on any column (besides "label") becomes a row, so the
+// table isn't limited to a fixed set of nutrients.
+const collectNutrientKeys = (columns) => {
+  const seen = new Set();
+  columns.forEach((col) => {
+    Object.keys(col).forEach((key) => {
+      if (key !== "label" && col[key] != null) seen.add(key);
+    });
+  });
+  return [...seen];
+};
+
+const formatNutrientValue = (value, unit) => {
+  const parsed = parseFloat(value);
+  const display = Number.isNaN(parsed) ? value : parsed;
+  return unit ? `${display} ${unit}` : `${display}`;
+};
+
 const NutritionPanel = ({ recipe }) => {
   const { t } = useTranslation();
 
@@ -39,9 +59,7 @@ const NutritionPanel = ({ recipe }) => {
   if (!columns) return null;
 
   const hasColumnLabels = columns.some((col) => col.label);
-  const rows = NUTRITION_FIELDS.filter(({ key }) =>
-    columns.some((col) => col[key] != null)
-  );
+  const nutrientKeys = collectNutrientKeys(columns);
 
   return (
     <Accordion defaultValue={["nutrition-info"]}>
@@ -54,24 +72,31 @@ const NutritionPanel = ({ recipe }) => {
                 <TableRow>
                   <TableHead />
                   {columns.map((col, i) => (
-                    <TableHead key={i}>{col.label}</TableHead>
+                    <TableHead key={i} className="text-right">
+                      {col.label}
+                    </TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
             )}
             <TableBody>
-              {rows.map(({ key, labelKey, unit }) => (
-                <TableRow key={key}>
-                  <TableCell className="pr-8">{t(labelKey)}</TableCell>
-                  {columns.map((col, i) => (
-                    <TableCell key={i} className=" text-right font-medium">
-                      {col[key] != null
-                        ? `${parseFloat(col[key])} ${unit}`
-                        : "–"}
+              {nutrientKeys.map((key) => {
+                const field = KNOWN_NUTRITION_FIELDS[key];
+                return (
+                  <TableRow key={key}>
+                    <TableCell className="pr-8">
+                      {field ? t(field.labelKey) : key}
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+                    {columns.map((col, i) => (
+                      <TableCell key={i} className="text-right font-medium">
+                        {col[key] != null
+                          ? formatNutrientValue(col[key], field?.unit)
+                          : "–"}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </AccordionContent>
