@@ -1,13 +1,6 @@
 import { useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Plus,
-  ArrowLeft,
-  GripVertical,
-  Clipboard,
-  ChevronDown,
-  ChevronRight,
-} from "lucide-react";
+import { Plus, ArrowLeft, GripVertical, Clipboard, X } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "cn";
 
@@ -29,6 +22,12 @@ import {
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   AlertDialog,
@@ -669,124 +668,144 @@ const RecipeForm = ({
 
             {/* Nutrition */}
             <Field className={isEditingTranslation ? "opacity-50" : ""}>
-              <div className="flex items-center justify-between">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowNutrition((v) => !v)}
-                >
-                  {showNutrition ? (
-                    <ChevronDown size={18} />
-                  ) : (
-                    <ChevronRight size={18} />
-                  )}
-                  {t("nutritional_info")}
-                </Button>
-                {showNutrition &&
-                  (formData.nutrition_columns.length < 2 ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handleInputChange("nutrition_columns", [
-                          ...formData.nutrition_columns,
-                          emptyNutritionColumn(),
-                        ])
-                      }
-                      disabled={isEditingTranslation}
-                    >
-                      + {t("nutrition_add_column")}
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handleInputChange("nutrition_columns", [
-                          formData.nutrition_columns[0],
-                        ])
-                      }
-                      disabled={isEditingTranslation}
-                    >
-                      {t("nutrition_remove_column")}
-                    </Button>
-                  ))}
-              </div>
-              {showNutrition && (
-                <div
-                  className={cn(
-                    "grid items-center gap-x-2 gap-y-2",
-                    formData.nutrition_columns.length > 1
-                      ? "grid-cols-[5rem_5.5rem_5.5rem_auto]"
-                      : "grid-cols-[5rem_5.5rem_auto]"
-                  )}
-                >
-                  {/* Label inputs row — aligned with the columns below */}
-                  <span />
-                  {formData.nutrition_columns.map((col, colIdx) => (
-                    <Input
-                      key={colIdx}
-                      type="text"
-                      value={col.label}
-                      onChange={(e) => {
-                        const updated = formData.nutrition_columns.map(
-                          (c, i) =>
-                            i === colIdx ? { ...c, label: e.target.value } : c
-                        );
-                        handleInputChange("nutrition_columns", updated);
-                      }}
-                      placeholder={
-                        colIdx === 0 ? t("nutrition_per_serving") : "per 100g"
-                      }
-                      disabled={isEditingTranslation}
-                    />
-                  ))}
-                  <span />
-                  {/* Data rows */}
-                  {NUTRITION_FORM_FIELDS.map(
-                    ({ key, labelKey, unit, step }) => (
-                      <Fragment key={key}>
-                        <span className="text-sm text-muted-foreground">
-                          {t(labelKey)}
-                        </span>
-                        {formData.nutrition_columns.map((col, colIdx) => (
-                          <Input
-                            key={`${key}-${colIdx}`}
-                            type="number"
-                            min="0"
-                            step={step}
-                            value={col[key] ?? ""}
-                            onChange={(e) => {
-                              const updated = formData.nutrition_columns.map(
-                                (c, i) =>
-                                  i === colIdx
-                                    ? {
-                                        ...c,
-                                        [key]:
-                                          e.target.value === ""
-                                            ? null
-                                            : e.target.value,
-                                      }
-                                    : c
-                              );
-                              handleInputChange("nutrition_columns", updated);
-                            }}
-                            placeholder="–"
-                            disabled={isEditingTranslation}
-                            onWheel={(e) => e.target.blur()}
-                          />
-                        ))}
-                        <span className="text-sm text-muted-foreground">
-                          {unit}
-                        </span>
-                      </Fragment>
-                    )
-                  )}
-                </div>
-              )}
+              <Accordion
+                value={showNutrition ? ["nutrition"] : []}
+                onValueChange={(value) =>
+                  setShowNutrition(value.includes("nutrition"))
+                }
+              >
+                <AccordionItem value="nutrition">
+                  <AccordionTrigger>{t("nutritional_info")}</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex flex-col gap-3">
+                      <div className="overflow-x-auto">
+                        <div
+                          className="grid items-center gap-x-2 gap-y-2"
+                          style={{
+                            gridTemplateColumns: `5rem repeat(${formData.nutrition_columns.length}, minmax(5.5rem, 8rem)) auto`,
+                            width: "max-content",
+                            minWidth: "100%",
+                          }}
+                        >
+                          {/* Label inputs row — aligned with the columns below */}
+                          <span />
+                          {formData.nutrition_columns.map((col, colIdx) => (
+                            <div
+                              key={colIdx}
+                              className="flex items-center gap-1"
+                            >
+                              <Input
+                                type="text"
+                                value={col.label}
+                                onChange={(e) => {
+                                  const updated =
+                                    formData.nutrition_columns.map((c, i) =>
+                                      i === colIdx
+                                        ? { ...c, label: e.target.value }
+                                        : c
+                                    );
+                                  handleInputChange(
+                                    "nutrition_columns",
+                                    updated
+                                  );
+                                }}
+                                placeholder={
+                                  colIdx === 0
+                                    ? t("nutrition_per_serving")
+                                    : t("nutrition_column_placeholder")
+                                }
+                                disabled={isEditingTranslation}
+                              />
+                              {formData.nutrition_columns.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  onClick={() =>
+                                    handleInputChange(
+                                      "nutrition_columns",
+                                      formData.nutrition_columns.filter(
+                                        (_, i) => i !== colIdx
+                                      )
+                                    )
+                                  }
+                                  disabled={isEditingTranslation}
+                                  aria-label={t("nutrition_remove_column")}
+                                >
+                                  <X size={14} />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                          <span />
+                          {/* Data rows */}
+                          {NUTRITION_FORM_FIELDS.map(
+                            ({ key, labelKey, unit, step }) => (
+                              <Fragment key={key}>
+                                <span className="text-sm text-muted-foreground">
+                                  {t(labelKey)}
+                                </span>
+                                {formData.nutrition_columns.map(
+                                  (col, colIdx) => (
+                                    <Input
+                                      key={`${key}-${colIdx}`}
+                                      type="number"
+                                      min="0"
+                                      step={step}
+                                      value={col[key] ?? ""}
+                                      onChange={(e) => {
+                                        const updated =
+                                          formData.nutrition_columns.map(
+                                            (c, i) =>
+                                              i === colIdx
+                                                ? {
+                                                    ...c,
+                                                    [key]:
+                                                      e.target.value === ""
+                                                        ? null
+                                                        : e.target.value,
+                                                  }
+                                                : c
+                                          );
+                                        handleInputChange(
+                                          "nutrition_columns",
+                                          updated
+                                        );
+                                      }}
+                                      placeholder="–"
+                                      disabled={isEditingTranslation}
+                                      onWheel={(e) => e.target.blur()}
+                                    />
+                                  )
+                                )}
+                                <span className="text-sm text-muted-foreground">
+                                  {unit}
+                                </span>
+                              </Fragment>
+                            )
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="self-start"
+                        onClick={() =>
+                          handleInputChange("nutrition_columns", [
+                            ...formData.nutrition_columns,
+                            emptyNutritionColumn(),
+                          ])
+                        }
+                        disabled={isEditingTranslation}
+                      >
+                        <Plus size={16} />
+                        {t("nutrition_add_column")}
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </Field>
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
