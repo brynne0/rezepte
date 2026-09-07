@@ -449,7 +449,7 @@ describe("RecipeForm", () => {
       expect(screen.getByDisplayValue("Sauce")).toBeInTheDocument();
 
       // Find the section remove button
-      const removeSectionButton = screen.getByText("remove_section");
+      const removeSectionButton = screen.getByLabelText("remove_section");
       fireEvent.click(removeSectionButton); // First remove button should be for removing the section
 
       expect(mockHookReturn.removeSection).toHaveBeenCalledWith("section-1");
@@ -779,7 +779,7 @@ describe("RecipeForm", () => {
       it("disables remove section button", () => {
         renderComponent({ isEditingTranslation: true });
 
-        const removeSectionButton = screen.getByText("remove_section");
+        const removeSectionButton = screen.getByLabelText("remove_section");
         expect(removeSectionButton).toBeDisabled();
       });
     });

@@ -1,6 +1,13 @@
 import { useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, ArrowLeft, GripVertical, Clipboard, X } from "lucide-react";
+import {
+  Plus,
+  ArrowLeft,
+  GripVertical,
+  Clipboard,
+  X,
+  Trash2,
+} from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "cn";
 
@@ -29,6 +36,11 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -362,6 +374,7 @@ const RecipeForm = ({
                     <ToggleGroupItem
                       key={category.value}
                       value={category.value}
+                      className="aria-pressed:border-accent-red aria-pressed:bg-accent-red/10 aria-pressed:text-accent-red"
                     >
                       {category.label}
                     </ToggleGroupItem>
@@ -511,15 +524,27 @@ const RecipeForm = ({
                                       className="flex-1"
                                       placeholder={t("section_title")}
                                     />
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => removeSection(section.id)}
-                                      disabled={isEditingTranslation}
-                                    >
-                                      {t("remove_section")}
-                                    </Button>
+                                    <Tooltip>
+                                      <TooltipTrigger
+                                        render={
+                                          <Button
+                                            type="button"
+                                            variant="ghost-destructive"
+                                            size="icon-sm"
+                                            onClick={() =>
+                                              removeSection(section.id)
+                                            }
+                                            disabled={isEditingTranslation}
+                                            aria-label={t("remove_section")}
+                                          >
+                                            <Trash2 size={16} />
+                                          </Button>
+                                        }
+                                      />
+                                      <TooltipContent>
+                                        {t("remove_section")}
+                                      </TooltipContent>
+                                    </Tooltip>
                                   </div>
 
                                   {/* Section Ingredients */}

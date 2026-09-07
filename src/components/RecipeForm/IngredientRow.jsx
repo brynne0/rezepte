@@ -173,7 +173,7 @@ const IngredientRow = ({
         </div>
 
         {/* Ingredient Details */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <Input
             id={`ingredient-quantity-${sectionId}-${index}-${ingredient.tempId}`}
             type="text"
@@ -256,6 +256,7 @@ const IngredientRow = ({
               )
             }
             placeholder={t("notes")}
+            className="col-span-2 sm:col-span-1"
           />
         </div>
       </div>
