@@ -205,9 +205,7 @@ const IngredientsSection = ({
                               </Button>
                             }
                           />
-                          <TooltipContent>
-                            {t("remove_section")}
-                          </TooltipContent>
+                          <TooltipContent>{t("remove_section")}</TooltipContent>
                         </Tooltip>
                       </div>
 
