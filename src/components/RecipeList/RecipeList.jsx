@@ -89,7 +89,7 @@ const RecipeList = ({
           </EmptyHeader>
           <EmptyContent>
             <Button
-              size="sm"
+              className="w-full sm:w-auto"
               onClick={() =>
                 navigate(isLoggedIn ? "/add-recipe" : "/auth-page")
               }

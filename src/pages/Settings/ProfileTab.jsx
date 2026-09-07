@@ -122,11 +122,17 @@ const ProfileTab = ({
       </FieldGroup>
 
       {isEditingProfile && (
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={handleCancelProfile}>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button
+            className="w-full sm:w-auto"
+            variant="outline"
+            onClick={handleCancelProfile}
+          >
             {t("cancel")}
           </Button>
-          <Button onClick={handleSaveProfile}>{t("save_changes")}</Button>
+          <Button className="w-full sm:w-auto" onClick={handleSaveProfile}>
+            {t("save_changes")}
+          </Button>
         </div>
       )}
 
@@ -151,7 +157,11 @@ const ProfileTab = ({
       <Separator />
 
       <div className="flex justify-center">
-        <Button variant="destructive" onClick={handleDeleteAccount}>
+        <Button
+          className="w-full sm:w-auto"
+          variant="destructive"
+          onClick={handleDeleteAccount}
+        >
           {t("delete_account")}
         </Button>
       </div>

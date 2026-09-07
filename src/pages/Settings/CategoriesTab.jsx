@@ -788,8 +788,9 @@ const CategoriesTab = ({
       )}
 
       {isEditingCategories && (
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button
+            className="w-full sm:w-auto"
             type="button"
             variant="outline"
             onClick={handleCancelPreferences}
@@ -798,6 +799,7 @@ const CategoriesTab = ({
             {t("cancel")}
           </Button>
           <Button
+            className="w-full sm:w-auto"
             type="button"
             onClick={handleSavePreferences}
             disabled={
