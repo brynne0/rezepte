@@ -37,7 +37,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-
 const Recipe = ({ isSharedView = false }) => {
   const { id, shareToken } = useParams();
   const {

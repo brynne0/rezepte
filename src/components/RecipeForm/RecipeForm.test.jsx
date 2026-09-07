@@ -243,10 +243,7 @@ describe("RecipeForm", () => {
 
       const sourceInput = screen.getByDisplayValue("https://example.com");
       expect(sourceInput).toBeInTheDocument();
-      expect(sourceInput).toHaveAttribute(
-        "placeholder",
-        "source_placeholder"
-      );
+      expect(sourceInput).toHaveAttribute("placeholder", "source_placeholder");
     });
 
     it("calls handleInputChange when source changes", () => {

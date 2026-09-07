@@ -88,16 +88,12 @@ describe("RecipeCard", () => {
     const mockWindowOpen = vi.fn();
 
     beforeEach(() => {
-      // Mock window.open
-      vi.stubGlobal("window", {
-        ...window,
-        open: mockWindowOpen,
-      });
+      vi.spyOn(window, "open").mockImplementation(mockWindowOpen);
       mockWindowOpen.mockClear();
     });
 
     afterEach(() => {
-      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
     });
 
     it("shows link icon when recipe has http source", () => {

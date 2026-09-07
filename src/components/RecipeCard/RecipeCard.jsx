@@ -11,6 +11,11 @@ import { extractFirstUrl } from "../../utils/linkUtils";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 import useIntersectionObserver from "../../hooks/ui/useIntersectionObserver";
 import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "cn";
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
@@ -18,6 +23,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { isLoggedIn } = useAuth();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isSourceLinkHovered, setIsSourceLinkHovered] = useState(false);
 
   // Use intersection observer to only load images when card is visible
   const { ref: cardRef, hasBeenVisible } = useIntersectionObserver({
@@ -71,25 +77,40 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
       onClick={() => onClick && onClick(recipe)}
     >
       <CardHeader className="py-2">
-        <CardTitle className="text-xs font-semibold uppercase group-hover/card:text-accent-red">
+        <CardTitle
+          className={cn(
+            "text-xs font-semibold uppercase",
+            !isSourceLinkHovered && "group-hover/card:text-accent-red"
+          )}
+        >
           {recipe.title}
         </CardTitle>
 
         {sourceUrl && hasNoContent && (
           <CardAction className="row-span-1 self-center">
-            <a
-              href={sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors hover:text-accent-red"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the card click
-              }}
-              aria-label={t("open_recipe_source_link")}
-              title={t("open_recipe_source_link")}
-            >
-              <Link size={16} />
-            </a>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-accent-red"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent triggering the card click
+                    }}
+                    onMouseEnter={() => setIsSourceLinkHovered(true)}
+                    onMouseLeave={() => setIsSourceLinkHovered(false)}
+                    onFocus={() => setIsSourceLinkHovered(true)}
+                    onBlur={() => setIsSourceLinkHovered(false)}
+                    aria-label={t("open_recipe_source_link")}
+                  >
+                    <Link size={16} />
+                  </a>
+                }
+              />
+              <TooltipContent>{t("open_recipe_source_link")}</TooltipContent>
+            </Tooltip>
           </CardAction>
         )}
       </CardHeader>
