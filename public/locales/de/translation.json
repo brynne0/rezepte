@@ -241,12 +241,8 @@
   "stay": "Bleiben",
 
   "images": "Bilder",
-  "upload_images": "Bilder hochladen",
-  "click_or_drag": "Klicken zum Auswählen oder per Drag & Drop hinzufügen",
-  "image_upload_hint": "PNG, JPEG, WebP bis zu 10MB",
   "drag_images_to_reorder": "Bilder per Drag & Drop neu anordnen. Das erste Bild ist das Hauptbild.",
   "main": "Hauptbild",
-  "set_as_main_image": "Als Hauptbild festlegen",
   "delete_image": "Bild löschen",
 
   "recipe_with_ingredients": "Rezept mit",

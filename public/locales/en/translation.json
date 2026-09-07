@@ -240,12 +240,8 @@
   "stay": "Stay",
 
   "images": "Images",
-  "upload_images": "Upload Images",
-  "click_or_drag": "Click to select or drag and drop",
-  "image_upload_hint": "PNG, JPEG, WebP up to 10MB",
   "drag_images_to_reorder": "Drag images to reorder them. The first image is the main image.",
   "main": "Main",
-  "set_as_main_image": "Set as main image",
   "delete_image": "Delete image",
 
   "recipe_with_ingredients": "Recipe with",
