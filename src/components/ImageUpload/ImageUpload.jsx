@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "cn";
@@ -194,123 +194,101 @@ const ImageUpload = ({
         disabled={disabled}
       />
 
-      {images.length === 0 ? (
-        <div
-          className={cn(
-            "flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 border-dashed border-input bg-muted/20 p-6 text-center transition-colors hover:bg-muted/40",
-            isDraggingFile && "border-primary bg-muted/40",
-            disabled && "pointer-events-none opacity-50"
-          )}
-          onClick={openFilePicker}
-        >
-          <Upload className="text-muted-foreground" size={32} />
-          <div className="text-sm font-medium">{t("upload_images")}</div>
-          <div className="text-xs text-muted-foreground">
-            {t("click_or_drag")}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {t("image_upload_hint")}
-          </div>
-        </div>
-      ) : (
-        <DragDropContext onDragEnd={handleReorder}>
-          <Droppable droppableId="images" direction="horizontal">
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className={cn(
-                  "flex flex-wrap gap-3 rounded-lg p-1 transition-colors",
-                  (snapshot.isDraggingOver || isDraggingFile) &&
-                    "bg-muted/50 ring-2 ring-primary"
-                )}
-              >
-                {images.map((image, index) => {
-                  const isLoading =
-                    loadingImages.has(image.id) ||
-                    uploadingImageIds.has(image.id);
+      <DragDropContext onDragEnd={handleReorder}>
+        <Droppable droppableId="images" direction="horizontal">
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={cn(
+                "flex flex-wrap gap-3 rounded-lg p-1 transition-colors",
+                (snapshot.isDraggingOver || isDraggingFile) &&
+                  "bg-muted/50 ring-2 ring-primary"
+              )}
+            >
+              {images.map((image, index) => {
+                const isLoading =
+                  loadingImages.has(image.id) ||
+                  uploadingImageIds.has(image.id);
 
-                  return (
-                    <Draggable
-                      key={image.id}
-                      draggableId={image.id}
-                      index={index}
-                      isDragDisabled={disabled}
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
+                return (
+                  <Draggable
+                    key={image.id}
+                    draggableId={image.id}
+                    index={index}
+                    isDragDisabled={disabled}
+                  >
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <Attachment
+                          orientation="vertical"
+                          state={isLoading ? "uploading" : "done"}
+                          className={cn(snapshot.isDragging && "shadow-lg")}
                         >
-                          <Attachment
-                            orientation="vertical"
-                            state={isLoading ? "uploading" : "done"}
-                            className={cn(snapshot.isDragging && "shadow-lg")}
-                          >
-                            <AttachmentMedia variant="image">
-                              <img
-                                src={getDisplayUrl(image)}
-                                alt={image.filename}
-                                loading="lazy"
-                                onLoadStart={() =>
-                                  handleImageLoadStart(image.id)
+                          <AttachmentMedia variant="image">
+                            <img
+                              src={getDisplayUrl(image)}
+                              alt={image.filename}
+                              loading="lazy"
+                              onLoadStart={() => handleImageLoadStart(image.id)}
+                              onLoad={() => handleImageLoad(image.id)}
+                              onError={() => handleImageLoad(image.id)}
+                            />
+                            {index === 0 && (
+                              <Badge className="absolute top-1.5 left-1.5">
+                                {t("main")}
+                              </Badge>
+                            )}
+                          </AttachmentMedia>
+                          <AttachmentActions>
+                            <Tooltip>
+                              <TooltipTrigger
+                                render={
+                                  <AttachmentAction
+                                    variant="ghost-destructive"
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onClick={() => handleDeleteImage(image)}
+                                    aria-label={t("delete_image")}
+                                    disabled={disabled}
+                                  >
+                                    <Trash2 />
+                                  </AttachmentAction>
                                 }
-                                onLoad={() => handleImageLoad(image.id)}
-                                onError={() => handleImageLoad(image.id)}
                               />
-                              {index === 0 && (
-                                <Badge className="absolute top-1.5 left-1.5">
-                                  {t("main")}
-                                </Badge>
-                              )}
-                            </AttachmentMedia>
-                            <AttachmentActions>
-                              <Tooltip>
-                                <TooltipTrigger
-                                  render={
-                                    <AttachmentAction
-                                      variant="ghost-destructive"
-                                      onPointerDown={(e) => e.stopPropagation()}
-                                      onClick={() => handleDeleteImage(image)}
-                                      aria-label={t("delete_image")}
-                                      disabled={disabled}
-                                    >
-                                      <Trash2 />
-                                    </AttachmentAction>
-                                  }
-                                />
-                                <TooltipContent>
-                                  {t("delete_image")}
-                                </TooltipContent>
-                              </Tooltip>
-                            </AttachmentActions>
-                          </Attachment>
-                        </div>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
+                              <TooltipContent>
+                                {t("delete_image")}
+                              </TooltipContent>
+                            </Tooltip>
+                          </AttachmentActions>
+                        </Attachment>
+                      </div>
+                    )}
+                  </Draggable>
+                );
+              })}
+              {provided.placeholder}
 
-                <Attachment
-                  orientation="vertical"
-                  state="idle"
-                  className={cn(
-                    "cursor-pointer",
-                    disabled && "pointer-events-none opacity-50"
-                  )}
-                  onClick={openFilePicker}
-                >
-                  <AttachmentMedia variant="icon">
-                    <Plus />
-                  </AttachmentMedia>
-                </Attachment>
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      )}
+              <Attachment
+                orientation="vertical"
+                state="idle"
+                className={cn(
+                  "cursor-pointer",
+                  disabled && "pointer-events-none opacity-50"
+                )}
+                onClick={openFilePicker}
+              >
+                <AttachmentMedia variant="icon">
+                  <Plus />
+                </AttachmentMedia>
+              </Attachment>
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {images.length > 1 && (
         <p className="text-xs text-muted-foreground">
