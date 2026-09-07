@@ -35,7 +35,6 @@ import { Squirrel } from "lucide-react";
 // Pages
 import AddRecipePage from "./pages/AddRecipe/AddRecipe";
 import EditRecipePage from "./pages/EditRecipe/EditRecipe";
-import GroceryList from "./pages/GroceryList/GroceryList";
 import CookingTimes from "./pages/CookingTimes/CookingTimes";
 import AuthPage from "./pages/AuthPage/AuthPage";
 import Recipe from "./pages/Recipe/Recipe";
@@ -55,7 +54,6 @@ function App() {
   const [sortBy, setSortBy] = useState("last_viewed_at_desc");
   const [showImages, setShowImages] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
-  const [isGroceryListEditing, setIsGroceryListEditing] = useState(false);
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const {
@@ -133,8 +131,6 @@ function App() {
             searchTerm={searchTerm}
             loading={loading}
             isFetchingRecipes={isFetchingRecipes}
-            isGroceryListEditing={isGroceryListEditing}
-            setIsGroceryListEditing={setIsGroceryListEditing}
             isCookingTimesEditing={isCookingTimesEditing}
             setIsCookingTimesEditing={setIsCookingTimesEditing}
             currentPage={currentPage}
@@ -158,13 +154,10 @@ function AppRoutes(props) {
   const {
     refreshRecipes,
     refreshCategories,
-    isGroceryListEditing,
-    setIsGroceryListEditing,
     isCookingTimesEditing,
     setIsCookingTimesEditing,
     isLoggedIn,
   } = props;
-  const isGroceryListPage = location.pathname === "/grocery-list";
   const isCookingTimesPage = location.pathname === "/cooking-times";
   const isOnline = useOnlineStatus();
   const { t, i18n } = useTranslation();
@@ -179,13 +172,6 @@ function AppRoutes(props) {
       });
     }
   }, [isOnline, t]);
-  // Reset grocery list editing state when leaving the grocery list page
-  useEffect(() => {
-    if (!isGroceryListPage && isGroceryListEditing) {
-      setIsGroceryListEditing(false);
-    }
-  }, [isGroceryListPage, isGroceryListEditing, setIsGroceryListEditing]);
-
   // Reset cooking times editing state when leaving the cooking times page
   useEffect(() => {
     if (!isCookingTimesPage && isCookingTimesEditing) {
@@ -219,7 +205,7 @@ function AppRoutes(props) {
         setLoginMessage={props.setLoginMessage}
         loginMessage={props.loginMessage}
         t={props.t}
-        disableLanguageSwitch={isGroceryListEditing || isCookingTimesEditing}
+        disableLanguageSwitch={isCookingTimesEditing}
         sortBy={props.sortBy}
         setSortBy={props.setSortBy}
         showImages={props.showImages}

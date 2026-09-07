@@ -161,7 +161,6 @@
     justify-content: center;
   }
 
-  .card-grocery,
   .card-form {
     min-width: -webkit-fill-available;
     padding: 1.25rem;

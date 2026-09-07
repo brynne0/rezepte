@@ -274,17 +274,6 @@ const Header = ({
               >
                 <Clock className="size-7" />
               </Button>
-              {/* Grocery List */}
-              {/* <button
-                  data-testid="lucide-shopping-basket"
-                  className={`btn btn-icon btn-icon-neutral ${
-                    location.pathname === "/grocery-list" ? "selected" : ""
-                  }`}
-                  onClick={() => navigate("/grocery-list")}
-                  aria-label={t("grocery_list")}
-                >
-                  <ShoppingBasket size={28} />
-                </button> */}
             </>
           )}
         </nav>

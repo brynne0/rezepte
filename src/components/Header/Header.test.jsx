@@ -38,7 +38,6 @@ const mockT = vi.fn((key) => {
     login: "Login",
     search: "Search",
     add_new_recipe: "Add New Recipe",
-    grocery_list: "Grocery List",
     user_menu: "User Menu",
     settings: "Settings",
     theme_dark: "Switch to dark mode",
@@ -272,10 +271,9 @@ describe("Header Component", () => {
     );
 
     expect(screen.getByTestId("lucide-plus")).toBeInTheDocument();
-    // expect(screen.getByTestId("lucide-shopping-basket")).toBeInTheDocument();
   });
 
-  test("hides add recipe and grocery list buttons when not logged in", () => {
+  test("hides add recipe button when not logged in", () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: false,
       isMe: false,
@@ -289,9 +287,6 @@ describe("Header Component", () => {
     );
 
     expect(screen.queryByTestId("lucide-plus")).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("lucide-shopping-basket")
-    ).not.toBeInTheDocument();
   });
 
   test("hides search bar when not on home page", () => {
@@ -325,23 +320,6 @@ describe("Header Component", () => {
     fireEvent.click(screen.getByTestId("lucide-plus"));
     expect(mockNavigate).toHaveBeenCalledWith("/add-recipe");
   });
-
-  // test("navigates to grocery list page when shopping basket is clicked", () => {
-  //   mockUseAuth.mockReturnValue({
-  //     isLoggedIn: true,
-  //     isMe: false,
-  //     isGuest: false,
-  //   });
-
-  //   render(
-  //     <TestWrapper>
-  //       <Header {...defaultProps} />
-  //     </TestWrapper>
-  //   );
-
-  //   fireEvent.click(screen.getByTestId("lucide-shopping-basket"));
-  //   expect(mockNavigate).toHaveBeenCalledWith("/grocery-list");
-  // });
 
   test("navigates to auth page when login button is clicked from user dropdown", () => {
     render(
@@ -789,9 +767,6 @@ describe("Header Component", () => {
         '[data-slot="dropdown-menu-content"]'
       );
       expect(dropdown.querySelector(".lucide-plus")).not.toBeInTheDocument();
-      expect(
-        dropdown.querySelector(".lucide-shopping-basket")
-      ).not.toBeInTheDocument();
     });
 
     test("closes hamburger menu when clicking outside", async () => {
@@ -821,27 +796,6 @@ describe("Header Component", () => {
   });
 
   describe("Navigation Button Selected States", () => {
-    // test("grocery list button has selected class when on grocery-list page", () => {
-    //   mockUseAuth.mockReturnValue({
-    //     isLoggedIn: true,
-    //     isMe: false,
-    //     isGuest: false,
-    //   });
-
-    //   useLocation.mockReturnValue({
-    //     pathname: "/grocery-list",
-    //   });
-
-    //   render(
-    //     <TestWrapper>
-    //       <Header {...defaultProps} />
-    //     </TestWrapper>
-    //   );
-
-    //   const groceryButton = screen.getByTestId("lucide-shopping-basket");
-    //   expect(groceryButton.className).toContain("selected");
-    // });
-
     test("navigation buttons do not have selected class on other pages", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
@@ -860,10 +814,8 @@ describe("Header Component", () => {
       );
 
       const addButton = screen.getByTestId("lucide-plus");
-      // const groceryButton = screen.getByTestId("lucide-shopping-basket");
 
       expect(addButton.className).not.toContain("selected");
-      // expect(groceryButton.className).not.toContain("selected");
     });
 
     test("navigates to add recipe from mobile hamburger menu item", () => {
