@@ -369,7 +369,7 @@ describe("RecipeForm", () => {
 
       // Check that section ingredient is rendered
       expect(screen.getByDisplayValue("tomatoes")).toBeInTheDocument();
-      expect(screen.getByDisplayValue("For the sauce")).toBeInTheDocument();
+      expect(screen.getByText("For the sauce")).toBeInTheDocument();
 
       // Find add ingredient button for the section
       const addSectionButton = screen.getByTestId("add-section-ingredient-btn");
@@ -446,7 +446,7 @@ describe("RecipeForm", () => {
       renderComponent();
 
       // Ensure section is rendered
-      expect(screen.getByDisplayValue("Sauce")).toBeInTheDocument();
+      expect(screen.getByText("Sauce")).toBeInTheDocument();
 
       // Find the section remove button
       const removeSectionButton = screen.getByLabelText("remove_section");

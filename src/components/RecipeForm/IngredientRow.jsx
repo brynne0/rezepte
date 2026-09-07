@@ -61,119 +61,58 @@ const IngredientRow = ({
         <GripVertical size={16} />
       </div>
 
-      <div className="flex flex-1 flex-col gap-2">
-        <div className="flex items-center gap-2">
-          {/* Ingredient Name */}
-          <Input
-            id={`ingredient-name-${sectionId}-${index}-${ingredient.tempId}`}
-            type="text"
-            value={ingredient.name || ""}
-            onChange={(e) => {
-              handleIngredientChange(
-                sectionId,
-                ingredient.tempId,
-                "name",
-                e.target.value,
-                validationErrors.ingredients ? "ingredients" : null
-              );
-            }}
-            onKeyDown={(e) =>
-              handleIngredientFieldEnter(
-                e,
-                "name",
-                sectionId,
-                ingredient.tempId,
-                index
-              )
-            }
-            onBlur={(e) => {
-              const value =
-                i18n.language === "de"
-                  ? e.target.value
-                      .split(" ")
-                      .map(
-                        (word) =>
-                          word.charAt(0).toUpperCase() +
-                          word.slice(1).toLowerCase()
-                      )
-                      .join(" ")
-                  : e.target.value.toLowerCase();
+      <div className="flex flex-1 flex-col gap-2 md:flex-row md:items-center">
+        {/* Ingredient Name */}
+        <Input
+          id={`ingredient-name-${sectionId}-${index}-${ingredient.tempId}`}
+          type="text"
+          value={ingredient.name || ""}
+          onChange={(e) => {
+            handleIngredientChange(
+              sectionId,
+              ingredient.tempId,
+              "name",
+              e.target.value,
+              validationErrors.ingredients ? "ingredients" : null
+            );
+          }}
+          onKeyDown={(e) =>
+            handleIngredientFieldEnter(
+              e,
+              "name",
+              sectionId,
+              ingredient.tempId,
+              index
+            )
+          }
+          onBlur={(e) => {
+            const value =
+              i18n.language === "de"
+                ? e.target.value
+                    .split(" ")
+                    .map(
+                      (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                    )
+                    .join(" ")
+                : e.target.value.toLowerCase();
 
-              handleIngredientChange(
-                sectionId,
-                ingredient.tempId,
-                "name",
-                value,
-                validationErrors.ingredients ? "ingredients" : null
-              );
-            }}
-            aria-invalid={!!validationErrors.ingredients}
-            placeholder={t("ingredient_name")}
-            className="flex-1"
-          />
-
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    type="button"
-                    variant={linkedRecipe ? "ghost-destructive" : "ghost"}
-                    size="icon-sm"
-                    onClick={() => {
-                      if (linkedRecipe) {
-                        removeIngredientLink(sectionId, ingredient.tempId);
-                      } else {
-                        handleOpenLinkDropdown(
-                          sectionId,
-                          ingredient.tempId,
-                          ingredient
-                        );
-                      }
-                    }}
-                    aria-label={
-                      linkedRecipe ? t("unlink_recipe") : t("link_to_recipe")
-                    }
-                    disabled={isEditingTranslation}
-                  >
-                    {linkedRecipe ? <Unlink size={16} /> : <Link size={16} />}
-                  </Button>
-                }
-              />
-              <TooltipContent>
-                {linkedRecipe ? t("unlink_recipe") : t("link_to_recipe")}
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    type="button"
-                    variant="ghost-destructive"
-                    size="icon-sm"
-                    onClick={() =>
-                      removeIngredient(sectionId, ingredient.tempId)
-                    }
-                    aria-label={t("remove_ingredient")}
-                    disabled={isEditingTranslation}
-                    data-testid={
-                      sectionId === "ungrouped"
-                        ? "remove-ingredient-btn"
-                        : `remove-section-ingredient-btn-${sectionId}-${ingredient.tempId}`
-                    }
-                  >
-                    <Trash2 size={16} />
-                  </Button>
-                }
-              />
-              <TooltipContent>{t("remove_ingredient")}</TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
+            handleIngredientChange(
+              sectionId,
+              ingredient.tempId,
+              "name",
+              value,
+              validationErrors.ingredients ? "ingredients" : null
+            );
+          }}
+          aria-invalid={!!validationErrors.ingredients}
+          placeholder={t("ingredient_name")}
+          className="md:w-56 md:flex-none"
+        />
 
         {/* Ingredient Details */}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:flex md:flex-1 md:gap-2">
           <Input
             id={`ingredient-quantity-${sectionId}-${index}-${ingredient.tempId}`}
             type="text"
@@ -198,6 +137,7 @@ const IngredientRow = ({
             placeholder={t("quantity")}
             disabled={isEditingTranslation}
             onWheel={(e) => e.target.blur()}
+            className="md:w-20 md:flex-none"
           />
 
           <Combobox
@@ -221,6 +161,7 @@ const IngredientRow = ({
               placeholder={t("unit")}
               disabled={isEditingTranslation}
               showClear
+              className="md:w-28"
             />
             <ComboboxContent>
               <ComboboxEmpty>{t("no_results")}</ComboboxEmpty>
@@ -256,8 +197,65 @@ const IngredientRow = ({
               )
             }
             placeholder={t("notes")}
-            className="col-span-2 sm:col-span-1"
+            className="col-span-2 sm:col-span-1 md:flex-1"
           />
+        </div>
+
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant={linkedRecipe ? "ghost-destructive" : "ghost"}
+                  size="icon-sm"
+                  onClick={() => {
+                    if (linkedRecipe) {
+                      removeIngredientLink(sectionId, ingredient.tempId);
+                    } else {
+                      handleOpenLinkDropdown(
+                        sectionId,
+                        ingredient.tempId,
+                        ingredient
+                      );
+                    }
+                  }}
+                  aria-label={
+                    linkedRecipe ? t("unlink_recipe") : t("link_to_recipe")
+                  }
+                  disabled={isEditingTranslation}
+                >
+                  {linkedRecipe ? <Unlink size={16} /> : <Link size={16} />}
+                </Button>
+              }
+            />
+            <TooltipContent>
+              {linkedRecipe ? t("unlink_recipe") : t("link_to_recipe")}
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost-destructive"
+                  size="icon-sm"
+                  onClick={() => removeIngredient(sectionId, ingredient.tempId)}
+                  aria-label={t("remove_ingredient")}
+                  disabled={isEditingTranslation}
+                  data-testid={
+                    sectionId === "ungrouped"
+                      ? "remove-ingredient-btn"
+                      : `remove-section-ingredient-btn-${sectionId}-${ingredient.tempId}`
+                  }
+                >
+                  <Trash2 size={16} />
+                </Button>
+              }
+            />
+            <TooltipContent>{t("remove_ingredient")}</TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>

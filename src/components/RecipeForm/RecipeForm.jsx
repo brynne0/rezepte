@@ -208,6 +208,7 @@ const RecipeForm = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
   const [linkingIngredient, setLinkingIngredient] = useState(null);
+  const [editingSectionId, setEditingSectionId] = useState(null);
   const [showNutrition, setShowNutrition] = useState(() =>
     formData.nutrition_columns.some((col) =>
       ["calories", "protein", "fat", "carbs", "fiber", "sugar", "sodium"].some(
@@ -408,7 +409,7 @@ const RecipeForm = ({
                     {(provided, snapshot) => (
                       <div
                         className={cn(
-                          "flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2",
+                          "flex flex-col gap-2",
                           snapshot.isDraggingOver && "bg-muted/50"
                         )}
                         {...provided.droppableProps}
@@ -511,19 +512,53 @@ const RecipeForm = ({
                                     >
                                       <GripVertical size={16} />
                                     </div>
-                                    <Input
-                                      type="text"
-                                      value={section.subheading}
-                                      onChange={(e) =>
-                                        handleSectionChange(
-                                          section.id,
-                                          "subheading",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="flex-1"
-                                      placeholder={t("section_title")}
-                                    />
+                                    {editingSectionId === section.id ||
+                                    !section.subheading ? (
+                                      <Input
+                                        type="text"
+                                        value={section.subheading}
+                                        onChange={(e) =>
+                                          handleSectionChange(
+                                            section.id,
+                                            "subheading",
+                                            e.target.value
+                                          )
+                                        }
+                                        onKeyDown={(e) => {
+                                          if (
+                                            e.key === "Enter" &&
+                                            section.subheading.trim()
+                                          ) {
+                                            e.preventDefault();
+                                            setEditingSectionId(null);
+                                          }
+                                        }}
+                                        onFocus={() =>
+                                          setEditingSectionId(section.id)
+                                        }
+                                        onBlur={() => {
+                                          if (section.subheading.trim()) {
+                                            setEditingSectionId(null);
+                                          }
+                                        }}
+                                        autoFocus={
+                                          editingSectionId === section.id
+                                        }
+                                        className="section-title-input flex-1"
+                                        placeholder={t("section_title")}
+                                      />
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setEditingSectionId(section.id)
+                                        }
+                                        disabled={isEditingTranslation}
+                                        className="flex-1 truncate text-left font-medium [word-break:break-word]"
+                                      >
+                                        {section.subheading}
+                                      </button>
+                                    )}
                                     <Tooltip>
                                       <TooltipTrigger
                                         render={
