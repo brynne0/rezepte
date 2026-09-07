@@ -532,10 +532,6 @@ const CategoriesTab = ({
     setDeleteCategoryName("");
   };
 
-  if (categoriesLoading || categoryPreferences.length === 0) {
-    return <LoadingAcorn />;
-  }
-
   return (
     <form
       className="flex flex-col gap-6"
@@ -590,6 +586,7 @@ const CategoriesTab = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsEditingCategories(true)}
+              disabled={categoriesLoading}
             >
               <Pencil />
               {t("edit_categories")}
@@ -618,171 +615,177 @@ const CategoriesTab = ({
         )}
       </div>
 
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="categories">
-          {(provided, snapshot) => (
-            <div
-              className={cn(
-                "flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2",
-                snapshot.isDraggingOver && "bg-muted/50"
-              )}
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {categoryPreferences.map((category, index) => (
-                <Draggable
-                  key={category.id}
-                  draggableId={category.id.toString()}
-                  index={index}
-                  isDragDisabled={!isEditingCategories}
-                >
-                  {(provided, snapshot) => (
-                    <div className="flex flex-col">
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={cn(
-                          "flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-2 transition-colors",
-                          !category.isVisible && "bg-muted/50 opacity-60",
-                          snapshot.isDragging && "shadow-md"
-                        )}
-                      >
-                        {isEditingCategories && (
-                          <div
-                            {...provided.dragHandleProps}
-                            className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
-                          >
-                            <GripVertical size={16} />
-                          </div>
-                        )}
-
-                        <div className="flex flex-1 items-center gap-2">
-                          {editingCategoryId === category.id ? (
-                            <Input
-                              type="text"
-                              value={editingCategoryName}
-                              onChange={(e) => {
-                                setEditingCategoryName(e.target.value);
-                                setCategoryError("");
-                              }}
-                              aria-invalid={
-                                !!categoryError &&
-                                editingCategoryId === category.id
-                              }
-                              placeholder={t("category_name")}
-                              autoFocus
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  handleSaveEditCategory();
-                                } else if (e.key === "Escape") {
-                                  handleCancelEditCategory();
-                                }
-                              }}
-                            />
-                          ) : (
-                            <>
-                              <span className="text-sm font-medium">
-                                {category.label}
-                              </span>
-                              {category.isSystem && (
-                                <Badge variant="outline">{t("system")}</Badge>
-                              )}
-
-                              {isEditingCategories &&
-                                !category.isSystem &&
-                                i18n.language === preferredLanguage && (
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon-xs"
-                                    onClick={() => handleEditCategory(category)}
-                                    aria-label={t("edit_category_name")}
-                                  >
-                                    <Pencil size={14} />
-                                  </Button>
-                                )}
-                            </>
+      {categoriesLoading ? (
+        <LoadingAcorn fullPage={false} className="py-40" />
+      ) : (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="categories">
+            {(provided, snapshot) => (
+              <div
+                className={cn(
+                  "flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2",
+                  snapshot.isDraggingOver && "bg-muted/50"
+                )}
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {categoryPreferences.map((category, index) => (
+                  <Draggable
+                    key={category.id}
+                    draggableId={category.id.toString()}
+                    index={index}
+                    isDragDisabled={!isEditingCategories}
+                  >
+                    {(provided, snapshot) => (
+                      <div className="flex flex-col">
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className={cn(
+                            "flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-2 transition-colors",
+                            !category.isVisible && "bg-muted/50 opacity-60",
+                            snapshot.isDragging && "shadow-md"
                           )}
-                        </div>
+                        >
+                          {isEditingCategories && (
+                            <div
+                              {...provided.dragHandleProps}
+                              className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
+                            >
+                              <GripVertical size={16} />
+                            </div>
+                          )}
 
-                        {isEditingCategories && (
-                          <div className="flex shrink-0 items-center gap-1">
+                          <div className="flex flex-1 items-center gap-2">
                             {editingCategoryId === category.id ? (
+                              <Input
+                                type="text"
+                                value={editingCategoryName}
+                                onChange={(e) => {
+                                  setEditingCategoryName(e.target.value);
+                                  setCategoryError("");
+                                }}
+                                aria-invalid={
+                                  !!categoryError &&
+                                  editingCategoryId === category.id
+                                }
+                                placeholder={t("category_name")}
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    handleSaveEditCategory();
+                                  } else if (e.key === "Escape") {
+                                    handleCancelEditCategory();
+                                  }
+                                }}
+                              />
+                            ) : (
                               <>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  onClick={handleSaveEditCategory}
-                                  aria-label={t("save_changes")}
-                                >
-                                  <Check size={16} />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  onClick={handleCancelEditCategory}
-                                  aria-label={t("cancel")}
-                                >
-                                  <X size={16} />
-                                </Button>
-                                {!category.isTemp && !category.isSystem && (
+                                <span className="text-sm font-medium">
+                                  {category.label}
+                                </span>
+                                {category.isSystem && (
+                                  <Badge variant="outline">{t("system")}</Badge>
+                                )}
+
+                                {isEditingCategories &&
+                                  !category.isSystem &&
+                                  i18n.language === preferredLanguage && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon-xs"
+                                      onClick={() =>
+                                        handleEditCategory(category)
+                                      }
+                                      aria-label={t("edit_category_name")}
+                                    >
+                                      <Pencil size={14} />
+                                    </Button>
+                                  )}
+                              </>
+                            )}
+                          </div>
+
+                          {isEditingCategories && (
+                            <div className="flex shrink-0 items-center gap-1">
+                              {editingCategoryId === category.id ? (
+                                <>
                                   <Button
                                     type="button"
                                     variant="ghost"
                                     size="icon-sm"
-                                    onClick={() =>
-                                      handleDeleteCategory(
-                                        category.id,
-                                        category.label
-                                      )
-                                    }
-                                    aria-label={t("delete_category")}
+                                    onClick={handleSaveEditCategory}
+                                    aria-label={t("save_changes")}
                                   >
-                                    <Trash2
-                                      size={16}
-                                      className="text-destructive"
-                                    />
+                                    <Check size={16} />
                                   </Button>
-                                )}
-                              </>
-                            ) : (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={() => toggleVisibility(category.id)}
-                                aria-label={
-                                  category.isVisible
-                                    ? t("hide_category")
-                                    : t("show_category")
-                                }
-                              >
-                                {category.isVisible ? (
-                                  <Eye size={16} />
-                                ) : (
-                                  <EyeOff size={16} />
-                                )}
-                              </Button>
-                            )}
-                          </div>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={handleCancelEditCategory}
+                                    aria-label={t("cancel")}
+                                  >
+                                    <X size={16} />
+                                  </Button>
+                                  {!category.isTemp && !category.isSystem && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={() =>
+                                        handleDeleteCategory(
+                                          category.id,
+                                          category.label
+                                        )
+                                      }
+                                      aria-label={t("delete_category")}
+                                    >
+                                      <Trash2
+                                        size={16}
+                                        className="text-destructive"
+                                      />
+                                    </Button>
+                                  )}
+                                </>
+                              ) : (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  onClick={() => toggleVisibility(category.id)}
+                                  aria-label={
+                                    category.isVisible
+                                      ? t("hide_category")
+                                      : t("show_category")
+                                  }
+                                >
+                                  {category.isVisible ? (
+                                    <Eye size={16} />
+                                  ) : (
+                                    <EyeOff size={16} />
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        {categoryError && editingCategoryId === category.id && (
+                          <span className="mt-1 text-sm text-destructive">
+                            {categoryError}
+                          </span>
                         )}
                       </div>
-                      {categoryError && editingCategoryId === category.id && (
-                        <span className="mt-1 text-sm text-destructive">
-                          {categoryError}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      )}
 
       {isEditingCategories && (
         <div className="flex justify-end gap-2">
