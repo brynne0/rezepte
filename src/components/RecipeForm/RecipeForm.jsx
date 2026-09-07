@@ -7,7 +7,7 @@ import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 import { useRecipeAutofill } from "../../hooks/forms/useRecipeAutofill";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import ImageUpload from "../ImageUpload/ImageUpload";
-import RecipeLinkDropdown from "../RecipeLinkDropdown/RecipeLinkDropdown";
+import RecipeLinkDropdown from "./RecipeLinkDropdown";
 import IngredientsSection from "./IngredientsSection";
 import InstructionsSection from "./InstructionsSection";
 import NutritionSection from "./NutritionSection";
