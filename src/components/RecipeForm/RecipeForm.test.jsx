@@ -65,34 +65,6 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../AutoResizeTextArea", () => ({
-  default: ({ value, onChange, ...props }) => (
-    <textarea
-      value={value}
-      onChange={onChange}
-      data-testid="auto-resize-textarea"
-      {...props}
-    />
-  ),
-}));
-
-vi.mock("../ConfirmationModal/ConfirmationModal", () => ({
-  default: ({ isOpen, onClose, onConfirm, message }) =>
-    isOpen ? (
-      <div data-testid="confirmation-modal">
-        <p>{message}</p>
-        <button onClick={onConfirm} data-testid="confirm-delete">
-          Confirm
-        </button>
-        <button onClick={onClose} data-testid="cancel-delete">
-          Cancel
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock("./RecipeForm.css", () => ({}));
-
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
 
 describe("RecipeForm", () => {
@@ -219,8 +191,8 @@ describe("RecipeForm", () => {
         .getByText("Main Dishes")
         .closest("button");
 
-      expect(dessertsButton).toHaveClass("selected");
-      expect(mainDishesButton).not.toHaveClass("selected");
+      expect(dessertsButton).toHaveAttribute("aria-pressed", "true");
+      expect(mainDishesButton).toHaveAttribute("aria-pressed", "false");
     });
 
     it("calls handleInputChange when category button is clicked", () => {
@@ -247,7 +219,7 @@ describe("RecipeForm", () => {
       renderComponent();
 
       const titleInput = screen.getByDisplayValue("Test Recipe");
-      expect(titleInput).toHaveClass("input--error");
+      expect(titleInput).toHaveAttribute("aria-invalid", "true");
       expect(screen.getByText("Title is required")).toBeInTheDocument();
     });
 
@@ -259,10 +231,10 @@ describe("RecipeForm", () => {
 
       renderComponent();
 
-      const categoriesWrapper = screen
+      const categoryField = screen
         .getByText("Desserts")
-        .closest(".form-categories-wrapper");
-      expect(categoriesWrapper).toHaveClass("input--error");
+        .closest('[data-slot="field"]');
+      expect(categoryField).toHaveAttribute("data-invalid", "true");
       expect(screen.getByText("Category is required")).toBeInTheDocument();
     });
 
@@ -552,7 +524,9 @@ describe("RecipeForm", () => {
       const deleteButton = screen.getByText("delete_recipe");
       fireEvent.click(deleteButton);
 
-      expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
+      expect(
+        screen.getByText("recipe_delete_confirmation")
+      ).toBeInTheDocument();
     });
 
     it("calls handleDelete when delete is confirmed", () => {
@@ -568,7 +542,7 @@ describe("RecipeForm", () => {
       fireEvent.click(deleteButton);
 
       // Confirm delete
-      const confirmButton = screen.getByTestId("confirm-delete");
+      const confirmButton = screen.getByRole("button", { name: "delete" });
       fireEvent.click(confirmButton);
 
       expect(mockHookReturn.handleDelete).toHaveBeenCalled();
@@ -650,13 +624,13 @@ describe("RecipeForm", () => {
         expect(servingsInput).toBeDisabled();
       });
 
-      it("applies translation-disabled class to servings field", () => {
+      it("applies disabled styling to servings field", () => {
         renderComponent({ isEditingTranslation: true });
 
         const servingsField = screen
           .getByDisplayValue("4")
-          .closest(".servings-field");
-        expect(servingsField).toHaveClass("translation-disabled");
+          .closest('[data-slot="field"]');
+        expect(servingsField).toHaveClass("opacity-50");
       });
 
       it("disables category buttons in translation mode", () => {
@@ -675,21 +649,11 @@ describe("RecipeForm", () => {
         });
       });
 
-      it("applies translation-disabled class to category form group", () => {
-        renderComponent({ isEditingTranslation: true });
-
-        const categoryFormGroup = screen
-          .getByText("category")
-          .closest(".form-group");
-        expect(categoryFormGroup).toHaveClass("translation-disabled");
-      });
-
       it("disables add section button in translation mode", () => {
         renderComponent({ isEditingTranslation: true });
 
         const addSectionButton = screen.getByText("add_section");
         expect(addSectionButton).toBeDisabled();
-        expect(addSectionButton).toHaveClass("translation-disabled");
       });
 
       it("disables add ingredient buttons in translation mode", () => {
@@ -699,7 +663,6 @@ describe("RecipeForm", () => {
           screen.getAllByTestId("add-ingredient-btn");
         addIngredientButtons.forEach((button) => {
           expect(button.closest("button")).toBeDisabled();
-          expect(button.closest("button")).toHaveClass("translation-disabled");
         });
       });
 
@@ -711,7 +674,6 @@ describe("RecipeForm", () => {
         );
         removeIngredientButtons.forEach((button) => {
           expect(button.closest("button")).toBeDisabled();
-          expect(button.closest("button")).toHaveClass("translation-disabled");
         });
       });
 
@@ -722,7 +684,6 @@ describe("RecipeForm", () => {
           .getByTestId("add-instruction-btn")
           .closest("button");
         expect(addInstructionButton).toBeDisabled();
-        expect(addInstructionButton).toHaveClass("translation-disabled");
       });
 
       it("disables remove instruction buttons in translation mode", () => {
@@ -733,7 +694,6 @@ describe("RecipeForm", () => {
         );
         removeInstructionButtons.forEach((button) => {
           expect(button.closest("button")).toBeDisabled();
-          expect(button.closest("button")).toHaveClass("translation-disabled");
         });
       });
 
@@ -741,9 +701,11 @@ describe("RecipeForm", () => {
         const { container } = renderComponent({ isEditingTranslation: true });
 
         // Check that drag handles have disabled styling
-        const dragHandles = container.querySelectorAll(".drag-handle");
+        const dragHandles = container.querySelectorAll(
+          '[data-slot="drag-handle"]'
+        );
         dragHandles.forEach((handle) => {
-          expect(handle).toHaveClass("translation-disabled");
+          expect(handle).toHaveStyle({ pointerEvents: "none" });
         });
       });
     });
@@ -805,9 +767,6 @@ describe("RecipeForm", () => {
           "remove-section-ingredient-btn-section-1-2"
         );
         expect(removeButton.closest("button")).toBeDisabled();
-        expect(removeButton.closest("button")).toHaveClass(
-          "translation-disabled"
-        );
       });
 
       it("disables add ingredient button for sections", () => {
@@ -817,9 +776,6 @@ describe("RecipeForm", () => {
           "add-section-ingredient-btn"
         );
         expect(addSectionIngredientButton.closest("button")).toBeDisabled();
-        expect(addSectionIngredientButton.closest("button")).toHaveClass(
-          "translation-disabled"
-        );
       });
 
       it("disables remove section button", () => {
@@ -827,7 +783,6 @@ describe("RecipeForm", () => {
 
         const removeSectionButton = screen.getByText("remove_section");
         expect(removeSectionButton).toBeDisabled();
-        expect(removeSectionButton).toHaveClass("translation-disabled");
       });
     });
 
@@ -957,18 +912,14 @@ describe("RecipeForm", () => {
         });
       });
 
-      it("does not apply translation-disabled class when not in translation mode", () => {
+      it("does not apply disabled styling when not in translation mode", () => {
         renderComponent({ isEditingTranslation: false });
 
         const servingsField = screen
           .getByDisplayValue("4")
-          .closest(".servings-field");
-        const categoryFormGroup = screen
-          .getByText("category")
-          .closest(".form-group");
+          .closest('[data-slot="field"]');
 
-        expect(servingsField).not.toHaveClass("translation-disabled");
-        expect(categoryFormGroup).not.toHaveClass("translation-disabled");
+        expect(servingsField).not.toHaveClass("opacity-50");
       });
     });
   });
@@ -989,9 +940,7 @@ describe("RecipeForm", () => {
         renderComponent();
 
         // Find all link buttons - should have one for each ingredient
-        const linkButtons = screen
-          .getAllByRole("button")
-          .filter((button) => button.className.includes("btn-icon-link"));
+        const linkButtons = screen.getAllByLabelText("link_to_recipe");
 
         expect(linkButtons.length).toBeGreaterThan(0);
       });
@@ -999,12 +948,9 @@ describe("RecipeForm", () => {
       it("renders link button with correct default styling", () => {
         renderComponent();
 
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("btn-icon-link"));
+        const linkButton = screen.getByLabelText("link_to_recipe");
 
-        expect(linkButton).toHaveClass("btn-icon-link");
-        expect(linkButton).not.toHaveClass("linked");
+        expect(linkButton).not.toHaveClass("text-destructive");
       });
 
       it("renders link button with linked styling when ingredient is linked", () => {
@@ -1015,12 +961,9 @@ describe("RecipeForm", () => {
 
         renderComponent();
 
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("linked"));
+        const linkButton = screen.getByLabelText("unlink_recipe");
 
-        expect(linkButton).toHaveClass("btn-icon-link");
-        expect(linkButton).toHaveClass("linked");
+        expect(linkButton).toHaveClass("text-destructive");
       });
     });
 
@@ -1028,9 +971,7 @@ describe("RecipeForm", () => {
       it("opens recipe selector when clicking unlinked ingredient button", () => {
         renderComponent();
 
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("btn-icon-link"));
+        const linkButton = screen.getByLabelText("link_to_recipe");
 
         fireEvent.click(linkButton);
 
@@ -1046,9 +987,7 @@ describe("RecipeForm", () => {
 
         renderComponent();
 
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("linked"));
+        const linkButton = screen.getByLabelText("unlink_recipe");
 
         fireEvent.click(linkButton);
 
@@ -1064,9 +1003,7 @@ describe("RecipeForm", () => {
         renderComponent();
 
         // Find and click link button to open selector
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("btn-icon-link"));
+        const linkButton = screen.getByLabelText("link_to_recipe");
 
         fireEvent.click(linkButton);
 
@@ -1137,9 +1074,7 @@ describe("RecipeForm", () => {
       it("has correct aria-label for unlinked ingredient", () => {
         renderComponent();
 
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("btn-icon-link"));
+        const linkButton = screen.getByLabelText("link_to_recipe");
 
         expect(linkButton).toHaveAttribute("aria-label", "link_to_recipe");
       });
@@ -1152,9 +1087,7 @@ describe("RecipeForm", () => {
 
         renderComponent();
 
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("linked"));
+        const linkButton = screen.getByLabelText("unlink_recipe");
 
         expect(linkButton).toHaveAttribute("aria-label", "unlink_recipe");
       });
@@ -1164,26 +1097,20 @@ describe("RecipeForm", () => {
       it("disables link buttons in translation mode", () => {
         renderComponent({ isEditingTranslation: true });
 
-        const linkButtons = screen
-          .getAllByRole("button")
-          .filter((button) => button.className.includes("btn-icon-link"));
+        const linkButtons = screen.getAllByLabelText("link_to_recipe");
 
         linkButtons.forEach((button) => {
           expect(button).toBeDisabled();
-          expect(button).toHaveClass("translation-disabled");
         });
       });
 
       it("enables link buttons in normal mode", () => {
         renderComponent({ isEditingTranslation: false });
 
-        const linkButtons = screen
-          .getAllByRole("button")
-          .filter((button) => button.className.includes("btn-icon-link"));
+        const linkButtons = screen.getAllByLabelText("link_to_recipe");
 
         linkButtons.forEach((button) => {
           expect(button).not.toBeDisabled();
-          expect(button).not.toHaveClass("translation-disabled");
         });
       });
     });
@@ -1218,9 +1145,7 @@ describe("RecipeForm", () => {
       it("renders link buttons for section ingredients", () => {
         renderComponent();
 
-        const linkButtons = screen
-          .getAllByRole("button")
-          .filter((button) => button.className.includes("btn-icon-link"));
+        const linkButtons = screen.getAllByLabelText("link_to_recipe");
 
         // Should have buttons for both ungrouped and section ingredients
         expect(linkButtons.length).toBeGreaterThanOrEqual(2);
@@ -1257,9 +1182,7 @@ describe("RecipeForm", () => {
 
         renderComponent();
 
-        const linkedButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("linked"));
+        const linkedButton = screen.getByLabelText("unlink_recipe");
 
         fireEvent.click(linkedButton);
 
@@ -1327,19 +1250,12 @@ describe("RecipeForm", () => {
       it("shows default link icon for unlinked ingredients", () => {
         renderComponent();
 
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("btn-icon-link"));
+        const linkButton = screen.getByLabelText("link_to_recipe");
 
-        // Check for the presence of link icon elements
-        const linkDefaultIcon = linkButton.querySelector(".link-default");
-        const linkHoverIcon = linkButton.querySelector(".link-hover");
-
-        expect(linkDefaultIcon).toBeInTheDocument();
-        expect(linkHoverIcon).toBeInTheDocument();
+        expect(linkButton.querySelector("svg")).toBeInTheDocument();
       });
 
-      it("applies correct CSS classes for icon visibility", () => {
+      it("shows the unlink icon for linked ingredients", () => {
         useRecipeForm.mockReturnValue({
           ...mockHookReturn,
           getIngredientLink: vi.fn(() => mockLinkedRecipe),
@@ -1347,16 +1263,9 @@ describe("RecipeForm", () => {
 
         renderComponent();
 
-        const linkButton = screen
-          .getAllByRole("button")
-          .find((button) => button.className.includes("linked"));
+        const linkButton = screen.getByLabelText("unlink_recipe");
 
-        // For linked buttons, both icons should be present but controlled by CSS
-        const linkDefaultIcon = linkButton.querySelector(".link-default");
-        const linkHoverIcon = linkButton.querySelector(".link-hover");
-
-        expect(linkDefaultIcon).toBeInTheDocument();
-        expect(linkHoverIcon).toBeInTheDocument();
+        expect(linkButton.querySelector("svg")).toBeInTheDocument();
       });
     });
   });
@@ -1539,9 +1448,10 @@ describe("RecipeForm", () => {
       // Check that drag handles are disabled in translation mode
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       dragHandles.forEach((handle) => {
-        const dragHandleElement = handle.querySelector(".drag-handle");
+        const dragHandleElement = handle.querySelector(
+          '[data-slot="drag-handle"]'
+        );
         expect(dragHandleElement).toHaveStyle({ pointerEvents: "none" });
-        expect(dragHandleElement).toHaveClass("translation-disabled");
       });
     });
 
@@ -1551,9 +1461,10 @@ describe("RecipeForm", () => {
       // Check that drag handles are enabled in normal mode
       const dragHandles = screen.getAllByTestId(/draggable-instruction-/);
       dragHandles.forEach((handle) => {
-        const dragHandleElement = handle.querySelector(".drag-handle");
+        const dragHandleElement = handle.querySelector(
+          '[data-slot="drag-handle"]'
+        );
         expect(dragHandleElement).toHaveStyle({ pointerEvents: "auto" });
-        expect(dragHandleElement).not.toHaveClass("translation-disabled");
       });
     });
 

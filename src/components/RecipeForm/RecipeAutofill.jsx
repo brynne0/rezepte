@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
 
-const RecipeAutofill = ({ onAutofill, categories = [] }) => {
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
   const { t } = useTranslation();
   const [pastedText, setPastedText] = useState("");
   const [isParsing, setIsParsing] = useState(false);
@@ -115,13 +118,13 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
   const handleCancel = () => {
     setPastedText("");
     setParseError("");
+    onCancel?.();
   };
 
   return (
-    <div className="paste-recipe-container">
-      <h3 className="form-header">{t("autofill_recipe")}</h3>
-      <AutoResizeTextArea
-        className={`input input--full-width input--textarea input--edit ${parseError || isOverLimit ? "input--error" : ""}`}
+    <div className="flex flex-col gap-3 rounded-lg border border-dashed border-input bg-muted/20 p-6">
+      <h3>{t("autofill_recipe")}</h3>
+      <Textarea
         value={pastedText}
         onChange={(e) => {
           setPastedText(e.target.value);
@@ -133,39 +136,49 @@ const RecipeAutofill = ({ onAutofill, categories = [] }) => {
             e.stopPropagation();
           }
         }}
+        aria-invalid={!!parseError || isOverLimit}
         placeholder={t("paste_recipe_placeholder")}
       />
       {isOverLimit && !parseError && (
-        <span className="error-message-small">
-          {t("paste_text_too_long", { max: MAX_CHARS.toLocaleString() })}
+        <Alert variant="destructive">
+          <AlertDescription>
+            {t("paste_text_too_long", { max: MAX_CHARS.toLocaleString() })}
+          </AlertDescription>
+        </Alert>
+      )}
+      {parseError && (
+        <Alert variant="destructive">
+          <AlertDescription>{parseError}</AlertDescription>
+        </Alert>
+      )}
+      {!isUrl(pastedText) && pastedText.length > 10000 && (
+        <span
+          className={
+            pastedText.length > MAX_CHARS
+              ? "self-end text-xs font-medium text-destructive"
+              : "self-end text-xs text-muted-foreground"
+          }
+        >
+          {pastedText.length.toLocaleString()} / {MAX_CHARS.toLocaleString()}
         </span>
       )}
-      {parseError && <span className="error-message-small">{parseError}</span>}
-      <div className="char-counter-container">
-        {!isUrl(pastedText) && pastedText.length > 10000 && (
-          <span
-            className={`char-counter ${pastedText.length > MAX_CHARS ? "char-counter--error" : ""}`}
-          >
-            {pastedText.length.toLocaleString()} / {MAX_CHARS.toLocaleString()}
-          </span>
-        )}
-      </div>
-      <div className="action-buttons-end">
-        <button
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button
           type="button"
+          variant="outline"
+          className="w-full sm:w-auto"
           onClick={handleCancel}
-          className="btn btn-action btn-secondary"
         >
           {t("cancel")}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          className="w-full sm:w-auto"
           onClick={parseRecipeWithAI}
-          className="btn btn-action btn-primary"
           disabled={isParsing}
         >
           {isParsing ? t("autofilling") : t("autofill")}
-        </button>
+        </Button>
       </div>
     </div>
   );

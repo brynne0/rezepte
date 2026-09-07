@@ -196,6 +196,7 @@
   "ingredient_name": "Ingredient name",
   "quantity": "Qty",
   "unit": "Unit",
+  "no_results": "No results found",
   "notes": "Notes",
   "subheading": "Subheading",
   "ingredient_subheading": "Ingredient subheading (optional)",
@@ -218,6 +219,7 @@
   "parse_error_blocked": "The website is blocking automated access. Please try copying and pasting the recipe text directly instead.",
   "autofill": "Autofill",
   "autofilling": "Autofilling...",
+  "autofill_recipe_cta": "Paste a recipe or link to autofill",
 
   "link_to_recipe": "Link to Recipe",
   "unlink_recipe": "Remove link",

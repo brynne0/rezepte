@@ -1,9 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, X } from "lucide-react";
+import { Search } from "lucide-react";
+
 import { fetchRecipes } from "../../services/recipes";
 import { getTranslatedRecipeTitle } from "../../services/translationService";
-import "./RecipeLinkDropdown.css";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 const RecipeLinkDropdown = ({
   isOpen,
@@ -17,7 +28,6 @@ const RecipeLinkDropdown = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const searchInputRef = useRef(null);
-  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -73,100 +83,62 @@ const RecipeLinkDropdown = ({
     }
   }, [searchTerm, recipes]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }
-  }, [isOpen, onClose]);
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
-      return () => {
-        document.removeEventListener("keydown", handleKeyDown);
-      };
-    }
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
   const handleRecipeSelect = (recipe) => {
     onSelectRecipe(recipe);
     onClose();
   };
 
   return (
-    <div className="recipe-link-dropdown-overlay">
-      <div className="recipe-link-dropdown" ref={dropdownRef}>
-        <div className="recipe-link-dropdown-header">
-          <h2 className="forta-red">{t("link_to_recipe")}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-icon btn-icon-neutral btn-icon-right"
-            aria-label="Close"
-          >
-            <X size={16} />
-          </button>
-        </div>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("link_to_recipe")}</DialogTitle>
+        </DialogHeader>
 
-        <div className="recipe-search-container">
-          <div className="search-input-wrapper">
-            <Search size={16} className="search-icon" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t("search_recipes")}
-              className="input input--full-width recipe-search-input"
-            />
-          </div>
-        </div>
+        <InputGroup>
+          <InputGroupAddon>
+            <Search size={16} />
+          </InputGroupAddon>
+          <InputGroupInput
+            ref={searchInputRef}
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={t("search_recipes")}
+          />
+        </InputGroup>
 
-        <div className="recipe-list-container">
+        <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
           {loading ? (
-            <div className="recipe-loading">{t("loading_recipes")}</div>
+            <div className="py-4 text-center text-sm text-muted-foreground">
+              {t("loading_recipes")}
+            </div>
           ) : filteredRecipes.length === 0 ? (
-            <div>
+            <div className="py-4 text-center text-sm text-muted-foreground">
               {searchTerm
                 ? t("no_recipes_found", { searchTerm })
                 : t("no_recipes_available")}
             </div>
           ) : (
-            <div className="flex-column">
-              {filteredRecipes.map((recipe) => (
-                <button
-                  key={recipe.id}
-                  type="button"
-                  className="recipe-item"
-                  onClick={() => handleRecipeSelect(recipe)}
-                >
-                  <span className="small">{recipe.title}</span>
-                </button>
-              ))}
-            </div>
+            filteredRecipes.map((recipe) => (
+              <button
+                key={recipe.id}
+                type="button"
+                onClick={() => handleRecipeSelect(recipe)}
+                className="rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
+              >
+                {recipe.title}
+              </button>
+            ))
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

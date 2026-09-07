@@ -196,6 +196,7 @@
   "ingredient_name": "Name der Zutat",
   "quantity": "Menge",
   "unit": "Einheit",
+  "no_results": "Keine Ergebnisse gefunden",
   "notes": "Notizen",
   "subheading": "Zwischenüberschrift",
   "ingredient_subheading": "Zutaten-Zwischenüberschrift (optional)",
@@ -218,6 +219,7 @@
   "parse_error_blocked": "Die Website blockiert den automatisierten Zugriff. Bitte den Rezepttext direkt kopieren und einfügen.",
   "autofill": "Automatisches Ausfüllen",
   "autofilling": "Automatisches Ausfüllen...",
+  "autofill_recipe_cta": "Rezept oder Link zum automatischen Ausfüllen einfügen",
 
 
   "link_to_recipe": "Mit Rezept verknüpfen",

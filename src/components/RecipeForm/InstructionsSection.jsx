@@ -1,8 +1,16 @@
 import { useTranslation } from "react-i18next";
 import { Trash2, Plus, GripVertical } from "lucide-react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
+import { cn } from "cn";
 
-import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const InstructionsSection = ({
   instructions,
@@ -15,17 +23,16 @@ const InstructionsSection = ({
   const { t } = useTranslation();
 
   return (
-    <div className="form-group">
-      <label className="form-header ">
-        <h3>{t("instructions")}</h3>
-      </label>
+    <Field>
+      <FieldLabel>{t("instructions")}</FieldLabel>
 
       <Droppable droppableId="instructions" type="instruction">
         {(provided, snapshot) => (
           <div
-            className={`flex-column instructions-list ${
-              snapshot.isDraggingOver ? "drag-over" : ""
-            }`}
+            className={cn(
+              "flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2",
+              snapshot.isDraggingOver && "bg-muted/50"
+            )}
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
@@ -41,47 +48,59 @@ const InstructionsSection = ({
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-                    className={`instruction-row ${
-                      snapshot.isDragging ? "dragging" : ""
-                    }`}
+                    className={cn(
+                      "flex items-start gap-2 rounded-lg border border-border bg-card p-2 transition-colors",
+                      snapshot.isDragging && "shadow-md"
+                    )}
                   >
-                    <div className="flex-column">
+                    <div className="flex flex-col items-center gap-1 pt-1.5">
                       {/* Step Number */}
-                      <span className="step-number">{index + 1}.</span>
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {index + 1}.
+                      </span>
 
                       {/* Instruction Drag Handle */}
                       <div
                         {...provided.dragHandleProps}
-                        className={`drag-handle ${
-                          isEditingTranslation ? "translation-disabled" : ""
-                        }`}
+                        data-slot="drag-handle"
                         style={{
                           pointerEvents: isEditingTranslation ? "none" : "auto",
                         }}
+                        className={cn(
+                          "flex cursor-grab items-center text-muted-foreground active:cursor-grabbing",
+                          isEditingTranslation && "opacity-50"
+                        )}
                       >
                         <GripVertical size={16} />
                       </div>
                     </div>
-                    <AutoResizeTextArea
+                    <Textarea
                       value={instruction}
                       onChange={(e) =>
                         handleInstructionChange(index, e.target.value)
                       }
                       onKeyDown={handleEnter}
-                      className="input input--full-width input--textarea input--edit "
+                      className="flex-1"
                     />
 
-                    <button
-                      type="button"
-                      onClick={() => removeInstruction(index)}
-                      className={`btn btn-icon btn-icon-remove ${
-                        isEditingTranslation ? "translation-disabled" : ""
-                      }`}
-                      aria-label={t("remove_instruction")}
-                      disabled={isEditingTranslation}
-                    >
-                      <Trash2 size={16} data-testid="remove-instruction-btn" />
-                    </button>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => removeInstruction(index)}
+                            aria-label={t("remove_instruction")}
+                            disabled={isEditingTranslation}
+                            data-testid="remove-instruction-btn"
+                          >
+                            <Trash2 size={16} className="text-destructive" />
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>{t("remove_instruction")}</TooltipContent>
+                    </Tooltip>
                   </div>
                 )}
               </Draggable>
@@ -90,23 +109,20 @@ const InstructionsSection = ({
           </div>
         )}
       </Droppable>
-      <div className="action-buttons-icon">
-        <button
+      <div>
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={addInstruction}
-          className={`btn btn-icon btn-icon-green ${
-            isEditingTranslation ? "translation-disabled" : ""
-          }`}
           disabled={isEditingTranslation}
+          data-testid="add-instruction-btn"
         >
-          <Plus
-            size={16}
-            data-testid="add-instruction-btn"
-            aria-label={t("add_instruction")}
-          />
-        </button>
+          <Plus size={16} />
+          {t("add_instruction")}
+        </Button>
       </div>
-    </div>
+    </Field>
   );
 };
 
