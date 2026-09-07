@@ -63,10 +63,9 @@
 
   --background: #f2e7d2;
   --foreground: #342a24;
-  /* TODO - adjust the belwo card to be slightly more white and not transparent?  */
-  --card: #fffbf4da;
+  --card: #fffbf4;
   --card-foreground: oklch(0.147 0.004 49.25);
-  --popover: oklch(1 0 0);
+  --popover: #fffbf4;
   --popover-foreground: oklch(0.147 0.004 49.25);
   --primary: #55443c;
   --primary-foreground: oklch(0.985 0.001 106.423);
@@ -75,12 +74,12 @@
   --secondary-foreground: oklch(0.216 0.006 56.043);
   --muted: #f8f2e6;
   --muted-foreground: oklch(0.553 0.013 58.071);
-  --accent: oklch(0.97 0.001 106.424);
+  --accent: #f8f2e6;
   --accent-foreground: oklch(0.216 0.006 56.043);
   --success: #2a905d;
   --accent-red: #933c1f;
   --destructive: #c03636;
-  --destructive-foreground: oklch(0.985 0.001 106.423);
+  --destructive-foreground: #fafaf9;
   --border: #523f1955;
   --input: #523f1955;
   --ring: #523f1955;
@@ -101,11 +100,11 @@
 }
 
 .dark {
-  --background: #342a24;
+  --background: #241d19;
   --foreground: #d4c2b3;
-  --card: #342a24;
+  --card: #2c241f;
   --card-foreground: oklch(0.985 0.001 106.423);
-  --popover: oklch(0.216 0.006 56.043);
+  --popover: #2c241f;
   --popover-foreground: oklch(0.985 0.001 106.423);
   --primary: #ccb3a3;
   --primary-foreground: oklch(0.216 0.006 56.043);
@@ -114,12 +113,12 @@
   --secondary-foreground: oklch(0.985 0.001 106.423);
   --muted: #3e352f;
   --muted-foreground: oklch(0.709 0.01 56.259);
-  --accent: oklch(0.268 0.007 34.298);
+  --accent: #3e352f;
   --accent-foreground: oklch(0.985 0.001 106.423);
   --success: #4db380;
   --accent-red: #e08a8a;
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0.001 106.423);
+  --destructive: #ff6466;
+  --destructive-foreground: #fafaf9;
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.553 0.013 58.071);

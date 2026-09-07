@@ -406,60 +406,31 @@ describe("Settings", () => {
       ).toBeInTheDocument();
     });
 
-    it("opens confirmation modal when delete button is clicked", () => {
+    it("opens confirmation dialog when delete button is clicked", () => {
       fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
 
-      expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
-      expect(screen.getByText("delete_account")).toBeInTheDocument();
       expect(
-        screen.getByText("delete_account_confirmation")
+        screen.getByText(/delete_account_confirmation/)
       ).toBeInTheDocument();
+      expect(screen.getByText(/delete_account_warning/)).toBeInTheDocument();
     });
 
-    it("displays confirmation checkbox with warning text", () => {
+    it("closes dialog when cancel button is clicked", async () => {
       fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-
-      expect(screen.getByTestId("confirmation-checkbox")).toBeInTheDocument();
-      expect(screen.getByText("delete_account_warning")).toBeInTheDocument();
-    });
-
-    it("disables confirm button initially when checkbox is required", () => {
-      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-
-      const confirmButton = screen.getByTestId("modal-confirm");
-      expect(confirmButton).toBeDisabled();
-    });
-
-    it("enables confirm button when checkbox is checked", async () => {
-      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-
-      const checkbox = screen.getByTestId("confirmation-checkbox");
-      const confirmButton = screen.getByTestId("modal-confirm");
-
-      expect(confirmButton).toBeDisabled();
-
-      fireEvent.click(checkbox);
+      fireEvent.click(screen.getByRole("button", { name: "cancel" }));
 
       await waitFor(() => {
-        expect(confirmButton).not.toBeDisabled();
+        expect(
+          screen.queryByText(/delete_account_confirmation/)
+        ).not.toBeInTheDocument();
       });
-    });
-
-    it("closes modal when cancel button is clicked", () => {
-      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-      fireEvent.click(screen.getByTestId("modal-cancel"));
-
-      expect(
-        screen.queryByTestId("confirmation-modal")
-      ).not.toBeInTheDocument();
     });
 
     it("calls deleteUserAccount when confirmed", async () => {
       mockDeleteUserAccount.mockResolvedValue();
 
       fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-      fireEvent.click(screen.getByTestId("confirmation-checkbox"));
-      fireEvent.click(screen.getByTestId("modal-confirm"));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
 
       await waitFor(() => {
         expect(mockDeleteUserAccount).toHaveBeenCalledTimes(1);
@@ -470,8 +441,7 @@ describe("Settings", () => {
       mockDeleteUserAccount.mockResolvedValue();
 
       fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-      fireEvent.click(screen.getByTestId("confirmation-checkbox"));
-      fireEvent.click(screen.getByTestId("modal-confirm"));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
 
       await waitFor(() => {
         expect(
@@ -480,7 +450,7 @@ describe("Settings", () => {
       });
 
       expect(
-        screen.queryByTestId("confirmation-modal")
+        screen.queryByText(/delete_account_confirmation/)
       ).not.toBeInTheDocument();
     });
 
@@ -488,8 +458,7 @@ describe("Settings", () => {
       mockDeleteUserAccount.mockResolvedValue();
 
       fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-      fireEvent.click(screen.getByTestId("confirmation-checkbox"));
-      fireEvent.click(screen.getByTestId("modal-confirm"));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
 
       await waitFor(() => {
         expect(window.localStorage.clear).toHaveBeenCalled();
@@ -502,15 +471,14 @@ describe("Settings", () => {
       mockDeleteUserAccount.mockRejectedValue(new Error(errorMessage));
 
       fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-      fireEvent.click(screen.getByTestId("confirmation-checkbox"));
-      fireEvent.click(screen.getByTestId("modal-confirm"));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
 
       await waitFor(() => {
         expect(screen.getByText(/delete_account_error/)).toBeInTheDocument();
       });
 
       expect(
-        screen.queryByTestId("confirmation-modal")
+        screen.queryByText(/delete_account_confirmation/)
       ).not.toBeInTheDocument();
       expect(
         screen.queryByText("account_deleted_goodbye_John")
@@ -521,8 +489,7 @@ describe("Settings", () => {
       mockDeleteUserAccount.mockRejectedValue(new Error("Network error"));
 
       fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
-      fireEvent.click(screen.getByTestId("confirmation-checkbox"));
-      fireEvent.click(screen.getByTestId("modal-confirm"));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
 
       await waitFor(() => {
         expect(screen.getByText(/delete_account_error/)).toBeInTheDocument();

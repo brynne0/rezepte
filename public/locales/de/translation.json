@@ -79,7 +79,7 @@
   "successfully_updated_language": "Bevorzugte Sprache erfolgreich aktualisiert",
   "delete_account": "Konto löschen",
   "delete_account_confirmation": "Möchtest du dein Konto wirklich löschen?",
-  "delete_account_warning": "Ich verstehe, dass dieser Vorgang nicht rückgängig gemacht werden kann und alle meine Rezepte gelöscht werden",
+  "delete_account_warning": "Dieser Vorgang kann nicht rückgängig gemacht werden und alle deine Rezepte werden gelöscht.",
   "account_deleted_goodbye": "Auf Wiedersehen, {{name}}! Dein Konto wurde erfolgreich gelöscht.",
   "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
 

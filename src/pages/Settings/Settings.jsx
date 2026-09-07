@@ -19,6 +19,16 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -216,10 +226,6 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
     }
   };
 
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-  };
-
   if (loading) {
     return <LoadingAcorn />;
   }
@@ -314,17 +320,27 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
             </CardContent>
           </Card>
 
-          <ConfirmationModal
-            isOpen={showDeleteModal}
-            onClose={handleCancelDelete}
-            onConfirm={handleConfirmDelete}
-            message={t("delete_account_confirmation")}
-            confirmText={t("delete")}
-            cancelText={t("cancel")}
-            confirmButtonType="danger"
-            requireConfirmation={true}
-            confirmationText={t("delete_account_warning")}
-          />
+          <AlertDialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("delete_account")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("delete_account_confirmation")}{" "}
+                  {t("delete_account_warning")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleConfirmDelete}
+                >
+                  {t("delete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           <ConfirmationModal
             isOpen={isUnsavedChangesModalOpen}
