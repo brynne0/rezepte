@@ -367,7 +367,7 @@ const Header = ({
                 navigate("/");
               }}
             >
-              <InputGroup className="h-12">
+              <InputGroup className="h-10">
                 <InputGroupAddon
                   align="inline-start"
                   className="text-foreground"

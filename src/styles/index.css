@@ -1,10 +1,10 @@
 /* Fonts */
-@import "../../public/fonts/fonts.css";
+/* @import "../../public/fonts/fonts.css"; */
 
 /* Components */
-@import "./components/buttons.css";
+/* @import "./components/buttons.css";
 @import "./components/inputs.css";
-@import "./components/modal.css";
+@import "./components/modal.css"; */
 
 /* Globals */
 /* @import "./globals/typography.css";
@@ -12,4 +12,4 @@
 @import "./globals/utilities.css"; */
 
 /* Layout */
-@import "./layout/containers.css";
+/* @import "./layout/containers.css"; */
