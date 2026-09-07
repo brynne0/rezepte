@@ -165,7 +165,12 @@ function ShowcasePage() {
           <Alert>
             <AlertTitle>Heads up</AlertTitle>
             <AlertDescription>
-              This is a default informational alert.
+              This is a default alert with a title and description.
+            </AlertDescription>
+          </Alert>
+          <Alert>
+            <AlertDescription>
+              This is a default alert with description only, no title.
             </AlertDescription>
           </Alert>
           <Alert variant="destructive">
@@ -178,6 +183,22 @@ function ShowcasePage() {
                 Retry
               </Button>
             </AlertAction>
+          </Alert>
+          <Alert variant="destructive">
+            <AlertDescription>
+              This is a destructive alert with description only.
+            </AlertDescription>
+          </Alert>
+          <Alert variant="success">
+            <AlertTitle>Recipe saved</AlertTitle>
+            <AlertDescription>
+              This is a success alert with a title and description.
+            </AlertDescription>
+          </Alert>
+          <Alert variant="success">
+            <AlertDescription>
+              This is a success alert with description only.
+            </AlertDescription>
           </Alert>
         </div>
       </Section>

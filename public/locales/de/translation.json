@@ -209,6 +209,7 @@
   "remove_instruction": "Anweisung entfernen",
  
   "autofill_recipe": "Rezept automatisch ausfüllen",
+  "autofill_warning": "Dadurch werden alle aktuellen Angaben im Formular ersetzt.",
   "paste_recipe_placeholder": "Hier ein Rezept oder einen Link einfügen (Text bevorzugt)",
   "paste_text_required": "Bitte füge zuerst den Rezepttext ein.",
   "paste_text_too_long": "Rezepttext ist zu lang. Bitte auf {{max}} Zeichen oder weniger kürzen.",

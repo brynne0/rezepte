@@ -162,6 +162,7 @@ const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
           {pastedText.length.toLocaleString()} / {MAX_CHARS.toLocaleString()}
         </span>
       )}
+      <p className="text-xs text-muted-foreground">{t("autofill_warning")}</p>
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button
           type="button"

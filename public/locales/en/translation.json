@@ -209,6 +209,7 @@
   "remove_instruction": "Remove instruction",
 
   "autofill_recipe": "Autofill Recipe",
+  "autofill_warning": "This will replace everything currently in the form.",
   "paste_recipe_placeholder": "Paste a recipe or link here (text preferred)",
   "paste_text_required": "Please paste recipe text first",
   "paste_text_too_long": "Recipe text is too long. Please shorten to {{max}} characters or less.",
