@@ -144,6 +144,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  ::selection {
+    @apply bg-accent-red text-primary-foreground;
+  }
   html {
     @apply font-sans;
   }
