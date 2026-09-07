@@ -118,7 +118,7 @@ const IngredientRow = ({
                 render={
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant={linkedRecipe ? "ghost-destructive" : "ghost"}
                     size="icon-sm"
                     onClick={() => {
                       if (linkedRecipe) {
@@ -131,7 +131,6 @@ const IngredientRow = ({
                         );
                       }
                     }}
-                    className={cn(linkedRecipe && "text-destructive")}
                     aria-label={
                       linkedRecipe ? t("unlink_recipe") : t("link_to_recipe")
                     }
@@ -151,7 +150,7 @@ const IngredientRow = ({
                 render={
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="ghost-destructive"
                     size="icon-sm"
                     onClick={() =>
                       removeIngredient(sectionId, ingredient.tempId)
@@ -164,7 +163,7 @@ const IngredientRow = ({
                         : `remove-section-ingredient-btn-${sectionId}-${ingredient.tempId}`
                     }
                   >
-                    <Trash2 size={16} className="text-destructive" />
+                    <Trash2 size={16} />
                   </Button>
                 }
               />

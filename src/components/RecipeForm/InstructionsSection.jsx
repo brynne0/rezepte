@@ -88,14 +88,14 @@ const InstructionsSection = ({
                         render={
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="ghost-destructive"
                             size="icon-sm"
                             onClick={() => removeInstruction(index)}
                             aria-label={t("remove_instruction")}
                             disabled={isEditingTranslation}
                             data-testid="remove-instruction-btn"
                           >
-                            <Trash2 size={16} className="text-destructive" />
+                            <Trash2 size={16} />
                           </Button>
                         }
                       />

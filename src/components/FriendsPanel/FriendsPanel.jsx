@@ -256,9 +256,8 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
                 </TableCell>
                 <TableCell className="w-px p-1 text-right">
                   <Button
-                    variant="ghost"
+                    variant="ghost-destructive"
                     size="icon-sm"
-                    className="text-destructive hover:text-destructive"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveFriend(friend.id);
@@ -304,9 +303,8 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
                       <Check className="size-3.5" />
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="ghost-destructive"
                       size="icon-sm"
-                      className="text-destructive hover:text-destructive"
                       onClick={() => handleDecline(req.id)}
                       disabled={loadingAction === req.id}
                       aria-label={t("friends_decline")}
@@ -330,9 +328,8 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
                 </TableCell>
                 <TableCell className="w-px p-1 text-right">
                   <Button
-                    variant="ghost"
+                    variant="ghost-destructive"
                     size="icon-sm"
-                    className="text-destructive hover:text-destructive"
                     onClick={() => handleDecline(req.id)}
                     disabled={loadingAction === req.id}
                     aria-label={t("friends_decline")}

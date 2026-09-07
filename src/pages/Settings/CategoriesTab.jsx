@@ -732,7 +732,7 @@ const CategoriesTab = ({
                                   {!category.isTemp && !category.isSystem && (
                                     <Button
                                       type="button"
-                                      variant="ghost"
+                                      variant="ghost-destructive"
                                       size="icon-sm"
                                       onClick={() =>
                                         handleDeleteCategory(
@@ -742,10 +742,7 @@ const CategoriesTab = ({
                                       }
                                       aria-label={t("delete_category")}
                                     >
-                                      <Trash2
-                                        size={16}
-                                        className="text-destructive"
-                                      />
+                                      <Trash2 size={16} />
                                     </Button>
                                   )}
                                 </>
