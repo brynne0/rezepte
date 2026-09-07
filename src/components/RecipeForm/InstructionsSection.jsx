@@ -30,7 +30,9 @@ const InstructionsSection = ({
         {(provided, snapshot) => (
           <div
             className={cn(
-              "flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2",
+              "flex flex-col gap-2",
+              (instructions.length > 0 || snapshot.isDraggingOver) &&
+                "rounded-lg border border-border/50 bg-muted/20 p-2",
               snapshot.isDraggingOver && "bg-muted/50"
             )}
             {...provided.droppableProps}
