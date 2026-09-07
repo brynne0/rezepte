@@ -747,7 +747,7 @@ describe("Header Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/add-recipe");
     });
 
-    test("hides navigation options in hamburger menu when not logged in", () => {
+    test("hides hamburger menu when not logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: false,
         isMe: false,
@@ -760,16 +760,16 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      const menuButton = screen.getByLabelText("Menu");
-      fireEvent.click(menuButton);
-
-      const dropdown = document.querySelector(
-        '[data-slot="dropdown-menu-content"]'
-      );
-      expect(dropdown.querySelector(".lucide-plus")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Menu")).not.toBeInTheDocument();
     });
 
     test("closes hamburger menu when clicking outside", async () => {
+      mockUseAuth.mockReturnValue({
+        isLoggedIn: true,
+        isMe: false,
+        isGuest: false,
+      });
+
       render(
         <TestWrapper>
           <Header {...defaultProps} />

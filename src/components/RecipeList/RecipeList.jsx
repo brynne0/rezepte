@@ -69,7 +69,7 @@ const RecipeList = ({
         </Empty>
       )}
       {!isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
-        <Empty className="mt-40">
+        <Empty className="mt-20">
           <EmptyHeader>
             <EmptyMedia>
               <WifiOff />
@@ -79,7 +79,7 @@ const RecipeList = ({
         </Empty>
       )}
       {isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
-        <Empty className="mx-auto mt-40 w-fit border border-primary bg-card shadow-sm">
+        <Empty className="mx-auto mt-20 w-fit border border-primary bg-card shadow-sm">
           <EmptyHeader>
             <EmptyTitle>
               {isLoggedIn

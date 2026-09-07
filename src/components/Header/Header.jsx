@@ -82,6 +82,9 @@ const Header = ({
   // Hide search bar on all pages except home
   const isHomePage = location.pathname === "/";
 
+  const isActivePage = (path) => location.pathname === path;
+  const isFriendsPageActive = location.pathname.startsWith("/friends/");
+
   const [showNavMenu, setShowNavMenu] = useState(false);
   const [currentSearchInput, setCurrentSearchInput] = useState("");
 
@@ -240,7 +243,11 @@ const Header = ({
                   <Button
                     variant="ghost"
                     size="icon-lg"
-                    className="relative"
+                    className={
+                      isFriendsPageActive
+                        ? "relative text-accent-red"
+                        : "relative"
+                    }
                     aria-label={t("friends")}
                   >
                     <Users className="size-7" />
@@ -260,6 +267,7 @@ const Header = ({
                 variant="ghost"
                 size="icon-lg"
                 onClick={() => navigate("/add-recipe")}
+                className={isActivePage("/add-recipe") ? "text-accent-red" : ""}
                 aria-label={t("add_new_recipe")}
               >
                 <Plus className="size-7" />
@@ -270,6 +278,9 @@ const Header = ({
                 variant="ghost"
                 size="icon-lg"
                 onClick={() => navigate("/cooking-times")}
+                className={
+                  isActivePage("/cooking-times") ? "text-accent-red" : ""
+                }
                 aria-label={t("cooking_times", "Cooking Times")}
               >
                 <Clock className="size-7" />
@@ -283,53 +294,64 @@ const Header = ({
           {/* Mobile User Icon */}
           <UserMenu />
 
-          {/* Hamburger Menu */}
-          <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="ghost" size="icon-lg" aria-label="Menu">
-                  <Menu className="size-7" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="center">
-              {/* Navigation options for logged in users */}
-              {isLoggedIn && (
-                <>
-                  <FriendsPanel
-                    onNavigate={() => setShowNavMenu(false)}
-                    renderTrigger={(pendingCount) => (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start gap-1.5"
-                        aria-label={t("friends")}
-                      >
-                        <Users className="size-4" />
-                        {t("friends")}
-                        {pendingCount > 0 && (
-                          <Badge
-                            variant="destructive"
-                            className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
-                          >
-                            {pendingCount}
-                          </Badge>
-                        )}
-                      </Button>
-                    )}
-                  />
-                  <DropdownMenuItem onClick={() => navigate("/add-recipe")}>
-                    <Plus className="size-4" />
-                    {t("add_new_recipe")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/cooking-times")}>
-                    <Clock className="size-4" />
-                    {t("cooking_times", "Cooking Times")}
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Hamburger Menu - only shown when logged in */}
+          {isLoggedIn && (
+            <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
+              <DropdownMenuTrigger
+                render={
+                  <Button variant="ghost" size="icon-lg" aria-label="Menu">
+                    <Menu className="size-7" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="center">
+                <FriendsPanel
+                  onNavigate={() => setShowNavMenu(false)}
+                  renderTrigger={(pendingCount) => (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={
+                        isFriendsPageActive
+                          ? "w-full justify-start gap-1.5 text-accent-red"
+                          : "w-full justify-start gap-1.5"
+                      }
+                      aria-label={t("friends")}
+                    >
+                      <Users className="size-4" />
+                      {t("friends")}
+                      {pendingCount > 0 && (
+                        <Badge
+                          variant="destructive"
+                          className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                        >
+                          {pendingCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  )}
+                />
+                <DropdownMenuItem
+                  onClick={() => navigate("/add-recipe")}
+                  className={
+                    isActivePage("/add-recipe") ? "text-accent-red" : ""
+                  }
+                >
+                  <Plus className="size-4" />
+                  {t("add_new_recipe")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => navigate("/cooking-times")}
+                  className={
+                    isActivePage("/cooking-times") ? "text-accent-red" : ""
+                  }
+                >
+                  <Clock className="size-4" />
+                  {t("cooking_times", "Cooking Times")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </header>
 

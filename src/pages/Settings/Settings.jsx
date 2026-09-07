@@ -231,7 +231,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   }
   if (error) {
     return (
-      <div className="mx-auto mt-20 w-full max-w-2xl px-4">
+      <div className="mx-auto md:mt-20 w-full max-w-2xl px-4">
         <Alert variant="destructive">
           <AlertDescription>Error: {error}</AlertDescription>
         </Alert>
@@ -240,7 +240,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   }
 
   return (
-    <div className="mx-auto mt-20 w-full max-w-2xl px-4">
+    <div className="mx-auto md:mt-20 w-full max-w-2xl px-4">
       {showDeleteSuccess ? (
         <div className="flex flex-col items-center gap-4 text-center">
           <p>
