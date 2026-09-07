@@ -412,7 +412,6 @@ describe("Settings", () => {
       expect(
         screen.getByText(/delete_account_confirmation/)
       ).toBeInTheDocument();
-      expect(screen.getByText(/delete_account_warning/)).toBeInTheDocument();
     });
 
     it("closes dialog when cancel button is clicked", async () => {

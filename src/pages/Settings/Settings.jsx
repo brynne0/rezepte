@@ -325,8 +325,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
               <AlertDialogHeader>
                 <AlertDialogTitle>{t("delete_account")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {t("delete_account_confirmation")}{" "}
-                  {t("delete_account_warning")}
+                  {t("delete_account_confirmation")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
 

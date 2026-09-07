@@ -78,8 +78,7 @@
   "successfully_updated_profile": "Successfully updated profile",
   "successfully_updated_language": "Successfully updated preferred language",
   "delete_account": "Delete account",
-  "delete_account_confirmation": "Are you sure you want to delete your account?",
-  "delete_account_warning": "This cannot be undone and all your recipes will be deleted.",
+  "delete_account_confirmation": "Are you sure you want to delete your account? This cannot be undone and all your recipes will be deleted.",
   "account_deleted_goodbye": "Goodbye, {{name}}! Your account has been successfully deleted.",
   "delete_account_error": "Failed to delete account. Please try again.",
 
