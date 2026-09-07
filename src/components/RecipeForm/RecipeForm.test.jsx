@@ -238,28 +238,29 @@ describe("RecipeForm", () => {
       expect(screen.getByText("Category is required")).toBeInTheDocument();
     });
 
-    it("renders source input with toggle button", () => {
+    it("renders a plain source input", () => {
       renderComponent();
 
-      expect(
-        screen.getByDisplayValue("https://example.com")
-      ).toBeInTheDocument();
-      expect(screen.getByLabelText(/switch_to/)).toBeInTheDocument(); // toggle button
+      const sourceInput = screen.getByDisplayValue("https://example.com");
+      expect(sourceInput).toBeInTheDocument();
+      expect(sourceInput).toHaveAttribute(
+        "placeholder",
+        "source_placeholder"
+      );
     });
 
-    it("source toggle button changes placeholder", () => {
+    it("calls handleInputChange when source changes", () => {
       renderComponent();
 
-      const toggleButton = screen.getByLabelText(/switch_to/);
       const sourceInput = screen.getByDisplayValue("https://example.com");
+      fireEvent.change(sourceInput, {
+        target: { value: "My grandmother's recipe" },
+      });
 
-      // Initially should be in note mode (new default)
-      expect(sourceInput).toHaveAttribute("placeholder", "source_note");
-
-      // Click toggle to switch to link mode
-      fireEvent.click(toggleButton);
-
-      expect(sourceInput).toHaveAttribute("placeholder", "source_link");
+      expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
+        "source",
+        "My grandmother's recipe"
+      );
     });
   });
 

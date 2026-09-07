@@ -7,6 +7,7 @@ import {
   getMainImage,
   getOptimizedImageUrl,
 } from "../../services/imageService";
+import { extractFirstUrl } from "../../utils/linkUtils";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 import useIntersectionObserver from "../../hooks/ui/useIntersectionObserver";
 import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
@@ -55,11 +56,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   };
 
   // Check if recipe has a source link
-  const hasSourceLink =
-    recipe.source &&
-    (recipe.source.startsWith("http://") ||
-      recipe.source.startsWith("https://") ||
-      recipe.source.startsWith("www."));
+  const sourceUrl = extractFirstUrl(recipe.source);
 
   // Check if recipe has no content (no ingredients and no instructions)
   const hasNoIngredients = !recipe.hasIngredients;
@@ -78,10 +75,10 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           {recipe.title}
         </CardTitle>
 
-        {hasSourceLink && hasNoContent && (
+        {sourceUrl && hasNoContent && (
           <CardAction className="row-span-1 self-center">
             <a
-              href={recipe.source}
+              href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="transition-colors hover:text-accent-red"

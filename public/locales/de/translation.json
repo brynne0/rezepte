@@ -107,10 +107,7 @@
   "ingredients": "Zutaten",
   "instructions": "Schritte",
   "source": "Quelle",
-  "source_link": "Quellenlink",
-  "source_note": "Quellenhinweis",
-  "switch_to_link": "Zum Link wechseln",
-  "switch_to_note": "Zu Notiz wechseln",
+  "source_placeholder": "Woher stammt dieses Rezept?",
 
   "units": [
     { "value": "", "label": "-" },

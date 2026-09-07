@@ -21,6 +21,7 @@ import {
   formatMultiplierLabel,
 } from "../../utils/scaleUtils";
 import { shouldUsePlural } from "../../utils/fractionUtils";
+import { linkifyText } from "../../utils/linkUtils";
 import { useWakeLock } from "../../hooks/ui/useWakeLock";
 import NutritionPanel from "../../components/NutritionPanel/NutritionPanel";
 import {
@@ -36,35 +37,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-// Helper function to parse text and convert URLs to clickable links
-const renderTextWithLinks = (text) => {
-  if (!text) return null;
-
-  // Regex to match URLs (http, https, www)
-  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
-  const parts = text.split(urlRegex);
-
-  return parts.map((part, index) => {
-    // Check if this part is a URL
-    if (part.match(urlRegex)) {
-      // Add protocol if missing (for www. links)
-      const href = part.startsWith("www.") ? `https://${part}` : part;
-      return (
-        <a
-          key={index}
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-accent-red break-all underline-offset-2 hover:underline"
-        >
-          {part}
-        </a>
-      );
-    }
-    // Return plain text
-    return part;
-  });
-};
 
 const Recipe = ({ isSharedView = false }) => {
   const { id, shareToken } = useParams();
@@ -524,7 +496,7 @@ const Recipe = ({ isSharedView = false }) => {
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
             <h2>{t("source")}:</h2>
             <span className="[word-wrap:break-word]">
-              {renderTextWithLinks(recipe.source)}
+              {linkifyText(recipe.source)}
             </span>
           </div>
         )}

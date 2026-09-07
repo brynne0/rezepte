@@ -4,8 +4,6 @@ import {
   Plus,
   ArrowLeft,
   GripVertical,
-  Link,
-  NotepadText,
   Clipboard,
   ChevronDown,
   ChevronRight,
@@ -32,11 +30,6 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  InputGroup,
-  InputGroupInput,
-  InputGroupButton,
-} from "@/components/ui/input-group";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -220,43 +213,6 @@ const RecipeForm = ({
     cancelNavigation,
     message: unsavedChangesMessage,
   } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
-
-  const [sourceMode, setSourceMode] = useState(() => {
-    // Initialise based on existing source content
-    if (initialRecipe?.source) {
-      const source = initialRecipe.source;
-      if (
-        source.startsWith("http://") ||
-        source.startsWith("https://") ||
-        source.startsWith("www.")
-      ) {
-        return "link";
-      } else {
-        return "note";
-      }
-    }
-    return "note"; // default to note mode
-  });
-
-  // Smart detection: auto-switch between link and note modes
-  const handleSourceChange = (value) => {
-    handleInputChange("source", value);
-
-    // Auto-detect URLs and switch to link mode
-    if (
-      value &&
-      (value.startsWith("http://") ||
-        value.startsWith("https://") ||
-        value.startsWith("www."))
-    ) {
-      if (sourceMode !== "link") {
-        setSourceMode("link");
-      }
-    } else if (value && sourceMode !== "note") {
-      // Auto-switch to note mode for non-link content
-      setSourceMode("note");
-    }
-  };
 
   // Handle opening the recipe link dropdown
   const handleOpenLinkDropdown = (sectionId, tempId, ingredient) => {
@@ -686,35 +642,13 @@ const RecipeForm = ({
             {/* Source */}
             <Field>
               <FieldLabel htmlFor="source">{t("source")}</FieldLabel>
-              <InputGroup>
-                <InputGroupInput
-                  id="source"
-                  type="text"
-                  value={formData.source || ""}
-                  onChange={(e) => handleSourceChange(e.target.value)}
-                  placeholder={
-                    sourceMode === "link" ? t("source_link") : t("source_note")
-                  }
-                />
-                <InputGroupButton
-                  type="button"
-                  size="icon-sm"
-                  onClick={() =>
-                    setSourceMode(sourceMode === "link" ? "note" : "link")
-                  }
-                  aria-label={
-                    sourceMode === "link"
-                      ? t("switch_to_note")
-                      : t("switch_to_link")
-                  }
-                >
-                  {sourceMode === "link" ? (
-                    <Link size={16} />
-                  ) : (
-                    <NotepadText size={16} />
-                  )}
-                </InputGroupButton>
-              </InputGroup>
+              <Input
+                id="source"
+                type="text"
+                value={formData.source || ""}
+                onChange={(e) => handleInputChange("source", e.target.value)}
+                placeholder={t("source_placeholder")}
+              />
             </Field>
 
             {/* Extra Notes */}
