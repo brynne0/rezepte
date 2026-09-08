@@ -17,6 +17,7 @@ import {
   validateUsernameUnique,
   isPasswordStrong,
 } from "../../utils/validation";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -40,6 +41,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 const AuthPage = ({ setLoginMessage }) => {
   // Form input states
@@ -63,6 +73,18 @@ const AuthPage = ({ setLoginMessage }) => {
 
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const hasUnsavedChanges =
+    isSignUpMode &&
+    !awaitingConfirmation &&
+    Boolean(email || firstName || username || password);
+
+  const {
+    isModalOpen: isUnsavedChangesModalOpen,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedChangesMessage,
+  } = useUnsavedChanges(hasUnsavedChanges, t("unsaved_changes_warning"));
 
   const handleValidation = () => {
     const formData = { email, firstName, username, password };
@@ -450,6 +472,26 @@ const AuthPage = ({ setLoginMessage }) => {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={isUnsavedChangesModalOpen}
+        onOpenChange={(open) => {
+          if (!open) confirmNavigation();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
+            <AlertDialogAction onClick={cancelNavigation}>
+              {t("stay")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -16,6 +16,7 @@ vi.mock("react-router-dom", async () => {
     ...actual,
     useNavigate: () => mockNavigate,
     useLocation: () => mockLocation,
+    useBlocker: () => ({ state: "unblocked" }),
   };
 });
 

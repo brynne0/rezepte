@@ -8,6 +8,7 @@ import {
   validateChangePasswordForm,
   isPasswordStrong,
 } from "../../utils/validation";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -30,6 +31,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 const ChangePasswordPage = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -47,6 +57,17 @@ const ChangePasswordPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const fromSettings = location.state?.fromSettings || false;
+
+  const hasUnsavedChanges =
+    !showSuccessMessage &&
+    Boolean(oldPassword || newPassword || newPasswordRepeat);
+
+  const {
+    isModalOpen: isUnsavedChangesModalOpen,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedChangesMessage,
+  } = useUnsavedChanges(hasUnsavedChanges, t("unsaved_changes_warning"));
 
   useEffect(() => {
     const initializePasswordReset = async (accessToken, refreshToken) => {
@@ -397,6 +418,26 @@ const ChangePasswordPage = () => {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={isUnsavedChangesModalOpen}
+        onOpenChange={(open) => {
+          if (!open) confirmNavigation();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
+            <AlertDialogAction onClick={cancelNavigation}>
+              {t("stay")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
