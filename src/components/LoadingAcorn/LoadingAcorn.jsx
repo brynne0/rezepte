@@ -1,6 +1,6 @@
 import { Nut } from "lucide-react";
 import "./LoadingAcorn.css";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 const LoadingAcorn = ({ size = 25, className = "", fullPage = true }) => {
   return (

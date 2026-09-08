@@ -137,22 +137,6 @@ describe("RecipeList", () => {
       ).toBeInTheDocument();
     });
 
-    it("shows login prompt and login button when logged out with no recipes", () => {
-      useAuth.mockReturnValue({ isLoggedIn: false });
-
-      renderComponent({
-        recipes: [],
-        totalRecipeCount: 0,
-        searchTerm: "",
-      });
-
-      expect(screen.queryByText("welcome_add_recipe")).not.toBeInTheDocument();
-      expect(
-        screen.getByText("logged_in_note_linklogged_in_note_suffix")
-      ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "login" })).toBeInTheDocument();
-    });
-
     it("navigates to add-recipe when the welcome button is clicked", () => {
       useAuth.mockReturnValue({ isLoggedIn: true });
 
@@ -165,20 +149,6 @@ describe("RecipeList", () => {
       fireEvent.click(screen.getByRole("button", { name: "add_new_recipe" }));
 
       expect(mockNavigate).toHaveBeenCalledWith("/add-recipe");
-    });
-
-    it("navigates to the auth page when the login button is clicked", () => {
-      useAuth.mockReturnValue({ isLoggedIn: false });
-
-      renderComponent({
-        recipes: [],
-        totalRecipeCount: 0,
-        searchTerm: "",
-      });
-
-      fireEvent.click(screen.getByRole("button", { name: "login" }));
-
-      expect(mockNavigate).toHaveBeenCalledWith("/auth-page");
     });
 
     it("does not show the empty state when there are recipes", () => {

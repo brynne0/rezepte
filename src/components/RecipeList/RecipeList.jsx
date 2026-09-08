@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { ChefHat, LogIn, WifiOff } from "lucide-react";
+import { ChefHat, WifiOff } from "lucide-react";
 import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../hooks/data/useAuth";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -24,7 +23,6 @@ const RecipeList = ({
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { isLoggedIn } = useAuth();
 
   // If using pagination, recipes are already filtered on the server side
   // Otherwise, apply client-side filtering for backward compatibility
@@ -81,21 +79,15 @@ const RecipeList = ({
       {isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
         <Empty className="mx-auto mt-20 w-fit border border-primary bg-card shadow-sm">
           <EmptyHeader>
-            <EmptyTitle>
-              {isLoggedIn
-                ? t("welcome_add_recipe")
-                : `${t("logged_in_note_link")}${t("logged_in_note_suffix")}`}
-            </EmptyTitle>
+            <EmptyTitle>{t("welcome_add_recipe")}</EmptyTitle>
           </EmptyHeader>
           <EmptyContent>
             <Button
               className="w-full sm:w-auto"
-              onClick={() =>
-                navigate(isLoggedIn ? "/add-recipe" : "/auth-page")
-              }
+              onClick={() => navigate("/add-recipe")}
             >
-              {isLoggedIn ? <ChefHat /> : <LogIn />}
-              {isLoggedIn ? t("add_new_recipe") : t("login")}
+              <ChefHat />
+              {t("add_new_recipe")}
             </Button>
           </EmptyContent>
         </Empty>

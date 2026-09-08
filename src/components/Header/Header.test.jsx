@@ -273,7 +273,7 @@ describe("Header Component", () => {
     expect(screen.getByTestId("lucide-plus")).toBeInTheDocument();
   });
 
-  test("hides add recipe button when not logged in", () => {
+  test("shows add recipe button when not logged in", () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: false,
       isMe: false,
@@ -286,7 +286,7 @@ describe("Header Component", () => {
       </TestWrapper>
     );
 
-    expect(screen.queryByTestId("lucide-plus")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("lucide-plus")).toBeInTheDocument();
   });
 
   test("hides search bar when not on home page", () => {
@@ -368,14 +368,14 @@ describe("Header Component", () => {
     expect(screen.getByPlaceholderText("Search")).toBeInTheDocument();
   });
 
-  test("hides search bar on home page for logged out users", () => {
+  test("shows search bar on home page for logged out users", () => {
     render(
       <TestWrapper>
         <Header {...defaultProps} />
       </TestWrapper>
     );
 
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).toBeInTheDocument();
   });
 
   // Removed search button functionality
@@ -405,7 +405,7 @@ describe("Header Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 
-  test("user dropdown does not respond when on auth page", () => {
+  test("hides the user menu on the auth page", () => {
     useLocation.mockReturnValue({
       pathname: "/auth-page",
     });
@@ -416,13 +416,7 @@ describe("Header Component", () => {
       </TestWrapper>
     );
 
-    // Click on chef hat - should not open dropdown on auth page
-    const chefHatButton = screen.getAllByLabelText("Login")[0];
-    fireEvent.click(chefHatButton);
-
-    // No dropdown should appear
-    expect(screen.queryByText("Login")).not.toBeInTheDocument();
-    expect(screen.queryByText("Logout")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Login")).not.toBeInTheDocument();
   });
 
   describe("Language Switching", () => {
@@ -609,7 +603,7 @@ describe("Header Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/settings");
     });
 
-    test("does not open dropdown when on auth page", () => {
+    test("hides the user menu on the auth page", () => {
       useLocation.mockReturnValue({
         pathname: "/auth-page",
       });
@@ -620,11 +614,7 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      const chefHatButton = screen.getAllByLabelText("Login")[0];
-      fireEvent.click(chefHatButton);
-
-      // No dropdown should appear
-      expect(screen.queryByText("Login")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Login")).not.toBeInTheDocument();
     });
 
     test("closes dropdown when clicking outside", async () => {
@@ -747,7 +737,7 @@ describe("Header Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/add-recipe");
     });
 
-    test("hides hamburger menu when not logged in", () => {
+    test("shows hamburger menu when not logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: false,
         isMe: false,
@@ -760,7 +750,7 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      expect(screen.queryByLabelText("Menu")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Menu")).toBeInTheDocument();
     });
 
     test("closes hamburger menu when clicking outside", async () => {

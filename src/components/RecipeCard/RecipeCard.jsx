@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import {
   getMainImage,
@@ -21,7 +20,6 @@ import { cn } from "cn";
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
-  const { isLoggedIn } = useAuth();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isSourceLinkHovered, setIsSourceLinkHovered] = useState(false);
@@ -49,8 +47,8 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
     });
   }, [signedMainImage?.url]);
 
-  // Only show images if user is logged in AND showImages is true AND card has been visible
-  const shouldShowImages = isLoggedIn && showImages && hasBeenVisible;
+  // Only show images if showImages is true AND card has been visible
+  const shouldShowImages = showImages && hasBeenVisible;
 
   const handleImageLoad = () => {
     setImageLoaded(true);

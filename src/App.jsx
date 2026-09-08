@@ -61,7 +61,6 @@ function HomePage() {
     isFetchingRecipes,
     paginationInfo,
     onPageChange,
-    isLoggedIn,
   } = useContext(AppStateContext);
   const isOnline = useOnlineStatus();
 
@@ -79,7 +78,7 @@ function HomePage() {
         selectedCategory={selectedCategory}
         recipes={recipes}
         searchTerm={searchTerm}
-        showImages={isLoggedIn ? showImages : false}
+        showImages={showImages}
         totalRecipeCount={totalRecipeCount}
         isPaginated={true}
         loading={isFetchingRecipes}
@@ -95,6 +94,14 @@ function HomePage() {
         />
       )}
     </>
+  );
+}
+
+function HomeRoute() {
+  return (
+    <ProtectedRoute>
+      <HomePage />
+    </ProtectedRoute>
   );
 }
 
@@ -301,7 +308,7 @@ function App() {
       {
         element: <Layout />,
         children: [
-          { path: "/", element: <HomePage /> },
+          { path: "/", element: <HomeRoute /> },
           {
             path: "/:id/:slug",
             element: (

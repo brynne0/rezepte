@@ -171,13 +171,6 @@ describe("SortButtons Component", () => {
     ).not.toThrow();
   });
 
-  test("does not render the show images toggle when not logged in", () => {
-    render(<SortButtons {...defaultProps} isLoggedIn={false} />);
-
-    expect(screen.queryByLabelText("show_images")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("hide_images")).not.toBeInTheDocument();
-  });
-
   test("renders the show images toggle when logged in", () => {
     render(
       <SortButtons {...defaultProps} isLoggedIn={true} showImages={true} />
