@@ -82,9 +82,7 @@ describe("ChangeEmailPage", () => {
     expect(screen.getByLabelText("current_password")).toBeInTheDocument();
     expect(screen.getByLabelText("new_email")).toBeInTheDocument();
     expect(screen.getByLabelText("new_email_repeat")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "confirm" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "confirm" })).toBeInTheDocument();
   });
 
   it("displays validation errors and does not submit", async () => {
@@ -142,9 +140,7 @@ describe("ChangeEmailPage", () => {
 
   it("shows an error when the new email is already in use", async () => {
     mockVerifyCurrentPassword.mockResolvedValue({ error: null });
-    mockValidateEmailUniqueForChange.mockResolvedValue(
-      "email_already_exists"
-    );
+    mockValidateEmailUniqueForChange.mockResolvedValue("email_already_exists");
 
     render(<ChangeEmailPageWrapper />);
 

@@ -95,10 +95,7 @@ const ChangeEmailPage = () => {
         return;
       }
 
-      const emailUniqueError = await validateEmailUniqueForChange(
-        newEmail,
-        t
-      );
+      const emailUniqueError = await validateEmailUniqueForChange(newEmail, t);
       if (emailUniqueError) {
         setValidationErrors((prev) => ({
           ...prev,
@@ -195,9 +192,7 @@ const ChangeEmailPage = () => {
                             render={
                               <InputGroupButton
                                 type="button"
-                                onClick={() =>
-                                  setShowPassword((prev) => !prev)
-                                }
+                                onClick={() => setShowPassword((prev) => !prev)}
                                 aria-label={
                                   showPassword
                                     ? t("hide_password")
@@ -216,9 +211,7 @@ const ChangeEmailPage = () => {
                         </Tooltip>
                       </InputGroupAddon>
                     </InputGroup>
-                    <FieldError>
-                      {validationErrors.currentPassword}
-                    </FieldError>
+                    <FieldError>{validationErrors.currentPassword}</FieldError>
                   </Field>
 
                   <Field data-invalid={!!validationErrors.newEmail}>
@@ -270,9 +263,7 @@ const ChangeEmailPage = () => {
                         aria-invalid={!!validationErrors.newEmailRepeat}
                       />
                     </InputGroup>
-                    <FieldError>
-                      {validationErrors.newEmailRepeat}
-                    </FieldError>
+                    <FieldError>{validationErrors.newEmailRepeat}</FieldError>
                   </Field>
 
                   <Button type="submit" size="lg">
