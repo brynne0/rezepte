@@ -28,6 +28,7 @@ const ProfileTab = ({
   handleSaveProfile,
   handleCancelProfile,
   handleChangePassword,
+  handleChangeEmail,
   handleLanguageChange,
   handleDeleteAccount,
   setTempFirstName,
@@ -73,11 +74,6 @@ const ProfileTab = ({
           />
         </Field>
 
-        <Field>
-          <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
-          <Input id="email" type="email" value={profileData.email} readOnly />
-        </Field>
-
         <Field data-invalid={!!usernameError}>
           <FieldLabel htmlFor="username">{t("username")}</FieldLabel>
           <Input
@@ -97,6 +93,27 @@ const ProfileTab = ({
             readOnly={!isEditingProfile}
           />
           <FieldError>{usernameError}</FieldError>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
+          <InputGroup>
+            <InputGroupInput
+              id="email"
+              type="email"
+              value={profileData.email}
+              readOnly
+              disabled={isEditingProfile}
+            />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                onClick={handleChangeEmail}
+                disabled={isEditingProfile}
+              >
+                {t("change_email")}
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
         </Field>
 
         <Field>

@@ -54,6 +54,15 @@
   "go_to_login": "zum Login",
   "go_to_home": "Zur Startseite",
 
+  "change_email": "E-Mail ändern",
+  "new_email": "Neue E-Mail",
+  "new_email_repeat": "Neue E-Mail wiederholen",
+  "email_repeat_required": "Wiederholung der E-Mail ist erforderlich",
+  "emails_do_not_match": "E-Mails stimmen nicht überein",
+  "email_change_requested": "Bitte bestätige die Änderung über den Link in deiner neuen E-Mail.",
+  "email_change_failed": "E-Mail konnte nicht geändert werden. Bitte erneut versuchen.",
+  "go_to_settings": "Zu den Einstellungen",
+
   "firstname_required": "Vorname ist erforderlich",
   "username_required": "Benutzername ist erforderlich",
   "username_too_short": "Benutzername muss mindestens 3 Zeichen lang sein",

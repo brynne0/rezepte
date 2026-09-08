@@ -40,6 +40,7 @@ import AuthPage from "./pages/AuthPage/AuthPage";
 import Recipe from "./pages/Recipe/Recipe";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
+import ChangeEmailPage from "./pages/ChangeEmailPage/ChangeEmailPage";
 import Settings from "./pages/Settings/Settings";
 import FriendRecipes from "./pages/FriendRecipes/FriendRecipes";
 import ShowcasePage from "./pages/ShowcasePage/ShowcasePage";
@@ -124,6 +125,14 @@ function CookingTimesRoute() {
         isEditMode={isCookingTimesEditing}
         setIsEditMode={setIsCookingTimesEditing}
       />
+    </ProtectedRoute>
+  );
+}
+
+function ChangeEmailRoute() {
+  return (
+    <ProtectedRoute>
+      <ChangeEmailPage />
     </ProtectedRoute>
   );
 }
@@ -313,6 +322,7 @@ function App() {
           { path: "/auth-page", element: <AuthPageRoute /> },
           { path: "/forgot-password", element: <ForgotPasswordPage /> },
           { path: "/change-password", element: <ChangePasswordPage /> },
+          { path: "/change-email", element: <ChangeEmailRoute /> },
           { path: "/settings", element: <SettingsRoute /> },
           {
             path: "/friends/:username",

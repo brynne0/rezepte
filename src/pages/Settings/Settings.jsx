@@ -146,6 +146,10 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
     navigate("/change-password", { state: { fromSettings: true } });
   };
 
+  const handleChangeEmail = () => {
+    navigate("/change-email", { state: { fromSettings: true } });
+  };
+
   const handleLanguageChange = async (language) => {
     try {
       await updateUserPreferredLanguage(language);
@@ -307,6 +311,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
                     handleSaveProfile={handleSaveProfile}
                     handleCancelProfile={handleCancelProfile}
                     handleChangePassword={handleChangePassword}
+                    handleChangeEmail={handleChangeEmail}
                     handleLanguageChange={handleLanguageChange}
                     handleDeleteAccount={handleDeleteAccount}
                     setTempFirstName={setTempFirstName}

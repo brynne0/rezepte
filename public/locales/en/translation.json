@@ -54,6 +54,15 @@
   "go_to_login": "Go to login",
   "go_to_home": "Go to home",
 
+  "change_email": "Change email",
+  "new_email": "New email",
+  "new_email_repeat": "Repeat new email",
+  "email_repeat_required": "Email repeat is required",
+  "emails_do_not_match": "Emails do not match",
+  "email_change_requested": "Check your new email address to confirm the change.",
+  "email_change_failed": "Failed to change email. Please try again.",
+  "go_to_settings": "Go to settings",
+
   "firstname_required": "First name is required",
   "username_required": "Username is required",
   "username_too_short": "Username must be at least 3 characters",

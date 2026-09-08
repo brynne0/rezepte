@@ -197,6 +197,33 @@ export const changePassword = async (new_password) => {
   }
 };
 
+export const changeEmail = async (new_email) => {
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("No authenticated user found");
+      return { error: { message: "No authenticated user" } };
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      email: new_email,
+    });
+
+    if (error) {
+      console.error("Supabase updateUser error:", error);
+    }
+
+    return { data, error };
+  } catch (err) {
+    console.error("Change email service exception:", err);
+    return { error: err };
+  }
+};
+
 export const getFirstName = async () => {
   try {
     const {
