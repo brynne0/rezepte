@@ -203,9 +203,7 @@ const ChangePasswordPage = () => {
     return (
       <div className="mx-auto mt-20 flex w-full max-w-sm flex-col items-center gap-4 px-4 text-center">
         <h3 className="text-lg font-semibold">{t("invalid_reset_link")}</h3>
-        <Button onClick={() => navigate("/login")}>
-          {t("go_to_login")}
-        </Button>
+        <Button onClick={() => navigate("/login")}>{t("go_to_login")}</Button>
       </div>
     );
   }
