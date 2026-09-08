@@ -33,8 +33,13 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
+const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -187,15 +192,22 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
         >
           <span className="truncate text-sm">@{user.username}</span>
           {user.friendshipStatus === "none" && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => handleSendRequest(user.id)}
-              disabled={loadingAction === user.id}
-              aria-label={t("friends_add")}
-            >
-              <UserPlus className="size-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => handleSendRequest(user.id)}
+                    disabled={loadingAction === user.id}
+                    aria-label={t("friends_add")}
+                  >
+                    <UserPlus className="size-4" />
+                  </Button>
+                }
+              />
+              <TooltipContent>{t("friends_add")}</TooltipContent>
+            </Tooltip>
           )}
           {user.friendshipStatus === "pending_sent" && (
             <span className="shrink-0 text-xs text-muted-foreground">
@@ -203,16 +215,23 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
             </span>
           )}
           {user.friendshipStatus === "pending_received" && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-success hover:text-success"
-              onClick={() => handleAccept(user.id)}
-              disabled={loadingAction === user.id}
-              aria-label={t("friends_accept")}
-            >
-              <Check className="size-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-success hover:text-success"
+                    onClick={() => handleAccept(user.id)}
+                    disabled={loadingAction === user.id}
+                    aria-label={t("friends_accept")}
+                  >
+                    <Check className="size-4" />
+                  </Button>
+                }
+              />
+              <TooltipContent>{t("friends_accept")}</TooltipContent>
+            </Tooltip>
           )}
           {user.friendshipStatus === "accepted" && (
             <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
@@ -255,18 +274,25 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
                   </span>
                 </TableCell>
                 <TableCell className="w-px p-1 text-right">
-                  <Button
-                    variant="ghost-destructive"
-                    size="icon-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveFriend(friend.id);
-                    }}
-                    disabled={loadingAction === friend.id}
-                    aria-label={t("friends_remove")}
-                  >
-                    <UserMinus className="size-3.5" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost-destructive"
+                          size="icon-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFriend(friend.id);
+                          }}
+                          disabled={loadingAction === friend.id}
+                          aria-label={t("friends_remove")}
+                        >
+                          <UserMinus className="size-4" />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>{t("friends_remove")}</TooltipContent>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
@@ -292,25 +318,39 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
                 </TableCell>
                 <TableCell className="w-px p-1 text-right">
                   <div className="flex shrink-0 items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-success hover:text-success"
-                      onClick={() => handleAccept(req.id)}
-                      disabled={loadingAction === req.id}
-                      aria-label={t("friends_accept")}
-                    >
-                      <Check className="size-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost-destructive"
-                      size="icon-sm"
-                      onClick={() => handleDecline(req.id)}
-                      disabled={loadingAction === req.id}
-                      aria-label={t("friends_decline")}
-                    >
-                      <X className="size-3.5" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-success hover:text-success"
+                            onClick={() => handleAccept(req.id)}
+                            disabled={loadingAction === req.id}
+                            aria-label={t("friends_accept")}
+                          >
+                            <Check className="size-4" />
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>{t("friends_accept")}</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost-destructive"
+                            size="icon-sm"
+                            onClick={() => handleDecline(req.id)}
+                            disabled={loadingAction === req.id}
+                            aria-label={t("friends_decline")}
+                          >
+                            <X className="size-4" />
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>{t("friends_decline")}</TooltipContent>
+                    </Tooltip>
                   </div>
                 </TableCell>
               </TableRow>
@@ -327,15 +367,22 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
                   </div>
                 </TableCell>
                 <TableCell className="w-px p-1 text-right">
-                  <Button
-                    variant="ghost-destructive"
-                    size="icon-sm"
-                    onClick={() => handleDecline(req.id)}
-                    disabled={loadingAction === req.id}
-                    aria-label={t("friends_decline")}
-                  >
-                    <X className="size-3.5" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost-destructive"
+                          size="icon-sm"
+                          onClick={() => handleDecline(req.id)}
+                          disabled={loadingAction === req.id}
+                          aria-label={t("friends_decline")}
+                        >
+                          <X className="size-4" />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>{t("friends_decline")}</TooltipContent>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
@@ -346,6 +393,11 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
   );
 
   const triggerButton = renderTrigger(pendingRequests.length);
+  const effectiveTrigger = tooltipLabel ? (
+    <TooltipTrigger render={triggerButton} />
+  ) : (
+    triggerButton
+  );
 
   const onOpenChange = (open) => {
     if (open) loadData();
@@ -353,9 +405,9 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
   };
 
   if (isMobile) {
-    return (
+    const dialog = (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogTrigger render={triggerButton} />
+        <DialogTrigger render={effectiveTrigger} />
         <DialogContent className="flex max-h-[80vh] flex-col gap-2.5 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t("friends")}</DialogTitle>
@@ -364,15 +416,33 @@ const FriendsPanel = ({ onNavigate, renderTrigger } = {}) => {
         </DialogContent>
       </Dialog>
     );
+
+    return tooltipLabel ? (
+      <Tooltip>
+        {dialog}
+        <TooltipContent>{tooltipLabel}</TooltipContent>
+      </Tooltip>
+    ) : (
+      dialog
+    );
   }
 
-  return (
+  const popover = (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
-      <PopoverTrigger render={triggerButton} />
+      <PopoverTrigger render={effectiveTrigger} />
       <PopoverContent align="end" className="max-h-105 w-72 overflow-y-auto">
         {content}
       </PopoverContent>
     </Popover>
+  );
+
+  return tooltipLabel ? (
+    <Tooltip>
+      {popover}
+      <TooltipContent>{tooltipLabel}</TooltipContent>
+    </Tooltip>
+  ) : (
+    popover
   );
 };
 

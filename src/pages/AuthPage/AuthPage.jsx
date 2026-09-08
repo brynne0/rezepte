@@ -35,6 +35,11 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const AuthPage = ({ setLoginMessage }) => {
   // Form input states
@@ -393,17 +398,28 @@ const AuthPage = ({ setLoginMessage }) => {
                         data-testid="password-input"
                       />
                       <InputGroupAddon align="inline-end">
-                        <InputGroupButton
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          aria-label={
-                            showPassword
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <InputGroupButton
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                aria-label={
+                                  showPassword
+                                    ? t("hide_password")
+                                    : t("show_password")
+                                }
+                              >
+                                {showPassword ? <EyeOff /> : <Eye />}
+                              </InputGroupButton>
+                            }
+                          />
+                          <TooltipContent>
+                            {showPassword
                               ? t("hide_password")
-                              : t("show_password")
-                          }
-                        >
-                          {showPassword ? <EyeOff /> : <Eye />}
-                        </InputGroupButton>
+                              : t("show_password")}
+                          </TooltipContent>
+                        </Tooltip>
                       </InputGroupAddon>
                     </InputGroup>
                     <FieldError>{validationErrors.password}</FieldError>

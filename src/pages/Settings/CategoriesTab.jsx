@@ -704,56 +704,94 @@ const CategoriesTab = ({
                             <div className="flex shrink-0 items-center gap-1">
                               {editingCategoryId === category.id ? (
                                 <>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    onClick={handleSaveEditCategory}
-                                    aria-label={t("save_changes")}
-                                  >
-                                    <Check size={16} />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    onClick={handleCancelEditCategory}
-                                    aria-label={t("cancel")}
-                                  >
-                                    <X size={16} />
-                                  </Button>
-                                  {!category.isTemp && !category.isSystem && (
-                                    <Button
-                                      type="button"
-                                      variant="ghost-destructive"
-                                      size="icon-sm"
-                                      onClick={() =>
-                                        handleDeleteCategory(
-                                          category.id,
-                                          category.label
-                                        )
+                                  <Tooltip>
+                                    <TooltipTrigger
+                                      render={
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon-sm"
+                                          onClick={handleSaveEditCategory}
+                                          aria-label={t("save_changes")}
+                                        >
+                                          <Check size={16} />
+                                        </Button>
                                       }
-                                      aria-label={t("delete_category")}
-                                    >
-                                      <Trash2 size={16} />
-                                    </Button>
+                                    />
+                                    <TooltipContent>
+                                      {t("save_changes")}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger
+                                      render={
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon-sm"
+                                          onClick={handleCancelEditCategory}
+                                          aria-label={t("cancel")}
+                                        >
+                                          <X size={16} />
+                                        </Button>
+                                      }
+                                    />
+                                    <TooltipContent>
+                                      {t("cancel")}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  {!category.isTemp && !category.isSystem && (
+                                    <Tooltip>
+                                      <TooltipTrigger
+                                        render={
+                                          <Button
+                                            type="button"
+                                            variant="ghost-destructive"
+                                            size="icon-sm"
+                                            onClick={() =>
+                                              handleDeleteCategory(
+                                                category.id,
+                                                category.label
+                                              )
+                                            }
+                                            aria-label={t("delete_category")}
+                                          >
+                                            <Trash2 size={16} />
+                                          </Button>
+                                        }
+                                      />
+                                      <TooltipContent>
+                                        {t("delete_category")}
+                                      </TooltipContent>
+                                    </Tooltip>
                                   )}
                                 </>
                               ) : (
                                 <>
                                   {!category.isSystem &&
                                     i18n.language === preferredLanguage && (
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon-sm"
-                                        onClick={() =>
-                                          handleEditCategory(category)
-                                        }
-                                        aria-label={t("edit_category_name")}
-                                      >
-                                        <Pencil size={16} />
-                                      </Button>
+                                      <Tooltip>
+                                        <TooltipTrigger
+                                          render={
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="icon-sm"
+                                              onClick={() =>
+                                                handleEditCategory(category)
+                                              }
+                                              aria-label={t(
+                                                "edit_category_name"
+                                              )}
+                                            >
+                                              <Pencil size={16} />
+                                            </Button>
+                                          }
+                                        />
+                                        <TooltipContent>
+                                          {t("edit_category_name")}
+                                        </TooltipContent>
+                                      </Tooltip>
                                     )}
                                   <Tooltip>
                                     <TooltipTrigger

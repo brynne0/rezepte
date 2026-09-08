@@ -1189,7 +1189,10 @@ const CookingTimes = ({
 
           <AlertDialogFooter>
             <AlertDialogCancel>{t("stay")}</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={confirmNavigation}>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={confirmNavigation}
+            >
               {t("leave_page")}
             </AlertDialogAction>
           </AlertDialogFooter>

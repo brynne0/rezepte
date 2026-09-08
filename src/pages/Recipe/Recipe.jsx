@@ -36,6 +36,11 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Recipe = ({ isSharedView = false }) => {
   const { id, shareToken } = useParams();
@@ -289,27 +294,40 @@ const Recipe = ({ isSharedView = false }) => {
         {!isSharedView && isLoggedIn && recipe?.user_id === user?.id && (
           <CardAction className="self-start">
             <ButtonGroup>
-              <Button
-                variant="secondary"
-                size="icon-lg"
-                onClick={() =>
-                  navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
-                }
-                data-testid="edit-recipe-btn"
-                aria-label={t("edit_recipe")}
-              >
-                <Pencil />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon-lg"
-                onClick={() => setShowShareModal(true)}
-                data-testid="share-recipe-btn"
-                aria-label={t("share_recipe")}
-                title={t("share_recipe")}
-              >
-                <Share2 />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="secondary"
+                      size="icon-lg"
+                      onClick={() =>
+                        navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                      }
+                      data-testid="edit-recipe-btn"
+                      aria-label={t("edit_recipe")}
+                    >
+                      <Pencil />
+                    </Button>
+                  }
+                />
+                <TooltipContent>{t("edit_recipe")}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="secondary"
+                      size="icon-lg"
+                      onClick={() => setShowShareModal(true)}
+                      data-testid="share-recipe-btn"
+                      aria-label={t("share_recipe")}
+                    >
+                      <Share2 />
+                    </Button>
+                  }
+                />
+                <TooltipContent>{t("share_recipe")}</TooltipContent>
+              </Tooltip>
             </ButtonGroup>
           </CardAction>
         )}

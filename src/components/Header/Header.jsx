@@ -28,6 +28,11 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import FriendsPanel from "../FriendsPanel/FriendsPanel";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -177,38 +182,45 @@ const Header = ({
 
   // Shared user dropdown menu
   const UserMenu = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            disabled={location.pathname === "/auth-page"}
-            aria-label={isLoggedIn ? t("user_menu") : t("login")}
-          >
-            <User className="size-7" />
-          </Button>
-        }
-      />
-      <DropdownMenuContent align="center">
-        {isLoggedIn ? (
-          <>
-            <DropdownMenuItem onClick={() => navigate("/settings")}>
-              <Settings className="size-4" />
-              {t("settings")}
+    <Tooltip>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  disabled={location.pathname === "/auth-page"}
+                  aria-label={isLoggedIn ? t("user_menu") : t("login")}
+                >
+                  <User className="size-7" />
+                </Button>
+              }
+            />
+          }
+        />
+        <DropdownMenuContent align="center">
+          {isLoggedIn ? (
+            <>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <Settings className="size-4" />
+                {t("settings")}
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                <LogOut className="size-4" />
+                {t("logout")}
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <DropdownMenuItem onClick={() => navigate("/auth-page")}>
+              {t("login")}
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onClick={handleLogout}>
-              <LogOut className="size-4" />
-              {t("logout")}
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <DropdownMenuItem onClick={() => navigate("/auth-page")}>
-            {t("login")}
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <TooltipContent>{isLoggedIn ? t("profile") : t("login")}</TooltipContent>
+    </Tooltip>
   );
 
   return (
@@ -248,6 +260,7 @@ const Header = ({
           {isLoggedIn && (
             <>
               <FriendsPanel
+                tooltipLabel={t("friends")}
                 renderTrigger={(pendingCount) => (
                   <Button
                     variant="ghost"
@@ -271,29 +284,47 @@ const Header = ({
                   </Button>
                 )}
               />
-              <Button
-                data-testid="lucide-plus"
-                variant="ghost"
-                size="icon-lg"
-                onClick={() => navigate("/add-recipe")}
-                className={isActivePage("/add-recipe") ? "text-accent-red" : ""}
-                aria-label={t("add_new_recipe")}
-              >
-                <Plus className="size-7" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      data-testid="lucide-plus"
+                      variant="ghost"
+                      size="icon-lg"
+                      onClick={() => navigate("/add-recipe")}
+                      className={
+                        isActivePage("/add-recipe") ? "text-accent-red" : ""
+                      }
+                      aria-label={t("add_new_recipe")}
+                    >
+                      <Plus className="size-7" />
+                    </Button>
+                  }
+                />
+                <TooltipContent>{t("add_new_recipe")}</TooltipContent>
+              </Tooltip>
               {/* Cooking Times */}
-              <Button
-                data-testid="lucide-clock"
-                variant="ghost"
-                size="icon-lg"
-                onClick={() => navigate("/cooking-times")}
-                className={
-                  isActivePage("/cooking-times") ? "text-accent-red" : ""
-                }
-                aria-label={t("cooking_times", "Cooking Times")}
-              >
-                <Clock className="size-7" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      data-testid="lucide-clock"
+                      variant="ghost"
+                      size="icon-lg"
+                      onClick={() => navigate("/cooking-times")}
+                      className={
+                        isActivePage("/cooking-times") ? "text-accent-red" : ""
+                      }
+                      aria-label={t("cooking_times", "Cooking Times")}
+                    >
+                      <Clock className="size-7" />
+                    </Button>
+                  }
+                />
+                <TooltipContent>
+                  {t("cooking_times", "Cooking Times")}
+                </TooltipContent>
+              </Tooltip>
             </>
           )}
         </nav>
@@ -305,61 +336,72 @@ const Header = ({
 
           {/* Hamburger Menu - only shown when logged in */}
           {isLoggedIn && (
-            <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
-              <DropdownMenuTrigger
-                render={
-                  <Button variant="ghost" size="icon-lg" aria-label="Menu">
-                    <Menu className="size-7" />
-                  </Button>
-                }
-              />
-              <DropdownMenuContent align="center">
-                <FriendsPanel
-                  onNavigate={() => setShowNavMenu(false)}
-                  renderTrigger={(pendingCount) => (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={
-                        isFriendsPageActive
-                          ? "w-full justify-start gap-1.5 text-accent-red"
-                          : "w-full justify-start gap-1.5"
-                      }
-                      aria-label={t("friends")}
-                    >
-                      <Users className="size-4" />
-                      {t("friends")}
-                      {pendingCount > 0 && (
-                        <Badge
-                          variant="destructive"
-                          className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
+            <Tooltip>
+              <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
+                <DropdownMenuTrigger
+                  render={
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon-lg"
+                          aria-label="Menu"
                         >
-                          {pendingCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  )}
+                          <Menu className="size-7" />
+                        </Button>
+                      }
+                    />
+                  }
                 />
-                <DropdownMenuItem
-                  onClick={() => navigate("/add-recipe")}
-                  className={
-                    isActivePage("/add-recipe") ? "text-accent-red" : ""
-                  }
-                >
-                  <Plus className="size-4" />
-                  {t("add_new_recipe")}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => navigate("/cooking-times")}
-                  className={
-                    isActivePage("/cooking-times") ? "text-accent-red" : ""
-                  }
-                >
-                  <Clock className="size-4" />
-                  {t("cooking_times", "Cooking Times")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenuContent align="center">
+                  <FriendsPanel
+                    onNavigate={() => setShowNavMenu(false)}
+                    renderTrigger={(pendingCount) => (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={
+                          isFriendsPageActive
+                            ? "w-full justify-start gap-1.5 text-accent-red"
+                            : "w-full justify-start gap-1.5"
+                        }
+                        aria-label={t("friends")}
+                      >
+                        <Users className="size-4" />
+                        {t("friends")}
+                        {pendingCount > 0 && (
+                          <Badge
+                            variant="destructive"
+                            className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                          >
+                            {pendingCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    )}
+                  />
+                  <DropdownMenuItem
+                    onClick={() => navigate("/add-recipe")}
+                    className={
+                      isActivePage("/add-recipe") ? "text-accent-red" : ""
+                    }
+                  >
+                    <Plus className="size-4" />
+                    {t("add_new_recipe")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate("/cooking-times")}
+                    className={
+                      isActivePage("/cooking-times") ? "text-accent-red" : ""
+                    }
+                  >
+                    <Clock className="size-4" />
+                    {t("cooking_times", "Cooking Times")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <TooltipContent>Menu</TooltipContent>
+            </Tooltip>
           )}
         </div>
       </header>
@@ -399,17 +441,24 @@ const Header = ({
                 />
                 {currentSearchInput && (
                   <InputGroupAddon align="inline-end">
-                    <InputGroupButton
-                      type="button"
-                      size="icon-xs"
-                      aria-label={t("clear_search")}
-                      onClick={() => {
-                        setCurrentSearchInput("");
-                        setSearchTerm("");
-                      }}
-                    >
-                      <X />
-                    </InputGroupButton>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <InputGroupButton
+                            type="button"
+                            size="icon-xs"
+                            aria-label={t("clear_search")}
+                            onClick={() => {
+                              setCurrentSearchInput("");
+                              setSearchTerm("");
+                            }}
+                          >
+                            <X />
+                          </InputGroupButton>
+                        }
+                      />
+                      <TooltipContent>{t("clear_search")}</TooltipContent>
+                    </Tooltip>
                   </InputGroupAddon>
                 )}
               </InputGroup>

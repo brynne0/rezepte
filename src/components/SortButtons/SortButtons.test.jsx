@@ -141,10 +141,84 @@ describe("SortButtons Component", () => {
     const titleButton = screen.getByLabelText("sort_by_title");
     const recentButton = screen.getByLabelText("sort_by_recently_used");
 
-    expect(titleButton).toHaveAttribute("title", "sort_by_title");
     expect(titleButton).toHaveAttribute("aria-label", "sort_by_title");
-    expect(recentButton).toHaveAttribute("title", "sort_by_recently_used");
     expect(recentButton).toHaveAttribute("aria-label", "sort_by_recently_used");
+  });
+
+  test("calls onPageReset when title sort is clicked", () => {
+    const mockOnPageReset = vi.fn();
+    render(<SortButtons {...defaultProps} onPageReset={mockOnPageReset} />);
+
+    fireEvent.click(screen.getByLabelText("sort_by_title"));
+
+    expect(mockOnPageReset).toHaveBeenCalledTimes(1);
+  });
+
+  test("calls onPageReset when recent sort is clicked", () => {
+    const mockOnPageReset = vi.fn();
+    render(<SortButtons {...defaultProps} onPageReset={mockOnPageReset} />);
+
+    fireEvent.click(screen.getByLabelText("sort_by_recently_used"));
+
+    expect(mockOnPageReset).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not throw when onPageReset is not provided", () => {
+    render(<SortButtons {...defaultProps} />);
+
+    expect(() =>
+      fireEvent.click(screen.getByLabelText("sort_by_title"))
+    ).not.toThrow();
+  });
+
+  test("does not render the show images toggle when not logged in", () => {
+    render(<SortButtons {...defaultProps} isLoggedIn={false} />);
+
+    expect(screen.queryByLabelText("show_images")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("hide_images")).not.toBeInTheDocument();
+  });
+
+  test("renders the show images toggle when logged in", () => {
+    render(
+      <SortButtons {...defaultProps} isLoggedIn={true} showImages={true} />
+    );
+
+    expect(screen.getByLabelText("hide_images")).toBeInTheDocument();
+  });
+
+  test("shows correct label and pressed state when images are shown", () => {
+    render(
+      <SortButtons {...defaultProps} isLoggedIn={true} showImages={true} />
+    );
+
+    const imageToggle = screen.getByLabelText("hide_images");
+    expect(imageToggle).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("shows correct label and pressed state when images are hidden", () => {
+    render(
+      <SortButtons {...defaultProps} isLoggedIn={true} showImages={false} />
+    );
+
+    const imageToggle = screen.getByLabelText("show_images");
+    expect(imageToggle).toHaveAttribute("aria-pressed", "false");
+  });
+
+  test("calls onShowImagesChange when the image toggle is clicked", () => {
+    const mockOnShowImagesChange = vi.fn();
+    render(
+      <SortButtons
+        {...defaultProps}
+        isLoggedIn={true}
+        showImages={false}
+        onShowImagesChange={mockOnShowImagesChange}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText("show_images"));
+
+    expect(mockOnShowImagesChange).toHaveBeenCalledTimes(1);
+    expect(mockOnShowImagesChange.mock.calls[0][0]).toBe(true);
   });
 
   test("translation function is called with correct keys", () => {

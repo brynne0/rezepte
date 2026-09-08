@@ -10,6 +10,11 @@ import {
 } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Toggle } from "@/components/ui/toggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const SortButtons = ({
   sortBy,
@@ -66,33 +71,53 @@ const SortButtons = ({
         value={isRecentActive ? ["recent"] : isTitleActive ? ["title"] : []}
         variant="outline"
       >
-        <ToggleGroupItem
-          value="recent"
-          onClick={handleRecentSort}
-          aria-label={t("sort_by_recently_used")}
-          title={t("sort_by_recently_used")}
-        >
-          {getRecentIcon()}
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="title"
-          onClick={handleTitleSort}
-          aria-label={t("sort_by_title")}
-          title={t("sort_by_title")}
-        >
-          {getTitleIcon()}
-        </ToggleGroupItem>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <ToggleGroupItem
+                value="recent"
+                onClick={handleRecentSort}
+                aria-label={t("sort_by_recently_used")}
+              >
+                {getRecentIcon()}
+              </ToggleGroupItem>
+            }
+          />
+          <TooltipContent>{t("sort_by_recently_used")}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <ToggleGroupItem
+                value="title"
+                onClick={handleTitleSort}
+                aria-label={t("sort_by_title")}
+              >
+                {getTitleIcon()}
+              </ToggleGroupItem>
+            }
+          />
+          <TooltipContent>{t("sort_by_title")}</TooltipContent>
+        </Tooltip>
       </ToggleGroup>
       {isLoggedIn && (
-        <Toggle
-          variant="outline"
-          pressed={showImages}
-          onPressedChange={onShowImagesChange}
-          aria-label={showImages ? t("hide_images") : t("show_images")}
-          title={showImages ? t("hide_images") : t("show_images")}
-        >
-          {getImageIcon()}
-        </Toggle>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Toggle
+                variant="outline"
+                pressed={showImages}
+                onPressedChange={onShowImagesChange}
+                aria-label={showImages ? t("hide_images") : t("show_images")}
+              >
+                {getImageIcon()}
+              </Toggle>
+            }
+          />
+          <TooltipContent>
+            {showImages ? t("hide_images") : t("show_images")}
+          </TooltipContent>
+        </Tooltip>
       )}
     </div>
   );

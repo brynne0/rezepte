@@ -25,6 +25,11 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ChangePasswordPage = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -244,17 +249,30 @@ const ChangePasswordPage = () => {
                           aria-invalid={!!validationErrors.oldPassword}
                         />
                         <InputGroupAddon align="inline-end">
-                          <InputGroupButton
-                            type="button"
-                            onClick={() => setShowOldPassword((prev) => !prev)}
-                            aria-label={
-                              showOldPassword
+                          <Tooltip>
+                            <TooltipTrigger
+                              render={
+                                <InputGroupButton
+                                  type="button"
+                                  onClick={() =>
+                                    setShowOldPassword((prev) => !prev)
+                                  }
+                                  aria-label={
+                                    showOldPassword
+                                      ? t("hide_password")
+                                      : t("show_password")
+                                  }
+                                >
+                                  {showOldPassword ? <EyeOff /> : <Eye />}
+                                </InputGroupButton>
+                              }
+                            />
+                            <TooltipContent>
+                              {showOldPassword
                                 ? t("hide_password")
-                                : t("show_password")
-                            }
-                          >
-                            {showOldPassword ? <EyeOff /> : <Eye />}
-                          </InputGroupButton>
+                                : t("show_password")}
+                            </TooltipContent>
+                          </Tooltip>
                         </InputGroupAddon>
                       </InputGroup>
                       <FieldError>{validationErrors.oldPassword}</FieldError>
@@ -284,17 +302,30 @@ const ChangePasswordPage = () => {
                         aria-invalid={!!validationErrors.newPassword}
                       />
                       <InputGroupAddon align="inline-end">
-                        <InputGroupButton
-                          type="button"
-                          onClick={() => setShowNewPassword((prev) => !prev)}
-                          aria-label={
-                            showNewPassword
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <InputGroupButton
+                                type="button"
+                                onClick={() =>
+                                  setShowNewPassword((prev) => !prev)
+                                }
+                                aria-label={
+                                  showNewPassword
+                                    ? t("hide_password")
+                                    : t("show_password")
+                                }
+                              >
+                                {showNewPassword ? <EyeOff /> : <Eye />}
+                              </InputGroupButton>
+                            }
+                          />
+                          <TooltipContent>
+                            {showNewPassword
                               ? t("hide_password")
-                              : t("show_password")
-                          }
-                        >
-                          {showNewPassword ? <EyeOff /> : <Eye />}
-                        </InputGroupButton>
+                              : t("show_password")}
+                          </TooltipContent>
+                        </Tooltip>
                       </InputGroupAddon>
                     </InputGroup>
                     <FieldError>{validationErrors.newPassword}</FieldError>
@@ -326,19 +357,30 @@ const ChangePasswordPage = () => {
                         aria-invalid={!!validationErrors.newPasswordRepeat}
                       />
                       <InputGroupAddon align="inline-end">
-                        <InputGroupButton
-                          type="button"
-                          onClick={() =>
-                            setShowNewPasswordRepeat((prev) => !prev)
-                          }
-                          aria-label={
-                            showNewPasswordRepeat
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <InputGroupButton
+                                type="button"
+                                onClick={() =>
+                                  setShowNewPasswordRepeat((prev) => !prev)
+                                }
+                                aria-label={
+                                  showNewPasswordRepeat
+                                    ? t("hide_password")
+                                    : t("show_password")
+                                }
+                              >
+                                {showNewPasswordRepeat ? <EyeOff /> : <Eye />}
+                              </InputGroupButton>
+                            }
+                          />
+                          <TooltipContent>
+                            {showNewPasswordRepeat
                               ? t("hide_password")
-                              : t("show_password")
-                          }
-                        >
-                          {showNewPasswordRepeat ? <EyeOff /> : <Eye />}
-                        </InputGroupButton>
+                              : t("show_password")}
+                          </TooltipContent>
+                        </Tooltip>
                       </InputGroupAddon>
                     </InputGroup>
                     <FieldError>

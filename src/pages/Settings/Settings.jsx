@@ -80,7 +80,9 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
       if (
         isEditingProfile &&
         profileContainerRef.current &&
-        !profileContainerRef.current.contains(event.target)
+        !profileContainerRef.current.contains(event.target) &&
+        !event.target.closest('[data-slot="tabs-list"]') &&
+        !event.target.closest('[data-slot^="alert-dialog"]')
       ) {
         handleCancelProfile();
       }
@@ -180,6 +182,9 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
     if (pendingTabSwitch) {
       setActiveTab(pendingTabSwitch);
       setPendingTabSwitch(null);
+    }
+    if (isEditingProfile) {
+      handleCancelProfile();
     }
     confirmNavigation();
   };

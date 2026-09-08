@@ -12,6 +12,11 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const NUTRITION_FORM_FIELDS = [
   { key: "calories", labelKey: "nutrition_calories", unit: "kcal", step: "1" },
@@ -73,18 +78,29 @@ const NutritionSection = ({ columns, onChange, isEditingTranslation }) => {
                         disabled={isEditingTranslation}
                       />
                       {columns.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() =>
-                            onChange(columns.filter((_, i) => i !== colIdx))
-                          }
-                          disabled={isEditingTranslation}
-                          aria-label={t("nutrition_remove_column")}
-                        >
-                          <X size={14} />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() =>
+                                  onChange(
+                                    columns.filter((_, i) => i !== colIdx)
+                                  )
+                                }
+                                disabled={isEditingTranslation}
+                                aria-label={t("nutrition_remove_column")}
+                              >
+                                <X size={14} />
+                              </Button>
+                            }
+                          />
+                          <TooltipContent>
+                            {t("nutrition_remove_column")}
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                     </div>
                   ))}
