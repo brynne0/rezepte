@@ -334,20 +334,9 @@ const Recipe = ({ isSharedView = false }) => {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        {wakeLockSupported && (
-          <Label htmlFor="wake-lock">
-            <Switch
-              id="wake-lock"
-              checked={wakeLockActive}
-              onCheckedChange={toggleWakeLock}
-            />
-            {t("keep_screen_on")}
-          </Label>
-        )}
-
         {/* Recipe Images - floating within content - only show when logged in */}
         {isOwner && signedImages && signedImages.length > 0 && (
-          <div className="relative w-full">
+          <div className="relative w-full max-w-lg">
             {imagesLoading && (
               <div className="bg-muted absolute -inset-4 z-10 flex items-center justify-center transition-opacity duration-300">
                 <LoadingAcorn size={20} fullPage={false} />
@@ -358,6 +347,17 @@ const Recipe = ({ isSharedView = false }) => {
               onAllImagesLoaded={() => setImagesLoading(false)}
             />
           </div>
+        )}
+
+        {wakeLockSupported && (
+          <Label htmlFor="wake-lock">
+            <Switch
+              id="wake-lock"
+              checked={wakeLockActive}
+              onCheckedChange={toggleWakeLock}
+            />
+            {t("keep_screen_on")}
+          </Label>
         )}
 
         {/* Servings */}

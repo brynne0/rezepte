@@ -250,6 +250,8 @@
   "drag_images_to_reorder": "Drag images to reorder them. The first image is the main image.",
   "main": "Main",
   "delete_image": "Delete image",
+  "crop_image": "Crop image",
+  "zoom": "Zoom",
 
   "recipe_with_ingredients": "Recipe with",
   "view_recipe_details": "View recipe details",

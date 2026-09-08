@@ -434,7 +434,7 @@ const Header = ({
       {/*  Search Recipe - visible on home page for logged in users  */}
       {isHomePage && isLoggedIn && (
         <div className="flex justify-center px-4 md:px-6">
-          <div className="flex w-full max-w-2xl flex-col items-stretch gap-3 md:flex-row md:items-center">
+          <div className="flex w-full max-w-xl flex-col items-stretch gap-3 md:flex-row md:items-center">
             <form
               className="w-full md:flex-1"
               onSubmit={(e) => {

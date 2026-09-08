@@ -1,11 +1,15 @@
 import { useState, useRef } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Crop } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "cn";
 
-import { validateImageFile } from "../../services/imageService";
+import {
+  validateImageFile,
+  getSignedImageUrl,
+} from "../../services/imageService";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
+import ImageCropDialog from "../ImageCropDialog/ImageCropDialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Attachment,
@@ -63,52 +67,131 @@ const ImageUpload = ({
     setLoadingImages((prev) => new Set(prev).add(imageId));
   };
 
+  // Files pending the crop step, cropped one at a time.
+  const [cropQueue, setCropQueue] = useState([]);
+  const [cropSrc, setCropSrc] = useState(null);
+
+  const addImage = (file, originalFile) => {
+    const imageId = crypto.randomUUID();
+    setLoadingImages((prev) => new Set(prev).add(imageId));
+
+    const previewUrl = URL.createObjectURL(file);
+    const imagePreview = {
+      id: imageId,
+      file,
+      originalFile,
+      url: previewUrl,
+      filename: file.name,
+      size: file.size,
+      type: file.type,
+      is_main: images.length === 0,
+      caption: "",
+      isLocal: true,
+    };
+
+    onChange([...images, imagePreview]);
+  };
+
+  const startCropQueue = (validFiles) => {
+    if (validFiles.length === 0) return;
+    setCropQueue(validFiles);
+    setCropSrc(URL.createObjectURL(validFiles[0]));
+  };
+
+  const advanceCropQueue = (remaining) => {
+    URL.revokeObjectURL(cropSrc);
+    setCropQueue(remaining);
+    setCropSrc(remaining.length > 0 ? URL.createObjectURL(remaining[0]) : null);
+  };
+
+  const handleCropSave = (croppedFile) => {
+    addImage(croppedFile, cropQueue[0]);
+    advanceCropQueue(cropQueue.slice(1));
+  };
+
+  const handleCropCancel = () => {
+    advanceCropQueue(cropQueue.slice(1));
+  };
+
+  // Re-cropping an existing image swaps it for a new local entry at the same
+  // position, so the parent's normal upload/cleanup flow uploads the
+  // recropped file and removes the old one. Always crops from the original
+  // (uncropped) photo, not the current display, so re-crops don't compound.
+  const [recropTarget, setRecropTarget] = useState(null);
+  const [recropSrc, setRecropSrc] = useState(null);
+
+  const openRecrop = async (image) => {
+    if (image.isLocal) {
+      setRecropTarget(image);
+      setRecropSrc(URL.createObjectURL(image.originalFile || image.file));
+      return;
+    }
+
+    const src = image.original_path
+      ? await getSignedImageUrl(image.original_path)
+      : null;
+    setRecropTarget(image);
+    setRecropSrc(src || getDisplayUrl(image));
+  };
+
+  const closeRecrop = () => {
+    if (recropTarget?.isLocal) {
+      URL.revokeObjectURL(recropSrc);
+    }
+    setRecropTarget(null);
+    setRecropSrc(null);
+  };
+
+  const handleRecropSave = (croppedFile) => {
+    const replacement = {
+      id: crypto.randomUUID(),
+      file: croppedFile,
+      originalFile: recropTarget.isLocal
+        ? recropTarget.originalFile || recropTarget.file
+        : undefined,
+      existingOriginalPath: recropTarget.isLocal
+        ? undefined
+        : recropTarget.original_path,
+      url: URL.createObjectURL(croppedFile),
+      filename: croppedFile.name,
+      size: croppedFile.size,
+      type: croppedFile.type,
+      is_main: recropTarget.is_main,
+      caption: recropTarget.caption || "",
+      isLocal: true,
+    };
+
+    if (recropTarget.isLocal) {
+      URL.revokeObjectURL(recropTarget.url);
+    }
+
+    setLoadingImages((prev) => new Set(prev).add(replacement.id));
+    onChange(
+      images.map((img) => (img.id === recropTarget.id ? replacement : img))
+    );
+    closeRecrop();
+  };
+
+  const handleRecropCancel = () => closeRecrop();
+
   const handleFileSelect = async (files) => {
     if (disabled) return;
 
     const fileArray = Array.from(files);
-    const newImages = [];
+    const validFiles = [];
 
     for (const file of fileArray) {
       try {
         setError("");
-
-        // Validate file
         validateImageFile(file);
-
-        // Create image object with local file
-        const imageId = crypto.randomUUID();
-
-        // Add to loading state first
-        setLoadingImages((prev) => new Set(prev).add(imageId));
-
-        // Create preview URL
-        const previewUrl = URL.createObjectURL(file);
-
-        const imagePreview = {
-          id: imageId,
-          file: file, // Store the actual file for later upload
-          url: previewUrl,
-          filename: file.name,
-          size: file.size,
-          type: file.type,
-          is_main: images.length + newImages.length === 0,
-          caption: "",
-          isLocal: true, // Flag to indicate this is a local preview
-        };
-
-        newImages.push(imagePreview);
+        validFiles.push(file);
       } catch (err) {
         setError(err.message);
         break; // Stop processing if there's an error
       }
     }
 
-    // Add all new images at once to prevent race conditions
-    if (newImages.length > 0) {
-      const allImages = [...images, ...newImages];
-      onChange(allImages);
-    }
+    startCropQueue(validFiles);
   };
 
   // The first image is always the main one, so deleting or reordering just
@@ -227,9 +310,15 @@ const ImageUpload = ({
                         <Attachment
                           orientation="vertical"
                           state={isLoading ? "uploading" : "done"}
-                          className={cn(snapshot.isDragging && "shadow-lg")}
+                          className={cn(
+                            "w-32",
+                            snapshot.isDragging && "shadow-lg"
+                          )}
                         >
-                          <AttachmentMedia variant="image">
+                          <AttachmentMedia
+                            variant="image"
+                            className="aspect-3/2 *:[img]:aspect-3/2"
+                          >
                             <img
                               src={getDisplayUrl(image)}
                               alt={image.filename}
@@ -245,6 +334,21 @@ const ImageUpload = ({
                             )}
                           </AttachmentMedia>
                           <AttachmentActions>
+                            <Tooltip>
+                              <TooltipTrigger
+                                render={
+                                  <AttachmentAction
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onClick={() => openRecrop(image)}
+                                    aria-label={t("crop_image")}
+                                    disabled={disabled}
+                                  >
+                                    <Crop />
+                                  </AttachmentAction>
+                                }
+                              />
+                              <TooltipContent>{t("crop_image")}</TooltipContent>
+                            </Tooltip>
                             <Tooltip>
                               <TooltipTrigger
                                 render={
@@ -276,12 +380,12 @@ const ImageUpload = ({
                 orientation="vertical"
                 state="idle"
                 className={cn(
-                  "cursor-pointer",
+                  "w-32 cursor-pointer",
                   disabled && "pointer-events-none opacity-50"
                 )}
                 onClick={openFilePicker}
               >
-                <AttachmentMedia variant="icon">
+                <AttachmentMedia variant="icon" className="aspect-3/2">
                   <Plus />
                 </AttachmentMedia>
               </Attachment>
@@ -297,6 +401,29 @@ const ImageUpload = ({
       )}
 
       {error && <div className="text-sm text-destructive">{error}</div>}
+
+      <ImageCropDialog
+        key={cropSrc}
+        open={cropQueue.length > 0}
+        imageSrc={cropSrc}
+        file={cropQueue[0]}
+        onCancel={handleCropCancel}
+        onSave={handleCropSave}
+      />
+
+      <ImageCropDialog
+        key={recropTarget?.id}
+        open={!!recropTarget}
+        imageSrc={recropSrc}
+        file={
+          recropTarget && {
+            name: recropTarget.filename,
+            type: recropTarget.type,
+          }
+        }
+        onCancel={handleRecropCancel}
+        onSave={handleRecropSave}
+      />
     </div>
   );
 };

@@ -251,6 +251,8 @@
   "drag_images_to_reorder": "Bilder per Drag & Drop neu anordnen. Das erste Bild ist das Hauptbild.",
   "main": "Hauptbild",
   "delete_image": "Bild löschen",
+  "crop_image": "Bild zuschneiden",
+  "zoom": "Zoom",
 
   "recipe_with_ingredients": "Rezept mit",
   "view_recipe_details": "Rezeptdetails anzeigen",

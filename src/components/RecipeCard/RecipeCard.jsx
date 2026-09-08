@@ -11,6 +11,7 @@ import { extractFirstUrl } from "../../utils/linkUtils";
 import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 import useIntersectionObserver from "../../hooks/ui/useIntersectionObserver";
 import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Tooltip,
   TooltipContent,
@@ -118,7 +119,10 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
         signedMainImage &&
         !imageError &&
         optimizedImageUrl && (
-          <div className="relative mx-2 mb-2 h-[clamp(100px,12vw,150px)] overflow-hidden rounded-lg">
+          <AspectRatio
+            ratio={3 / 2}
+            className="mx-2 mb-2 overflow-hidden rounded-lg"
+          >
             <img
               className={cn(
                 "size-full object-cover transition-opacity duration-200 will-change-[opacity]",
@@ -136,7 +140,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
                 <LoadingAcorn size={20} fullPage={false} />
               </div>
             )}
-          </div>
+          </AspectRatio>
         )}
     </Card>
   );

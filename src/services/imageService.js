@@ -74,8 +74,15 @@ const generateFileName = (originalName) => {
   return `${timestamp}-${randomString}.${extension}`;
 };
 
-// Upload image to Supabase Storage
-export const uploadRecipeImage = async (file, userId, recipeId) => {
+// Upload image to Supabase Storage. `originalFile` is the pre-crop photo,
+// uploaded alongside `file` so re-cropping can start from the uncropped
+// original; `existingOriginalPath` reuses one already in storage.
+export const uploadRecipeImage = async (
+  file,
+  userId,
+  recipeId,
+  { originalFile, existingOriginalPath } = {}
+) => {
   try {
     validateImageFile(file);
 
@@ -94,10 +101,29 @@ export const uploadRecipeImage = async (file, userId, recipeId) => {
       throw new Error(`Upload failed: ${error.message}`);
     }
 
+    let originalPath = existingOriginalPath || null;
+    if (!originalPath && originalFile) {
+      validateImageFile(originalFile);
+      const originalFileName = generateFileName(originalFile.name);
+      originalPath = `${userId}/${recipeId}/originals/${originalFileName}`;
+
+      const { error: originalError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(originalPath, originalFile, {
+          cacheControl: "public, max-age=31536000, immutable",
+          upsert: false,
+        });
+
+      if (originalError) {
+        throw new Error(`Original upload failed: ${originalError.message}`);
+      }
+    }
+
     // URL will be generated on-demand via signed URLs
     return {
       id: crypto.randomUUID(),
       path: filePath,
+      original_path: originalPath,
       url: "", // Empty - generated on-demand
       filename: file.name,
       size: file.size,
@@ -223,7 +249,11 @@ export const uploadLocalImages = async (
         const uploadedImage = await uploadRecipeImage(
           image.file,
           userId,
-          recipeId
+          recipeId,
+          {
+            originalFile: image.originalFile,
+            existingOriginalPath: image.existingOriginalPath,
+          }
         );
 
         // Keep the same ID and main status
@@ -261,21 +291,29 @@ export const uploadLocalImages = async (
   return uploadedImages;
 };
 
-// Delete orphaned images when recipe is updated
+// Delete orphaned images when recipe is updated. A re-crop keeps the same
+// original_path across ids, so only delete paths no longer referenced.
 export const cleanupOrphanedImages = async (oldImages, newImages) => {
   if (!oldImages || oldImages.length === 0) {
     return;
   }
 
   const newImageIds = new Set(newImages.map((img) => img.id));
+  const pathsStillInUse = new Set(
+    newImages.flatMap((img) => [img.path, img.original_path].filter(Boolean))
+  );
   const imagesToDelete = oldImages.filter((img) => !newImageIds.has(img.id));
 
   for (const image of imagesToDelete) {
-    if (image.path) {
+    const pathsToDelete = [image.path, image.original_path].filter(
+      (path) => path && !pathsStillInUse.has(path)
+    );
+
+    for (const path of pathsToDelete) {
       try {
-        await deleteRecipeImage(image.path);
+        await deleteRecipeImage(path);
       } catch (error) {
-        console.error(`Failed to delete orphaned image ${image.path}:`, error);
+        console.error(`Failed to delete orphaned image ${path}:`, error);
         // Don't throw - continue with other deletions
       }
     }
