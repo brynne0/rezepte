@@ -28,12 +28,9 @@ vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
-const mockNavigateWithConfirmation = vi.fn();
-
 vi.mock("../../hooks/ui/useUnsavedChanges", () => ({
   useUnsavedChanges: () => ({
     isModalOpen: false,
-    navigate: mockNavigateWithConfirmation,
     confirmNavigation: vi.fn(),
     cancelNavigation: vi.fn(),
     message: "unsaved_changes_warning",
@@ -170,7 +167,7 @@ describe("Settings", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "go_back" }));
 
-      expect(mockNavigateWithConfirmation).toHaveBeenCalledWith(-1);
+      expect(mockNavigate).toHaveBeenCalledWith(-1);
     });
   });
 

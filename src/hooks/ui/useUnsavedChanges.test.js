@@ -1,23 +1,16 @@
 import { renderHook, act } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useUnsavedChanges } from "./useUnsavedChanges";
 
-// Mock react-router-dom
-const mockNavigate = vi.fn();
+const mockUseBlocker = vi.fn();
 vi.mock("react-router-dom", () => ({
-  useNavigate: () => mockNavigate,
+  useBlocker: (...args) => mockUseBlocker(...args),
 }));
 
 describe("useUnsavedChanges", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Clear any existing event listeners
-    window.removeEventListener("beforeunload", expect.any(Function));
-  });
-
-  afterEach(() => {
-    // Clean up event listeners after each test
-    window.removeEventListener("beforeunload", expect.any(Function));
+    mockUseBlocker.mockReturnValue({ state: "unblocked" });
   });
 
   describe("Basic Hook Functionality", () => {
@@ -28,9 +21,9 @@ describe("useUnsavedChanges", () => {
 
       expect(result.current.isModalOpen).toBe(false);
       expect(result.current.message).toBe("Test message");
-      expect(typeof result.current.navigate).toBe("function");
       expect(typeof result.current.confirmNavigation).toBe("function");
       expect(typeof result.current.cancelNavigation).toBe("function");
+      expect(result.current.navigate).toBeUndefined();
     });
 
     it("should handle message parameter", () => {
@@ -41,134 +34,141 @@ describe("useUnsavedChanges", () => {
 
       expect(result.current.message).toBe(customMessage);
     });
-  });
 
-  describe("Navigation Behavior", () => {
-    it("should navigate directly when no unsaved changes", () => {
-      const { result } = renderHook(() =>
-        useUnsavedChanges(false, "Test message")
-      );
+    it("passes a predicate function to useBlocker", () => {
+      renderHook(() => useUnsavedChanges(true, "Test message"));
 
-      act(() => {
-        result.current.navigate("/test-path");
-      });
-
-      expect(mockNavigate).toHaveBeenCalledWith("/test-path", {});
-      expect(result.current.isModalOpen).toBe(false);
-    });
-
-    it("should navigate directly with replace option", () => {
-      const { result } = renderHook(() =>
-        useUnsavedChanges(true, "Test message")
-      );
-
-      act(() => {
-        result.current.navigate("/test-path", { replace: true });
-      });
-
-      expect(mockNavigate).toHaveBeenCalledWith("/test-path", {
-        replace: true,
-      });
-      expect(result.current.isModalOpen).toBe(false);
-    });
-
-    it("should show modal when unsaved changes exist", () => {
-      const { result } = renderHook(() =>
-        useUnsavedChanges(true, "Test message")
-      );
-
-      act(() => {
-        result.current.navigate("/test-path");
-      });
-
-      expect(result.current.isModalOpen).toBe(true);
-      expect(mockNavigate).not.toHaveBeenCalled();
-    });
-
-    it("should handle navigation with options", () => {
-      const { result } = renderHook(() =>
-        useUnsavedChanges(false, "Test message")
-      );
-
-      const options = { state: { from: "test" } };
-
-      act(() => {
-        result.current.navigate("/test-path", options);
-      });
-
-      expect(mockNavigate).toHaveBeenCalledWith("/test-path", options);
+      expect(mockUseBlocker).toHaveBeenCalledWith(expect.any(Function));
     });
   });
 
-  describe("Modal State Management", () => {
-    it("should open modal when navigating with unsaved changes", () => {
+  describe("Blocking predicate", () => {
+    it("blocks when hasUnsavedChanges is true and the pathname changes", () => {
+      renderHook(() => useUnsavedChanges(true, "Test message"));
+      const predicate = mockUseBlocker.mock.calls[0][0];
+
+      expect(
+        predicate({
+          currentLocation: { pathname: "/a" },
+          nextLocation: { pathname: "/b" },
+        })
+      ).toBe(true);
+    });
+
+    it("does not block when hasUnsavedChanges is false", () => {
+      renderHook(() => useUnsavedChanges(false, "Test message"));
+      const predicate = mockUseBlocker.mock.calls[0][0];
+
+      expect(
+        predicate({
+          currentLocation: { pathname: "/a" },
+          nextLocation: { pathname: "/b" },
+        })
+      ).toBe(false);
+    });
+
+    it("does not block when the pathname is unchanged", () => {
+      renderHook(() => useUnsavedChanges(true, "Test message"));
+      const predicate = mockUseBlocker.mock.calls[0][0];
+
+      expect(
+        predicate({
+          currentLocation: { pathname: "/a" },
+          nextLocation: { pathname: "/a" },
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe("Modal state driven by the blocker", () => {
+    it("reports the modal as open when the blocker is blocked", () => {
+      mockUseBlocker.mockReturnValue({
+        state: "blocked",
+        proceed: vi.fn(),
+        reset: vi.fn(),
+      });
+
       const { result } = renderHook(() =>
         useUnsavedChanges(true, "Test message")
       );
-
-      act(() => {
-        result.current.navigate("/test-path");
-      });
 
       expect(result.current.isModalOpen).toBe(true);
     });
 
-    it("should close modal on cancel navigation", () => {
+    it("reports the modal as closed when the blocker is unblocked", () => {
+      mockUseBlocker.mockReturnValue({ state: "unblocked" });
+
       const { result } = renderHook(() =>
         useUnsavedChanges(true, "Test message")
       );
 
-      // Open modal
-      act(() => {
-        result.current.navigate("/test-path");
+      expect(result.current.isModalOpen).toBe(false);
+    });
+
+    it("confirmNavigation calls blocker.proceed when blocked", () => {
+      const proceed = vi.fn();
+      mockUseBlocker.mockReturnValue({
+        state: "blocked",
+        proceed,
+        reset: vi.fn(),
       });
 
-      expect(result.current.isModalOpen).toBe(true);
+      const { result } = renderHook(() =>
+        useUnsavedChanges(true, "Test message")
+      );
 
-      // Cancel navigation
+      act(() => {
+        result.current.confirmNavigation();
+      });
+
+      expect(proceed).toHaveBeenCalledTimes(1);
+    });
+
+    it("confirmNavigation is a no-op when not blocked", () => {
+      mockUseBlocker.mockReturnValue({ state: "unblocked" });
+
+      const { result } = renderHook(() =>
+        useUnsavedChanges(true, "Test message")
+      );
+
+      expect(() => {
+        act(() => {
+          result.current.confirmNavigation();
+        });
+      }).not.toThrow();
+    });
+
+    it("cancelNavigation calls blocker.reset when blocked", () => {
+      const reset = vi.fn();
+      mockUseBlocker.mockReturnValue({
+        state: "blocked",
+        proceed: vi.fn(),
+        reset,
+      });
+
+      const { result } = renderHook(() =>
+        useUnsavedChanges(true, "Test message")
+      );
+
       act(() => {
         result.current.cancelNavigation();
       });
 
-      expect(result.current.isModalOpen).toBe(false);
-      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(reset).toHaveBeenCalledTimes(1);
     });
 
-    it("should close modal and navigate on confirm", () => {
+    it("cancelNavigation is a no-op when not blocked", () => {
+      mockUseBlocker.mockReturnValue({ state: "unblocked" });
+
       const { result } = renderHook(() =>
         useUnsavedChanges(true, "Test message")
       );
 
-      // Open modal
-      act(() => {
-        result.current.navigate("/test-path", { state: { test: true } });
-      });
-
-      expect(result.current.isModalOpen).toBe(true);
-
-      // Confirm navigation
-      act(() => {
-        result.current.confirmNavigation();
-      });
-
-      expect(result.current.isModalOpen).toBe(false);
-      expect(mockNavigate).toHaveBeenCalledWith("/test-path", {
-        state: { test: true },
-      });
-    });
-
-    it("should handle confirm navigation when no pending navigation", () => {
-      const { result } = renderHook(() =>
-        useUnsavedChanges(false, "Test message")
-      );
-
-      // Try to confirm without pending navigation
-      act(() => {
-        result.current.confirmNavigation();
-      });
-
-      expect(result.current.isModalOpen).toBe(false);
-      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(() => {
+        act(() => {
+          result.current.cancelNavigation();
+        });
+      }).not.toThrow();
     });
   });
 
@@ -189,7 +189,6 @@ describe("useUnsavedChanges", () => {
     it("should prevent beforeunload when unsaved changes exist", () => {
       renderHook(() => useUnsavedChanges(true, "Test message"));
 
-      // Simulate beforeunload event
       const beforeUnloadEvent = new Event("beforeunload");
       Object.defineProperty(beforeUnloadEvent, "preventDefault", {
         value: vi.fn(),
@@ -239,35 +238,6 @@ describe("useUnsavedChanges", () => {
   });
 
   describe("Hook Updates", () => {
-    it("should update behavior when hasUnsavedChanges changes", () => {
-      let hasUnsavedChanges = false;
-      const { result, rerender } = renderHook(() =>
-        useUnsavedChanges(hasUnsavedChanges, "Test message")
-      );
-
-      // Initially no unsaved changes - should navigate directly
-      act(() => {
-        result.current.navigate("/test-path");
-      });
-
-      expect(mockNavigate).toHaveBeenCalledWith("/test-path", {});
-      expect(result.current.isModalOpen).toBe(false);
-
-      mockNavigate.mockClear();
-
-      // Update to have unsaved changes
-      hasUnsavedChanges = true;
-      rerender();
-
-      // Now should show modal instead of navigating
-      act(() => {
-        result.current.navigate("/another-path");
-      });
-
-      expect(result.current.isModalOpen).toBe(true);
-      expect(mockNavigate).not.toHaveBeenCalled();
-    });
-
     it("should update message when message changes", () => {
       let message = "Initial message";
       const { result, rerender } = renderHook(() =>
@@ -295,90 +265,24 @@ describe("useUnsavedChanges", () => {
 
       expect(result.current.message).toBe("");
     });
-
-    it("should handle multiple rapid navigation attempts", () => {
-      const { result } = renderHook(() =>
-        useUnsavedChanges(true, "Test message")
-      );
-
-      // Multiple rapid navigation calls
-      act(() => {
-        result.current.navigate("/path1");
-        result.current.navigate("/path2");
-        result.current.navigate("/path3");
-      });
-
-      // Should only open modal once and store the last navigation
-      expect(result.current.isModalOpen).toBe(true);
-
-      // Confirm should navigate to the last requested path
-      act(() => {
-        result.current.confirmNavigation();
-      });
-
-      expect(mockNavigate).toHaveBeenCalledTimes(1);
-      expect(mockNavigate).toHaveBeenCalledWith("/path3", {});
-    });
-
-    it("should handle navigation options correctly", () => {
-      const { result } = renderHook(() =>
-        useUnsavedChanges(true, "Test message")
-      );
-
-      const complexOptions = {
-        replace: false,
-        state: { from: "test", data: { id: 123 } },
-      };
-
-      act(() => {
-        result.current.navigate("/complex-path", complexOptions);
-      });
-
-      expect(result.current.isModalOpen).toBe(true);
-
-      act(() => {
-        result.current.confirmNavigation();
-      });
-
-      expect(mockNavigate).toHaveBeenCalledWith(
-        "/complex-path",
-        complexOptions
-      );
-    });
   });
 
   describe("Callback Stability", () => {
-    it("should maintain stable callback references", () => {
+    it("should maintain stable callback references across rerenders with the same blocker", () => {
+      const stableBlocker = { state: "unblocked" };
+      mockUseBlocker.mockReturnValue(stableBlocker);
+
       const { result, rerender } = renderHook(() =>
         useUnsavedChanges(true, "Test message")
       );
 
-      const initialNavigate = result.current.navigate;
       const initialConfirm = result.current.confirmNavigation;
       const initialCancel = result.current.cancelNavigation;
 
-      // Rerender with same props
       rerender();
 
-      expect(result.current.navigate).toBe(initialNavigate);
       expect(result.current.confirmNavigation).toBe(initialConfirm);
       expect(result.current.cancelNavigation).toBe(initialCancel);
-    });
-
-    it("should update navigate callback when hasUnsavedChanges changes", () => {
-      let hasUnsavedChanges = true;
-      const { result, rerender } = renderHook(() =>
-        useUnsavedChanges(hasUnsavedChanges, "Test message")
-      );
-
-      const initialNavigate = result.current.navigate;
-
-      // Change hasUnsavedChanges
-      hasUnsavedChanges = false;
-      rerender();
-
-      // Navigate callback should be updated due to dependency change
-      expect(result.current.navigate).not.toBe(initialNavigate);
     });
   });
 });

@@ -39,6 +39,8 @@ import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../hooks/ui/useTheme";
 import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
+import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
+import { cn } from "cn";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -70,6 +72,20 @@ const Header = ({
   const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
 
   const [showInstallModal, setShowInstallModal] = useState(false);
+
+  // Only show a border under the header once there's scrolled content above it
+  const mainScrollRef = useMainScrollRef();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const node = mainScrollRef?.current;
+    if (!node) return;
+
+    const handleScroll = () => setIsScrolled(node.scrollTop > 0);
+    handleScroll();
+    node.addEventListener("scroll", handleScroll, { passive: true });
+    return () => node.removeEventListener("scroll", handleScroll);
+  }, [mainScrollRef]);
 
   // Show install modal once when prompt is available (or on iOS), and user is
   // logged in, unless previously dismissed
@@ -225,184 +241,193 @@ const Header = ({
 
   return (
     <>
-      <header className="relative flex items-center justify-between pt-2 pb-4 bg-background">
-        {/* Language and Theme Selection */}
-        <div className="flex shrink-0 items-center md:gap-2">
-          {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
-          <LanguageSelector />
-          <ThemeToggle />
-        </div>
+      <header
+        className={cn(
+          "sticky top-0 z-20 border-b",
+          isScrolled ? "border-border/60" : "border-transparent"
+        )}
+      >
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-6 md:pb-6">
+          {/* Language and Theme Selection */}
+          <div className="flex shrink-0 items-center md:gap-2">
+            {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
 
-        {/* Title */}
-        <div className="absolute inset-0 m-auto flex h-max w-max flex-col items-center">
-          {/* Display user's first name above header */}
-          {firstName && (
-            <span className="text-sm leading-none md:text-base">{`${firstName}'s`}</span>
-          )}
-          <Button
-            variant="ghost"
-            className="h-auto select-none p-0 font-forta text-3xl leading-none text-foreground transition-none hover:bg-transparent active:translate-y-0 dark:hover:bg-transparent md:text-5xl"
-            onClick={() => {
-              navigate("/");
-            }}
-            aria-label={t("go_to_home")}
-          >
-            Rezepte
-          </Button>
-        </div>
+          {/* Title */}
+          <div className="absolute inset-0 m-auto flex h-max w-max flex-col items-center">
+            {/* Display user's first name above header */}
+            {firstName && (
+              <span className="text-sm leading-none md:text-base">{`${firstName}'s`}</span>
+            )}
+            <Button
+              variant="ghost"
+              className="h-auto select-none p-0 font-forta text-3xl leading-none text-foreground transition-none hover:bg-transparent active:translate-y-0 dark:hover:bg-transparent md:text-5xl"
+              onClick={() => {
+                navigate("/");
+              }}
+              aria-label={t("go_to_home")}
+            >
+              Rezepte
+            </Button>
+          </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-2 md:flex md:gap-4">
-          {/* Desktop User Icon */}
-          <UserMenu />
+          {/* Desktop Navigation */}
+          <nav className="hidden items-center gap-2 md:flex md:gap-4">
+            {/* Desktop User Icon */}
+            <UserMenu />
 
-          {/* Only display if user logged in */}
-          {isLoggedIn && (
-            <>
-              <FriendsPanel
-                tooltipLabel={t("friends")}
-                renderTrigger={(pendingCount) => (
-                  <Button
-                    variant="ghost"
-                    size="icon-lg"
-                    className={
-                      isFriendsPageActive
-                        ? "relative text-accent-red"
-                        : "relative"
-                    }
-                    aria-label={t("friends")}
-                  >
-                    <Users className="size-7" />
-                    {pendingCount > 0 && (
-                      <Badge
-                        variant="destructive"
-                        className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.625rem]"
-                      >
-                        {pendingCount}
-                      </Badge>
-                    )}
-                  </Button>
-                )}
-              />
-              <Tooltip>
-                <TooltipTrigger
-                  render={
+            {/* Only display if user logged in */}
+            {isLoggedIn && (
+              <>
+                <FriendsPanel
+                  tooltipLabel={t("friends")}
+                  renderTrigger={(pendingCount) => (
                     <Button
-                      data-testid="lucide-plus"
                       variant="ghost"
                       size="icon-lg"
+                      className={
+                        isFriendsPageActive
+                          ? "relative text-accent-red"
+                          : "relative"
+                      }
+                      aria-label={t("friends")}
+                    >
+                      <Users className="size-7" />
+                      {pendingCount > 0 && (
+                        <Badge
+                          variant="destructive"
+                          className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                        >
+                          {pendingCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  )}
+                />
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        data-testid="lucide-plus"
+                        variant="ghost"
+                        size="icon-lg"
+                        onClick={() => navigate("/add-recipe")}
+                        className={
+                          isActivePage("/add-recipe") ? "text-accent-red" : ""
+                        }
+                        aria-label={t("add_new_recipe")}
+                      >
+                        <Plus className="size-7" />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>{t("add_new_recipe")}</TooltipContent>
+                </Tooltip>
+                {/* Cooking Times */}
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        data-testid="lucide-clock"
+                        variant="ghost"
+                        size="icon-lg"
+                        onClick={() => navigate("/cooking-times")}
+                        className={
+                          isActivePage("/cooking-times")
+                            ? "text-accent-red"
+                            : ""
+                        }
+                        aria-label={t("cooking_times", "Cooking Times")}
+                      >
+                        <Clock className="size-7" />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>
+                    {t("cooking_times", "Cooking Times")}
+                  </TooltipContent>
+                </Tooltip>
+              </>
+            )}
+          </nav>
+
+          {/* Mobile User and Menu Icons */}
+          <div className="flex items-center md:hidden">
+            {/* Mobile User Icon */}
+            <UserMenu />
+
+            {/* Hamburger Menu - only shown when logged in */}
+            {isLoggedIn && (
+              <Tooltip>
+                <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
+                  <DropdownMenuTrigger
+                    render={
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon-lg"
+                            aria-label="Menu"
+                          >
+                            <Menu className="size-7" />
+                          </Button>
+                        }
+                      />
+                    }
+                  />
+                  <DropdownMenuContent align="center">
+                    <FriendsPanel
+                      onNavigate={() => setShowNavMenu(false)}
+                      renderTrigger={(pendingCount) => (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={
+                            isFriendsPageActive
+                              ? "w-full justify-start gap-1.5 text-accent-red"
+                              : "w-full justify-start gap-1.5"
+                          }
+                          aria-label={t("friends")}
+                        >
+                          <Users className="size-4" />
+                          {t("friends")}
+                          {pendingCount > 0 && (
+                            <Badge
+                              variant="destructive"
+                              className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                            >
+                              {pendingCount}
+                            </Badge>
+                          )}
+                        </Button>
+                      )}
+                    />
+                    <DropdownMenuItem
                       onClick={() => navigate("/add-recipe")}
                       className={
                         isActivePage("/add-recipe") ? "text-accent-red" : ""
                       }
-                      aria-label={t("add_new_recipe")}
                     >
-                      <Plus className="size-7" />
-                    </Button>
-                  }
-                />
-                <TooltipContent>{t("add_new_recipe")}</TooltipContent>
-              </Tooltip>
-              {/* Cooking Times */}
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      data-testid="lucide-clock"
-                      variant="ghost"
-                      size="icon-lg"
+                      <Plus className="size-4" />
+                      {t("add_new_recipe")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       onClick={() => navigate("/cooking-times")}
                       className={
                         isActivePage("/cooking-times") ? "text-accent-red" : ""
                       }
-                      aria-label={t("cooking_times", "Cooking Times")}
                     >
-                      <Clock className="size-7" />
-                    </Button>
-                  }
-                />
-                <TooltipContent>
-                  {t("cooking_times", "Cooking Times")}
-                </TooltipContent>
+                      <Clock className="size-4" />
+                      {t("cooking_times", "Cooking Times")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <TooltipContent>Menu</TooltipContent>
               </Tooltip>
-            </>
-          )}
-        </nav>
-
-        {/* Mobile User and Menu Icons */}
-        <div className="flex items-center md:hidden">
-          {/* Mobile User Icon */}
-          <UserMenu />
-
-          {/* Hamburger Menu - only shown when logged in */}
-          {isLoggedIn && (
-            <Tooltip>
-              <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
-                <DropdownMenuTrigger
-                  render={
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="ghost"
-                          size="icon-lg"
-                          aria-label="Menu"
-                        >
-                          <Menu className="size-7" />
-                        </Button>
-                      }
-                    />
-                  }
-                />
-                <DropdownMenuContent align="center">
-                  <FriendsPanel
-                    onNavigate={() => setShowNavMenu(false)}
-                    renderTrigger={(pendingCount) => (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={
-                          isFriendsPageActive
-                            ? "w-full justify-start gap-1.5 text-accent-red"
-                            : "w-full justify-start gap-1.5"
-                        }
-                        aria-label={t("friends")}
-                      >
-                        <Users className="size-4" />
-                        {t("friends")}
-                        {pendingCount > 0 && (
-                          <Badge
-                            variant="destructive"
-                            className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
-                          >
-                            {pendingCount}
-                          </Badge>
-                        )}
-                      </Button>
-                    )}
-                  />
-                  <DropdownMenuItem
-                    onClick={() => navigate("/add-recipe")}
-                    className={
-                      isActivePage("/add-recipe") ? "text-accent-red" : ""
-                    }
-                  >
-                    <Plus className="size-4" />
-                    {t("add_new_recipe")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => navigate("/cooking-times")}
-                    className={
-                      isActivePage("/cooking-times") ? "text-accent-red" : ""
-                    }
-                  >
-                    <Clock className="size-4" />
-                    {t("cooking_times", "Cooking Times")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <TooltipContent>Menu</TooltipContent>
-            </Tooltip>
-          )}
+            )}
+          </div>
         </div>
       </header>
 

@@ -1,5 +1,5 @@
 // React & hooks
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext, createContext } from "react";
 
 // Data hooks
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
@@ -8,9 +8,9 @@ import { useCategories } from "./hooks/data/useCategories";
 
 // Routing
 import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
   useLocation,
 } from "react-router-dom";
 
@@ -44,6 +44,191 @@ import Settings from "./pages/Settings/Settings";
 import FriendRecipes from "./pages/FriendRecipes/FriendRecipes";
 import ShowcasePage from "./pages/ShowcasePage/ShowcasePage";
 import ShowcaseLegacyPage from "./pages/ShowcaseLegacyPage/ShowcaseLegacyPage";
+
+const AppStateContext = createContext(null);
+
+function HomePage() {
+  const {
+    categories,
+    selectedCategory,
+    setSelectedCategory,
+    setSearchTerm,
+    recipes,
+    searchTerm,
+    showImages,
+    totalRecipeCount,
+    isFetchingRecipes,
+    paginationInfo,
+    onPageChange,
+    isLoggedIn,
+  } = useContext(AppStateContext);
+  const isOnline = useOnlineStatus();
+
+  return (
+    <>
+      {isOnline && (
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          setSearchTerm={setSearchTerm}
+        />
+      )}
+      <RecipeList
+        selectedCategory={selectedCategory}
+        recipes={recipes}
+        searchTerm={searchTerm}
+        showImages={isLoggedIn ? showImages : false}
+        totalRecipeCount={totalRecipeCount}
+        isPaginated={true}
+        loading={isFetchingRecipes}
+        isOnline={isOnline}
+      />
+      {isOnline && (
+        <Pagination
+          currentPage={paginationInfo.currentPage}
+          totalPages={paginationInfo.totalPages}
+          onPageChange={onPageChange}
+          hasNextPage={paginationInfo.hasNextPage}
+          hasPrevPage={paginationInfo.hasPrevPage}
+        />
+      )}
+    </>
+  );
+}
+
+function AddRecipeRoute() {
+  const { categories } = useContext(AppStateContext);
+  return (
+    <ProtectedRoute>
+      <AddRecipePage categories={categories} />
+    </ProtectedRoute>
+  );
+}
+
+function EditRecipeRoute() {
+  const { categories } = useContext(AppStateContext);
+  return (
+    <ProtectedRoute>
+      <EditRecipePage categories={categories} />
+    </ProtectedRoute>
+  );
+}
+
+function CookingTimesRoute() {
+  const { isCookingTimesEditing, setIsCookingTimesEditing } =
+    useContext(AppStateContext);
+  return (
+    <ProtectedRoute>
+      <CookingTimes
+        isEditMode={isCookingTimesEditing}
+        setIsEditMode={setIsCookingTimesEditing}
+      />
+    </ProtectedRoute>
+  );
+}
+
+function SettingsRoute() {
+  const { refreshCategories } = useContext(AppStateContext);
+  return (
+    <ProtectedRoute>
+      <Settings refreshCategories={refreshCategories} />
+    </ProtectedRoute>
+  );
+}
+
+function AuthPageRoute() {
+  const { setLoginMessage } = useContext(AppStateContext);
+  return <AuthPage setLoginMessage={setLoginMessage} />;
+}
+
+function Layout() {
+  const {
+    setSelectedCategory,
+    setSearchTerm,
+    searchTerm,
+    setLoginMessage,
+    loginMessage,
+    t,
+    sortBy,
+    setSortBy,
+    showImages,
+    setShowImages,
+    onPageReset,
+    refreshRecipes,
+    isCookingTimesEditing,
+    setIsCookingTimesEditing,
+    isLoggedIn,
+  } = useContext(AppStateContext);
+  const location = useLocation();
+  const mainScrollRef = useMainScrollRef();
+  const isCookingTimesPage = location.pathname === "/cooking-times";
+  const isOnline = useOnlineStatus();
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+
+  // Notify the user via toast when the connection drops
+  useEffect(() => {
+    if (!isOnline) {
+      toast.add({
+        title: t("no_internet_connection"),
+        type: "error",
+      });
+    }
+  }, [isOnline, t]);
+
+  // Reset cooking times editing state when leaving the cooking times page
+  useEffect(() => {
+    if (!isCookingTimesPage && isCookingTimesEditing) {
+      setIsCookingTimesEditing(false);
+    }
+  }, [isCookingTimesPage, isCookingTimesEditing, setIsCookingTimesEditing]);
+
+  // Refresh recipes when navigating to home page
+  useEffect(() => {
+    if (location.pathname === "/") {
+      refreshRecipes();
+    }
+  }, [location.pathname, refreshRecipes]);
+
+  // Refresh recipes when login state changes
+  useEffect(() => {
+    refreshRecipes();
+  }, [isLoggedIn, refreshRecipes]);
+
+  // Refresh recipes when language changes
+  useEffect(() => {
+    refreshRecipes();
+  }, [currentLanguage, refreshRecipes]);
+
+  return (
+    <>
+      <Header
+        setSelectedCategory={setSelectedCategory}
+        setSearchTerm={setSearchTerm}
+        searchTerm={searchTerm}
+        setLoginMessage={setLoginMessage}
+        loginMessage={loginMessage}
+        t={t}
+        disableLanguageSwitch={isCookingTimesEditing}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        showImages={showImages}
+        setShowImages={setShowImages}
+        onPageReset={onPageReset}
+      />
+      <ScrollArea
+        className="min-h-0 flex-1"
+        viewportClassName="pb-3 md:pb-8"
+        viewportRef={mainScrollRef}
+      >
+        <div className="mx-auto w-full max-w-7xl px-3 pt-3 md:px-8 md:pt-4">
+          <Outlet />
+        </div>
+      </ScrollArea>
+    </>
+  );
+}
 
 function App() {
   const { t } = useTranslation();
@@ -83,14 +268,6 @@ function App() {
   const location = window.location;
   const isHomePage = location.pathname === "/";
 
-  if (isHomePage && (loading || categoriesLoading)) {
-    return (
-      <div className="loading-squirrel">
-        <Squirrel />
-      </div>
-    );
-  }
-
   const handlePageChange = (page) => {
     setCurrentPage(page);
     mainScrollRef.current?.scrollTo(0, 0);
@@ -110,214 +287,89 @@ function App() {
     setCurrentPage(1);
   };
 
-  return (
-    <div className="mx-auto flex h-screen max-w-7xl flex-col overflow-hidden px-3 pt-3 md:px-8 md:pt-4">
-      <MainScrollProvider value={mainScrollRef}>
-        <Router>
-          <AppRoutes
-            setSelectedCategory={handleCategoryChange}
-            setSearchTerm={handleSearchChange}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            showImages={showImages}
-            setShowImages={setShowImages}
-            setLoginMessage={setLoginMessage}
-            loginMessage={loginMessage}
-            t={t}
-            categories={categories}
-            selectedCategory={selectedCategory}
-            recipes={recipes}
-            totalRecipeCount={totalRecipeCount}
-            searchTerm={searchTerm}
-            loading={loading}
-            isFetchingRecipes={isFetchingRecipes}
-            isCookingTimesEditing={isCookingTimesEditing}
-            setIsCookingTimesEditing={setIsCookingTimesEditing}
-            currentPage={currentPage}
-            paginationInfo={paginationInfo}
-            onPageChange={handlePageChange}
-            onPageReset={handlePageReset}
-            refreshRecipes={refreshRecipes}
-            refreshCategories={refreshCategories}
-            isLoggedIn={isLoggedIn}
-          />
-        </Router>
-      </MainScrollProvider>
-      <Toaster />
-    </div>
-  );
-}
-
-function AppRoutes(props) {
-  const location = useLocation();
-  const mainScrollRef = useMainScrollRef();
-  const {
-    refreshRecipes,
-    refreshCategories,
-    isCookingTimesEditing,
-    setIsCookingTimesEditing,
-    isLoggedIn,
-  } = props;
-  const isCookingTimesPage = location.pathname === "/cooking-times";
-  const isOnline = useOnlineStatus();
-  const { t, i18n } = useTranslation();
-  const currentLanguage = i18n.language;
-
-  // Notify the user via toast when the connection drops
-  useEffect(() => {
-    if (!isOnline) {
-      toast.add({
-        title: t("no_internet_connection"),
-        type: "error",
-      });
-    }
-  }, [isOnline, t]);
-  // Reset cooking times editing state when leaving the cooking times page
-  useEffect(() => {
-    if (!isCookingTimesPage && isCookingTimesEditing) {
-      setIsCookingTimesEditing(false);
-    }
-  }, [isCookingTimesPage, isCookingTimesEditing, setIsCookingTimesEditing]);
-
-  // Refresh recipes when navigating to home page
-  useEffect(() => {
-    if (location.pathname === "/") {
-      refreshRecipes();
-    }
-  }, [location.pathname, refreshRecipes]);
-
-  // Refresh recipes when login state changes
-  useEffect(() => {
-    refreshRecipes();
-  }, [isLoggedIn, refreshRecipes]);
-
-  // Refresh recipes when language changes
-  useEffect(() => {
-    refreshRecipes();
-  }, [currentLanguage, refreshRecipes]);
-
-  return (
-    <>
-      <Header
-        setSelectedCategory={props.setSelectedCategory}
-        setSearchTerm={props.setSearchTerm}
-        searchTerm={props.searchTerm}
-        setLoginMessage={props.setLoginMessage}
-        loginMessage={props.loginMessage}
-        t={props.t}
-        disableLanguageSwitch={isCookingTimesEditing}
-        sortBy={props.sortBy}
-        setSortBy={props.setSortBy}
-        showImages={props.showImages}
-        setShowImages={props.setShowImages}
-        onPageReset={props.onPageReset}
-      />
-      <ScrollArea
-        className="min-h-0 flex-1"
-        viewportClassName="pb-3 md:pb-8"
-        viewportRef={mainScrollRef}
-      >
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                {isOnline && (
-                  <CategoryFilter
-                    categories={props.categories}
-                    selectedCategory={props.selectedCategory}
-                    setSelectedCategory={props.setSelectedCategory}
-                    setSearchTerm={props.setSearchTerm}
-                  />
-                )}
-                <RecipeList
-                  selectedCategory={props.selectedCategory}
-                  recipes={props.recipes}
-                  searchTerm={props.searchTerm}
-                  showImages={isLoggedIn ? props.showImages : false}
-                  totalRecipeCount={props.totalRecipeCount}
-                  isPaginated={true}
-                  loading={props.isFetchingRecipes}
-                  isOnline={isOnline}
-                />
-                {isOnline && (
-                  <Pagination
-                    currentPage={props.paginationInfo.currentPage}
-                    totalPages={props.paginationInfo.totalPages}
-                    onPageChange={props.onPageChange}
-                    hasNextPage={props.paginationInfo.hasNextPage}
-                    hasPrevPage={props.paginationInfo.hasPrevPage}
-                  />
-                )}
-              </>
-            }
-          />
-          <Route
-            path="/:id/:slug"
-            element={
+  const [router] = useState(() =>
+    createBrowserRouter([
+      {
+        element: <Layout />,
+        children: [
+          { path: "/", element: <HomePage /> },
+          {
+            path: "/:id/:slug",
+            element: (
               <ProtectedRoute>
                 <Recipe />
               </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/shared/:shareToken/:slug?"
-            element={<Recipe isSharedView={true} />}
-          />
-          <Route
-            path="/add-recipe"
-            element={
-              <ProtectedRoute>
-                <AddRecipePage categories={props.categories} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/edit-recipe/:id/:slug"
-            element={
-              <ProtectedRoute>
-                <EditRecipePage categories={props.categories} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cooking-times"
-            element={
-              <ProtectedRoute>
-                <CookingTimes
-                  isEditMode={isCookingTimesEditing}
-                  setIsEditMode={setIsCookingTimesEditing}
-                />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/showcase" element={<ShowcasePage />} />
-          <Route path="/showcase-legacy" element={<ShowcaseLegacyPage />} />
-          <Route
-            path="/auth-page"
-            element={<AuthPage setLoginMessage={props.setLoginMessage} />}
-          />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/change-password" element={<ChangePasswordPage />} />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings refreshCategories={refreshCategories} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/friends/:username"
-            element={
+            ),
+          },
+          {
+            path: "/shared/:shareToken/:slug?",
+            element: <Recipe isSharedView={true} />,
+          },
+          { path: "/add-recipe", element: <AddRecipeRoute /> },
+          { path: "/edit-recipe/:id/:slug", element: <EditRecipeRoute /> },
+          { path: "/cooking-times", element: <CookingTimesRoute /> },
+          { path: "/showcase", element: <ShowcasePage /> },
+          { path: "/showcase-legacy", element: <ShowcaseLegacyPage /> },
+          { path: "/auth-page", element: <AuthPageRoute /> },
+          { path: "/forgot-password", element: <ForgotPasswordPage /> },
+          { path: "/change-password", element: <ChangePasswordPage /> },
+          { path: "/settings", element: <SettingsRoute /> },
+          {
+            path: "/friends/:username",
+            element: (
               <ProtectedRoute>
                 <FriendRecipes />
               </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </ScrollArea>
-    </>
+            ),
+          },
+        ],
+      },
+    ])
+  );
+
+  if (isHomePage && (loading || categoriesLoading)) {
+    return (
+      <div className="loading-squirrel">
+        <Squirrel />
+      </div>
+    );
+  }
+
+  const appStateValue = {
+    setSelectedCategory: handleCategoryChange,
+    setSearchTerm: handleSearchChange,
+    sortBy,
+    setSortBy,
+    showImages,
+    setShowImages,
+    setLoginMessage,
+    loginMessage,
+    t,
+    categories,
+    selectedCategory,
+    recipes,
+    totalRecipeCount,
+    searchTerm,
+    isFetchingRecipes,
+    isCookingTimesEditing,
+    setIsCookingTimesEditing,
+    paginationInfo,
+    onPageChange: handlePageChange,
+    onPageReset: handlePageReset,
+    refreshRecipes,
+    refreshCategories,
+    isLoggedIn,
+  };
+
+  return (
+    <div className="flex h-screen flex-col overflow-hidden">
+      <MainScrollProvider value={mainScrollRef}>
+        <AppStateContext.Provider value={appStateValue}>
+          <RouterProvider router={router} />
+        </AppStateContext.Provider>
+      </MainScrollProvider>
+      <Toaster />
+    </div>
   );
 }
 

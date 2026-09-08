@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Clipboard } from "lucide-react";
 import { DragDropContext } from "@hello-pangea/dnd";
@@ -41,6 +42,7 @@ const RecipeForm = ({
   isEditingTranslation = false,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const {
     formData,
@@ -94,7 +96,6 @@ const RecipeForm = ({
   // Unsaved changes detection
   const {
     isModalOpen: isUnsavedChangesModalOpen,
-    navigate: navigateWithConfirmation,
     confirmNavigation,
     cancelNavigation,
     message: unsavedChangesMessage,
@@ -120,15 +121,15 @@ const RecipeForm = ({
   const selectedCategories = formData.categories || [];
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <Card>
+    <>
+      <Card className="max-w-3xl mx-auto">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="relative flex w-full items-center justify-center">
             <Button
               variant="ghost"
               size="icon-sm"
               className="absolute left-0"
-              onClick={() => navigateWithConfirmation(-1)}
+              onClick={() => navigate(-1)}
               data-testid="back-arrow"
               aria-label={t("go_back")}
             >
@@ -354,7 +355,7 @@ const RecipeForm = ({
                 type="button"
                 variant="outline"
                 className="w-full sm:w-auto"
-                onClick={() => navigateWithConfirmation(-1)}
+                onClick={() => navigate(-1)}
               >
                 {t("cancel")}
               </Button>
@@ -434,7 +435,7 @@ const RecipeForm = ({
         onSelectRecipe={handleSelectRecipe}
         currentRecipeId={initialRecipe?.id}
       />
-    </div>
+    </>
   );
 };
 

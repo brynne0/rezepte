@@ -46,6 +46,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   const [categoriesHasUnsavedChanges, setCategoriesHasUnsavedChanges] =
     useState(false);
   const [pendingTabSwitch, setPendingTabSwitch] = useState(null);
+  const [isTabSwitchModalOpen, setIsTabSwitchModalOpen] = useState(false);
   const firstNameInputRef = useRef(null);
   const profileContainerRef = useRef(null);
   const navigate = useNavigate();
@@ -160,7 +161,6 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
 
   const {
     isModalOpen: isUnsavedChangesModalOpen,
-    navigate: navigateWithConfirmation,
     confirmNavigation,
     cancelNavigation,
     message: unsavedChangesMessage,
@@ -172,26 +172,31 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   const handleTabSwitch = (targetTab) => {
     if (isEditingProfile || categoriesHasUnsavedChanges) {
       setPendingTabSwitch(targetTab);
-      navigateWithConfirmation(`/settings?tab=${targetTab}`);
+      setIsTabSwitchModalOpen(true);
     } else {
       setActiveTab(targetTab);
     }
   };
 
-  const handleConfirmModal = () => {
-    if (pendingTabSwitch) {
-      setActiveTab(pendingTabSwitch);
-      setPendingTabSwitch(null);
+  const handleConfirmTabSwitch = () => {
+    setActiveTab(pendingTabSwitch);
+    setPendingTabSwitch(null);
+    if (isEditingProfile) {
+      handleCancelProfile();
     }
+    setIsTabSwitchModalOpen(false);
+  };
+
+  const handleCancelTabSwitch = () => {
+    setPendingTabSwitch(null);
+    setIsTabSwitchModalOpen(false);
+  };
+
+  const handleConfirmRouteLeave = () => {
     if (isEditingProfile) {
       handleCancelProfile();
     }
     confirmNavigation();
-  };
-
-  const handleCancelModal = () => {
-    setPendingTabSwitch(null);
-    cancelNavigation();
   };
 
   const handleDeleteAccount = () => {
@@ -235,7 +240,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   }
   if (error) {
     return (
-      <div className="mx-auto md:mt-20 w-full max-w-2xl px-4">
+      <div className="max-w-2xl mx-auto">
         <Alert variant="destructive">
           <AlertDescription>Error: {error}</AlertDescription>
         </Alert>
@@ -244,7 +249,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   }
 
   return (
-    <div className="mx-auto md:mt-20 w-full max-w-2xl px-4">
+    <div className="max-w-2xl mx-auto">
       {showDeleteSuccess ? (
         <div className="flex flex-col items-center gap-4 text-center">
           <p>
@@ -262,7 +267,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
                   variant="ghost"
                   size="icon-sm"
                   className="absolute left-0"
-                  onClick={() => navigateWithConfirmation(-1)}
+                  onClick={() => navigate(-1)}
                   aria-label={t("go_back")}
                 >
                   <ArrowLeft />
@@ -348,7 +353,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
           <AlertDialog
             open={isUnsavedChangesModalOpen}
             onOpenChange={(open) => {
-              if (!open) handleConfirmModal();
+              if (!open) handleConfirmRouteLeave();
             }}
           >
             <AlertDialogContent>
@@ -358,7 +363,29 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
 
               <AlertDialogFooter>
                 <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancelModal}>
+                <AlertDialogAction onClick={cancelNavigation}>
+                  {t("stay")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog
+            open={isTabSwitchModalOpen}
+            onOpenChange={(open) => {
+              if (!open) handleConfirmTabSwitch();
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("unsaved_changes_warning")}
+                </AlertDialogTitle>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleCancelTabSwitch}>
                   {t("stay")}
                 </AlertDialogAction>
               </AlertDialogFooter>

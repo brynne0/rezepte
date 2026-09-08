@@ -158,10 +158,10 @@ export const useRecipeFormState = ({ initialRecipe = null }) => {
     };
   }, [initialRecipe]);
 
-  const [formData, setFormData] = useState(getInitialFormData);
+  const [initialFormData, setInitialFormData] = useState(getInitialFormData);
+  const [formData, setFormData] = useState(initialFormData);
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionError, setSubmissionError] = useState("");
-  const [initialFormData, setInitialFormData] = useState(getInitialFormData);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [uploadingImageIds, setUploadingImageIds] = useState(new Set());

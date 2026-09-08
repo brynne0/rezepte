@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import { createRoutesStub } from "react-router-dom";
 import CookingTimes from "./CookingTimes";
 import * as cookingTimesService from "../../services/cookingTimesService";
 import * as userService from "../../services/userService";
@@ -127,11 +127,15 @@ describe("CookingTimes", () => {
   });
 
   const renderComponent = (props = {}) => {
-    return render(
-      <MemoryRouter>
-        <CookingTimes isEditMode={false} setIsEditMode={vi.fn()} {...props} />
-      </MemoryRouter>
-    );
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <CookingTimes isEditMode={false} setIsEditMode={vi.fn()} {...props} />
+        ),
+      },
+    ]);
+    return render(<Stub initialEntries={["/"]} />);
   };
 
   describe("Loading State", () => {

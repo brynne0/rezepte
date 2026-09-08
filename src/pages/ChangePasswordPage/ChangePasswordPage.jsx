@@ -190,7 +190,7 @@ const ChangePasswordPage = () => {
   }
 
   return (
-    <div className="mx-auto mt-20 w-full max-w-sm px-4">
+    <div className="mx-auto mt-20 max-w-sm">
       <Card className="w-full">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="relative flex w-full items-center justify-center">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import {
@@ -38,6 +39,7 @@ const CookingTimes = ({
   setIsEditMode: externalSetIsEditMode,
 }) => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState("all");
@@ -81,7 +83,6 @@ const CookingTimes = ({
   // Unsaved changes hook
   const {
     isModalOpen: isUnsavedChangesModalOpen,
-    navigate: navigateWithConfirmation,
     confirmNavigation,
     cancelNavigation,
     message: unsavedChangesMessage,
@@ -751,7 +752,7 @@ const CookingTimes = ({
         setIsEditMode(false);
       }
     } else {
-      navigateWithConfirmation(-1);
+      navigate(-1);
     }
   };
 
