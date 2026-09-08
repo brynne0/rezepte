@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { useState } from "react";
 import Settings from "./Settings";
 
 // Create mock functions
@@ -39,52 +38,6 @@ vi.mock("../../hooks/ui/useUnsavedChanges", () => ({
     cancelNavigation: vi.fn(),
     message: "unsaved_changes_warning",
   }),
-}));
-
-vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
-  default: function ConfirmationModal({
-    isOpen,
-    onClose,
-    onConfirm,
-    title,
-    message,
-    confirmText,
-    cancelText,
-    requireConfirmation,
-    confirmationText,
-  }) {
-    const [isConfirmed, setIsConfirmed] = useState(false);
-
-    if (!isOpen) return null;
-
-    return (
-      <div data-testid="confirmation-modal">
-        <h3>{title}</h3>
-        <p>{message}</p>
-        {requireConfirmation && (
-          <label>
-            <input
-              type="checkbox"
-              data-testid="confirmation-checkbox"
-              checked={isConfirmed}
-              onChange={(e) => setIsConfirmed(e.target.checked)}
-            />
-            {confirmationText}
-          </label>
-        )}
-        <button onClick={onClose} data-testid="modal-cancel">
-          {cancelText}
-        </button>
-        <button
-          onClick={onConfirm}
-          data-testid="modal-confirm"
-          disabled={requireConfirmation && !isConfirmed}
-        >
-          {confirmText}
-        </button>
-      </div>
-    );
-  },
 }));
 
 const mockChangeLanguage = vi.fn();

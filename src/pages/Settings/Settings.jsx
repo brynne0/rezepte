@@ -12,7 +12,6 @@ import {
 } from "../../services/userService";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import ProfileTab from "./ProfileTab";
 import CategoriesTab from "./CategoriesTab";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -341,15 +340,25 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
             </AlertDialogContent>
           </AlertDialog>
 
-          <ConfirmationModal
-            isOpen={isUnsavedChangesModalOpen}
-            onConfirm={handleCancelModal}
-            onClose={handleConfirmModal}
-            message={unsavedChangesMessage}
-            cancelText={t("leave_page")}
-            confirmText={t("stay")}
-            confirmButtonType="primary"
-          />
+          <AlertDialog
+            open={isUnsavedChangesModalOpen}
+            onOpenChange={(open) => {
+              if (!open) handleConfirmModal();
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleCancelModal}>
+                  {t("stay")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </>
       )}
     </div>

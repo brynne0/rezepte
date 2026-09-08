@@ -28,23 +28,6 @@ vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
-vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
-  default: function ConfirmationModal({ isOpen, onClose, onConfirm, message }) {
-    if (!isOpen) return null;
-    return (
-      <div data-testid="confirmation-modal">
-        <p>{message}</p>
-        <button onClick={onClose} data-testid="modal-cancel">
-          Cancel
-        </button>
-        <button onClick={onConfirm} data-testid="modal-confirm">
-          Confirm
-        </button>
-      </div>
-    );
-  },
-}));
-
 // Mock i18next
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({

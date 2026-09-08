@@ -22,7 +22,16 @@ import {
 } from "../../services/categoriesService";
 import { getUserPreferredLanguage } from "../../services/userService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -687,22 +696,6 @@ const CategoriesTab = ({
                                 {category.isSystem && (
                                   <Badge variant="outline">{t("system")}</Badge>
                                 )}
-
-                                {isEditingCategories &&
-                                  !category.isSystem &&
-                                  i18n.language === preferredLanguage && (
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon-xs"
-                                      onClick={() =>
-                                        handleEditCategory(category)
-                                      }
-                                      aria-label={t("edit_category_name")}
-                                    >
-                                      <Pencil size={14} />
-                                    </Button>
-                                  )}
                               </>
                             )}
                           </div>
@@ -747,23 +740,52 @@ const CategoriesTab = ({
                                   )}
                                 </>
                               ) : (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  onClick={() => toggleVisibility(category.id)}
-                                  aria-label={
-                                    category.isVisible
-                                      ? t("hide_category")
-                                      : t("show_category")
-                                  }
-                                >
-                                  {category.isVisible ? (
-                                    <Eye size={16} />
-                                  ) : (
-                                    <EyeOff size={16} />
-                                  )}
-                                </Button>
+                                <>
+                                  {!category.isSystem &&
+                                    i18n.language === preferredLanguage && (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        onClick={() =>
+                                          handleEditCategory(category)
+                                        }
+                                        aria-label={t("edit_category_name")}
+                                      >
+                                        <Pencil size={16} />
+                                      </Button>
+                                    )}
+                                  <Tooltip>
+                                    <TooltipTrigger
+                                      render={
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon-sm"
+                                          onClick={() =>
+                                            toggleVisibility(category.id)
+                                          }
+                                          aria-label={
+                                            category.isVisible
+                                              ? t("hide_category")
+                                              : t("show_category")
+                                          }
+                                        >
+                                          {category.isVisible ? (
+                                            <Eye size={16} />
+                                          ) : (
+                                            <EyeOff size={16} />
+                                          )}
+                                        </Button>
+                                      }
+                                    />
+                                    <TooltipContent>
+                                      {category.isVisible
+                                        ? t("hide_category")
+                                        : t("show_category")}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </>
                               )}
                             </div>
                           )}
@@ -811,18 +833,35 @@ const CategoriesTab = ({
       )}
 
       {/* Delete Category Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={handleCancelDeleteCategory}
-        onConfirm={handleConfirmDeleteCategory}
-        message={t("delete_category_confirmation", {
-          categoryName: deleteCategoryName,
-        })}
-        secondaryMessage={t("delete_category_warning")}
-        confirmText={t("delete_category")}
-        cancelText={t("cancel")}
-        confirmButtonType="danger"
-      />
+      <AlertDialog
+        open={showDeleteModal}
+        onOpenChange={(open) => {
+          if (!open) handleCancelDeleteCategory();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("delete_category_confirmation", {
+                categoryName: deleteCategoryName,
+              })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_category_warning")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleConfirmDeleteCategory}
+            >
+              {t("delete_category")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   );
 };

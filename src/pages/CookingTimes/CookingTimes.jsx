@@ -21,7 +21,15 @@ import {
 } from "../../services/cookingTimesService";
 import { getUserPreferredLanguage } from "../../services/userService";
 import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
-import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import "./CookingTimes.css";
 
@@ -1168,26 +1176,49 @@ const CookingTimes = ({
       </div>
 
       {/* Unsaved Changes Modal - for page navigation */}
-      <ConfirmationModal
-        isOpen={isUnsavedChangesModalOpen}
-        onClose={cancelNavigation}
-        onConfirm={confirmNavigation}
-        message={unsavedChangesMessage}
-        confirmText={t("leave_page")}
-        cancelText={t("stay")}
-        confirmButtonType="danger"
-      />
+      <AlertDialog
+        open={isUnsavedChangesModalOpen}
+        onOpenChange={(open) => {
+          if (!open) cancelNavigation();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("stay")}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={confirmNavigation}>
+              {t("leave_page")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Exit Edit Mode Modal - for exiting edit mode with unsaved changes */}
-      <ConfirmationModal
-        isOpen={showExitEditModeModal}
-        onClose={handleCancelExitEditMode}
-        onConfirm={handleConfirmExitEditMode}
-        message={t("unsaved_changes_warning")}
-        confirmText={t("leave_page")}
-        cancelText={t("stay")}
-        confirmButtonType="danger"
-      />
+      <AlertDialog
+        open={showExitEditModeModal}
+        onOpenChange={(open) => {
+          if (!open) handleCancelExitEditMode();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("unsaved_changes_warning")}</AlertDialogTitle>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("stay")}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleConfirmExitEditMode}
+            >
+              {t("leave_page")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

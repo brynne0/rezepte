@@ -34,7 +34,16 @@ import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../hooks/ui/useTheme";
 import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
-import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import SortButtons from "../SortButtons/SortButtons";
 
 const Header = ({
@@ -419,16 +428,32 @@ const Header = ({
         </div>
       )}
 
-      <ConfirmationModal
-        isOpen={showInstallModal}
-        onClose={handleDismissInstall}
-        onConfirm={isIOS ? handleDismissInstall : handleConfirmInstall}
-        title={t("install_app")}
-        message={isIOS ? t("install_app_ios") : t("install_app_prompt")}
-        confirmText={isIOS ? t("got_it") : t("install_app")}
-        cancelText={t("maybe_later")}
-        confirmButtonType="primary"
-      />
+      <AlertDialog
+        open={showInstallModal}
+        onOpenChange={(open) => {
+          if (!open) handleDismissInstall();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("install_app")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isIOS ? t("install_app_ios") : t("install_app_prompt")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            {!isIOS && (
+              <AlertDialogCancel>{t("maybe_later")}</AlertDialogCancel>
+            )}
+            <AlertDialogAction
+              onClick={isIOS ? handleDismissInstall : handleConfirmInstall}
+            >
+              {isIOS ? t("got_it") : t("install_app")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
