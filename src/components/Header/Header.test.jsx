@@ -273,7 +273,7 @@ describe("Header Component", () => {
     expect(screen.getByTestId("lucide-plus")).toBeInTheDocument();
   });
 
-  test("shows add recipe button when not logged in", () => {
+  test("hides add recipe button when not logged in", () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: false,
       isMe: false,
@@ -286,7 +286,7 @@ describe("Header Component", () => {
       </TestWrapper>
     );
 
-    expect(screen.queryByTestId("lucide-plus")).toBeInTheDocument();
+    expect(screen.queryByTestId("lucide-plus")).not.toBeInTheDocument();
   });
 
   test("hides search bar when not on home page", () => {
@@ -737,7 +737,7 @@ describe("Header Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/add-recipe");
     });
 
-    test("shows hamburger menu when not logged in", () => {
+    test("hides hamburger menu when not logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: false,
         isMe: false,
@@ -750,7 +750,7 @@ describe("Header Component", () => {
         </TestWrapper>
       );
 
-      expect(screen.queryByLabelText("Menu")).toBeInTheDocument();
+      expect(screen.queryByLabelText("Menu")).not.toBeInTheDocument();
     });
 
     test("closes hamburger menu when clicking outside", async () => {

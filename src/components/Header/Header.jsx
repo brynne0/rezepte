@@ -274,11 +274,11 @@ const Header = ({
 
           {/* Desktop Navigation */}
           <nav className="hidden items-center gap-2 md:flex md:gap-4">
-            {!isAuthPage && (
-              <>
-                {/* Desktop User Icon */}
-                <UserMenu />
+            {/* Desktop User Icon */}
+            {!isAuthPage && <UserMenu />}
 
+            {isLoggedIn && (
+              <>
                 <FriendsPanel
                   tooltipLabel={t("friends")}
                   renderTrigger={(pendingCount) => (
@@ -353,83 +353,76 @@ const Header = ({
 
           {/* Mobile User and Menu Icons */}
           <div className="flex items-center md:hidden">
-            {!isAuthPage && (
-              <>
-                {/* Mobile User Icon */}
-                <UserMenu />
+            {/* Mobile User Icon */}
+            {!isAuthPage && <UserMenu />}
 
-                <Tooltip>
-                  <DropdownMenu
-                    open={showNavMenu}
-                    onOpenChange={setShowNavMenu}
-                  >
-                    <DropdownMenuTrigger
-                      render={
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              variant="ghost"
-                              size="icon-lg"
-                              aria-label="Menu"
-                            >
-                              <Menu className="size-7" />
-                            </Button>
-                          }
-                        />
-                      }
-                    />
-                    <DropdownMenuContent align="center">
-                      <FriendsPanel
-                        onNavigate={() => setShowNavMenu(false)}
-                        renderTrigger={(pendingCount) => (
+            {isLoggedIn && (
+              <Tooltip>
+                <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
+                  <DropdownMenuTrigger
+                    render={
+                      <TooltipTrigger
+                        render={
                           <Button
                             variant="ghost"
-                            size="sm"
-                            className={
-                              isFriendsPageActive
-                                ? "w-full justify-start gap-1.5 text-accent-red"
-                                : "w-full justify-start gap-1.5"
-                            }
-                            aria-label={t("friends")}
+                            size="icon-lg"
+                            aria-label="Menu"
                           >
-                            <Users className="size-4" />
-                            {t("friends")}
-                            {pendingCount > 0 && (
-                              <Badge
-                                variant="destructive"
-                                className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
-                              >
-                                {pendingCount}
-                              </Badge>
-                            )}
+                            <Menu className="size-7" />
                           </Button>
-                        )}
+                        }
                       />
-                      <DropdownMenuItem
-                        onClick={() => navigate("/add-recipe")}
-                        className={
-                          isActivePage("/add-recipe") ? "text-accent-red" : ""
-                        }
-                      >
-                        <Plus className="size-4" />
-                        {t("add_new_recipe")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/cooking-times")}
-                        className={
-                          isActivePage("/cooking-times")
-                            ? "text-accent-red"
-                            : ""
-                        }
-                      >
-                        <Clock className="size-4" />
-                        {t("cooking_times", "Cooking Times")}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <TooltipContent>Menu</TooltipContent>
-                </Tooltip>
-              </>
+                    }
+                  />
+                  <DropdownMenuContent align="center">
+                    <FriendsPanel
+                      onNavigate={() => setShowNavMenu(false)}
+                      renderTrigger={(pendingCount) => (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={
+                            isFriendsPageActive
+                              ? "w-full justify-start gap-1.5 text-accent-red"
+                              : "w-full justify-start gap-1.5"
+                          }
+                          aria-label={t("friends")}
+                        >
+                          <Users className="size-4" />
+                          {t("friends")}
+                          {pendingCount > 0 && (
+                            <Badge
+                              variant="destructive"
+                              className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                            >
+                              {pendingCount}
+                            </Badge>
+                          )}
+                        </Button>
+                      )}
+                    />
+                    <DropdownMenuItem
+                      onClick={() => navigate("/add-recipe")}
+                      className={
+                        isActivePage("/add-recipe") ? "text-accent-red" : ""
+                      }
+                    >
+                      <Plus className="size-4" />
+                      {t("add_new_recipe")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/cooking-times")}
+                      className={
+                        isActivePage("/cooking-times") ? "text-accent-red" : ""
+                      }
+                    >
+                      <Clock className="size-4" />
+                      {t("cooking_times", "Cooking Times")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <TooltipContent>Menu</TooltipContent>
+              </Tooltip>
             )}
           </div>
         </div>

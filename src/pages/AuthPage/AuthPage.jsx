@@ -1,16 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import {
-  Mail,
-  User,
-  ChefHat,
-  Lock,
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  Squirrel,
-} from "lucide-react";
+import { Mail, User, ChefHat, Lock, Eye, EyeOff, Squirrel } from "lucide-react";
 import { signUp, signIn, resendConfirmationEmail } from "../../services/auth";
 import {
   validateAuthForm,
@@ -242,17 +233,8 @@ const AuthPage = ({ setLoginMessage }) => {
     <div className="mx-auto mt-20 max-w-sm">
       <Card className="w-full">
         <CardHeader className="flex flex-col items-stretch gap-4">
-          <div className="grid w-full grid-cols-3 items-center">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="justify-self-start"
-              onClick={() => navigate(-1)}
-              aria-label={t("go_back")}
-            >
-              <ArrowLeft className="size-5" />
-            </Button>
-            <Squirrel className="size-9 justify-self-center text-primary" />
+          <div className="flex w-full items-center justify-center">
+            <Squirrel className="size-9 text-primary" />
           </div>
 
           {!awaitingConfirmation && (
