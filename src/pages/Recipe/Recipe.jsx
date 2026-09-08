@@ -336,7 +336,7 @@ const Recipe = ({ isSharedView = false }) => {
       <CardContent className="flex flex-col gap-4">
         {/* Recipe Images - floating within content - only show when logged in */}
         {isOwner && signedImages && signedImages.length > 0 && (
-          <div className="relative w-full max-w-lg">
+          <div className="relative w-full">
             {imagesLoading && (
               <div className="bg-muted absolute -inset-4 z-10 flex items-center justify-center transition-opacity duration-300">
                 <LoadingAcorn size={20} fullPage={false} />

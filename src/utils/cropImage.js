@@ -34,7 +34,8 @@ export const getCroppedImageFile = (imageSrc, cropAreaPixels, file) => {
         0.9
       );
     };
-    image.onerror = () => reject(new Error("Failed to load image for cropping"));
+    image.onerror = () =>
+      reject(new Error("Failed to load image for cropping"));
     image.src = imageSrc;
   });
 };
