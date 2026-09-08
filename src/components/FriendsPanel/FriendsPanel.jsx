@@ -129,6 +129,23 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
     }
   };
 
+  const handleCancelRequest = async (userId) => {
+    setLoadingAction(userId);
+    try {
+      await removeFriendship(userId);
+      setSearchResults((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, friendshipStatus: "none" } : u
+        )
+      );
+      await loadData();
+    } catch (err) {
+      console.error("Error cancelling friend request:", err);
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
   const handleDecline = async (userId) => {
     setLoadingAction(userId);
     try {
@@ -210,9 +227,27 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
             </Tooltip>
           )}
           {user.friendshipStatus === "pending_sent" && (
-            <span className="shrink-0 text-xs text-muted-foreground">
-              {t("friends_pending")}
-            </span>
+            <div className="flex shrink-0 items-center gap-1">
+              <span className="text-xs text-muted-foreground">
+                {t("friends_pending")}
+              </span>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost-destructive"
+                      size="icon-sm"
+                      onClick={() => handleCancelRequest(user.id)}
+                      disabled={loadingAction === user.id}
+                      aria-label={t("friends_cancel")}
+                    >
+                      <X className="size-4" />
+                    </Button>
+                  }
+                />
+                <TooltipContent>{t("friends_cancel")}</TooltipContent>
+              </Tooltip>
+            </div>
           )}
           {user.friendshipStatus === "pending_received" && (
             <Tooltip>
@@ -373,15 +408,15 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
                         <Button
                           variant="ghost-destructive"
                           size="icon-sm"
-                          onClick={() => handleDecline(req.id)}
+                          onClick={() => handleCancelRequest(req.id)}
                           disabled={loadingAction === req.id}
-                          aria-label={t("friends_decline")}
+                          aria-label={t("friends_cancel")}
                         >
                           <X className="size-4" />
                         </Button>
                       }
                     />
-                    <TooltipContent>{t("friends_decline")}</TooltipContent>
+                    <TooltipContent>{t("friends_cancel")}</TooltipContent>
                   </Tooltip>
                 </TableCell>
               </TableRow>

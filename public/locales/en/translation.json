@@ -282,6 +282,7 @@
   "friends_pending": "Pending",
   "friends_accept": "Accept",
   "friends_decline": "Decline",
+  "friends_cancel": "Cancel request",
   "friends_remove": "Remove friend",
   "friends_accepted": "Friends",
   "friends_search_above": "Add friends to see their recipes.",
