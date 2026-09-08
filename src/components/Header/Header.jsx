@@ -324,7 +324,7 @@ const Header = ({
                   <TooltipContent>{t("add_new_recipe")}</TooltipContent>
                 </Tooltip>
                 {/* Cooking Times */}
-                <Tooltip>
+                {/* <Tooltip>
                   <TooltipTrigger
                     render={
                       <Button
@@ -346,7 +346,7 @@ const Header = ({
                   <TooltipContent>
                     {t("cooking_times", "Cooking Times")}
                   </TooltipContent>
-                </Tooltip>
+                </Tooltip> */}
               </>
             )}
           </nav>

@@ -12,6 +12,7 @@ import {
   RouterProvider,
   Outlet,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 
 // i18n
@@ -44,7 +45,6 @@ import ChangeEmailPage from "./pages/ChangeEmailPage/ChangeEmailPage";
 import Settings from "./pages/Settings/Settings";
 import FriendRecipes from "./pages/FriendRecipes/FriendRecipes";
 import ShowcasePage from "./pages/ShowcasePage/ShowcasePage";
-import ShowcaseLegacyPage from "./pages/ShowcaseLegacyPage/ShowcaseLegacyPage";
 
 const AppStateContext = createContext(null);
 
@@ -323,9 +323,8 @@ function App() {
           },
           { path: "/add-recipe", element: <AddRecipeRoute /> },
           { path: "/edit-recipe/:id/:slug", element: <EditRecipeRoute /> },
-          { path: "/cooking-times", element: <CookingTimesRoute /> },
+          // { path: "/cooking-times", element: <CookingTimesRoute /> },
           { path: "/showcase", element: <ShowcasePage /> },
-          { path: "/showcase-legacy", element: <ShowcaseLegacyPage /> },
           { path: "/auth-page", element: <AuthPageRoute /> },
           { path: "/forgot-password", element: <ForgotPasswordPage /> },
           { path: "/change-password", element: <ChangePasswordPage /> },
@@ -339,6 +338,7 @@ function App() {
               </ProtectedRoute>
             ),
           },
+          { path: "*", element: <Navigate to="/" replace /> },
         ],
       },
     ])
