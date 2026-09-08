@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { flushSync } from "react-dom";
 import { buildNutritionColumns } from "../../utils/nutritionUtils";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +17,7 @@ export const useRecipeFormActions = ({
   initialRecipe,
   isEditingTranslation,
   validateForm,
+  setInitialFormData,
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -309,6 +311,7 @@ export const useRecipeFormActions = ({
           );
         }
 
+        flushSync(() => setInitialFormData(formData));
         navigate(`/${result.id}/${result.slug}`);
       } catch (err) {
         console.error(
@@ -346,6 +349,7 @@ export const useRecipeFormActions = ({
       updateRecipe,
       updateTranslation,
       navigate,
+      setInitialFormData,
       t,
       i18n,
     ]
