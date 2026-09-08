@@ -1,7 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
-import { useEffect } from "react";
 import "@testing-library/jest-dom";
 import Recipe from "./Recipe";
 
@@ -67,12 +66,9 @@ vi.mock("../LoadingAcorn/LoadingAcorn", () => ({
 }));
 
 vi.mock("../../components/ImageGallery/ImageGallery", () => {
-  const MockImageGallery = ({ images, onAllImagesLoaded }) => {
-    useEffect(() => {
-      if (onAllImagesLoaded) onAllImagesLoaded();
-    }, [onAllImagesLoaded]);
-    return <div data-testid="image-gallery">Images: {images.length}</div>;
-  };
+  const MockImageGallery = ({ images }) => (
+    <div data-testid="image-gallery">Images: {images.length}</div>
+  );
   return {
     default: MockImageGallery,
   };

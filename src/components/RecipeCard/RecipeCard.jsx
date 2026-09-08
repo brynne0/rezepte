@@ -8,10 +8,10 @@ import {
   getOptimizedImageUrl,
 } from "../../services/imageService";
 import { extractFirstUrl } from "../../utils/linkUtils";
-import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 import useIntersectionObserver from "../../hooks/ui/useIntersectionObserver";
 import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -123,10 +123,13 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
             ratio={3 / 2}
             className="mx-2 mb-2 overflow-hidden rounded-lg"
           >
+            {!imageLoaded && (
+              <Skeleton className="absolute inset-0 rounded-lg" />
+            )}
             <img
               className={cn(
                 "size-full object-cover transition-opacity duration-200 will-change-[opacity]",
-                imageLoaded ? "opacity-100" : "opacity-30"
+                imageLoaded ? "opacity-100" : "opacity-0"
               )}
               src={optimizedImageUrl}
               alt={recipe.title}
@@ -135,11 +138,6 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
               onError={handleImageError}
               key={signedMainImage?.id}
             />
-            {!imageLoaded && (
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-body">
-                <LoadingAcorn size={20} fullPage={false} />
-              </div>
-            )}
           </AspectRatio>
         )}
     </Card>

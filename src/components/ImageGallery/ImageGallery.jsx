@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { getOptimizedImageUrl } from "../../services/imageService";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
@@ -6,9 +6,10 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "cn";
 
-const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
+const ImageGallery = ({ images = [] }) => {
   const [api, setApi] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState(new Set());
@@ -53,16 +54,6 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
     return () => api.off("select", onSelect);
   }, [api]);
 
-  useEffect(() => {
-    if (
-      loadedImages.size === images.length &&
-      images.length > 0 &&
-      onAllImagesLoaded
-    ) {
-      onAllImagesLoaded();
-    }
-  }, [loadedImages.size, images.length, onAllImagesLoaded]);
-
   const handleImageLoadComplete = useCallback((imageId) => {
     setLoadedImages((prev) => new Set(prev).add(imageId));
   }, []);
@@ -75,47 +66,68 @@ const ImageGallery = ({ images = [], onAllImagesLoaded }) => {
     <>
       <Carousel setApi={setApi}>
         <CarouselContent>
-          {reorderedImages.map((image) => (
-            <CarouselItem key={image.id}>
-              <AspectRatio ratio={3 / 2} className="overflow-hidden rounded-lg">
-                <img
-                  src={optimizedUrls[image.id]?.main}
-                  alt={image.filename || "Recipe image"}
-                  className="size-full object-cover"
-                  loading="lazy"
-                  onLoad={() => handleImageLoadComplete(image.id)}
-                  onError={() => handleImageLoadComplete(image.id)}
-                />
-              </AspectRatio>
-            </CarouselItem>
-          ))}
+          {reorderedImages.map((image) => {
+            const isLoaded = loadedImages.has(image.id);
+            return (
+              <CarouselItem key={image.id}>
+                <AspectRatio
+                  ratio={3 / 2}
+                  className="overflow-hidden rounded-lg"
+                >
+                  {!isLoaded && (
+                    <Skeleton className="absolute inset-0 rounded-lg" />
+                  )}
+                  <img
+                    src={optimizedUrls[image.id]?.main}
+                    alt={image.filename || "Recipe image"}
+                    className={cn(
+                      "size-full object-cover transition-opacity duration-200",
+                      isLoaded ? "opacity-100" : "opacity-0"
+                    )}
+                    loading="lazy"
+                    onLoad={() => handleImageLoadComplete(image.id)}
+                    onError={() => handleImageLoadComplete(image.id)}
+                  />
+                </AspectRatio>
+              </CarouselItem>
+            );
+          })}
         </CarouselContent>
       </Carousel>
 
       {reorderedImages.length > 1 && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {reorderedImages.map((image, index) => (
-            <button
-              key={image.id}
-              type="button"
-              onClick={() => api?.scrollTo(index)}
-              className={cn(
-                "size-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors",
-                index === selectedIndex
-                  ? "border-accent-red"
-                  : "border-transparent hover:border-muted-foreground"
-              )}
-            >
-              <img
-                src={optimizedUrls[image.id]?.thumb}
-                alt={image.filename || `Recipe image ${index + 1}`}
-                className="size-full object-cover"
-                loading="lazy"
-                onLoad={() => handleImageLoadComplete(image.id)}
-                onError={() => handleImageLoadComplete(image.id)}
-              />
-            </button>
-          ))}
+          {reorderedImages.map((image, index) => {
+            const isLoaded = loadedImages.has(image.id);
+            return (
+              <button
+                key={image.id}
+                type="button"
+                onClick={() => api?.scrollTo(index)}
+                className={cn(
+                  "relative size-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors",
+                  index === selectedIndex
+                    ? "border-accent-red"
+                    : "border-transparent hover:border-muted-foreground"
+                )}
+              >
+                {!isLoaded && (
+                  <Skeleton className="absolute inset-0 rounded-none" />
+                )}
+                <img
+                  src={optimizedUrls[image.id]?.thumb}
+                  alt={image.filename || `Recipe image ${index + 1}`}
+                  className={cn(
+                    "size-full object-cover transition-opacity duration-200",
+                    isLoaded ? "opacity-100" : "opacity-0"
+                  )}
+                  loading="lazy"
+                  onLoad={() => handleImageLoadComplete(image.id)}
+                  onError={() => handleImageLoadComplete(image.id)}
+                />
+              </button>
+            );
+          })}
         </div>
       )}
     </>
