@@ -325,7 +325,7 @@ function App() {
           { path: "/edit-recipe/:id/:slug", element: <EditRecipeRoute /> },
           // { path: "/cooking-times", element: <CookingTimesRoute /> },
           { path: "/showcase", element: <ShowcasePage /> },
-          { path: "/auth-page", element: <AuthPageRoute /> },
+          { path: "/login", element: <AuthPageRoute /> },
           { path: "/forgot-password", element: <ForgotPasswordPage /> },
           { path: "/change-password", element: <ChangePasswordPage /> },
           { path: "/change-email", element: <ChangeEmailRoute /> },

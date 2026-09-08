@@ -17,7 +17,7 @@ const TestAppRoutes = ({ isOnline }) => {
           {isOnline && <div data-testid="pagination">Pagination</div>}
         </>
       )}
-      {location.pathname === "/auth-page" && (
+      {location.pathname === "/login" && (
         <div data-testid="auth-page">Auth Page</div>
       )}
     </>

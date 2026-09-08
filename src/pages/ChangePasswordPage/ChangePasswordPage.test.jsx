@@ -853,7 +853,7 @@ describe("ChangePasswordPage", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "go_to_login" }));
 
-      expect(mockNavigate).toHaveBeenCalledWith("/auth-page");
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
 
     it("navigates to auth page from success message", async () => {
@@ -901,7 +901,7 @@ describe("ChangePasswordPage", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "login" }));
 
-      expect(mockNavigate).toHaveBeenCalledWith("/auth-page");
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
   });
 

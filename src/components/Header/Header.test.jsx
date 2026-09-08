@@ -335,7 +335,7 @@ describe("Header Component", () => {
     // Click login button in dropdown
     fireEvent.click(screen.getAllByText("Login")[0]);
 
-    expect(mockNavigate).toHaveBeenCalledWith("/auth-page");
+    expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 
   test("navigates to home when title is clicked", () => {
@@ -407,7 +407,7 @@ describe("Header Component", () => {
 
   test("hides the user menu on the auth page", () => {
     useLocation.mockReturnValue({
-      pathname: "/auth-page",
+      pathname: "/login",
     });
 
     render(
@@ -605,7 +605,7 @@ describe("Header Component", () => {
 
     test("hides the user menu on the auth page", () => {
       useLocation.mockReturnValue({
-        pathname: "/auth-page",
+        pathname: "/login",
       });
 
       render(

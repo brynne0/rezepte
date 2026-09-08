@@ -110,7 +110,7 @@ const Header = ({
   };
 
   const isHomePage = location.pathname === "/";
-  const isAuthPage = location.pathname === "/auth-page";
+  const isAuthPage = location.pathname === "/login";
 
   const isActivePage = (path) => location.pathname === path;
   const isFriendsPageActive = location.pathname.startsWith("/friends/");
@@ -206,7 +206,7 @@ const Header = ({
                 <Button
                   variant="ghost"
                   size="icon-lg"
-                  disabled={location.pathname === "/auth-page"}
+                  disabled={location.pathname === "/login"}
                   aria-label={isLoggedIn ? t("user_menu") : t("login")}
                 >
                   <User className="size-7" />
@@ -228,7 +228,7 @@ const Header = ({
               </DropdownMenuItem>
             </>
           ) : (
-            <DropdownMenuItem onClick={() => navigate("/auth-page")}>
+            <DropdownMenuItem onClick={() => navigate("/login")}>
               {t("login")}
             </DropdownMenuItem>
           )}
