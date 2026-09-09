@@ -32,13 +32,7 @@ export default defineConfig({
             src: "/eichhörnchen/web-app-manifest-192x192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "maskable",
-          },
-          {
-            src: "/eichhörnchen/web-app-manifest-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
+            purpose: "any",
           },
           {
             src: "/eichhörnchen/web-app-manifest-512x512.png",
