@@ -12,6 +12,7 @@ import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Field,
   FieldGroup,
@@ -47,6 +48,7 @@ const ChangeEmailPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -75,6 +77,7 @@ const ChangeEmailPage = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const {
         data: { session },
@@ -125,6 +128,8 @@ const ChangeEmailPage = () => {
       setTimeout(() => {
         setErrorMessage("");
       }, 3000);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -266,7 +271,8 @@ const ChangeEmailPage = () => {
                     <FieldError>{validationErrors.newEmailRepeat}</FieldError>
                   </Field>
 
-                  <Button type="submit" size="lg">
+                  <Button type="submit" size="lg" disabled={isSubmitting}>
+                    {isSubmitting && <Spinner />}
                     {t("confirm")}
                   </Button>
                 </FieldGroup>

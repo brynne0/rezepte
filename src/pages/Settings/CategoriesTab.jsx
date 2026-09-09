@@ -21,7 +21,7 @@ import {
   updateCategoryName,
 } from "../../services/categoriesService";
 import { getUserPreferredLanguage } from "../../services/userService";
-import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -625,7 +625,16 @@ const CategoriesTab = ({
       </div>
 
       {categoriesLoading ? (
-        <LoadingAcorn fullPage={false} className="py-40" />
+        <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-2 rounded-lg border border-border bg-card p-2"
+            >
+              <Skeleton className="h-5 w-32" />
+            </div>
+          ))}
+        </div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="categories">
