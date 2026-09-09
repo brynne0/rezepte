@@ -4,8 +4,7 @@ import { createRoot } from "react-dom/client";
 
 import App from "./App.jsx";
 import "./lib/i18n";
-import "../src/styles/index.css";
-import "./styles/tailwind.css";
+import "./style.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
