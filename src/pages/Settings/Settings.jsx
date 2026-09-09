@@ -16,6 +16,7 @@ import ProfileTab from "./ProfileTab";
 import CategoriesTab from "./CategoriesTab";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -34,8 +35,6 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [saveMessage, setSaveMessage] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [tempFirstName, setTempFirstName] = useState("");
@@ -128,8 +127,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
         username: tempUsername,
       });
       setIsEditingProfile(false);
-      setSuccessMessage(t("successfully_updated_profile"));
-      setTimeout(() => setSuccessMessage(""), 3000);
+      toast.add({ title: t("successfully_updated_profile"), type: "success" });
     } catch (err) {
       setError(err.message);
     }
@@ -155,8 +153,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
       await updateUserPreferredLanguage(language);
       setProfileData({ ...profileData, preferred_language: language });
       await i18n.changeLanguage(language);
-      setSuccessMessage(t("successfully_updated_language"));
-      setTimeout(() => setSuccessMessage(""), 3000);
+      toast.add({ title: t("successfully_updated_language"), type: "success" });
     } catch (err) {
       setError(`Failed to update language: ${err.message}`);
       console.error("Language save error:", err);
@@ -173,8 +170,10 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
       await updateUserProfile({
         friends_can_view_images: friendsCanViewImages,
       });
-      setSuccessMessage(t("successfully_updated_friends_can_view_images"));
-      setTimeout(() => setSuccessMessage(""), 3000);
+      toast.add({
+        title: t("successfully_updated_friends_can_view_images"),
+        type: "success",
+      });
     } catch (err) {
       setProfileData({ ...profileData, friends_can_view_images: previous });
       setError(`Failed to update friends image visibility: ${err.message}`);
@@ -313,11 +312,6 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
             <CardContent>
               {activeTab === "profile" && (
                 <>
-                  {successMessage && (
-                    <Alert variant="success" className="mb-4">
-                      <AlertDescription>{successMessage}</AlertDescription>
-                    </Alert>
-                  )}
                   <ProfileTab
                     profileData={profileData}
                     isEditingProfile={isEditingProfile}
@@ -346,8 +340,6 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
               {activeTab === "categories" && (
                 <CategoriesTab
                   t={t}
-                  saveMessage={saveMessage}
-                  setSaveMessage={setSaveMessage}
                   onUnsavedChangesChange={setCategoriesHasUnsavedChanges}
                   refreshCategories={refreshCategories}
                   resetCategoryFilter={resetCategoryFilter}

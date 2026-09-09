@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "../data/useRecipeActions";
 import { normaliseUnicodeFractions } from "../../utils/fractionUtils";
+import { toast } from "@/components/ui/toast";
 
 export const useRecipeFormActions = ({
   formData,
@@ -368,8 +369,9 @@ export const useRecipeFormActions = ({
       navigate("/");
     } catch (err) {
       console.error("Failed to delete recipe:", err);
+      toast.add({ title: t("delete_recipe_failed"), type: "error" });
     }
-  }, [initialRecipe, deleteRecipe, navigate]);
+  }, [initialRecipe, deleteRecipe, navigate, t]);
 
   return {
     handleImagesChange,

@@ -23,7 +23,8 @@ import { useTranslation } from "react-i18next";
 import { useOnlineStatus } from "./hooks/ui/useOnlineStatus";
 
 // Components
-import { Toaster, toast } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MainScrollProvider } from "./contexts/MainScrollContext";
 import { AppStateContext } from "./contexts/AppStateContext";
@@ -165,15 +166,8 @@ function SettingsRoute() {
   );
 }
 
-function AuthPageRoute() {
-  const { setLoginMessage } = useContext(AppStateContext);
-  return <AuthPage setLoginMessage={setLoginMessage} />;
-}
-
 function Layout() {
   const {
-    setLoginMessage,
-    loginMessage,
     t,
     refreshRecipes,
     isCookingTimesEditing,
@@ -187,16 +181,6 @@ function Layout() {
   const isOnline = useOnlineStatus();
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-
-  // Notify the user via toast when the connection drops
-  useEffect(() => {
-    if (!isOnline) {
-      toast.add({
-        title: t("no_internet_connection"),
-        type: "error",
-      });
-    }
-  }, [isOnline, t]);
 
   // Reset cooking times editing state when leaving the cooking times page
   useEffect(() => {
@@ -225,12 +209,15 @@ function Layout() {
   return (
     <>
       <Header
-        setLoginMessage={setLoginMessage}
-        loginMessage={loginMessage}
         t={t}
         disableLanguageSwitch={isCookingTimesEditing}
         friendBar={friendBar}
       />
+      {!isOnline && (
+        <Alert variant="destructive" className="rounded-none border-x-0">
+          <AlertDescription>{t("no_internet_connection")}</AlertDescription>
+        </Alert>
+      )}
       <ScrollArea
         className="min-h-0 flex-1"
         viewportClassName="pb-3 md:pb-8"
@@ -252,7 +239,6 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("last_viewed_at_desc");
   const [showImages, setShowImages] = useState(false);
-  const [loginMessage, setLoginMessage] = useState("");
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [friendBar, setFriendBar] = useState(null);
@@ -320,7 +306,7 @@ function App() {
           { path: "/edit-recipe/:id/:slug", element: <EditRecipeRoute /> },
           // { path: "/cooking-times", element: <CookingTimesRoute /> },
           { path: "/showcase", element: <ShowcasePage /> },
-          { path: "/login", element: <AuthPageRoute /> },
+          { path: "/login", element: <AuthPage /> },
           { path: "/forgot-password", element: <ForgotPasswordPage /> },
           { path: "/change-password", element: <ChangePasswordPage /> },
           { path: "/change-email", element: <ChangeEmailRoute /> },
@@ -354,8 +340,6 @@ function App() {
     setSortBy,
     showImages,
     setShowImages,
-    setLoginMessage,
-    loginMessage,
     t,
     categories,
     selectedCategory,

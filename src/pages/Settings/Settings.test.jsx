@@ -5,8 +5,13 @@ import Settings from "./Settings";
 
 // Create mock functions
 const mockNavigate = vi.fn();
+const { mockToastAdd } = vi.hoisted(() => ({ mockToastAdd: vi.fn() }));
 
 // Mock dependencies
+vi.mock("@/components/ui/toast", () => ({
+  toast: { add: mockToastAdd },
+}));
+
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
@@ -220,9 +225,10 @@ describe("Settings", () => {
           first_name: "Jane",
           username: "newusername",
         });
-        expect(
-          screen.getByText("successfully_updated_profile")
-        ).toBeInTheDocument();
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "successfully_updated_profile",
+          type: "success",
+        });
       });
     });
 
@@ -333,9 +339,10 @@ describe("Settings", () => {
       await waitFor(() => {
         expect(mockUpdateUserPreferredLanguage).toHaveBeenCalledWith("de");
         expect(mockChangeLanguage).toHaveBeenCalledWith("de");
-        expect(
-          screen.getByText("successfully_updated_language")
-        ).toBeInTheDocument();
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "successfully_updated_language",
+          type: "success",
+        });
       });
     });
   });
@@ -503,9 +510,10 @@ describe("Settings", () => {
       fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("successfully_updated_profile")
-        ).toBeInTheDocument();
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "successfully_updated_profile",
+          type: "success",
+        });
       });
     });
   });

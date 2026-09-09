@@ -11,6 +11,7 @@ import {
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import ImageCropDialog from "../ImageCropDialog/ImageCropDialog";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/toast";
 import {
   Attachment,
   AttachmentMedia,
@@ -43,7 +44,6 @@ const ImageUpload = ({
   // Get the display URL for an image: use signed URL for existing, blob URL for local
   const getDisplayUrl = (image) =>
     image.isLocal ? image.url : signedUrlMap.get(image.id) || image.url;
-  const [error, setError] = useState("");
   const [loadingImages, setLoadingImages] = useState(() => {
     // Set initial loading state for existing images immediately
     if (images && images.length > 0) {
@@ -182,11 +182,10 @@ const ImageUpload = ({
 
     for (const file of fileArray) {
       try {
-        setError("");
         validateImageFile(file);
         validFiles.push(file);
       } catch (err) {
-        setError(err.message);
+        toast.add({ title: err.message, type: "error" });
         break; // Stop processing if there's an error
       }
     }
@@ -399,8 +398,6 @@ const ImageUpload = ({
           {t("drag_images_to_reorder")}
         </p>
       )}
-
-      {error && <div className="text-sm text-destructive">{error}</div>}
 
       <ImageCropDialog
         key={cropSrc}

@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CategoriesTab from "./CategoriesTab";
 
+const { mockToastAdd } = vi.hoisted(() => ({ mockToastAdd: vi.fn() }));
+
+vi.mock("@/components/ui/toast", () => ({
+  toast: { add: mockToastAdd },
+}));
+
 // Mock supabase
 vi.mock("../../lib/supabase", () => ({
   default: {
@@ -52,8 +58,6 @@ describe("CategoriesTab - Adding Categories", () => {
 
   const mockProps = {
     t: (key) => key,
-    saveMessage: "",
-    setSaveMessage: vi.fn(),
     onUnsavedChangesChange: vi.fn(),
     refreshCategories: vi.fn(),
     resetCategoryFilter: vi.fn(),
@@ -431,9 +435,10 @@ describe("CategoriesTab - Adding Categories", () => {
 
       await waitFor(() => {
         expect(mockCreateCategory).toHaveBeenCalled();
-        expect(mockProps.setSaveMessage).toHaveBeenCalledWith(
-          "category_preferences_saved"
-        );
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "category_preferences_saved",
+          type: "success",
+        });
       });
     });
 
@@ -457,9 +462,10 @@ describe("CategoriesTab - Adding Categories", () => {
       fireEvent.click(savePrefsButton);
 
       await waitFor(() => {
-        expect(mockProps.setSaveMessage).toHaveBeenCalledWith(
-          "category_preferences_error"
-        );
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "category_preferences_error",
+          type: "error",
+        });
       });
     });
   });

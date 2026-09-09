@@ -67,7 +67,6 @@ describe("Header Component", () => {
   let mockToggleTheme;
 
   const defaultProps = {
-    loginMessage: "",
     disableLanguageSwitch: false,
   };
 

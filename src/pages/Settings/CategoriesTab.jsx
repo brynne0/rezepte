@@ -33,6 +33,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -45,8 +46,6 @@ import { cn } from "cn";
 
 const CategoriesTab = ({
   t,
-  saveMessage,
-  setSaveMessage,
   onUnsavedChangesChange,
   refreshCategories,
   resetCategoryFilter,
@@ -163,7 +162,6 @@ const CategoriesTab = ({
   const handleSavePreferences = async () => {
     try {
       setPreferencesLoading(true);
-      setSaveMessage("");
 
       // First, create any pending categories in the database
       const updatedPreferences = [...categoryPreferences];
@@ -222,13 +220,17 @@ const CategoriesTab = ({
         resetCategoryFilter();
       }
 
-      setSaveMessage(t("category_preferences_saved"));
-      setTimeout(() => setSaveMessage(""), 3000);
+      toast.add({
+        title: t("category_preferences_saved"),
+        type: "success",
+      });
       setIsEditingCategories(false);
     } catch (error) {
       console.error("Error saving category preferences:", error);
-      setSaveMessage(t("category_preferences_error"));
-      setTimeout(() => setSaveMessage(""), 3000);
+      toast.add({
+        title: t("category_preferences_error"),
+        type: "error",
+      });
     } finally {
       setPreferencesLoading(false);
     }
@@ -548,14 +550,6 @@ const CategoriesTab = ({
         e.preventDefault();
       }}
     >
-      {saveMessage && (
-        <Alert
-          variant={saveMessage.includes("Error") ? "destructive" : "success"}
-        >
-          <AlertDescription>{saveMessage}</AlertDescription>
-        </Alert>
-      )}
-
       {isEditingCategories && i18n.language !== preferredLanguage && (
         <Alert variant="destructive">
           <AlertDescription>

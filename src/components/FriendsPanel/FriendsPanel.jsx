@@ -12,6 +12,7 @@ import {
   getSentRequests,
 } from "../../services/friendsService";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
@@ -110,8 +111,10 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
           u.id === userId ? { ...u, friendshipStatus: "pending_sent" } : u
         )
       );
+      toast.add({ title: t("friends_request_sent"), type: "success" });
     } catch (err) {
       console.error("Error sending friend request:", err);
+      toast.add({ title: t("friends_request_sent_failed"), type: "error" });
     } finally {
       setLoadingAction(null);
     }
@@ -122,8 +125,10 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
     try {
       await acceptFriendRequest(requesterId);
       await loadData();
+      toast.add({ title: t("friends_request_accepted"), type: "success" });
     } catch (err) {
       console.error("Error accepting friend request:", err);
+      toast.add({ title: t("friends_request_accept_failed"), type: "error" });
     } finally {
       setLoadingAction(null);
     }
@@ -139,8 +144,10 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
         )
       );
       await loadData();
+      toast.add({ title: t("friends_request_cancelled"), type: "success" });
     } catch (err) {
       console.error("Error cancelling friend request:", err);
+      toast.add({ title: t("friends_request_cancel_failed"), type: "error" });
     } finally {
       setLoadingAction(null);
     }
@@ -151,8 +158,10 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
     try {
       await removeFriendship(userId);
       await loadData();
+      toast.add({ title: t("friends_request_declined"), type: "success" });
     } catch (err) {
       console.error("Error declining friend request:", err);
+      toast.add({ title: t("friends_request_decline_failed"), type: "error" });
     } finally {
       setLoadingAction(null);
     }
@@ -163,8 +172,10 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
     try {
       await removeFriendship(friendId);
       await loadData();
+      toast.add({ title: t("friends_removed"), type: "success" });
     } catch (err) {
       console.error("Error removing friend:", err);
+      toast.add({ title: t("friends_remove_failed"), type: "error" });
     } finally {
       setLoadingAction(null);
     }

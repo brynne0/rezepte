@@ -12,6 +12,7 @@ import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,7 +43,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-const AuthPage = ({ setLoginMessage }) => {
+const AuthPage = () => {
   // Form input states
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -60,7 +61,6 @@ const AuthPage = ({ setLoginMessage }) => {
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [sentToEmail, setSentToEmail] = useState("");
   const [isResending, setIsResending] = useState(false);
-  const [resendMessage, setResendMessage] = useState("");
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -113,8 +113,6 @@ const AuthPage = ({ setLoginMessage }) => {
           break;
       }
     } else {
-      setLoginMessage(t("login_success"));
-
       // Wait for recipes to load before navigating
       setTimeout(() => {
         // Clear form fields and navigate
@@ -125,8 +123,6 @@ const AuthPage = ({ setLoginMessage }) => {
     }
 
     setTimeout(() => {
-      // Reset login message
-      setLoginMessage("");
       setErrorMessage("");
       setValidationErrors({});
     }, 3000);
@@ -217,16 +213,14 @@ const AuthPage = ({ setLoginMessage }) => {
 
   const handleResendConfirmation = async () => {
     setIsResending(true);
-    setResendMessage("");
 
     const { error } = await resendConfirmationEmail(sentToEmail);
 
     setIsResending(false);
-    setResendMessage(error ? t("resend_email_failed") : t("resend_email_sent"));
-
-    setTimeout(() => {
-      setResendMessage("");
-    }, 3000);
+    toast.add({
+      title: error ? t("resend_email_failed") : t("resend_email_sent"),
+      type: error ? "error" : "success",
+    });
   };
 
   return (
@@ -269,9 +263,6 @@ const AuthPage = ({ setLoginMessage }) => {
                 {isResending && <Spinner />}
                 {isResending ? t("resending_email") : t("resend_email")}
               </Button>
-              {resendMessage && (
-                <p className="text-xs text-muted-foreground">{resendMessage}</p>
-              )}
             </div>
           ) : (
             <>
