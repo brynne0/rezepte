@@ -48,6 +48,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "@/components/ui/toast";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import { cn } from "cn";
 
@@ -749,6 +750,10 @@ const CookingTimes = ({
       await i18n.changeLanguage(preferredLanguage);
       // Wait for data to reload in new language before entering edit mode
       await new Promise((resolve) => setTimeout(resolve, 100));
+      toast.add({
+        title: t("switched_to_preferred_language_for_editing"),
+        type: "info",
+      });
     }
     setIsEditMode(true);
     setSelectedSection("all");
@@ -909,6 +914,10 @@ const CookingTimes = ({
                     originalUserLanguage.current = i18n.language;
                     await i18n.changeLanguage(preferredLanguage);
                     await new Promise((resolve) => setTimeout(resolve, 50));
+                    toast.add({
+                      title: t("switched_to_preferred_language_for_editing"),
+                      type: "info",
+                    });
                   }
                   addCookingTime("ungrouped");
                   setSelectedSection("all");

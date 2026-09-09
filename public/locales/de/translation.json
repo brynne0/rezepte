@@ -260,6 +260,8 @@
   "no_cooking_times_title": "Noch keine Garzeiten",
   "add_first_cooking_time": "Füge deine erste Garzeit hinzu",
   "edit_mode": "Bearbeitungsmodus",
+  "cooking_times_language_locked_hint": "Die Sprache ist gesperrt, während du Kochzeiten bearbeitest",
+  "switched_to_preferred_language_for_editing": "Zur bevorzugten Sprache für die Bearbeitung gewechselt",
   "add_cooking_time": "Garzeit hinzufügen",
   "no_search_results": "Keine Ergebnisse für deine Suche gefunden.",
   "cook": "kochen",

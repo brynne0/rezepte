@@ -130,7 +130,10 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
   // Language toggle
   const LanguageSelector = ({ onLanguageChange = null }) => {
     const nextLanguage = i18n.language === "en" ? "de" : "en";
-    return (
+    const label =
+      nextLanguage === "en" ? t("switch_to_english") : t("switch_to_german");
+
+    const button = (
       <Button
         variant="ghost"
         className="text-base"
@@ -141,12 +144,29 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
           }
         }}
         disabled={disableLanguageSwitch}
-        aria-label={
-          nextLanguage === "en" ? t("switch_to_english") : t("switch_to_german")
-        }
+        aria-label={label}
       >
         {nextLanguage.toUpperCase()}
       </Button>
+    );
+
+    if (!disableLanguageSwitch) {
+      return button;
+    }
+
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <span tabIndex={0} className="inline-flex">
+              {button}
+            </span>
+          }
+        />
+        <TooltipContent>
+          {t("cooking_times_language_locked_hint")}
+        </TooltipContent>
+      </Tooltip>
     );
   };
 

@@ -259,6 +259,8 @@
   "no_cooking_times_title": "No cooking times yet",
   "add_first_cooking_time": "Add your first cooking time",
   "edit_mode": "Edit Mode",
+  "cooking_times_language_locked_hint": "Language is locked while editing cooking times",
+  "switched_to_preferred_language_for_editing": "Switched to your preferred language for editing",
   "add_cooking_time": "Add cooking time",
   "no_search_results": "No results found for your search.",
   "cook": "cook",
