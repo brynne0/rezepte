@@ -218,7 +218,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
       <header
         className={cn(
           "sticky top-0 z-20 border-b",
-          isScrolled ? "border-border/60" : "border-transparent"
+          isScrolled && !friendBar ? "border-border/60" : "border-transparent"
         )}
       >
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-6 md:pb-6">
