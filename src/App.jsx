@@ -317,10 +317,6 @@ function App() {
               </ProtectedRoute>
             ),
           },
-          {
-            path: "/shared/:shareToken/:slug?",
-            element: <Recipe isSharedView={true} />,
-          },
           { path: "/add-recipe", element: <AddRecipeRoute /> },
           { path: "/edit-recipe/:id/:slug", element: <EditRecipeRoute /> },
           // { path: "/cooking-times", element: <CookingTimesRoute /> },

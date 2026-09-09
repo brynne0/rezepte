@@ -1,4 +1,4 @@
-/* Confirmation Modal (used by ShareModal) */
+/* Confirmation Modal */
 .confirmation-modal-overlay {
   position: fixed;
   top: 0;
@@ -61,58 +61,10 @@
   font-size: 0.9rem;
 }
 
-/* Share Modal Specific Styles */
-.share-url-container {
-  margin-bottom: 1rem;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.share-url-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: var(--color-text-strong);
-}
-
-.share-url-input {
-  flex: 1;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  background-color: var(--background-primary);
-  color: var(--text-primary);
-  min-width: 0;
-  width: 100%;
-  word-break: break-all;
-  white-space: normal;
-}
-
-.share-copy-button {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--color-text-strong);
-  padding: 0.5rem;
-}
-
-.share-error-box {
-  padding: 0.75rem;
-  background-color: var(--color-error-background);
-  border: 1px dashed var(--color-error);
-  border-radius: 6px;
-  color: var(--color-error);
-  margin-bottom: 1rem;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .confirmation-modal-content {
     min-width: 16rem;
     margin: 0.5rem;
-  }
-
-  .share-url-input {
-    font-size: 0.9rem;
   }
 }

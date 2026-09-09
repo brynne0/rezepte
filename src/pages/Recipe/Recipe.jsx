@@ -1,15 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Pencil, Share2, RotateCcw, Minus, Plus } from "lucide-react";
+import { Pencil, Copy, RotateCcw, Minus, Plus } from "lucide-react";
 
 import { useRecipe } from "../../hooks/data/useRecipe";
-import { fetchSharedRecipe } from "../../services/sharingService";
-import { getTranslatedRecipe } from "../../services/translationService";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import ShareModal from "../../components/ShareModal/ShareModal";
 import ImageGallery from "../../components/ImageGallery/ImageGallery";
 import {
   formatIngredientMeasurement,
@@ -22,8 +19,10 @@ import {
 } from "../../utils/scaleUtils";
 import { shouldUsePlural } from "../../utils/fractionUtils";
 import { linkifyText } from "../../utils/linkUtils";
+import { recipeToText } from "../../utils/recipeToText";
 import { useWakeLock } from "../../hooks/ui/useWakeLock";
 import NutritionPanel from "../../components/NutritionPanel/NutritionPanel";
+import { toast } from "@/components/ui/toast";
 import {
   Card,
   CardHeader,
@@ -42,16 +41,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const Recipe = ({ isSharedView = false }) => {
-  const { id, shareToken } = useParams();
-  const {
-    recipe: ownedRecipe,
-    loading: ownedLoading,
-    error: ownedError,
-  } = useRecipe(isSharedView ? null : id);
-  const [sharedRecipe, setSharedRecipe] = useState(null);
-  const [sharedLoading, setSharedLoading] = useState(false);
-  const [sharedError, setSharedError] = useState("");
+const Recipe = () => {
+  const { id } = useParams();
+  const { recipe, loading, error } = useRecipe(id);
   const {
     active: wakeLockActive,
     supported: wakeLockSupported,
@@ -59,12 +51,12 @@ const Recipe = ({ isSharedView = false }) => {
   } = useWakeLock();
   const [multiplier, setMultiplier] = useState(1);
   const [checkedIngredients, setCheckedIngredients] = useState({});
-  const recipeStorageKey = isSharedView ? shareToken : id;
+  const recipeStorageKey = id;
 
   // Reset scale when navigating to a different recipe
   useEffect(() => {
     setMultiplier(1);
-  }, [id, shareToken]);
+  }, [id]);
 
   // Restore ticked-off ingredients for this recipe from localStorage
   useEffect(() => {
@@ -100,48 +92,35 @@ const Recipe = ({ isSharedView = false }) => {
   };
 
   const navigate = useNavigate();
-  const { isLoggedIn, user } = useAuth();
+  const { user } = useAuth();
   const { t, i18n } = useTranslation();
-  const [showShareModal, setShowShareModal] = useState(false);
 
-  // Load shared recipe if in shared view
-  useEffect(() => {
-    if (isSharedView && shareToken) {
-      const loadSharedRecipe = async () => {
-        try {
-          setSharedLoading(true);
-          setSharedError("");
+  const isOwner = !!user?.id && recipe?.user_id === user?.id;
 
-          const fetchedSharedRecipe = await fetchSharedRecipe(shareToken);
-          const translatedRecipe = await getTranslatedRecipe(
-            fetchedSharedRecipe,
-            i18n.language
-          );
-          setSharedRecipe(translatedRecipe);
-        } catch (err) {
-          setSharedError(err.message || t("failed_load_shared_recipe"));
-        } finally {
-          setSharedLoading(false);
-        }
-      };
-
-      loadSharedRecipe();
-    }
-  }, [isSharedView, shareToken, i18n.language, t]);
-
-  // Determine which recipe and state to use
-  const recipe = isSharedView ? sharedRecipe : ownedRecipe;
-  const loading = isSharedView ? sharedLoading : ownedLoading;
-  const error = isSharedView ? sharedError : ownedError;
-
-  const isOwner = isLoggedIn && !!user?.id && recipe?.user_id === user?.id;
-
-  // Generate signed URLs for recipe images — only for owner and shared views.
+  // Generate signed URLs for recipe images — only for the owner.
   // Friends cannot generate signed URLs for another user's storage bucket path.
-  const { signedImages } = useSignedImageUrls(
-    isOwner || isSharedView ? recipe?.images : [],
-    isSharedView // 7-day expiration for shared recipes
-  );
+  const { signedImages } = useSignedImageUrls(isOwner ? recipe?.images : []);
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        recipeToText(recipe, {
+          t,
+          units: t("units", { returnObjects: true }),
+          language: i18n.language,
+        })
+      );
+      toast.add({
+        title: t("recipe_copied"),
+        type: "success",
+      });
+    } catch {
+      toast.add({
+        title: t("recipe_copy_failed"),
+        type: "error",
+      });
+    }
+  };
 
   // Parse servings — plain integer, numeric range, or freetext
   const servingsInfo = (() => {
@@ -257,14 +236,9 @@ const Recipe = ({ isSharedView = false }) => {
     return <LoadingAcorn />;
   }
   if (error) {
-    const isSharedRecipeNotFound = error === "SHARED_RECIPE_NOT_FOUND";
-    const errorMessage = isSharedRecipeNotFound
-      ? t("shared_recipe_not_found")
-      : error;
-
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
-        {errorMessage}
+        {error}
       </div>
     );
   }
@@ -277,20 +251,12 @@ const Recipe = ({ isSharedView = false }) => {
 
   return (
     <Card size="lg" className="mx-auto max-w-3xl text-left">
-      {/* Show shared indicator for shared recipes */}
-      {isSharedView && (
-        <div className="border-destructive bg-destructive/10 text-destructive mx-(--card-spacing) flex w-fit items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium">
-          <Share2 size={16} />
-          <span>{t("shared_recipe")}</span>
-        </div>
-      )}
-
       <CardHeader>
         <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
           {recipe.title}
         </CardTitle>
 
-        {!isSharedView && isLoggedIn && recipe?.user_id === user?.id && (
+        {isOwner && (
           <CardAction className="self-start">
             <ButtonGroup>
               <Tooltip>
@@ -317,15 +283,15 @@ const Recipe = ({ isSharedView = false }) => {
                     <Button
                       variant="secondary"
                       size="icon-lg"
-                      onClick={() => setShowShareModal(true)}
+                      onClick={handleShare}
                       data-testid="share-recipe-btn"
-                      aria-label={t("share_recipe")}
+                      aria-label={t("copy_recipe")}
                     >
-                      <Share2 />
+                      <Copy />
                     </Button>
                   }
                 />
-                <TooltipContent>{t("share_recipe")}</TooltipContent>
+                <TooltipContent>{t("copy_recipe")}</TooltipContent>
               </Tooltip>
             </ButtonGroup>
           </CardAction>
@@ -520,15 +486,6 @@ const Recipe = ({ isSharedView = false }) => {
         {/* Nutrition */}
         <NutritionPanel recipe={recipe} />
       </CardContent>
-
-      {/* Share Modal - only for owned recipes */}
-      {!isSharedView && recipe?.user_id === user?.id && (
-        <ShareModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          recipe={recipe}
-        />
-      )}
     </Card>
   );
 };

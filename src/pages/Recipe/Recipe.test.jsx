@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
@@ -74,6 +74,11 @@ vi.mock("../../components/ImageGallery/ImageGallery", () => {
   };
 });
 
+const mockToastAdd = vi.fn();
+vi.mock("@/components/ui/toast", () => ({
+  toast: { add: (...args) => mockToastAdd(...args) },
+}));
+
 // Mock variables
 let mockNavigate;
 let mockRecipeHook;
@@ -85,6 +90,10 @@ describe("Recipe Component", () => {
     // Reset all mocks
     vi.clearAllMocks();
     localStorage.clear();
+    mockToastAdd.mockClear();
+    Object.assign(navigator, {
+      clipboard: { writeText: vi.fn(() => Promise.resolve()) },
+    });
 
     // Default mock values
     mockNavigate = vi.fn();
@@ -246,13 +255,6 @@ describe("Recipe Component", () => {
       expect(screen.getByTestId("edit-recipe-btn")).toBeInTheDocument();
     });
 
-    test("doesn't show edit button for non-logged in users", () => {
-      mockAuth.isLoggedIn = false;
-      renderRecipe();
-
-      expect(screen.queryByTestId("edit-recipe-btn")).not.toBeInTheDocument();
-    });
-
     test("navigates to edit page when edit button clicked", () => {
       mockAuth.isLoggedIn = true;
       renderRecipe();
@@ -261,6 +263,48 @@ describe("Recipe Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         "/edit-recipe/recipe-1/test-recipe"
       );
+    });
+  });
+
+  describe("Copy Recipe", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = mockRecipeData;
+      mockAuth.isLoggedIn = true;
+    });
+
+    test("copies a formatted recipe to the clipboard and shows a success toast", async () => {
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("share-recipe-btn"));
+
+      await waitFor(() => {
+        expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
+      });
+
+      const copiedText = navigator.clipboard.writeText.mock.calls[0][0];
+      expect(copiedText).toContain("Test Recipe");
+      expect(copiedText).toContain("2 cups flour (sifted)");
+      expect(copiedText).toContain("1 tsp salt");
+      expect(copiedText).toContain("Step 1");
+
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "success" })
+      );
+    });
+
+    test("shows an error toast when copying to the clipboard fails", async () => {
+      navigator.clipboard.writeText = vi
+        .fn()
+        .mockRejectedValue(new Error("denied"));
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("share-recipe-btn"));
+
+      await waitFor(() => {
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
+      });
     });
   });
 
@@ -281,13 +325,6 @@ describe("Recipe Component", () => {
 
       expect(screen.getByTestId("image-gallery")).toBeInTheDocument();
       expect(screen.getByText("Images: 2")).toBeInTheDocument();
-    });
-
-    test("hides images when user is not logged in", () => {
-      mockAuth.isLoggedIn = false;
-      renderRecipe();
-
-      expect(screen.queryByTestId("image-gallery")).not.toBeInTheDocument();
     });
 
     test("doesn't render image section when no images exist", () => {

@@ -4,8 +4,7 @@ import supabase from "../lib/supabase";
 const STORAGE_BUCKET = "recipe-images";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-const SIGNED_URL_EXPIRY = 3600; // 1 hour for regular views
-const SHARED_SIGNED_URL_EXPIRY = 604800; // 7 days for shared recipes
+const SIGNED_URL_EXPIRY = 3600; // 1 hour
 
 // Generate signed URL for single image
 export const getSignedImageUrl = async (
