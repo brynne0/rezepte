@@ -11,7 +11,6 @@ import {
 import { getTranslatedRecipeTitle } from "../../services/translationService";
 import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
-import { getCategoriesForUI } from "../../services/categoriesService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
@@ -54,10 +53,9 @@ const FriendRecipes = () => {
           return;
         }
         const currentLanguage = i18n.language.split("-")[0];
-        const [profile, recipes, allCategories] = await Promise.all([
+        const [profile, recipes] = await Promise.all([
           getFriendProfile(user.id),
           fetchFriendRecipes(user.id),
-          getCategoriesForUI(currentLanguage),
         ]);
         setFriend(profile || user);
 
@@ -66,14 +64,36 @@ const FriendRecipes = () => {
         );
         setAllRecipes(translated);
 
-        const usedNames = new Set(
-          translated.flatMap((r) => r.categories ?? [])
-        );
-        setFriendCategories(
-          allCategories.filter(
-            (c) => c.value === "all_recipes" || usedNames.has(c.value)
-          )
-        );
+        const categoryTranslations = {};
+        translated.forEach((r) => {
+          Object.entries(r.categoryTranslations || {}).forEach(
+            ([name, translations]) => {
+              if (!categoryTranslations[name]) {
+                categoryTranslations[name] = translations;
+              }
+            }
+          );
+        });
+
+        const usedNames = Array.from(
+          new Set(translated.flatMap((r) => r.categories ?? []))
+        ).sort();
+
+        setFriendCategories([
+          {
+            value: "all_recipes",
+            label: currentLanguage === "de" ? "Alle Rezepte" : "All Recipes",
+            isSystem: true,
+          },
+          ...usedNames.map((name) => {
+            const translations = categoryTranslations[name];
+            let label = name.charAt(0).toUpperCase() + name.slice(1);
+            if (translations && translations[currentLanguage]) {
+              label = translations[currentLanguage];
+            }
+            return { value: name, label };
+          }),
+        ]);
       } catch (err) {
         setError(err.message || t("recipe_not_found"));
       } finally {
