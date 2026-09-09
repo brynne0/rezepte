@@ -301,7 +301,7 @@ const Recipe = () => {
               variant="ghost"
               size="icon-sm"
               className="shrink-0"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/")}
               aria-label={t("go_back")}
             >
               <ArrowLeft />

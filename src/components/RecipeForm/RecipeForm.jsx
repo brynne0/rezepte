@@ -34,6 +34,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const RecipeForm = ({
   categories,
@@ -142,9 +143,11 @@ const RecipeForm = ({
         <CardContent className="flex flex-col gap-6">
           {/* Translation Editing Notice */}
           {isEditingTranslation && (
-            <div className="rounded-lg border border-dashed border-destructive bg-destructive/10 p-2 text-center text-sm text-destructive">
-              {t("editing_translation_notice")}
-            </div>
+            <Alert variant="destructive">
+              <AlertDescription>
+                {t("editing_translation_notice")}
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Submission Error Message */}
