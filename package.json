@@ -55,7 +55,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^6.0.2",
+    "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
@@ -64,7 +64,7 @@
     "jsdom": "^26.1.0",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.3.3",
-    "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
   }
 }
