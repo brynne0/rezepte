@@ -1,9 +1,18 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Pencil, Copy, RotateCcw, Minus, Plus } from "lucide-react";
+import {
+  Pencil,
+  Copy,
+  Lock,
+  LockOpen,
+  RotateCcw,
+  Minus,
+  Plus,
+} from "lucide-react";
 
 import { useRecipe } from "../../hooks/data/useRecipe";
+import { setRecipePrivate } from "../../services/recipes";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -51,11 +60,13 @@ const Recipe = () => {
   } = useWakeLock();
   const [multiplier, setMultiplier] = useState(1);
   const [checkedIngredients, setCheckedIngredients] = useState({});
+  const [privateOverride, setPrivateOverride] = useState(null);
   const recipeStorageKey = id;
 
-  // Reset scale when navigating to a different recipe
+  // Reset scale and privacy override when navigating to a different recipe
   useEffect(() => {
     setMultiplier(1);
+    setPrivateOverride(null);
   }, [id]);
 
   // Restore ticked-off ingredients for this recipe from localStorage
@@ -96,10 +107,31 @@ const Recipe = () => {
   const { t, i18n } = useTranslation();
 
   const isOwner = !!user?.id && recipe?.user_id === user?.id;
+  const isPrivate = privateOverride ?? recipe?.private ?? false;
 
   // Generate signed URLs for recipe images — only for the owner.
   // Friends cannot generate signed URLs for another user's storage bucket path.
   const { signedImages } = useSignedImageUrls(isOwner ? recipe?.images : []);
+
+  const handleTogglePrivate = async () => {
+    const next = !isPrivate;
+    setPrivateOverride(next);
+    try {
+      await setRecipePrivate(recipe.id, next);
+      toast.add({
+        title: next
+          ? t("recipe_marked_private")
+          : t("recipe_visible_to_friends"),
+        type: "success",
+      });
+    } catch {
+      setPrivateOverride(!next);
+      toast.add({
+        title: t("recipe_privacy_update_failed"),
+        type: "error",
+      });
+    }
+  };
 
   const handleShare = async () => {
     try {
@@ -292,6 +324,30 @@ const Recipe = () => {
                   }
                 />
                 <TooltipContent>{t("copy_recipe")}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="secondary"
+                      size="icon-lg"
+                      onClick={handleTogglePrivate}
+                      data-testid="toggle-private-btn"
+                      aria-label={
+                        isPrivate
+                          ? t("make_recipe_visible_to_friends")
+                          : t("make_recipe_private")
+                      }
+                    >
+                      {isPrivate ? <Lock /> : <LockOpen />}
+                    </Button>
+                  }
+                />
+                <TooltipContent>
+                  {isPrivate
+                    ? t("make_recipe_visible_to_friends")
+                    : t("make_recipe_private")}
+                </TooltipContent>
               </Tooltip>
             </ButtonGroup>
           </CardAction>

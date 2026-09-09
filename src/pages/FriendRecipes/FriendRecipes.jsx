@@ -212,7 +212,7 @@ const FriendRecipes = () => {
             searchTerm={searchTerm}
             isPaginated={true}
             loading={loading}
-            showImages={false}
+            showImages={!!friend?.friends_can_view_images}
           />
           <Pagination
             currentPage={currentPage}

@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const ProfileTab = ({
   profileData,
@@ -30,6 +32,7 @@ const ProfileTab = ({
   handleChangePassword,
   handleChangeEmail,
   handleLanguageChange,
+  handleFriendsCanViewImagesChange,
   handleDeleteAccount,
   setTempFirstName,
   setTempUsername,
@@ -169,6 +172,24 @@ const ProfileTab = ({
           <ToggleGroupItem value="en">EN</ToggleGroupItem>
           <ToggleGroupItem value="de">DE</ToggleGroupItem>
         </ToggleGroup>
+      </div>
+
+      <Separator />
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="friends-can-view-images" className="justify-between">
+          <span className="flex flex-col">
+            <span className="font-medium">{t("friends_can_view_images")}</span>
+            <span className="text-sm text-muted-foreground">
+              {t("friends_can_view_images_description")}
+            </span>
+          </span>
+          <Switch
+            id="friends-can-view-images"
+            checked={!!profileData.friends_can_view_images}
+            onCheckedChange={handleFriendsCanViewImagesChange}
+          />
+        </Label>
       </div>
 
       <Separator />

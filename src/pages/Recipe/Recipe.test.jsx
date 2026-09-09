@@ -79,6 +79,11 @@ vi.mock("@/components/ui/toast", () => ({
   toast: { add: (...args) => mockToastAdd(...args) },
 }));
 
+const mockSetRecipePrivate = vi.fn();
+vi.mock("../../services/recipes", () => ({
+  setRecipePrivate: (...args) => mockSetRecipePrivate(...args),
+}));
+
 // Mock variables
 let mockNavigate;
 let mockRecipeHook;
@@ -305,6 +310,52 @@ describe("Recipe Component", () => {
           expect.objectContaining({ type: "error" })
         );
       });
+    });
+  });
+
+  describe("Recipe Privacy Toggle", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = mockRecipeData;
+      mockAuth.isLoggedIn = true;
+    });
+
+    test("marks a public recipe as private when clicked", async () => {
+      mockSetRecipePrivate.mockResolvedValue(true);
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("toggle-private-btn"));
+
+      await waitFor(() => {
+        expect(mockSetRecipePrivate).toHaveBeenCalledWith("recipe-1", true);
+      });
+    });
+
+    test("makes a private recipe visible to friends again when clicked", async () => {
+      mockSetRecipePrivate.mockResolvedValue(true);
+      mockRecipeHook.recipe = { ...mockRecipeData, private: true };
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("toggle-private-btn"));
+
+      await waitFor(() => {
+        expect(mockSetRecipePrivate).toHaveBeenCalledWith("recipe-1", false);
+      });
+    });
+
+    test("reverts the toggle if the update fails", async () => {
+      mockSetRecipePrivate.mockRejectedValue(new Error("network error"));
+      renderRecipe();
+
+      const toggleButton = screen.getByTestId("toggle-private-btn");
+      fireEvent.click(toggleButton);
+
+      await waitFor(() => {
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
+      });
+
+      expect(toggleButton).toHaveAttribute("aria-label", "make_recipe_private");
     });
   });
 

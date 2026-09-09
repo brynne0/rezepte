@@ -1343,3 +1343,18 @@ export const deleteRecipe = async (id) => {
 
   return true;
 };
+
+// Hides (or unhides) a recipe from friends. A targeted single-field update,
+// separate from updateRecipe, which doesn't touch this field.
+export const setRecipePrivate = async (id, isPrivate) => {
+  const { error } = await supabase
+    .from("recipes")
+    .update({ private: isPrivate })
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return true;
+};

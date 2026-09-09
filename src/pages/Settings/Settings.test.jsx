@@ -340,6 +340,39 @@ describe("Settings", () => {
     });
   });
 
+  describe("Friends Can View Images", () => {
+    beforeEach(async () => {
+      render(<SettingsWrapper />);
+      await waitFor(() => {
+        expect(screen.getByText("preferred_language")).toBeInTheDocument();
+      });
+    });
+
+    it("reflects the current preference", () => {
+      expect(screen.getByRole("switch")).not.toBeChecked();
+    });
+
+    it("saves immediately when toggled on", async () => {
+      fireEvent.click(screen.getByRole("switch"));
+
+      await waitFor(() => {
+        expect(mockUpdateUserProfile).toHaveBeenCalledWith({
+          friends_can_view_images: true,
+        });
+      });
+      expect(screen.getByRole("switch")).toBeChecked();
+    });
+
+    it("shows an error message if saving fails", async () => {
+      mockUpdateUserProfile.mockRejectedValue(new Error("network error"));
+      fireEvent.click(screen.getByRole("switch"));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("Delete Account", () => {
     beforeEach(async () => {
       render(<SettingsWrapper />);

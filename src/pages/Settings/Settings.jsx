@@ -163,6 +163,25 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
     }
   };
 
+  const handleFriendsCanViewImagesChange = async (friendsCanViewImages) => {
+    const previous = profileData.friends_can_view_images;
+    setProfileData({
+      ...profileData,
+      friends_can_view_images: friendsCanViewImages,
+    });
+    try {
+      await updateUserProfile({
+        friends_can_view_images: friendsCanViewImages,
+      });
+      setSuccessMessage(t("successfully_updated_friends_can_view_images"));
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setProfileData({ ...profileData, friends_can_view_images: previous });
+      setError(`Failed to update friends image visibility: ${err.message}`);
+      console.error("Friends image visibility save error:", err);
+    }
+  };
+
   const {
     isModalOpen: isUnsavedChangesModalOpen,
     confirmNavigation,
@@ -313,6 +332,9 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
                     handleChangePassword={handleChangePassword}
                     handleChangeEmail={handleChangeEmail}
                     handleLanguageChange={handleLanguageChange}
+                    handleFriendsCanViewImagesChange={
+                      handleFriendsCanViewImagesChange
+                    }
                     handleDeleteAccount={handleDeleteAccount}
                     setTempFirstName={setTempFirstName}
                     setTempUsername={setTempUsername}
