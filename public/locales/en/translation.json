@@ -288,6 +288,7 @@
   "friends_decline": "Decline",
   "friends_cancel": "Cancel request",
   "friends_remove": "Remove friend",
+  "view_friend_recipes": "View {{name}}'s recipes",
   "friends_accepted": "Friends",
   "friends_search_above": "Add friends to see their recipes.",
   "friends_no_recipes": "No recipes yet.",

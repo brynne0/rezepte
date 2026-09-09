@@ -301,12 +301,21 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
                 onClick={() => handleFriendClick(friend.username)}
               >
                 <TableCell className="p-1">
-                  <span className="min-w-0 truncate text-sm">
-                    {friend.first_name}{" "}
-                    <span className="text-muted-foreground">
-                      @{friend.username}
-                    </span>
-                  </span>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <span className="min-w-0 truncate text-sm">
+                          {friend.first_name}{" "}
+                          <span className="text-muted-foreground">
+                            @{friend.username}
+                          </span>
+                        </span>
+                      }
+                    />
+                    <TooltipContent>
+                      {t("view_friend_recipes", { name: friend.first_name })}
+                    </TooltipContent>
+                  </Tooltip>
                 </TableCell>
                 <TableCell className="w-px p-1 text-right">
                   <Tooltip>

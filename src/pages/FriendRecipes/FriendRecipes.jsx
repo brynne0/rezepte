@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowBigLeft, Search } from "lucide-react";
+import { ArrowLeft, Search, X } from "lucide-react";
 import {
   getUserByUsername,
   checkFriendship,
@@ -16,6 +16,14 @@ import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
 import CategoryFilter from "../../components/CategoryFilter/CategoryFilter";
+import { Button } from "@/components/ui/button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupButton,
+} from "@/components/ui/input-group";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 const PAGE_SIZE = 36;
 
@@ -118,18 +126,21 @@ const FriendRecipes = () => {
   if (error === "not_friends") {
     return (
       <>
-        <div className="page-header">
-          <button
-            className="btn-unstyled back-arrow"
+        <div className="mt-1 flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => navigate("/")}
             aria-label={t("go_back")}
           >
-            <ArrowBigLeft size={28} />
-          </button>
+            <ArrowLeft />
+          </Button>
         </div>
-        <div className="page-centered">
-          <p>{t("friends_not_friends", { username })}</p>
-        </div>
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyTitle>{t("friends_not_friends", { username })}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       </>
     );
   }
@@ -137,55 +148,70 @@ const FriendRecipes = () => {
   if (error) {
     return (
       <>
-        <div className="page-header">
-          <button
-            className="btn-unstyled back-arrow"
+        <div className="mt-1 flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => navigate("/")}
             aria-label={t("go_back")}
           >
-            <ArrowBigLeft size={28} />
-          </button>
+            <ArrowLeft />
+          </Button>
         </div>
-        <div className="page-centered">
-          <p>{error}</p>
-        </div>
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyTitle>{error}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       </>
     );
   }
 
   return (
     <>
-      <div className="page-header mt-1">
-        <button
-          className="btn-unstyled back-arrow"
+      <div className="mt-1 flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => navigate(-1)}
           aria-label={t("go_back")}
         >
-          <ArrowBigLeft size={28} />
-        </button>
-        <h1 className="forta">
+          <ArrowLeft />
+        </Button>
+        <h1 className="font-forta text-2xl md:text-3xl">
           {t("friends_recipes_title", { name: friend?.first_name })}
         </h1>
       </div>
 
-      <div className="search-bar-wrapper">
-        <form className="search-bar" onSubmit={(e) => e.preventDefault()}>
-          <div className="search-input-wrapper">
-            <input
+      <div className="flex justify-center px-4 py-4 md:px-6">
+        <form
+          className="w-full max-w-xl"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <InputGroup className="h-10">
+            <InputGroupAddon align="inline-start" className="text-foreground">
+              <Search className="size-5" />
+            </InputGroupAddon>
+            <InputGroupInput
+              className="text-base"
               type="text"
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="input input--secondary search-input-with-icon"
               placeholder={t("search")}
             />
-            <button
-              className="btn btn-icon btn-icon-neutral btn-search"
-              type="submit"
-              aria-label={t("search")}
-            >
-              <Search size={20} />
-            </button>
-          </div>
+            {searchTerm && (
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  type="button"
+                  size="icon-xs"
+                  onClick={() => handleSearchChange("")}
+                  aria-label={t("clear_search")}
+                >
+                  <X />
+                </InputGroupButton>
+              </InputGroupAddon>
+            )}
+          </InputGroup>
         </form>
       </div>
 
@@ -197,13 +223,17 @@ const FriendRecipes = () => {
       />
 
       {allRecipes.length === 0 ? (
-        <div className="page-centered high">
-          <p>{t("friends_no_recipes")}</p>
-        </div>
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyTitle>{t("friends_no_recipes")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : recipes.length === 0 ? (
-        <div className="page-centered high">
-          <p>{t("no_recipes_available")}</p>
-        </div>
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyTitle>{t("no_recipes_available")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <>
           <RecipeList
