@@ -623,11 +623,16 @@ const addRecipeToCategory = async (recipeId, categoryName) => {
   if (!categoryName || categoryName === "all_recipes") return;
 
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     // Get category by name
     const { data: category } = await supabase
       .from("categories")
       .select("id")
       .eq("name", categoryName.toLowerCase())
+      .eq("user_id", user?.id)
       .single();
 
     if (category) {
@@ -659,11 +664,16 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
   const normalizedName = categoryName.toLowerCase();
 
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     // First try to find existing category
     const { data: existingCategory } = await supabase
       .from("categories")
       .select("id")
       .eq("name", normalizedName)
+      .eq("user_id", user?.id)
       .single();
 
     if (existingCategory) {
@@ -671,9 +681,6 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
     }
 
     // Category doesn't exist, create it with translations
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
     // Create translations for the category
     let translations = {};
@@ -716,8 +723,7 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
       .from("categories")
       .insert({
         name: normalizedName,
-        is_system: false,
-        created_by: user?.id || null,
+        user_id: user?.id,
         translated_category: translations,
       })
       .select("id")

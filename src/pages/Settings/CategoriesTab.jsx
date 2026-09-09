@@ -2,23 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import supabase from "../../lib/supabase";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import {
-  GripVertical,
-  Eye,
-  EyeOff,
-  Plus,
-  Pencil,
-  Check,
-  X,
-  Trash2,
-} from "lucide-react";
-import {
-  saveUserCategoryPreferences,
-  getAllCategoriesForManagement,
-} from "../../services/categoryPreferencesService";
+import { GripVertical, Plus, Pencil, Check, X, Trash2 } from "lucide-react";
 import {
   createCategory,
   updateCategoryName,
+  deleteCategory,
+  saveCategoryOrder,
+  getCategoriesForManagement,
 } from "../../services/categoriesService";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,7 +25,6 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Tooltip,
@@ -72,9 +61,7 @@ const CategoriesTab = ({
     const loadAllCategories = async () => {
       try {
         setCategoriesLoading(true);
-        const allCategories = await getAllCategoriesForManagement(
-          i18n.language
-        );
+        const allCategories = await getCategoriesForManagement(i18n.language);
         setCategories(allCategories);
       } catch (error) {
         console.error("Error loading categories for management:", error);
@@ -120,9 +107,7 @@ const CategoriesTab = ({
 
     return categoryPreferences.some((pref, index) => {
       const original = originalCategoryPreferences[index];
-      return (
-        pref.isVisible !== original.isVisible || pref.order !== original.order
-      );
+      return pref.id !== original.id;
     });
   }, [
     categoryPreferences,
@@ -135,14 +120,6 @@ const CategoriesTab = ({
   useEffect(() => {
     onUnsavedChangesChange?.(hasUnsavedChanges());
   }, [hasUnsavedChanges, onUnsavedChangesChange]);
-
-  const toggleVisibility = (categoryId) => {
-    setCategoryPreferences((prev) =>
-      prev.map((cat) =>
-        cat.id === categoryId ? { ...cat, isVisible: !cat.isVisible } : cat
-      )
-    );
-  };
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -163,7 +140,17 @@ const CategoriesTab = ({
     try {
       setPreferencesLoading(true);
 
-      // First, create any pending categories in the database
+      // Delete any categories removed since the last save
+      const currentIds = new Set(categoryPreferences.map((cat) => cat.id));
+      const removedIds = originalCategoryPreferences
+        .filter((cat) => !currentIds.has(cat.id))
+        .map((cat) => cat.id);
+
+      for (const categoryId of removedIds) {
+        await deleteCategory(categoryId);
+      }
+
+      // Then, create any pending categories in the database
       const updatedPreferences = [...categoryPreferences];
 
       for (let i = 0; i < updatedPreferences.length; i++) {
@@ -180,8 +167,6 @@ const CategoriesTab = ({
               id: newCategory.id,
               value: newCategory.name,
               label: cat.label,
-              isSystem: false,
-              isVisible: cat.isVisible,
               order: cat.order,
               isTemp: false,
               pendingCreation: false,
@@ -204,7 +189,7 @@ const CategoriesTab = ({
         cat.order = index;
       });
 
-      await saveUserCategoryPreferences(validCategoryPreferences);
+      await saveCategoryOrder(validCategoryPreferences.map((cat) => cat.id));
 
       // Update state with the final categories
       setCategoryPreferences(validCategoryPreferences);
@@ -236,7 +221,7 @@ const CategoriesTab = ({
     }
   };
 
-  // Discard any pending reordering, visibility, or add/edit changes
+  // Discard any pending reordering or add/edit changes
   const handleCancelPreferences = () => {
     setCategoryPreferences([...originalCategoryPreferences]);
     setIsAddingCategory(false);
@@ -256,8 +241,6 @@ const CategoriesTab = ({
       id: tempId,
       value: "",
       label: "",
-      isSystem: false,
-      isVisible: true,
       order: categoryPreferences.length,
       isTemp: true,
     };
@@ -293,14 +276,19 @@ const CategoriesTab = ({
 
     // Check if this category already exists in the database
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const { data: existingCategory } = await supabase
         .from("categories")
-        .select("id, name, is_system, translated_category")
+        .select("id, name, translated_category")
         .eq("name", trimmedName.toLowerCase())
+        .eq("user_id", user?.id)
         .single();
 
       if (existingCategory) {
-        // Category exists! Add it to user's preferences instead of creating new one
+        // Category exists! Add it to user's list instead of creating new one
         let label = existingCategory.name;
         if (
           existingCategory.translated_category &&
@@ -317,8 +305,6 @@ const CategoriesTab = ({
                   id: existingCategory.id,
                   value: existingCategory.name,
                   label: label,
-                  isSystem: existingCategory.is_system || false,
-                  isVisible: true,
                   order: cat.order,
                   isTemp: false,
                   pendingCreation: false,
@@ -387,7 +373,6 @@ const CategoriesTab = ({
 
   // Edit existing category
   const handleEditCategory = (category) => {
-    if (category.isSystem) return; // Can't edit system categories
     setEditingCategoryId(category.id);
     setEditingCategoryName(category.label);
     setCategoryError("");
@@ -474,48 +459,13 @@ const CategoriesTab = ({
     setShowDeleteModal(true);
   };
 
-  // Remove category from user preferences and their recipes
-  const handleConfirmDeleteCategory = async () => {
+  // Mark the category for deletion locally; it's only actually deleted
+  // (and cascades to remove it from the user's recipes) once preferences
+  // are saved
+  const handleConfirmDeleteCategory = () => {
     try {
       setCategoryError("");
 
-      // Remove this category from all of the user's recipes
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        // First get all the user's recipe IDs
-        const { data: userRecipes, error: recipesError } = await supabase
-          .from("recipes")
-          .select("id")
-          .eq("user_id", user.id);
-
-        if (recipesError) {
-          throw new Error(
-            `Failed to get user recipes: ${recipesError.message}`
-          );
-        }
-
-        if (userRecipes && userRecipes.length > 0) {
-          const recipeIds = userRecipes.map((recipe) => recipe.id);
-
-          // Remove this category from the user's recipes
-          const { error: recipeCategoryError } = await supabase
-            .from("recipe_categories")
-            .delete()
-            .eq("categoriy_id", deleteCategoryId)
-            .in("recipe_id", recipeIds);
-
-          if (recipeCategoryError) {
-            throw new Error(
-              `Failed to remove category from your recipes: ${recipeCategoryError.message}`
-            );
-          }
-        }
-      }
-
-      // Remove from preferences list (local state only - user must save manually)
       setCategoryPreferences((prev) =>
         prev.filter((cat) => cat.id !== deleteCategoryId)
       );
@@ -531,7 +481,7 @@ const CategoriesTab = ({
       setDeleteCategoryId(null);
       setDeleteCategoryName("");
     } catch (error) {
-      console.error("Error removing category:", error);
+      console.error("Error deleting category:", error);
       setCategoryError(error.message);
     }
   };
@@ -655,7 +605,6 @@ const CategoriesTab = ({
                           {...provided.draggableProps}
                           className={cn(
                             "flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-2 transition-colors",
-                            !category.isVisible && "bg-muted/50 opacity-60",
                             snapshot.isDragging && "shadow-md"
                           )}
                         >
@@ -692,14 +641,9 @@ const CategoriesTab = ({
                                 }}
                               />
                             ) : (
-                              <>
-                                <span className="text-sm font-medium">
-                                  {category.label}
-                                </span>
-                                {category.isSystem && (
-                                  <Badge variant="outline">{t("system")}</Badge>
-                                )}
-                              </>
+                              <span className="text-sm font-medium">
+                                {category.label}
+                              </span>
                             )}
                           </div>
 
@@ -743,7 +687,32 @@ const CategoriesTab = ({
                                       {t("cancel")}
                                     </TooltipContent>
                                   </Tooltip>
-                                  {!category.isTemp && !category.isSystem && (
+                                </>
+                              ) : (
+                                <>
+                                  {i18n.language === preferredLanguage && (
+                                    <Tooltip>
+                                      <TooltipTrigger
+                                        render={
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon-sm"
+                                            onClick={() =>
+                                              handleEditCategory(category)
+                                            }
+                                            aria-label={t("edit_category_name")}
+                                          >
+                                            <Pencil size={16} />
+                                          </Button>
+                                        }
+                                      />
+                                      <TooltipContent>
+                                        {t("edit_category_name")}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                  {!category.isTemp && (
                                     <Tooltip>
                                       <TooltipTrigger
                                         render={
@@ -768,64 +737,6 @@ const CategoriesTab = ({
                                       </TooltipContent>
                                     </Tooltip>
                                   )}
-                                </>
-                              ) : (
-                                <>
-                                  {!category.isSystem &&
-                                    i18n.language === preferredLanguage && (
-                                      <Tooltip>
-                                        <TooltipTrigger
-                                          render={
-                                            <Button
-                                              type="button"
-                                              variant="ghost"
-                                              size="icon-sm"
-                                              onClick={() =>
-                                                handleEditCategory(category)
-                                              }
-                                              aria-label={t(
-                                                "edit_category_name"
-                                              )}
-                                            >
-                                              <Pencil size={16} />
-                                            </Button>
-                                          }
-                                        />
-                                        <TooltipContent>
-                                          {t("edit_category_name")}
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    )}
-                                  <Tooltip>
-                                    <TooltipTrigger
-                                      render={
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="icon-sm"
-                                          onClick={() =>
-                                            toggleVisibility(category.id)
-                                          }
-                                          aria-label={
-                                            category.isVisible
-                                              ? t("hide_category")
-                                              : t("show_category")
-                                          }
-                                        >
-                                          {category.isVisible ? (
-                                            <Eye size={16} />
-                                          ) : (
-                                            <EyeOff size={16} />
-                                          )}
-                                        </Button>
-                                      }
-                                    />
-                                    <TooltipContent>
-                                      {category.isVisible
-                                        ? t("hide_category")
-                                        : t("show_category")}
-                                    </TooltipContent>
-                                  </Tooltip>
                                 </>
                               )}
                             </div>

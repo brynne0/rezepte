@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { getCategoriesForUI } from "../../services/categoriesService";
-import { getCategoriesWithPreferences } from "../../services/categoryPreferencesService";
 import supabase from "../../lib/supabase";
 
 const CACHE_KEY_PREFIX = "categories-cache-";
@@ -56,18 +55,7 @@ export const useCategories = () => {
   const refreshCategories = useCallback(async () => {
     try {
       setError(null);
-      // Try to get categories with user preferences first
-      let categoriesData;
-      try {
-        categoriesData = await getCategoriesWithPreferences(currentLanguage);
-      } catch (prefsError) {
-        // Fall back to regular categories if preferences fail
-        console.warn(
-          "Failed to load category preferences, using defaults:",
-          prefsError
-        );
-        categoriesData = await getCategoriesForUI(currentLanguage);
-      }
+      const categoriesData = await getCategoriesForUI(currentLanguage);
       setCategories(categoriesData);
       writeCachedCategories(currentLanguage, categoriesData);
     } catch (err) {

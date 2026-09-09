@@ -1,12 +1,21 @@
 import supabase from "../lib/supabase";
 import { translateText } from "./translationService";
 
-// Fetch all categories with their translations
+// Fetch the current user's categories, ordered for display
 export const fetchCategories = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("categories")
     .select("*")
-    .order("name");
+    .eq("user_id", user.id)
+    .order("display_order");
 
   if (error) {
     throw new Error(`Error fetching categories: ${error.message}`);
@@ -43,12 +52,35 @@ export const getCategoriesForUI = async (currentLanguage = "en") => {
     formattedCategories.push({
       value: category.name,
       label: label,
-      isSystem: category.is_system || false,
       id: category.id,
+      order: category.display_order,
     });
   });
 
   return formattedCategories;
+};
+
+// Get categories formatted for the Settings management UI
+export const getCategoriesForManagement = async (currentLanguage = "en") => {
+  const categories = await fetchCategories();
+
+  return categories.map((category) => {
+    let label = category.name.charAt(0).toUpperCase() + category.name.slice(1);
+
+    if (
+      category.translated_category &&
+      category.translated_category[currentLanguage]
+    ) {
+      label = category.translated_category[currentLanguage];
+    }
+
+    return {
+      id: category.id,
+      value: category.name,
+      label,
+      order: category.display_order,
+    };
+  });
 };
 
 // Create a new category with translation
@@ -67,6 +99,7 @@ export const createCategory = async (name, translations = {}) => {
       .from("categories")
       .select("id")
       .eq("name", name.toLowerCase())
+      .eq("user_id", user.id)
       .single();
 
     if (existingCategory) {
@@ -102,8 +135,7 @@ export const createCategory = async (name, translations = {}) => {
 
   const categoryData = {
     name: name.toLowerCase(),
-    is_system: false,
-    created_by: user.id,
+    user_id: user.id,
     translated_category:
       Object.keys(translations).length > 0 ? translations : null,
   };
@@ -154,7 +186,7 @@ export const updateCategoryName = async (
   // Check if category exists and user can edit it
   const { data: category } = await supabase
     .from("categories")
-    .select("is_system, created_by, name, translated_category")
+    .select("user_id, name, translated_category")
     .eq("id", categoryId)
     .single();
 
@@ -162,11 +194,7 @@ export const updateCategoryName = async (
     throw new Error("Category not found");
   }
 
-  if (category.is_system) {
-    throw new Error("Cannot rename system categories");
-  }
-
-  if (category.created_by !== user.id) {
+  if (category.user_id !== user.id) {
     throw new Error("You can only rename categories you created");
   }
 
@@ -176,6 +204,7 @@ export const updateCategoryName = async (
       .from("categories")
       .select("id")
       .eq("name", newName.toLowerCase())
+      .eq("user_id", user.id)
       .single();
 
     if (existingCategory) {
@@ -226,7 +255,7 @@ export const updateCategoryName = async (
   return data;
 };
 
-// Delete a category (only non-system categories by their creators)
+// Delete a category (only by its creator)
 export const deleteCategory = async (categoryId) => {
   const {
     data: { user },
@@ -239,7 +268,7 @@ export const deleteCategory = async (categoryId) => {
   // Check if category exists and user can delete it
   const { data: category } = await supabase
     .from("categories")
-    .select("is_system, created_by")
+    .select("user_id")
     .eq("id", categoryId)
     .single();
 
@@ -247,11 +276,7 @@ export const deleteCategory = async (categoryId) => {
     throw new Error("Category not found");
   }
 
-  if (category.is_system) {
-    throw new Error("Cannot delete system categories");
-  }
-
-  if (category.created_by !== user.id) {
+  if (category.user_id !== user.id) {
     throw new Error("You can only delete categories you created");
   }
 
@@ -267,13 +292,39 @@ export const deleteCategory = async (categoryId) => {
   return true;
 };
 
+// Persist display order for a set of categories (id -> order)
+export const saveCategoryOrder = async (orderedCategoryIds) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  await Promise.all(
+    orderedCategoryIds.map((categoryId, index) =>
+      supabase
+        .from("categories")
+        .update({ display_order: index })
+        .eq("id", categoryId)
+        .eq("user_id", user.id)
+    )
+  );
+};
+
 // Add recipe to category (for many-to-many relationship)
 export const addRecipeToCategory = async (recipeId, categoryName) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Get category by name
   const { data: category } = await supabase
     .from("categories")
     .select("id")
     .eq("name", categoryName)
+    .eq("user_id", user?.id)
     .single();
 
   if (!category) {
@@ -311,11 +362,16 @@ export const addRecipeToCategory = async (recipeId, categoryName) => {
 
 // Remove recipe from category
 export const removeRecipeFromCategory = async (recipeId, categoryName) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Get category by name
   const { data: category } = await supabase
     .from("categories")
     .select("id")
     .eq("name", categoryName)
+    .eq("user_id", user?.id)
     .single();
 
   if (!category) {
@@ -350,11 +406,16 @@ export const getRecipesByCategory = async (
       .range((page - 1) * limit, page * limit - 1);
   }
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Get category
   const { data: category } = await supabase
     .from("categories")
     .select("id")
     .eq("name", categoryName)
+    .eq("user_id", user?.id)
     .single();
 
   if (!category) {

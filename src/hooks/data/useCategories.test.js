@@ -18,10 +18,6 @@ vi.mock("../../services/categoriesService", () => ({
   getCategoriesForUI: vi.fn(),
 }));
 
-vi.mock("../../services/categoryPreferencesService", () => ({
-  getCategoriesWithPreferences: vi.fn(),
-}));
-
 vi.mock("../../lib/supabase", () => ({
   default: {
     auth: {
@@ -33,7 +29,6 @@ vi.mock("../../lib/supabase", () => ({
 }));
 
 import { getCategoriesForUI } from "../../services/categoriesService";
-import { getCategoriesWithPreferences } from "../../services/categoryPreferencesService";
 
 describe("useCategories", () => {
   beforeEach(() => {
@@ -42,28 +37,14 @@ describe("useCategories", () => {
     mockUseTranslation.i18n.language = "en";
   });
 
-  test("loads categories with preferences successfully", async () => {
+  test("loads categories successfully", async () => {
     const mockCategories = [
       { value: "all_recipes", label: "All Recipes", isSystem: true },
-      {
-        value: "dinner",
-        label: "Dinner",
-        isSystem: false,
-        id: 1,
-        isVisible: true,
-        order: 0,
-      },
-      {
-        value: "brunch",
-        label: "Brunch",
-        isSystem: false,
-        id: 2,
-        isVisible: true,
-        order: 1,
-      },
+      { value: "dinner", label: "Dinner", id: 1, order: 0 },
+      { value: "brunch", label: "Brunch", id: 2, order: 1 },
     ];
 
-    getCategoriesWithPreferences.mockResolvedValue(mockCategories);
+    getCategoriesForUI.mockResolvedValue(mockCategories);
 
     const { result } = renderHook(() => useCategories());
 
@@ -75,36 +56,11 @@ describe("useCategories", () => {
 
     expect(result.current.categories).toEqual(mockCategories);
     expect(result.current.error).toBe(null);
-    expect(getCategoriesWithPreferences).toHaveBeenCalledWith("en");
-  });
-
-  test("falls back to basic categories when preferences fail", async () => {
-    const mockBasicCategories = [
-      { value: "all_recipes", label: "All Recipes" },
-      { value: "dinner", label: "Dinner" },
-    ];
-
-    getCategoriesWithPreferences.mockRejectedValue(
-      new Error("Preferences failed")
-    );
-    getCategoriesForUI.mockResolvedValue(mockBasicCategories);
-
-    const { result } = renderHook(() => useCategories());
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    expect(result.current.categories).toEqual(mockBasicCategories);
-    expect(result.current.error).toBe(null);
     expect(getCategoriesForUI).toHaveBeenCalledWith("en");
   });
 
-  test("handles complete failure gracefully", async () => {
+  test("handles failure gracefully", async () => {
     const errorMessage = "Complete failure";
-    getCategoriesWithPreferences.mockRejectedValue(
-      new Error("Preferences failed")
-    );
     getCategoriesForUI.mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useCategories());
@@ -120,19 +76,12 @@ describe("useCategories", () => {
   test("refreshes categories when language changes", async () => {
     const mockEnglishCategories = [
       { value: "all_recipes", label: "All Recipes", isSystem: true },
-      { value: "dinner", label: "Dinner", isSystem: false },
+      { value: "dinner", label: "Dinner" },
     ];
     const mockGermanCategories = [
       { value: "all_recipes", label: "Alle Rezepte", isSystem: true },
-      { value: "dinner", label: "Abendessen", isSystem: false },
+      { value: "dinner", label: "Abendessen" },
     ];
-
-    // Set up persistent mock implementation that handles both languages
-    getCategoriesWithPreferences.mockImplementation((language) => {
-      if (language === "en") return Promise.resolve(mockEnglishCategories);
-      if (language === "de") return Promise.resolve(mockGermanCategories);
-      return Promise.resolve(mockEnglishCategories);
-    });
 
     getCategoriesForUI.mockImplementation((language) => {
       if (language === "en") return Promise.resolve(mockEnglishCategories);
@@ -163,7 +112,7 @@ describe("useCategories", () => {
     );
 
     // Verify the correct language was called
-    expect(getCategoriesWithPreferences).toHaveBeenCalledWith("de");
+    expect(getCategoriesForUI).toHaveBeenCalledWith("de");
   });
 
   test("provides refresh function that reloads categories", async () => {
@@ -172,10 +121,10 @@ describe("useCategories", () => {
     ];
     const refreshedCategories = [
       { value: "all_recipes", label: "All Recipes", isSystem: true },
-      { value: "dinner", label: "Dinner", isSystem: false },
+      { value: "dinner", label: "Dinner" },
     ];
 
-    getCategoriesWithPreferences
+    getCategoriesForUI
       .mockResolvedValueOnce(initialCategories)
       .mockResolvedValueOnce(refreshedCategories);
 
@@ -194,7 +143,7 @@ describe("useCategories", () => {
       expect(result.current.categories).toEqual(refreshedCategories);
     });
 
-    expect(getCategoriesWithPreferences).toHaveBeenCalledTimes(2);
+    expect(getCategoriesForUI).toHaveBeenCalledTimes(2);
   });
 
   test("maintains stable reference for categories to prevent re-renders", async () => {
@@ -202,7 +151,7 @@ describe("useCategories", () => {
       { value: "all_recipes", label: "All Recipes", isSystem: true },
     ];
 
-    getCategoriesWithPreferences.mockResolvedValue(mockCategories);
+    getCategoriesForUI.mockResolvedValue(mockCategories);
 
     const { result, rerender } = renderHook(() => useCategories());
 
@@ -221,14 +170,14 @@ describe("useCategories", () => {
   test("shows cached categories immediately without a loading state", async () => {
     const cachedCategories = [
       { value: "all_recipes", label: "All Recipes", isSystem: true },
-      { value: "dinner", label: "Dinner", isSystem: false },
+      { value: "dinner", label: "Dinner" },
     ];
     localStorage.setItem(
       "categories-cache-en",
       JSON.stringify(cachedCategories)
     );
 
-    getCategoriesWithPreferences.mockResolvedValue(cachedCategories);
+    getCategoriesForUI.mockResolvedValue(cachedCategories);
 
     const { result } = renderHook(() => useCategories());
 
@@ -237,7 +186,7 @@ describe("useCategories", () => {
     expect(result.current.categories).toEqual(cachedCategories);
 
     await waitFor(() => {
-      expect(getCategoriesWithPreferences).toHaveBeenCalledWith("en");
+      expect(getCategoriesForUI).toHaveBeenCalledWith("en");
     });
   });
 
@@ -250,7 +199,6 @@ describe("useCategories", () => {
       JSON.stringify(cachedCategories)
     );
 
-    getCategoriesWithPreferences.mockRejectedValue(new Error("offline"));
     getCategoriesForUI.mockRejectedValue(new Error("offline"));
 
     const { result } = renderHook(() => useCategories());
@@ -267,7 +215,7 @@ describe("useCategories", () => {
     const mockCategories = [
       { value: "all_recipes", label: "All Recipes", isSystem: true },
     ];
-    getCategoriesWithPreferences.mockResolvedValue(mockCategories);
+    getCategoriesForUI.mockResolvedValue(mockCategories);
 
     renderHook(() => useCategories());
 
@@ -283,7 +231,7 @@ describe("useCategories", () => {
       { value: "all_recipes", label: "All Recipes", isSystem: true },
     ];
 
-    getCategoriesWithPreferences.mockResolvedValue(mockCategories);
+    getCategoriesForUI.mockResolvedValue(mockCategories);
 
     const { result } = renderHook(() => useCategories());
 
