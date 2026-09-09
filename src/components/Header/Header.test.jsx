@@ -67,9 +67,6 @@ describe("Header Component", () => {
   let mockToggleTheme;
 
   const defaultProps = {
-    setSelectedCategory: vi.fn(),
-    setSearchTerm: vi.fn(),
-    searchTerm: "",
     loginMessage: "",
     disableLanguageSwitch: false,
   };
@@ -234,7 +231,6 @@ describe("Header Component", () => {
 
     await waitFor(() => {
       expect(mockSignOut).toHaveBeenCalled();
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("");
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });
@@ -289,21 +285,6 @@ describe("Header Component", () => {
     expect(screen.queryByTestId("lucide-plus")).not.toBeInTheDocument();
   });
 
-  test("hides search bar when not on home page", () => {
-    useLocation.mockReturnValue({
-      pathname: "/add-recipe",
-    });
-
-    render(
-      <TestWrapper>
-        <Header {...defaultProps} />
-      </TestWrapper>
-    );
-
-    // Search bar should not be visible on non-home pages
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-  });
-
   test("navigates to add recipe page when plus button is clicked", () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: true,
@@ -346,61 +327,6 @@ describe("Header Component", () => {
     );
 
     fireEvent.click(screen.getByText("Rezepte"));
-
-    expect(mockNavigate).toHaveBeenCalledWith("/");
-  });
-
-  test("shows search bar on home page for logged in users", () => {
-    mockUseAuth.mockReturnValue({
-      isLoggedIn: true,
-      isMe: false,
-      isGuest: false,
-    });
-
-    render(
-      <TestWrapper>
-        <Header {...defaultProps} />
-      </TestWrapper>
-    );
-
-    // Search bar should be visible on home page
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Search")).toBeInTheDocument();
-  });
-
-  test("shows search bar on home page for logged out users", () => {
-    render(
-      <TestWrapper>
-        <Header {...defaultProps} />
-      </TestWrapper>
-    );
-
-    expect(screen.queryByRole("textbox")).toBeInTheDocument();
-  });
-
-  // Removed search button functionality
-  // test("navigates to home and opens search when search button clicked on non-home page", () => {});
-
-  test("submits search form correctly", () => {
-    mockUseAuth.mockReturnValue({
-      isLoggedIn: true,
-      isMe: false,
-      isGuest: false,
-    });
-
-    render(
-      <TestWrapper>
-        <Header {...defaultProps} />
-      </TestWrapper>
-    );
-
-    // Enter search term
-    const searchInput = screen.getByRole("textbox");
-    fireEvent.change(searchInput, { target: { value: "pasta" } });
-
-    // Submit form by clicking search button
-    const searchForm = searchInput.closest("form");
-    fireEvent.submit(searchForm);
 
     expect(mockNavigate).toHaveBeenCalledWith("/");
   });
@@ -832,174 +758,6 @@ describe("Header Component", () => {
         .querySelector('[data-slot="dropdown-menu-content"] .lucide-plus')
         .closest('[role="menuitem"]');
       expect(addButton).toBeInTheDocument();
-    });
-  });
-
-  describe("Real-time Search Functionality", () => {
-    beforeEach(() => {
-      mockUseAuth.mockReturnValue({
-        isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
-      });
-    });
-
-    test("updates search term in real-time as user types", () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const searchInput = screen.getByRole("textbox");
-
-      // Type "pasta" character by character
-      fireEvent.change(searchInput, { target: { value: "p" } });
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("p");
-
-      fireEvent.change(searchInput, { target: { value: "pa" } });
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("pa");
-
-      fireEvent.change(searchInput, { target: { value: "pasta" } });
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("pasta");
-    });
-
-    test("resets category to 'all' when typing in search input", () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const searchInput = screen.getByRole("textbox");
-
-      // Start typing - should reset category
-      fireEvent.change(searchInput, { target: { value: "tofu" } });
-
-      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith(
-        "all_recipes"
-      );
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("tofu");
-    });
-
-    test("does not reset category when search input is cleared", () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const searchInput = screen.getByRole("textbox");
-
-      // First type something to establish a baseline
-      fireEvent.change(searchInput, { target: { value: "test" } });
-
-      // Verify the category was reset when typing
-      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith(
-        "all_recipes"
-      );
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("test");
-
-      // Reset the mocks to check the next behavior
-      defaultProps.setSelectedCategory.mockClear();
-      defaultProps.setSearchTerm.mockClear();
-
-      // Clear the search input (empty string)
-      fireEvent.change(searchInput, { target: { value: "" } });
-
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("");
-      expect(defaultProps.setSelectedCategory).not.toHaveBeenCalled();
-    });
-
-    test("syncs input value with external searchTerm changes", () => {
-      const { rerender } = render(
-        <TestWrapper>
-          <Header {...defaultProps} searchTerm="initial" />
-        </TestWrapper>
-      );
-
-      const searchInput = screen.getByRole("textbox");
-      expect(searchInput.value).toBe("initial");
-
-      // External searchTerm change (e.g., from category filter reset)
-      rerender(
-        <TestWrapper>
-          <Header {...defaultProps} searchTerm="" />
-        </TestWrapper>
-      );
-
-      expect(searchInput.value).toBe("");
-    });
-
-    test("form submission uses current input value", () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const searchInput = screen.getByRole("textbox");
-
-      // Type in search input
-      fireEvent.change(searchInput, { target: { value: "pizza" } });
-
-      // Submit form
-      const searchForm = searchInput.closest("form");
-      fireEvent.submit(searchForm);
-
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("pizza");
-      expect(mockNavigate).toHaveBeenCalledWith("/");
-    });
-
-    test("input maintains focus during real-time updates", () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const searchInput = screen.getByRole("textbox");
-      searchInput.focus();
-      searchInput.click();
-
-      // Type and verify focus is maintained
-      fireEvent.change(searchInput, { target: { value: "test" } });
-
-      expect(document.activeElement).toBe(searchInput);
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledWith("test");
-    });
-
-    test("handles rapid typing correctly", () => {
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      const searchInput = screen.getByRole("textbox");
-
-      // Simulate rapid typing
-      const searchTerm = "rapidtyping";
-      for (let i = 1; i <= searchTerm.length; i++) {
-        const partialTerm = searchTerm.substring(0, i);
-        fireEvent.change(searchInput, { target: { value: partialTerm } });
-      }
-
-      // Should have been called for each character
-      expect(defaultProps.setSearchTerm).toHaveBeenCalledTimes(
-        searchTerm.length
-      );
-      expect(defaultProps.setSearchTerm).toHaveBeenLastCalledWith(
-        "rapidtyping"
-      );
-
-      // Category should only be reset once (when first character is typed)
-      expect(defaultProps.setSelectedCategory).toHaveBeenCalledTimes(
-        searchTerm.length
-      );
-      expect(defaultProps.setSelectedCategory).toHaveBeenCalledWith(
-        "all_recipes"
-      );
     });
   });
 

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useContext } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Search, X } from "lucide-react";
 import { AppStateContext } from "../../contexts/AppStateContext";
 import {
   getUserByUsername,
@@ -16,14 +15,7 @@ import { getCategoriesForUI } from "../../services/categoriesService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
-import CategoryFilter from "../../components/CategoryFilter/CategoryFilter";
-import SortButtons from "../../components/SortButtons/SortButtons";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupButton,
-} from "@/components/ui/input-group";
+import RecipeFilters from "../../components/RecipeFilters/RecipeFilters";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 const PAGE_SIZE = 36;
@@ -93,9 +85,9 @@ const FriendRecipes = () => {
 
   // Show the "viewing a friend" back bar in Header while this page is open
   useEffect(() => {
-    setFriendBar({ name: friend?.first_name || null });
+    setFriendBar({ name: friend?.first_name || null, loading });
     return () => setFriendBar(null);
-  }, [friend, setFriendBar]);
+  }, [friend, loading, setFriendBar]);
 
   const { recipes, totalPages } = useMemo(() => {
     const searched = searchTerm
@@ -166,53 +158,19 @@ const FriendRecipes = () => {
 
   return (
     <>
-      <div className="flex justify-center px-4 py-4 md:px-6">
-        <div className="flex w-full max-w-xl flex-col items-stretch gap-3 md:flex-row md:items-center">
-          <form
-            className="w-full md:flex-1"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <InputGroup className="h-10">
-              <InputGroupAddon align="inline-start" className="text-foreground">
-                <Search className="size-5" />
-              </InputGroupAddon>
-              <InputGroupInput
-                className="text-base"
-                type="text"
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder={t("search")}
-              />
-              {searchTerm && (
-                <InputGroupAddon align="inline-end">
-                  <InputGroupButton
-                    type="button"
-                    size="icon-xs"
-                    onClick={() => handleSearchChange("")}
-                    aria-label={t("clear_search")}
-                  >
-                    <X />
-                  </InputGroupButton>
-                </InputGroupAddon>
-              )}
-            </InputGroup>
-          </form>
-          <SortButtons
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-            showImages={showImages}
-            onShowImagesChange={setShowImages}
-            onPageReset={() => setCurrentPage(1)}
-            showImageToggle={!!friend?.friends_can_view_images}
-          />
-        </div>
-      </div>
-
-      <CategoryFilter
+      <RecipeFilters
         categories={friendCategories}
         selectedCategory={selectedCategory}
         setSelectedCategory={handleCategoryChange}
+        searchTerm={searchTerm}
         setSearchTerm={handleSearchChange}
+        resetCategoryOnSearch={false}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        showImages={showImages}
+        setShowImages={setShowImages}
+        onPageReset={() => setCurrentPage(1)}
+        showImageToggle={!!friend?.friends_can_view_images}
       />
 
       {allRecipes.length === 0 ? (

@@ -12,6 +12,7 @@ import {
   RouterProvider,
   Outlet,
   useLocation,
+  useNavigate,
   Navigate,
 } from "react-router-dom";
 
@@ -28,7 +29,7 @@ import { MainScrollProvider } from "./contexts/MainScrollContext";
 import { AppStateContext } from "./contexts/AppStateContext";
 import { useMainScrollRef } from "./hooks/ui/useMainScrollRef";
 import Header from "./components/Header/Header";
-import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
+import RecipeFilters from "./components/RecipeFilters/RecipeFilters";
 import RecipeList from "./components/RecipeList/RecipeList";
 import Pagination from "./components/Pagination/Pagination";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
@@ -55,22 +56,34 @@ function HomePage() {
     setSearchTerm,
     recipes,
     searchTerm,
+    sortBy,
+    setSortBy,
     showImages,
+    setShowImages,
+    onPageReset,
     totalRecipeCount,
     isFetchingRecipes,
     paginationInfo,
     onPageChange,
   } = useContext(AppStateContext);
   const isOnline = useOnlineStatus();
+  const navigate = useNavigate();
 
   return (
     <>
       {isOnline && (
-        <CategoryFilter
+        <RecipeFilters
           categories={categories}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
+          searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          onSearchSubmit={() => navigate("/")}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          showImages={showImages}
+          setShowImages={setShowImages}
+          onPageReset={onPageReset}
         />
       )}
       <RecipeList
@@ -159,17 +172,9 @@ function AuthPageRoute() {
 
 function Layout() {
   const {
-    setSelectedCategory,
-    setSearchTerm,
-    searchTerm,
     setLoginMessage,
     loginMessage,
     t,
-    sortBy,
-    setSortBy,
-    showImages,
-    setShowImages,
-    onPageReset,
     refreshRecipes,
     isCookingTimesEditing,
     setIsCookingTimesEditing,
@@ -220,18 +225,10 @@ function Layout() {
   return (
     <>
       <Header
-        setSelectedCategory={setSelectedCategory}
-        setSearchTerm={setSearchTerm}
-        searchTerm={searchTerm}
         setLoginMessage={setLoginMessage}
         loginMessage={loginMessage}
         t={t}
         disableLanguageSwitch={isCookingTimesEditing}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        showImages={showImages}
-        setShowImages={setShowImages}
-        onPageReset={onPageReset}
         friendBar={friendBar}
       />
       <ScrollArea

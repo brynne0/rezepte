@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
-  Search,
   Plus,
   Squirrel,
   Menu,
@@ -13,22 +12,16 @@ import {
   Clock,
   Settings,
   LogOut,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import {
   Tooltip,
   TooltipContent,
@@ -52,20 +45,8 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import SortButtons from "../SortButtons/SortButtons";
 
-const Header = ({
-  setSelectedCategory,
-  setSearchTerm,
-  searchTerm,
-  disableLanguageSwitch = false,
-  sortBy,
-  setSortBy,
-  showImages,
-  setShowImages,
-  onPageReset,
-  friendBar,
-}) => {
+const Header = ({ disableLanguageSwitch = false, friendBar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -111,14 +92,12 @@ const Header = ({
     triggerInstall();
   };
 
-  const isHomePage = location.pathname === "/";
   const isAuthPage = location.pathname === "/login";
 
   const isActivePage = (path) => location.pathname === path;
   const isFriendsPageActive = location.pathname.startsWith("/friends/");
 
   const [showNavMenu, setShowNavMenu] = useState(false);
-  const [currentSearchInput, setCurrentSearchInput] = useState("");
 
   const { t, i18n } = useTranslation();
 
@@ -141,16 +120,10 @@ const Header = ({
     }
   }, [isLoggedIn, setFirstName]);
 
-  // Sync search input with external search term changes
-  useEffect(() => {
-    setCurrentSearchInput(searchTerm || "");
-  }, [searchTerm]);
-
   const handleLogout = async () => {
     await signOut();
 
     setFirstName("");
-    setSearchTerm("");
     navigate("/");
   };
 
@@ -443,81 +416,15 @@ const Header = ({
             >
               <ArrowLeft />
             </Button>
-            {friendBar.name && (
-              <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm font-medium">
-                <User className="size-3.5" />
-                {t("friends_recipes_title", { name: friendBar.name })}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/*  Search Recipe */}
-      {isHomePage && (
-        <div className="flex justify-center px-4 md:px-6">
-          <div className="flex w-full max-w-xl flex-col items-stretch gap-3 md:flex-row md:items-center">
-            <form
-              className="w-full md:flex-1"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSearchTerm(currentSearchInput);
-                navigate("/");
-              }}
-            >
-              <InputGroup className="h-10">
-                <InputGroupAddon
-                  align="inline-start"
-                  className="text-foreground"
-                >
-                  <Search className="size-5" />
-                </InputGroupAddon>
-                <InputGroupInput
-                  id="search"
-                  type="text"
-                  value={currentSearchInput}
-                  onChange={(e) => {
-                    setCurrentSearchInput(e.target.value);
-                    setSearchTerm(e.target.value);
-                    if (e.target.value.length > 0) {
-                      setSelectedCategory("all_recipes");
-                    }
-                  }}
-                  className="text-base"
-                  placeholder={t("search")}
-                />
-                {currentSearchInput && (
-                  <InputGroupAddon align="inline-end">
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <InputGroupButton
-                            type="button"
-                            size="icon-xs"
-                            aria-label={t("clear_search")}
-                            onClick={() => {
-                              setCurrentSearchInput("");
-                              setSearchTerm("");
-                            }}
-                          >
-                            <X />
-                          </InputGroupButton>
-                        }
-                      />
-                      <TooltipContent>{t("clear_search")}</TooltipContent>
-                    </Tooltip>
-                  </InputGroupAddon>
-                )}
-              </InputGroup>
-            </form>
-            {setSortBy && (
-              <SortButtons
-                sortBy={sortBy}
-                onSortChange={setSortBy}
-                showImages={showImages}
-                onShowImagesChange={setShowImages}
-                onPageReset={onPageReset}
-              />
+            {friendBar.loading ? (
+              <Skeleton className="h-6 w-40 rounded-full" />
+            ) : (
+              friendBar.name && (
+                <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm font-medium">
+                  <User className="size-3.5" />
+                  {t("friends_recipes_title", { name: friendBar.name })}
+                </div>
+              )
             )}
           </div>
         </div>
