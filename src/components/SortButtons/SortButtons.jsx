@@ -22,6 +22,7 @@ const SortButtons = ({
   showImages,
   onShowImagesChange,
   onPageReset,
+  showImageToggle = true,
 }) => {
   const { t } = useTranslation();
 
@@ -99,23 +100,25 @@ const SortButtons = ({
           <TooltipContent>{t("sort_by_title")}</TooltipContent>
         </Tooltip>
       </ToggleGroup>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Toggle
-              variant="outline"
-              pressed={showImages}
-              onPressedChange={onShowImagesChange}
-              aria-label={showImages ? t("hide_images") : t("show_images")}
-            >
-              {getImageIcon()}
-            </Toggle>
-          }
-        />
-        <TooltipContent>
-          {showImages ? t("hide_images") : t("show_images")}
-        </TooltipContent>
-      </Tooltip>
+      {showImageToggle && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Toggle
+                variant="outline"
+                pressed={showImages}
+                onPressedChange={onShowImagesChange}
+                aria-label={showImages ? t("hide_images") : t("show_images")}
+              >
+                {getImageIcon()}
+              </Toggle>
+            }
+          />
+          <TooltipContent>
+            {showImages ? t("hide_images") : t("show_images")}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </div>
   );
 };

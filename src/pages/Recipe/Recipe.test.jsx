@@ -3,6 +3,7 @@ import { describe, test, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
 import Recipe from "./Recipe";
+import { AppStateContext } from "../../contexts/AppStateContext";
 
 // Mock dependencies
 vi.mock("react-router-dom", async () => {
@@ -84,11 +85,17 @@ vi.mock("../../services/recipes", () => ({
   setRecipePrivate: (...args) => mockSetRecipePrivate(...args),
 }));
 
+const mockGetFriendProfile = vi.fn();
+vi.mock("../../services/friendsService", () => ({
+  getFriendProfile: (...args) => mockGetFriendProfile(...args),
+}));
+
 // Mock variables
 let mockNavigate;
 let mockRecipeHook;
 let mockAuth;
 let mockGetUserPreferredLanguage;
+let mockSetFriendBar;
 
 describe("Recipe Component", () => {
   beforeEach(() => {
@@ -114,12 +121,16 @@ describe("Recipe Component", () => {
       error: null,
     };
     mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
+    mockSetFriendBar = vi.fn();
+    mockGetFriendProfile.mockResolvedValue(null);
   });
 
   const renderRecipe = () => {
     return render(
       <BrowserRouter>
-        <Recipe />
+        <AppStateContext.Provider value={{ setFriendBar: mockSetFriendBar }}>
+          <Recipe />
+        </AppStateContext.Provider>
       </BrowserRouter>
     );
   };

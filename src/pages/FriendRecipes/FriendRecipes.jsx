@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect, useMemo, useContext } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
+import { AppStateContext } from "../../contexts/AppStateContext";
 import {
   getUserByUsername,
   checkFriendship,
@@ -16,7 +17,7 @@ import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
 import CategoryFilter from "../../components/CategoryFilter/CategoryFilter";
-import { Button } from "@/components/ui/button";
+import SortButtons from "../../components/SortButtons/SortButtons";
 import {
   InputGroup,
   InputGroupAddon,
@@ -29,8 +30,8 @@ const PAGE_SIZE = 36;
 
 const FriendRecipes = () => {
   const { username } = useParams();
-  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { setFriendBar } = useContext(AppStateContext);
 
   const [friend, setFriend] = useState(null);
   const [allRecipes, setAllRecipes] = useState([]);
@@ -44,6 +45,8 @@ const FriendRecipes = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [friendCategories, setFriendCategories] = useState([]);
+  const [sortBy, setSortBy] = useState("title_asc");
+  const [showImages, setShowImages] = useState(true);
 
   useEffect(() => {
     const load = async () => {
@@ -88,6 +91,12 @@ const FriendRecipes = () => {
     load();
   }, [username, i18n.language, t]);
 
+  // Show the "viewing a friend" back bar in Header while this page is open
+  useEffect(() => {
+    setFriendBar({ name: friend?.first_name || null });
+    return () => setFriendBar(null);
+  }, [friend, setFriendBar]);
+
   const { recipes, totalPages } = useMemo(() => {
     const searched = searchTerm
       ? allRecipes.filter((r) =>
@@ -100,12 +109,24 @@ const FriendRecipes = () => {
         ? searched
         : searched.filter((r) => r.categories?.includes(selectedCategory));
 
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === "title_desc") {
+        return (b.title || "").localeCompare(a.title || "");
+      }
+      if (sortBy === "last_viewed_at_asc" || sortBy === "last_viewed_at_desc") {
+        const aTime = a.last_viewed_at ? new Date(a.last_viewed_at) : 0;
+        const bTime = b.last_viewed_at ? new Date(b.last_viewed_at) : 0;
+        return sortBy === "last_viewed_at_asc" ? aTime - bTime : bTime - aTime;
+      }
+      return (a.title || "").localeCompare(b.title || "");
+    });
+
     const start = (currentPage - 1) * PAGE_SIZE;
     return {
-      recipes: filtered.slice(start, start + PAGE_SIZE),
-      totalPages: Math.ceil(filtered.length / PAGE_SIZE),
+      recipes: sorted.slice(start, start + PAGE_SIZE),
+      totalPages: Math.ceil(sorted.length / PAGE_SIZE),
     };
-  }, [allRecipes, searchTerm, selectedCategory, currentPage]);
+  }, [allRecipes, searchTerm, selectedCategory, sortBy, currentPage]);
 
   const handleCategoryChange = (category) => {
     setSearchParams(category === "all_recipes" ? {} : { category }, {
@@ -125,94 +146,66 @@ const FriendRecipes = () => {
 
   if (error === "not_friends") {
     return (
-      <>
-        <div className="mt-1 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => navigate("/")}
-            aria-label={t("go_back")}
-          >
-            <ArrowLeft />
-          </Button>
-        </div>
-        <Empty className="mt-20">
-          <EmptyHeader>
-            <EmptyTitle>{t("friends_not_friends", { username })}</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      </>
+      <Empty className="mt-20">
+        <EmptyHeader>
+          <EmptyTitle>{t("friends_not_friends", { username })}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   if (error) {
     return (
-      <>
-        <div className="mt-1 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => navigate("/")}
-            aria-label={t("go_back")}
-          >
-            <ArrowLeft />
-          </Button>
-        </div>
-        <Empty className="mt-20">
-          <EmptyHeader>
-            <EmptyTitle>{error}</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      </>
+      <Empty className="mt-20">
+        <EmptyHeader>
+          <EmptyTitle>{error}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   return (
     <>
-      <div className="mt-1 flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => navigate(-1)}
-          aria-label={t("go_back")}
-        >
-          <ArrowLeft />
-        </Button>
-        <h1 className="font-forta text-2xl md:text-3xl">
-          {t("friends_recipes_title", { name: friend?.first_name })}
-        </h1>
-      </div>
-
       <div className="flex justify-center px-4 py-4 md:px-6">
-        <form
-          className="w-full max-w-xl"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <InputGroup className="h-10">
-            <InputGroupAddon align="inline-start" className="text-foreground">
-              <Search className="size-5" />
-            </InputGroupAddon>
-            <InputGroupInput
-              className="text-base"
-              type="text"
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder={t("search")}
-            />
-            {searchTerm && (
-              <InputGroupAddon align="inline-end">
-                <InputGroupButton
-                  type="button"
-                  size="icon-xs"
-                  onClick={() => handleSearchChange("")}
-                  aria-label={t("clear_search")}
-                >
-                  <X />
-                </InputGroupButton>
+        <div className="flex w-full max-w-xl flex-col items-stretch gap-3 md:flex-row md:items-center">
+          <form
+            className="w-full md:flex-1"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <InputGroup className="h-10">
+              <InputGroupAddon align="inline-start" className="text-foreground">
+                <Search className="size-5" />
               </InputGroupAddon>
-            )}
-          </InputGroup>
-        </form>
+              <InputGroupInput
+                className="text-base"
+                type="text"
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder={t("search")}
+              />
+              {searchTerm && (
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton
+                    type="button"
+                    size="icon-xs"
+                    onClick={() => handleSearchChange("")}
+                    aria-label={t("clear_search")}
+                  >
+                    <X />
+                  </InputGroupButton>
+                </InputGroupAddon>
+              )}
+            </InputGroup>
+          </form>
+          <SortButtons
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            showImages={showImages}
+            onShowImagesChange={setShowImages}
+            onPageReset={() => setCurrentPage(1)}
+            showImageToggle={!!friend?.friends_can_view_images}
+          />
+        </div>
       </div>
 
       <CategoryFilter
@@ -242,7 +235,7 @@ const FriendRecipes = () => {
             searchTerm={searchTerm}
             isPaginated={true}
             loading={loading}
-            showImages={!!friend?.friends_can_view_images}
+            showImages={!!friend?.friends_can_view_images && showImages}
           />
           <Pagination
             currentPage={currentPage}

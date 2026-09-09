@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
+  ArrowLeft,
   Search,
   Plus,
   Squirrel,
@@ -63,6 +64,7 @@ const Header = ({
   showImages,
   setShowImages,
   onPageReset,
+  friendBar,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -427,6 +429,29 @@ const Header = ({
           </div>
         </div>
       </header>
+
+      {/* Viewing a friend's content */}
+      {friendBar && (
+        <div className="border-t border-b">
+          <div className="relative mx-auto flex max-w-7xl items-center justify-center px-3 pt-2 pb-2 md:px-8">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="absolute left-3 md:left-8"
+              onClick={() => navigate("/")}
+              aria-label={t("go_back")}
+            >
+              <ArrowLeft />
+            </Button>
+            {friendBar.name && (
+              <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm font-medium">
+                <User className="size-3.5" />
+                {t("friends_recipes_title", { name: friendBar.name })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/*  Search Recipe */}
       {isHomePage && (

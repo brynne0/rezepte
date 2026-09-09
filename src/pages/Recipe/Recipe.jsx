@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
+  ArrowLeft,
   Pencil,
   Copy,
   Lock,
@@ -11,8 +12,10 @@ import {
   Plus,
 } from "lucide-react";
 
+import { AppStateContext } from "../../contexts/AppStateContext";
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { setRecipePrivate } from "../../services/recipes";
+import { getFriendProfile } from "../../services/friendsService";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -32,13 +35,7 @@ import { recipeToText } from "../../utils/recipeToText";
 import { useWakeLock } from "../../hooks/ui/useWakeLock";
 import NutritionPanel from "../../components/NutritionPanel/NutritionPanel";
 import { toast } from "@/components/ui/toast";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardAction,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -105,6 +102,7 @@ const Recipe = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
+  const { setFriendBar } = useContext(AppStateContext);
 
   const isOwner = !!user?.id && recipe?.user_id === user?.id;
   const isPrivate = privateOverride ?? recipe?.private ?? false;
@@ -112,6 +110,19 @@ const Recipe = () => {
   // Generate signed URLs for recipe images — only for the owner.
   // Friends cannot generate signed URLs for another user's storage bucket path.
   const { signedImages } = useSignedImageUrls(isOwner ? recipe?.images : []);
+
+  // When viewing a friend's recipe, show the "viewing a friend" banner in
+  // Header (fetching their profile for the name pill); hide it for your own.
+  useEffect(() => {
+    if (!recipe || isOwner) {
+      setFriendBar(null);
+      return;
+    }
+    getFriendProfile(recipe.user_id)
+      .then((profile) => setFriendBar({ name: profile?.first_name || null }))
+      .catch(() => setFriendBar({ name: null }));
+    return () => setFriendBar(null);
+  }, [recipe, isOwner, setFriendBar]);
 
   const handleTogglePrivate = async () => {
     const next = !isPrivate;
@@ -282,267 +293,279 @@ const Recipe = () => {
     (recipe.ingredients && recipe.ingredients.length > 0);
 
   return (
-    <Card size="lg" className="mx-auto max-w-3xl text-left">
-      <CardHeader>
-        <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
-          {recipe.title}
-        </CardTitle>
+    <>
+      <Card size="lg" className="mx-auto max-w-3xl text-left">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="shrink-0"
+              onClick={() => navigate(-1)}
+              aria-label={t("go_back")}
+            >
+              <ArrowLeft />
+            </Button>
 
-        {isOwner && (
-          <CardAction className="self-start">
-            <ButtonGroup>
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="secondary"
-                      size="icon-lg"
-                      onClick={() =>
-                        navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
-                      }
-                      data-testid="edit-recipe-btn"
-                      aria-label={t("edit_recipe")}
-                    >
-                      <Pencil />
-                    </Button>
-                  }
-                />
-                <TooltipContent>{t("edit_recipe")}</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="secondary"
-                      size="icon-lg"
-                      onClick={handleShare}
-                      data-testid="share-recipe-btn"
-                      aria-label={t("copy_recipe")}
-                    >
-                      <Copy />
-                    </Button>
-                  }
-                />
-                <TooltipContent>{t("copy_recipe")}</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="secondary"
-                      size="icon-lg"
-                      onClick={handleTogglePrivate}
-                      data-testid="toggle-private-btn"
-                      aria-label={
-                        isPrivate
-                          ? t("make_recipe_visible_to_friends")
-                          : t("make_recipe_private")
-                      }
-                    >
-                      {isPrivate ? <Lock /> : <LockOpen />}
-                    </Button>
-                  }
-                />
-                <TooltipContent>
-                  {isPrivate
-                    ? t("make_recipe_visible_to_friends")
-                    : t("make_recipe_private")}
-                </TooltipContent>
-              </Tooltip>
-            </ButtonGroup>
-          </CardAction>
-        )}
-      </CardHeader>
+            <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+              {recipe.title}
+            </CardTitle>
 
-      <CardContent className="flex flex-col gap-4">
-        {/* Recipe Images - floating within content - only show when logged in */}
-        {isOwner && signedImages && signedImages.length > 0 && (
-          <ImageGallery images={signedImages} />
-        )}
-
-        {wakeLockSupported && (
-          <Label htmlFor="wake-lock">
-            <Switch
-              id="wake-lock"
-              checked={wakeLockActive}
-              onCheckedChange={toggleWakeLock}
-            />
-            {t("keep_screen_on")}
-          </Label>
-        )}
-
-        {/* Servings */}
-        {recipe.servings && (
-          <div className="flex flex-wrap items-center">
-            <h2>{t("servings")}:</h2>
-            {hasIngredients ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleServingsChange(-1)}
-                    disabled={
-                      servingsInfo?.base
-                        ? Math.round(servingsInfo.base * multiplier) <= 1
-                        : multiplier <= 0.25
+            {isOwner && (
+              <ButtonGroup className="shrink-0">
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="secondary"
+                        size="icon-lg"
+                        onClick={() =>
+                          navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                        }
+                        data-testid="edit-recipe-btn"
+                        aria-label={t("edit_recipe")}
+                      >
+                        <Pencil />
+                      </Button>
                     }
-                    aria-label={t("decrease_servings")}
-                  >
-                    <Minus strokeWidth={2} />
-                  </Button>
-                  <span className="text-center font-semibold">
-                    {scaledServingsLabel}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleServingsChange(1)}
-                    disabled={!servingsInfo?.base && multiplier >= 8}
-                    aria-label={t("increase_servings")}
-                  >
-                    <Plus strokeWidth={2} />
-                  </Button>
-                  {servingsInfo?.type === "text" && multiplier !== 1 && (
-                    <span className="text-sm font-medium">
-                      {formatMultiplierLabel(multiplier)}
-                    </span>
-                  )}
-                </div>
-                {multiplier !== 1 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-accent-red"
-                    onClick={() => setMultiplier(1)}
-                    aria-label={t("reset_servings")}
-                  >
-                    <RotateCcw strokeWidth={2} />
-                  </Button>
-                )}
-              </>
-            ) : (
-              recipe.servings
+                  />
+                  <TooltipContent>{t("edit_recipe")}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="secondary"
+                        size="icon-lg"
+                        onClick={handleShare}
+                        data-testid="share-recipe-btn"
+                        aria-label={t("copy_recipe")}
+                      >
+                        <Copy />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>{t("copy_recipe")}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="secondary"
+                        size="icon-lg"
+                        onClick={handleTogglePrivate}
+                        data-testid="toggle-private-btn"
+                        aria-label={
+                          isPrivate
+                            ? t("make_recipe_visible_to_friends")
+                            : t("make_recipe_private")
+                        }
+                      >
+                        {isPrivate ? <Lock /> : <LockOpen />}
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>
+                    {isPrivate
+                      ? t("make_recipe_visible_to_friends")
+                      : t("make_recipe_private")}
+                  </TooltipContent>
+                </Tooltip>
+              </ButtonGroup>
             )}
           </div>
-        )}
+        </CardHeader>
 
-        {/* Ingredients */}
-        {hasIngredients && (
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2>{t("ingredients")}:</h2>
-              {!recipe.servings && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleMultiplierChange(-1)}
-                    disabled={multiplier <= 0.25}
-                    aria-label={t("decrease_scale")}
-                  >
-                    <Minus strokeWidth={2} />
-                  </Button>
-                  <span className="text-center font-semibold">
-                    {formatMultiplierLabel(multiplier)}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleMultiplierChange(1)}
-                    disabled={multiplier >= 8}
-                    aria-label={t("increase_scale")}
-                  >
-                    <Plus strokeWidth={2} />
-                  </Button>
+        <CardContent className="flex flex-col gap-4">
+          {/* Recipe Images - floating within content - only show when logged in */}
+          {isOwner && signedImages && signedImages.length > 0 && (
+            <ImageGallery images={signedImages} />
+          )}
+
+          {wakeLockSupported && (
+            <Label htmlFor="wake-lock">
+              <Switch
+                id="wake-lock"
+                checked={wakeLockActive}
+                onCheckedChange={toggleWakeLock}
+              />
+              {t("keep_screen_on")}
+            </Label>
+          )}
+
+          {/* Servings */}
+          {recipe.servings && (
+            <div className="flex flex-wrap items-center">
+              <h2>{t("servings")}:</h2>
+              {hasIngredients ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleServingsChange(-1)}
+                      disabled={
+                        servingsInfo?.base
+                          ? Math.round(servingsInfo.base * multiplier) <= 1
+                          : multiplier <= 0.25
+                      }
+                      aria-label={t("decrease_servings")}
+                    >
+                      <Minus strokeWidth={2} />
+                    </Button>
+                    <span className="text-center font-semibold">
+                      {scaledServingsLabel}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleServingsChange(1)}
+                      disabled={!servingsInfo?.base && multiplier >= 8}
+                      aria-label={t("increase_servings")}
+                    >
+                      <Plus strokeWidth={2} />
+                    </Button>
+                    {servingsInfo?.type === "text" && multiplier !== 1 && (
+                      <span className="text-sm font-medium">
+                        {formatMultiplierLabel(multiplier)}
+                      </span>
+                    )}
+                  </div>
                   {multiplier !== 1 && (
                     <Button
                       variant="ghost"
                       size="icon"
                       className="text-muted-foreground hover:text-accent-red"
                       onClick={() => setMultiplier(1)}
-                      aria-label={t("reset_scale")}
+                      aria-label={t("reset_servings")}
                     >
                       <RotateCcw strokeWidth={2} />
                     </Button>
                   )}
-                </div>
-              )}
-            </div>
-
-            {/* Ungrouped Ingredients */}
-            {recipe.ungroupedIngredients &&
-              recipe.ungroupedIngredients.length > 0 && (
-                <ul>
-                  {recipe.ungroupedIngredients.map((ingredient, index) =>
-                    renderIngredientItem(ingredient, "ungrouped", index)
-                  )}
-                </ul>
-              )}
-
-            {/* Ingredient Sections */}
-            {recipe.ingredientSections &&
-              recipe.ingredientSections.length > 0 && (
-                <>
-                  {recipe.ingredientSections.map((section, sectionIndex) => (
-                    <div key={sectionIndex}>
-                      <h3 className="[word-break:break-word]">
-                        {section.subheading}
-                      </h3>
-                      <ul>
-                        {section.ingredients.map(
-                          (ingredient, ingredientIndex) =>
-                            renderIngredientItem(
-                              ingredient,
-                              `section-${sectionIndex}`,
-                              ingredientIndex
-                            )
-                        )}
-                      </ul>
-                    </div>
-                  ))}
                 </>
+              ) : (
+                recipe.servings
               )}
-          </div>
-        )}
-
-        {/* Instructions */}
-        {recipe.instructions && recipe.instructions.length > 0 && (
-          <div>
-            <h2>{t("instructions")}:</h2>
-
-            <ol className="list-decimal space-y-1 pl-8">
-              {recipe.instructions.map((instruction, i) => (
-                <li key={i}>{instruction}</li>
-              ))}
-            </ol>
-          </div>
-        )}
-
-        {/* Source */}
-        {recipe.source && (
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-            <h2>{t("source")}:</h2>
-            <span className="[word-wrap:break-word]">
-              {linkifyText(recipe.source)}
-            </span>
-          </div>
-        )}
-
-        {/* Extra Notes */}
-        {recipe.notes && recipe.notes.length > 0 && (
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-            <h2>{t("notes")}:</h2>
-            <div className="[word-break:break-word] whitespace-pre-wrap">
-              {recipe.notes}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Nutrition */}
-        <NutritionPanel recipe={recipe} />
-      </CardContent>
-    </Card>
+          {/* Ingredients */}
+          {hasIngredients && (
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2>{t("ingredients")}:</h2>
+                {!recipe.servings && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleMultiplierChange(-1)}
+                      disabled={multiplier <= 0.25}
+                      aria-label={t("decrease_scale")}
+                    >
+                      <Minus strokeWidth={2} />
+                    </Button>
+                    <span className="text-center font-semibold">
+                      {formatMultiplierLabel(multiplier)}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleMultiplierChange(1)}
+                      disabled={multiplier >= 8}
+                      aria-label={t("increase_scale")}
+                    >
+                      <Plus strokeWidth={2} />
+                    </Button>
+                    {multiplier !== 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-accent-red"
+                        onClick={() => setMultiplier(1)}
+                        aria-label={t("reset_scale")}
+                      >
+                        <RotateCcw strokeWidth={2} />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Ungrouped Ingredients */}
+              {recipe.ungroupedIngredients &&
+                recipe.ungroupedIngredients.length > 0 && (
+                  <ul>
+                    {recipe.ungroupedIngredients.map((ingredient, index) =>
+                      renderIngredientItem(ingredient, "ungrouped", index)
+                    )}
+                  </ul>
+                )}
+
+              {/* Ingredient Sections */}
+              {recipe.ingredientSections &&
+                recipe.ingredientSections.length > 0 && (
+                  <>
+                    {recipe.ingredientSections.map((section, sectionIndex) => (
+                      <div key={sectionIndex}>
+                        <h3 className="[word-break:break-word]">
+                          {section.subheading}
+                        </h3>
+                        <ul>
+                          {section.ingredients.map(
+                            (ingredient, ingredientIndex) =>
+                              renderIngredientItem(
+                                ingredient,
+                                `section-${sectionIndex}`,
+                                ingredientIndex
+                              )
+                          )}
+                        </ul>
+                      </div>
+                    ))}
+                  </>
+                )}
+            </div>
+          )}
+
+          {/* Instructions */}
+          {recipe.instructions && recipe.instructions.length > 0 && (
+            <div>
+              <h2>{t("instructions")}:</h2>
+
+              <ol className="list-decimal space-y-1 pl-8">
+                {recipe.instructions.map((instruction, i) => (
+                  <li key={i}>{instruction}</li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {/* Source */}
+          {recipe.source && (
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+              <h2>{t("source")}:</h2>
+              <span className="[word-wrap:break-word]">
+                {linkifyText(recipe.source)}
+              </span>
+            </div>
+          )}
+
+          {/* Extra Notes */}
+          {recipe.notes && recipe.notes.length > 0 && (
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+              <h2>{t("notes")}:</h2>
+              <div className="[word-break:break-word] whitespace-pre-wrap">
+                {recipe.notes}
+              </div>
+            </div>
+          )}
+
+          {/* Nutrition */}
+          <NutritionPanel recipe={recipe} />
+        </CardContent>
+      </Card>
+    </>
   );
 };
 

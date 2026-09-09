@@ -1,5 +1,5 @@
 // React & hooks
-import { useState, useEffect, useRef, useContext, createContext } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 
 // Data hooks
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
@@ -25,6 +25,7 @@ import { useOnlineStatus } from "./hooks/ui/useOnlineStatus";
 import { Toaster, toast } from "@/components/ui/toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MainScrollProvider } from "./contexts/MainScrollContext";
+import { AppStateContext } from "./contexts/AppStateContext";
 import { useMainScrollRef } from "./hooks/ui/useMainScrollRef";
 import Header from "./components/Header/Header";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
@@ -45,8 +46,6 @@ import ChangeEmailPage from "./pages/ChangeEmailPage/ChangeEmailPage";
 import Settings from "./pages/Settings/Settings";
 import FriendRecipes from "./pages/FriendRecipes/FriendRecipes";
 import ShowcasePage from "./pages/ShowcasePage/ShowcasePage";
-
-const AppStateContext = createContext(null);
 
 function HomePage() {
   const {
@@ -175,6 +174,7 @@ function Layout() {
     isCookingTimesEditing,
     setIsCookingTimesEditing,
     isLoggedIn,
+    friendBar,
   } = useContext(AppStateContext);
   const location = useLocation();
   const mainScrollRef = useMainScrollRef();
@@ -232,6 +232,7 @@ function Layout() {
         showImages={showImages}
         setShowImages={setShowImages}
         onPageReset={onPageReset}
+        friendBar={friendBar}
       />
       <ScrollArea
         className="min-h-0 flex-1"
@@ -257,6 +258,7 @@ function App() {
   const [loginMessage, setLoginMessage] = useState("");
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [friendBar, setFriendBar] = useState(null);
   const {
     recipes,
     loading,
@@ -372,6 +374,8 @@ function App() {
     refreshRecipes,
     refreshCategories,
     isLoggedIn,
+    friendBar,
+    setFriendBar,
   };
 
   return (
