@@ -49,8 +49,8 @@ describe("CookingTimeRow", () => {
 
     it("should display weight conversion with ratio", () => {
       render(<CookingTimeRow {...defaultProps} />);
-      const weightText = screen.getByText(/100g dry → 300g cooked \(x3\)/);
-      expect(weightText).toBeInTheDocument();
+      expect(screen.getByText(/100g dry → 300g cooked/)).toBeInTheDocument();
+      expect(screen.getByText("x3")).toBeInTheDocument();
     });
 
     it("should display notes when present", () => {
@@ -307,7 +307,7 @@ describe("CookingTimeRow", () => {
   describe("Weight Ratio Calculation", () => {
     it("should display correct ratio for 1:3 conversion", () => {
       render(<CookingTimeRow {...defaultProps} />);
-      expect(screen.getByText(/x3\)/)).toBeInTheDocument();
+      expect(screen.getByText("x3")).toBeInTheDocument();
     });
 
     it("should handle decimal ratios without trailing zeros", () => {
@@ -318,7 +318,7 @@ describe("CookingTimeRow", () => {
       };
       render(<CookingTimeRow {...defaultProps} item={itemWithDecimal} />);
 
-      expect(screen.getByText(/x2\.5\)/)).toBeInTheDocument();
+      expect(screen.getByText("x2.5")).toBeInTheDocument();
     });
 
     it("should not display weight info when weights are missing", () => {
@@ -329,12 +329,12 @@ describe("CookingTimeRow", () => {
       };
       render(<CookingTimeRow {...defaultProps} item={itemWithoutWeights} />);
 
-      expect(screen.queryByText(/x/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/^x\d/)).not.toBeInTheDocument();
     });
   });
 
   describe("Drag and Drop Styling", () => {
-    it("should apply dragging class when being dragged", () => {
+    it("should apply dragging styles when being dragged", () => {
       const snapshot = { isDragging: true };
       const provided = {
         innerRef: vi.fn(),
@@ -351,7 +351,7 @@ describe("CookingTimeRow", () => {
         />
       );
 
-      const rowElement = container.querySelector(".dragging");
+      const rowElement = container.querySelector(".border-ring");
       expect(rowElement).toBeInTheDocument();
     });
   });

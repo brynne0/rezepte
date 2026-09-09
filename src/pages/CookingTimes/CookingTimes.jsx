@@ -6,13 +6,13 @@ import {
   Plus,
   Timer,
   ArrowLeftRight,
+  ArrowLeft,
   GripVertical,
-  ArrowBigLeft,
   Pencil,
+  Trash2,
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import CookingTimeRow from "../../components/CookingTimeRow/CookingTimeRow";
-import "../../components/CookingTimeRow/CookingTimeRow.css";
 import {
   createCookingTime,
   updateCookingTime,
@@ -22,6 +22,18 @@ import {
 } from "../../services/cookingTimesService";
 import { getUserPreferredLanguage } from "../../services/userService";
 import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "@/components/ui/empty";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -31,8 +43,13 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
-import "./CookingTimes.css";
+import { cn } from "cn";
 
 const CookingTimes = ({
   isEditMode: externalIsEditMode,
@@ -44,6 +61,7 @@ const CookingTimes = ({
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState("all");
   const [showExitEditModeModal, setShowExitEditModeModal] = useState(false);
+  const [editingSectionId, setEditingSectionId] = useState(null);
   const originalUserLanguage = useRef(null);
   const HAS_LOADED_ONCE = useRef(false);
 
@@ -697,24 +715,6 @@ const CookingTimes = ({
     [formData, isEditMode]
   );
 
-  const EmptyState = (
-    { type, icon: IconComponent, onAddClick } // eslint-disable-line no-unused-vars
-  ) => (
-    <div className="empty-state">
-      <div>
-        <IconComponent size={40} />
-      </div>
-      <h3 className="empty-state-title">
-        {type === "cooking-times" &&
-          t("no_cooking_times_title", "No cooking times yet")}
-      </h3>
-      <button className="btn btn-tertiary" onClick={onAddClick}>
-        <Plus size={20} />
-        {t("add_first_cooking_time")}
-      </button>
-    </div>
-  );
-
   // Render cooking time item (uses CookingTimeRow component like RecipeForm uses IngredientRow)
   const renderCookingTimeItem = (
     item,
@@ -740,6 +740,23 @@ const CookingTimes = ({
   if (loading) {
     return <LoadingAcorn />;
   }
+
+  const hasAnyItems =
+    formData.ungroupedCookingTimes.length > 0 ||
+    formData.cookingTimeSections.length > 0;
+
+  const enterEditMode = async () => {
+    // Switch to preferred language first, then enter edit mode
+    const preferredLanguage = await getUserPreferredLanguage();
+    if (i18n.language !== preferredLanguage) {
+      originalUserLanguage.current = i18n.language;
+      await i18n.changeLanguage(preferredLanguage);
+      // Wait for data to reload in new language before entering edit mode
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    setIsEditMode(true);
+    setSelectedSection("all");
+  };
 
   const handleBackNavigation = () => {
     if (activeTab === "conversions") {
@@ -767,173 +784,361 @@ const CookingTimes = ({
     setShowExitEditModeModal(false);
   };
 
+  const handleCancelEdit = () => {
+    if (hasUnsavedChanges()) {
+      setShowExitEditModeModal(true);
+    } else {
+      setIsEditMode(false);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    await saveAllChanges();
+    setIsEditMode(false);
+  };
+
   return (
-    <div className="card card-form">
-      <div className="flex-column-center">
-        <div className="cookingtimes-header flex-between ">
-          <button
-            className="btn-unstyled back-arrow"
+    <Card className="mx-auto max-w-3xl">
+      <CardHeader className="flex flex-col items-stretch gap-4">
+        <div className="relative flex w-full items-center justify-center">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="absolute left-0"
             onClick={handleBackNavigation}
             aria-label={t("go_back", "Go Back")}
           >
-            <ArrowBigLeft size={28} />
-          </button>
-          <div className="flex-row cookingtime-tabs-wrapper">
-            <button
-              className={`tab-button ${activeTab === "cooking-times" ? "active" : ""}`}
-              onClick={() => setActiveTab("cooking-times")}
-            >
-              <Timer size={20} />
-              {t("cooking_times_tab")}
-            </button>
-            <button
-              className={`tab-button ${activeTab === "conversions" ? "active" : ""}`}
-              onClick={() => setActiveTab("conversions")}
-            >
-              <ArrowLeftRight size={20} />
-              {t("conversions_tab")}
-            </button>
-          </div>
-          {/* Edit button - Only show on cooking times tab when not in edit mode */}
-          {activeTab === "cooking-times" &&
-          !isEditMode &&
-          (formData.ungroupedCookingTimes.length > 0 ||
-            formData.cookingTimeSections.length > 0) ? (
-            <button
-              className="btn-unstyled pencil-icon-right"
-              onClick={async () => {
-                // Switch to preferred language first, then enter edit mode
-                const preferredLanguage = await getUserPreferredLanguage();
-                if (i18n.language !== preferredLanguage) {
-                  originalUserLanguage.current = i18n.language;
-                  await i18n.changeLanguage(preferredLanguage);
-                  // Wait for data to reload in new language before entering edit mode
-                  await new Promise((resolve) => setTimeout(resolve, 100));
-                }
-                setIsEditMode(true);
-                setSelectedSection("all");
-              }}
-              aria-label={t("edit_mode", "Edit Mode")}
-            >
-              <Pencil size={20} />
-            </button>
+            <ArrowLeft />
+          </Button>
+
+          {isEditMode ? (
+            <h1 className="text-lg font-semibold">{t("cooking_times_tab")}</h1>
           ) : (
-            <div className="pencil-placeholder" />
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="cooking-times">
+                  <Timer />
+                  {t("cooking_times_tab")}
+                </TabsTrigger>
+                <TabsTrigger value="conversions">
+                  <ArrowLeftRight />
+                  {t("conversions_tab")}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
+
+          {activeTab === "cooking-times" && !isEditMode && hasAnyItems && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="absolute right-0"
+                    onClick={enterEditMode}
+                    aria-label={t("edit_mode", "Edit Mode")}
+                  >
+                    <Pencil size={16} />
+                  </Button>
+                }
+              />
+              <TooltipContent>{t("edit_mode", "Edit Mode")}</TooltipContent>
+            </Tooltip>
           )}
         </div>
 
-        {/* Category Filter Chips - Only for cooking times tab */}
-        {activeTab === "cooking-times" &&
-          !isEditMode &&
-          (formData.ungroupedCookingTimes.length > 0 ||
-            formData.cookingTimeSections.length > 0) && (
-            <div className="cookingtime-categories-wrapper">
-              <button
-                className={`subheading-wrapper${selectedSection === "all" ? " selected" : ""}`}
-                onClick={() => setSelectedSection("all")}
+        {/* Section Filter Chips - Only for cooking times tab */}
+        {activeTab === "cooking-times" && !isEditMode && hasAnyItems && (
+          <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
+            <Button
+              variant="text"
+              aria-pressed={selectedSection === "all"}
+              onClick={() => setSelectedSection("all")}
+            >
+              <span className="font-forta uppercase">{t("all", "All")}</span>
+            </Button>
+            {formData.cookingTimeSections.map((section) => (
+              <Button
+                key={section.id}
+                variant="text"
+                aria-pressed={selectedSection === section.subheading}
+                onClick={() => setSelectedSection(section.subheading)}
               >
-                <h3 className="forta">{t("all", "All")}</h3>
-              </button>
-              {formData.cookingTimeSections.map((section) => (
-                <button
-                  key={section.id}
-                  className={`subheading-wrapper${selectedSection === section.subheading ? " selected" : ""}`}
-                  onClick={() => setSelectedSection(section.subheading)}
-                >
-                  <h3 className="forta">{section.subheading}</h3>
-                </button>
-              ))}
-            </div>
-          )}
+                <span className="font-forta uppercase">
+                  {section.subheading}
+                </span>
+              </Button>
+            ))}
+          </div>
+        )}
+      </CardHeader>
 
-        {/* Cooking Times Tab Content */}
-        <div
-          className={`${isEditMode ? "flex-column-center" : "w-100-mobile"}`}
-        >
+      <CardContent className="flex flex-col gap-4">
+        {activeTab === "conversions" ? (
+          <ConversionsTab />
+        ) : !hasAnyItems ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia>
+                <Timer />
+              </EmptyMedia>
+              <EmptyTitle>
+                {t("no_cooking_times_title", "No cooking times yet")}
+              </EmptyTitle>
+              <EmptyDescription>
+                {t("add_first_cooking_time", "Add your first cooking time")}
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button
+                type="button"
+                onClick={async () => {
+                  setIsEditMode(true);
+                  const preferredLanguage = await getUserPreferredLanguage();
+                  if (i18n.language !== preferredLanguage) {
+                    originalUserLanguage.current = i18n.language;
+                    await i18n.changeLanguage(preferredLanguage);
+                    await new Promise((resolve) => setTimeout(resolve, 50));
+                  }
+                  addCookingTime("ungrouped");
+                  setSelectedSection("all");
+                }}
+              >
+                <Plus size={16} />
+                {t("add_first_cooking_time")}
+              </Button>
+            </EmptyContent>
+          </Empty>
+        ) : filteredData.ungroupedCookingTimes.length === 0 &&
+          filteredData.cookingTimeSections.length === 0 &&
+          selectedSection !== "all" ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            {t("no_items_in_category", "No items in this category.")}
+          </p>
+        ) : (
           <DragDropContext onDragEnd={handleDragEnd}>
-            {activeTab === "cooking-times" && (
-              <>
-                {formData.ungroupedCookingTimes.length === 0 &&
-                formData.cookingTimeSections.length === 0 ? (
-                  <EmptyState
-                    type="cooking-times"
-                    icon={Timer}
-                    onAddClick={async () => {
-                      // Enter edit mode first
-                      setIsEditMode(true);
-                      // Switch to preferred language
-                      const preferredLanguage =
-                        await getUserPreferredLanguage();
-                      if (i18n.language !== preferredLanguage) {
-                        originalUserLanguage.current = i18n.language;
-                        await i18n.changeLanguage(preferredLanguage);
-                        // Wait a bit for state to settle
-                        await new Promise((resolve) => setTimeout(resolve, 50));
-                      }
-                      // Now add the empty cooking time
-                      addCookingTime("ungrouped");
-                      setSelectedSection("all");
-                    }}
-                  />
-                ) : (
-                  <>
-                    {filteredData.ungroupedCookingTimes.length === 0 &&
-                    filteredData.cookingTimeSections.length === 0 &&
-                    selectedSection !== "all" ? (
-                      <div className="no-results">
-                        <p>
-                          {t(
-                            "no_items_in_category",
-                            "No items in this category."
-                          )}
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Form header */}
-                        <div className="flex-between add-section-wrapper">
-                          {isEditMode && (
-                            <button
-                              type="button"
-                              onClick={addSection}
-                              className="btn btn-section"
-                            >
-                              {t("add_section")}
-                            </button>
-                          )}
-                        </div>
+            {isEditMode && (
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full"
+                onClick={addSection}
+              >
+                <Plus size={16} />
+                {t("add_section")}
+              </Button>
+            )}
 
-                        {/* Ungrouped Cooking Times */}
-                        {(isEditMode
-                          ? formData.ungroupedCookingTimes.length > 0
-                          : filteredData.ungroupedCookingTimes.length > 0) && (
-                          <>
+            {/* Ungrouped Cooking Times */}
+            {(isEditMode
+              ? formData.ungroupedCookingTimes.length > 0
+              : filteredData.ungroupedCookingTimes.length > 0) && (
+              <>
+                {isEditMode ? (
+                  <Droppable droppableId="ungrouped" type="cooking-time-item">
+                    {(provided, snapshot) => (
+                      <div
+                        className={cn(
+                          "flex flex-col gap-2 rounded-lg",
+                          snapshot.isDraggingOver && "bg-muted/40"
+                        )}
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        {formData.ungroupedCookingTimes.map((item, index) => (
+                          <Draggable
+                            key={`ungrouped-${index}-${item.tempId || item.id}`}
+                            draggableId={`ungrouped-${index}-${item.tempId || item.id}`}
+                            index={index}
+                            type="cooking-time-item"
+                          >
+                            {(provided, snapshot) =>
+                              renderCookingTimeItem(
+                                item,
+                                index,
+                                "ungrouped",
+                                provided,
+                                snapshot
+                              )
+                            }
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {filteredData.ungroupedCookingTimes.map((item, index) =>
+                      renderCookingTimeItem(
+                        item,
+                        index,
+                        "ungrouped",
+                        null,
+                        null
+                      )
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Add Cooking Time Button for Ungrouped */}
+            {isEditMode && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => addCookingTime("ungrouped")}
+              >
+                <Plus size={16} data-testid="add-cooking-time-btn" />
+                {t("add_cooking_time")}
+              </Button>
+            )}
+
+            {/* Cooking Time Sections */}
+            {(isEditMode
+              ? formData.cookingTimeSections.length > 0
+              : filteredData.cookingTimeSections.length > 0) && (
+              <Droppable droppableId="sections" type="cooking-time-section">
+                {(provided) => (
+                  <div
+                    className="flex flex-col gap-4"
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    {(isEditMode
+                      ? formData.cookingTimeSections
+                      : filteredData.cookingTimeSections
+                    ).map((section, sectionIndex) => (
+                      <Draggable
+                        key={section.id}
+                        draggableId={section.id}
+                        index={sectionIndex}
+                        type="cooking-time-section"
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={cn(
+                              isEditMode &&
+                                "rounded-xl border border-border bg-muted/20 p-3",
+                              snapshot.isDragging && "shadow-md"
+                            )}
+                          >
+                            {/* Section Header */}
+                            {isEditMode ? (
+                              <div className="mb-3 flex items-center gap-2">
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="cursor-grab text-muted-foreground active:cursor-grabbing"
+                                >
+                                  <GripVertical size={16} />
+                                </div>
+                                {editingSectionId === section.id ||
+                                !section.subheading ? (
+                                  <Input
+                                    type="text"
+                                    value={section.subheading}
+                                    onChange={(e) =>
+                                      handleSectionChange(
+                                        section.id,
+                                        "subheading",
+                                        e.target.value
+                                      )
+                                    }
+                                    onKeyDown={(e) => {
+                                      if (
+                                        e.key === "Enter" &&
+                                        section.subheading.trim()
+                                      ) {
+                                        e.preventDefault();
+                                        setEditingSectionId(null);
+                                      }
+                                    }}
+                                    onFocus={() =>
+                                      setEditingSectionId(section.id)
+                                    }
+                                    onBlur={() => {
+                                      if (section.subheading.trim()) {
+                                        setEditingSectionId(null);
+                                      }
+                                    }}
+                                    autoFocus={editingSectionId === section.id}
+                                    className="section-title-input flex-1"
+                                    placeholder={t("section_title")}
+                                  />
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setEditingSectionId(section.id)
+                                    }
+                                    className="flex-1 truncate text-left font-medium [word-break:break-word]"
+                                  >
+                                    {section.subheading}
+                                  </button>
+                                )}
+                                <Tooltip>
+                                  <TooltipTrigger
+                                    render={
+                                      <Button
+                                        type="button"
+                                        variant="ghost-destructive"
+                                        size="icon-sm"
+                                        onClick={() =>
+                                          removeSection(section.id)
+                                        }
+                                        aria-label={t("remove_section")}
+                                      >
+                                        <Trash2 size={16} />
+                                      </Button>
+                                    }
+                                  />
+                                  <TooltipContent>
+                                    {t("remove_section")}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
+                            ) : (
+                              // Only show section header in view mode if showing all sections
+                              selectedSection === "all" && (
+                                <h2 className="mb-2 flex items-center gap-3 font-medium [word-break:break-word] after:h-px after:flex-1 after:bg-border after:content-['']">
+                                  {section.subheading}
+                                </h2>
+                              )
+                            )}
+
+                            {/* Section Cooking Times */}
                             {isEditMode ? (
                               <Droppable
-                                droppableId="ungrouped"
+                                droppableId={section.id}
                                 type="cooking-time-item"
                               >
                                 {(provided, snapshot) => (
                                   <div
-                                    className={`flex-column ${
-                                      snapshot.isDraggingOver ? "drag-over" : ""
-                                    }`}
+                                    className={cn(
+                                      "flex flex-col gap-2 rounded-lg",
+                                      snapshot.isDraggingOver && "bg-muted/40"
+                                    )}
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
                                   >
-                                    {formData.ungroupedCookingTimes.map(
-                                      (item, index) => (
+                                    {section.cookingTimes.map(
+                                      (item, itemIndex) => (
                                         <Draggable
-                                          key={`ungrouped-${index}-${item.tempId || item.id}`}
-                                          draggableId={`ungrouped-${index}-${item.tempId || item.id}`}
-                                          index={index}
+                                          key={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
+                                          draggableId={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
+                                          index={itemIndex}
                                           type="cooking-time-item"
                                         >
                                           {(provided, snapshot) =>
                                             renderCookingTimeItem(
                                               item,
-                                              index,
-                                              "ungrouped",
+                                              itemIndex,
+                                              section.id,
                                               provided,
                                               snapshot
                                             )
@@ -946,235 +1151,68 @@ const CookingTimes = ({
                                 )}
                               </Droppable>
                             ) : (
-                              <div className="flex-column gap-xs">
-                                {filteredData.ungroupedCookingTimes.map(
-                                  (item, index) =>
-                                    renderCookingTimeItem(
-                                      item,
-                                      index,
-                                      "ungrouped",
-                                      null,
-                                      null
-                                    )
+                              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                {section.cookingTimes.map((item, itemIndex) =>
+                                  renderCookingTimeItem(
+                                    item,
+                                    itemIndex,
+                                    section.id,
+                                    null,
+                                    null
+                                  )
                                 )}
                               </div>
                             )}
-                          </>
-                        )}
 
-                        {/* Add Cooking Time Button for Ungrouped */}
-                        {isEditMode && (
-                          <div className="flex-center">
-                            <button
-                              type="button"
-                              onClick={() => addCookingTime("ungrouped")}
-                              className="btn btn-icon btn-icon-green"
-                            >
-                              <Plus
-                                size={16}
-                                data-testid="add-cooking-time-btn"
+                            {/* Add Cooking Time Button (like RecipeForm) */}
+                            {isEditMode && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="mt-2 w-full"
+                                onClick={() => addCookingTime(section.id)}
                                 aria-label={t("add_cooking_time")}
-                              />
-                            </button>
+                              >
+                                <Plus
+                                  size={16}
+                                  data-testid="add-section-cooking-time-btn"
+                                />
+                                {t("add_cooking_time")}
+                              </Button>
+                            )}
                           </div>
                         )}
-
-                        {/* Cooking Time Sections */}
-                        {(isEditMode
-                          ? formData.cookingTimeSections.length > 0
-                          : filteredData.cookingTimeSections.length > 0) && (
-                          <Droppable
-                            droppableId="sections"
-                            type="cooking-time-section"
-                          >
-                            {(provided) => (
-                              <div
-                                className="flex-column"
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                              >
-                                {(isEditMode
-                                  ? formData.cookingTimeSections
-                                  : filteredData.cookingTimeSections
-                                ).map((section, sectionIndex) => (
-                                  <Draggable
-                                    key={section.id}
-                                    draggableId={section.id}
-                                    index={sectionIndex}
-                                    type="cooking-time-section"
-                                  >
-                                    {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        className={`cooking-time-section ${
-                                          snapshot.isDragging ? "dragging" : ""
-                                        }`}
-                                      >
-                                        {/* Section Header */}
-                                        {isEditMode ? (
-                                          <div className="flex-row">
-                                            <div
-                                              {...provided.dragHandleProps}
-                                              className="drag-handle"
-                                            >
-                                              <GripVertical size={16} />
-                                            </div>
-                                            <input
-                                              type="text"
-                                              value={section.subheading}
-                                              onChange={(e) =>
-                                                handleSectionChange(
-                                                  section.id,
-                                                  "subheading",
-                                                  e.target.value
-                                                )
-                                              }
-                                              className="input input--borderless section-title-input"
-                                              placeholder={t("section_title")}
-                                            />
-                                            <button
-                                              type="button"
-                                              onClick={() =>
-                                                removeSection(section.id)
-                                              }
-                                              className="btn btn-section"
-                                            >
-                                              {t("remove_section")}
-                                            </button>
-                                          </div>
-                                        ) : (
-                                          // Only show section header in view mode if showing all sections
-                                          selectedSection === "all" && (
-                                            <div className="cookingtime-section-subheading">
-                                              <h3>{section.subheading}</h3>
-                                            </div>
-                                          )
-                                        )}
-
-                                        {/* Section Cooking Times */}
-                                        {isEditMode ? (
-                                          <Droppable
-                                            droppableId={section.id}
-                                            type="cooking-time-item"
-                                          >
-                                            {(provided, snapshot) => (
-                                              <div
-                                                className={`flex-column gap-xs ${
-                                                  snapshot.isDraggingOver
-                                                    ? "drag-over"
-                                                    : ""
-                                                }`}
-                                                {...provided.droppableProps}
-                                                ref={provided.innerRef}
-                                              >
-                                                {section.cookingTimes.map(
-                                                  (item, itemIndex) => (
-                                                    <Draggable
-                                                      key={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
-                                                      draggableId={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
-                                                      index={itemIndex}
-                                                      type="cooking-time-item"
-                                                    >
-                                                      {(provided, snapshot) =>
-                                                        renderCookingTimeItem(
-                                                          item,
-                                                          itemIndex,
-                                                          section.id,
-                                                          provided,
-                                                          snapshot
-                                                        )
-                                                      }
-                                                    </Draggable>
-                                                  )
-                                                )}
-                                                {provided.placeholder}
-                                              </div>
-                                            )}
-                                          </Droppable>
-                                        ) : (
-                                          <div className="flex-column gap-xs">
-                                            {section.cookingTimes.map(
-                                              (item, itemIndex) =>
-                                                renderCookingTimeItem(
-                                                  item,
-                                                  itemIndex,
-                                                  section.id,
-                                                  null,
-                                                  null
-                                                )
-                                            )}
-                                          </div>
-                                        )}
-
-                                        {/* Add Cooking Time Button (like RecipeForm) */}
-                                        {isEditMode && (
-                                          <div className="flex-center">
-                                            <button
-                                              type="button"
-                                              onClick={() =>
-                                                addCookingTime(section.id)
-                                              }
-                                              className="btn btn-icon btn-icon-green"
-                                              aria-label={t("add_cooking_time")}
-                                            >
-                                              <Plus
-                                                size={16}
-                                                data-testid="add-section-cooking-time-btn"
-                                              />
-                                            </button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </div>
-                            )}
-                          </Droppable>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-
-                {/* Action buttons for edit mode */}
-                {isEditMode && (
-                  <div className="action-buttons-end">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        // Check for unsaved changes before canceling
-                        if (hasUnsavedChanges()) {
-                          setShowExitEditModeModal(true);
-                        } else {
-                          setIsEditMode(false);
-                        }
-                      }}
-                      className="btn btn-action btn-secondary"
-                    >
-                      {t("cancel")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        // Save all changes and exit edit mode
-                        await saveAllChanges();
-                        setIsEditMode(false);
-                      }}
-                      className="btn btn-action btn-primary"
-                    >
-                      {t("save_changes", "Save Changes")}
-                    </button>
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
                   </div>
                 )}
-              </>
+              </Droppable>
+            )}
+
+            {/* Action buttons for edit mode */}
+            {isEditMode && (
+              <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={handleCancelEdit}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  type="button"
+                  className="w-full sm:w-auto"
+                  onClick={handleSaveEdit}
+                >
+                  {t("save_changes", "Save Changes")}
+                </Button>
+              </div>
             )}
           </DragDropContext>
-        </div>
-        {activeTab === "conversions" && <ConversionsTab />}
-      </div>
+        )}
+      </CardContent>
 
       {/* Unsaved Changes Modal - for page navigation */}
       <AlertDialog
@@ -1223,7 +1261,7 @@ const CookingTimes = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </Card>
   );
 };
 

@@ -1,68 +1,78 @@
 import { useTranslation } from "react-i18next";
-import "./ConversionsTab.css";
+import { Beaker, Scale, Thermometer } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 // Quick reference guide for cooking measurements
 const conversions = {
-  volume: [
-    // Teaspoons & Tablespoons
-    "3 tsp = 1 tbsp",
-    "4 tbsp = 1/4 cup",
+  volume: {
+    icon: Beaker,
+    items: [
+      // Teaspoons & Tablespoons
+      "3 tsp = 1 tbsp",
+      "4 tbsp = 1/4 cup",
+      "1 cup = 16 tbsp",
 
-    // To ml
-    "1 tsp = 5 ml",
-    "1 tbsp = 15 ml",
-    "1 fl oz = 30 ml",
-    "1 cup = 236 ml",
-  ],
+      // To ml
+      "1 tsp = 5 ml",
+      "1 tbsp = 15 ml",
+      "1 cup = 236 ml",
+    ],
+  },
 
-  weight: [
-    // Ounces & Pounds
-    "1 oz = 28 g",
-    "1 lb = 454 g",
+  weight: {
+    icon: Scale,
+    items: [
+      // Ounces & Pounds
+      "1 oz = 28 g",
+      "1 lb = 454 g",
 
-    "canned_translation",
-  ],
+      "canned_translation",
+    ],
+  },
 
-  temperature: [
-    // Common Baking Temperatures
-    "150°C = 300°F",
-    "160°C = 320°F",
-    "180°C = 350°F",
-    "190°C = 375°F",
-    "200°C = 400°F",
-    "220°C = 425°F",
-  ],
+  temperature: {
+    icon: Thermometer,
+    items: [
+      // Common Baking Temperatures
+      "150°C = 300°F",
+      "160°C = 320°F",
+      "180°C = 350°F",
+      "190°C = 375°F",
+      "200°C = 400°F",
+      "220°C = 425°F",
+    ],
+  },
 };
 
 const ConversionsTab = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="conversions-grid">
-      {Object.keys(conversions).map((category) => {
-        const categoryConversions = conversions[category];
-        if (categoryConversions.length === 0) return null;
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Object.entries(conversions).map(([category, data]) => {
+        if (data.items.length === 0) return null;
 
         return (
-          <div key={category}>
-            <div className="mb-05">
-              <h3>
+          <Card key={category} size="sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <data.icon className="size-4 text-muted-foreground" />
                 {t(
                   category,
                   category.charAt(0).toUpperCase() + category.slice(1)
                 )}
-              </h3>
-            </div>
-            <div>
-              {categoryConversions.map((conversion, index) => (
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-1.5 text-sm text-foreground/80">
+              {data.items.map((conversion, index) => (
                 <div key={index}>
                   {conversion.includes("=") && !conversion.includes("°")
                     ? conversion
                     : t(conversion, conversion)}
                 </div>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         );
       })}
     </div>

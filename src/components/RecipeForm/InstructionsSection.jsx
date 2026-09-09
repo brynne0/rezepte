@@ -49,7 +49,7 @@ const InstructionsSection = ({
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     className={cn(
-                      "flex items-start gap-2 rounded-lg border border-border bg-card p-2 transition-colors",
+                      "flex items-start gap-2 rounded-lg border border-primary/50 bg-card p-2 transition-colors",
                       snapshot.isDragging && "shadow-md"
                     )}
                   >
