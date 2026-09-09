@@ -53,7 +53,11 @@ const ConversionsTab = () => {
         if (data.items.length === 0) return null;
 
         return (
-          <Card key={category} size="sm">
+          <Card
+            key={category}
+            size="sm"
+            className="border-primary/50 bg-muted/20"
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <data.icon className="size-4 text-muted-foreground" />

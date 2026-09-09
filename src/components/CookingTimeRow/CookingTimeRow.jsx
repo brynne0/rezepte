@@ -81,7 +81,7 @@ const CookingTimeRow = ({
       <Item
         variant="outline"
         size="sm"
-        className="items-start border-primary/50 bg-card"
+        className="items-start border-primary/50 bg-muted/20"
       >
         <ItemContent>
           <ItemTitle className="text-base">{item.ingredient_name}</ItemTitle>
@@ -126,7 +126,7 @@ const CookingTimeRow = ({
       ref={provided?.innerRef}
       {...provided?.draggableProps}
       className={cn(
-        "flex items-start gap-2 rounded-lg border border-primary/50 bg-card p-3 transition-colors",
+        "flex items-start gap-2 rounded-lg border border-primary/50 bg-muted/20 p-3 transition-colors",
         snapshot?.isDragging && "border-ring bg-muted/50 shadow-sm"
       )}
     >

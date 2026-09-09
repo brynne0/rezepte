@@ -55,7 +55,7 @@ const IngredientsSection = ({
           {(provided, snapshot) => (
             <div
               className={cn(
-                "flex flex-col gap-2",
+                "flex flex-col overflow-hidden rounded-lg border border-primary/50 bg-card",
                 snapshot.isDraggingOver && "bg-muted/50"
               )}
               {...provided.droppableProps}
@@ -128,7 +128,7 @@ const IngredientsSection = ({
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       className={cn(
-                        "flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2",
+                        "flex flex-col gap-2 rounded-lg border border-primary/50 bg-muted/20 p-2",
                         snapshot.isDragging && "shadow-md"
                       )}
                     >
@@ -214,7 +214,7 @@ const IngredientsSection = ({
                         {(provided, snapshot) => (
                           <div
                             className={cn(
-                              "flex flex-col gap-2",
+                              "flex flex-col overflow-hidden rounded-lg border border-primary/50 bg-card",
                               snapshot.isDraggingOver && "bg-muted/50"
                             )}
                             {...provided.droppableProps}

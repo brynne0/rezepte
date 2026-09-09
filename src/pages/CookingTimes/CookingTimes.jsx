@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import {
   Plus,
   Timer,
@@ -23,6 +22,7 @@ import {
 import { getUserPreferredLanguage } from "../../services/userService";
 import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -737,10 +737,6 @@ const CookingTimes = ({
     />
   );
 
-  if (loading) {
-    return <LoadingAcorn />;
-  }
-
   const hasAnyItems =
     formData.ungroupedCookingTimes.length > 0 ||
     formData.cookingTimeSections.length > 0;
@@ -875,7 +871,20 @@ const CookingTimes = ({
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        {activeTab === "conversions" ? (
+        {loading ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex flex-col gap-2 rounded-lg border border-primary/50 bg-muted/20 p-3"
+              >
+                <Skeleton className="h-5 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-1/3" />
+              </div>
+            ))}
+          </div>
+        ) : activeTab === "conversions" ? (
           <ConversionsTab />
         ) : !hasAnyItems ? (
           <Empty>

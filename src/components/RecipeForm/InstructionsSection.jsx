@@ -30,7 +30,7 @@ const InstructionsSection = ({
         {(provided, snapshot) => (
           <div
             className={cn(
-              "flex flex-col gap-2",
+              "flex flex-col overflow-hidden rounded-lg border border-primary/50 bg-card",
               snapshot.isDraggingOver && "bg-muted/50"
             )}
             {...provided.droppableProps}
@@ -49,8 +49,10 @@ const InstructionsSection = ({
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     className={cn(
-                      "flex items-start gap-2 rounded-lg border border-primary/50 bg-card p-2 transition-colors",
-                      snapshot.isDragging && "shadow-md"
+                      "flex items-start gap-2 p-2 transition-colors",
+                      index > 0 && "border-t border-border",
+                      snapshot.isDragging &&
+                        "rounded-lg border border-primary/50 bg-card shadow-md"
                     )}
                   >
                     <div className="flex flex-col items-center gap-1 pt-1.5">

@@ -44,8 +44,10 @@ const IngredientRow = ({
       ref={provided.innerRef}
       {...provided.draggableProps}
       className={cn(
-        "flex flex-wrap items-start gap-2 rounded-lg border border-primary/50 bg-card p-2 transition-colors",
-        snapshot.isDragging && "shadow-md"
+        "flex flex-wrap items-start gap-2 p-2 transition-colors",
+        index > 0 && "border-t border-border",
+        snapshot.isDragging &&
+          "rounded-lg border border-primary/50 bg-card shadow-md"
       )}
     >
       {/* Ingredient Drag Handle */}

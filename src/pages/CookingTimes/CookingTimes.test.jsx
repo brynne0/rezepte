@@ -27,10 +27,6 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
-  default: () => <div data-testid="loading-acorn">Loading...</div>,
-}));
-
 vi.mock("../../components/ConversionsTab/ConversionsTab", () => ({
   default: () => <div data-testid="conversions-tab">Conversions</div>,
 }));
@@ -139,12 +135,14 @@ describe("CookingTimes", () => {
   };
 
   describe("Loading State", () => {
-    it("should show loading spinner while fetching data", () => {
+    it("should show loading skeletons while fetching data", () => {
       cookingTimesService.getTranslatedCookingTimes.mockImplementation(
         () => new Promise(() => {})
       );
-      renderComponent();
-      expect(screen.getByTestId("loading-acorn")).toBeInTheDocument();
+      const { container } = renderComponent();
+      expect(
+        container.querySelectorAll('[data-slot="skeleton"]').length
+      ).toBeGreaterThan(0);
     });
   });
 
