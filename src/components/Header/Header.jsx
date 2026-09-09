@@ -1,38 +1,52 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Search,
-  ShoppingBasket,
+  ArrowLeft,
   Plus,
   Squirrel,
   Menu,
   User,
+  Users,
   Sun,
   Moon,
   Clock,
+  Settings,
+  LogOut,
 } from "lucide-react";
-import FriendsDropdown from "../FriendsDropdown/FriendsDropdown";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import FriendsPanel from "../FriendsPanel/FriendsPanel";
 import { signOut, getFirstName } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useTranslation } from "react-i18next";
-import useClickOutside from "../../hooks/ui/useClickOutside";
 import { useTheme } from "../../hooks/ui/useTheme";
 import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
-import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
-import SortButtons from "../SortButtons/SortButtons";
-import "./Header.css";
+import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
+import { cn } from "cn";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
-const Header = ({
-  setSelectedCategory,
-  setSearchTerm,
-  searchTerm,
-  disableLanguageSwitch = false,
-  sortBy,
-  setSortBy,
-  showImages,
-  setShowImages,
-  onPageReset,
-}) => {
+const Header = ({ disableLanguageSwitch = false, friendBar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,6 +55,20 @@ const Header = ({
   const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
 
   const [showInstallModal, setShowInstallModal] = useState(false);
+
+  // Only show a border under the header once there's scrolled content above it
+  const mainScrollRef = useMainScrollRef();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const node = mainScrollRef?.current;
+    if (!node) return;
+
+    const handleScroll = () => setIsScrolled(node.scrollTop > 0);
+    handleScroll();
+    node.addEventListener("scroll", handleScroll, { passive: true });
+    return () => node.removeEventListener("scroll", handleScroll);
+  }, [mainScrollRef]);
 
   // Show install modal once when prompt is available (or on iOS), and user is
   // logged in, unless previously dismissed
@@ -64,14 +92,13 @@ const Header = ({
     triggerInstall();
   };
 
-  // Hide search bar on all pages except home
-  const isHomePage = location.pathname === "/";
+  const isAuthPage = location.pathname === "/login";
+
+  const isActivePage = (path) => location.pathname === path;
+  const isFriendsPageActive = location.pathname.startsWith("/friends/");
 
   const [showNavMenu, setShowNavMenu] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [currentSearchInput, setCurrentSearchInput] = useState("");
 
-  // Language
   const { t, i18n } = useTranslation();
 
   // Display name
@@ -93,395 +120,362 @@ const Header = ({
     }
   }, [isLoggedIn, setFirstName]);
 
-  // Sync search input with external search term changes
-  useEffect(() => {
-    setCurrentSearchInput(searchTerm || "");
-  }, [searchTerm]);
-
-  // Refs for click outside detection
-
-  const userDropdownRef = useClickOutside(() => {
-    setShowUserDropdown(false);
-  });
-
-  const navMenuRef = useClickOutside(() => {
-    setShowNavMenu(false);
-  });
-
   const handleLogout = async () => {
     await signOut();
 
     setFirstName("");
-    setSearchTerm("");
     navigate("/");
   };
 
-  // Reusable Language Selector Component
-  const LanguageSelector = ({ className = "", onLanguageChange = null }) => (
-    <div className={`language-wrapper ${className}`}>
-      <button
-        className={`btn-unstyled language${
-          i18n.language === "en" ? " selected" : ""
-        }${disableLanguageSwitch ? " disabled" : ""}`}
-        onClick={() => {
-          if (!disableLanguageSwitch) {
-            i18n.changeLanguage("en");
-            if (onLanguageChange) onLanguageChange();
-          }
-        }}
-        disabled={disableLanguageSwitch}
-        aria-label={t("switch_to_english")}
-      >
-        EN
-      </button>
-      |
-      <button
-        className={`btn-unstyled language${
-          i18n.language === "de" ? " selected" : ""
-        }${disableLanguageSwitch ? " disabled" : ""}`}
-        onClick={() => {
-          if (!disableLanguageSwitch) {
-            i18n.changeLanguage("de");
-            if (onLanguageChange) onLanguageChange();
-          }
-        }}
-        disabled={disableLanguageSwitch}
-        aria-label={t("switch_to_german")}
-      >
-        DE
-      </button>
-    </div>
-  );
+  // Language toggle
+  const LanguageSelector = ({ onLanguageChange = null }) => {
+    const nextLanguage = i18n.language === "en" ? "de" : "en";
+    const label =
+      nextLanguage === "en" ? t("switch_to_english") : t("switch_to_german");
 
-  // Get theme icon
-  const getThemeIcon = () => {
-    return theme === "light" ? <Moon size={20} /> : <Sun size={20} />;
+    const button = (
+      <Button
+        variant="ghost"
+        className="text-base"
+        onClick={() => {
+          if (!disableLanguageSwitch) {
+            i18n.changeLanguage(nextLanguage);
+            if (onLanguageChange) onLanguageChange();
+          }
+        }}
+        disabled={disableLanguageSwitch}
+        aria-label={label}
+      >
+        {nextLanguage.toUpperCase()}
+      </Button>
+    );
+
+    if (!disableLanguageSwitch) {
+      return button;
+    }
+
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <span tabIndex={0} className="inline-flex">
+              {button}
+            </span>
+          }
+        />
+        <TooltipContent>
+          {t("cooking_times_language_locked_hint")}
+        </TooltipContent>
+      </Tooltip>
+    );
   };
 
-  // Shared user dropdown menu content
-  const userDropdownMenu = showUserDropdown && (
-    <div className="dropdown user-menu">
-      <div className="dropdown-content">
-        <button
-          className="dropdown-item"
-          onClick={() => {
-            toggleTheme();
-            setShowUserDropdown(false);
-          }}
-          aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
-        >
-          {getThemeIcon()}
-        </button>
-        {isLoggedIn ? (
-          <>
-            <button
-              className={`dropdown-item ${
-                location.pathname === "/settings" ? "selected" : ""
-              }`}
-              onClick={() => {
-                setShowUserDropdown(false);
-                navigate("/settings");
-              }}
-            >
-              {t("settings")}
-            </button>
-            <button
-              className="dropdown-item"
-              onClick={() => {
-                handleLogout();
-                setShowUserDropdown(false);
-              }}
-            >
-              {t("logout")}
-            </button>
-          </>
-        ) : (
-          <button
-            className="dropdown-item"
-            onClick={() => {
-              setShowUserDropdown(false);
-              navigate("/auth-page");
-            }}
-          >
-            {t("login")}
-          </button>
-        )}
-      </div>
-    </div>
+  // Theme toggle
+  const getThemeIcon = () => {
+    return theme === "light" ? (
+      <Moon className="size-5" />
+    ) : (
+      <Sun className="size-5" />
+    );
+  };
+
+  const ThemeToggle = () => (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => toggleTheme()}
+      aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
+    >
+      {getThemeIcon()}
+    </Button>
+  );
+
+  // Shared user dropdown menu
+  const UserMenu = () => (
+    <Tooltip>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  disabled={location.pathname === "/login"}
+                  aria-label={isLoggedIn ? t("user_menu") : t("login")}
+                >
+                  <User className="size-7" />
+                </Button>
+              }
+            />
+          }
+        />
+        <DropdownMenuContent align="center">
+          {isLoggedIn ? (
+            <>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <Settings className="size-4" />
+                {t("settings")}
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                <LogOut className="size-4" />
+                {t("logout")}
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <DropdownMenuItem onClick={() => navigate("/login")}>
+              {t("login")}
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <TooltipContent>{isLoggedIn ? t("profile") : t("login")}</TooltipContent>
+    </Tooltip>
   );
 
   return (
     <>
-      <header className="header">
-        <div className="header-container flex-between">
-          {/* Login and Logout */}
-          <div className="logo-language-wrapper">
-            {/* <button className="btn-unstyled"> */}
-            <Squirrel size={40} className="header-logo" />
-
-            {/* {isMe && (
-                <Squirrel
-                  data-testid="lucide-squirrel"
-                  className="header-logo-2"
-                />
-              )} */}
-
-            {/* Language Selection */}
+      <header
+        className={cn(
+          "sticky top-0 z-20 border-b",
+          isScrolled && !friendBar ? "border-border/60" : "border-transparent"
+        )}
+      >
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-6 md:pb-6">
+          {/* Language and Theme Selection */}
+          <div className="flex shrink-0 items-center md:gap-2">
+            {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
             <LanguageSelector />
+            <ThemeToggle />
           </div>
 
           {/* Title */}
-          <div className="title-wrapper">
-            {/* Display user's first name above header or login message */}
+          <div className="absolute inset-0 m-auto flex h-max w-max flex-col items-center">
+            {/* Display user's first name above header */}
             {firstName && (
-              <span className="first-name"> {`${firstName}'s`}</span>
+              <span className="text-sm leading-none md:text-base">{`${firstName}'s`}</span>
             )}
-            <button
-              className="site-title"
+            <Button
+              variant="ghost"
+              className="h-auto select-none p-0 font-forta text-3xl leading-none text-foreground transition-none hover:bg-transparent active:translate-y-0 dark:hover:bg-transparent md:text-5xl"
               onClick={() => {
                 navigate("/");
               }}
               aria-label={t("go_to_home")}
             >
               Rezepte
-            </button>
+            </Button>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="header-nav desktop-nav">
+          <nav className="hidden items-center gap-2 md:flex md:gap-4">
             {/* Desktop User Icon */}
-            <div className="user-icon-wrapper">
-              <button
-                className={`btn btn-icon btn-icon-neutral ${
-                  showUserDropdown || location.pathname === "/settings"
-                    ? "selected"
-                    : ""
-                }`}
-                onMouseDown={() => {
-                  setShowNavMenu(false);
-                }}
-                onClick={() => {
-                  if (location.pathname === "/auth-page") return;
-                  setShowUserDropdown((prev) => !prev);
-                }}
-                aria-label={isLoggedIn ? t("user_menu") : t("login")}
-              >
-                <User size={28} />
-              </button>
-              {userDropdownMenu}
-            </div>
+            {!isAuthPage && <UserMenu />}
 
-            {/* Only display if user logged in */}
             {isLoggedIn && (
               <>
-                <FriendsDropdown />
-                <button
-                  data-testid="lucide-plus"
-                  className={`btn btn-icon btn-icon-neutral ${
-                    location.pathname === "/add-recipe" ? "selected" : ""
-                  }`}
-                  onClick={() => navigate("/add-recipe")}
-                  aria-label={t("add_new_recipe")}
-                >
-                  <Plus size={28} />
-                </button>
+                <FriendsPanel
+                  tooltipLabel={t("friends")}
+                  renderTrigger={(pendingCount) => (
+                    <Button
+                      variant="ghost"
+                      size="icon-lg"
+                      className={
+                        isFriendsPageActive
+                          ? "relative text-accent-red"
+                          : "relative"
+                      }
+                      aria-label={t("friends")}
+                    >
+                      <Users className="size-7" />
+                      {pendingCount > 0 && (
+                        <Badge
+                          variant="destructive"
+                          className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                        >
+                          {pendingCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  )}
+                />
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        data-testid="lucide-plus"
+                        variant="ghost"
+                        size="icon-lg"
+                        onClick={() => navigate("/add-recipe")}
+                        className={
+                          isActivePage("/add-recipe") ? "text-accent-red" : ""
+                        }
+                        aria-label={t("add_new_recipe")}
+                      >
+                        <Plus className="size-7" />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>{t("add_new_recipe")}</TooltipContent>
+                </Tooltip>
                 {/* Cooking Times */}
-                <button
-                  data-testid="lucide-clock"
-                  className={`btn btn-icon btn-icon-neutral ${
-                    location.pathname === "/cooking-times" ? "selected" : ""
-                  }`}
-                  onClick={() => navigate("/cooking-times")}
-                  aria-label={t("cooking_times", "Cooking Times")}
-                >
-                  <Clock size={28} />
-                </button>
-                {/* Grocery List */}
-                {/* <button
-                  data-testid="lucide-shopping-basket"
-                  className={`btn btn-icon btn-icon-neutral ${
-                    location.pathname === "/grocery-list" ? "selected" : ""
-                  }`}
-                  onClick={() => navigate("/grocery-list")}
-                  aria-label={t("grocery_list")}
-                >
-                  <ShoppingBasket size={28} />
-                </button> */}
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        data-testid="lucide-clock"
+                        variant="ghost"
+                        size="icon-lg"
+                        onClick={() => navigate("/cooking-times")}
+                        className={
+                          isActivePage("/cooking-times")
+                            ? "text-accent-red"
+                            : ""
+                        }
+                        aria-label={t("cooking_times", "Cooking Times")}
+                      >
+                        <Clock className="size-7" />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>
+                    {t("cooking_times", "Cooking Times")}
+                  </TooltipContent>
+                </Tooltip>
               </>
             )}
           </nav>
 
           {/* Mobile User and Menu Icons */}
-          <div className="mobile-nav">
+          <div className="flex items-center md:hidden">
             {/* Mobile User Icon */}
-            <div className="user-icon-wrapper" ref={userDropdownRef}>
-              <button
-                className={`btn btn-icon btn-icon-neutral ${
-                  showUserDropdown || location.pathname === "/settings"
-                    ? "selected"
-                    : ""
-                }`}
-                onMouseDown={() => {
-                  setShowNavMenu(false);
-                }}
-                onClick={() => {
-                  if (location.pathname === "/auth-page") return;
-                  setShowUserDropdown((prev) => !prev);
-                }}
-                aria-label={isLoggedIn ? t("user_menu") : t("login")}
-              >
-                <User size={28} />
-              </button>
-              {userDropdownMenu}
-            </div>
+            {!isAuthPage && <UserMenu />}
 
-            {/* Hamburger Menu */}
-            <div className="nav-menu-wrapper" ref={navMenuRef}>
-              <button
-                className={`btn btn-icon btn-icon-neutral ${
-                  showNavMenu ? "selected" : ""
-                }`}
-                onMouseDown={() => {
-                  setShowUserDropdown(false);
-                }}
-                onClick={() => {
-                  setShowNavMenu((prev) => !prev);
-                }}
-                aria-label="Menu"
-              >
-                <Menu size={28} />
-              </button>
-
-              {/* Mobile Menu Dropdown */}
-              {showNavMenu && (
-                <div className="dropdown nav-menu-dropdown">
-                  <div className="dropdown-content">
-                    {/* Navigation options for logged in users */}
-                    {isLoggedIn && (
-                      <>
-                        <div className="dropdown-item">
-                          <FriendsDropdown
-                            onNavigate={() => setShowNavMenu(false)}
-                          />
-                        </div>
-                        <button
-                          className={`dropdown-item ${
-                            location.pathname === "/add-recipe"
-                              ? "selected"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            navigate("/add-recipe");
-                            setShowNavMenu(false);
-                          }}
-                          aria-label={t("add_new_recipe")}
+            {isLoggedIn && (
+              <Tooltip>
+                <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
+                  <DropdownMenuTrigger
+                    render={
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon-lg"
+                            aria-label="Menu"
+                          >
+                            <Menu className="size-7" />
+                          </Button>
+                        }
+                      />
+                    }
+                  />
+                  <DropdownMenuContent align="center">
+                    <FriendsPanel
+                      onNavigate={() => setShowNavMenu(false)}
+                      renderTrigger={(pendingCount) => (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={
+                            isFriendsPageActive
+                              ? "w-full justify-start gap-1.5 text-accent-red"
+                              : "w-full justify-start gap-1.5"
+                          }
+                          aria-label={t("friends")}
                         >
-                          <Plus size={20} />
-                        </button>
-                        <button
-                          className={`dropdown-item ${
-                            location.pathname === "/cooking-times"
-                              ? "selected"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            navigate("/cooking-times");
-                            setShowNavMenu(false);
-                          }}
-                          aria-label={t("cooking_times", "Cooking Times")}
-                        >
-                          <Clock size={20} />
-                        </button>
-                        {/* <button
-                          className={`dropdown-item ${
-                            location.pathname === "/grocery-list"
-                              ? "selected"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            navigate("/grocery-list");
-                            setShowNavMenu(false);
-                          }}
-                          aria-label={t("grocery_list")}
-                        >
-                          <ShoppingBasket size={20} />
-                        </button> */}
-                      </>
-                    )}
-
-                    {/* Language selection in mobile menu */}
-                    <LanguageSelector
-                      className="dropdown-item"
-                      onLanguageChange={() => setShowNavMenu(false)}
+                          <Users className="size-4" />
+                          {t("friends")}
+                          {pendingCount > 0 && (
+                            <Badge
+                              variant="destructive"
+                              className="ml-auto size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                            >
+                              {pendingCount}
+                            </Badge>
+                          )}
+                        </Button>
+                      )}
                     />
-                  </div>
-                </div>
-              )}
-            </div>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/add-recipe")}
+                      className={
+                        isActivePage("/add-recipe") ? "text-accent-red" : ""
+                      }
+                    >
+                      <Plus className="size-4" />
+                      {t("add_new_recipe")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/cooking-times")}
+                      className={
+                        isActivePage("/cooking-times") ? "text-accent-red" : ""
+                      }
+                    >
+                      <Clock className="size-4" />
+                      {t("cooking_times", "Cooking Times")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <TooltipContent>Menu</TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </div>
-
-        {/*  Search Recipe - Always visible on home page  */}
-        {isHomePage && (
-          <div className="search-bar-wrapper">
-            <div className="search-and-sort-container">
-              <form
-                className="search-bar"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSearchTerm(currentSearchInput);
-                  navigate("/");
-                }}
-              >
-                <div className="search-input-wrapper">
-                  <input
-                    id="search"
-                    type="text"
-                    value={currentSearchInput}
-                    onChange={(e) => {
-                      setCurrentSearchInput(e.target.value);
-                      setSearchTerm(e.target.value);
-                      if (e.target.value.length > 0) {
-                        setSelectedCategory("all_recipes");
-                      }
-                    }}
-                    className="input input--secondary search-input-with-icon"
-                    placeholder={t("search")}
-                  />
-                  <button
-                    className="btn btn-icon btn-icon-neutral btn-search"
-                    type="submit"
-                    aria-label={t("search")}
-                  >
-                    <Search size={20} />
-                  </button>
-                </div>
-              </form>
-              {setSortBy && (
-                <SortButtons
-                  sortBy={sortBy}
-                  onSortChange={setSortBy}
-                  showImages={showImages}
-                  onShowImagesChange={setShowImages}
-                  onPageReset={onPageReset}
-                  isLoggedIn={isLoggedIn}
-                />
-              )}
-            </div>
-          </div>
-        )}
       </header>
 
-      <ConfirmationModal
-        isOpen={showInstallModal}
-        onClose={handleDismissInstall}
-        onConfirm={isIOS ? handleDismissInstall : handleConfirmInstall}
-        title={t("install_app")}
-        message={isIOS ? t("install_app_ios") : t("install_app_prompt")}
-        confirmText={isIOS ? t("got_it") : t("install_app")}
-        cancelText={t("maybe_later")}
-        confirmButtonType="primary"
-      />
+      {/* Viewing a friend's content */}
+      {friendBar && (
+        <div className="border-t border-b">
+          <div className="relative mx-auto flex max-w-7xl items-center justify-center px-3 pt-2 pb-2 md:px-8">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="absolute left-3 md:left-8"
+              onClick={() => navigate("/")}
+              aria-label={t("go_back")}
+            >
+              <ArrowLeft />
+            </Button>
+            {friendBar.loading ? (
+              <Skeleton className="h-6 w-40 rounded-full" />
+            ) : (
+              friendBar.name && (
+                <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm font-medium">
+                  <User className="size-3.5" />
+                  {t("friends_recipes_title", { name: friendBar.name })}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
+
+      <AlertDialog
+        open={showInstallModal}
+        onOpenChange={(open) => {
+          if (!open) handleDismissInstall();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("install_app")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isIOS ? t("install_app_ios") : t("install_app_prompt")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            {!isIOS && (
+              <AlertDialogCancel>{t("maybe_later")}</AlertDialogCancel>
+            )}
+            <AlertDialogAction
+              onClick={isIOS ? handleDismissInstall : handleConfirmInstall}
+            >
+              {isIOS ? t("got_it") : t("install_app")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

@@ -138,6 +138,25 @@ export const validateChangePasswordForm = (
   return errors;
 };
 
+export const validateChangeEmailForm = (formData, t) => {
+  const errors = {};
+  const { currentPassword, newEmail, newEmailRepeat } = formData;
+
+  const currentPasswordError = validatePassword(currentPassword, t);
+  if (currentPasswordError) errors.currentPassword = currentPasswordError;
+
+  const emailError = validateEmail(newEmail, t);
+  if (emailError) errors.newEmail = emailError;
+
+  if (!newEmailRepeat.trim()) {
+    errors.newEmailRepeat = t("email_repeat_required");
+  } else if (newEmail !== newEmailRepeat) {
+    errors.newEmailRepeat = t("emails_do_not_match");
+  }
+
+  return errors;
+};
+
 // Recipe validation functions
 export const validateRecipeTitle = (title, t) => {
   if (!title.trim()) {
@@ -207,6 +226,21 @@ export const validateEmailUnique = async (email, t) => {
       "../services/userService"
     );
     const exists = await checkEmailExistsForSignup(email);
+    if (exists) {
+      return t("email_already_exists");
+    }
+    return null;
+  } catch (error) {
+    console.error("Error checking email uniqueness:", error);
+    return null; // Don't block submission if check fails
+  }
+};
+
+// Email uniqueness validation for changing email (excludes current user)
+export const validateEmailUniqueForChange = async (email, t) => {
+  try {
+    const { checkEmailExists } = await import("../services/userService");
+    const exists = await checkEmailExists(email);
     if (exists) {
       return t("email_already_exists");
     }

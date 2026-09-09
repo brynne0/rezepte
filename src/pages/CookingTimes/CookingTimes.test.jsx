@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import { createRoutesStub } from "react-router-dom";
 import CookingTimes from "./CookingTimes";
 import * as cookingTimesService from "../../services/cookingTimesService";
 import * as userService from "../../services/userService";
@@ -25,10 +25,6 @@ vi.mock("react-i18next", () => ({
       changeLanguage: vi.fn(),
     },
   }),
-}));
-
-vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
-  default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
 vi.mock("../../components/ConversionsTab/ConversionsTab", () => ({
@@ -127,20 +123,26 @@ describe("CookingTimes", () => {
   });
 
   const renderComponent = (props = {}) => {
-    return render(
-      <MemoryRouter>
-        <CookingTimes isEditMode={false} setIsEditMode={vi.fn()} {...props} />
-      </MemoryRouter>
-    );
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <CookingTimes isEditMode={false} setIsEditMode={vi.fn()} {...props} />
+        ),
+      },
+    ]);
+    return render(<Stub initialEntries={["/"]} />);
   };
 
   describe("Loading State", () => {
-    it("should show loading spinner while fetching data", () => {
+    it("should show loading skeletons while fetching data", () => {
       cookingTimesService.getTranslatedCookingTimes.mockImplementation(
         () => new Promise(() => {})
       );
-      renderComponent();
-      expect(screen.getByTestId("loading-acorn")).toBeInTheDocument();
+      const { container } = renderComponent();
+      expect(
+        container.querySelectorAll('[data-slot="skeleton"]').length
+      ).toBeGreaterThan(0);
     });
   });
 

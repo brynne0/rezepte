@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect, useMemo, useContext } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowBigLeft, Search } from "lucide-react";
+import { AppStateContext } from "../../contexts/AppStateContext";
 import {
   getUserByUsername,
   checkFriendship,
@@ -10,30 +10,35 @@ import {
 } from "../../services/friendsService";
 import { getTranslatedRecipeTitle } from "../../services/translationService";
 import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
+import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import { getCategoriesForUI } from "../../services/categoriesService";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
-import CategoryFilter from "../../components/CategoryFilter/CategoryFilter";
+import RecipeFilters from "../../components/RecipeFilters/RecipeFilters";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 const PAGE_SIZE = 36;
 
 const FriendRecipes = () => {
   const { username } = useParams();
-  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { setFriendBar } = useContext(AppStateContext);
 
   const [friend, setFriend] = useState(null);
   const [allRecipes, setAllRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  useScrollRestoration(!loading);
+  const mainScrollRef = useMainScrollRef();
+  useScrollRestoration(mainScrollRef, !loading);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") ?? "all_recipes";
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [friendCategories, setFriendCategories] = useState([]);
+  const [sortBy, setSortBy] = useState("title_asc");
+  const [showImages, setShowImages] = useState(true);
 
   useEffect(() => {
     const load = async () => {
@@ -78,6 +83,12 @@ const FriendRecipes = () => {
     load();
   }, [username, i18n.language, t]);
 
+  // Show the "viewing a friend" back bar in Header while this page is open
+  useEffect(() => {
+    setFriendBar({ name: friend?.first_name || null, loading });
+    return () => setFriendBar(null);
+  }, [friend, loading, setFriendBar]);
+
   const { recipes, totalPages } = useMemo(() => {
     const searched = searchTerm
       ? allRecipes.filter((r) =>
@@ -90,12 +101,24 @@ const FriendRecipes = () => {
         ? searched
         : searched.filter((r) => r.categories?.includes(selectedCategory));
 
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === "title_desc") {
+        return (b.title || "").localeCompare(a.title || "");
+      }
+      if (sortBy === "last_viewed_at_asc" || sortBy === "last_viewed_at_desc") {
+        const aTime = a.last_viewed_at ? new Date(a.last_viewed_at) : 0;
+        const bTime = b.last_viewed_at ? new Date(b.last_viewed_at) : 0;
+        return sortBy === "last_viewed_at_asc" ? aTime - bTime : bTime - aTime;
+      }
+      return (a.title || "").localeCompare(b.title || "");
+    });
+
     const start = (currentPage - 1) * PAGE_SIZE;
     return {
-      recipes: filtered.slice(start, start + PAGE_SIZE),
-      totalPages: Math.ceil(filtered.length / PAGE_SIZE),
+      recipes: sorted.slice(start, start + PAGE_SIZE),
+      totalPages: Math.ceil(sorted.length / PAGE_SIZE),
     };
-  }, [allRecipes, searchTerm, selectedCategory, currentPage]);
+  }, [allRecipes, searchTerm, selectedCategory, sortBy, currentPage]);
 
   const handleCategoryChange = (category) => {
     setSearchParams(category === "all_recipes" ? {} : { category }, {
@@ -115,93 +138,53 @@ const FriendRecipes = () => {
 
   if (error === "not_friends") {
     return (
-      <>
-        <div className="page-header">
-          <button
-            className="btn-unstyled back-arrow"
-            onClick={() => navigate("/")}
-            aria-label={t("go_back")}
-          >
-            <ArrowBigLeft size={28} />
-          </button>
-        </div>
-        <div className="page-centered">
-          <p>{t("friends_not_friends", { username })}</p>
-        </div>
-      </>
+      <Empty className="mt-20">
+        <EmptyHeader>
+          <EmptyTitle>{t("friends_not_friends", { username })}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   if (error) {
     return (
-      <>
-        <div className="page-header">
-          <button
-            className="btn-unstyled back-arrow"
-            onClick={() => navigate("/")}
-            aria-label={t("go_back")}
-          >
-            <ArrowBigLeft size={28} />
-          </button>
-        </div>
-        <div className="page-centered">
-          <p>{error}</p>
-        </div>
-      </>
+      <Empty className="mt-20">
+        <EmptyHeader>
+          <EmptyTitle>{error}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   return (
     <>
-      <div className="page-header mt-1">
-        <button
-          className="btn-unstyled back-arrow"
-          onClick={() => navigate(-1)}
-          aria-label={t("go_back")}
-        >
-          <ArrowBigLeft size={28} />
-        </button>
-        <h1 className="forta">
-          {t("friends_recipes_title", { name: friend?.first_name })}
-        </h1>
-      </div>
-
-      <div className="search-bar-wrapper">
-        <form className="search-bar" onSubmit={(e) => e.preventDefault()}>
-          <div className="search-input-wrapper">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="input input--secondary search-input-with-icon"
-              placeholder={t("search")}
-            />
-            <button
-              className="btn btn-icon btn-icon-neutral btn-search"
-              type="submit"
-              aria-label={t("search")}
-            >
-              <Search size={20} />
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <CategoryFilter
+      <RecipeFilters
         categories={friendCategories}
         selectedCategory={selectedCategory}
         setSelectedCategory={handleCategoryChange}
+        searchTerm={searchTerm}
         setSearchTerm={handleSearchChange}
+        resetCategoryOnSearch={false}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        showImages={showImages}
+        setShowImages={setShowImages}
+        onPageReset={() => setCurrentPage(1)}
+        showImageToggle={!!friend?.friends_can_view_images}
       />
 
       {allRecipes.length === 0 ? (
-        <div className="page-centered high">
-          <p>{t("friends_no_recipes")}</p>
-        </div>
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyTitle>{t("friends_no_recipes")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : recipes.length === 0 ? (
-        <div className="page-centered high">
-          <p>{t("no_recipes_available")}</p>
-        </div>
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyTitle>{t("no_recipes_available")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <>
           <RecipeList
@@ -210,14 +193,14 @@ const FriendRecipes = () => {
             searchTerm={searchTerm}
             isPaginated={true}
             loading={loading}
-            showImages={false}
+            showImages={!!friend?.friends_can_view_images && showImages}
           />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={(page) => {
               setCurrentPage(page);
-              document.getElementById("main-content")?.scrollTo(0, 0);
+              mainScrollRef?.current?.scrollTo(0, 0);
             }}
           />
         </>

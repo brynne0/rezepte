@@ -1,27 +1,25 @@
-import "./Recipe.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
+  ArrowLeft,
   Pencil,
-  ShoppingBasket,
-  Loader2,
-  Share2,
+  Copy,
+  Lock,
+  LockOpen,
   RotateCcw,
+  Minus,
+  Plus,
 } from "lucide-react";
 
+import { AppStateContext } from "../../contexts/AppStateContext";
 import { useRecipe } from "../../hooks/data/useRecipe";
-import { fetchSharedRecipe } from "../../services/sharingService";
-import { getTranslatedRecipe } from "../../services/translationService";
-// import { getUserPreferredLanguage } from "../../services/userService";
+import { setRecipePrivate } from "../../services/recipes";
+import { getFriendProfile } from "../../services/friendsService";
 import { useAuth } from "../../hooks/data/useAuth";
-import { useGroceryList } from "../../hooks/data/useGroceryList";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import ShareModal from "../../components/ShareModal/ShareModal";
 import ImageGallery from "../../components/ImageGallery/ImageGallery";
-import SEO from "../../components/SEO/SEO";
-import { getMainImage } from "../../services/imageService";
 import {
   formatIngredientMeasurement,
   getIngredientDisplayName,
@@ -32,156 +30,140 @@ import {
   formatMultiplierLabel,
 } from "../../utils/scaleUtils";
 import { shouldUsePlural } from "../../utils/fractionUtils";
+import { linkifyText } from "../../utils/linkUtils";
+import { recipeToText } from "../../utils/recipeToText";
 import { useWakeLock } from "../../hooks/ui/useWakeLock";
 import NutritionPanel from "../../components/NutritionPanel/NutritionPanel";
+import { toast } from "@/components/ui/toast";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-// Helper function to parse text and convert URLs to clickable links
-const renderTextWithLinks = (text) => {
-  if (!text) return null;
-
-  // Regex to match URLs (http, https, www)
-  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
-  const parts = text.split(urlRegex);
-
-  return parts.map((part, index) => {
-    // Check if this part is a URL
-    if (part.match(urlRegex)) {
-      // Add protocol if missing (for www. links)
-      const href = part.startsWith("www.") ? `https://${part}` : part;
-      return (
-        <a
-          key={index}
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="link-red break-all"
-        >
-          {part}
-        </a>
-      );
-    }
-    // Return plain text
-    return part;
-  });
-};
-
-const Recipe = ({ isSharedView = false }) => {
-  const { id, shareToken } = useParams();
-  const {
-    recipe: ownedRecipe,
-    loading: ownedLoading,
-    error: ownedError,
-  } = useRecipe(isSharedView ? null : id);
-  const [sharedRecipe, setSharedRecipe] = useState(null);
-  const [sharedLoading, setSharedLoading] = useState(false);
-  const [sharedError, setSharedError] = useState("");
+const Recipe = () => {
+  const { id } = useParams();
+  const { recipe, loading, error } = useRecipe(id);
   const {
     active: wakeLockActive,
     supported: wakeLockSupported,
     toggle: toggleWakeLock,
   } = useWakeLock();
   const [multiplier, setMultiplier] = useState(1);
+  const [checkedIngredients, setCheckedIngredients] = useState({});
+  const [privateOverride, setPrivateOverride] = useState(null);
+  const recipeStorageKey = id;
 
-  // Reset scale when navigating to a different recipe
+  // Reset scale and privacy override when navigating to a different recipe
   useEffect(() => {
     setMultiplier(1);
-  }, [id, shareToken]);
-  const navigate = useNavigate();
-  const { isLoggedIn, user } = useAuth();
-  const { t, i18n } = useTranslation();
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [imagesLoading, setImagesLoading] = useState(true);
-  // const [userPreferredLanguage, setUserPreferredLanguage] = useState(null);
+    setPrivateOverride(null);
+  }, [id]);
 
-  // Load user's preferred language
-  // useEffect(() => {
-  //   if (isLoggedIn) {
-  //     getUserPreferredLanguage().then(setUserPreferredLanguage);
-  //   }
-  // }, [isLoggedIn]);
-
-  // Load shared recipe if in shared view
+  // Restore ticked-off ingredients for this recipe from localStorage
   useEffect(() => {
-    if (isSharedView && shareToken) {
-      const loadSharedRecipe = async () => {
-        try {
-          setSharedLoading(true);
-          setSharedError("");
-
-          const fetchedSharedRecipe = await fetchSharedRecipe(shareToken);
-          const translatedRecipe = await getTranslatedRecipe(
-            fetchedSharedRecipe,
-            i18n.language
-          );
-          setSharedRecipe(translatedRecipe);
-        } catch (err) {
-          setSharedError(err.message || t("failed_load_shared_recipe"));
-        } finally {
-          setSharedLoading(false);
-        }
-      };
-
-      loadSharedRecipe();
+    if (!recipeStorageKey) return;
+    try {
+      const stored = localStorage.getItem(
+        `checked-ingredients-${recipeStorageKey}`
+      );
+      setCheckedIngredients(stored ? JSON.parse(stored) : {});
+    } catch {
+      setCheckedIngredients({});
     }
-  }, [isSharedView, shareToken, i18n.language, t]);
+  }, [recipeStorageKey]);
 
-  // Determine which recipe and state to use
-  const recipe = isSharedView ? sharedRecipe : ownedRecipe;
-  const loading = isSharedView ? sharedLoading : ownedLoading;
-  const error = isSharedView ? sharedError : ownedError;
+  // Persist ticked-off ingredients as they change
+  useEffect(() => {
+    if (!recipeStorageKey) return;
+    try {
+      localStorage.setItem(
+        `checked-ingredients-${recipeStorageKey}`,
+        JSON.stringify(checkedIngredients)
+      );
+    } catch {
+      // Ignore storage errors (e.g. private browsing with storage disabled)
+    }
+  }, [recipeStorageKey, checkedIngredients]);
 
-  const isOwner = isLoggedIn && !!user?.id && recipe?.user_id === user?.id;
+  const handleCheckboxChange = (ingredientId) => {
+    setCheckedIngredients((prev) => ({
+      ...prev,
+      [ingredientId]: !prev[ingredientId],
+    }));
+  };
 
-  // Generate signed URLs for recipe images — only for owner and shared views.
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { setFriendBar } = useContext(AppStateContext);
+
+  const isOwner = !!user?.id && recipe?.user_id === user?.id;
+  const isPrivate = privateOverride ?? recipe?.private ?? false;
+
+  // Generate signed URLs for recipe images — only for the owner.
   // Friends cannot generate signed URLs for another user's storage bucket path.
-  const { signedImages } = useSignedImageUrls(
-    isOwner || isSharedView ? recipe?.images : [],
-    isSharedView // 7-day expiration for shared recipes
-  );
+  const { signedImages } = useSignedImageUrls(isOwner ? recipe?.images : []);
 
-  // Check if user is viewing the site in their preferred language
-  // const currentLanguage = i18n.language.split("-")[0]; // Normalise region codes
-  // const isViewingInPreferredLanguage =
-  //   currentLanguage === userPreferredLanguage;
+  // When viewing a friend's recipe, show the "viewing a friend" banner in
+  // Header (fetching their profile for the name pill); hide it for your own.
+  useEffect(() => {
+    if (!recipe || isOwner) {
+      setFriendBar(null);
+      return;
+    }
+    getFriendProfile(recipe.user_id)
+      .then((profile) => setFriendBar({ name: profile?.first_name || null }))
+      .catch(() => setFriendBar({ name: null }));
+    return () => setFriendBar(null);
+  }, [recipe, isOwner, setFriendBar]);
 
-  // Use the grocery list hook
-  const {
-    checkedIngredients,
-    // addingToGroceryList,
-    // showSuccess,
-    handleCheckboxChange,
-    // addToGroceryList,
-  } = useGroceryList();
+  const handleTogglePrivate = async () => {
+    const next = !isPrivate;
+    setPrivateOverride(next);
+    try {
+      await setRecipePrivate(recipe.id, next);
+      toast.add({
+        title: next
+          ? t("recipe_marked_private")
+          : t("recipe_visible_to_friends"),
+        type: "success",
+      });
+    } catch {
+      setPrivateOverride(!next);
+      toast.add({
+        title: t("recipe_privacy_update_failed"),
+        type: "error",
+      });
+    }
+  };
 
-  // Helper function to get all ingredients as a flat array
-  // const getAllIngredients = () => {
-  //   const allIngredients = [];
-
-  //   // Add ungrouped ingredients
-  //   if (recipe.ungroupedIngredients) {
-  //     allIngredients.push(...recipe.ungroupedIngredients);
-  //   }
-
-  //   // Add ingredients from sections
-  //   if (recipe.ingredientSections) {
-  //     recipe.ingredientSections.forEach((section) => {
-  //       if (section.ingredients) {
-  //         allIngredients.push(...section.ingredients);
-  //       }
-  //     });
-  //   }
-
-  //   // Fallback to old flat structure
-  //   if (
-  //     !recipe.ungroupedIngredients &&
-  //     !recipe.ingredientSections &&
-  //     recipe.ingredients
-  //   ) {
-  //     allIngredients.push(...recipe.ingredients);
-  //   }
-
-  //   return allIngredients;
-  // };
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        recipeToText(recipe, {
+          t,
+          units: t("units", { returnObjects: true }),
+          language: i18n.language,
+        })
+      );
+      toast.add({
+        title: t("recipe_copied"),
+        type: "success",
+      });
+    } catch {
+      toast.add({
+        title: t("recipe_copy_failed"),
+        type: "error",
+      });
+    }
+  };
 
   // Parse servings — plain integer, numeric range, or freetext
   const servingsInfo = (() => {
@@ -255,20 +237,27 @@ const Recipe = ({ isSharedView = false }) => {
       t("units", { returnObjects: true })
     );
     return (
-      <li key={`${keyPrefix}-${index}-${ingredient.id}`} className="ingredient">
-        <input
-          type="checkbox"
+      <li
+        key={`${keyPrefix}-${index}-${ingredient.id}`}
+        className="flex items-center gap-2 py-0.5"
+      >
+        <Checkbox
           checked={checkedIngredients[ingredient.recipe_ingredient_id] || false}
-          onChange={() => handleCheckboxChange(ingredient.recipe_ingredient_id)}
+          onCheckedChange={() =>
+            handleCheckboxChange(ingredient.recipe_ingredient_id)
+          }
           id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
         />
-        <label htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}>
-          <span className="ingredient-measurement">{measurement}</span>
+        <label
+          htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
+          className="peer-data-checked:text-muted-foreground min-w-0 flex-1 [word-break:break-word] transition-[opacity,text-decoration] duration-200 peer-data-checked:line-through peer-data-checked:opacity-60"
+        >
+          <span className="font-semibold">{measurement}</span>
           {measurement && " "}
 
           {ingredient.linked_recipe ? (
             <a
-              className="ingredient-name-linked"
+              className="text-accent-red inline-flex items-center gap-1 underline decoration-2 underline-offset-2 transition-colors hover:text-destructive"
               href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -279,7 +268,7 @@ const Recipe = ({ isSharedView = false }) => {
           )}
 
           {ingredient.notes && (
-            <span className="ingredient-notes"> {ingredient.notes}</span>
+            <span className="text-muted-foreground"> {ingredient.notes}</span>
           )}
         </label>
       </li>
@@ -290,192 +279,168 @@ const Recipe = ({ isSharedView = false }) => {
     return <LoadingAcorn />;
   }
   if (error) {
-    const isSharedRecipeNotFound = error === "SHARED_RECIPE_NOT_FOUND";
-    const errorMessage = isSharedRecipeNotFound
-      ? t("shared_recipe_not_found")
-      : error;
-
-    return <div className="page-centered">{errorMessage}</div>;
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        {error}
+      </div>
+    );
   }
   if (!recipe) return <div>{t("recipe_not_found")}</div>;
-
-  // Generate SEO data using signed URLs
-  const mainImage = getMainImage(signedImages);
-  const recipeImageUrl =
-    mainImage?.url || "https://acorn-rezepte.com/eichhörnchen/og-image.png";
-  const recipeUrl = isSharedView
-    ? `https://acorn-rezepte.com/shared/${shareToken}`
-    : `https://acorn-rezepte.com/recipe/${id}`;
-
-  // Create description from ingredients or instructions
-  const createDescription = () => {
-    if (recipe.ungroupedIngredients && recipe.ungroupedIngredients.length > 0) {
-      const firstFewIngredients = recipe.ungroupedIngredients
-        .slice(0, 3)
-        .map((ing) => getIngredientDisplayName(ing, i18n.language))
-        .join(", ");
-      return `${t("recipe_with_ingredients")}: ${firstFewIngredients}...`;
-    }
-    if (recipe.instructions && recipe.instructions.length > 0) {
-      return recipe.instructions[0].substring(0, 155);
-    }
-    return `${recipe.title} - ${t("view_recipe_details")}`;
-  };
 
   const hasIngredients =
     (recipe.ungroupedIngredients && recipe.ungroupedIngredients.length > 0) ||
     (recipe.ingredientSections && recipe.ingredientSections.length > 0) ||
     (recipe.ingredients && recipe.ingredients.length > 0);
 
-  // Generate structured data for Google (Recipe schema)
-  const structuredData = {
-    "@context": "https://schema.org/",
-    "@type": "Recipe",
-    name: recipe.title,
-    image: recipeImageUrl,
-    description: createDescription(),
-    ...(recipe.servings && { recipeYield: recipe.servings.toString() }),
-    ...(recipe.category && { recipeCategory: recipe.category }),
-    ...(recipe.source && { url: recipe.source }),
-    ...(recipe.ungroupedIngredients &&
-      recipe.ungroupedIngredients.length > 0 && {
-        recipeIngredient: recipe.ungroupedIngredients.map(
-          (ing) =>
-            `${formatIngredientMeasurement(ing, i18n.language)} ${getIngredientDisplayName(ing, i18n.language)}`
-        ),
-      }),
-    ...(recipe.instructions &&
-      recipe.instructions.length > 0 && {
-        recipeInstructions: recipe.instructions.map((instruction, index) => ({
-          "@type": "HowToStep",
-          position: index + 1,
-          text: instruction,
-        })),
-      }),
-  };
-
   return (
-    <div className="recipe-container card card-recipe">
-      {/* SEO Meta Tags and Structured Data */}
-      <SEO
-        title={`${recipe.title}`}
-        description={createDescription()}
-        image={recipeImageUrl}
-        url={recipeUrl}
-        type="article"
-        structuredData={structuredData}
-      />
-
-      {/* Show shared indicator for shared recipes */}
-      {isSharedView && (
-        <div className="shared-indicator">
-          <Share2 size={16} />
-          <span>{t("shared_recipe")}</span>
-        </div>
-      )}
-
-      <div className="flex-between gap-xs">
-        <h1 className="forta-red wrap">{recipe.title}</h1>
-
-        {!isSharedView && isLoggedIn && recipe?.user_id === user?.id && (
-          <div className="action-buttons-bordered">
-            <button
-              className="btn btn-icon-red"
-              onClick={() =>
-                navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
-              }
-              data-testid="edit-recipe-btn"
-              aria-label={t("edit_recipe")}
+    <>
+      <Card size="lg" className="mx-auto max-w-3xl text-left">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="shrink-0"
+              onClick={() => navigate("/")}
+              aria-label={t("go_back")}
             >
-              <Pencil />
-            </button>
-            <button
-              className="btn btn-icon-red"
-              onClick={() => setShowShareModal(true)}
-              data-testid="share-recipe-btn"
-              aria-label={t("share_recipe")}
-              title={t("share_recipe")}
-            >
-              <Share2 />
-            </button>
+              <ArrowLeft />
+            </Button>
+
+            <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+              {recipe.title}
+            </CardTitle>
+
+            {isOwner && (
+              <ButtonGroup className="shrink-0">
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="secondary"
+                        size="icon-lg"
+                        onClick={() =>
+                          navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                        }
+                        data-testid="edit-recipe-btn"
+                        aria-label={t("edit_recipe")}
+                      >
+                        <Pencil />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>{t("edit_recipe")}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="secondary"
+                        size="icon-lg"
+                        onClick={handleShare}
+                        data-testid="share-recipe-btn"
+                        aria-label={t("copy_recipe")}
+                      >
+                        <Copy />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>{t("copy_recipe")}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="secondary"
+                        size="icon-lg"
+                        onClick={handleTogglePrivate}
+                        data-testid="toggle-private-btn"
+                        aria-label={
+                          isPrivate
+                            ? t("make_recipe_visible_to_friends")
+                            : t("make_recipe_private")
+                        }
+                      >
+                        {isPrivate ? <Lock /> : <LockOpen />}
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>
+                    {isPrivate
+                      ? t("make_recipe_visible_to_friends")
+                      : t("make_recipe_private")}
+                  </TooltipContent>
+                </Tooltip>
+              </ButtonGroup>
+            )}
           </div>
-        )}
-      </div>
+        </CardHeader>
 
-      {wakeLockSupported && (
-        <button
-          className="wake-lock-toggle"
-          onClick={toggleWakeLock}
-          role="switch"
-          aria-checked={wakeLockActive}
-        >
-          <span className={`wake-lock-pill${wakeLockActive ? " on" : ""}`}>
-            <span className="wake-lock-thumb" />
-          </span>
-          <span>{t("keep_screen_on")}</span>
-        </button>
-      )}
-
-      {/* Single column layout with floating images */}
-      <div className="recipe-layout">
-        <div className="recipe-content">
+        <CardContent className="flex flex-col gap-4">
           {/* Recipe Images - floating within content - only show when logged in */}
           {isOwner && signedImages && signedImages.length > 0 && (
-            <div className="recipe-images-float">
-              {imagesLoading && (
-                <div className="images-loading-overlay">
-                  <LoadingAcorn size={20} className="loading-acorn-small" />
-                </div>
-              )}
-              <ImageGallery
-                images={signedImages}
-                onAllImagesLoaded={() => setImagesLoading(false)}
+            <ImageGallery images={signedImages} />
+          )}
+
+          {wakeLockSupported && (
+            <Label htmlFor="wake-lock">
+              <Switch
+                id="wake-lock"
+                checked={wakeLockActive}
+                onCheckedChange={toggleWakeLock}
               />
-            </div>
+              {t("keep_screen_on")}
+            </Label>
           )}
 
           {/* Servings */}
           {recipe.servings && (
-            <div className="recipe-subheading">
+            <div className="flex flex-wrap items-center">
               <h2>{t("servings")}:</h2>
               {hasIngredients ? (
                 <>
-                  <div className="scale-control">
-                    <button
-                      className="scale-btn"
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleServingsChange(-1)}
                       disabled={
                         servingsInfo?.base
                           ? Math.round(servingsInfo.base * multiplier) <= 1
                           : multiplier <= 0.25
                       }
-                      aria-label="decrease servings"
+                      aria-label={t("decrease_servings")}
                     >
-                      -
-                    </button>
-                    <span className="scale-value">{scaledServingsLabel}</span>
-                    <button
-                      className="scale-btn"
+                      <Minus strokeWidth={2} />
+                    </Button>
+                    <span className="text-center font-semibold">
+                      {scaledServingsLabel}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleServingsChange(1)}
                       disabled={!servingsInfo?.base && multiplier >= 8}
-                      aria-label="increase servings"
+                      aria-label={t("increase_servings")}
                     >
-                      +
-                    </button>
+                      <Plus strokeWidth={2} />
+                    </Button>
                     {servingsInfo?.type === "text" && multiplier !== 1 && (
-                      <span className="scale-multiplier">
+                      <span className="text-sm font-medium">
                         {formatMultiplierLabel(multiplier)}
                       </span>
                     )}
                   </div>
                   {multiplier !== 1 && (
-                    <button
-                      className="btn btn-unstyled scale-reset"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-accent-red"
                       onClick={() => setMultiplier(1)}
-                      aria-label="reset servings"
+                      aria-label={t("reset_servings")}
                     >
-                      <RotateCcw size={14} />
-                    </button>
+                      <RotateCcw strokeWidth={2} />
+                    </Button>
                   )}
                 </>
               ) : (
@@ -486,88 +451,45 @@ const Recipe = ({ isSharedView = false }) => {
 
           {/* Ingredients */}
           {hasIngredients && (
-            <>
-              <div className="flex-row recipe-subheading">
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2>{t("ingredients")}:</h2>
                 {!recipe.servings && (
-                  <div className="scale-control">
-                    <button
-                      className="scale-btn"
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleMultiplierChange(-1)}
                       disabled={multiplier <= 0.25}
-                      aria-label="decrease scale"
+                      aria-label={t("decrease_scale")}
                     >
-                      -
-                    </button>
-                    <span className="scale-value">
+                      <Minus strokeWidth={2} />
+                    </Button>
+                    <span className="text-center font-semibold">
                       {formatMultiplierLabel(multiplier)}
                     </span>
-                    <button
-                      className="scale-btn"
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleMultiplierChange(1)}
                       disabled={multiplier >= 8}
-                      aria-label="increase scale"
+                      aria-label={t("increase_scale")}
                     >
-                      +
-                    </button>
+                      <Plus strokeWidth={2} />
+                    </Button>
                     {multiplier !== 1 && (
-                      <button
-                        className="btn btn-unstyled scale-reset"
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-accent-red"
                         onClick={() => setMultiplier(1)}
-                        aria-label="reset scale"
+                        aria-label={t("reset_scale")}
                       >
-                        <RotateCcw size={14} />
-                      </button>
+                        <RotateCcw strokeWidth={2} />
+                      </Button>
                     )}
                   </div>
                 )}
-                {/* Grocery Cart - only show for owned recipes and when viewing in preferred language */}
-                {/* {!isSharedView &&
-                  isLoggedIn &&
-                  isViewingInPreferredLanguage && (
-                    <div className="cart-container">
-                      <button
-                        onClick={() =>
-                          addToGroceryList(
-                            getAllIngredients(),
-                            recipe.title,
-                            recipe.id
-                          )
-                        }
-                        className="btn btn-icon-red"
-                        disabled={addingToGroceryList}
-                        data-testid="lucide-shopping-basket"
-                        aria-label={t("add_to_grocery_list")}
-                      >
-                        <ShoppingBasket /> */}
-                {/* Selected ingredients counter or loading spinner */}
-                {/* {addingToGroceryList ? (
-                          <span className="cart-counter flex-center">
-                            <Loader2
-                              size={12}
-                              className="animate-spin"
-                              data-testid="cart-loader"
-                            />
-                          </span>
-                        ) : (
-                          Object.values(checkedIngredients).filter(Boolean)
-                            .length > 0 && (
-                            <span className="cart-counter flex-center">
-                              {
-                                Object.values(checkedIngredients).filter(
-                                  Boolean
-                                ).length
-                              }
-                            </span>
-                          )
-                        )}
-                      </button>
-                    </div>
-                  )}  */}
-                {/* {!isSharedView &&
-                  isViewingInPreferredLanguage &&
-                  showSuccess &&
-                  t("added_to_groceries")} */}
               </div>
 
               {/* Ungrouped Ingredients */}
@@ -583,10 +505,10 @@ const Recipe = ({ isSharedView = false }) => {
               {/* Ingredient Sections */}
               {recipe.ingredientSections &&
                 recipe.ingredientSections.length > 0 && (
-                  <div className="ingredient-sections">
+                  <>
                     {recipe.ingredientSections.map((section, sectionIndex) => (
-                      <div key={sectionIndex} className="ingredient-section">
-                        <h3 className="section-subheading">
+                      <div key={sectionIndex}>
+                        <h3 className="[word-break:break-word]">
                           {section.subheading}
                         </h3>
                         <ul>
@@ -601,67 +523,49 @@ const Recipe = ({ isSharedView = false }) => {
                         </ul>
                       </div>
                     ))}
-                  </div>
+                  </>
                 )}
-
-              {/* Fallback for old flat ingredient structure */}
-              {!recipe.ungroupedIngredients &&
-                !recipe.ingredientSections &&
-                recipe.ingredients &&
-                recipe.ingredients.length > 0 && (
-                  <ul>
-                    {recipe.ingredients.map((ingredient, index) =>
-                      renderIngredientItem(ingredient, "flat", index)
-                    )}
-                  </ul>
-                )}
-            </>
+            </div>
           )}
 
           {/* Instructions */}
           {recipe.instructions && recipe.instructions.length > 0 && (
-            <>
-              <div className="recipe-subheading">
-                <h2>{t("instructions")}:</h2>
-              </div>
-              <ol>
+            <div>
+              <h2>{t("instructions")}:</h2>
+
+              <ol className="list-decimal space-y-1 pl-8">
                 {recipe.instructions.map((instruction, i) => (
                   <li key={i}>{instruction}</li>
                 ))}
               </ol>
-            </>
+            </div>
           )}
 
           {/* Source */}
           {recipe.source && (
-            <div className="recipe-subheading">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
               <h2>{t("source")}:</h2>
-              <span className="wrap">{renderTextWithLinks(recipe.source)}</span>
+              <span className="[word-wrap:break-word]">
+                {linkifyText(recipe.source)}
+              </span>
             </div>
           )}
 
           {/* Extra Notes */}
           {recipe.notes && recipe.notes.length > 0 && (
-            <div className="recipe-subheading">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
               <h2>{t("notes")}:</h2>
-              <div className="recipe-notes-content">{recipe.notes}</div>
+              <div className="[word-break:break-word] whitespace-pre-wrap">
+                {recipe.notes}
+              </div>
             </div>
           )}
 
           {/* Nutrition */}
           <NutritionPanel recipe={recipe} />
-        </div>
-      </div>
-
-      {/* Share Modal - only for owned recipes */}
-      {!isSharedView && recipe?.user_id === user?.id && (
-        <ShareModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          recipe={recipe}
-        />
-      )}
-    </div>
+        </CardContent>
+      </Card>
+    </>
   );
 };
 

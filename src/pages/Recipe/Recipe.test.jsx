@@ -1,9 +1,9 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
-import { useEffect } from "react";
 import "@testing-library/jest-dom";
 import Recipe from "./Recipe";
+import { AppStateContext } from "../../contexts/AppStateContext";
 
 // Mock dependencies
 vi.mock("react-router-dom", async () => {
@@ -58,10 +58,6 @@ vi.mock("../../hooks/data/useSignedImageUrls", () => ({
   }),
 }));
 
-vi.mock("../../hooks/data/useGroceryList", () => ({
-  useGroceryList: () => mockGroceryListHook,
-}));
-
 vi.mock("../../services/userService", () => ({
   getUserPreferredLanguage: () => mockGetUserPreferredLanguage(),
 }));
@@ -71,30 +67,45 @@ vi.mock("../LoadingAcorn/LoadingAcorn", () => ({
 }));
 
 vi.mock("../../components/ImageGallery/ImageGallery", () => {
-  const MockImageGallery = ({ images, onAllImagesLoaded }) => {
-    useEffect(() => {
-      if (onAllImagesLoaded) onAllImagesLoaded();
-    }, [onAllImagesLoaded]);
-    return <div data-testid="image-gallery">Images: {images.length}</div>;
-  };
+  const MockImageGallery = ({ images }) => (
+    <div data-testid="image-gallery">Images: {images.length}</div>
+  );
   return {
     default: MockImageGallery,
   };
 });
 
-vi.mock("./Recipe.css", () => ({}));
+const mockToastAdd = vi.fn();
+vi.mock("@/components/ui/toast", () => ({
+  toast: { add: (...args) => mockToastAdd(...args) },
+}));
+
+const mockSetRecipePrivate = vi.fn();
+vi.mock("../../services/recipes", () => ({
+  setRecipePrivate: (...args) => mockSetRecipePrivate(...args),
+}));
+
+const mockGetFriendProfile = vi.fn();
+vi.mock("../../services/friendsService", () => ({
+  getFriendProfile: (...args) => mockGetFriendProfile(...args),
+}));
 
 // Mock variables
 let mockNavigate;
 let mockRecipeHook;
 let mockAuth;
-let mockGroceryListHook;
 let mockGetUserPreferredLanguage;
+let mockSetFriendBar;
 
 describe("Recipe Component", () => {
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
+    localStorage.clear();
+    mockToastAdd.mockClear();
+    Object.assign(navigator, {
+      clipboard: { writeText: vi.fn(() => Promise.resolve()) },
+    });
 
     // Default mock values
     mockNavigate = vi.fn();
@@ -104,25 +115,22 @@ describe("Recipe Component", () => {
       isGuest: false,
       user: { id: "user-1" },
     };
-    mockGroceryListHook = {
-      checkedIngredients: {},
-      addingToGroceryList: false,
-      showSuccess: false,
-      handleCheckboxChange: vi.fn(),
-      addToGroceryList: vi.fn(),
-    };
     mockRecipeHook = {
       recipe: null,
       loading: false,
       error: null,
     };
     mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
+    mockSetFriendBar = vi.fn();
+    mockGetFriendProfile.mockResolvedValue(null);
   });
 
   const renderRecipe = () => {
     return render(
       <BrowserRouter>
-        <Recipe />
+        <AppStateContext.Provider value={{ setFriendBar: mockSetFriendBar }}>
+          <Recipe />
+        </AppStateContext.Provider>
       </BrowserRouter>
     );
   };
@@ -263,13 +271,6 @@ describe("Recipe Component", () => {
       expect(screen.getByTestId("edit-recipe-btn")).toBeInTheDocument();
     });
 
-    test("doesn't show edit button for non-logged in users", () => {
-      mockAuth.isLoggedIn = false;
-      renderRecipe();
-
-      expect(screen.queryByTestId("edit-recipe-btn")).not.toBeInTheDocument();
-    });
-
     test("navigates to edit page when edit button clicked", () => {
       mockAuth.isLoggedIn = true;
       renderRecipe();
@@ -278,6 +279,94 @@ describe("Recipe Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         "/edit-recipe/recipe-1/test-recipe"
       );
+    });
+  });
+
+  describe("Copy Recipe", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = mockRecipeData;
+      mockAuth.isLoggedIn = true;
+    });
+
+    test("copies a formatted recipe to the clipboard and shows a success toast", async () => {
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("share-recipe-btn"));
+
+      await waitFor(() => {
+        expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
+      });
+
+      const copiedText = navigator.clipboard.writeText.mock.calls[0][0];
+      expect(copiedText).toContain("Test Recipe");
+      expect(copiedText).toContain("2 cups flour (sifted)");
+      expect(copiedText).toContain("1 tsp salt");
+      expect(copiedText).toContain("Step 1");
+
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "success" })
+      );
+    });
+
+    test("shows an error toast when copying to the clipboard fails", async () => {
+      navigator.clipboard.writeText = vi
+        .fn()
+        .mockRejectedValue(new Error("denied"));
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("share-recipe-btn"));
+
+      await waitFor(() => {
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
+      });
+    });
+  });
+
+  describe("Recipe Privacy Toggle", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = mockRecipeData;
+      mockAuth.isLoggedIn = true;
+    });
+
+    test("marks a public recipe as private when clicked", async () => {
+      mockSetRecipePrivate.mockResolvedValue(true);
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("toggle-private-btn"));
+
+      await waitFor(() => {
+        expect(mockSetRecipePrivate).toHaveBeenCalledWith("recipe-1", true);
+      });
+    });
+
+    test("makes a private recipe visible to friends again when clicked", async () => {
+      mockSetRecipePrivate.mockResolvedValue(true);
+      mockRecipeHook.recipe = { ...mockRecipeData, private: true };
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("toggle-private-btn"));
+
+      await waitFor(() => {
+        expect(mockSetRecipePrivate).toHaveBeenCalledWith("recipe-1", false);
+      });
+    });
+
+    test("reverts the toggle if the update fails", async () => {
+      mockSetRecipePrivate.mockRejectedValue(new Error("network error"));
+      renderRecipe();
+
+      const toggleButton = screen.getByTestId("toggle-private-btn");
+      fireEvent.click(toggleButton);
+
+      await waitFor(() => {
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
+      });
+
+      expect(toggleButton).toHaveAttribute("aria-label", "make_recipe_private");
     });
   });
 
@@ -298,13 +387,6 @@ describe("Recipe Component", () => {
 
       expect(screen.getByTestId("image-gallery")).toBeInTheDocument();
       expect(screen.getByText("Images: 2")).toBeInTheDocument();
-    });
-
-    test("hides images when user is not logged in", () => {
-      mockAuth.isLoggedIn = false;
-      renderRecipe();
-
-      expect(screen.queryByTestId("image-gallery")).not.toBeInTheDocument();
     });
 
     test("doesn't render image section when no images exist", () => {
@@ -360,24 +442,43 @@ describe("Recipe Component", () => {
       expect(checkboxes).toHaveLength(2);
     });
 
-    test("handles checkbox changes", () => {
+    test("toggles a checkbox when clicked", () => {
+      renderRecipe();
+
+      const firstCheckbox = screen.getAllByRole("checkbox")[0];
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "false");
+
+      fireEvent.click(firstCheckbox);
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "true");
+
+      fireEvent.click(firstCheckbox);
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "false");
+    });
+
+    test("persists checked ingredients to localStorage", () => {
       renderRecipe();
 
       const firstCheckbox = screen.getAllByRole("checkbox")[0];
       fireEvent.click(firstCheckbox);
 
-      // expect(mockGroceryListHook.handleCheckboxChange).toHaveBeenCalledWith(
-      //   "ri-1"
-      // );
+      const stored = JSON.parse(
+        localStorage.getItem("checked-ingredients-test-recipe-id")
+      );
+      expect(stored).toEqual({ "ri-1": true });
     });
 
-    // test("shows checked state from grocery list hook", () => {
-    // mockGroceryListHook.checkedIngredients = { "ri-1": true };
-    // renderRecipe();
+    test("restores checked ingredients from localStorage on mount", () => {
+      localStorage.setItem(
+        "checked-ingredients-test-recipe-id",
+        JSON.stringify({ "ri-1": true })
+      );
 
-    //   const firstCheckbox = screen.getAllByRole("checkbox")[0];
-    //   expect(firstCheckbox).toBeChecked();
-    // });
+      renderRecipe();
+
+      const [firstCheckbox, secondCheckbox] = screen.getAllByRole("checkbox");
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "true");
+      expect(secondCheckbox).toHaveAttribute("aria-checked", "false");
+    });
   });
 
   describe("Ingredient Sections", () => {
@@ -436,120 +537,6 @@ describe("Recipe Component", () => {
       expect(checkboxes).toHaveLength(2);
     });
   });
-
-  describe("Fallback Ingredient Structure", () => {
-    beforeEach(() => {
-      mockRecipeHook.recipe = {
-        ...mockRecipeData,
-        ungroupedIngredients: undefined,
-        ingredientSections: undefined,
-        ingredients: [
-          {
-            id: "ing-5",
-            recipe_ingredient_id: "ri-5",
-            quantity: "1",
-            unit: "cup/s",
-            singular_name: "sugar",
-            plural_name: "sugars",
-          },
-        ],
-      };
-    });
-
-    test("renders flat ingredient structure as fallback", () => {
-      renderRecipe();
-
-      expect(screen.getByText("1 cup")).toBeInTheDocument();
-      expect(screen.getByText("sugar")).toBeInTheDocument();
-    });
-  });
-
-  // describe("Grocery List Integration", () => {
-  //   beforeEach(() => {
-  //     mockRecipeHook.recipe = mockRecipeData;
-  //     mockAuth.isLoggedIn = true;
-  //     // Default: user's preferred language matches current UI language
-  //     mockLanguage = "en";
-  //     mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
-  //   });
-
-  //   test("shows grocery cart button for logged in users viewing in preferred language", async () => {
-  //     renderRecipe();
-
-  //     // Wait for language preference to be loaded
-  //     await screen.findByTestId("lucide-shopping-basket");
-  //     expect(screen.getByTestId("lucide-shopping-basket")).toBeInTheDocument();
-  //   });
-
-  //   test("doesn't show grocery cart button for non-logged in users", () => {
-  //     mockAuth.isLoggedIn = false;
-  //     renderRecipe();
-
-  //     expect(
-  //       screen.queryByTestId("lucide-shopping-basket")
-  //     ).not.toBeInTheDocument();
-  //   });
-
-  //   test("doesn't show grocery cart button when user is not viewing in preferred language", async () => {
-  //     // User prefers German but is viewing in English
-  //     mockLanguage = "en";
-  //     mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("de"));
-
-  //     renderRecipe();
-
-  //     // Wait for component to settle
-  //     await new Promise((resolve) => setTimeout(resolve, 0));
-
-  //     expect(
-  //       screen.queryByTestId("lucide-shopping-basket")
-  //     ).not.toBeInTheDocument();
-  //   });
-
-  //   test("shows loading spinner when adding to grocery list", async () => {
-  //     mockGroceryListHook.addingToGroceryList = true;
-  //     renderRecipe();
-
-  //     await screen.findByTestId("cart-loader");
-  //     expect(screen.getByTestId("cart-loader")).toBeInTheDocument();
-  //   });
-
-  //   test("shows counter when ingredients are selected", async () => {
-  //     mockGroceryListHook.checkedIngredients = { "ri-1": true, "ri-2": true };
-  //     renderRecipe();
-
-  //     await screen.findByText("2");
-  //     expect(screen.getByText("2")).toBeInTheDocument();
-  //   });
-
-  //   test("shows success message after adding to grocery list", async () => {
-  //     mockGroceryListHook.showSuccess = true;
-  //     renderRecipe();
-
-  //     await screen.findByText("added_to_groceries");
-  //     expect(screen.getByText("added_to_groceries")).toBeInTheDocument();
-  //   });
-
-  //   test("calls addToGroceryList when cart button clicked", async () => {
-  //     renderRecipe();
-
-  //     const cartButton = await screen.findByTestId("lucide-shopping-basket");
-  //     fireEvent.click(cartButton);
-
-  //     expect(mockGroceryListHook.addToGroceryList).toHaveBeenCalledWith(
-  //       mockRecipeData.ungroupedIngredients,
-  //       "Test Recipe",
-  //       "recipe-1"
-  //     );
-  //   });
-
-  //   test("disables cart button when adding to grocery list", async () => {
-  //     mockGroceryListHook.addingToGroceryList = true;
-  //     renderRecipe();
-
-  //     const cartButton = await screen.findByTestId("lucide-shopping-basket");
-  //     expect(cartButton.closest("button")).toBeDisabled();
-  //   });
-  // });
 
   describe("Ingredient Display Name Logic", () => {
     test("uses singular name for is_plural false", () => {
@@ -964,9 +951,7 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-123/homemade-oat-flour"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
-      );
+      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
 
       // Unlinked ingredient should be plain text
       const unlinkedIngredient = screen.getByText("sea salt");
@@ -1041,9 +1026,7 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-789/coconut-flour-recipe"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
-      );
+      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
 
       // Unlinked sectioned ingredient should be plain text
       const unlinkedIngredient = screen.getByText("vanilla extract");
@@ -1110,9 +1093,7 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-101/selbstgemachtes-mandelmehl"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
-      );
+      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
 
       // Reset language to English
       mockLanguage = "en";
@@ -1177,9 +1158,7 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-202/fresh-mushrooms"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
-      );
+      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
     });
 
     test("linked ingredients work with missing slug", () => {
@@ -1208,121 +1187,7 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-303/undefined"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass(
-        "ingredient-name-linked"
-      );
-    });
-  });
-
-  // describe("getAllIngredients Helper Function", () => {
-  // test("combines ungrouped ingredients and sectioned ingredients for grocery list", async () => {
-  //   mockAuth.isLoggedIn = true;
-
-  //   mockRecipeHook.recipe = {
-  //     ...mockRecipeData,
-  //     ingredientSections: [
-  //       {
-  //         subheading: "Section 1",
-  //         ingredients: [
-  //           {
-  //             id: "ing-3",
-  //             recipe_ingredient_id: "ri-3",
-  //             singular_name: "sectioned ingredient",
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   };
-
-  //   renderRecipe();
-
-  // Wait for and click add to grocery list
-  // const cartButton = await screen.findByTestId("lucide-shopping-basket");
-  // fireEvent.click(cartButton);
-
-  // Should be called with combined ingredients
-  //   expect(mockGroceryListHook.addToGroceryList).toHaveBeenCalledWith(
-  //     expect.arrayContaining([
-  //       expect.objectContaining({ id: "ing-1" }),
-  //       expect.objectContaining({ id: "ing-2" }),
-  //       expect.objectContaining({ id: "ing-3" }),
-  //     ]),
-  //     "Test Recipe",
-  //     "recipe-1"
-  //   );
-  // });
-  // });
-
-  describe("Language Preference Integration", () => {
-    beforeEach(() => {
-      mockRecipeHook.recipe = mockRecipeData;
-      mockAuth.isLoggedIn = true;
-      // Default: user's preferred language matches current UI language
-      mockLanguage = "en";
-      mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
-    });
-
-    // test("shows grocery list features when current language matches user preference", async () => {
-    //   mockLanguage = "en";
-    //   mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
-    //   mockGroceryListHook.showSuccess = true;
-
-    //   renderRecipe();
-
-    // Should show grocery cart button
-    // await screen.findByTestId("lucide-shopping-basket");
-    // expect(screen.getByTestId("lucide-shopping-basket")).toBeInTheDocument();
-
-    // Should show success message when present
-    // expect(screen.getByText("added_to_groceries")).toBeInTheDocument();
-    // });
-
-    test("hides grocery list features when current language differs from user preference", async () => {
-      mockLanguage = "de";
-      mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
-      mockGroceryListHook.showSuccess = true;
-
-      renderRecipe();
-
-      // Wait for component to settle
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Should hide grocery cart button
-      expect(
-        screen.queryByTestId("lucide-shopping-basket")
-      ).not.toBeInTheDocument();
-
-      // Should hide success message even when it would normally show
-      expect(screen.queryByText("added_to_groceries")).not.toBeInTheDocument();
-    });
-
-    test("handles loading state of user preferred language gracefully", async () => {
-      // Simulate slow user preference loading
-      let resolvePreference;
-      const preferencePromise = new Promise((resolve) => {
-        resolvePreference = resolve;
-      });
-      mockGetUserPreferredLanguage = vi.fn(() => preferencePromise);
-
-      renderRecipe();
-
-      // Initially should not show grocery cart (waiting for preference)
-      expect(
-        screen.queryByTestId("lucide-shopping-basket")
-      ).not.toBeInTheDocument();
-
-      // Resolve the preference to match current language
-      resolvePreference("en");
-
-      // Now should show grocery cart button after state updates
-      // await waitFor(
-      //   () => {
-      //     expect(
-      //       screen.getByTestId("lucide-shopping-basket")
-      //     ).toBeInTheDocument();
-      //   },
-      //   { timeout: 3000 }
-      // );
+      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
     });
   });
 });

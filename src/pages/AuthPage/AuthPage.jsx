@@ -1,22 +1,55 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Mail, User, ChefHat, Lock, ArrowBigLeft } from "lucide-react";
-import { signUp, signIn } from "../../services/auth";
+import { Mail, User, ChefHat, Lock, Eye, EyeOff, Squirrel } from "lucide-react";
+import { signUp, signIn, resendConfirmationEmail } from "../../services/auth";
 import {
   validateAuthForm,
   validateUsernameUnique,
   isPasswordStrong,
 } from "../../utils/validation";
-import PasswordInput from "../../components/PasswordInput/PasswordInput";
+import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/toast";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
-const AuthPage = ({ setLoginMessage }) => {
+const AuthPage = () => {
   // Form input states
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Error message
   const [errorMessage, setErrorMessage] = useState("");
@@ -27,9 +60,22 @@ const AuthPage = ({ setLoginMessage }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [sentToEmail, setSentToEmail] = useState("");
+  const [isResending, setIsResending] = useState(false);
 
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const hasUnsavedChanges =
+    isSignUpMode &&
+    !awaitingConfirmation &&
+    Boolean(email || firstName || username || password);
+
+  const {
+    isModalOpen: isUnsavedChangesModalOpen,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedChangesMessage,
+  } = useUnsavedChanges(hasUnsavedChanges, t("unsaved_changes_warning"));
 
   const handleValidation = () => {
     const formData = { email, firstName, username, password };
@@ -67,8 +113,6 @@ const AuthPage = ({ setLoginMessage }) => {
           break;
       }
     } else {
-      setLoginMessage(t("login_success"));
-
       // Wait for recipes to load before navigating
       setTimeout(() => {
         // Clear form fields and navigate
@@ -79,8 +123,6 @@ const AuthPage = ({ setLoginMessage }) => {
     }
 
     setTimeout(() => {
-      // Reset login message
-      setLoginMessage("");
       setErrorMessage("");
       setValidationErrors({});
     }, 3000);
@@ -149,6 +191,7 @@ const AuthPage = ({ setLoginMessage }) => {
     setFirstName("");
     setUsername("");
     setPassword("");
+    setShowPassword(false);
     setValidationErrors({});
   };
 
@@ -156,6 +199,7 @@ const AuthPage = ({ setLoginMessage }) => {
     setIsSignUpMode(true);
     setUsername("");
     setPassword("");
+    setShowPassword(false);
     setValidationErrors({});
   };
 
@@ -164,203 +208,263 @@ const AuthPage = ({ setLoginMessage }) => {
     setUsername("");
     setPassword("");
     setValidationErrors({});
-    navigate("/forgot-password");
+    navigate("/forgot-password", { state: { email: username } });
+  };
+
+  const handleResendConfirmation = async () => {
+    setIsResending(true);
+
+    const { error } = await resendConfirmationEmail(sentToEmail);
+
+    setIsResending(false);
+    toast.add({
+      title: error ? t("resend_email_failed") : t("resend_email_sent"),
+      type: error ? "error" : "success",
+    });
   };
 
   return (
-    <div className="page-centered">
-      <div className="auth-container">
-        {awaitingConfirmation ? (
-          <div className="flex-column">
-            <span>{t("signup_success")}</span>
-            <strong>{sentToEmail}</strong>
+    <div className="mx-auto mt-20 max-w-sm">
+      <Card className="w-full">
+        <CardHeader className="flex flex-col items-stretch gap-4">
+          <div className="flex w-full items-center justify-center">
+            <Squirrel className="size-9 text-primary" />
           </div>
-        ) : (
-          <>
-            {/* Headers to toggle between modes */}
-            <header className="flex-row">
-              <button
-                className="btn-unstyled back-arrow"
-                onClick={() => navigate(-1)}
-                aria-label={t("go_back")}
-              >
-                <ArrowBigLeft size={28} />
-              </button>
-              <button
-                className={`subheading-wrapper ${!isSignUpMode ? "selected" : ""}`}
-                type="button"
-                onClick={switchToLogin}
-                aria-label={t("login")}
-              >
-                <h1 className="forta-small"> {t("login")}</h1>
-              </button>
-              <button
-                className={`subheading-wrapper ${isSignUpMode ? "selected" : ""}`}
-                type="button"
-                onClick={switchToSignUp}
-                aria-label={t("signup")}
-              >
-                <h1 className="forta-small"> {t("signup")}</h1>
-              </button>
-            </header>
 
-            {errorMessage && (
-              <span className="error-message">{errorMessage}</span>
-            )}
-
-            <form
-              className="auth-form"
-              onSubmit={isSignUpMode ? handleSignUp : handleLogin}
-              data-testid="auth-form"
+          {!awaitingConfirmation && (
+            <Tabs
+              value={isSignUpMode ? "signup" : "login"}
+              onValueChange={(value) =>
+                value === "signup" ? switchToSignUp() : switchToLogin()
+              }
             >
-              {isSignUpMode && (
-                <>
-                  {/* Email */}
-                  <div className="input-validation-wrapper">
-                    <div className="input-with-icon floating-label-input">
-                      <Mail size={20} />
-                      <input
-                        id="email"
-                        type="text"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            email: "",
-                          }));
-                        }}
-                        placeholder=" "
-                        className={`input input--secondary input--with-icon ${
-                          validationErrors.email ? "input--error" : ""
-                        }`}
-                      />
-                      <label htmlFor="email">{t("email")}</label>
-                    </div>
-                    {validationErrors.email && (
-                      <span className="error-message-small">
-                        {validationErrors.email}
-                      </span>
-                    )}
-                  </div>
-                  {/* First Name */}
-                  <div className="input-validation-wrapper">
-                    <div className="input-with-icon floating-label-input">
-                      <User size={20} />
-                      <input
-                        id="name"
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => {
-                          setFirstName(e.target.value);
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            firstName: "",
-                          }));
-                        }}
-                        placeholder=" "
-                        className={`input input--secondary input--with-icon ${
-                          validationErrors.firstName ? "input--error" : ""
-                        }`}
-                      />
-                      <label htmlFor="name">{t("first_name")}</label>
-                    </div>
-                    {validationErrors.firstName && (
-                      <span className="error-message-small">
-                        {validationErrors.firstName}
-                      </span>
-                    )}
-                  </div>
-                </>
-              )}
+              <TabsList className="w-full">
+                <TabsTrigger value="login" className="flex-1">
+                  {t("login")}
+                </TabsTrigger>
+                <TabsTrigger value="signup" className="flex-1">
+                  {t("signup")}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
+        </CardHeader>
 
-              {/* Username */}
-              <div className="input-validation-wrapper">
-                <div className="input-with-icon floating-label-input">
-                  <ChefHat size={20} />
-                  <input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => {
-                      setUsername(e.target.value);
-                      setValidationErrors((prev) => ({
-                        ...prev,
-                        username: "",
-                      }));
-                    }}
-                    placeholder=" "
-                    className={`input input--secondary input--with-icon ${
-                      validationErrors.username ? "input--error" : ""
-                    }`}
-                  />
-                  <label htmlFor="username">
-                    {isSignUpMode ? t("username") : t("username_or_email")}
-                  </label>
-                </div>
-                {validationErrors.username && (
-                  <span className="error-message-small">
-                    {validationErrors.username}
-                  </span>
-                )}
-              </div>
-              {/* Password */}
-              <div className="input-validation-wrapper">
-                <div className="input-with-icon floating-label-input">
-                  <Lock size={20} />
-                  <PasswordInput
-                    id="password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      setValidationErrors((prev) => ({
-                        ...prev,
-                        password: "",
-                      }));
-                    }}
-                    placeholder=" "
-                    className={`input input--secondary input--with-icon ${
-                      validationErrors.password ? "input--error" : ""
-                    }`}
-                  />
-                  <label htmlFor="password">{t("password")}</label>
-                </div>
-                {validationErrors.password && (
-                  <span className="error-message-small">
-                    {validationErrors.password}
-                  </span>
-                )}
-                {isSignUpMode && password && (
-                  <PasswordRequirements password={password} />
-                )}
-              </div>
-
-              {/* Forgot Password  */}
-              {!isSignUpMode && (
-                <span onClick={switchToForgotPassword} className="link">
-                  {t("forgot_password")}
-                </span>
-              )}
-
-              {/* Submit button */}
-              <button
-                type="submit"
-                aria-label="submit-button"
-                className={"btn btn-standard"}
-                disabled={isLoading}
+        <CardContent>
+          {awaitingConfirmation ? (
+            <div className="flex flex-col items-center gap-4 text-center">
+              <p>{t("signup_success")}</p>
+              <p className="text-muted-foreground">{sentToEmail}</p>
+              <Button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={isResending}
               >
-                {isLoading
-                  ? isSignUpMode
-                    ? t("signing_up")
-                    : t("logging_in")
-                  : isSignUpMode
-                    ? t("signup")
-                    : t("login")}
-              </button>
-            </form>
-          </>
-        )}
-      </div>
+                {isResending && <Spinner />}
+                {isResending ? t("resending_email") : t("resend_email")}
+              </Button>
+            </div>
+          ) : (
+            <>
+              {errorMessage && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              )}
+
+              <form
+                onSubmit={isSignUpMode ? handleSignUp : handleLogin}
+                data-testid="auth-form"
+              >
+                <FieldGroup>
+                  {isSignUpMode && (
+                    <>
+                      {/* Email */}
+                      <Field data-invalid={!!validationErrors.email}>
+                        <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
+                        <InputGroup>
+                          <InputGroupAddon>
+                            <Mail />
+                          </InputGroupAddon>
+                          <InputGroupInput
+                            id="email"
+                            type="text"
+                            value={email}
+                            onChange={(e) => {
+                              setEmail(e.target.value);
+                              setValidationErrors((prev) => ({
+                                ...prev,
+                                email: "",
+                              }));
+                            }}
+                            aria-invalid={!!validationErrors.email}
+                          />
+                        </InputGroup>
+                        <FieldError>{validationErrors.email}</FieldError>
+                      </Field>
+
+                      {/* First Name */}
+                      <Field data-invalid={!!validationErrors.firstName}>
+                        <FieldLabel htmlFor="name">
+                          {t("first_name")}
+                        </FieldLabel>
+                        <InputGroup>
+                          <InputGroupAddon>
+                            <User />
+                          </InputGroupAddon>
+                          <InputGroupInput
+                            id="name"
+                            type="text"
+                            value={firstName}
+                            onChange={(e) => {
+                              setFirstName(e.target.value);
+                              setValidationErrors((prev) => ({
+                                ...prev,
+                                firstName: "",
+                              }));
+                            }}
+                            aria-invalid={!!validationErrors.firstName}
+                          />
+                        </InputGroup>
+                        <FieldError>{validationErrors.firstName}</FieldError>
+                      </Field>
+                    </>
+                  )}
+
+                  {/* Username */}
+                  <Field data-invalid={!!validationErrors.username}>
+                    <FieldLabel htmlFor="username">
+                      {isSignUpMode ? t("username") : t("username_or_email")}
+                    </FieldLabel>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <ChefHat />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="username"
+                        type="text"
+                        value={username}
+                        onChange={(e) => {
+                          setUsername(e.target.value);
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            username: "",
+                          }));
+                        }}
+                        aria-invalid={!!validationErrors.username}
+                      />
+                    </InputGroup>
+                    <FieldError>{validationErrors.username}</FieldError>
+                  </Field>
+
+                  {/* Password */}
+                  <Field data-invalid={!!validationErrors.password}>
+                    <div className="flex items-center justify-between">
+                      <FieldLabel htmlFor="password">
+                        {t("password")}
+                      </FieldLabel>
+                      {!isSignUpMode && (
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="h-auto p-0 text-xs"
+                          onClick={switchToForgotPassword}
+                        >
+                          {t("forgot_password")}
+                        </Button>
+                      )}
+                    </div>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <Lock className="" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            password: "",
+                          }));
+                        }}
+                        aria-invalid={!!validationErrors.password}
+                        data-testid="password-input"
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <InputGroupButton
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                aria-label={
+                                  showPassword
+                                    ? t("hide_password")
+                                    : t("show_password")
+                                }
+                              >
+                                {showPassword ? <EyeOff /> : <Eye />}
+                              </InputGroupButton>
+                            }
+                          />
+                          <TooltipContent>
+                            {showPassword
+                              ? t("hide_password")
+                              : t("show_password")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    <FieldError>{validationErrors.password}</FieldError>
+                    {isSignUpMode && password && (
+                      <PasswordRequirements password={password} />
+                    )}
+                  </Field>
+
+                  {/* Submit button */}
+                  <Button
+                    type="submit"
+                    aria-label="submit-button"
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading && <Spinner />}
+                    {isLoading
+                      ? isSignUpMode
+                        ? t("signing_up")
+                        : t("logging_in")
+                      : isSignUpMode
+                        ? t("signup")
+                        : t("login")}
+                  </Button>
+                </FieldGroup>
+              </form>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog
+        open={isUnsavedChangesModalOpen}
+        onOpenChange={(open) => {
+          if (!open) confirmNavigation();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
+            <AlertDialogAction onClick={cancelNavigation}>
+              {t("stay")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

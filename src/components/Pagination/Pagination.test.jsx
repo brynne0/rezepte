@@ -31,7 +31,7 @@ describe("Pagination Component", () => {
     expect(container2.firstChild).toBeNull();
   });
 
-  test("renders pagination when totalPages is greater than 1", () => {
+  test("renders pagination nav when totalPages is greater than 1", () => {
     render(
       <Pagination
         currentPage={1}
@@ -40,9 +40,9 @@ describe("Pagination Component", () => {
       />
     );
 
-    const pagination = document.querySelector(".pagination");
-    expect(pagination).toBeInTheDocument();
-    expect(pagination).toHaveClass("pagination");
+    expect(
+      screen.getByRole("navigation", { name: "pagination" })
+    ).toBeInTheDocument();
   });
 
   test("displays correct page numbers for small page count", () => {
@@ -62,7 +62,7 @@ describe("Pagination Component", () => {
     }
   });
 
-  test("highlights current page with active class", () => {
+  test("marks current page with aria-current", () => {
     render(
       <Pagination
         currentPage={3}
@@ -72,11 +72,10 @@ describe("Pagination Component", () => {
     );
 
     const currentPageButton = screen.getByRole("button", { name: "3" });
-    expect(currentPageButton).toHaveClass("btn", "btn-page", "active");
+    expect(currentPageButton).toHaveAttribute("aria-current", "page");
 
     const otherPageButton = screen.getByRole("button", { name: "2" });
-    expect(otherPageButton).toHaveClass("btn", "btn-page");
-    expect(otherPageButton).not.toHaveClass("active");
+    expect(otherPageButton).not.toHaveAttribute("aria-current");
   });
 
   test("calls onPageChange when page button is clicked", async () => {
@@ -109,8 +108,7 @@ describe("Pagination Component", () => {
     expect(screen.getByRole("button", { name: "1" })).toBeInTheDocument();
 
     // Should show ellipsis
-    const ellipses = screen.getAllByText("...");
-    expect(ellipses.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("More pages").length).toBeGreaterThanOrEqual(1);
 
     // Should show pages around current page (6, 7, 8, 9, 10)
     expect(screen.getByRole("button", { name: "6" })).toBeInTheDocument();
@@ -137,8 +135,7 @@ describe("Pagination Component", () => {
     expect(screen.getByRole("button", { name: "5" })).toBeInTheDocument();
 
     // Should show ellipsis
-    const ellipses = screen.getAllByText("...");
-    expect(ellipses.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("More pages").length).toBeGreaterThanOrEqual(1);
 
     // Should show last page
     expect(screen.getByRole("button", { name: "15" })).toBeInTheDocument();
@@ -160,8 +157,7 @@ describe("Pagination Component", () => {
     expect(screen.getByRole("button", { name: "20" })).toBeInTheDocument();
 
     // Should show two ellipses
-    const ellipses = screen.getAllByText("...");
-    expect(ellipses).toHaveLength(2);
+    expect(screen.getAllByText("More pages")).toHaveLength(2);
 
     // Should show pages around current page
     expect(screen.getByRole("button", { name: "6" })).toBeInTheDocument();
@@ -188,7 +184,7 @@ describe("Pagination Component", () => {
     expect(screen.getByRole("button", { name: "5" })).toBeInTheDocument();
 
     // Should show ellipsis and last page
-    expect(screen.getByText("...")).toBeInTheDocument();
+    expect(screen.getByText("More pages")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "10" })).toBeInTheDocument();
   });
 
@@ -203,7 +199,7 @@ describe("Pagination Component", () => {
 
     // Should show first page and ellipsis
     expect(screen.getByRole("button", { name: "1" })).toBeInTheDocument();
-    expect(screen.getByText("...")).toBeInTheDocument();
+    expect(screen.getByText("More pages")).toBeInTheDocument();
 
     // Should show last 5 pages
     expect(screen.getByRole("button", { name: "6" })).toBeInTheDocument();
@@ -230,7 +226,7 @@ describe("Pagination Component", () => {
     expect(screen.getByRole("button", { name: "5" })).toBeInTheDocument();
 
     // Should not show any ellipsis
-    expect(screen.queryByText("...")).not.toBeInTheDocument();
+    expect(screen.queryByText("More pages")).not.toBeInTheDocument();
   });
 
   test("handles clicking on first page button", async () => {
@@ -263,54 +259,6 @@ describe("Pagination Component", () => {
     await user.click(lastPageButton);
 
     expect(mockOnPageChange).toHaveBeenCalledWith(15);
-  });
-
-  test("applies correct CSS classes to pagination container", () => {
-    render(
-      <Pagination
-        currentPage={1}
-        totalPages={5}
-        onPageChange={mockOnPageChange}
-      />
-    );
-
-    const pagination = document.querySelector(".pagination");
-    expect(pagination).toHaveClass("pagination");
-
-    const pageNumbers = pagination.querySelector(".page-numbers");
-    expect(pageNumbers).toBeInTheDocument();
-    expect(pageNumbers).toHaveClass("page-numbers");
-  });
-
-  test("applies correct CSS classes to page buttons", () => {
-    render(
-      <Pagination
-        currentPage={2}
-        totalPages={5}
-        onPageChange={mockOnPageChange}
-      />
-    );
-
-    const page1Button = screen.getByRole("button", { name: "1" });
-    const page2Button = screen.getByRole("button", { name: "2" });
-
-    expect(page1Button).toHaveClass("btn", "btn-page");
-    expect(page1Button).not.toHaveClass("active");
-
-    expect(page2Button).toHaveClass("btn", "btn-page", "active");
-  });
-
-  test("applies correct CSS classes to ellipsis elements", () => {
-    render(
-      <Pagination
-        currentPage={8}
-        totalPages={15}
-        onPageChange={mockOnPageChange}
-      />
-    );
-
-    const ellipses = screen.getAllByText("...");
-    expect(ellipses[0]).toHaveClass("page-ellipsis");
   });
 
   test("getPageNumbers function works correctly for various scenarios", () => {

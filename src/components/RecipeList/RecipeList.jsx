@@ -1,9 +1,15 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { ChefHat, WifiOff } from "lucide-react";
 import RecipeCard from "../RecipeCard/RecipeCard";
 import { useTranslation } from "react-i18next";
-import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
-import { useAuth } from "../../hooks/data/useAuth";
-import "./RecipeList.css";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyContent,
+} from "@/components/ui/empty";
 
 const RecipeList = ({
   selectedCategory,
@@ -13,11 +19,10 @@ const RecipeList = ({
   totalRecipeCount = 0,
   isPaginated = false,
   loading = false,
+  isOnline = true,
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const isOnline = useOnlineStatus();
-  const { isLoggedIn } = useAuth();
 
   // If using pagination, recipes are already filtered on the server side
   // Otherwise, apply client-side filtering for backward compatibility
@@ -42,7 +47,7 @@ const RecipeList = ({
   return (
     <>
       {/* Display all recipes in selected category */}
-      <div className="recipe-list">
+      <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4">
         {filteredRecipes.map((r) => (
           <RecipeCard
             key={r.id}
@@ -55,25 +60,37 @@ const RecipeList = ({
         ))}
       </div>
       {filteredRecipes.length === 0 && searchTerm && (
-        <span>{t("no_recipes_found", { searchTerm })}</span>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>{t("no_recipes_found", { searchTerm })}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       )}
-      {totalRecipeCount === 0 && !searchTerm && !loading && (
-        <div className="page-centered high">
-          <div className="card welcome-card">
-            {!isOnline ? (
-              <p>{t("no_internet_connection")}</p>
-            ) : isLoggedIn ? (
-              <p>{t("welcome_add_recipe")}</p>
-            ) : (
-              <p className="grey-small">
-                <Link to="/auth-page" className="link-red">
-                  {t("logged_in_note_link")}
-                </Link>
-                {t("logged_in_note_suffix")}
-              </p>
-            )}
-          </div>
-        </div>
+      {!isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyMedia>
+              <WifiOff />
+            </EmptyMedia>
+            <EmptyTitle>{t("no_internet_connection")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      )}
+      {isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
+        <Empty className="mx-auto mt-20 w-fit border border-primary bg-card shadow-sm">
+          <EmptyHeader>
+            <EmptyTitle>{t("welcome_add_recipe")}</EmptyTitle>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => navigate("/add-recipe")}
+            >
+              <ChefHat />
+              {t("add_new_recipe")}
+            </Button>
+          </EmptyContent>
+        </Empty>
       )}
     </>
   );

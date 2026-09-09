@@ -29,8 +29,8 @@ describe("useTheme Hook", () => {
       writable: true,
     });
 
-    // Mock document.documentElement.setAttribute
-    document.documentElement.setAttribute = vi.fn();
+    // Mock document.documentElement.classList.toggle
+    document.documentElement.classList.toggle = vi.fn();
   });
 
   afterEach(() => {
@@ -75,20 +75,20 @@ describe("useTheme Hook", () => {
     renderHook(() => useTheme());
 
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith("theme", "light");
-    expect(document.documentElement.setAttribute).toHaveBeenCalledWith(
-      "data-theme",
-      "light"
+    expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+      "dark",
+      false
     );
   });
 
-  test("sets data-theme attribute on document element on initialisation", () => {
+  test("toggles the dark class on document element on initialisation", () => {
     mockLocalStorage.getItem.mockReturnValue("dark");
 
     renderHook(() => useTheme());
 
-    expect(document.documentElement.setAttribute).toHaveBeenCalledWith(
-      "data-theme",
-      "dark"
+    expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+      "dark",
+      true
     );
   });
 
@@ -103,9 +103,9 @@ describe("useTheme Hook", () => {
 
     expect(result.current.theme).toBe("dark");
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith("theme", "dark");
-    expect(document.documentElement.setAttribute).toHaveBeenCalledWith(
-      "data-theme",
-      "dark"
+    expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+      "dark",
+      true
     );
   });
 
@@ -120,9 +120,9 @@ describe("useTheme Hook", () => {
 
     expect(result.current.theme).toBe("light");
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith("theme", "light");
-    expect(document.documentElement.setAttribute).toHaveBeenCalledWith(
-      "data-theme",
-      "light"
+    expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+      "dark",
+      false
     );
   });
 
@@ -137,9 +137,9 @@ describe("useTheme Hook", () => {
 
     expect(result.current.theme).toBe("dark");
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith("theme", "dark");
-    expect(document.documentElement.setAttribute).toHaveBeenCalledWith(
-      "data-theme",
-      "dark"
+    expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+      "dark",
+      true
     );
   });
 
@@ -154,9 +154,9 @@ describe("useTheme Hook", () => {
 
     expect(result.current.theme).toBe("light");
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith("theme", "light");
-    expect(document.documentElement.setAttribute).toHaveBeenCalledWith(
-      "data-theme",
-      "light"
+    expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+      "dark",
+      false
     );
   });
 
@@ -181,7 +181,7 @@ describe("useTheme Hook", () => {
     expect(result.current.theme).toBe("dark");
 
     expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(4); // Initial + 3 toggles
-    expect(document.documentElement.setAttribute).toHaveBeenCalledTimes(4);
+    expect(document.documentElement.classList.toggle).toHaveBeenCalledTimes(4);
   });
 
   test("returns all expected methods and values", () => {
@@ -208,9 +208,9 @@ describe("useTheme Hook", () => {
       "theme",
       "invalid-theme"
     );
-    expect(document.documentElement.setAttribute).toHaveBeenCalledWith(
-      "data-theme",
-      "invalid-theme"
+    expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+      "dark",
+      false
     );
   });
 
@@ -232,8 +232,8 @@ describe("useTheme Hook", () => {
     const { result } = renderHook(() => useTheme());
 
     const initialSetItemCalls = mockLocalStorage.setItem.mock.calls.length;
-    const initialSetAttributeCalls =
-      document.documentElement.setAttribute.mock.calls.length;
+    const initialToggleCalls =
+      document.documentElement.classList.toggle.mock.calls.length;
 
     act(() => {
       result.current.setTheme("dark");
@@ -242,8 +242,8 @@ describe("useTheme Hook", () => {
     expect(mockLocalStorage.setItem.mock.calls.length).toBe(
       initialSetItemCalls + 1
     );
-    expect(document.documentElement.setAttribute.mock.calls.length).toBe(
-      initialSetAttributeCalls + 1
+    expect(document.documentElement.classList.toggle.mock.calls.length).toBe(
+      initialToggleCalls + 1
     );
   });
 });

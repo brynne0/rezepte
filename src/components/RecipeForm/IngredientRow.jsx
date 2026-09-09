@@ -1,8 +1,23 @@
 import { useTranslation } from "react-i18next";
-import { Trash2, GripVertical, Link, X } from "lucide-react";
+import { Trash2, GripVertical, Link, Unlink } from "lucide-react";
+import { cn } from "cn";
 
 import { formatQuantityForUnit } from "../../utils/ingredientFormatting";
-import Selector from "../Selector/Selector";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const IngredientRow = ({
   ingredient,
@@ -20,29 +35,37 @@ const IngredientRow = ({
   removeIngredientLink,
 }) => {
   const { t, i18n } = useTranslation();
+  const units = t("units", { returnObjects: true }) || [];
+  const unitOptions = units.filter((unit) => unit.value !== "");
+  const linkedRecipe = getIngredientLink(sectionId, ingredient.tempId);
 
   return (
     <div
       ref={provided.innerRef}
       {...provided.draggableProps}
-      className={`ingredient-row ${snapshot.isDragging ? "dragging" : ""}`}
+      className={cn(
+        "flex flex-wrap items-start gap-2 p-2 transition-colors",
+        index > 0 && "border-t border-border",
+        snapshot.isDragging &&
+          "rounded-lg border border-primary/50 bg-card shadow-md"
+      )}
     >
       {/* Ingredient Drag Handle */}
       <div
         {...provided.dragHandleProps}
-        className={`drag-handle ${
-          isEditingTranslation ? "translation-disabled" : ""
-        }`}
-        style={{
-          pointerEvents: isEditingTranslation ? "none" : "auto",
-        }}
+        data-slot="drag-handle"
+        style={{ pointerEvents: isEditingTranslation ? "none" : "auto" }}
+        className={cn(
+          "flex h-8 cursor-grab items-center text-muted-foreground active:cursor-grabbing",
+          isEditingTranslation && "opacity-50"
+        )}
       >
         <GripVertical size={16} />
       </div>
 
-      <div className="ingredient-content">
+      <div className="flex flex-1 flex-col gap-2 md:flex-row md:items-center">
         {/* Ingredient Name */}
-        <input
+        <Input
           id={`ingredient-name-${sectionId}-${index}-${ingredient.tempId}`}
           type="text"
           value={ingredient.name || ""}
@@ -85,71 +108,76 @@ const IngredientRow = ({
               validationErrors.ingredients ? "ingredients" : null
             );
           }}
-          className={`input input--full-width input--edit ${
-            validationErrors.ingredients ? "input--error" : ""
-          }`}
+          aria-invalid={!!validationErrors.ingredients}
           placeholder={t("ingredient_name")}
+          className="md:w-56 md:flex-none"
         />
 
         {/* Ingredient Details */}
-        <div className="ingredient-details">
-          <div className={isEditingTranslation ? "translation-disabled" : ""}>
-            <input
-              id={`ingredient-quantity-${sectionId}-${index}-${ingredient.tempId}`}
-              type="text"
-              value={formatQuantityForUnit(ingredient.quantity)}
-              onChange={(e) =>
-                handleIngredientChange(
-                  sectionId,
-                  ingredient.tempId,
-                  "quantity",
-                  e.target.value
-                )
-              }
-              onKeyDown={(e) =>
-                handleIngredientFieldEnter(
-                  e,
-                  "quantity",
-                  sectionId,
-                  ingredient.tempId,
-                  index
-                )
-              }
-              className="input input--full-width input--edit"
-              placeholder={t("quantity")}
-              disabled={isEditingTranslation}
-              onWheel={(e) => e.target.blur()}
-            />
-          </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:flex md:flex-1 md:gap-2">
+          <Input
+            id={`ingredient-quantity-${sectionId}-${index}-${ingredient.tempId}`}
+            type="text"
+            value={formatQuantityForUnit(ingredient.quantity)}
+            onChange={(e) =>
+              handleIngredientChange(
+                sectionId,
+                ingredient.tempId,
+                "quantity",
+                e.target.value
+              )
+            }
+            onKeyDown={(e) =>
+              handleIngredientFieldEnter(
+                e,
+                "quantity",
+                sectionId,
+                ingredient.tempId,
+                index
+              )
+            }
+            placeholder={t("quantity")}
+            disabled={isEditingTranslation}
+            onWheel={(e) => e.target.blur()}
+            className="md:w-20 md:flex-none"
+          />
 
-          <div className={isEditingTranslation ? "translation-disabled" : ""}>
-            <Selector
+          <Combobox
+            items={unitOptions}
+            value={
+              unitOptions.find((unit) => unit.value === ingredient.unit) || null
+            }
+            onValueChange={(unit) =>
+              handleIngredientChange(
+                sectionId,
+                ingredient.tempId,
+                "unit",
+                unit ? unit.value : ""
+              )
+            }
+            isItemEqualToValue={(a, b) => a.value === b.value}
+            disabled={isEditingTranslation}
+          >
+            <ComboboxInput
               id={`ingredient-unit-${sectionId}-${index}-${ingredient.tempId}`}
-              value={ingredient.unit || ""}
-              onChange={(value) =>
-                handleIngredientChange(
-                  sectionId,
-                  ingredient.tempId,
-                  "unit",
-                  value
-                )
-              }
-              onKeyDown={(e) =>
-                handleIngredientFieldEnter(
-                  e,
-                  "unit",
-                  sectionId,
-                  ingredient.tempId,
-                  index
-                )
-              }
-              type="unit"
-              className="input--full-width"
+              placeholder={t("unit")}
               disabled={isEditingTranslation}
+              showClear
+              className="md:w-28"
             />
-          </div>
+            <ComboboxContent>
+              <ComboboxEmpty>{t("no_results")}</ComboboxEmpty>
+              <ComboboxList>
+                {(unit) => (
+                  <ComboboxItem key={unit.value} value={unit}>
+                    {unit.label}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
 
-          <input
+          <Input
             id={`ingredient-notes-${sectionId}-${index}-${ingredient.tempId}`}
             type="text"
             value={ingredient.notes || ""}
@@ -170,61 +198,66 @@ const IngredientRow = ({
                 index
               )
             }
-            className="input input--full-width input--edit"
             placeholder={t("notes")}
+            className="col-span-2 sm:col-span-1 md:flex-1"
           />
         </div>
 
-        <div className="flex-row">
-          <button
-            type="button"
-            onClick={() => {
-              const linkedRecipe = getIngredientLink(
-                sectionId,
-                ingredient.tempId
-              );
-              if (linkedRecipe) {
-                removeIngredientLink(sectionId, ingredient.tempId);
-              } else {
-                handleOpenLinkDropdown(
-                  sectionId,
-                  ingredient.tempId,
-                  ingredient
-                );
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant={linkedRecipe ? "ghost-destructive" : "ghost"}
+                  size="icon-sm"
+                  onClick={() => {
+                    if (linkedRecipe) {
+                      removeIngredientLink(sectionId, ingredient.tempId);
+                    } else {
+                      handleOpenLinkDropdown(
+                        sectionId,
+                        ingredient.tempId,
+                        ingredient
+                      );
+                    }
+                  }}
+                  aria-label={
+                    linkedRecipe ? t("unlink_recipe") : t("link_to_recipe")
+                  }
+                  disabled={isEditingTranslation}
+                >
+                  {linkedRecipe ? <Unlink size={16} /> : <Link size={16} />}
+                </Button>
               }
-            }}
-            className={`btn btn-icon ${
-              getIngredientLink(sectionId, ingredient.tempId)
-                ? "btn-icon-link linked"
-                : "btn-icon-link"
-            } ${isEditingTranslation ? "translation-disabled" : ""}`}
-            aria-label={
-              getIngredientLink(sectionId, ingredient.tempId)
-                ? t("unlink_recipe")
-                : t("link_to_recipe")
-            }
-            disabled={isEditingTranslation}
-          >
-            <Link size={16} className="link-default" />
-            <X size={16} className="link-hover" />
-          </button>
+            />
+            <TooltipContent>
+              {linkedRecipe ? t("unlink_recipe") : t("link_to_recipe")}
+            </TooltipContent>
+          </Tooltip>
 
-          <button
-            type="button"
-            onClick={() => removeIngredient(sectionId, ingredient.tempId)}
-            className={`btn btn-icon btn-icon-remove ${
-              isEditingTranslation ? "translation-disabled" : ""
-            }`}
-            aria-label={t("remove_ingredient")}
-            disabled={isEditingTranslation}
-            data-testid={
-              sectionId === "ungrouped"
-                ? "remove-ingredient-btn"
-                : `remove-section-ingredient-btn-${sectionId}-${ingredient.tempId}`
-            }
-          >
-            <Trash2 size={16} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost-destructive"
+                  size="icon-sm"
+                  onClick={() => removeIngredient(sectionId, ingredient.tempId)}
+                  aria-label={t("remove_ingredient")}
+                  disabled={isEditingTranslation}
+                  data-testid={
+                    sectionId === "ungrouped"
+                      ? "remove-ingredient-btn"
+                      : `remove-section-ingredient-btn-${sectionId}-${ingredient.tempId}`
+                  }
+                >
+                  <Trash2 size={16} />
+                </Button>
+              }
+            />
+            <TooltipContent>{t("remove_ingredient")}</TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>

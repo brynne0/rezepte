@@ -5,7 +5,7 @@ import { getSignedImageUrls } from "../../services/imageService";
 const urlCache = new Map();
 const CACHE_DURATION = 50 * 60 * 1000; // 50 minutes (before 1-hour expiry)
 
-export const useSignedImageUrls = (images, isShared = false) => {
+export const useSignedImageUrls = (images) => {
   const [signedImages, setSignedImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -40,8 +40,7 @@ export const useSignedImageUrls = (images, isShared = false) => {
 
         // Check cache first
         images.forEach((image) => {
-          const cacheKey = `${image.path}-${isShared}`;
-          const cached = urlCache.get(cacheKey);
+          const cached = urlCache.get(image.path);
 
           if (cached && now - cached.timestamp < CACHE_DURATION) {
             cachedResults.push(cached.image);
@@ -53,13 +52,11 @@ export const useSignedImageUrls = (images, isShared = false) => {
         // Fetch uncached images
         let newSignedImages = [...cachedResults];
         if (imagesToFetch.length > 0) {
-          const expiresIn = isShared ? 604800 : 3600; // 7 days vs 1 hour
-          const freshUrls = await getSignedImageUrls(imagesToFetch, expiresIn);
+          const freshUrls = await getSignedImageUrls(imagesToFetch);
 
           // Cache new URLs
           freshUrls.forEach((image) => {
-            const cacheKey = `${image.path}-${isShared}`;
-            urlCache.set(cacheKey, { image, timestamp: now });
+            urlCache.set(image.path, { image, timestamp: now });
           });
 
           newSignedImages = [...newSignedImages, ...freshUrls];
@@ -84,7 +81,7 @@ export const useSignedImageUrls = (images, isShared = false) => {
 
     fetchSignedUrls();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imagesKey, isShared]); // Use imagesKey instead of images to prevent infinite loops
+  }, [imagesKey]); // Use imagesKey instead of images to prevent infinite loops
 
   return { signedImages, loading, error };
 };

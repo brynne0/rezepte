@@ -1,15 +1,30 @@
-import "./NutritionPanel.css";
 import { useTranslation } from "react-i18next";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
-const NUTRITION_FIELDS = [
-  { key: "calories", labelKey: "nutrition_calories", unit: "kcal" },
-  { key: "protein", labelKey: "nutrition_protein", unit: "g" },
-  { key: "fat", labelKey: "nutrition_fat", unit: "g" },
-  { key: "carbs", labelKey: "nutrition_carbs", unit: "g" },
-  { key: "fiber", labelKey: "nutrition_fiber", unit: "g" },
-  { key: "sugar", labelKey: "nutrition_sugar", unit: "g" },
-  { key: "sodium", labelKey: "nutrition_sodium", unit: "mg" },
-];
+// Known fields get a translated label and a unit; any other key present in
+// the data still renders, just with its raw name and no unit.
+const KNOWN_NUTRITION_FIELDS = {
+  calories: { labelKey: "nutrition_calories", unit: "kcal" },
+  protein: { labelKey: "nutrition_protein", unit: "g" },
+  fat: { labelKey: "nutrition_fat", unit: "g" },
+  carbs: { labelKey: "nutrition_carbs", unit: "g" },
+  fiber: { labelKey: "nutrition_fiber", unit: "g" },
+  sugar: { labelKey: "nutrition_sugar", unit: "g" },
+  sodium: { labelKey: "nutrition_sodium", unit: "mg" },
+};
 
 // Normalise DB value into an array of column objects
 const toColumns = (nutrition) => {
@@ -19,69 +34,76 @@ const toColumns = (nutrition) => {
   return [{ label: "", ...nutrition }];
 };
 
+// Every key present on any column (besides "label") becomes a row, so the
+// table isn't limited to a fixed set of nutrients.
+const collectNutrientKeys = (columns) => {
+  const seen = new Set();
+  columns.forEach((col) => {
+    Object.keys(col).forEach((key) => {
+      if (key !== "label" && col[key] != null) seen.add(key);
+    });
+  });
+  return [...seen];
+};
+
+const formatNutrientValue = (value, unit) => {
+  const parsed = parseFloat(value);
+  const display = Number.isNaN(parsed) ? value : parsed;
+  return unit ? `${display} ${unit}` : `${display}`;
+};
+
 const NutritionPanel = ({ recipe }) => {
   const { t } = useTranslation();
 
   const columns = toColumns(recipe.nutrition);
   if (!columns) return null;
 
-  const isDual = columns.length > 1;
+  const hasColumnLabels = columns.some((col) => col.label);
+  const nutrientKeys = collectNutrientKeys(columns);
 
   return (
-    <>
-      <div className="recipe-subheading">
-        <h2>{t("nutritional_info")}:</h2>
-      </div>
-      {isDual ? (
-        <div className="nutrition-dual-table">
-          {columns.some((col) => col.label) && (
-            <div className="nutrition-dual-header">
-              <span />
-              {columns.map((col, i) => (
-                <span key={i} className="grey-small nutrition-col-title">
-                  {col.label}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {NUTRITION_FIELDS.map(({ key, labelKey, unit }) => {
-            const hasAny = columns.some((col) => col[key] != null);
-            if (!hasAny) return null;
-            return (
-              <div key={key} className="nutrition-dual-row">
-                <span className="grey-small">{t(labelKey)}</span>
-                {columns.map((col, i) => (
-                  <span key={i} className="nutrition-value">
-                    {col[key] != null ? `${parseFloat(col[key])} ${unit}` : "–"}
-                  </span>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="nutrition-table">
-          {columns[0]?.label && (
-            <div className="nutrition-col-header-single grey-small">
-              {columns[0].label}
-            </div>
-          )}
-          {NUTRITION_FIELDS.map(({ key, labelKey, unit }) => {
-            const raw = columns[0][key];
-            if (raw == null) return null;
-            return (
-              <div key={key} className="nutrition-row">
-                <span className="grey-small">{t(labelKey)}</span>
-                <span className="nutrition-value">
-                  {parseFloat(raw)} {unit}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </>
+    <Accordion defaultValue={["nutrition-info"]}>
+      <AccordionItem value="nutrition-info">
+        <AccordionTrigger>
+          <h2>{t("nutritional_info")}:</h2>
+        </AccordionTrigger>
+        <AccordionContent>
+          <Table className="md:w-fit">
+            {hasColumnLabels && (
+              <TableHeader>
+                <TableRow>
+                  <TableHead />
+                  {columns.map((col, i) => (
+                    <TableHead key={i} className="text-right">
+                      {col.label}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+            )}
+            <TableBody>
+              {nutrientKeys.map((key) => {
+                const field = KNOWN_NUTRITION_FIELDS[key];
+                return (
+                  <TableRow key={key}>
+                    <TableCell className="pr-8">
+                      {field ? t(field.labelKey) : key}
+                    </TableCell>
+                    {columns.map((col, i) => (
+                      <TableCell key={i} className="text-right font-medium">
+                        {col[key] != null
+                          ? formatNutrientValue(col[key], field?.unit)
+                          : "–"}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
 

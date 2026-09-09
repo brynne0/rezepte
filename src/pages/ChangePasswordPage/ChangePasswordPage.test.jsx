@@ -16,6 +16,7 @@ vi.mock("react-router-dom", async () => {
     ...actual,
     useNavigate: () => mockNavigate,
     useLocation: () => mockLocation,
+    useBlocker: () => ({ state: "unblocked" }),
   };
 });
 
@@ -43,19 +44,6 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key) => key, // Return the key as the translation for testing
   }),
-}));
-
-vi.mock("../../components/PasswordInput/PasswordInput", () => ({
-  default: ({ id, value, onChange, placeholder, className }) => (
-    <input
-      id={id}
-      type="password"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className={className}
-    />
-  ),
 }));
 
 vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
@@ -143,7 +131,7 @@ describe("ChangePasswordPage", () => {
       render(<ChangePasswordPageWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText("SET_NEW_PASSWORD")).toBeInTheDocument();
+        expect(screen.getByText("set_new_password")).toBeInTheDocument();
       });
 
       expect(screen.getByLabelText("new_password")).toBeInTheDocument();
@@ -711,7 +699,7 @@ describe("ChangePasswordPage", () => {
         expect(screen.getByLabelText("current_password")).toBeInTheDocument();
       });
 
-      expect(screen.getByText("SET_NEW_PASSWORD")).toBeInTheDocument();
+      expect(screen.getByText("set_new_password")).toBeInTheDocument();
       expect(screen.getByLabelText("new_password")).toBeInTheDocument();
       expect(screen.getByLabelText("new_password_repeat")).toBeInTheDocument();
     });
@@ -865,7 +853,7 @@ describe("ChangePasswordPage", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "go_to_login" }));
 
-      expect(mockNavigate).toHaveBeenCalledWith("/auth-page");
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
 
     it("navigates to auth page from success message", async () => {
@@ -913,7 +901,7 @@ describe("ChangePasswordPage", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "login" }));
 
-      expect(mockNavigate).toHaveBeenCalledWith("/auth-page");
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
   });
 
@@ -941,7 +929,7 @@ describe("ChangePasswordPage", () => {
       expect(repeatPasswordInput.value).toBe("password123");
     });
 
-    it("applies error class to inputs when validation fails", async () => {
+    it("marks inputs as invalid when validation fails", async () => {
       mockValidateChangePasswordForm.mockReturnValue({
         newPassword: "Password too short",
         newPasswordRepeat: "Passwords must match",
@@ -958,8 +946,8 @@ describe("ChangePasswordPage", () => {
           "new_password_repeat"
         );
 
-        expect(newPasswordInput.className).toContain("input--error");
-        expect(repeatPasswordInput.className).toContain("input--error");
+        expect(newPasswordInput).toHaveAttribute("aria-invalid", "true");
+        expect(repeatPasswordInput).toHaveAttribute("aria-invalid", "true");
       });
     });
   });

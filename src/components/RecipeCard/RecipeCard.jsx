@@ -1,21 +1,28 @@
 import { useState, useMemo } from "react";
-import "./RecipeCard.css";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import {
   getMainImage,
   getOptimizedImageUrl,
 } from "../../services/imageService";
-import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
+import { extractFirstUrl } from "../../utils/linkUtils";
 import useIntersectionObserver from "../../hooks/ui/useIntersectionObserver";
+import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "cn";
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
-  const { isLoggedIn } = useAuth();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isSourceLinkHovered, setIsSourceLinkHovered] = useState(false);
 
   // Use intersection observer to only load images when card is visible
   const { ref: cardRef, hasBeenVisible } = useIntersectionObserver({
@@ -40,8 +47,8 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
     });
   }, [signedMainImage?.url]);
 
-  // Only show images if user is logged in AND showImages is true AND card has been visible
-  const shouldShowImages = isLoggedIn && showImages && hasBeenVisible;
+  // Only show images if showImages is true AND card has been visible
+  const shouldShowImages = showImages && hasBeenVisible;
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -54,11 +61,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   };
 
   // Check if recipe has a source link
-  const hasSourceLink =
-    recipe.source &&
-    (recipe.source.startsWith("http://") ||
-      recipe.source.startsWith("https://") ||
-      recipe.source.startsWith("www."));
+  const sourceUrl = extractFirstUrl(recipe.source);
 
   // Check if recipe has no content (no ingredients and no instructions)
   const hasNoIngredients = !recipe.hasIngredients;
@@ -67,37 +70,65 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const hasNoContent = hasNoIngredients && hasNoInstructions;
 
   return (
-    <div
+    <Card
       ref={cardRef}
-      className="recipe-card"
+      className="cursor-pointer py-0"
       onClick={() => onClick && onClick(recipe)}
     >
-      <div className="flex-center">
-        <h4 className="recipe-card-title">{recipe.title}</h4>
+      <CardHeader className="py-2">
+        <CardTitle
+          className={cn(
+            "text-xs font-semibold uppercase",
+            !isSourceLinkHovered && "group-hover/card:text-accent-red"
+          )}
+        >
+          {recipe.title}
+        </CardTitle>
 
-        {hasSourceLink && hasNoContent && (
-          <a
-            href={recipe.source}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-unstyled recipe-card-link"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent triggering the card click
-            }}
-            aria-label={t("open_recipe_source_link")}
-            title={t("open_recipe_source_link")}
-          >
-            <Link size={16} />
-          </a>
+        {sourceUrl && hasNoContent && (
+          <CardAction className="row-span-1 self-center">
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-accent-red"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent triggering the card click
+                    }}
+                    onMouseEnter={() => setIsSourceLinkHovered(true)}
+                    onMouseLeave={() => setIsSourceLinkHovered(false)}
+                    onFocus={() => setIsSourceLinkHovered(true)}
+                    onBlur={() => setIsSourceLinkHovered(false)}
+                    aria-label={t("open_recipe_source_link")}
+                  >
+                    <Link size={16} />
+                  </a>
+                }
+              />
+              <TooltipContent>{t("open_recipe_source_link")}</TooltipContent>
+            </Tooltip>
+          </CardAction>
         )}
-      </div>
+      </CardHeader>
       {shouldShowImages &&
         signedMainImage &&
         !imageError &&
         optimizedImageUrl && (
-          <div className="recipe-image-container">
+          <AspectRatio
+            ratio={3 / 2}
+            className="mx-2 mb-2 overflow-hidden rounded-lg"
+          >
+            {!imageLoaded && (
+              <Skeleton className="absolute inset-0 rounded-lg" />
+            )}
             <img
-              className={`recipe-image ${imageLoaded ? "loaded" : "loading"}`}
+              className={cn(
+                "size-full object-cover transition-opacity duration-200 will-change-[opacity]",
+                imageLoaded ? "opacity-100" : "opacity-0"
+              )}
               src={optimizedImageUrl}
               alt={recipe.title}
               loading="lazy"
@@ -105,14 +136,9 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
               onError={handleImageError}
               key={signedMainImage?.id}
             />
-            {!imageLoaded && (
-              <div className="recipe-image-loading">
-                <LoadingAcorn size={20} className="loading-acorn-small" />
-              </div>
-            )}
-          </div>
+          </AspectRatio>
         )}
-    </div>
+    </Card>
   );
 };
 

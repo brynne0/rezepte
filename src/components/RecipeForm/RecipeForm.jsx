@@ -1,38 +1,40 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  Plus,
-  ArrowBigLeft,
-  GripVertical,
-  Link,
-  NotepadText,
-  Clipboard,
-  ChevronDown,
-  ChevronRight,
-} from "lucide-react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { ArrowLeft, Clipboard } from "lucide-react";
+import { DragDropContext } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
-import { emptyNutritionColumn } from "../../utils/nutritionUtils";
+import { useRecipeAutofill } from "../../hooks/forms/useRecipeAutofill";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
-import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import ImageUpload from "../ImageUpload/ImageUpload";
-import RecipeLinkDropdown from "../RecipeLinkDropdown/RecipeLinkDropdown";
-import IngredientRow from "./IngredientRow";
+import RecipeLinkDropdown from "./RecipeLinkDropdown";
+import IngredientsSection from "./IngredientsSection";
 import InstructionsSection from "./InstructionsSection";
+import NutritionSection from "./NutritionSection";
 import RecipeAutofill from "./RecipeAutofill";
-import "./RecipeForm.css";
-import AutoResizeTextArea from "../AutoResizeTextArea/AutoResizeTextArea";
-
-const NUTRITION_FORM_FIELDS = [
-  { key: "calories", labelKey: "nutrition_calories", unit: "kcal", step: "1" },
-  { key: "fiber", labelKey: "nutrition_fiber", unit: "g", step: "0.1" },
-  { key: "protein", labelKey: "nutrition_protein", unit: "g", step: "0.1" },
-  { key: "sodium", labelKey: "nutrition_sodium", unit: "mg", step: "1" },
-  { key: "carbs", labelKey: "nutrition_carbs", unit: "g", step: "0.1" },
-  { key: "sugar", labelKey: "nutrition_sugar", unit: "g", step: "0.1" },
-  { key: "fat", labelKey: "nutrition_fat", unit: "g", step: "0.1" },
-];
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+} from "@/components/ui/field";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const RecipeForm = ({
   categories,
@@ -41,107 +43,7 @@ const RecipeForm = ({
   isEditingTranslation = false,
 }) => {
   const { t } = useTranslation();
-
-  // Autofill state
-  const [showPasteArea, setShowPasteArea] = useState(false);
-
-  // Handle autofill callback from RecipeAutofill component
-  const handleAutofill = (parsed) => {
-    // Clear existing form data first
-    setFormData((prev) => ({
-      ...prev,
-      title: "",
-      servings: "",
-      categories: [],
-      ungroupedIngredients: [],
-      ingredientSections: [],
-      instructions: [],
-    }));
-
-    // Auto-fill form fields
-    if (parsed.title) {
-      handleInputChange("title", toTitleCase(parsed.title));
-    }
-    if (parsed.servings) {
-      handleInputChange("servings", parsed.servings);
-    }
-
-    // Handle category prediction
-    if (parsed.categories && Array.isArray(parsed.categories)) {
-      handleInputChange("categories", parsed.categories);
-    }
-
-    // Handle ingredient sections (if present)
-    if (
-      parsed.ingredientSections &&
-      Array.isArray(parsed.ingredientSections) &&
-      parsed.ingredientSections.length > 0
-    ) {
-      // Build new sections with proper structure
-      const newSections = parsed.ingredientSections.map((section) => ({
-        id: `section-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        subheading: section.subheading || "",
-        ingredients: section.ingredients.map((ing) => ({
-          tempId: generateUniqueId(),
-          ingredient_id: "",
-          recipe_ingredient_id: "",
-          name: ing.name || "",
-          quantity: ing.quantity || "",
-          unit: ing.unit || "",
-          notes: ing.notes || "",
-        })),
-      }));
-
-      // Add sections (form is already cleared)
-      setFormData((prev) => ({
-        ...prev,
-        ingredientSections: newSections,
-      }));
-    } else if (
-      parsed.ingredients &&
-      Array.isArray(parsed.ingredients) &&
-      parsed.ingredients.length > 0
-    ) {
-      // Handle flat ingredients (no sections)
-      // Build new ingredients with proper structure
-      const newIngredients = parsed.ingredients.map((ing) => ({
-        tempId: generateUniqueId(),
-        ingredient_id: "",
-        recipe_ingredient_id: "",
-        name: ing.name || "",
-        quantity: ing.quantity || "",
-        unit: ing.unit || "",
-        notes: ing.notes || "",
-      }));
-
-      // Add ingredients (form is already cleared)
-      setFormData((prev) => ({
-        ...prev,
-        ungroupedIngredients: newIngredients,
-      }));
-    }
-
-    // Handle instructions
-    if (
-      parsed.instructions &&
-      Array.isArray(parsed.instructions) &&
-      parsed.instructions.length > 0
-    ) {
-      // Add instructions (form is already cleared)
-      setFormData((prev) => ({
-        ...prev,
-        instructions: parsed.instructions,
-      }));
-    }
-
-    // Handle source URL (if provided)
-    if (parsed.source) {
-      handleInputChange("source", parsed.source);
-    }
-
-    // Hide paste area after successful autofill
-    setShowPasteArea(false);
-  };
+  const navigate = useNavigate();
 
   const {
     formData,
@@ -178,62 +80,27 @@ const RecipeForm = ({
     generateUniqueId,
   } = useRecipeForm({ initialRecipe, isEditingTranslation });
 
+  const [showPasteArea, setShowPasteArea] = useState(false);
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
   const [linkingIngredient, setLinkingIngredient] = useState(null);
-  const [showNutrition, setShowNutrition] = useState(() =>
-    formData.nutrition_columns.some((col) =>
-      ["calories", "protein", "fat", "carbs", "fiber", "sugar", "sodium"].some(
-        (k) => col[k] != null
-      )
-    )
-  );
+
+  const handleAutofill = useRecipeAutofill({
+    setFormData,
+    handleInputChange,
+    toTitleCase,
+    generateUniqueId,
+    onDone: () => setShowPasteArea(false),
+  });
 
   // Unsaved changes detection
   const {
     isModalOpen: isUnsavedChangesModalOpen,
-    navigate: navigateWithConfirmation,
     confirmNavigation,
     cancelNavigation,
     message: unsavedChangesMessage,
   } = useUnsavedChanges(hasUnsavedChanges(), t("unsaved_changes_warning"));
-
-  const [sourceMode, setSourceMode] = useState(() => {
-    // Initialise based on existing source content
-    if (initialRecipe?.source) {
-      const source = initialRecipe.source;
-      if (
-        source.startsWith("http://") ||
-        source.startsWith("https://") ||
-        source.startsWith("www.")
-      ) {
-        return "link";
-      } else {
-        return "note";
-      }
-    }
-    return "note"; // default to note mode
-  });
-
-  // Smart detection: auto-switch between link and note modes
-  const handleSourceChange = (value) => {
-    handleInputChange("source", value);
-
-    // Auto-detect URLs and switch to link mode
-    if (
-      value &&
-      (value.startsWith("http://") ||
-        value.startsWith("https://") ||
-        value.startsWith("www."))
-    ) {
-      if (sourceMode !== "link") {
-        setSourceMode("link");
-      }
-    } else if (value && sourceMode !== "note") {
-      // Auto-switch to note mode for non-link content
-      setSourceMode("note");
-    }
-  };
 
   // Handle opening the recipe link dropdown
   const handleOpenLinkDropdown = (sectionId, tempId, ingredient) => {
@@ -252,707 +119,314 @@ const RecipeForm = ({
     }
   };
 
+  const selectedCategories = formData.categories || [];
+
   return (
-    <div className="card card-form">
-      <header className="page-header flex-between">
-        <button
-          className="btn-unstyled back-arrow"
-          onClick={() => {
-            navigateWithConfirmation(-1);
-          }}
-          data-testid="back-arrow"
-          aria-label={t("go_back")}
-        >
-          <ArrowBigLeft size={28} />
-        </button>
-        <h1 className="forta">{title}</h1>
-
-        {/* Recipe Autofill Toggle Button */}
-        {!isEditingTranslation ? (
-          <div>
-            <button
-              type="button"
-              onClick={() => setShowPasteArea(!showPasteArea)}
-              className="btn btn-secondary"
-              aria-label={t("autofill_recipe")}
+    <>
+      <Card className="max-w-3xl mx-auto">
+        <CardHeader className="flex flex-col items-stretch gap-4">
+          <div className="relative flex w-full items-center justify-center">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="absolute left-0"
+              onClick={() => navigate(-1)}
+              data-testid="back-arrow"
+              aria-label={t("go_back")}
             >
-              <Clipboard />
-            </button>
+              <ArrowLeft />
+            </Button>
+            <h1 className="text-lg font-semibold">{title}</h1>
           </div>
-        ) : (
-          <div style={{ visibility: "hidden" }}>
-            <Clipboard size={28} />
-          </div>
-        )}
-      </header>
+        </CardHeader>
 
-      {/* Translation Editing Notice */}
-      {isEditingTranslation && (
-        <span className="warning-notice flex-center">
-          {t("editing_translation_notice")}
-        </span>
-      )}
-
-      {/* Submission Error Message */}
-      {submissionError && (
-        <div className="error-message submission-error">{submissionError}</div>
-      )}
-
-      <form
-        onSubmit={handleSubmit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && e.target.type !== "submit") {
-            e.preventDefault();
-          }
-        }}
-        className="recipe-form"
-        role="form"
-      >
-        {/*  Recipe Paste Area  */}
-        <div className="form-group">
-          {showPasteArea && (
-            <RecipeAutofill
-              onAutofill={handleAutofill}
-              categories={categories}
-            />
+        <CardContent className="flex flex-col gap-6">
+          {/* Translation Editing Notice */}
+          {isEditingTranslation && (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {t("editing_translation_notice")}
+              </AlertDescription>
+            </Alert>
           )}
-        </div>
 
-        {/* Recipe Title and Servings */}
-        <div className="form-group">
-          <div className="title-servings-row">
-            <div className="title-field">
-              <span className="form-header">
-                <h3>{t("recipe_title")}</h3>
-              </span>
-              <input
-                id="title"
-                type="text"
-                value={formData.title}
-                onChange={(e) =>
-                  handleInputChange(
-                    "title",
-                    e.target.value,
-                    !!validationErrors.title
-                  )
-                }
-                onBlur={(e) => {
-                  handleInputChange(
-                    "title",
-                    toTitleCase(e.target.value),
-                    !!validationErrors.title
-                  );
-                  handleTitleBlur();
-                }}
-                className={`input--full-width input--edit input ${
-                  validationErrors.title ? "input--error" : ""
-                }`}
-              />
-              {validationErrors.title && (
-                <span className="error-message-small">
-                  {validationErrors.title}
-                </span>
-              )}
-            </div>
+          {/* Submission Error Message */}
+          {submissionError && (
+            <div className="text-sm text-destructive">{submissionError}</div>
+          )}
 
-            <div
-              className={`servings-field ${
-                isEditingTranslation ? "translation-disabled" : ""
-              }`}
-            >
-              <span className="form-header">
-                <h3 id="servings-label">{t("servings")}</h3>
-              </span>
-              <div
-                className={isEditingTranslation ? "translation-disabled" : ""}
-              >
-                <input
+          <form
+            onSubmit={handleSubmit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.target.type !== "submit") {
+                e.preventDefault();
+              }
+            }}
+            className="flex flex-col gap-6"
+            role="form"
+          >
+            {/*  Recipe Paste Area  */}
+            {!isEditingTranslation &&
+              (showPasteArea ? (
+                <RecipeAutofill
+                  onAutofill={handleAutofill}
+                  onCancel={() => setShowPasteArea(false)}
+                  categories={categories}
+                />
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowPasteArea(true)}
+                >
+                  <Clipboard size={16} />
+                  {t("autofill_recipe_cta")}
+                </Button>
+              ))}
+
+            {/* Recipe Title and Servings */}
+            <FieldGroup className="grid gap-4 sm:grid-cols-[1fr_140px]">
+              <Field data-invalid={!!validationErrors.title}>
+                <FieldLabel htmlFor="title">{t("recipe_title")}</FieldLabel>
+                <Input
+                  id="title"
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "title",
+                      e.target.value,
+                      !!validationErrors.title
+                    )
+                  }
+                  onBlur={(e) => {
+                    handleInputChange(
+                      "title",
+                      toTitleCase(e.target.value),
+                      !!validationErrors.title
+                    );
+                    handleTitleBlur();
+                  }}
+                  aria-invalid={!!validationErrors.title}
+                />
+                <FieldError>{validationErrors.title}</FieldError>
+              </Field>
+
+              <Field className={isEditingTranslation ? "opacity-50" : ""}>
+                <FieldLabel htmlFor="servings">{t("servings")}</FieldLabel>
+                <Input
                   id="servings"
                   type="text"
                   value={formData.servings || ""}
                   onChange={(e) =>
                     handleInputChange("servings", e.target.value)
                   }
-                  className="input input--full-width input--edit"
-                  aria-labelledby="servings-label"
                   disabled={isEditingTranslation}
                   onWheel={(e) => {
                     e.target.blur();
                   }}
                 />
-              </div>
-            </div>
-          </div>
-        </div>
+              </Field>
+            </FieldGroup>
 
-        {/* Category */}
-        <div
-          className={`form-group ${
-            isEditingTranslation ? "translation-disabled" : ""
-          }`}
-        >
-          <div className="form-header">
-            <h3 id="category-label">{t("category")}</h3>
-          </div>
-
-          <div
-            className={`form-categories-wrapper ${
-              validationErrors.category ? "input--error" : ""
-            } ${isEditingTranslation ? "translation-disabled" : ""}`}
-            role="group"
-            aria-labelledby="category-label"
-          >
-            {categories
-              ?.filter((category) => category.value !== "all_recipes")
-              .map((category) => (
-                <button
-                  key={category.value}
-                  type="button"
-                  className={`subheading-wrapper${
-                    formData.categories?.includes(category.value)
-                      ? " selected"
-                      : ""
-                  }`}
-                  disabled={isEditingTranslation}
-                  onClick={() => {
-                    const currentCategories = formData.categories || [];
-                    const isSelected = currentCategories.includes(
-                      category.value
-                    );
-                    const newCategories = isSelected
-                      ? currentCategories.filter(
-                          (cat) => cat !== category.value
-                        )
-                      : [...currentCategories, category.value];
-
-                    handleInputChange("categories", newCategories, true);
-                  }}
-                >
-                  <h3 className="forta">{category.label}</h3>
-                </button>
-              ))}
-          </div>
-          {validationErrors.category && (
-            <span className="error-message-small">
-              {validationErrors.category}
-            </span>
-          )}
-        </div>
-
-        <DragDropContext
-          onDragEnd={isEditingTranslation ? () => {} : handleDragEnd}
-        >
-          {/* Ingredients */}
-          <div className="form-group">
-            <div className="form-header flex-between">
-              <h3>{t("ingredients")}</h3>
-              <button
-                type="button"
-                onClick={addSection}
-                className={`btn btn-section ${
-                  isEditingTranslation ? "translation-disabled" : ""
-                }`}
+            {/* Category */}
+            <Field
+              data-invalid={!!validationErrors.category}
+              className={isEditingTranslation ? "opacity-50" : ""}
+            >
+              <FieldLabel id="category-label">{t("category")}</FieldLabel>
+              <ToggleGroup
+                variant="outline"
+                multiple
+                value={selectedCategories}
+                onValueChange={(value) =>
+                  handleInputChange("categories", value, true)
+                }
+                aria-labelledby="category-label"
+                className="flex flex-wrap"
                 disabled={isEditingTranslation}
               >
-                {t("add_section")}
-              </button>
-            </div>
-            {/* Ungrouped Ingredients First */}
-            {formData.ungroupedIngredients.length > 0 && (
-              <Droppable droppableId="ungrouped" type="ingredient">
-                {(provided, snapshot) => (
-                  <div
-                    className={`flex-column ingredient-list ${
-                      snapshot.isDraggingOver ? "drag-over" : ""
-                    }`}
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    {formData.ungroupedIngredients.map((ingredient, index) => (
-                      <Draggable
-                        key={`ungrouped-${index}-${ingredient.tempId}`}
-                        draggableId={`ungrouped-${index}-${ingredient.tempId}`}
-                        index={index}
-                        type="ingredient"
-                      >
-                        {(provided, snapshot) => (
-                          <IngredientRow
-                            ingredient={ingredient}
-                            index={index}
-                            sectionId="ungrouped"
-                            validationErrors={validationErrors}
-                            isEditingTranslation={isEditingTranslation}
-                            provided={provided}
-                            snapshot={snapshot}
-                            handleIngredientChange={handleIngredientChange}
-                            handleIngredientFieldEnter={
-                              handleIngredientFieldEnter
-                            }
-                            handleOpenLinkDropdown={handleOpenLinkDropdown}
-                            removeIngredient={removeIngredient}
-                            getIngredientLink={getIngredientLink}
-                            removeIngredientLink={removeIngredientLink}
-                          />
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            )}
-
-            {/* Add Ingredient Button for Ungrouped */}
-            <div className="flex-center">
-              <button
-                type="button"
-                onClick={() => addIngredient("ungrouped")}
-                className={`btn btn-icon btn-icon-green ${
-                  isEditingTranslation ? "translation-disabled" : ""
-                }`}
-                disabled={isEditingTranslation}
-              >
-                <Plus
-                  size={16}
-                  data-testid="add-ingredient-btn"
-                  aria-label={t("add_ingredient")}
-                />
-              </button>
-            </div>
-
-            {/* Ingredient Sections */}
-            {formData.ingredientSections.length > 0 && (
-              <Droppable droppableId="sections" type="section">
-                {(provided) => (
-                  <div
-                    className="flex-column"
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    {formData.ingredientSections.map(
-                      (section, sectionIndex) => (
-                        <Draggable
-                          key={section.id}
-                          draggableId={section.id}
-                          index={sectionIndex}
-                          type="section"
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={`ingredient-section ${
-                                snapshot.isDragging ? "dragging" : ""
-                              }`}
-                            >
-                              {/* Section Header */}
-                              <div className="flex-row">
-                                <div
-                                  {...provided.dragHandleProps}
-                                  className={`drag-handle ${
-                                    isEditingTranslation
-                                      ? "translation-disabled"
-                                      : ""
-                                  }`}
-                                  style={{
-                                    pointerEvents: isEditingTranslation
-                                      ? "none"
-                                      : "auto",
-                                  }}
-                                >
-                                  <GripVertical size={16} />
-                                </div>
-                                <input
-                                  type="text"
-                                  value={section.subheading}
-                                  onChange={(e) =>
-                                    handleSectionChange(
-                                      section.id,
-                                      "subheading",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="input input--borderless section-title-input grey-small"
-                                  placeholder={t("section_title")}
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => removeSection(section.id)}
-                                  className={`btn btn-section ${
-                                    isEditingTranslation
-                                      ? "translation-disabled"
-                                      : ""
-                                  }`}
-                                  disabled={isEditingTranslation}
-                                >
-                                  {t("remove_section")}
-                                </button>
-                              </div>
-
-                              {/* Section Ingredients */}
-                              <Droppable
-                                droppableId={section.id}
-                                type="ingredient"
-                              >
-                                {(provided, snapshot) => (
-                                  <div
-                                    className={`flex-column ingredient-list ${
-                                      snapshot.isDraggingOver ? "drag-over" : ""
-                                    }`}
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                  >
-                                    {section.ingredients.map(
-                                      (ingredient, ingredientIndex) => (
-                                        <Draggable
-                                          key={`${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                          draggableId={`${section.id}-${ingredientIndex}-${ingredient.tempId}`}
-                                          index={ingredientIndex}
-                                          type="ingredient"
-                                        >
-                                          {(provided, snapshot) => (
-                                            <IngredientRow
-                                              ingredient={ingredient}
-                                              index={ingredientIndex}
-                                              sectionId={section.id}
-                                              validationErrors={
-                                                validationErrors
-                                              }
-                                              isEditingTranslation={
-                                                isEditingTranslation
-                                              }
-                                              provided={provided}
-                                              snapshot={snapshot}
-                                              handleIngredientChange={
-                                                handleIngredientChange
-                                              }
-                                              handleIngredientFieldEnter={
-                                                handleIngredientFieldEnter
-                                              }
-                                              handleOpenLinkDropdown={
-                                                handleOpenLinkDropdown
-                                              }
-                                              removeIngredient={
-                                                removeIngredient
-                                              }
-                                              getIngredientLink={
-                                                getIngredientLink
-                                              }
-                                              removeIngredientLink={
-                                                removeIngredientLink
-                                              }
-                                            />
-                                          )}
-                                        </Draggable>
-                                      )
-                                    )}
-                                    {provided.placeholder}
-                                  </div>
-                                )}
-                              </Droppable>
-
-                              {/* Add Ingredient Button */}
-                              <div className="flex-center">
-                                <button
-                                  type="button"
-                                  onClick={() => addIngredient(section.id)}
-                                  className={`btn btn-icon btn-icon-green ${
-                                    isEditingTranslation
-                                      ? "translation-disabled"
-                                      : ""
-                                  }`}
-                                  aria-label={t("add_ingredient")}
-                                  disabled={isEditingTranslation}
-                                >
-                                  <Plus
-                                    size={16}
-                                    data-testid="add-section-ingredient-btn"
-                                  />
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      )
-                    )}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            )}
-
-            {validationErrors.ingredients && (
-              <span className="error-message-small">
-                {validationErrors.ingredients}
-              </span>
-            )}
-          </div>
-
-          {/* Instructions */}
-          <InstructionsSection
-            instructions={formData.instructions}
-            isEditingTranslation={isEditingTranslation}
-            handleInstructionChange={handleInstructionChange}
-            handleEnter={handleEnter}
-            removeInstruction={removeInstruction}
-            addInstruction={addInstruction}
-          />
-        </DragDropContext>
-
-        {/* Recipe Images */}
-        <div
-          className={`form-group ${
-            isEditingTranslation ? "translation-disabled" : ""
-          }`}
-        >
-          <div className="form-header">
-            <h3>{t("images")}</h3>
-          </div>
-          <ImageUpload
-            images={formData.images}
-            onChange={handleImagesChange}
-            disabled={isEditingTranslation}
-            uploadingImageIds={uploadingImageIds}
-          />
-        </div>
-
-        {/* Source */}
-        <div className="form-group">
-          <div className="form-header">
-            <h3>{t("source")}</h3>
-          </div>
-          <div className="source-input-wrapper">
-            <input
-              id="source"
-              type="text"
-              value={formData.source || ""}
-              onChange={(e) => handleSourceChange(e.target.value)}
-              className="input input--full-width input--edit"
-              placeholder={
-                sourceMode === "link" ? t("source_link") : t("source_note")
-              }
-            />
-            <button
-              type="button"
-              className={`btn btn-icon source-toggle ${
-                sourceMode === "link" ? "active" : ""
-              }`}
-              onClick={() =>
-                setSourceMode(sourceMode === "link" ? "note" : "link")
-              }
-              aria-label={
-                sourceMode === "link"
-                  ? t("switch_to_note")
-                  : t("switch_to_link")
-              }
-              title={
-                sourceMode === "link"
-                  ? t("switch_to_note")
-                  : t("switch_to_link")
-              }
-            >
-              {sourceMode === "link" ? (
-                <Link size={16} />
-              ) : (
-                <NotepadText size={16} />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Extra Notes */}
-        <div className="form-group">
-          <label htmlFor="extra-notes" className="form-header flex-between">
-            <h3> {t("notes")}</h3>
-          </label>
-          <AutoResizeTextArea
-            id="extra-notes"
-            value={formData.notes || ""}
-            onChange={(e) => handleInputChange("notes", e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.stopPropagation();
-              }
-            }}
-            className="input input--full-width input--textarea input--edit"
-            placeholder={t("notes")}
-          />
-        </div>
-
-        {/* Nutrition */}
-        <div
-          className={`form-group${isEditingTranslation ? " translation-disabled" : ""}`}
-        >
-          <div className="form-header flex-between">
-            <button
-              type="button"
-              className="btn-unstyled flex-row"
-              onClick={() => setShowNutrition((v) => !v)}
-            >
-              {showNutrition ? (
-                <ChevronDown size={18} />
-              ) : (
-                <ChevronRight size={18} />
-              )}
-              <h3>{t("nutritional_info")}</h3>
-            </button>
-            {showNutrition &&
-              (formData.nutrition_columns.length < 2 ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleInputChange("nutrition_columns", [
-                      ...formData.nutrition_columns,
-                      emptyNutritionColumn(),
-                    ])
-                  }
-                  className={`btn btn-section ${isEditingTranslation ? "translation-disabled" : ""}`}
-                  disabled={isEditingTranslation}
-                >
-                  + {t("nutrition_add_column")}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleInputChange("nutrition_columns", [
-                      formData.nutrition_columns[0],
-                    ])
-                  }
-                  className={`btn btn-section ${isEditingTranslation ? "translation-disabled" : ""}`}
-                  disabled={isEditingTranslation}
-                >
-                  {t("nutrition_remove_column")}
-                </button>
-              ))}
-          </div>
-          {showNutrition && (
-            <div
-              className={`nutrition-fields-grid${formData.nutrition_columns.length > 1 ? " nutrition-fields-grid--dual" : ""}`}
-            >
-              {/* Label inputs row — aligned with the columns below */}
-              <span />
-              {formData.nutrition_columns.map((col, colIdx) => (
-                <input
-                  key={colIdx}
-                  type="text"
-                  value={col.label}
-                  onChange={(e) => {
-                    const updated = formData.nutrition_columns.map((c, i) =>
-                      i === colIdx ? { ...c, label: e.target.value } : c
-                    );
-                    handleInputChange("nutrition_columns", updated);
-                  }}
-                  className="input input--borderless section-title-input grey-small"
-                  placeholder={
-                    colIdx === 0 ? t("nutrition_per_serving") : "per 100g"
-                  }
-                  disabled={isEditingTranslation}
-                />
-              ))}
-              <span />
-              {/* Data rows */}
-              {NUTRITION_FORM_FIELDS.map(({ key, labelKey, unit, step }) => (
-                <div key={key} className="nutrition-field-row">
-                  <span className="grey-small">{t(labelKey)}</span>
-                  {formData.nutrition_columns.map((col, colIdx) => (
-                    <input
-                      key={colIdx}
-                      type="number"
-                      min="0"
-                      step={step}
-                      value={col[key] ?? ""}
-                      onChange={(e) => {
-                        const updated = formData.nutrition_columns.map(
-                          (c, i) =>
-                            i === colIdx
-                              ? {
-                                  ...c,
-                                  [key]:
-                                    e.target.value === ""
-                                      ? null
-                                      : e.target.value,
-                                }
-                              : c
-                        );
-                        handleInputChange("nutrition_columns", updated);
-                      }}
-                      className="input input--edit"
-                      placeholder="–"
-                      disabled={isEditingTranslation}
-                      onWheel={(e) => e.target.blur()}
-                    />
+                {categories
+                  ?.filter((category) => category.value !== "all_recipes")
+                  .map((category) => (
+                    <ToggleGroupItem
+                      key={category.value}
+                      value={category.value}
+                      className="aria-pressed:border-accent-red aria-pressed:bg-accent-red/10 aria-pressed:text-accent-red"
+                    >
+                      {category.label}
+                    </ToggleGroupItem>
                   ))}
-                  <span className="grey-small">{unit}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </ToggleGroup>
+              <FieldError>{validationErrors.category}</FieldError>
+            </Field>
 
-        <div className={`action-buttons-end ${isEditMode ? "edit" : ""}`}>
-          {/* Delete Button */}
-          {isEditMode && (
-            <>
-              <button
+            <DragDropContext
+              onDragEnd={isEditingTranslation ? () => {} : handleDragEnd}
+            >
+              {/* Ingredients */}
+              <IngredientsSection
+                ungroupedIngredients={formData.ungroupedIngredients}
+                ingredientSections={formData.ingredientSections}
+                validationErrors={validationErrors}
+                isEditingTranslation={isEditingTranslation}
+                addSection={addSection}
+                addIngredient={addIngredient}
+                removeSection={removeSection}
+                handleSectionChange={handleSectionChange}
+                handleIngredientChange={handleIngredientChange}
+                handleIngredientFieldEnter={handleIngredientFieldEnter}
+                handleOpenLinkDropdown={handleOpenLinkDropdown}
+                removeIngredient={removeIngredient}
+                getIngredientLink={getIngredientLink}
+                removeIngredientLink={removeIngredientLink}
+              />
+              {/* Instructions */}
+              <InstructionsSection
+                instructions={formData.instructions}
+                isEditingTranslation={isEditingTranslation}
+                handleInstructionChange={handleInstructionChange}
+                handleEnter={handleEnter}
+                removeInstruction={removeInstruction}
+                addInstruction={addInstruction}
+              />
+            </DragDropContext>
+
+            {/* Recipe Images */}
+            <Field className={isEditingTranslation ? "opacity-50" : ""}>
+              <FieldLabel>{t("images")}</FieldLabel>
+              <ImageUpload
+                images={formData.images}
+                onChange={handleImagesChange}
+                disabled={isEditingTranslation}
+                uploadingImageIds={uploadingImageIds}
+              />
+            </Field>
+
+            {/* Source */}
+            <Field>
+              <FieldLabel htmlFor="source">{t("source")}</FieldLabel>
+              <Input
+                id="source"
+                type="text"
+                value={formData.source || ""}
+                onChange={(e) => handleInputChange("source", e.target.value)}
+                placeholder={t("source_placeholder")}
+              />
+            </Field>
+
+            {/* Extra Notes */}
+            <Field>
+              <FieldLabel htmlFor="extra-notes">{t("notes")}</FieldLabel>
+              <Textarea
+                id="extra-notes"
+                value={formData.notes || ""}
+                onChange={(e) => handleInputChange("notes", e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.stopPropagation();
+                  }
+                }}
+                placeholder={t("notes")}
+              />
+            </Field>
+
+            {/* Nutrition */}
+            <NutritionSection
+              columns={formData.nutrition_columns}
+              onChange={(columns) =>
+                handleInputChange("nutrition_columns", columns)
+              }
+              isEditingTranslation={isEditingTranslation}
+            />
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              {/* Delete Button */}
+              {isEditMode && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="w-full sm:mr-auto sm:w-auto"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                >
+                  {t("delete_recipe")}
+                </Button>
+              )}
+              {/* Cancel Button */}
+              <Button
                 type="button"
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="btn btn-action btn-danger"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => navigate(-1)}
               >
-                {t("delete_recipe")}
-              </button>
-            </>
-          )}
-          {/* Cancel Button */}
-          <button
-            type="button"
-            onClick={() => navigateWithConfirmation(-1)}
-            className="btn btn-action btn-secondary"
-          >
-            {t("cancel")}
-          </button>
-          {/* Submit button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-action btn-primary"
-          >
-            {loading
-              ? isEditMode
-                ? isEditingTranslation
-                  ? t("updating_translation")
-                  : t("updating")
-                : t("creating")
-              : isEditMode
-                ? isEditingTranslation
-                  ? t("update_translation")
-                  : t("update_recipe")
-                : t("create_recipe")}
-          </button>
-        </div>
-      </form>
+                {t("cancel")}
+              </Button>
+              {/* Submit button */}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-auto"
+              >
+                {loading
+                  ? isEditMode
+                    ? isEditingTranslation
+                      ? t("updating_translation")
+                      : t("updating")
+                    : t("creating")
+                  : isEditMode
+                    ? isEditingTranslation
+                      ? t("update_translation")
+                      : t("update_recipe")
+                    : t("create_recipe")}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Delete Modal */}
-      <ConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-        message={t("recipe_delete_confirmation")}
-        confirmText={t("delete")}
-        cancelText={t("cancel")}
-        confirmButtonType="danger"
-      />
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_recipe")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("recipe_delete_confirmation")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete}>
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Unsaved Changes Modal */}
-      <ConfirmationModal
-        isOpen={isUnsavedChangesModalOpen}
-        onClose={confirmNavigation}
-        onConfirm={cancelNavigation}
-        message={unsavedChangesMessage}
-        confirmText={t("stay")}
-        cancelText={t("leave_page")}
-        confirmButtonType="primary"
-      />
+      <AlertDialog
+        open={isUnsavedChangesModalOpen}
+        onOpenChange={(open) => {
+          // Dismissing (overlay click / Escape) is treated the same as
+          // explicitly choosing to leave the page.
+          if (!open) confirmNavigation();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("unsaved_changes_warning")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {unsavedChangesMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
+            <AlertDialogAction onClick={cancelNavigation}>
+              {t("stay")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Recipe Link Dropdown */}
       <RecipeLinkDropdown
@@ -964,7 +438,7 @@ const RecipeForm = ({
         onSelectRecipe={handleSelectRecipe}
         currentRecipeId={initialRecipe?.id}
       />
-    </div>
+    </>
   );
 };
 

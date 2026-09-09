@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 
-export const useScrollRestoration = (ready = true) => {
+export const useScrollRestoration = (scrollRef, ready = true) => {
   const location = useLocation();
   const navigationType = useNavigationType();
 
   // Save scroll position whenever the user scrolls
   useEffect(() => {
-    const el = document.getElementById("main-content");
+    const el = scrollRef?.current;
     if (!el) return;
 
     const handleScroll = () => {
@@ -16,12 +16,12 @@ export const useScrollRestoration = (ready = true) => {
 
     el.addEventListener("scroll", handleScroll, { passive: true });
     return () => el.removeEventListener("scroll", handleScroll);
-  }, [location.key]);
+  }, [location.key, scrollRef]);
 
   // Restore scroll only once content is ready
   useEffect(() => {
     if (!ready) return;
-    const el = document.getElementById("main-content");
+    const el = scrollRef?.current;
     if (!el) return;
 
     if (navigationType === "POP") {
@@ -30,5 +30,5 @@ export const useScrollRestoration = (ready = true) => {
     } else {
       el.scrollTo(0, 0);
     }
-  }, [ready, location.key, navigationType]);
+  }, [ready, location.key, navigationType, scrollRef]);
 };

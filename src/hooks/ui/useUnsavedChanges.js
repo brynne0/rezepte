@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useCallback } from "react";
+import { useBlocker } from "react-router-dom";
 
 export const useUnsavedChanges = (hasUnsavedChanges, message) => {
-  const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState(null);
-  const originalNavigate = useRef(navigate);
+  const blocker = useBlocker(
+    useCallback(
+      ({ currentLocation, nextLocation }) =>
+        hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname,
+      [hasUnsavedChanges]
+    )
+  );
 
   // Handle browser navigation (back button, refresh, closing tab)
   useEffect(() => {
@@ -21,37 +24,22 @@ export const useUnsavedChanges = (hasUnsavedChanges, message) => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges, message]);
 
-  // Custom navigate function that shows confirmation dialog
-  const navigateWithConfirmation = useCallback(
-    (to, options = {}) => {
-      if (hasUnsavedChanges && !options.replace) {
-        setPendingNavigation({ to, options });
-        setIsModalOpen(true);
-      } else {
-        originalNavigate.current(to, options);
-      }
-    },
-    [hasUnsavedChanges]
-  );
-
-  const handleConfirmNavigation = useCallback(() => {
-    if (pendingNavigation) {
-      originalNavigate.current(pendingNavigation.to, pendingNavigation.options);
-      setPendingNavigation(null);
+  const confirmNavigation = useCallback(() => {
+    if (blocker.state === "blocked") {
+      blocker.proceed();
     }
-    setIsModalOpen(false);
-  }, [pendingNavigation]);
+  }, [blocker]);
 
-  const handleCancelNavigation = useCallback(() => {
-    setPendingNavigation(null);
-    setIsModalOpen(false);
-  }, []);
+  const cancelNavigation = useCallback(() => {
+    if (blocker.state === "blocked") {
+      blocker.reset();
+    }
+  }, [blocker]);
 
   return {
-    isModalOpen,
-    navigate: navigateWithConfirmation,
-    confirmNavigation: handleConfirmNavigation,
-    cancelNavigation: handleCancelNavigation,
+    isModalOpen: blocker.state === "blocked",
+    confirmNavigation,
+    cancelNavigation,
     message,
   };
 };

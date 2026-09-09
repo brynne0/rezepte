@@ -21,7 +21,7 @@ export const useTheme = () => {
     } catch {
       // localStorage not available (private browsing, file:// protocol, etc.)
     }
-    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.classList.toggle("dark", theme === "dark");
 
     // Update theme-color meta tag for mobile browsers
     const updateThemeColor = () => {

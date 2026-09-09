@@ -41,6 +41,7 @@ export const useRecipeForm = (options) => {
     initialRecipe: options.initialRecipe,
     isEditingTranslation: options.isEditingTranslation,
     validateForm: validation.validateForm,
+    setInitialFormData: formState.setInitialFormData,
   });
 
   // Combine all functionality

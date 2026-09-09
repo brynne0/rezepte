@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CategoriesTab from "./CategoriesTab";
 
+const { mockToastAdd } = vi.hoisted(() => ({ mockToastAdd: vi.fn() }));
+
+vi.mock("@/components/ui/toast", () => ({
+  toast: { add: mockToastAdd },
+}));
+
 // Mock supabase
 vi.mock("../../lib/supabase", () => ({
   default: {
@@ -28,23 +34,6 @@ vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
-vi.mock("../../components/ConfirmationModal/ConfirmationModal", () => ({
-  default: function ConfirmationModal({ isOpen, onClose, onConfirm, message }) {
-    if (!isOpen) return null;
-    return (
-      <div data-testid="confirmation-modal">
-        <p>{message}</p>
-        <button onClick={onClose} data-testid="modal-cancel">
-          Cancel
-        </button>
-        <button onClick={onConfirm} data-testid="modal-confirm">
-          Confirm
-        </button>
-      </div>
-    );
-  },
-}));
-
 // Mock i18next
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -69,8 +58,6 @@ describe("CategoriesTab - Adding Categories", () => {
 
   const mockProps = {
     t: (key) => key,
-    saveMessage: "",
-    setSaveMessage: vi.fn(),
     onUnsavedChangesChange: vi.fn(),
     refreshCategories: vi.fn(),
     resetCategoryFilter: vi.fn(),
@@ -94,6 +81,22 @@ describe("CategoriesTab - Adding Categories", () => {
       order: 1,
     },
   ];
+
+  // Renders the tab and enters editing mode so the add/edit/reorder controls
+  // (gated behind the "edit_categories" button) are available.
+  const renderInEditMode = async () => {
+    render(<CategoriesTab {...mockProps} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("edit_categories")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("edit_categories"));
+
+    await waitFor(() => {
+      expect(screen.getByText("add_category")).toBeInTheDocument();
+    });
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -127,34 +130,36 @@ describe("CategoriesTab - Adding Categories", () => {
     mockSupabase.from.mockReturnValue(mockQuery);
   });
 
-  describe("Add Category Button", () => {
-    it("renders add category button", async () => {
+  describe("Edit Categories Button", () => {
+    it("does not show management controls until edit mode is entered", async () => {
       render(<CategoriesTab {...mockProps} />);
 
       await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
+        expect(screen.getByText("edit_categories")).toBeInTheDocument();
       });
+
+      expect(screen.queryByText("add_category")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Add Category Button", () => {
+    it("renders add category button", async () => {
+      await renderInEditMode();
+
+      expect(screen.getByText("add_category")).toBeInTheDocument();
     });
 
     it("shows temporary category input when add button is clicked", async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       fireEvent.click(screen.getByText("add_category"));
 
       expect(screen.getByPlaceholderText("category_name")).toBeInTheDocument();
-      expect(screen.queryByText("add_category")).not.toBeInTheDocument();
+      expect(screen.getByText("add_category")).toBeDisabled();
     });
 
     it("focuses input field when adding new category", async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       fireEvent.click(screen.getByText("add_category"));
 
@@ -165,11 +170,7 @@ describe("CategoriesTab - Adding Categories", () => {
 
   describe("Category Input Validation", () => {
     beforeEach(async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       fireEvent.click(screen.getByText("add_category"));
     });
@@ -234,11 +235,7 @@ describe("CategoriesTab - Adding Categories", () => {
       };
       mockSupabase.from.mockReturnValue(mockQuery);
 
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       fireEvent.click(screen.getByText("add_category"));
 
@@ -258,11 +255,7 @@ describe("CategoriesTab - Adding Categories", () => {
     });
 
     it("creates new temporary category when not found in database", async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       fireEvent.click(screen.getByText("add_category"));
 
@@ -283,11 +276,7 @@ describe("CategoriesTab - Adding Categories", () => {
 
   describe("Category Management Actions", () => {
     beforeEach(async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       fireEvent.click(screen.getByText("add_category"));
     });
@@ -310,7 +299,9 @@ describe("CategoriesTab - Adding Categories", () => {
       const input = screen.getByPlaceholderText("category_name");
       fireEvent.change(input, { target: { value: "Breakfast" } });
 
-      const cancelButton = screen.getByRole("button", { name: "cancel" });
+      // The always-visible bottom "Cancel" button also matches this
+      // accessible name, so grab the row-level one (appears first).
+      const [cancelButton] = screen.getAllByRole("button", { name: "cancel" });
       fireEvent.click(cancelButton);
 
       expect(
@@ -343,11 +334,7 @@ describe("CategoriesTab - Adding Categories", () => {
 
   describe("Multiple Category Addition", () => {
     it("can add multiple categories in one session", async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       // Add first category
       fireEvent.click(screen.getByText("add_category"));
@@ -373,11 +360,7 @@ describe("CategoriesTab - Adding Categories", () => {
     });
 
     it("prevents duplicate categories in same session", async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       // Add first category
       fireEvent.click(screen.getByText("add_category"));
@@ -405,11 +388,7 @@ describe("CategoriesTab - Adding Categories", () => {
 
   describe("Category Persistence", () => {
     it("creates categories in database when preferences are saved", async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       // Add a new category
       fireEvent.click(screen.getByText("add_category"));
@@ -439,11 +418,7 @@ describe("CategoriesTab - Adding Categories", () => {
     });
 
     it("shows success message after saving", async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       // Add and save category
       fireEvent.click(screen.getByText("add_category"));
@@ -460,20 +435,17 @@ describe("CategoriesTab - Adding Categories", () => {
 
       await waitFor(() => {
         expect(mockCreateCategory).toHaveBeenCalled();
-        expect(mockProps.setSaveMessage).toHaveBeenCalledWith(
-          "category_preferences_saved"
-        );
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "category_preferences_saved",
+          type: "success",
+        });
       });
     });
 
     it("handles creation errors gracefully", async () => {
       mockCreateCategory.mockRejectedValue(new Error("Database error"));
 
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       // Add a category
       fireEvent.click(screen.getByText("add_category"));
@@ -490,20 +462,17 @@ describe("CategoriesTab - Adding Categories", () => {
       fireEvent.click(savePrefsButton);
 
       await waitFor(() => {
-        expect(mockProps.setSaveMessage).toHaveBeenCalledWith(
-          "category_preferences_error"
-        );
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "category_preferences_error",
+          type: "error",
+        });
       });
     });
   });
 
   describe("UI State Management", () => {
     it("notifies parent of unsaved changes when adding category", async () => {
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       // Initially no unsaved changes
       expect(mockProps.onUnsavedChangesChange).toHaveBeenCalledWith(false);
@@ -519,11 +488,7 @@ describe("CategoriesTab - Adding Categories", () => {
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
 
-      render(<CategoriesTab {...mockProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText("add_category")).toBeInTheDocument();
-      });
+      await renderInEditMode();
 
       // Add category and save preferences
       fireEvent.click(screen.getByText("add_category"));

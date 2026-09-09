@@ -19,6 +19,20 @@ export const signUp = async (email, first_name, username, password) => {
   return { data, error };
 };
 
+export const resendConfirmationEmail = async (email) => {
+  try {
+    const { data, error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+
+    return { data, error };
+  } catch (err) {
+    console.error("Resend confirmation email error:", err);
+    return { error: err };
+  }
+};
+
 export const signIn = async (usernameOrEmail, password) => {
   try {
     // Check if input is an email
@@ -179,6 +193,33 @@ export const changePassword = async (new_password) => {
     return { data, error };
   } catch (err) {
     console.error("Change password service exception:", err);
+    return { error: err };
+  }
+};
+
+export const changeEmail = async (new_email) => {
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("No authenticated user found");
+      return { error: { message: "No authenticated user" } };
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      email: new_email,
+    });
+
+    if (error) {
+      console.error("Supabase updateUser error:", error);
+    }
+
+    return { data, error };
+  } catch (err) {
+    console.error("Change email service exception:", err);
     return { error: err };
   }
 };

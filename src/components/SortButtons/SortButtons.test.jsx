@@ -35,8 +35,8 @@ describe("SortButtons Component", () => {
     const recentButton = screen.getByLabelText("sort_by_recently_used");
     const titleButton = screen.getByLabelText("sort_by_title");
 
-    expect(recentButton).toHaveClass("selected");
-    expect(titleButton).not.toHaveClass("selected");
+    expect(recentButton).toHaveAttribute("aria-pressed", "true");
+    expect(titleButton).toHaveAttribute("aria-pressed", "false");
   });
 
   test("shows correct active state for title sorting", () => {
@@ -45,8 +45,8 @@ describe("SortButtons Component", () => {
     const titleButton = screen.getByLabelText("sort_by_title");
     const recentButton = screen.getByLabelText("sort_by_recently_used");
 
-    expect(titleButton).toHaveClass("selected");
-    expect(recentButton).not.toHaveClass("selected");
+    expect(titleButton).toHaveAttribute("aria-pressed", "true");
+    expect(recentButton).toHaveAttribute("aria-pressed", "false");
   });
 
   test("handles title sort click - from unselected to asc", () => {
@@ -141,25 +141,77 @@ describe("SortButtons Component", () => {
     const titleButton = screen.getByLabelText("sort_by_title");
     const recentButton = screen.getByLabelText("sort_by_recently_used");
 
-    expect(titleButton).toHaveAttribute("title", "sort_by_title");
     expect(titleButton).toHaveAttribute("aria-label", "sort_by_title");
-    expect(recentButton).toHaveAttribute("title", "sort_by_recently_used");
     expect(recentButton).toHaveAttribute("aria-label", "sort_by_recently_used");
   });
 
-  test("buttons have correct CSS classes", () => {
-    render(<SortButtons {...defaultProps} sortBy="title_asc" />);
+  test("calls onPageReset when title sort is clicked", () => {
+    const mockOnPageReset = vi.fn();
+    render(<SortButtons {...defaultProps} onPageReset={mockOnPageReset} />);
 
-    const titleButton = screen.getByLabelText("sort_by_title");
-    const recentButton = screen.getByLabelText("sort_by_recently_used");
+    fireEvent.click(screen.getByLabelText("sort_by_title"));
 
-    expect(titleButton).toHaveClass(
-      "btn-unstyled",
-      "btn-icon-neutral",
-      "selected"
+    expect(mockOnPageReset).toHaveBeenCalledTimes(1);
+  });
+
+  test("calls onPageReset when recent sort is clicked", () => {
+    const mockOnPageReset = vi.fn();
+    render(<SortButtons {...defaultProps} onPageReset={mockOnPageReset} />);
+
+    fireEvent.click(screen.getByLabelText("sort_by_recently_used"));
+
+    expect(mockOnPageReset).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not throw when onPageReset is not provided", () => {
+    render(<SortButtons {...defaultProps} />);
+
+    expect(() =>
+      fireEvent.click(screen.getByLabelText("sort_by_title"))
+    ).not.toThrow();
+  });
+
+  test("renders the show images toggle when logged in", () => {
+    render(
+      <SortButtons {...defaultProps} isLoggedIn={true} showImages={true} />
     );
-    expect(recentButton).toHaveClass("btn-unstyled", "btn-icon-neutral");
-    expect(recentButton).not.toHaveClass("selected");
+
+    expect(screen.getByLabelText("hide_images")).toBeInTheDocument();
+  });
+
+  test("shows correct label and pressed state when images are shown", () => {
+    render(
+      <SortButtons {...defaultProps} isLoggedIn={true} showImages={true} />
+    );
+
+    const imageToggle = screen.getByLabelText("hide_images");
+    expect(imageToggle).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("shows correct label and pressed state when images are hidden", () => {
+    render(
+      <SortButtons {...defaultProps} isLoggedIn={true} showImages={false} />
+    );
+
+    const imageToggle = screen.getByLabelText("show_images");
+    expect(imageToggle).toHaveAttribute("aria-pressed", "false");
+  });
+
+  test("calls onShowImagesChange when the image toggle is clicked", () => {
+    const mockOnShowImagesChange = vi.fn();
+    render(
+      <SortButtons
+        {...defaultProps}
+        isLoggedIn={true}
+        showImages={false}
+        onShowImagesChange={mockOnShowImagesChange}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText("show_images"));
+
+    expect(mockOnShowImagesChange).toHaveBeenCalledTimes(1);
+    expect(mockOnShowImagesChange.mock.calls[0][0]).toBe(true);
   });
 
   test("translation function is called with correct keys", () => {
