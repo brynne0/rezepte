@@ -194,7 +194,7 @@ function Layout() {
       )}
       <ScrollArea
         className="min-h-0 flex-1"
-        viewportClassName="pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-[calc(2rem+env(safe-area-inset-bottom))]"
+        viewportClassName="pb-6 md:pb-8"
         viewportRef={mainScrollRef}
       >
         <div className="mx-auto w-full max-w-7xl px-3 pt-3 md:px-8 md:pt-4">

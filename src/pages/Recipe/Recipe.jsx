@@ -108,10 +108,6 @@ const Recipe = () => {
   const isOwner = !!user?.id && recipe?.user_id === user?.id;
   const isPrivate = privateOverride ?? recipe?.private ?? false;
 
-  // Generate signed URLs for recipe images — only for the owner.
-  // Friends cannot generate signed URLs for another user's storage bucket path.
-  const { signedImages } = useSignedImageUrls(isOwner ? recipe?.images : []);
-
   // When viewing a friend's recipe, show the "viewing a friend" banner in
   // Header (fetching their profile for the name pill); hide it for your own.
   const showFriendBar = !!recipe && !isOwner;
@@ -121,6 +117,12 @@ const Recipe = () => {
     enabled: showFriendBar,
   });
 
+  // Show images for the owner, or for a friend who has image sharing enabled.
+  const canViewImages = isOwner || !!friendProfile?.friends_can_view_images;
+  const { signedImages } = useSignedImageUrls(
+    canViewImages ? recipe?.images : []
+  );
+
   useEffect(() => {
     if (!showFriendBar) {
       setFriendBar(null);
@@ -129,6 +131,7 @@ const Recipe = () => {
     setFriendBar({
       name: friendProfile?.first_name || null,
       loading: friendProfileLoading,
+      hideBack: true,
     });
     return () => setFriendBar(null);
   }, [showFriendBar, friendProfile, friendProfileLoading, setFriendBar]);
@@ -305,89 +308,105 @@ const Recipe = () => {
     <>
       <Card size="lg" className="mx-auto max-w-3xl text-left">
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="shrink-0"
-              onClick={() => navigate(-1)}
-              aria-label={t("go_back")}
-            >
-              <ArrowLeft />
-            </Button>
+          <div
+            className={
+              isOwner
+                ? "flex flex-col gap-4 md:gap-2"
+                : "flex items-center gap-2"
+            }
+          >
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0"
+                onClick={() => navigate(-1)}
+                aria-label={t("go_back")}
+              >
+                <ArrowLeft />
+              </Button>
 
-            <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
-              {recipe.title}
-            </CardTitle>
+              {!isOwner && (
+                <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+                  {recipe.title}
+                </CardTitle>
+              )}
+
+              {isOwner && (
+                <ButtonGroup className="ml-auto shrink-0">
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="dashed"
+                          size="icon-lg"
+                          onClick={() =>
+                            navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                          }
+                          data-testid="edit-recipe-btn"
+                          aria-label={t("edit_recipe")}
+                        >
+                          <Pencil />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>{t("edit_recipe")}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="dashed"
+                          size="icon-lg"
+                          onClick={handleShare}
+                          data-testid="share-recipe-btn"
+                          aria-label={t("copy_recipe")}
+                        >
+                          <Copy />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>{t("copy_recipe")}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="dashed"
+                          size="icon-lg"
+                          onClick={handleTogglePrivate}
+                          data-testid="toggle-private-btn"
+                          aria-label={
+                            isPrivate
+                              ? t("make_recipe_visible_to_friends")
+                              : t("make_recipe_private")
+                          }
+                        >
+                          {isPrivate ? <Lock /> : <LockOpen />}
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>
+                      {isPrivate
+                        ? t("make_recipe_visible_to_friends")
+                        : t("make_recipe_private")}
+                    </TooltipContent>
+                  </Tooltip>
+                </ButtonGroup>
+              )}
+            </div>
 
             {isOwner && (
-              <ButtonGroup className="shrink-0">
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="dashed"
-                        size="icon-lg"
-                        onClick={() =>
-                          navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
-                        }
-                        data-testid="edit-recipe-btn"
-                        aria-label={t("edit_recipe")}
-                      >
-                        <Pencil />
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>{t("edit_recipe")}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="dashed"
-                        size="icon-lg"
-                        onClick={handleShare}
-                        data-testid="share-recipe-btn"
-                        aria-label={t("copy_recipe")}
-                      >
-                        <Copy />
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>{t("copy_recipe")}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="dashed"
-                        size="icon-lg"
-                        onClick={handleTogglePrivate}
-                        data-testid="toggle-private-btn"
-                        aria-label={
-                          isPrivate
-                            ? t("make_recipe_visible_to_friends")
-                            : t("make_recipe_private")
-                        }
-                      >
-                        {isPrivate ? <Lock /> : <LockOpen />}
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>
-                    {isPrivate
-                      ? t("make_recipe_visible_to_friends")
-                      : t("make_recipe_private")}
-                  </TooltipContent>
-                </Tooltip>
-              </ButtonGroup>
+              <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+                {recipe.title}
+              </CardTitle>
             )}
           </div>
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
           {/* Recipe Images - floating within content - only show when logged in */}
-          {isOwner && signedImages && signedImages.length > 0 && (
+          {canViewImages && signedImages && signedImages.length > 0 && (
             <ImageGallery images={signedImages} />
           )}
 

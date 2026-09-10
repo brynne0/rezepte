@@ -76,14 +76,12 @@ export const useRecipeForm = (options) => {
     handleIngredientLink: ingredients.handleIngredientLink,
     removeIngredientLink: ingredients.removeIngredientLink,
     getIngredientLink: ingredients.getIngredientLink,
-    handleIngredientFieldEnter: ingredients.handleIngredientFieldEnter,
     handleDragEnd: ingredients.handleDragEnd,
 
     // Instructions
     handleInstructionChange: instructions.handleInstructionChange,
     addInstruction: instructions.addInstruction,
     removeInstruction: instructions.removeInstruction,
-    handleEnter: instructions.handleEnter,
 
     // Actions
     handleImagesChange: actions.handleImagesChange,

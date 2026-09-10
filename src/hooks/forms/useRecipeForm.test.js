@@ -1,27 +1,6 @@
 import { describe, test, expect } from "vitest";
 
 describe("useRecipeForm - Ingredient Field Navigation Logic", () => {
-  test("handleIngredientFieldEnter function logic - field navigation order", () => {
-    // Test the field order logic that would be used in the actual function
-    const fieldOrder = ["name", "quantity", "unit", "notes"];
-
-    // Test each field transition
-    fieldOrder.forEach((field, index) => {
-      const currentIndex = fieldOrder.indexOf(field);
-
-      if (currentIndex < fieldOrder.length - 1) {
-        const expectedNextField = fieldOrder[currentIndex + 1];
-        const actualNextField = fieldOrder[index + 1];
-
-        expect(actualNextField).toBe(expectedNextField);
-      }
-    });
-
-    // Test last field behavior (should not have a next field)
-    const lastFieldIndex = fieldOrder.indexOf("notes");
-    expect(lastFieldIndex).toBe(fieldOrder.length - 1);
-  });
-
   test("ingredient field ID generation logic", () => {
     // Test ungrouped ingredient ID format
     const ungroupedId = (field, index, tempId) =>

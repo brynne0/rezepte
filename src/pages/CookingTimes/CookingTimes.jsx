@@ -83,6 +83,7 @@ const CookingTimes = ({
     saveAllChanges,
     handleCookingTimeFieldEnter,
     handleDragEnd,
+    isSaving,
   } = useEditCookingTimes({
     isEditMode,
     formData,
@@ -242,7 +243,7 @@ const CookingTimes = ({
           </div>
         ) : activeTab === "conversions" ? (
           <ConversionsTab />
-        ) : !hasAnyItems ? (
+        ) : !hasAnyItems && !isEditMode ? (
           <Empty>
             <EmptyHeader>
               <EmptyMedia>
@@ -275,7 +276,7 @@ const CookingTimes = ({
                 }}
               >
                 <Plus size={16} />
-                {t("add_first_cooking_time")}
+                {t("add_cooking_time")}
               </Button>
             </EmptyContent>
           </Empty>
@@ -300,6 +301,7 @@ const CookingTimes = ({
             removeCookingTime={removeCookingTime}
             handleCancelEdit={handleCancelEdit}
             handleSaveEdit={handleSaveEdit}
+            isSaving={isSaving}
             showExitEditModeModal={showExitEditModeModal}
             handleConfirmExitEditMode={handleConfirmExitEditMode}
             handleCancelExitEditMode={handleCancelExitEditMode}

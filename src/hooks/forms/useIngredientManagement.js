@@ -111,30 +111,32 @@ export const useIngredientManagement = ({
         }));
       }
 
-      // Focus on the new ingredient name input
-      setTimeout(() => {
-        if (sectionId === "ungrouped") {
-          // Focus on the last ungrouped ingredient
-          const ungroupedInputs = document.querySelectorAll(
-            '[id^="ingredient-name-ungrouped-"]'
-          );
-          if (ungroupedInputs.length > 0) {
-            const lastInput = ungroupedInputs[ungroupedInputs.length - 1];
-            lastInput.focus();
-            lastInput.click();
+      // Wait for the new row to actually paint before focusing it.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (sectionId === "ungrouped") {
+            // Focus on the last ungrouped ingredient
+            const ungroupedInputs = document.querySelectorAll(
+              '[id^="ingredient-name-ungrouped-"]'
+            );
+            if (ungroupedInputs.length > 0) {
+              const lastInput = ungroupedInputs[ungroupedInputs.length - 1];
+              lastInput.focus();
+              lastInput.click();
+            }
+          } else {
+            // Focus on the last ingredient in the specific section
+            const sectionInputs = document.querySelectorAll(
+              `[id^="ingredient-name-${sectionId}-"]`
+            );
+            if (sectionInputs.length > 0) {
+              const lastInput = sectionInputs[sectionInputs.length - 1];
+              lastInput.focus();
+              lastInput.click();
+            }
           }
-        } else {
-          // Focus on the last ingredient in the specific section
-          const sectionInputs = document.querySelectorAll(
-            `[id^="ingredient-name-${sectionId}-"]`
-          );
-          if (sectionInputs.length > 0) {
-            const lastInput = sectionInputs[sectionInputs.length - 1];
-            lastInput.focus();
-            lastInput.click();
-          }
-        }
-      }, 10);
+        });
+      });
     },
     [setFormData, generateUniqueId]
   );
@@ -258,59 +260,6 @@ export const useIngredientManagement = ({
       return result;
     },
     [formData.ingredientLinks]
-  );
-
-  // Handle keyboard navigation between ingredient fields
-  const handleIngredientFieldEnter = useCallback(
-    (e, currentField, sectionId, tempId, index) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-
-        const fieldOrder = ["name", "quantity", "unit", "notes"];
-        const currentFieldIndex = fieldOrder.indexOf(currentField);
-        const nextFieldIndex = currentFieldIndex + 1;
-
-        if (nextFieldIndex < fieldOrder.length) {
-          // Move to next field in same ingredient
-          const nextField = fieldOrder[nextFieldIndex];
-          const nextInput = document.getElementById(
-            `ingredient-${nextField}-${sectionId}-${index}-${tempId}`
-          );
-          if (nextInput) {
-            nextInput.focus();
-            nextInput.click();
-          }
-        } else {
-          // Move to first field of next ingredient or create new one
-          const nextIndex = index + 1;
-          let nextIngredientInput;
-
-          if (sectionId === "ungrouped") {
-            nextIngredientInput = document.getElementById(
-              `ingredient-name-ungrouped-${nextIndex}-${formData.ungroupedIngredients[nextIndex]?.tempId}`
-            );
-          } else {
-            const section = formData.ingredientSections.find(
-              (s) => s.id === sectionId
-            );
-            if (section && section.ingredients[nextIndex]) {
-              nextIngredientInput = document.getElementById(
-                `ingredient-name-${sectionId}-${nextIndex}-${section.ingredients[nextIndex].tempId}`
-              );
-            }
-          }
-
-          if (nextIngredientInput) {
-            nextIngredientInput.focus();
-            nextIngredientInput.click();
-          } else {
-            // No next ingredient, add a new one
-            addIngredient(sectionId);
-          }
-        }
-      }
-    },
-    [formData, addIngredient]
   );
 
   // Handle drag and drop reordering
@@ -457,7 +406,6 @@ export const useIngredientManagement = ({
     handleIngredientLink,
     removeIngredientLink,
     getIngredientLink,
-    handleIngredientFieldEnter,
     handleDragEnd,
   };
 };
