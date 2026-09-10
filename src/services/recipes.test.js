@@ -1,270 +1,451 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 
-// Mock pluralize
-const mockPluralize = {
-  isPlural: vi.fn(),
-};
-
-vi.mock("pluralize", () => ({
-  default: mockPluralize,
+vi.mock("./translationService", () => ({
+  updateRecipeTranslations: vi.fn(),
 }));
 
-// Mock the translation function (DeepL service)
-const mockTranslateText = vi.fn();
+vi.mock("./imageService", () => ({
+  uploadLocalImages: vi.fn(),
+  cleanupOrphanedImages: vi.fn(),
+}));
 
-// Mock Supabase for the translation function
 vi.mock("../lib/supabase", () => ({
   default: {
-    functions: {
-      invoke: vi.fn(),
-    },
+    auth: { getUser: vi.fn() },
+    from: vi.fn(),
+    functions: { invoke: vi.fn() },
   },
 }));
 
+import {
+  fetchRecipes,
+  fetchRecipesPaginated,
+  checkRecipeTitleExists,
+  fetchRecipe,
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+} from "./recipes";
 import supabase from "../lib/supabase";
+import { uploadLocalImages } from "./imageService";
 
-describe("German Pluralization Logic", () => {
+// Supabase's real query builder is itself thenable, so `await` resolves at
+// any point in the chain. Every chain method returns the same builder, and
+// the builder resolves to `result` when awaited or terminated with
+// `.single()`.
+const makeQueryBuilder = (result) => {
+  const builder = {};
+  [
+    "select",
+    "insert",
+    "update",
+    "delete",
+    "eq",
+    "neq",
+    "ilike",
+    "order",
+    "range",
+  ].forEach((method) => {
+    builder[method] = vi.fn(() => builder);
+  });
+  builder.single = vi.fn(() => Promise.resolve(result));
+  builder.then = (resolve, reject) =>
+    Promise.resolve(result).then(resolve, reject);
+  return builder;
+};
+
+const currentUser = { id: "u1" };
+
+describe("recipes service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    supabase.auth.getUser.mockResolvedValue({ data: { user: currentUser } });
   });
 
-  // Test the core logic by replicating it in a test function
-  const testDetermineIngredientPlurality = async (
-    inputName,
-    language = "en"
-  ) => {
-    if (!inputName) {
-      return false;
-    }
+  describe("fetchRecipes", () => {
+    test("returns an empty array when there is no logged-in user", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
 
-    const trimmedName = inputName.trim().toLowerCase();
+      expect(await fetchRecipes()).toEqual([]);
+    });
 
-    // If it's English, test directly
-    if (language === "en") {
-      return mockPluralize.isPlural(trimmedName);
-    }
-
-    // For other languages, translate to English first then test plurality
-    try {
-      const translatedToEnglish = await mockTranslateText(
-        trimmedName,
-        "en",
-        language
+    test("returns the current user's recipes", async () => {
+      const recipes = [{ id: "r1", title: "Chili" }];
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: recipes, error: null })
       );
-      return mockPluralize.isPlural(translatedToEnglish.toLowerCase());
-    } catch (error) {
-      console.error("Failed to translate for plurality check:", error);
-      return false;
-    }
-  };
 
-  // Mock the translate function
-  beforeEach(() => {
-    mockTranslateText.mockImplementation(
-      async (text, targetLang, sourceLang) => {
-        if (sourceLang === "de" && targetLang === "en") {
-          const translations = {
-            äpfel: "apples",
-            zucker: "sugar",
-            tomaten: "tomatoes",
-            kartoffeln: "potatoes",
-            apfel: "apple",
-          };
-          return translations[text.toLowerCase()] || text;
-        }
-        return text;
-      }
-    );
-  });
-
-  test("detects English plural ingredients correctly", async () => {
-    // Mock pluralize for English words
-    mockPluralize.isPlural.mockImplementation((word) => {
-      const plurals = ["apples", "tomatoes", "potatoes", "carrots"];
-      return plurals.includes(word.toLowerCase());
+      expect(await fetchRecipes()).toEqual(recipes);
     });
 
-    // Test English plurals
-    expect(await testDetermineIngredientPlurality("apples", "en")).toBe(true);
-    expect(await testDetermineIngredientPlurality("tomatoes", "en")).toBe(true);
+    test("throws when the query fails", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: null, error: new Error("db down") })
+      );
 
-    // Test English singulars
-    expect(await testDetermineIngredientPlurality("sugar", "en")).toBe(false);
-    expect(await testDetermineIngredientPlurality("flour", "en")).toBe(false);
-
-    // Verify pluralize.isPlural was called with correct arguments
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("apples");
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("tomatoes");
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("sugar");
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("flour");
+      await expect(fetchRecipes()).rejects.toThrow("db down");
+    });
   });
 
-  test("translates German ingredients to English for pluralization detection", async () => {
-    // Mock pluralize for translated English words
-    mockPluralize.isPlural.mockImplementation((word) => {
-      const plurals = ["apples", "tomatoes", "potatoes"];
-      return plurals.includes(word.toLowerCase());
+  describe("fetchRecipesPaginated", () => {
+    test("returns an empty page when there is no logged-in user", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+
+      expect(await fetchRecipesPaginated(1, 12)).toEqual({
+        recipes: [],
+        totalCount: 0,
+        totalPages: 0,
+        currentPage: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+      });
     });
 
-    // Test German plurals -> English plurals -> detected as plural
-    expect(await testDetermineIngredientPlurality("Äpfel", "de")).toBe(true);
-    expect(await testDetermineIngredientPlurality("Tomaten", "de")).toBe(true);
+    test("computes pagination info from the total count", async () => {
+      const builder = makeQueryBuilder({
+        data: [{ id: "r1" }, { id: "r2" }],
+        error: null,
+        count: 25,
+      });
+      supabase.from.mockReturnValueOnce(builder);
 
-    // Test German singulars -> English singulars -> detected as singular
-    expect(await testDetermineIngredientPlurality("Zucker", "de")).toBe(false);
-    expect(await testDetermineIngredientPlurality("Apfel", "de")).toBe(false);
+      const result = await fetchRecipesPaginated(2, 12);
 
-    // Verify translation was called with correct arguments
-    expect(mockTranslateText).toHaveBeenCalledWith("äpfel", "en", "de");
-    expect(mockTranslateText).toHaveBeenCalledWith("tomaten", "en", "de");
-    expect(mockTranslateText).toHaveBeenCalledWith("zucker", "en", "de");
-    expect(mockTranslateText).toHaveBeenCalledWith("apfel", "en", "de");
-
-    // Verify pluralize was called on translated English words
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("apples");
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("tomatoes");
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("sugar");
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("apple");
-  });
-
-  test("falls back to singular when German translation fails", async () => {
-    // Mock translation failure
-    mockTranslateText.mockRejectedValueOnce(
-      new Error("Translation API failed")
-    );
-
-    const result = await testDetermineIngredientPlurality(
-      "UnbekanntesWort",
-      "de"
-    );
-
-    // Should return false (singular) when translation fails
-    expect(result).toBe(false);
-
-    // Verify translation was attempted (should be lowercase)
-    expect(mockTranslateText).toHaveBeenCalledWith(
-      "unbekannteswort",
-      "en",
-      "de"
-    );
-
-    // Should NOT call pluralize.isPlural due to translation failure
-    expect(mockPluralize.isPlural).not.toHaveBeenCalled();
-  });
-
-  test("handles empty or null ingredient names", async () => {
-    expect(await testDetermineIngredientPlurality("", "en")).toBe(false);
-    expect(await testDetermineIngredientPlurality(null, "en")).toBe(false);
-    expect(await testDetermineIngredientPlurality(undefined, "de")).toBe(false);
-
-    // Should not call any external functions for empty/null inputs
-    expect(mockPluralize.isPlural).not.toHaveBeenCalled();
-    expect(mockTranslateText).not.toHaveBeenCalled();
-  });
-
-  test("handles whitespace in ingredient names", async () => {
-    mockPluralize.isPlural.mockReturnValue(true);
-
-    // Test that whitespace is properly trimmed
-    await testDetermineIngredientPlurality("  apples  ", "en");
-
-    // Verify trimmed and lowercased name was passed to pluralize
-    expect(mockPluralize.isPlural).toHaveBeenCalledWith("apples");
-  });
-
-  test("correctly handles case-insensitive German translations", async () => {
-    mockPluralize.isPlural.mockReturnValue(true);
-
-    // Test different cases of German words
-    await testDetermineIngredientPlurality("ÄPFEL", "de");
-    await testDetermineIngredientPlurality("äpfel", "de");
-    await testDetermineIngredientPlurality("Äpfel", "de");
-
-    // All should be translated with lowercase
-    expect(mockTranslateText).toHaveBeenCalledWith("äpfel", "en", "de");
-    expect(mockTranslateText).toHaveBeenCalledTimes(3);
-  });
-});
-
-// Test the actual integration with the translation service
-describe("Translation Service Integration", () => {
-  test("uses Supabase edge function for translation", async () => {
-    const mockInvoke = supabase.functions.invoke;
-
-    // Mock successful translation response
-    mockInvoke.mockResolvedValue({
-      data: { translatedText: "apples" },
-      error: null,
+      expect(result).toMatchObject({
+        totalCount: 25,
+        totalPages: 3,
+        currentPage: 2,
+        hasNextPage: true,
+        hasPrevPage: true,
+      });
     });
 
-    mockPluralize.isPlural.mockReturnValue(true);
+    test("filters by category and search term when given", async () => {
+      const builder = makeQueryBuilder({ data: [], error: null, count: 0 });
+      supabase.from.mockReturnValueOnce(builder);
 
-    // Simulate the translation logic from recipes.js
-    const translateText = async (
-      text,
-      targetLanguage,
-      sourceLanguage = null
-    ) => {
-      const { data, error } = await supabase.functions.invoke("translate", {
-        body: {
-          text: text.trim(),
-          target_lang: targetLanguage.toUpperCase(),
-          source_lang: sourceLanguage ? sourceLanguage.toUpperCase() : null,
-        },
+      await fetchRecipesPaginated(1, 12, {
+        category: "Dinner",
+        searchTerm: "chili",
       });
 
-      if (error) {
-        return text;
-      }
+      expect(builder.eq).toHaveBeenCalledWith("category", "Dinner");
+      expect(builder.ilike).toHaveBeenCalledWith("title", "%chili%");
+    });
 
-      return data?.translatedText || text;
-    };
+    test("throws when the query fails", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: null, error: new Error("db down") })
+      );
 
-    const result = await translateText("äpfel", "en", "de");
-
-    expect(result).toBe("apples");
-    expect(mockInvoke).toHaveBeenCalledWith("translate", {
-      body: {
-        text: "äpfel",
-        target_lang: "EN",
-        source_lang: "DE",
-      },
+      await expect(fetchRecipesPaginated()).rejects.toThrow("db down");
     });
   });
 
-  test("handles translation service errors gracefully", async () => {
-    const mockInvoke = supabase.functions.invoke;
+  describe("checkRecipeTitleExists", () => {
+    test("throws when there is no logged-in user", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
 
-    // Mock translation service error
-    mockInvoke.mockResolvedValue({
-      data: null,
-      error: { message: "Translation service unavailable" },
+      await expect(checkRecipeTitleExists("Chili")).rejects.toThrow(
+        "User not authenticated"
+      );
     });
 
-    // Simulate error handling from recipes.js
-    const translateText = async (
-      text,
-      targetLanguage,
-      sourceLanguage = null
-    ) => {
-      const { data, error } = await supabase.functions.invoke("translate", {
-        body: {
-          text: text.trim(),
-          target_lang: targetLanguage.toUpperCase(),
-          source_lang: sourceLanguage ? sourceLanguage.toUpperCase() : null,
+    test("returns true when a matching title exists", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: [{ id: "r1" }], error: null })
+      );
+
+      expect(await checkRecipeTitleExists("Chili")).toBe(true);
+    });
+
+    test("returns false when no matching title exists", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: [], error: null })
+      );
+
+      expect(await checkRecipeTitleExists("Chili")).toBe(false);
+    });
+
+    test("excludes the given recipe id when checking (edit mode)", async () => {
+      const builder = makeQueryBuilder({ data: [], error: null });
+      supabase.from.mockReturnValueOnce(builder);
+
+      await checkRecipeTitleExists("Chili", "r1");
+
+      expect(builder.neq).toHaveBeenCalledWith("id", "r1");
+    });
+
+    test("throws a friendly error when the query fails", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: null, error: { message: "db down" } })
+      );
+
+      await expect(checkRecipeTitleExists("Chili")).rejects.toThrow(
+        "Error checking recipe title: db down"
+      );
+    });
+  });
+
+  describe("fetchRecipe", () => {
+    test("throws when no id is given", async () => {
+      await expect(fetchRecipe()).rejects.toThrow("Recipe ID is required");
+    });
+
+    test("throws when the query fails", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: null, error: new Error("not found") })
+      );
+
+      await expect(fetchRecipe("r1")).rejects.toThrow("not found");
+    });
+
+    test("separates ungrouped ingredients from sectioned ones, in order", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({
+          data: {
+            id: "r1",
+            title: "Chili",
+            recipe_ingredients: [
+              {
+                id: "ri2",
+                order_index: 1,
+                subheading: "Sauce",
+                ingredients: { id: "i2", singular_name: "tahini" },
+              },
+              {
+                id: "ri1",
+                order_index: 0,
+                subheading: null,
+                ingredients: { id: "i1", singular_name: "tofu" },
+              },
+            ],
+            recipe_categories: [],
+          },
+          error: null,
+        })
+      );
+
+      const result = await fetchRecipe("r1");
+
+      expect(result.ungroupedIngredients).toHaveLength(1);
+      expect(result.ungroupedIngredients[0].singular_name).toBe("tofu");
+      expect(result.ingredientSections).toEqual([
+        {
+          id: "section-0",
+          subheading: "Sauce",
+          ingredients: [expect.objectContaining({ singular_name: "tahini" })],
         },
+      ]);
+      // Ordering is preserved by order_index before grouping.
+      expect(result.ingredients.map((i) => i.recipe_ingredient_id)).toEqual([
+        "ri1",
+        "ri2",
+      ]);
+    });
+
+    test("extracts category names and removes the raw join fields", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({
+          data: {
+            id: "r1",
+            recipe_ingredients: [],
+            recipe_categories: [
+              { categories: { name: "Dinner" } },
+              { categories: null },
+            ],
+          },
+          error: null,
+        })
+      );
+
+      const result = await fetchRecipe("r1");
+
+      expect(result.categories).toEqual(["Dinner"]);
+      expect(result.recipe_ingredients).toBeUndefined();
+      expect(result.recipe_categories).toBeUndefined();
+    });
+  });
+
+  describe("createRecipe", () => {
+    test("throws when there is no logged-in user", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+
+      await expect(createRecipe({ title: "Chili" })).rejects.toThrow(
+        "User not authenticated"
+      );
+    });
+
+    test("creates the recipe and inserts ingredients referenced by id", async () => {
+      const insertBuilder = makeQueryBuilder({
+        data: { id: "r1", title: "Chili" },
+        error: null,
+      });
+      const ingredientsInsertBuilder = makeQueryBuilder({ error: null });
+      supabase.from
+        .mockReturnValueOnce(insertBuilder) // recipes insert
+        .mockReturnValueOnce(ingredientsInsertBuilder); // recipe_ingredients insert
+
+      const result = await createRecipe({
+        title: "Chili",
+        original_language: "en",
+        ungroupedIngredients: [
+          { ingredient_id: "i1", tempId: "t1", quantity: "1", unit: "can" },
+        ],
       });
 
-      if (error) {
-        return text; // Return original text on error
-      }
+      expect(result).toEqual({ id: "r1", title: "Chili" });
+      expect(ingredientsInsertBuilder.insert).toHaveBeenCalledWith([
+        expect.objectContaining({
+          recipe_id: "r1",
+          ingredient_id: "i1",
+          order_index: 0,
+        }),
+      ]);
+    });
 
-      return data?.translatedText || text;
-    };
+    test("throws when the recipe insert fails", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: null, error: { message: "db down" } })
+      );
 
-    const result = await translateText("äpfel", "en", "de");
+      await expect(createRecipe({ title: "Chili" })).rejects.toThrow("db down");
+    });
 
-    // Should return original text when translation fails
-    expect(result).toBe("äpfel");
+    test("throws a wrapped error when inserting ingredients fails", async () => {
+      supabase.from
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: { id: "r1" }, error: null })
+        )
+        .mockReturnValueOnce(
+          makeQueryBuilder({ error: { message: "constraint violation" } })
+        );
+
+      await expect(
+        createRecipe({
+          title: "Chili",
+          original_language: "en",
+          ungroupedIngredients: [{ ingredient_id: "i1", tempId: "t1" }],
+        })
+      ).rejects.toThrow(
+        "Recipe created but failed to add ingredients: constraint violation"
+      );
+    });
+
+    test("uploads local images after creating the recipe", async () => {
+      const imagesUpdateBuilder = makeQueryBuilder({ error: null });
+      supabase.from
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: { id: "r1" }, error: null })
+        )
+        .mockReturnValueOnce(imagesUpdateBuilder);
+      uploadLocalImages.mockResolvedValue([{ id: "img1", path: "u/r1/a.jpg" }]);
+
+      await createRecipe({
+        title: "Chili",
+        images: [{ id: "img1", isLocal: true, file: {} }],
+      });
+
+      expect(uploadLocalImages).toHaveBeenCalled();
+      expect(imagesUpdateBuilder.update).toHaveBeenCalledWith({
+        images: [{ id: "img1", path: "u/r1/a.jpg" }],
+      });
+    });
+  });
+
+  describe("updateRecipe", () => {
+    test("throws when there is no logged-in user", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+
+      await expect(updateRecipe("r1", {})).rejects.toThrow(
+        "User not authenticated"
+      );
+    });
+
+    test("updates the recipe, replacing its ingredients", async () => {
+      const fetchOriginalBuilder = makeQueryBuilder({
+        data: { title: "Old", images: [] },
+        error: null,
+      });
+      const updateBuilder = makeQueryBuilder({
+        data: { id: "r1", title: "New" },
+        error: null,
+      });
+      const deleteIngredientsBuilder = makeQueryBuilder({ error: null });
+      const languageLookupBuilder = makeQueryBuilder({
+        data: { original_language: "en" },
+        error: null,
+      });
+      const insertIngredientsBuilder = makeQueryBuilder({ error: null });
+
+      supabase.from
+        .mockReturnValueOnce(fetchOriginalBuilder) // fetch original recipe
+        .mockReturnValueOnce(updateBuilder) // update recipe
+        .mockReturnValueOnce(deleteIngredientsBuilder) // delete old ingredients
+        .mockReturnValueOnce(languageLookupBuilder) // per-ingredient language lookup
+        .mockReturnValueOnce(insertIngredientsBuilder); // insert new ingredients
+
+      const result = await updateRecipe("r1", {
+        title: "New",
+        ungroupedIngredients: [{ ingredient_id: "i1", tempId: "t1" }],
+      });
+
+      expect(result).toEqual({ id: "r1", title: "New" });
+      expect(deleteIngredientsBuilder.delete).toHaveBeenCalled();
+      expect(insertIngredientsBuilder.insert).toHaveBeenCalledWith([
+        expect.objectContaining({ recipe_id: "r1", ingredient_id: "i1" }),
+      ]);
+    });
+
+    test("throws when the recipe update fails", async () => {
+      supabase.from
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: { title: "Old", images: [] }, error: null })
+        )
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: null, error: { message: "db down" } })
+        );
+
+      await expect(updateRecipe("r1", { title: "New" })).rejects.toThrow(
+        "db down"
+      );
+    });
+  });
+
+  describe("deleteRecipe", () => {
+    test("deletes the recipe's ingredients, then the recipe", async () => {
+      const deleteIngredientsBuilder = makeQueryBuilder({ error: null });
+      const deleteRecipeBuilder = makeQueryBuilder({ error: null });
+      supabase.from
+        .mockReturnValueOnce(deleteIngredientsBuilder)
+        .mockReturnValueOnce(deleteRecipeBuilder);
+
+      await expect(deleteRecipe("r1")).resolves.toBe(true);
+      expect(deleteIngredientsBuilder.eq).toHaveBeenCalledWith(
+        "recipe_id",
+        "r1"
+      );
+      expect(deleteRecipeBuilder.eq).toHaveBeenCalledWith("id", "r1");
+    });
+
+    test("throws when deleting the recipe's ingredients fails", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ error: { message: "db down" } })
+      );
+
+      await expect(deleteRecipe("r1")).rejects.toThrow(
+        "Failed to delete recipe ingredients: db down"
+      );
+    });
+
+    test("throws when deleting the recipe itself fails", async () => {
+      supabase.from
+        .mockReturnValueOnce(makeQueryBuilder({ error: null }))
+        .mockReturnValueOnce(
+          makeQueryBuilder({ error: { message: "db down" } })
+        );
+
+      await expect(deleteRecipe("r1")).rejects.toThrow("db down");
+    });
   });
 });

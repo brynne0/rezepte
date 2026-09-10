@@ -37,4 +37,3 @@ export const useIntersectionObserver = (options = {}) => {
 
   return { ref, isVisible, hasBeenVisible };
 };
-

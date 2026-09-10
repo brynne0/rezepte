@@ -60,10 +60,6 @@ vi.mock("../../hooks/data/useSignedImageUrls", () => ({
   }),
 }));
 
-vi.mock("../../services/userService", () => ({
-  getUserPreferredLanguage: () => mockGetUserPreferredLanguage(),
-}));
-
 vi.mock("../LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
@@ -96,7 +92,6 @@ vi.mock("../../services/friendsService", () => ({
 let mockNavigate;
 let mockRecipeHook;
 let mockAuth;
-let mockGetUserPreferredLanguage;
 let mockSetFriendBar;
 
 describe("Recipe Component", () => {
@@ -121,7 +116,6 @@ describe("Recipe Component", () => {
       loading: false,
       error: null,
     };
-    mockGetUserPreferredLanguage = vi.fn(() => Promise.resolve("en"));
     mockSetFriendBar = vi.fn();
     mockGetFriendProfile.mockResolvedValue(null);
   });
@@ -263,20 +257,18 @@ describe("Recipe Component", () => {
     });
   });
 
-  describe("Authentication and Edit Button", () => {
+  describe("Ownership and Edit Button", () => {
     beforeEach(() => {
       mockRecipeHook.recipe = mockRecipeData;
     });
 
-    test("shows edit button for logged in users only", () => {
-      mockAuth.isLoggedIn = true;
+    test("shows the edit button for the recipe's owner", () => {
       renderRecipe();
 
       expect(screen.getByTestId("edit-recipe-btn")).toBeInTheDocument();
     });
 
     test("navigates to edit page when edit button clicked", () => {
-      mockAuth.isLoggedIn = true;
       renderRecipe();
 
       fireEvent.click(screen.getByTestId("edit-recipe-btn"));
@@ -284,12 +276,39 @@ describe("Recipe Component", () => {
         "/edit-recipe/recipe-1/test-recipe"
       );
     });
+
+    test("hides the edit, copy, and privacy-toggle buttons when viewing someone else's recipe", () => {
+      mockAuth.user = { id: "some-other-user" };
+      renderRecipe();
+
+      expect(screen.queryByTestId("edit-recipe-btn")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("share-recipe-btn")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("toggle-private-btn")
+      ).not.toBeInTheDocument();
+    });
+
+    test("tells Header it's showing a friend's recipe when viewing someone else's", () => {
+      mockAuth.user = { id: "some-other-user" };
+      mockGetFriendProfile.mockResolvedValue({ first_name: "Alice" });
+
+      renderRecipe();
+
+      expect(mockSetFriendBar).toHaveBeenCalledWith(
+        expect.objectContaining({ hideBack: true })
+      );
+    });
+
+    test("does not tell Header about a friend bar when viewing your own recipe", () => {
+      renderRecipe();
+
+      expect(mockSetFriendBar).toHaveBeenCalledWith(null);
+    });
   });
 
   describe("Copy Recipe", () => {
     beforeEach(() => {
       mockRecipeHook.recipe = mockRecipeData;
-      mockAuth.isLoggedIn = true;
     });
 
     test("copies a formatted recipe to the clipboard and shows a success toast", async () => {
@@ -331,7 +350,6 @@ describe("Recipe Component", () => {
   describe("Recipe Privacy Toggle", () => {
     beforeEach(() => {
       mockRecipeHook.recipe = mockRecipeData;
-      mockAuth.isLoggedIn = true;
     });
 
     test("marks a public recipe as private when clicked", async () => {
@@ -385,12 +403,33 @@ describe("Recipe Component", () => {
       };
     });
 
-    test("shows images when user is logged in", () => {
-      mockAuth.isLoggedIn = true;
+    test("shows images to the recipe's owner", () => {
       renderRecipe();
 
       expect(screen.getByTestId("image-gallery")).toBeInTheDocument();
       expect(screen.getByText("Images: 2")).toBeInTheDocument();
+    });
+
+    test("hides images from a friend who hasn't been granted image access", () => {
+      mockAuth.user = { id: "some-other-user" };
+      mockGetFriendProfile.mockResolvedValue({
+        friends_can_view_images: false,
+      });
+
+      renderRecipe();
+
+      expect(screen.queryByTestId("image-gallery")).not.toBeInTheDocument();
+    });
+
+    test("shows images to a friend who has been granted image access", async () => {
+      mockAuth.user = { id: "some-other-user" };
+      mockGetFriendProfile.mockResolvedValue({
+        friends_can_view_images: true,
+      });
+
+      renderRecipe();
+
+      expect(await screen.findByTestId("image-gallery")).toBeInTheDocument();
     });
 
     test("doesn't render image section when no images exist", () => {
@@ -398,7 +437,6 @@ describe("Recipe Component", () => {
         ...mockRecipeData,
         images: [],
       };
-      mockAuth.isLoggedIn = true;
       renderRecipe();
 
       expect(screen.queryByTestId("image-gallery")).not.toBeInTheDocument();
