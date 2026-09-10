@@ -5,6 +5,7 @@ import { ArrowLeft, Clipboard } from "lucide-react";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
+import { handleEnterNav } from "../../utils/enterKeyNavigation";
 import { useRecipeAutofill } from "../../hooks/forms/useRecipeAutofill";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import ImageUpload from "../ImageUpload/ImageUpload";
@@ -70,8 +71,6 @@ const RecipeForm = ({
     removeSection,
     removeIngredient,
     handleDragEnd,
-    handleEnter,
-    handleIngredientFieldEnter,
     handleSubmit,
     handleDelete,
     toTitleCase,
@@ -159,7 +158,8 @@ const RecipeForm = ({
           <form
             onSubmit={handleSubmit}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && e.target.type !== "submit") {
+              // Prevent Enter from implicitly submitting the form; buttons still activate normally.
+              if (e.key === "Enter" && e.target.tagName !== "BUTTON") {
                 e.preventDefault();
               }
             }}
@@ -209,6 +209,8 @@ const RecipeForm = ({
                     );
                     handleTitleBlur();
                   }}
+                  onKeyDown={handleEnterNav}
+                  data-enter-nav
                   aria-invalid={!!validationErrors.title}
                 />
                 <FieldError>{validationErrors.title}</FieldError>
@@ -227,6 +229,8 @@ const RecipeForm = ({
                   onWheel={(e) => {
                     e.target.blur();
                   }}
+                  onKeyDown={handleEnterNav}
+                  data-enter-nav
                 />
               </Field>
             </FieldGroup>
@@ -277,7 +281,6 @@ const RecipeForm = ({
                 removeSection={removeSection}
                 handleSectionChange={handleSectionChange}
                 handleIngredientChange={handleIngredientChange}
-                handleIngredientFieldEnter={handleIngredientFieldEnter}
                 handleOpenLinkDropdown={handleOpenLinkDropdown}
                 removeIngredient={removeIngredient}
                 getIngredientLink={getIngredientLink}
@@ -288,7 +291,6 @@ const RecipeForm = ({
                 instructions={formData.instructions}
                 isEditingTranslation={isEditingTranslation}
                 handleInstructionChange={handleInstructionChange}
-                handleEnter={handleEnter}
                 removeInstruction={removeInstruction}
                 addInstruction={addInstruction}
               />
@@ -314,6 +316,8 @@ const RecipeForm = ({
                 value={formData.source || ""}
                 onChange={(e) => handleInputChange("source", e.target.value)}
                 placeholder={t("source_placeholder")}
+                onKeyDown={handleEnterNav}
+                data-enter-nav
               />
             </Field>
 
@@ -329,6 +333,8 @@ const RecipeForm = ({
                     e.stopPropagation();
                   }
                 }}
+                // A nav target for Source's Enter, but keeps its own newline-on-Enter behavior above.
+                data-enter-nav
                 placeholder={t("notes")}
               />
             </Field>

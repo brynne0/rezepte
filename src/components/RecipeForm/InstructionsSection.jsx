@@ -4,6 +4,7 @@ import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "cn";
 
 import { Textarea } from "@/components/ui/textarea";
+import { handleEnterNav } from "../../utils/enterKeyNavigation";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
@@ -16,7 +17,6 @@ const InstructionsSection = ({
   instructions,
   isEditingTranslation,
   handleInstructionChange,
-  handleEnter,
   removeInstruction,
   addInstruction,
 }) => {
@@ -81,7 +81,8 @@ const InstructionsSection = ({
                       onChange={(e) =>
                         handleInstructionChange(index, e.target.value)
                       }
-                      onKeyDown={handleEnter}
+                      onKeyDown={handleEnterNav}
+                      data-enter-nav
                       className="flex-1"
                     />
 
@@ -119,6 +120,7 @@ const InstructionsSection = ({
           onClick={addInstruction}
           disabled={isEditingTranslation}
           data-testid="add-instruction-btn"
+          data-enter-nav
         >
           <Plus size={16} />
           {t("add_instruction")}

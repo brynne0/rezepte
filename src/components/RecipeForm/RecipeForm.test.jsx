@@ -120,8 +120,6 @@ describe("RecipeForm", () => {
     removeSection: vi.fn(),
     removeIngredient: vi.fn(),
     handleDragEnd: vi.fn(),
-    handleEnter: vi.fn(),
-    handleIngredientFieldEnter: vi.fn(),
     handleSubmit: vi.fn(),
     handleDelete: vi.fn(),
     toTitleCase: vi.fn((str) => str),
@@ -1311,7 +1309,6 @@ describe("RecipeForm", () => {
     beforeEach(() => {
       useRecipeForm.mockReturnValue({
         ...mockHookReturn,
-        handleIngredientFieldEnter: vi.fn(),
         formData: {
           ...mockFormData,
           ungroupedIngredients: [
@@ -1344,10 +1341,6 @@ describe("RecipeForm", () => {
 
     it("renders ingredient fields with navigation handlers without errors", () => {
       expect(() => renderComponent()).not.toThrow();
-
-      // Verify that handleIngredientFieldEnter is available in hook
-      expect(mockHookReturn.handleIngredientFieldEnter).toBeDefined();
-      expect(typeof mockHookReturn.handleIngredientFieldEnter).toBe("function");
     });
 
     it("renders ungrouped ingredient fields with proper IDs for navigation", () => {

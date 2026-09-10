@@ -24,7 +24,6 @@ const IngredientsSection = ({
   removeSection,
   handleSectionChange,
   handleIngredientChange,
-  handleIngredientFieldEnter,
   handleOpenLinkDropdown,
   removeIngredient,
   getIngredientLink,
@@ -78,7 +77,6 @@ const IngredientsSection = ({
                       provided={provided}
                       snapshot={snapshot}
                       handleIngredientChange={handleIngredientChange}
-                      handleIngredientFieldEnter={handleIngredientFieldEnter}
                       handleOpenLinkDropdown={handleOpenLinkDropdown}
                       removeIngredient={removeIngredient}
                       getIngredientLink={getIngredientLink}
@@ -101,6 +99,7 @@ const IngredientsSection = ({
           size="sm"
           onClick={() => addIngredient("ungrouped")}
           disabled={isEditingTranslation}
+          data-enter-nav
         >
           <Plus size={16} data-testid="add-ingredient-btn" />
           {t("add_ingredient")}
@@ -242,9 +241,6 @@ const IngredientsSection = ({
                                       handleIngredientChange={
                                         handleIngredientChange
                                       }
-                                      handleIngredientFieldEnter={
-                                        handleIngredientFieldEnter
-                                      }
                                       handleOpenLinkDropdown={
                                         handleOpenLinkDropdown
                                       }
@@ -271,6 +267,7 @@ const IngredientsSection = ({
                           size="sm"
                           onClick={() => addIngredient(section.id)}
                           disabled={isEditingTranslation}
+                          data-enter-nav
                         >
                           <Plus
                             size={16}

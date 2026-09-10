@@ -3,6 +3,7 @@ import { Trash2, GripVertical, Link, Unlink } from "lucide-react";
 import { cn } from "cn";
 
 import { formatQuantityForUnit } from "../../utils/ingredientFormatting";
+import { handleEnterNav } from "../../utils/enterKeyNavigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,6 @@ const IngredientRow = ({
   provided,
   snapshot,
   handleIngredientChange,
-  handleIngredientFieldEnter,
   handleOpenLinkDropdown,
   removeIngredient,
   getIngredientLink,
@@ -78,15 +78,8 @@ const IngredientRow = ({
               validationErrors.ingredients ? "ingredients" : null
             );
           }}
-          onKeyDown={(e) =>
-            handleIngredientFieldEnter(
-              e,
-              "name",
-              sectionId,
-              ingredient.tempId,
-              index
-            )
-          }
+          onKeyDown={handleEnterNav}
+          data-enter-nav
           onBlur={(e) => {
             const value =
               i18n.language === "de"
@@ -127,15 +120,8 @@ const IngredientRow = ({
                 e.target.value
               )
             }
-            onKeyDown={(e) =>
-              handleIngredientFieldEnter(
-                e,
-                "quantity",
-                sectionId,
-                ingredient.tempId,
-                index
-              )
-            }
+            onKeyDown={handleEnterNav}
+            data-enter-nav
             placeholder={t("quantity")}
             disabled={isEditingTranslation}
             onWheel={(e) => e.target.blur()}
@@ -164,6 +150,8 @@ const IngredientRow = ({
               disabled={isEditingTranslation}
               showClear
               className="md:w-28"
+              onKeyDown={handleEnterNav}
+              data-enter-nav
             />
             <ComboboxContent>
               <ComboboxEmpty>{t("no_results")}</ComboboxEmpty>
@@ -189,15 +177,8 @@ const IngredientRow = ({
                 e.target.value.toLowerCase()
               )
             }
-            onKeyDown={(e) =>
-              handleIngredientFieldEnter(
-                e,
-                "notes",
-                sectionId,
-                ingredient.tempId,
-                index
-              )
-            }
+            onKeyDown={handleEnterNav}
+            data-enter-nav
             placeholder={t("notes")}
             className="col-span-2 sm:col-span-1 md:flex-1"
           />

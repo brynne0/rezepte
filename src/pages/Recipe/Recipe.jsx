@@ -308,7 +308,13 @@ const Recipe = () => {
     <>
       <Card size="lg" className="mx-auto max-w-3xl text-left">
         <CardHeader>
-          <div className="flex flex-col gap-4 md:gap-2">
+          <div
+            className={
+              isOwner
+                ? "flex flex-col gap-4 md:gap-2"
+                : "flex items-center gap-2"
+            }
+          >
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -319,6 +325,12 @@ const Recipe = () => {
               >
                 <ArrowLeft />
               </Button>
+
+              {!isOwner && (
+                <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+                  {recipe.title}
+                </CardTitle>
+              )}
 
               {isOwner && (
                 <ButtonGroup className="ml-auto shrink-0">
@@ -384,9 +396,11 @@ const Recipe = () => {
               )}
             </div>
 
-            <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
-              {recipe.title}
-            </CardTitle>
+            {isOwner && (
+              <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+                {recipe.title}
+              </CardTitle>
+            )}
           </div>
         </CardHeader>
 

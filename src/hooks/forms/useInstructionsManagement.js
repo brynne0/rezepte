@@ -21,18 +21,20 @@ export const useInstructionsManagement = ({ setFormData }) => {
       instructions: [...prev.instructions, ""],
     }));
 
-    // Focus on the new instruction text box
-    setTimeout(() => {
-      const instructionTextareas = document.querySelectorAll(
-        ".instruction-row .input"
-      );
-      if (instructionTextareas.length > 0) {
-        const lastTextarea =
-          instructionTextareas[instructionTextareas.length - 1];
-        lastTextarea.focus();
-        lastTextarea.click();
-      }
-    }, 10);
+    // Wait for the new row to actually paint before focusing it.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const instructionTextareas = document.querySelectorAll(
+          ".instruction-row .input"
+        );
+        if (instructionTextareas.length > 0) {
+          const lastTextarea =
+            instructionTextareas[instructionTextareas.length - 1];
+          lastTextarea.focus();
+          lastTextarea.click();
+        }
+      });
+    });
   }, [setFormData]);
 
   // Remove instruction
@@ -46,39 +48,9 @@ export const useInstructionsManagement = ({ setFormData }) => {
     [setFormData]
   );
 
-  // Handle Enter key for instruction navigation
-  const handleEnter = useCallback(
-    (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        const textarea = e.target;
-        const instructionRows = Array.from(
-          document.querySelectorAll(".instruction-row")
-        );
-        const currentRow = textarea.closest(".instruction-row");
-        const currentIndex = instructionRows.indexOf(currentRow);
-
-        if (currentIndex < instructionRows.length - 1) {
-          // Focus next instruction
-          const nextRow = instructionRows[currentIndex + 1];
-          const nextTextarea = nextRow.querySelector(".input");
-          if (nextTextarea) {
-            nextTextarea.focus();
-            nextTextarea.click();
-          }
-        } else {
-          // Add new instruction if we're on the last one
-          addInstruction();
-        }
-      }
-    },
-    [addInstruction]
-  );
-
   return {
     handleInstructionChange,
     addInstruction,
     removeInstruction,
-    handleEnter,
   };
 };
