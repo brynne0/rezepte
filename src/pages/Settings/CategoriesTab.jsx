@@ -3,7 +3,15 @@ import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import supabase from "../../lib/supabase";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { GripVertical, Plus, Pencil, Check, X, Trash2 } from "lucide-react";
+import {
+  GripVertical,
+  Plus,
+  Pencil,
+  Check,
+  X,
+  Trash2,
+  Tag,
+} from "lucide-react";
 import {
   createCategory,
   updateCategoryName,
@@ -13,6 +21,12 @@ import {
 } from "../../services/categoriesService";
 import { getUserPreferredLanguage } from "../../services/userService";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -567,7 +581,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
       </div>
 
       {categoriesLoading ? (
-        <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2">
+        <div className="flex flex-col gap-2">
           {Array.from({ length: 8 }).map((_, index) => (
             <div
               key={index}
@@ -577,13 +591,22 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
             </div>
           ))}
         </div>
+      ) : categoryPreferences.length === 0 ? (
+        <Empty className="rounded-lg border border-border bg-card">
+          <EmptyHeader>
+            <EmptyMedia>
+              <Tag />
+            </EmptyMedia>
+            <EmptyTitle>{t("no_categories")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="categories">
             {(provided, snapshot) => (
               <div
                 className={cn(
-                  "flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2",
+                  "flex flex-col gap-2 rounded-lg",
                   snapshot.isDraggingOver && "bg-muted/50"
                 )}
                 {...provided.droppableProps}
