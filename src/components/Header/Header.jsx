@@ -258,7 +258,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
             )}
             <Button
               variant="ghost"
-              className="h-auto select-none p-0 font-forta text-3xl leading-none text-primary transition-none hover:bg-transparent hover:text-primary active:translate-y-0 dark:hover:bg-transparent md:text-5xl"
+              className="h-auto select-none p-0 font-forta text-3xl leading-none text-foreground transition-none hover:bg-transparent hover:text-foreground active:translate-y-0 dark:hover:bg-transparent md:text-5xl"
               onClick={() => {
                 navigate("/");
               }}

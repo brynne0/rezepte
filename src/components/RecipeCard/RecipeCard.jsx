@@ -72,7 +72,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   return (
     <Card
       ref={cardRef}
-      className="cursor-pointer py-0"
+      className="cursor-pointer py-0 justify-between"
       onClick={() => onClick && onClick(recipe)}
     >
       <CardHeader className="py-2">
