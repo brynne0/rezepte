@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BrowserRouter } from "react-router-dom";
-import ForgotPasswordPage from "./ForgotPasswordPage";
+import ForgotPassword from "./ForgotPassword";
 import { forgotPassword } from "../../services/auth";
 import { validateForgotPasswordForm } from "../../utils/validation";
 
@@ -38,13 +38,13 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-describe("ForgotPasswordPage", () => {
+describe("ForgotPassword", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("renders the form correctly", () => {
-    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
+    render(<ForgotPassword />, { wrapper: BrowserRouter });
 
     expect(screen.getByLabelText("email")).toBeInTheDocument();
     expect(
@@ -55,7 +55,7 @@ describe("ForgotPasswordPage", () => {
   it("displays validation errors when form is submitted with invalid email", async () => {
     validateForgotPasswordForm.mockReturnValue({ email: "Invalid email" });
 
-    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
+    render(<ForgotPassword />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
@@ -74,7 +74,7 @@ describe("ForgotPasswordPage", () => {
     validateForgotPasswordForm.mockReturnValue({});
     forgotPassword.mockResolvedValue({ error: null });
 
-    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
+    render(<ForgotPassword />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
@@ -94,7 +94,7 @@ describe("ForgotPasswordPage", () => {
     validateForgotPasswordForm.mockReturnValue({});
     forgotPassword.mockResolvedValue({ error: null });
 
-    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
+    render(<ForgotPassword />, { wrapper: BrowserRouter });
 
     fireEvent.change(screen.getByLabelText("email"), {
       target: { value: "test@example.com" },
@@ -119,7 +119,7 @@ describe("ForgotPasswordPage", () => {
     validateForgotPasswordForm.mockReturnValue({});
     forgotPassword.mockResolvedValue({ error: "Error" });
 
-    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
+    render(<ForgotPassword />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {
@@ -137,7 +137,7 @@ describe("ForgotPasswordPage", () => {
   it("clears validation errors when user types in the email field", () => {
     validateForgotPasswordForm.mockReturnValue({ email: "Invalid email" });
 
-    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
+    render(<ForgotPassword />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
 
@@ -164,7 +164,7 @@ describe("ForgotPasswordPage", () => {
         )
     );
 
-    render(<ForgotPasswordPage />, { wrapper: BrowserRouter });
+    render(<ForgotPassword />, { wrapper: BrowserRouter });
 
     const emailInput = screen.getByLabelText("email");
     const submitButton = screen.getByRole("button", {

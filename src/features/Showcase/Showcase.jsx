@@ -136,7 +136,7 @@ function Section({ title, children }) {
   );
 }
 
-function ShowcasePage() {
+function Showcase() {
   const [dropdownRadio, setDropdownRadio] = useState("light");
   const [checked, setChecked] = useState(true);
   const [ingredientChecked, setIngredientChecked] = useState(false);
@@ -622,4 +622,4 @@ function ShowcasePage() {
   );
 }
 
-export default ShowcasePage;
+export default Showcase;

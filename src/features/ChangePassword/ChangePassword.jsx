@@ -42,7 +42,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-const ChangePasswordPage = () => {
+const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
@@ -446,4 +446,4 @@ const ChangePasswordPage = () => {
   );
 };
 
-export default ChangePasswordPage;
+export default ChangePassword;

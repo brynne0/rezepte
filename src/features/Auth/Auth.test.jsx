@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import AuthPage from "./AuthPage";
+import Auth from "./Auth";
 
 // Create mock functions
 const mockNavigate = vi.fn();
@@ -47,13 +47,13 @@ vi.mock("../../components/PasswordRequirements/PasswordRequirements", () => ({
 }));
 
 // Wrapper component for router context
-const AuthPageWrapper = () => (
+const AuthWrapper = () => (
   <BrowserRouter>
-    <AuthPage />
+    <Auth />
   </BrowserRouter>
 );
 
-describe("AuthPage", () => {
+describe("Auth", () => {
   // Get the mocked functions after import
   let mockSignUp;
   let mockSignIn;
@@ -97,7 +97,7 @@ describe("AuthPage", () => {
 
   describe("Component Rendering", () => {
     it("renders login form by default", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Check login tab is selected
       const loginTab = screen.getByRole("tab", { name: "login" });
@@ -124,7 +124,7 @@ describe("AuthPage", () => {
     });
 
     it("does not render email and firstName fields in login mode", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       expect(screen.queryByLabelText("email")).not.toBeInTheDocument();
       expect(screen.queryByLabelText("first_name")).not.toBeInTheDocument();
@@ -133,7 +133,7 @@ describe("AuthPage", () => {
 
   describe("Mode Switching", () => {
     it("switches to sign up mode when sign up tab is clicked", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const signUpTab = screen.getByRole("tab", { name: "signup" });
       const loginTab = screen.getByRole("tab", { name: "login" });
@@ -155,7 +155,7 @@ describe("AuthPage", () => {
     });
 
     it("switches back to login mode when login tab is clicked", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const signUpTab = screen.getByRole("tab", { name: "signup" });
       const loginTab = screen.getByRole("tab", { name: "login" });
@@ -172,7 +172,7 @@ describe("AuthPage", () => {
     });
 
     it("clears form fields when switching modes", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Fill in username and password
       const usernameInput = screen.getByLabelText("username_or_email");
@@ -194,7 +194,7 @@ describe("AuthPage", () => {
     });
 
     it("shows password requirements in signup mode when password is entered", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Switch to sign up mode
       const signUpTab = screen.getByRole("tab", { name: "signup" });
@@ -212,7 +212,7 @@ describe("AuthPage", () => {
     });
 
     it("does not show password requirements in login mode", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Enter password in login mode
       const passwordInput = screen.getByTestId("password-input");
@@ -225,7 +225,7 @@ describe("AuthPage", () => {
     });
 
     it("does not show password requirements when password is empty", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Switch to sign up mode
       const signUpTab = screen.getByRole("tab", { name: "signup" });
@@ -238,7 +238,7 @@ describe("AuthPage", () => {
     });
 
     it("toggles password visibility", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const passwordInput = screen.getByTestId("password-input");
       const toggleButton = screen.getByRole("button", {
@@ -257,7 +257,7 @@ describe("AuthPage", () => {
 
   describe("Form Input Handling", () => {
     it("updates form fields correctly in login mode", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
@@ -270,7 +270,7 @@ describe("AuthPage", () => {
     });
 
     it("updates form fields correctly in sign up mode", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Switch to sign up mode
       const signUpTab = screen.getByRole("tab", { name: "signup" });
@@ -297,7 +297,7 @@ describe("AuthPage", () => {
     it("calls validation before login submission", () => {
       mockValidateAuthForm.mockReturnValue({});
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -312,7 +312,7 @@ describe("AuthPage", () => {
     it("calls validation before sign up submission", () => {
       mockValidateAuthForm.mockReturnValue({});
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Switch to sign up mode
       const signUpTab = screen.getByRole("tab", { name: "signup" });
@@ -334,7 +334,7 @@ describe("AuthPage", () => {
         password: "Password is required",
       });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -349,7 +349,7 @@ describe("AuthPage", () => {
         password: "Password is required",
       });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -361,7 +361,7 @@ describe("AuthPage", () => {
     });
 
     it("clears validation errors when user types", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
 
@@ -377,7 +377,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockValidateUsernameUnique.mockResolvedValue("username_already_exists");
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       fireEvent.click(screen.getByRole("tab", { name: "signup" }));
       fireEvent.change(screen.getByLabelText("username"), {
@@ -401,7 +401,7 @@ describe("AuthPage", () => {
       mockIsPasswordStrong.mockReturnValue(true);
       mockSignUp.mockResolvedValue({ error: { type: "EMAIL_EXISTS" } });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       fireEvent.click(screen.getByRole("tab", { name: "signup" }));
       fireEvent.change(screen.getByLabelText("email"), {
@@ -421,7 +421,7 @@ describe("AuthPage", () => {
       mockIsPasswordStrong.mockReturnValue(true);
       mockSignUp.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       fireEvent.click(screen.getByRole("tab", { name: "signup" }));
 
@@ -460,7 +460,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockIsPasswordStrong.mockReturnValue(false);
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       fireEvent.click(screen.getByRole("tab", { name: "signup" }));
 
@@ -494,7 +494,7 @@ describe("AuthPage", () => {
       mockIsPasswordStrong.mockReturnValue(false);
       mockValidateUsernameUnique.mockResolvedValue("username_already_exists");
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       fireEvent.click(screen.getByRole("tab", { name: "signup" }));
 
@@ -526,7 +526,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignIn.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       fireEvent.change(screen.getByLabelText("username_or_email"), {
         target: { value: "testuser" },
@@ -549,7 +549,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignIn.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
@@ -569,7 +569,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignIn.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -585,7 +585,7 @@ describe("AuthPage", () => {
         error: { type: "USER_NOT_FOUND", translationKey: "user_not_found" },
       });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -601,7 +601,7 @@ describe("AuthPage", () => {
         error: { type: "INVALID_PASSWORD", translationKey: "invalid_password" },
       });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -617,7 +617,7 @@ describe("AuthPage", () => {
         error: { type: "GENERAL_ERROR", translationKey: "login_failed" },
       });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const form = screen.getByTestId("auth-form");
       fireEvent.submit(form);
@@ -631,7 +631,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignIn.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
@@ -655,7 +655,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignIn.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
@@ -675,7 +675,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignIn.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
@@ -699,7 +699,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignUp.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Switch to sign up mode
       const signUpTab = screen.getByRole("tab", { name: "signup" });
@@ -733,7 +733,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignUp.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Switch to sign up mode
       const signUpTab = screen.getByRole("tab", { name: "signup" });
@@ -756,7 +756,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignUp.mockResolvedValue({ error: "User already exists" });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Switch to sign up mode
       const signUpTab = screen.getByRole("tab", { name: "signup" });
@@ -774,7 +774,7 @@ describe("AuthPage", () => {
       mockValidateAuthForm.mockReturnValue({});
       mockSignUp.mockResolvedValue({ error: null });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       // Switch to sign up mode
       const signUpTab = screen.getByRole("tab", { name: "signup" });
@@ -804,7 +804,7 @@ describe("AuthPage", () => {
 
   describe("Forgot Password Functionality", () => {
     it("navigates to forgot password page when link is clicked", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const forgotPasswordLink = screen.getByText("forgot_password");
       fireEvent.click(forgotPasswordLink);
@@ -815,7 +815,7 @@ describe("AuthPage", () => {
     });
 
     it("carries the entered username or email over to the forgot password page", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
       fireEvent.change(usernameInput, {
@@ -831,7 +831,7 @@ describe("AuthPage", () => {
     });
 
     it("clears form fields when navigating to forgot password", () => {
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
       const passwordInput = screen.getByTestId("password-input");
@@ -854,7 +854,7 @@ describe("AuthPage", () => {
         username: "Username is required",
       });
 
-      render(<AuthPageWrapper />);
+      render(<AuthWrapper />);
 
       const usernameInput = screen.getByLabelText("username_or_email");
       const form = screen.getByTestId("auth-form");

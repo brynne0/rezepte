@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import ChangeEmailPage from "./ChangeEmailPage";
+import ChangeEmail from "./ChangeEmail";
 
 const mockNavigate = vi.fn();
 
@@ -38,13 +38,13 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-const ChangeEmailPageWrapper = () => (
+const ChangeEmailWrapper = () => (
   <BrowserRouter>
-    <ChangeEmailPage />
+    <ChangeEmail />
   </BrowserRouter>
 );
 
-describe("ChangeEmailPage", () => {
+describe("ChangeEmail", () => {
   let mockSupabase;
   let mockChangeEmail;
   let mockVerifyCurrentPassword;
@@ -76,7 +76,7 @@ describe("ChangeEmailPage", () => {
   });
 
   it("renders the change email form", () => {
-    render(<ChangeEmailPageWrapper />);
+    render(<ChangeEmailWrapper />);
 
     expect(screen.getByText("change_email")).toBeInTheDocument();
     expect(screen.getByLabelText("current_password")).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe("ChangeEmailPage", () => {
       newEmailRepeat: "emails_do_not_match",
     });
 
-    render(<ChangeEmailPageWrapper />);
+    render(<ChangeEmailWrapper />);
 
     const form = screen
       .getByRole("button", { name: "confirm" })
@@ -112,7 +112,7 @@ describe("ChangeEmailPage", () => {
       error: { message: "Current password is incorrect" },
     });
 
-    render(<ChangeEmailPageWrapper />);
+    render(<ChangeEmailWrapper />);
 
     fireEvent.change(screen.getByLabelText("current_password"), {
       target: { value: "wrongpass" },
@@ -142,7 +142,7 @@ describe("ChangeEmailPage", () => {
     mockVerifyCurrentPassword.mockResolvedValue({ error: null });
     mockValidateEmailUniqueForChange.mockResolvedValue("email_already_exists");
 
-    render(<ChangeEmailPageWrapper />);
+    render(<ChangeEmailWrapper />);
 
     fireEvent.change(screen.getByLabelText("current_password"), {
       target: { value: "correctpass" },
@@ -170,7 +170,7 @@ describe("ChangeEmailPage", () => {
     mockVerifyCurrentPassword.mockResolvedValue({ error: null });
     mockChangeEmail.mockResolvedValue({ error: null });
 
-    render(<ChangeEmailPageWrapper />);
+    render(<ChangeEmailWrapper />);
 
     fireEvent.change(screen.getByLabelText("current_password"), {
       target: { value: "correctpass" },
@@ -206,7 +206,7 @@ describe("ChangeEmailPage", () => {
       error: { message: "Email change failed" },
     });
 
-    render(<ChangeEmailPageWrapper />);
+    render(<ChangeEmailWrapper />);
 
     fireEvent.change(screen.getByLabelText("current_password"), {
       target: { value: "correctpass" },
@@ -236,7 +236,7 @@ describe("ChangeEmailPage", () => {
       error: null,
     });
 
-    render(<ChangeEmailPageWrapper />);
+    render(<ChangeEmailWrapper />);
 
     fireEvent.change(screen.getByLabelText("current_password"), {
       target: { value: "correctpass" },

@@ -21,7 +21,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-const ForgotPasswordPage = () => {
+const ForgotPassword = () => {
   const location = useLocation();
   const [email, setEmail] = useState(location.state?.email || "");
   const [sentToEmail, setSentToEmail] = useState("");
@@ -168,4 +168,4 @@ const ForgotPasswordPage = () => {
   );
 };
 
-export default ForgotPasswordPage;
+export default ForgotPassword;

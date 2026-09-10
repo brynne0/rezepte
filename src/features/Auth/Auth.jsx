@@ -43,7 +43,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-const AuthPage = () => {
+const Auth = () => {
   // Form input states
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -469,4 +469,4 @@ const AuthPage = () => {
   );
 };
 
-export default AuthPage;
+export default Auth;

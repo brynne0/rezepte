@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import ChangePasswordPage from "./ChangePasswordPage";
+import ChangePassword from "./ChangePassword";
 
 // Create mock functions
 const mockNavigate = vi.fn();
@@ -59,13 +59,13 @@ vi.mock("../../components/PasswordRequirements/PasswordRequirements", () => ({
 }));
 
 // Wrapper component for router context
-const ChangePasswordPageWrapper = () => (
+const ChangePasswordWrapper = () => (
   <BrowserRouter>
-    <ChangePasswordPage />
+    <ChangePassword />
   </BrowserRouter>
 );
 
-describe("ChangePasswordPage", () => {
+describe("ChangePassword", () => {
   let mockSupabase;
   let mockChangePassword;
   let mockVerifyCurrentPassword;
@@ -112,7 +112,7 @@ describe("ChangePasswordPage", () => {
         () => new Promise(() => {}) // Never resolves to keep loading
       );
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       expect(screen.getByTestId("loading-acorn")).toBeInTheDocument();
     });
@@ -128,7 +128,7 @@ describe("ChangePasswordPage", () => {
         error: null,
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText("set_new_password")).toBeInTheDocument();
@@ -147,7 +147,7 @@ describe("ChangePasswordPage", () => {
         error: null,
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText("invalid_reset_link")).toBeInTheDocument();
@@ -171,7 +171,7 @@ describe("ChangePasswordPage", () => {
       mockChangePassword.mockResolvedValue({ error: null });
       mockValidateChangePasswordForm.mockReturnValue({});
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -219,7 +219,7 @@ describe("ChangePasswordPage", () => {
       window.location.hash =
         "#access_token=test-access&refresh_token=test-refresh&type=recovery";
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(mockSupabase.auth.setSession).toHaveBeenCalledWith({
@@ -243,7 +243,7 @@ describe("ChangePasswordPage", () => {
       window.location.search =
         "?access_token=test-access&refresh_token=test-refresh&type=recovery";
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(mockSupabase.auth.setSession).toHaveBeenCalledWith({
@@ -264,7 +264,7 @@ describe("ChangePasswordPage", () => {
         error: null,
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(mockSupabase.auth.getSession).toHaveBeenCalled();
@@ -283,7 +283,7 @@ describe("ChangePasswordPage", () => {
         error: { message: "Invalid session" },
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText("invalid_reset_link")).toBeInTheDocument();
@@ -295,7 +295,7 @@ describe("ChangePasswordPage", () => {
         new Error("Session error")
       );
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText("invalid_reset_link")).toBeInTheDocument();
@@ -316,7 +316,7 @@ describe("ChangePasswordPage", () => {
       });
       mockValidateChangePasswordForm.mockReturnValue({});
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -361,7 +361,7 @@ describe("ChangePasswordPage", () => {
         newPasswordRepeat: "Passwords must match",
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -394,7 +394,7 @@ describe("ChangePasswordPage", () => {
         newPassword: "Password too short",
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -423,7 +423,7 @@ describe("ChangePasswordPage", () => {
       mockChangePassword.mockResolvedValue({ error: null });
       mockValidateChangePasswordForm.mockReturnValue({});
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -464,7 +464,7 @@ describe("ChangePasswordPage", () => {
       mockChangePassword.mockResolvedValue({ error: null });
       mockValidateChangePasswordForm.mockReturnValue({});
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -507,7 +507,7 @@ describe("ChangePasswordPage", () => {
       });
       mockValidateChangePasswordForm.mockReturnValue({});
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -550,7 +550,7 @@ describe("ChangePasswordPage", () => {
       mockChangePassword.mockRejectedValue(new Error("Network error"));
       mockValidateChangePasswordForm.mockReturnValue({});
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -605,7 +605,7 @@ describe("ChangePasswordPage", () => {
       });
       mockValidateChangePasswordForm.mockReturnValue({});
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -649,7 +649,7 @@ describe("ChangePasswordPage", () => {
         newPassword: "Password too short",
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -693,7 +693,7 @@ describe("ChangePasswordPage", () => {
     });
 
     it("renders old password field when coming from account settings", async () => {
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(screen.getByLabelText("current_password")).toBeInTheDocument();
@@ -708,7 +708,7 @@ describe("ChangePasswordPage", () => {
       mockValidateChangePasswordForm.mockReturnValue({});
       mockVerifyCurrentPassword.mockResolvedValue({ error: null });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -745,7 +745,7 @@ describe("ChangePasswordPage", () => {
       mockVerifyCurrentPassword.mockResolvedValue({ error: null });
       mockChangePassword.mockResolvedValue({ error: null });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -779,7 +779,7 @@ describe("ChangePasswordPage", () => {
         error: { message: "Current password is incorrect" },
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -814,7 +814,7 @@ describe("ChangePasswordPage", () => {
         oldPassword: "password_required",
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -843,7 +843,7 @@ describe("ChangePasswordPage", () => {
         error: null,
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -869,7 +869,7 @@ describe("ChangePasswordPage", () => {
       mockChangePassword.mockResolvedValue({ error: null });
       mockValidateChangePasswordForm.mockReturnValue({});
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -907,7 +907,7 @@ describe("ChangePasswordPage", () => {
 
   describe("Input Handling", () => {
     beforeEach(async () => {
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(
@@ -964,7 +964,7 @@ describe("ChangePasswordPage", () => {
         error: null,
       });
 
-      render(<ChangePasswordPageWrapper />);
+      render(<ChangePasswordWrapper />);
 
       await waitFor(() => {
         expect(

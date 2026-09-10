@@ -40,7 +40,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-const ChangeEmailPage = () => {
+const ChangeEmail = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newEmailRepeat, setNewEmailRepeat] = useState("");
@@ -305,4 +305,4 @@ const ChangeEmailPage = () => {
   );
 };
 
-export default ChangeEmailPage;
+export default ChangeEmail;

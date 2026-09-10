@@ -37,14 +37,14 @@ import Home from "./features/Home/Home";
 import AddRecipePage from "./features/AddRecipe/AddRecipe";
 import EditRecipePage from "./features/EditRecipe/EditRecipe";
 import CookingTimes from "./features/CookingTimes/CookingTimes";
-import AuthPage from "./features/AuthPage/AuthPage";
+import Auth from "./features/Auth/Auth";
 import Recipe from "./features/Recipe/Recipe";
-import ForgotPasswordPage from "./features/ForgotPasswordPage/ForgotPasswordPage";
-import ChangePasswordPage from "./features/ChangePasswordPage/ChangePasswordPage";
-import ChangeEmailPage from "./features/ChangeEmailPage/ChangeEmailPage";
+import ForgotPassword from "./features/ForgotPassword/ForgotPassword";
+import ChangePassword from "./features/ChangePassword/ChangePassword";
+import ChangeEmail from "./features/ChangeEmail/ChangeEmail";
 import Settings from "./features/Settings/Settings";
 import FriendRecipes from "./features/FriendRecipes/FriendRecipes";
-import ShowcasePage from "./features/ShowcasePage/ShowcasePage";
+import Showcase from "./features/Showcase/Showcase";
 
 function HomeRoute() {
   return (
@@ -88,7 +88,7 @@ function CookingTimesRoute() {
 function ChangeEmailRoute() {
   return (
     <ProtectedRoute>
-      <ChangeEmailPage />
+      <ChangeEmail />
     </ProtectedRoute>
   );
 }
@@ -219,10 +219,10 @@ function App() {
           { path: "/add-recipe", element: <AddRecipeRoute /> },
           { path: "/edit-recipe/:id/:slug", element: <EditRecipeRoute /> },
           { path: "/cooking-times", element: <CookingTimesRoute /> },
-          { path: "/showcase", element: <ShowcasePage /> },
-          { path: "/login", element: <AuthPage /> },
-          { path: "/forgot-password", element: <ForgotPasswordPage /> },
-          { path: "/change-password", element: <ChangePasswordPage /> },
+          { path: "/showcase", element: <Showcase /> },
+          { path: "/login", element: <Auth /> },
+          { path: "/forgot-password", element: <ForgotPassword /> },
+          { path: "/change-password", element: <ChangePassword /> },
           { path: "/change-email", element: <ChangeEmailRoute /> },
           { path: "/settings", element: <SettingsRoute /> },
           {
