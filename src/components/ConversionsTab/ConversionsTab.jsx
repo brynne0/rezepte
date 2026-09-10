@@ -67,7 +67,7 @@ const ConversionsTab = () => {
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-1.5 text-sm text-foreground/80">
+            <CardContent className="flex flex-col gap-1.5 text-sm text-foreground">
               {data.items.map((conversion, index) => (
                 <div key={index}>
                   {conversion.includes("=") && !conversion.includes("°")

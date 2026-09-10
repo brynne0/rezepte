@@ -955,7 +955,9 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-123/homemade-oat-flour"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "text-muted-foreground"
+      );
 
       // Unlinked ingredient should be plain text
       const unlinkedIngredient = screen.getByText("sea salt");
@@ -1030,7 +1032,9 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-789/coconut-flour-recipe"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "text-muted-foreground"
+      );
 
       // Unlinked sectioned ingredient should be plain text
       const unlinkedIngredient = screen.getByText("vanilla extract");
@@ -1097,7 +1101,9 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-101/selbstgemachtes-mandelmehl"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "text-muted-foreground"
+      );
 
       // Reset language to English
       mockLanguage = "en";
@@ -1162,7 +1168,9 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-202/fresh-mushrooms"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "text-muted-foreground"
+      );
     });
 
     test("linked ingredients work with missing slug", () => {
@@ -1191,7 +1199,9 @@ describe("Recipe Component", () => {
         "href",
         "/recipe-303/undefined"
       );
-      expect(linkedIngredient.closest("a")).toHaveClass("text-accent-red");
+      expect(linkedIngredient.closest("a")).toHaveClass(
+        "text-muted-foreground"
+      );
     });
   });
 });

@@ -66,7 +66,7 @@ const EditCookingTimes = ({
       <DragDropContext onDragEnd={handleDragEnd}>
         <Button
           type="button"
-          variant="secondary"
+          variant="dashed"
           className="w-full"
           onClick={addSection}
         >

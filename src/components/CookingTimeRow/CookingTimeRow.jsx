@@ -86,7 +86,7 @@ const CookingTimeRow = ({
         <ItemContent>
           <ItemTitle className="text-base">{item.ingredient_name}</ItemTitle>
           {(soakText || cookText) && (
-            <ItemDescription className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <ItemDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-foreground">
               {soakText && (
                 <span className="inline-flex items-center gap-1">
                   <Droplet className="size-3.5" />
@@ -102,7 +102,7 @@ const CookingTimeRow = ({
             </ItemDescription>
           )}
           {weightText && (
-            <ItemDescription className="inline-flex items-center gap-1">
+            <ItemDescription className="inline-flex items-center gap-1 text-foreground">
               <Scale className="size-3.5" />
               {weightText}
               {ratio && (

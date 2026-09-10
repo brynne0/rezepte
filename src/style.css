@@ -99,11 +99,11 @@
 
 .dark {
   --background: #241d19;
-  --foreground: #d4c2b3;
+  --foreground: #f0e8e0;
   --card: #2c241f;
-  --card-foreground: #d4c2b3;
+  --card-foreground: #f0e8e0;
   --popover: #2c241f;
-  --popover-foreground: #d4c2b3;
+  --popover-foreground: #f0e8e0;
   --primary: #ccb3a3;
   --primary-foreground: oklch(0.216 0.006 56.043);
   --secondary: oklch(0.268 0.007 34.298);
