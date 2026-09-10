@@ -1,9 +1,11 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
 import "@testing-library/jest-dom";
 import Recipe from "./Recipe";
 import { AppStateContext } from "../../contexts/AppStateContext";
+import { createTestQueryClient } from "../../test-utils/queryClient";
 
 // Mock dependencies
 vi.mock("react-router-dom", async () => {
@@ -125,12 +127,15 @@ describe("Recipe Component", () => {
   });
 
   const renderRecipe = () => {
+    const queryClient = createTestQueryClient();
     return render(
-      <BrowserRouter>
-        <AppStateContext.Provider value={{ setFriendBar: mockSetFriendBar }}>
-          <Recipe />
-        </AppStateContext.Provider>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AppStateContext.Provider value={{ setFriendBar: mockSetFriendBar }}>
+            <Recipe />
+          </AppStateContext.Provider>
+        </BrowserRouter>
+      </QueryClientProvider>
     );
   };
 
