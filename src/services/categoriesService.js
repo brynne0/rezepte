@@ -1,6 +1,9 @@
 import supabase from "../lib/supabase";
 import { translateText } from "./translationService";
 
+// Escape % and _ so a typed name isn't read as an ILIKE wildcard
+const escapeForIlike = (value) => value.replace(/[%_]/g, "\\$&");
+
 // Fetch the current user's categories, ordered for display
 export const fetchCategories = async () => {
   const {
@@ -39,9 +42,10 @@ export const getCategoriesForUI = async (currentLanguage = "en") => {
 
   // Add database categories
   categories.forEach((category) => {
-    let label = category.name.charAt(0).toUpperCase() + category.name.slice(1);
+    // `name` is already the properly-cased original text; override it
+    // only when a translation exists for the current language
+    let label = category.name;
 
-    // Use translation if available for the current language
     if (
       category.translated_category &&
       category.translated_category[currentLanguage]
@@ -65,7 +69,7 @@ export const getCategoriesForManagement = async (currentLanguage = "en") => {
   const categories = await fetchCategories();
 
   return categories.map((category) => {
-    let label = category.name.charAt(0).toUpperCase() + category.name.slice(1);
+    let label = category.name;
 
     if (
       category.translated_category &&
@@ -93,12 +97,14 @@ export const createCategory = async (name, translations = {}) => {
     throw new Error("User not authenticated");
   }
 
+  const trimmedName = name.trim();
+
   // Check if category already exists (handle RLS by ignoring errors)
   try {
     const { data: existingCategory } = await supabase
       .from("categories")
       .select("id")
-      .eq("name", name.toLowerCase())
+      .ilike("name", escapeForIlike(trimmedName))
       .eq("user_id", user.id)
       .single();
 
@@ -116,28 +122,39 @@ export const createCategory = async (name, translations = {}) => {
     }
   }
 
-  // Translate to the other language via DeepL
+  // translated_category only ever stores the non-original language
+  let translatedCategory = null;
+  const sourceLanguage =
+    Object.keys(translations).length > 0 ? Object.keys(translations)[0] : "en";
+
   if (Object.keys(translations).length > 0) {
-    const sourceLanguage = Object.keys(translations)[0];
+    const sourceText = translations[sourceLanguage];
     const targetLanguage = sourceLanguage === "en" ? "de" : "en";
 
     try {
       const translatedName = await translateText(
-        translations[sourceLanguage],
+        sourceText,
         targetLanguage,
         "Food category"
       );
-      translations[targetLanguage] = translatedName;
+      // An unchanged result means translateText silently failed and fell
+      // back to the original text - don't store that as a "translation"
+      if (
+        translatedName &&
+        translatedName.trim().toLowerCase() !== sourceText.trim().toLowerCase()
+      ) {
+        translatedCategory = { [targetLanguage]: translatedName };
+      }
     } catch (error) {
       console.warn("Failed to translate category name:", error);
     }
   }
 
   const categoryData = {
-    name: name.toLowerCase(),
+    name: trimmedName,
     user_id: user.id,
-    translated_category:
-      Object.keys(translations).length > 0 ? translations : null,
+    original_language: sourceLanguage,
+    translated_category: translatedCategory,
   };
 
   const { data, error } = await supabase
@@ -186,7 +203,7 @@ export const updateCategoryName = async (
   // Check if category exists and user can edit it
   const { data: category } = await supabase
     .from("categories")
-    .select("user_id, name, translated_category")
+    .select("user_id, name")
     .eq("id", categoryId)
     .single();
 
@@ -198,12 +215,14 @@ export const updateCategoryName = async (
     throw new Error("You can only rename categories you created");
   }
 
+  const trimmedName = newName.trim();
+
   // Check if new name already exists (if name is changing)
-  if (newName.toLowerCase() !== category.name) {
+  if (trimmedName.toLowerCase() !== category.name.toLowerCase()) {
     const { data: existingCategory } = await supabase
       .from("categories")
       .select("id")
-      .eq("name", newName.toLowerCase())
+      .ilike("name", escapeForIlike(trimmedName))
       .eq("user_id", user.id)
       .single();
 
@@ -212,33 +231,41 @@ export const updateCategoryName = async (
     }
   }
 
-  // Translate to the other language via DeepL and merge with existing translations
-  let mergedTranslations = { ...(category.translated_category || {}) };
+  // The rename's language becomes the new original; old translations are
+  // stale, so start fresh instead of merging with what was there before
+  let translatedCategory = null;
+  const sourceLanguage =
+    Object.keys(newTranslations).length > 0
+      ? Object.keys(newTranslations)[0]
+      : "en";
 
   if (Object.keys(newTranslations).length > 0) {
-    const sourceLanguage = Object.keys(newTranslations)[0];
+    const sourceText = newTranslations[sourceLanguage];
     const targetLanguage = sourceLanguage === "en" ? "de" : "en";
 
-    // Update the edited language
-    mergedTranslations[sourceLanguage] = newTranslations[sourceLanguage];
-
-    // Re-translate to the other language
     try {
       const translatedName = await translateText(
-        newTranslations[sourceLanguage],
+        sourceText,
         targetLanguage,
         "Food category"
       );
-      mergedTranslations[targetLanguage] = translatedName;
+      // An unchanged result means translateText silently failed and fell
+      // back to the original text - don't store that as a "translation"
+      if (
+        translatedName &&
+        translatedName.trim().toLowerCase() !== sourceText.trim().toLowerCase()
+      ) {
+        translatedCategory = { [targetLanguage]: translatedName };
+      }
     } catch (error) {
       console.warn("Failed to translate category name:", error);
     }
   }
 
   const updateData = {
-    name: newName.toLowerCase(),
-    translated_category:
-      Object.keys(mergedTranslations).length > 0 ? mergedTranslations : null,
+    name: trimmedName,
+    original_language: sourceLanguage,
+    translated_category: translatedCategory,
   };
 
   const { data, error } = await supabase

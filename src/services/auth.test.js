@@ -65,7 +65,8 @@ describe("Auth Service", () => {
         "test@example.com",
         "John",
         "johndoe",
-        "password123"
+        "password123",
+        "en"
       );
 
       expect(supabase.auth.signUp).toHaveBeenCalledWith({
@@ -75,6 +76,7 @@ describe("Auth Service", () => {
           data: {
             first_name: "John",
             username: "johndoe",
+            language: "en",
           },
         },
       });

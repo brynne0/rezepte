@@ -283,7 +283,7 @@ const CategoriesTab = ({
       const { data: existingCategory } = await supabase
         .from("categories")
         .select("id, name, translated_category")
-        .eq("name", trimmedName.toLowerCase())
+        .ilike("name", trimmedName.replace(/[%_]/g, "\\$&"))
         .eq("user_id", user?.id)
         .single();
 

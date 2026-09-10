@@ -63,7 +63,7 @@ const AuthPage = () => {
   const [isResending, setIsResending] = useState(false);
 
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const hasUnsavedChanges =
     isSignUpMode &&
@@ -161,7 +161,13 @@ const AuthPage = () => {
       return;
     }
 
-    const { error } = await signUp(email, firstName, username, password);
+    const { error } = await signUp(
+      email,
+      firstName,
+      username,
+      password,
+      i18n.language.split("-")[0]
+    );
 
     if (error) {
       setIsLoading(false);

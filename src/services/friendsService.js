@@ -248,7 +248,6 @@ export const fetchFriendRecipes = async (friendUserId) => {
     ...recipe,
     categories:
       recipe.recipe_categories?.map((rc) => rc.categories?.name) || [],
-
     categoryTranslations: Object.fromEntries(
       (recipe.recipe_categories || [])
         .filter((rc) => rc.categories?.name)

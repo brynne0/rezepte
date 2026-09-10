@@ -618,6 +618,9 @@ export const fetchRecipe = async (id) => {
   return transformedData;
 };
 
+// Escape % and _ so a typed name isn't read as an ILIKE wildcard
+const escapeForIlike = (value) => value.replace(/[%_]/g, "\\$&");
+
 // Helper function to add recipe to category using many-to-many relationship
 const addRecipeToCategory = async (recipeId, categoryName) => {
   if (!categoryName || categoryName === "all_recipes") return;
@@ -631,7 +634,7 @@ const addRecipeToCategory = async (recipeId, categoryName) => {
     const { data: category } = await supabase
       .from("categories")
       .select("id")
-      .eq("name", categoryName.toLowerCase())
+      .ilike("name", escapeForIlike(categoryName))
       .eq("user_id", user?.id)
       .single();
 
@@ -661,7 +664,7 @@ const addRecipeToCategory = async (recipeId, categoryName) => {
 const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
   if (!categoryName || categoryName === "all_recipes") return null;
 
-  const normalizedName = categoryName.toLowerCase();
+  const trimmedName = categoryName.trim();
 
   try {
     const {
@@ -672,7 +675,7 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
     const { data: existingCategory } = await supabase
       .from("categories")
       .select("id")
-      .eq("name", normalizedName)
+      .ilike("name", escapeForIlike(trimmedName))
       .eq("user_id", user?.id)
       .single();
 
@@ -680,51 +683,36 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
       return existingCategory;
     }
 
-    // Category doesn't exist, create it with translations
+    // translated_category only ever stores the non-original language
+    let translatedCategory = null;
+    const targetLanguage = currentLanguage !== "en" ? "en" : "de";
+    const sourceLanguage = currentLanguage !== "en" ? currentLanguage : "en";
 
-    // Create translations for the category
-    let translations = {};
-
-    if (currentLanguage !== "en") {
-      // If creating in non-English, translate to English and other languages
-      try {
-        const translatedToEnglish = await translateText(
-          categoryName,
-          "en",
-          currentLanguage
-        );
-        translations = {
-          en: translatedToEnglish,
-          [currentLanguage]: categoryName,
-        };
-      } catch (error) {
-        console.warn("Failed to translate category name:", error);
-        translations = { [currentLanguage]: categoryName };
+    try {
+      const translatedName = await translateText(
+        trimmedName,
+        targetLanguage,
+        sourceLanguage
+      );
+      // An unchanged result means translateText silently failed and fell
+      // back to the original text - don't store that as a "translation"
+      if (
+        translatedName &&
+        translatedName.trim().toLowerCase() !== trimmedName.toLowerCase()
+      ) {
+        translatedCategory = { [targetLanguage]: translatedName };
       }
-    } else {
-      // Creating in English, translate to German
-      try {
-        const translatedToGerman = await translateText(
-          categoryName,
-          "de",
-          "en"
-        );
-        translations = {
-          en: categoryName,
-          de: translatedToGerman,
-        };
-      } catch (error) {
-        console.warn("Failed to translate category to German:", error);
-        translations = { en: categoryName };
-      }
+    } catch (error) {
+      console.warn("Failed to translate category name:", error);
     }
 
     const { data: newCategory, error } = await supabase
       .from("categories")
       .insert({
-        name: normalizedName,
+        name: trimmedName,
         user_id: user?.id,
-        translated_category: translations,
+        original_language: sourceLanguage,
+        translated_category: translatedCategory,
       })
       .select("id")
       .single();

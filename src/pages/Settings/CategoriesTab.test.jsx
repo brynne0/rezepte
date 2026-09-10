@@ -220,6 +220,7 @@ describe("CategoriesTab - Adding Categories", () => {
       const mockQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
+        ilike: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({ data: existingCategory }),
       };
       mockSupabase.from.mockReturnValue(mockQuery);
