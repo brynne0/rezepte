@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 import { flushSync } from "react-dom";
 import { buildNutritionColumns } from "../../utils/nutritionUtils";
 import { useTranslation } from "react-i18next";
@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecipeActions } from "../data/useRecipeActions";
 import { normaliseUnicodeFractions } from "../../utils/fractionUtils";
 import { toast } from "@/components/ui/toast";
+import { AppStateContext } from "../../contexts/AppStateContext";
 
 export const useRecipeFormActions = ({
   formData,
@@ -22,6 +23,7 @@ export const useRecipeFormActions = ({
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { refreshRecipes } = useContext(AppStateContext);
   const {
     createRecipe,
     updateRecipe,
@@ -313,6 +315,7 @@ export const useRecipeFormActions = ({
         }
 
         flushSync(() => setInitialFormData(formData));
+        refreshRecipes();
         navigate(`/${result.id}/${result.slug}`);
       } catch (err) {
         console.error(
@@ -351,6 +354,7 @@ export const useRecipeFormActions = ({
       updateTranslation,
       navigate,
       setInitialFormData,
+      refreshRecipes,
       t,
       i18n,
     ]
@@ -366,12 +370,13 @@ export const useRecipeFormActions = ({
     if (!initialRecipe) return;
     try {
       await deleteRecipe(initialRecipe.id);
+      refreshRecipes();
       navigate("/");
     } catch (err) {
       console.error("Failed to delete recipe:", err);
       toast.add({ title: t("delete_recipe_failed"), type: "error" });
     }
-  }, [initialRecipe, deleteRecipe, navigate, t]);
+  }, [initialRecipe, deleteRecipe, navigate, refreshRecipes, t]);
 
   return {
     handleImagesChange,

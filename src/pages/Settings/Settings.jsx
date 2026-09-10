@@ -30,7 +30,11 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-const Settings = ({ refreshCategories, resetCategoryFilter }) => {
+const Settings = ({
+  refreshCategories,
+  refreshRecipes,
+  resetCategoryFilter,
+}) => {
   const [activeTab, setActiveTab] = useState("profile");
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -342,6 +346,7 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
                   t={t}
                   onUnsavedChangesChange={setCategoriesHasUnsavedChanges}
                   refreshCategories={refreshCategories}
+                  refreshRecipes={refreshRecipes}
                   resetCategoryFilter={resetCategoryFilter}
                 />
               )}

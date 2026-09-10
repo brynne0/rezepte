@@ -37,6 +37,7 @@ const CategoriesTab = ({
   t,
   onUnsavedChangesChange,
   refreshCategories,
+  refreshRecipes,
   resetCategoryFilter,
 }) => {
   const [categories, setCategories] = useState([]);
@@ -195,9 +196,12 @@ const CategoriesTab = ({
       setCategoryPreferences(validCategoryPreferences);
       setOriginalCategoryPreferences([...validCategoryPreferences]);
 
-      // Refresh categories in the main app to reflect preference changes
+      // Refresh categories and recipes in the main app to reflect changes
       if (refreshCategories) {
         refreshCategories();
+      }
+      if (refreshRecipes) {
+        refreshRecipes();
       }
 
       // Reset selected category to "all_recipes" so user sees all recipes when going back

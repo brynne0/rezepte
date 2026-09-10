@@ -158,29 +158,24 @@ function ChangeEmailRoute() {
 }
 
 function SettingsRoute() {
-  const { refreshCategories } = useContext(AppStateContext);
+  const { refreshCategories, refreshRecipes } = useContext(AppStateContext);
   return (
     <ProtectedRoute>
-      <Settings refreshCategories={refreshCategories} />
+      <Settings
+        refreshCategories={refreshCategories}
+        refreshRecipes={refreshRecipes}
+      />
     </ProtectedRoute>
   );
 }
 
 function Layout() {
-  const {
-    t,
-    refreshRecipes,
-    isCookingTimesEditing,
-    setIsCookingTimesEditing,
-    isLoggedIn,
-    friendBar,
-  } = useContext(AppStateContext);
+  const { t, isCookingTimesEditing, setIsCookingTimesEditing, friendBar } =
+    useContext(AppStateContext);
   const location = useLocation();
   const mainScrollRef = useMainScrollRef();
   const isCookingTimesPage = location.pathname === "/cooking-times";
   const isOnline = useOnlineStatus();
-  const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
 
   // Reset cooking times editing state when leaving the cooking times page
   useEffect(() => {
@@ -188,23 +183,6 @@ function Layout() {
       setIsCookingTimesEditing(false);
     }
   }, [isCookingTimesPage, isCookingTimesEditing, setIsCookingTimesEditing]);
-
-  // Refresh recipes when navigating to home page
-  useEffect(() => {
-    if (location.pathname === "/") {
-      refreshRecipes();
-    }
-  }, [location.pathname, refreshRecipes]);
-
-  // Refresh recipes when login state changes
-  useEffect(() => {
-    refreshRecipes();
-  }, [isLoggedIn, refreshRecipes]);
-
-  // Refresh recipes when language changes
-  useEffect(() => {
-    refreshRecipes();
-  }, [currentLanguage, refreshRecipes]);
 
   return (
     <>
