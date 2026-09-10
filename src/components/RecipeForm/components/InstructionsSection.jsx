@@ -4,7 +4,7 @@ import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "cn";
 
 import { Textarea } from "@/components/ui/textarea";
-import { handleEnterNav } from "../../utils/enterKeyNavigation";
+import { handleEnterNav } from "../../../utils/enterKeyNavigation";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {

@@ -2,7 +2,7 @@ import { useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, X } from "lucide-react";
 
-import { emptyNutritionColumn } from "../../utils/nutritionUtils";
+import { emptyNutritionColumn } from "../../../utils/nutritionUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";

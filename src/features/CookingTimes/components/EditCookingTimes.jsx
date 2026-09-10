@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Plus, GripVertical, Trash2 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import CookingTimeRow from "../CookingTimeRow/CookingTimeRow";
+import CookingTimeRow from "./CookingTimeRow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";

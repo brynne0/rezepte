@@ -4,7 +4,7 @@ import CategoriesTab from "./CategoriesTab";
 import {
   createTestQueryClient,
   createQueryClientWrapper,
-} from "../../test-utils/queryClient";
+} from "../../../test-utils/queryClient";
 
 const { mockToastAdd } = vi.hoisted(() => ({ mockToastAdd: vi.fn() }));
 
@@ -13,7 +13,7 @@ vi.mock("@/components/ui/toast", () => ({
 }));
 
 // Mock supabase
-vi.mock("../../lib/supabase", () => ({
+vi.mock("../../../lib/supabase", () => ({
   default: {
     auth: {
       getUser: vi.fn(),
@@ -23,7 +23,7 @@ vi.mock("../../lib/supabase", () => ({
 }));
 
 // Mock services
-vi.mock("../../services/categoriesService", () => ({
+vi.mock("../../../services/categoriesService", () => ({
   getCategoriesForManagement: vi.fn(),
   saveCategoryOrder: vi.fn(),
   createCategory: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock("../../services/categoriesService", () => ({
 }));
 
 // Mock components
-vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
+vi.mock("../../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
@@ -108,8 +108,10 @@ describe("CategoriesTab - Adding Categories", () => {
     vi.spyOn(testQueryClient, "invalidateQueries");
 
     // Import mocked modules
-    const categoriesService = await import("../../services/categoriesService");
-    const supabase = await import("../../lib/supabase");
+    const categoriesService = await import(
+      "../../../services/categoriesService"
+    );
+    const supabase = await import("../../../lib/supabase");
 
     mockGetCategoriesForManagement =
       categoriesService.getCategoriesForManagement;

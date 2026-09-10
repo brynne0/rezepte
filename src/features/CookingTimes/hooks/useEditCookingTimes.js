@@ -4,9 +4,9 @@ import {
   updateCookingTime,
   deleteCookingTime,
   updateCookingTimeTranslations,
-} from "../../services/cookingTimesService";
-import { getUserPreferredLanguage } from "../../services/userService";
-import { useUnsavedChanges } from "../ui/useUnsavedChanges";
+} from "../../../services/cookingTimesService";
+import { getUserPreferredLanguage } from "../../../services/userService";
+import { useUnsavedChanges } from "../../../hooks/ui/useUnsavedChanges";
 
 export const useEditCookingTimes = ({
   isEditMode,

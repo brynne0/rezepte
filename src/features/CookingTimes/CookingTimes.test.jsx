@@ -27,11 +27,11 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-vi.mock("../../components/ConversionsTab/ConversionsTab", () => ({
+vi.mock("./components/ConversionsTab", () => ({
   default: () => <div data-testid="conversions-tab">Conversions</div>,
 }));
 
-vi.mock("../../components/CookingTimeRow/CookingTimeRow", () => ({
+vi.mock("./components/CookingTimeRow", () => ({
   default: ({ item, isEditMode, handleItemChange, sectionId }) => (
     <div data-testid={`cooking-time-${item.tempId || item.id}`}>
       {isEditMode ? (

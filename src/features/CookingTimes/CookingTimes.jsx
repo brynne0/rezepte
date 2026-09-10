@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Plus, Timer, ArrowLeftRight, ArrowLeft, Pencil } from "lucide-react";
-import CookingTimeRow from "../../components/CookingTimeRow/CookingTimeRow";
-import EditCookingTimes from "../../components/EditCookingTimes/EditCookingTimes";
+import CookingTimeRow from "./components/CookingTimeRow";
+import EditCookingTimes from "./components/EditCookingTimes";
 import { getUserPreferredLanguage } from "../../services/userService";
-import ConversionsTab from "../../components/ConversionsTab/ConversionsTab";
+import ConversionsTab from "./components/ConversionsTab";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -33,8 +33,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "@/components/ui/toast";
-import { useCookingTimesData } from "../../hooks/cookingTimes/useCookingTimesData";
-import { useEditCookingTimes } from "../../hooks/cookingTimes/useEditCookingTimes";
+import { useCookingTimesData } from "./hooks/useCookingTimesData";
+import { useEditCookingTimes } from "./hooks/useEditCookingTimes";
 
 const CookingTimes = ({
   isEditMode: externalIsEditMode,

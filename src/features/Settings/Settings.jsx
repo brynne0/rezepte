@@ -11,8 +11,8 @@ import {
 } from "../../services/userService";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import ProfileTab from "./ProfileTab";
-import CategoriesTab from "./CategoriesTab";
+import ProfileTab from "./components/ProfileTab";
+import CategoriesTab from "./components/CategoriesTab";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/toast";

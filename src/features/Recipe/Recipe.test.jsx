@@ -68,7 +68,7 @@ vi.mock("../LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
-vi.mock("../../components/ImageGallery/ImageGallery", () => {
+vi.mock("./components/ImageGallery", () => {
   const MockImageGallery = ({ images }) => (
     <div data-testid="image-gallery">Images: {images.length}</div>
   );

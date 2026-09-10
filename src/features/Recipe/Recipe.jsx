@@ -20,7 +20,7 @@ import { getFriendProfile } from "../../services/friendsService";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import ImageGallery from "../../components/ImageGallery/ImageGallery";
+import ImageGallery from "./components/ImageGallery";
 import {
   formatIngredientMeasurement,
   getIngredientDisplayName,
@@ -34,7 +34,7 @@ import { shouldUsePlural } from "../../utils/fractionUtils";
 import { linkifyText } from "../../utils/linkUtils";
 import { recipeToText } from "../../utils/recipeToText";
 import { useWakeLock } from "../../hooks/ui/useWakeLock";
-import NutritionPanel from "../../components/NutritionPanel/NutritionPanel";
+import NutritionPanel from "./components/NutritionPanel";
 import { toast } from "@/components/ui/toast";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

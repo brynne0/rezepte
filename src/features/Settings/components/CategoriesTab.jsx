@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import supabase from "../../lib/supabase";
+import supabase from "../../../lib/supabase";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   GripVertical,
@@ -18,8 +18,8 @@ import {
   deleteCategory,
   saveCategoryOrder,
   getCategoriesForManagement,
-} from "../../services/categoriesService";
-import { getUserPreferredLanguage } from "../../services/userService";
+} from "../../../services/categoriesService";
+import { getUserPreferredLanguage } from "../../../services/userService";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Empty,

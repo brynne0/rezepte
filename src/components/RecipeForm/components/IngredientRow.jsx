@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Trash2, GripVertical, Link, Unlink } from "lucide-react";
 import { cn } from "cn";
 
-import { formatQuantityForUnit } from "../../utils/ingredientFormatting";
-import { handleEnterNav } from "../../utils/enterKeyNavigation";
+import { formatQuantityForUnit } from "../../../utils/ingredientFormatting";
+import { handleEnterNav } from "../../../utils/enterKeyNavigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {

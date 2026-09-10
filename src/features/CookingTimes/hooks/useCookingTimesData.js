@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { getTranslatedCookingTimes } from "../../services/cookingTimesService";
-import { getUserPreferredLanguage } from "../../services/userService";
+import { getTranslatedCookingTimes } from "../../../services/cookingTimesService";
+import { getUserPreferredLanguage } from "../../../services/userService";
 
 export const useCookingTimesData = ({ isEditMode, i18n }) => {
   const [loading, setLoading] = useState(true);

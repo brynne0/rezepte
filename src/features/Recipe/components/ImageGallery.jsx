@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { getOptimizedImageUrl } from "../../services/imageService";
+import { getOptimizedImageUrl } from "../../../services/imageService";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Carousel,

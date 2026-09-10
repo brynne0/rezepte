@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 
-import { fetchRecipes } from "../../services/recipes";
-import { getTranslatedRecipeTitle } from "../../services/translationService";
+import { fetchRecipes } from "../../../services/recipes";
+import { getTranslatedRecipeTitle } from "../../../services/translationService";
 import {
   Dialog,
   DialogContent,
