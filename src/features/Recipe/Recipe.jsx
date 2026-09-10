@@ -33,7 +33,7 @@ import {
 import { shouldUsePlural } from "../../utils/fractionUtils";
 import { linkifyText } from "../../utils/linkUtils";
 import { recipeToText } from "../../utils/recipeToText";
-import { useWakeLock } from "../../hooks/ui/useWakeLock";
+import { useWakeLock } from "./hooks/useWakeLock";
 import NutritionPanel from "./components/NutritionPanel";
 import { toast } from "@/components/ui/toast";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";

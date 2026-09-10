@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import {
   validateRecipeForm,
   validateRecipeTitleUnique,
-} from "../../utils/validation";
-import { toTitleCase } from "../../utils/stringUtils";
+} from "../../../utils/validation";
+import { toTitleCase } from "../../../utils/stringUtils";
 
 export const useRecipeFormValidation = ({
   formData,

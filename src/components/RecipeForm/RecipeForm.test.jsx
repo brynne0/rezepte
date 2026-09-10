@@ -53,7 +53,7 @@ vi.mock("@hello-pangea/dnd", () => ({
   ),
 }));
 
-vi.mock("../../hooks/forms/useRecipeForm", () => ({
+vi.mock("./hooks/useRecipeForm", () => ({
   useRecipeForm: vi.fn(),
 }));
 
@@ -66,7 +66,7 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
+import { useRecipeForm } from "./hooks/useRecipeForm";
 
 describe("RecipeForm", () => {
   const mockCategories = [

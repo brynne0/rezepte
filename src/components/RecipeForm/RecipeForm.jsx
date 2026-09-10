@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, Clipboard } from "lucide-react";
 import { DragDropContext } from "@hello-pangea/dnd";
 
-import { useRecipeForm } from "../../hooks/forms/useRecipeForm";
+import { useRecipeForm } from "./hooks/useRecipeForm";
 import { handleEnterNav } from "../../utils/enterKeyNavigation";
-import { useRecipeAutofill } from "../../hooks/forms/useRecipeAutofill";
+import { useRecipeAutofill } from "./hooks/useRecipeAutofill";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import ImageUpload from "../ImageUpload/ImageUpload";
 import RecipeLinkDropdown from "./components/RecipeLinkDropdown";

@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useFriendRecipes } from "./useFriendRecipes";
-import { createQueryClientWrapper } from "../../test-utils/queryClient";
+import { createQueryClientWrapper } from "../../../test-utils/queryClient";
 
 const mockUseTranslation = {
   i18n: { language: "en" },
@@ -12,14 +12,14 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => mockUseTranslation,
 }));
 
-vi.mock("../../services/friendsService", () => ({
+vi.mock("../../../services/friendsService", () => ({
   getUserByUsername: vi.fn(),
   checkFriendship: vi.fn(),
   getFriendProfile: vi.fn(),
   fetchFriendRecipes: vi.fn(),
 }));
 
-vi.mock("../../services/translationService", () => ({
+vi.mock("../../../services/translationService", () => ({
   getTranslatedRecipeTitle: vi.fn((recipe) => Promise.resolve(recipe)),
 }));
 
@@ -28,8 +28,8 @@ import {
   checkFriendship,
   getFriendProfile,
   fetchFriendRecipes,
-} from "../../services/friendsService";
-import { getTranslatedRecipeTitle } from "../../services/translationService";
+} from "../../../services/friendsService";
+import { getTranslatedRecipeTitle } from "../../../services/translationService";
 
 const renderUseFriendRecipes = (username) =>
   renderHook(() => useFriendRecipes(username), {

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 // Custom hook for intersection observer
 // Detects when an element enters the viewport
-const useIntersectionObserver = (options = {}) => {
+export const useIntersectionObserver = (options = {}) => {
   const ref = useRef();
   const [isVisible, setIsVisible] = useState(false);
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
@@ -38,4 +38,3 @@ const useIntersectionObserver = (options = {}) => {
   return { ref, isVisible, hasBeenVisible };
 };
 
-export default useIntersectionObserver;

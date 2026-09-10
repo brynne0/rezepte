@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import {
   emptyNutritionColumn,
   parseNutritionColumns,
-} from "../../utils/nutritionUtils";
+} from "../../../utils/nutritionUtils";
 
 export const useRecipeFormState = ({ initialRecipe = null }) => {
   // Generate unique IDs for ingredients
