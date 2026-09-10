@@ -1,7 +1,42 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabase from "../../lib/supabase";
 import { getTranslatedRecipeTitle } from "../../services/translationService";
+import { useAuth } from "./useAuth";
+
+// Fetch recipes with category information for the given user
+const fetchRecipesWithCategories = async (userId) => {
+  if (!userId) return [];
+
+  const { data: recipes, error } = await supabase
+    .from("recipes")
+    .select(
+      `
+      *,
+      recipe_categories (
+        categoriy_id,
+        categories (
+          name,
+          translated_category
+        )
+      ),
+      recipe_ingredients!recipe_ingredients_recipe_id_fkey(id)
+    `
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  // Transform the data to include category names and ingredient flag
+  return recipes.map((recipe) => ({
+    ...recipe,
+    categories:
+      recipe.recipe_categories?.map((rc) => rc.categories?.name) || [],
+    hasIngredients: recipe.recipe_ingredients?.length > 0,
+  }));
+};
 
 // Fetch all recipes using client-side pagination and filtering
 export const useRecipesPagination = (
@@ -12,137 +47,29 @@ export const useRecipesPagination = (
   sortBy = "created_at_desc",
   enabled = true
 ) => {
-  const [allRecipes, setAllRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isFetchingRecipes, setIsFetchingRecipes] = useState(false);
   const { i18n } = useTranslation();
+  const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
+  const { user } = useAuth();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
 
-  // Fetch recipes with category information
-  const fetchRecipesWithCategories = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      // Build query with user filtering
-      let query = supabase
-        .from("recipes")
-        .select(
-          `
-          *,
-          recipe_categories (
-            categoriy_id,
-            categories (
-              name,
-              translated_category
-            )
-          ),
-          recipe_ingredients!recipe_ingredients_recipe_id_fkey(id)
-        `
-        )
-        .order("created_at", { ascending: false });
-
-      // Apply user filtering
-      if (user) {
-        // Logged in: only show user's own recipes
-        query = query.eq("user_id", user.id);
-      } else {
-        // Not logged in: show nothing
-        return [];
-      }
-
-      const { data: recipes, error } = await query;
-
-      if (error) throw error;
-
-      // Transform the data to include category names and ingredient flag
-      return recipes.map((recipe) => ({
-        ...recipe,
-        categories:
-          recipe.recipe_categories?.map((rc) => rc.categories?.name) || [],
-        hasIngredients: recipe.recipe_ingredients?.length > 0,
-      }));
-    } catch (error) {
-      console.error("Error fetching recipes with categories:", error);
-      return [];
-    }
-  };
-
-  const loadRecipes = useCallback(async () => {
-    if (!enabled) {
-      setAllRecipes([]);
-      setLoading(false);
-      setIsFetchingRecipes(false);
-      return;
-    }
-
-    setIsFetchingRecipes(true);
-    try {
-      const data = await fetchRecipesWithCategories();
-
-      // Translate only recipe titles for the current language
-      const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
-      const translatedRecipes = await Promise.all(
+  const {
+    data: allRecipes = [],
+    isLoading: loading,
+    isFetching: isFetchingRecipes,
+  } = useQuery({
+    queryKey: ["recipes", userId, currentLanguage],
+    queryFn: async () => {
+      const data = await fetchRecipesWithCategories(userId);
+      return Promise.all(
         data.map((recipe) => getTranslatedRecipeTitle(recipe, currentLanguage))
       );
-      setAllRecipes(translatedRecipes);
-    } catch (err) {
-      console.error("Error: ", err);
-      setAllRecipes([]);
-    } finally {
-      setLoading(false);
-      setIsFetchingRecipes(false);
-    }
-  }, [enabled, i18n.language]);
-
-  const refreshRecipes = useCallback(
-    async (showLoading = false) => {
-      if (!enabled) {
-        setAllRecipes([]);
-        setLoading(false);
-        setIsFetchingRecipes(false);
-        return;
-      }
-
-      if (showLoading) setLoading(true);
-      setIsFetchingRecipes(true);
-      try {
-        const data = await fetchRecipesWithCategories();
-
-        // Translate only recipe titles for the current language
-        const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
-        const translatedRecipes = await Promise.all(
-          data.map((recipe) =>
-            getTranslatedRecipeTitle(recipe, currentLanguage)
-          )
-        );
-        setAllRecipes(translatedRecipes);
-      } catch (err) {
-        console.error("Error refreshing: ", err);
-        setAllRecipes([]);
-      } finally {
-        if (showLoading) setLoading(false);
-        setIsFetchingRecipes(false);
-      }
     },
-    [enabled, i18n.language]
-  );
+    enabled: enabled && !!userId,
+  });
 
-  useEffect(() => {
-    loadRecipes();
-
-    // Listen to auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      // Reload recipes when user signs in or out to ensure proper access
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-        loadRecipes();
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [loadRecipes]);
+  const refreshRecipes = () =>
+    queryClient.invalidateQueries({ queryKey: ["recipes"] });
 
   // Client-side filtering, sorting and pagination
   const paginatedData = useMemo(() => {

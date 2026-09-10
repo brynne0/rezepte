@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import supabase from "../../lib/supabase";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { GripVertical, Plus, Pencil, Check, X, Trash2 } from "lucide-react";
@@ -33,12 +34,8 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "cn";
 
-const CategoriesTab = ({
-  t,
-  onUnsavedChangesChange,
-  refreshCategories,
-  resetCategoryFilter,
-}) => {
+const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
+  const queryClient = useQueryClient();
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [isEditingCategories, setIsEditingCategories] = useState(false);
@@ -195,10 +192,10 @@ const CategoriesTab = ({
       setCategoryPreferences(validCategoryPreferences);
       setOriginalCategoryPreferences([...validCategoryPreferences]);
 
-      // Refresh categories in the main app to reflect preference changes
-      if (refreshCategories) {
-        refreshCategories();
-      }
+      // Refresh categories and recipes in the main app to reflect changes
+      // (renamed/deleted categories affect how recipes display)
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["recipes"] });
 
       // Reset selected category to "all_recipes" so user sees all recipes when going back
       if (resetCategoryFilter) {

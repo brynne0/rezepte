@@ -2,15 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { UserPlus, Check, X, UserMinus, Search } from "lucide-react";
-import {
-  searchUsers,
-  sendFriendRequest,
-  acceptFriendRequest,
-  removeFriendship,
-  getFriends,
-  getPendingRequests,
-  getSentRequests,
-} from "../../services/friendsService";
+import { searchUsers, sendFriendRequest } from "../../services/friendsService";
+import { useFriendsData } from "../../hooks/data/useFriendsData";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -45,38 +38,21 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
-  const [friends, setFriends] = useState([]);
-  const [pendingRequests, setPendingRequests] = useState([]);
-  const [sentRequests, setSentRequests] = useState([]);
+  const {
+    friends,
+    pendingRequests,
+    sentRequests,
+    isLoadingData,
+    refetch,
+    acceptFriendRequest,
+    removeFriendship,
+  } = useFriendsData();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [loadingAction, setLoadingAction] = useState(null);
-  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const searchTimeoutRef = useRef(null);
-
-  const loadData = async () => {
-    setIsLoadingData(true);
-    try {
-      const [friendsList, requests, sent] = await Promise.all([
-        getFriends(),
-        getPendingRequests(),
-        getSentRequests(),
-      ]);
-      setFriends(friendsList);
-      setPendingRequests(requests);
-      setSentRequests(sent);
-    } catch (err) {
-      console.error("Error loading friends data:", err);
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   // Debounced search
   useEffect(() => {
@@ -124,7 +100,6 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
     setLoadingAction(requesterId);
     try {
       await acceptFriendRequest(requesterId);
-      await loadData();
       toast.add({ title: t("friends_request_accepted"), type: "success" });
     } catch (err) {
       console.error("Error accepting friend request:", err);
@@ -143,7 +118,6 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
           u.id === userId ? { ...u, friendshipStatus: "none" } : u
         )
       );
-      await loadData();
       toast.add({ title: t("friends_request_cancelled"), type: "success" });
     } catch (err) {
       console.error("Error cancelling friend request:", err);
@@ -157,7 +131,6 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
     setLoadingAction(userId);
     try {
       await removeFriendship(userId);
-      await loadData();
       toast.add({ title: t("friends_request_declined"), type: "success" });
     } catch (err) {
       console.error("Error declining friend request:", err);
@@ -171,7 +144,6 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
     setLoadingAction(friendId);
     try {
       await removeFriendship(friendId);
-      await loadData();
       toast.add({ title: t("friends_removed"), type: "success" });
     } catch (err) {
       console.error("Error removing friend:", err);
@@ -455,7 +427,7 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
   );
 
   const onOpenChange = (open) => {
-    if (open) loadData();
+    if (open) refetch();
     setIsOpen(open);
   };
 

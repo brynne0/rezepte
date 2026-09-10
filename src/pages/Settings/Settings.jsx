@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  getUserPreferredLanguage,
   updateUserPreferredLanguage,
   getUserProfile,
   updateUserProfile,
@@ -30,7 +29,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-const Settings = ({ refreshCategories, resetCategoryFilter }) => {
+const Settings = ({ resetCategoryFilter }) => {
   const [activeTab, setActiveTab] = useState("profile");
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,15 +54,8 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
     const loadProfile = async () => {
       try {
         setLoading(true);
-        const [profileData, preferredLanguage] = await Promise.all([
-          getUserProfile(),
-          getUserPreferredLanguage(),
-        ]);
-
-        setProfileData({
-          ...profileData,
-          preferred_language: preferredLanguage,
-        });
+        const profileData = await getUserProfile();
+        setProfileData(profileData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -341,7 +333,6 @@ const Settings = ({ refreshCategories, resetCategoryFilter }) => {
                 <CategoriesTab
                   t={t}
                   onUnsavedChangesChange={setCategoriesHasUnsavedChanges}
-                  refreshCategories={refreshCategories}
                   resetCategoryFilter={resetCategoryFilter}
                 />
               )}

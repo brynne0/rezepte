@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CategoriesTab from "./CategoriesTab";
+import {
+  createTestQueryClient,
+  createQueryClientWrapper,
+} from "../../test-utils/queryClient";
 
 const { mockToastAdd } = vi.hoisted(() => ({ mockToastAdd: vi.fn() }));
 
@@ -57,9 +61,15 @@ describe("CategoriesTab - Adding Categories", () => {
   const mockProps = {
     t: (key) => key,
     onUnsavedChangesChange: vi.fn(),
-    refreshCategories: vi.fn(),
     resetCategoryFilter: vi.fn(),
   };
+
+  let testQueryClient;
+
+  const renderCategoriesTab = () =>
+    render(<CategoriesTab {...mockProps} />, {
+      wrapper: createQueryClientWrapper(testQueryClient),
+    });
 
   const mockExistingCategories = [
     {
@@ -79,7 +89,7 @@ describe("CategoriesTab - Adding Categories", () => {
   // Renders the tab and enters editing mode so the add/edit/reorder controls
   // (gated behind the "edit_categories" button) are available.
   const renderInEditMode = async () => {
-    render(<CategoriesTab {...mockProps} />);
+    renderCategoriesTab();
 
     await waitFor(() => {
       expect(screen.getByText("edit_categories")).toBeInTheDocument();
@@ -94,6 +104,8 @@ describe("CategoriesTab - Adding Categories", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    testQueryClient = createTestQueryClient();
+    vi.spyOn(testQueryClient, "invalidateQueries");
 
     // Import mocked modules
     const categoriesService = await import("../../services/categoriesService");
@@ -122,7 +134,7 @@ describe("CategoriesTab - Adding Categories", () => {
 
   describe("Edit Categories Button", () => {
     it("does not show management controls until edit mode is entered", async () => {
-      render(<CategoriesTab {...mockProps} />);
+      renderCategoriesTab();
 
       await waitFor(() => {
         expect(screen.getByText("edit_categories")).toBeInTheDocument();
@@ -402,7 +414,12 @@ describe("CategoriesTab - Adding Categories", () => {
 
       await waitFor(() => {
         expect(mockSaveCategoryOrder).toHaveBeenCalled();
-        expect(mockProps.refreshCategories).toHaveBeenCalled();
+        expect(testQueryClient.invalidateQueries).toHaveBeenCalledWith({
+          queryKey: ["categories"],
+        });
+        expect(testQueryClient.invalidateQueries).toHaveBeenCalledWith({
+          queryKey: ["recipes"],
+        });
         expect(mockProps.resetCategoryFilter).toHaveBeenCalled();
       });
     });

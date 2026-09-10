@@ -3,6 +3,7 @@ import { flushSync } from "react-dom";
 import { buildNutritionColumns } from "../../utils/nutritionUtils";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRecipeActions } from "../data/useRecipeActions";
 import { normaliseUnicodeFractions } from "../../utils/fractionUtils";
 import { toast } from "@/components/ui/toast";
@@ -22,6 +23,7 @@ export const useRecipeFormActions = ({
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     createRecipe,
     updateRecipe,
@@ -313,7 +315,13 @@ export const useRecipeFormActions = ({
         }
 
         flushSync(() => setInitialFormData(formData));
-        navigate(`/${result.id}/${result.slug}`);
+        queryClient.invalidateQueries({ queryKey: ["recipes"] });
+        queryClient.invalidateQueries({ queryKey: ["recipe"] });
+        if (initialRecipe) {
+          navigate(-1);
+        } else {
+          navigate(`/${result.id}/${result.slug}`, { replace: true });
+        }
       } catch (err) {
         console.error(
           `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
@@ -351,6 +359,7 @@ export const useRecipeFormActions = ({
       updateTranslation,
       navigate,
       setInitialFormData,
+      queryClient,
       t,
       i18n,
     ]
@@ -366,12 +375,14 @@ export const useRecipeFormActions = ({
     if (!initialRecipe) return;
     try {
       await deleteRecipe(initialRecipe.id);
+      queryClient.invalidateQueries({ queryKey: ["recipes"] });
+      queryClient.invalidateQueries({ queryKey: ["recipe"] });
       navigate("/");
     } catch (err) {
       console.error("Failed to delete recipe:", err);
       toast.add({ title: t("delete_recipe_failed"), type: "error" });
     }
-  }, [initialRecipe, deleteRecipe, navigate, t]);
+  }, [initialRecipe, deleteRecipe, navigate, queryClient, t]);
 
   return {
     handleImagesChange,

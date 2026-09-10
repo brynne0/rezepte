@@ -158,29 +158,20 @@ function ChangeEmailRoute() {
 }
 
 function SettingsRoute() {
-  const { refreshCategories } = useContext(AppStateContext);
   return (
     <ProtectedRoute>
-      <Settings refreshCategories={refreshCategories} />
+      <Settings />
     </ProtectedRoute>
   );
 }
 
 function Layout() {
-  const {
-    t,
-    refreshRecipes,
-    isCookingTimesEditing,
-    setIsCookingTimesEditing,
-    isLoggedIn,
-    friendBar,
-  } = useContext(AppStateContext);
+  const { t, isCookingTimesEditing, setIsCookingTimesEditing, friendBar } =
+    useContext(AppStateContext);
   const location = useLocation();
   const mainScrollRef = useMainScrollRef();
   const isCookingTimesPage = location.pathname === "/cooking-times";
   const isOnline = useOnlineStatus();
-  const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
 
   // Reset cooking times editing state when leaving the cooking times page
   useEffect(() => {
@@ -188,23 +179,6 @@ function Layout() {
       setIsCookingTimesEditing(false);
     }
   }, [isCookingTimesPage, isCookingTimesEditing, setIsCookingTimesEditing]);
-
-  // Refresh recipes when navigating to home page
-  useEffect(() => {
-    if (location.pathname === "/") {
-      refreshRecipes();
-    }
-  }, [location.pathname, refreshRecipes]);
-
-  // Refresh recipes when login state changes
-  useEffect(() => {
-    refreshRecipes();
-  }, [isLoggedIn, refreshRecipes]);
-
-  // Refresh recipes when language changes
-  useEffect(() => {
-    refreshRecipes();
-  }, [currentLanguage, refreshRecipes]);
 
   return (
     <>
@@ -246,7 +220,6 @@ function App() {
     recipes,
     loading,
     isFetchingRecipes,
-    refreshRecipes,
     totalRecipeCount,
     paginationInfo,
   } = useRecipesPagination(
@@ -259,11 +232,16 @@ function App() {
   );
 
   // Categories from database
-  const {
-    categories,
-    loading: categoriesLoading,
-    refreshCategories,
-  } = useCategories();
+  const { categories, loading: categoriesLoading } = useCategories();
+
+  // Clear search/filter/paging state on logout
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setSearchTerm("");
+      setSelectedCategory("all_recipes");
+      setCurrentPage(1);
+    }
+  }, [isLoggedIn]);
 
   // Show loading screen only for home page where recipes and categories are needed
   const location = window.location;
@@ -352,8 +330,6 @@ function App() {
     paginationInfo,
     onPageChange: handlePageChange,
     onPageReset: handlePageReset,
-    refreshRecipes,
-    refreshCategories,
     isLoggedIn,
     friendBar,
     setFriendBar,

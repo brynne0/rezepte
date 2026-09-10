@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest";
 import { BrowserRouter, useNavigate, useLocation } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
 import Header from "./Header";
 import { useAuth } from "../../hooks/data/useAuth";
 import { signOut, getFirstName } from "../../services/auth";
 import { useTheme } from "../../hooks/ui/useTheme";
+import { createTestQueryClient } from "../../test-utils/queryClient";
 import "@testing-library/jest-dom";
 
 // Mock the hooks and services
@@ -24,6 +27,15 @@ vi.mock("react-router-dom", async () => {
     useLocation: vi.fn(),
   };
 });
+vi.mock("../../services/friendsService", () => ({
+  getFriends: vi.fn().mockResolvedValue([]),
+  getPendingRequests: vi.fn().mockResolvedValue([]),
+  getSentRequests: vi.fn().mockResolvedValue([]),
+  acceptFriendRequest: vi.fn(),
+  removeFriendship: vi.fn(),
+  searchUsers: vi.fn().mockResolvedValue([]),
+  sendFriendRequest: vi.fn(),
+}));
 
 // Mock i18next
 const mockI18n = {
@@ -56,7 +68,12 @@ vi.mock("react-i18next", () => ({
 
 // Create a test wrapper component
 const TestWrapper = ({ children }) => {
-  return <BrowserRouter>{children}</BrowserRouter>;
+  const [queryClient] = useState(() => createTestQueryClient());
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>{children}</BrowserRouter>
+    </QueryClientProvider>
+  );
 };
 
 describe("Header Component", () => {
@@ -79,8 +96,6 @@ describe("Header Component", () => {
 
     mockUseAuth = vi.fn().mockReturnValue({
       isLoggedIn: false,
-      isMe: false,
-      isGuest: false,
     });
 
     // Apply mocks
@@ -191,8 +206,6 @@ describe("Header Component", () => {
   test("shows chef hat icon with user menu label when logged in", () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: true,
-      isMe: false,
-      isGuest: false,
     });
 
     render(
@@ -209,8 +222,6 @@ describe("Header Component", () => {
   test("handles logout correctly from user dropdown", async () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: true,
-      isMe: false,
-      isGuest: false,
     });
 
     render(
@@ -237,8 +248,6 @@ describe("Header Component", () => {
   test("displays user display name when logged in", async () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: true,
-      isMe: false,
-      isGuest: false,
     });
 
     render(
@@ -255,8 +264,6 @@ describe("Header Component", () => {
   test("shows navigation buttons when logged in and not guest", () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: true,
-      isMe: false,
-      isGuest: false,
     });
 
     render(
@@ -271,8 +278,6 @@ describe("Header Component", () => {
   test("hides add recipe button when not logged in", () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: false,
-      isMe: false,
-      isGuest: false,
     });
 
     render(
@@ -287,8 +292,6 @@ describe("Header Component", () => {
   test("navigates to add recipe page when plus button is clicked", () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: true,
-      isMe: false,
-      isGuest: false,
     });
 
     render(
@@ -490,8 +493,6 @@ describe("Header Component", () => {
     test("shows account settings option when logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       render(
@@ -510,8 +511,6 @@ describe("Header Component", () => {
     test("navigates to settings page when settings is clicked", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       render(
@@ -568,8 +567,6 @@ describe("Header Component", () => {
     test("opens hamburger menu when menu button is clicked", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       render(
@@ -590,8 +587,6 @@ describe("Header Component", () => {
     test("closes hamburger menu when menu button is clicked again", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       render(
@@ -618,8 +613,6 @@ describe("Header Component", () => {
     test("shows plus icon in hamburger menu when logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       render(
@@ -641,8 +634,6 @@ describe("Header Component", () => {
     test("navigates to add recipe from hamburger menu", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       render(
@@ -665,8 +656,6 @@ describe("Header Component", () => {
     test("hides hamburger menu when not logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: false,
-        isMe: false,
-        isGuest: false,
       });
 
       render(
@@ -681,8 +670,6 @@ describe("Header Component", () => {
     test("closes hamburger menu when clicking outside", async () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       render(
@@ -714,8 +701,6 @@ describe("Header Component", () => {
     test("navigation buttons do not have selected class on other pages", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       useLocation.mockReturnValue({
@@ -736,8 +721,6 @@ describe("Header Component", () => {
     test("navigates to add recipe from mobile hamburger menu item", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       useLocation.mockReturnValue({
@@ -843,8 +826,6 @@ describe("Header Component", () => {
     test("theme toggle is available when not logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: false,
-        isMe: false,
-        isGuest: false,
       });
 
       useTheme.mockReturnValue({
@@ -864,8 +845,6 @@ describe("Header Component", () => {
     test("theme toggle is available when logged in", () => {
       mockUseAuth.mockReturnValue({
         isLoggedIn: true,
-        isMe: false,
-        isGuest: false,
       });
 
       useTheme.mockReturnValue({

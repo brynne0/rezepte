@@ -1,16 +1,17 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategoriesForUI } from "../../services/categoriesService";
-import supabase from "../../lib/supabase";
+import { useAuth } from "./useAuth";
 
 const CACHE_KEY_PREFIX = "categories-cache-";
 
 const readCachedCategories = (language) => {
   try {
     const stored = localStorage.getItem(`${CACHE_KEY_PREFIX}${language}`);
-    return stored ? JSON.parse(stored) : null;
+    return stored ? JSON.parse(stored) : undefined;
   } catch {
-    return null;
+    return undefined;
   }
 };
 
@@ -30,68 +31,47 @@ export const useCategories = () => {
 
   // Stabilize the language to prevent loops
   const currentLanguage = useMemo(() => i18n.language, [i18n.language]);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id;
 
-  const [categories, setCategories] = useState(
-    () => readCachedCategories(currentLanguage) ?? []
-  );
-  const [loading, setLoading] = useState(
-    () => readCachedCategories(currentLanguage) === null
-  );
-  const [error, setError] = useState(null);
-
-  // Show any cached categories for this language immediately, so switching
-  // language (or a fresh mount) doesn't flash an empty list while the
-  // network request for the new language is still in flight.
-  useEffect(() => {
-    const cached = readCachedCategories(currentLanguage);
-    if (cached) {
-      setCategories(cached);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-  }, [currentLanguage]);
-
-  const refreshCategories = useCallback(async () => {
-    try {
-      setError(null);
-      const categoriesData = await getCategoriesForUI(currentLanguage);
-      setCategories(categoriesData);
-      writeCachedCategories(currentLanguage, categoriesData);
-    } catch (err) {
-      // Keep showing whatever we already have (cached or previous state)
-      // rather than clearing the list on a failed refresh, e.g. offline.
-      setError(err.message);
-      console.error("Error fetching categories:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentLanguage]);
-
-  useEffect(() => {
-    refreshCategories();
-  }, [refreshCategories]);
-
-  // Listen to auth state changes and refresh categories
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-        refreshCategories();
+  const {
+    data: categories = [],
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ["categories", userId, currentLanguage],
+    enabled: !!userId,
+    queryFn: async () => {
+      try {
+        const categoriesData = await getCategoriesForUI(currentLanguage);
+        writeCachedCategories(currentLanguage, categoriesData);
+        return categoriesData;
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+        throw err;
       }
-    });
+    },
+    // Seed the cache with last session's categories for this language, so a
+    // fresh mount shows them instantly instead of an empty list. Marked as
+    // already-stale (initialDataUpdatedAt: 0) with its own staleTime so it
+    // still triggers a background refetch on mount despite the app-wide
+    // "don't refetch on mount" default — and because it's real cached data
+    // (not just a placeholder), it's kept on screen if that refetch fails,
+    // rather than being cleared — `error` is surfaced separately.
+    initialData: () => readCachedCategories(currentLanguage),
+    initialDataUpdatedAt: 0,
+    staleTime: 0,
+    refetchOnMount: true,
+  });
 
-    return () => subscription.unsubscribe();
-  }, [refreshCategories]);
-
-  // Memoize categories to prevent unnecessary re-renders
-  const memoizedCategories = useMemo(() => categories, [categories]);
+  const refreshCategories = () =>
+    queryClient.invalidateQueries({ queryKey: ["categories"] });
 
   return {
-    categories: memoizedCategories,
+    categories,
     loading,
-    error,
+    error: error?.message ?? null,
     refreshCategories,
   };
 };
