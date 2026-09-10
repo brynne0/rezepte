@@ -266,7 +266,7 @@ const Recipe = () => {
 
           {ingredient.linked_recipe ? (
             <a
-              className="text-accent-red inline-flex items-center gap-1 underline decoration-2 underline-offset-2 transition-colors hover:text-destructive"
+              className="text-muted-foreground inline-flex items-center gap-1 underline decoration-2 underline-offset-2 transition-colors hover:text-accent-red"
               href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -326,7 +326,7 @@ const Recipe = () => {
                   <TooltipTrigger
                     render={
                       <Button
-                        variant="secondary"
+                        variant="dashed"
                         size="icon-lg"
                         onClick={() =>
                           navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
@@ -344,7 +344,7 @@ const Recipe = () => {
                   <TooltipTrigger
                     render={
                       <Button
-                        variant="secondary"
+                        variant="dashed"
                         size="icon-lg"
                         onClick={handleShare}
                         data-testid="share-recipe-btn"
@@ -360,7 +360,7 @@ const Recipe = () => {
                   <TooltipTrigger
                     render={
                       <Button
-                        variant="secondary"
+                        variant="dashed"
                         size="icon-lg"
                         onClick={handleTogglePrivate}
                         data-testid="toggle-private-btn"

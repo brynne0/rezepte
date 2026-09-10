@@ -54,7 +54,7 @@ const RecipeFilters = ({
             }}
           >
             <InputGroup className="h-10">
-              <InputGroupAddon align="inline-start" className="text-foreground">
+              <InputGroupAddon align="inline-start">
                 <Search className="size-5" />
               </InputGroupAddon>
               <InputGroupInput

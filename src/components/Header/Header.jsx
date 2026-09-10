@@ -202,6 +202,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
                   variant="ghost"
                   size="icon-lg"
                   disabled={location.pathname === "/login"}
+                  className={isActivePage("/settings") ? "text-accent-red" : ""}
                   aria-label={isLoggedIn ? t("user_menu") : t("login")}
                 >
                   <User className="size-7" />
@@ -253,7 +254,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
           <div className="absolute inset-0 m-auto flex h-max w-max flex-col items-center">
             {/* Display user's first name above header */}
             {firstName && (
-              <span className="text-sm leading-none md:text-base">{`${firstName}'s`}</span>
+              <span className="text-primary text-sm leading-none md:text-base">{`${firstName}'s`}</span>
             )}
             <Button
               variant="ghost"

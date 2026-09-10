@@ -153,7 +153,7 @@ function ShowcasePage() {
       <Section title="Buttons">
         <Button>Default</Button>
         <Button variant="outline">Outline</Button>
-        <Button variant="secondary">Secondary</Button>
+        <Button variant="dashed">Dashed</Button>
         <Button variant="ghost">Ghost</Button>
         <Button variant="destructive">Destructive</Button>
         <Button variant="ghost-destructive">Ghost destructive</Button>
@@ -201,7 +201,7 @@ function ShowcasePage() {
           <Tooltip>
             <TooltipTrigger
               render={
-                <Button variant="secondary" size="icon-lg" aria-label="Copy">
+                <Button variant="dashed" size="icon-lg" aria-label="Copy">
                   <ArrowLeft className="rotate-180" />
                 </Button>
               }
@@ -210,7 +210,7 @@ function ShowcasePage() {
               Grouped icon actions (recipe header)
             </TooltipContent>
           </Tooltip>
-          <Button variant="secondary" size="icon-lg" aria-label="Edit">
+          <Button variant="dashed" size="icon-lg" aria-label="Edit">
             <SearchIcon />
           </Button>
         </ButtonGroup>

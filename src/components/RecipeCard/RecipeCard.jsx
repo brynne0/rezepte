@@ -78,7 +78,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
       <CardHeader className="py-2">
         <CardTitle
           className={cn(
-            "text-xs font-semibold uppercase",
+            "text-xs font-medium uppercase",
             !isSourceLinkHovered && "group-hover/card:text-accent-red"
           )}
         >
