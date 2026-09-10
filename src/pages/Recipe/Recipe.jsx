@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Pencil,
@@ -113,16 +114,24 @@ const Recipe = () => {
 
   // When viewing a friend's recipe, show the "viewing a friend" banner in
   // Header (fetching their profile for the name pill); hide it for your own.
+  const showFriendBar = !!recipe && !isOwner;
+  const { data: friendProfile, isLoading: friendProfileLoading } = useQuery({
+    queryKey: ["friendProfile", recipe?.user_id],
+    queryFn: () => getFriendProfile(recipe.user_id),
+    enabled: showFriendBar,
+  });
+
   useEffect(() => {
-    if (!recipe || isOwner) {
+    if (!showFriendBar) {
       setFriendBar(null);
       return;
     }
-    getFriendProfile(recipe.user_id)
-      .then((profile) => setFriendBar({ name: profile?.first_name || null }))
-      .catch(() => setFriendBar({ name: null }));
+    setFriendBar({
+      name: friendProfile?.first_name || null,
+      loading: friendProfileLoading,
+    });
     return () => setFriendBar(null);
-  }, [recipe, isOwner, setFriendBar]);
+  }, [showFriendBar, friendProfile, friendProfileLoading, setFriendBar]);
 
   const handleTogglePrivate = async () => {
     const next = !isPrivate;
