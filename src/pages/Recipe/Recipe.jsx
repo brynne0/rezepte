@@ -308,83 +308,85 @@ const Recipe = () => {
     <>
       <Card size="lg" className="mx-auto max-w-3xl text-left">
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="shrink-0"
-              onClick={() => navigate(-1)}
-              aria-label={t("go_back")}
-            >
-              <ArrowLeft />
-            </Button>
+          <div className="flex flex-col gap-4 md:gap-2">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0"
+                onClick={() => navigate(-1)}
+                aria-label={t("go_back")}
+              >
+                <ArrowLeft />
+              </Button>
 
-            <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+              {isOwner && (
+                <ButtonGroup className="ml-auto shrink-0">
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="dashed"
+                          size="icon-lg"
+                          onClick={() =>
+                            navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                          }
+                          data-testid="edit-recipe-btn"
+                          aria-label={t("edit_recipe")}
+                        >
+                          <Pencil />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>{t("edit_recipe")}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="dashed"
+                          size="icon-lg"
+                          onClick={handleShare}
+                          data-testid="share-recipe-btn"
+                          aria-label={t("copy_recipe")}
+                        >
+                          <Copy />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>{t("copy_recipe")}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="dashed"
+                          size="icon-lg"
+                          onClick={handleTogglePrivate}
+                          data-testid="toggle-private-btn"
+                          aria-label={
+                            isPrivate
+                              ? t("make_recipe_visible_to_friends")
+                              : t("make_recipe_private")
+                          }
+                        >
+                          {isPrivate ? <Lock /> : <LockOpen />}
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>
+                      {isPrivate
+                        ? t("make_recipe_visible_to_friends")
+                        : t("make_recipe_private")}
+                    </TooltipContent>
+                  </Tooltip>
+                </ButtonGroup>
+              )}
+            </div>
+
+            <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
               {recipe.title}
             </CardTitle>
-
-            {isOwner && (
-              <ButtonGroup className="shrink-0">
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="dashed"
-                        size="icon-lg"
-                        onClick={() =>
-                          navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
-                        }
-                        data-testid="edit-recipe-btn"
-                        aria-label={t("edit_recipe")}
-                      >
-                        <Pencil />
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>{t("edit_recipe")}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="dashed"
-                        size="icon-lg"
-                        onClick={handleShare}
-                        data-testid="share-recipe-btn"
-                        aria-label={t("copy_recipe")}
-                      >
-                        <Copy />
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>{t("copy_recipe")}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="dashed"
-                        size="icon-lg"
-                        onClick={handleTogglePrivate}
-                        data-testid="toggle-private-btn"
-                        aria-label={
-                          isPrivate
-                            ? t("make_recipe_visible_to_friends")
-                            : t("make_recipe_private")
-                        }
-                      >
-                        {isPrivate ? <Lock /> : <LockOpen />}
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>
-                    {isPrivate
-                      ? t("make_recipe_visible_to_friends")
-                      : t("make_recipe_private")}
-                  </TooltipContent>
-                </Tooltip>
-              </ButtonGroup>
-            )}
           </div>
         </CardHeader>
 
