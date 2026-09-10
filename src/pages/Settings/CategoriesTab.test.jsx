@@ -511,7 +511,9 @@ describe("CategoriesTab - Adding Categories", () => {
       fireEvent.click(savePrefsButton);
 
       // Should show saving state
-      expect(screen.getByText("saving")).toBeInTheDocument();
+      expect(
+        screen.getByRole("status", { name: /loading/i })
+      ).toBeInTheDocument();
     });
   });
 });

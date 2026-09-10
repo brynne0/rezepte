@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Card,
   CardHeader,
@@ -27,6 +28,18 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -44,24 +57,57 @@ import {
   InputGroupAddon,
   InputGroupInput,
   InputGroupButton,
-  InputGroupText,
 } from "@/components/ui/input-group";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  SelectGroup,
-  SelectLabel,
-  SelectSeparator,
-} from "@/components/ui/select";
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldGroup,
+} from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Spinner } from "@/components/ui/spinner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import {
+  Item,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+} from "@/components/ui/item";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Empty,
   EmptyHeader,
@@ -71,17 +117,8 @@ import {
   EmptyContent,
 } from "@/components/ui/empty";
 import { Toaster, toast } from "@/components/ui/toast";
-import {
-  SearchIcon,
-  MailIcon,
-  ImageIcon,
-  ArrowBigLeft,
-  ArrowLeft,
-  ChevronLeft,
-  MoveLeft,
-  CircleArrowLeft,
-  ArrowLeftToLine,
-} from "lucide-react";
+import Pagination from "@/components/Pagination/Pagination";
+import { SearchIcon, MailIcon, ArrowLeft, Trash2, Link } from "lucide-react";
 
 function Section({ title, children }) {
   return (
@@ -93,9 +130,12 @@ function Section({ title, children }) {
 }
 
 function ShowcasePage() {
-  const [radioValue, setRadioValue] = useState("one");
   const [dropdownRadio, setDropdownRadio] = useState("light");
   const [checked, setChecked] = useState(true);
+  const [ingredientChecked, setIngredientChecked] = useState(false);
+  const [switchOn, setSwitchOn] = useState(true);
+  const [language, setLanguage] = useState(["en"]);
+  const [paginationPage, setPaginationPage] = useState(1);
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8 text-left">
@@ -104,8 +144,9 @@ function ShowcasePage() {
           Component Showcase
         </h1>
         <p className="text-sm text-muted-foreground">
-          Temporary page for reviewing shadcn components against the theme. Not
-          linked from navigation — visit /showcase directly.
+          Temporary page for reviewing components actually used across the app
+          against the theme. Not linked from navigation — visit /showcase
+          directly.
         </p>
       </header>
 
@@ -115,6 +156,7 @@ function ShowcasePage() {
         <Button variant="secondary">Secondary</Button>
         <Button variant="ghost">Ghost</Button>
         <Button variant="destructive">Destructive</Button>
+        <Button variant="ghost-destructive">Ghost destructive</Button>
         <Button variant="link">Link</Button>
         <Button variant="text">Text</Button>
         <Button variant="text" aria-pressed>
@@ -123,33 +165,97 @@ function ShowcasePage() {
         <Button disabled>Disabled</Button>
       </Section>
 
-      <Section title="Button sizes">
+      <Section title="Button sizes & icon buttons">
         <Button size="xs">Extra small</Button>
         <Button size="sm">Small</Button>
         <Button size="default">Default</Button>
         <Button size="lg">Large</Button>
-        <Button size="icon" aria-label="Search">
-          <SearchIcon />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button variant="ghost" size="icon-sm" aria-label="Go back">
+                <ArrowLeft />
+              </Button>
+            }
+          />
+          <TooltipContent>Back (as used in page headers)</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost-destructive"
+                size="icon-sm"
+                aria-label="Delete"
+              >
+                <Trash2 size={16} />
+              </Button>
+            }
+          />
+          <TooltipContent>Delete row (form rows)</TooltipContent>
+        </Tooltip>
+      </Section>
+
+      <Section title="Button group">
+        <ButtonGroup>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button variant="secondary" size="icon-lg" aria-label="Copy">
+                  <ArrowLeft className="rotate-180" />
+                </Button>
+              }
+            />
+            <TooltipContent>
+              Grouped icon actions (recipe header)
+            </TooltipContent>
+          </Tooltip>
+          <Button variant="secondary" size="icon-lg" aria-label="Edit">
+            <SearchIcon />
+          </Button>
+        </ButtonGroup>
       </Section>
 
       <Section title="Card">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle>Recipe title</CardTitle>
-            <CardDescription>
-              A short description of the recipe goes here.
-            </CardDescription>
-            <CardAction>
-              <Button variant="ghost" size="icon-sm" aria-label="More">
-                ⋮
-              </Button>
+        <Card className="w-full max-w-sm py-0">
+          <CardHeader className="py-2">
+            <CardTitle className="text-xs font-semibold uppercase">
+              Recipe title
+            </CardTitle>
+            <CardAction className="row-span-1 self-center">
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Open source link"
+                    >
+                      <Link size={16} />
+                    </Button>
+                  }
+                />
+                <TooltipContent>Open recipe source link</TooltipContent>
+              </Tooltip>
             </CardAction>
           </CardHeader>
+          <AspectRatio
+            ratio={3 / 2}
+            className="mx-2 mb-2 overflow-hidden rounded-lg"
+          >
+            <Skeleton className="absolute inset-0 rounded-lg" />
+          </AspectRatio>
+        </Card>
+
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Settings card</CardTitle>
+            <CardDescription>
+              A card used outside the recipe grid, e.g. settings sections.
+            </CardDescription>
+          </CardHeader>
           <CardContent>
-            <p className="text-sm">
-              Card body content, e.g. ingredients or steps preview.
-            </p>
+            <p className="text-sm">Card body content.</p>
           </CardContent>
           <CardFooter className="justify-end gap-2">
             <Button variant="outline" size="sm">
@@ -162,43 +268,22 @@ function ShowcasePage() {
 
       <Section title="Alerts">
         <div className="flex w-full flex-col gap-3">
-          <Alert>
-            <AlertTitle>Heads up</AlertTitle>
+          <Alert variant="destructive">
             <AlertDescription>
-              This is a default alert with a title and description.
-            </AlertDescription>
-          </Alert>
-          <Alert>
-            <AlertDescription>
-              This is a default alert with description only, no title.
+              This is the only alert pattern actually used in the app — a
+              destructive alert for surfacing form/auth errors.
             </AlertDescription>
           </Alert>
           <Alert variant="destructive">
             <AlertTitle>Something went wrong</AlertTitle>
             <AlertDescription>
-              This is a destructive alert with an action.
+              Destructive alert with a title and a retry action.
             </AlertDescription>
             <AlertAction>
               <Button variant="outline" size="sm">
                 Retry
               </Button>
             </AlertAction>
-          </Alert>
-          <Alert variant="destructive">
-            <AlertDescription>
-              This is a destructive alert with description only.
-            </AlertDescription>
-          </Alert>
-          <Alert variant="success">
-            <AlertTitle>Recipe saved</AlertTitle>
-            <AlertDescription>
-              This is a success alert with a title and description.
-            </AlertDescription>
-          </Alert>
-          <Alert variant="success">
-            <AlertDescription>
-              This is a success alert with description only.
-            </AlertDescription>
           </Alert>
         </div>
       </Section>
@@ -218,10 +303,38 @@ function ShowcasePage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction>Delete</AlertDialogAction>
+              <AlertDialogAction variant="destructive">
+                Delete
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+      </Section>
+
+      <Section title="Dialog & Popover">
+        <Dialog>
+          <DialogTrigger
+            render={<Button variant="outline">Open dialog</Button>}
+          />
+          <DialogContent className="flex max-h-[80vh] flex-col gap-2.5 overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Friends</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground">
+              Mobile presentation of panels like FriendsPanel.
+            </p>
+          </DialogContent>
+        </Dialog>
+        <Popover>
+          <PopoverTrigger
+            render={<Button variant="outline">Open popover</Button>}
+          />
+          <PopoverContent align="end" className="w-72">
+            <p className="text-sm text-muted-foreground">
+              Desktop presentation of the same panel content.
+            </p>
+          </PopoverContent>
+        </Popover>
       </Section>
 
       <Section title="Dropdown menu">
@@ -229,10 +342,9 @@ function ShowcasePage() {
           <DropdownMenuTrigger
             render={<Button variant="outline">Open menu</Button>}
           />
-          <DropdownMenuContent>
+          <DropdownMenuContent align="center">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Duplicate</DropdownMenuItem>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuCheckboxItem
               checked={checked}
@@ -250,21 +362,28 @@ function ShowcasePage() {
               <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </Section>
 
-      <Section title="Inputs">
-        <div className="flex w-full max-w-sm flex-col gap-3">
-          <Input placeholder="Recipe name" />
-          <Input placeholder="Disabled" disabled />
-          <Textarea placeholder="Instructions" />
+      <Section title="Form fields">
+        <div className="flex w-full max-w-sm flex-col gap-4">
+          <Field>
+            <FieldLabel>Ingredients</FieldLabel>
+            <Input placeholder="Ingredient name" />
+            <FieldError>This field is required.</FieldError>
+          </Field>
+          <FieldGroup className="gap-2">
+            <Input placeholder="Recipe name" />
+            <Input placeholder="Disabled" disabled />
+            <Textarea placeholder="Instructions" />
+          </FieldGroup>
           <InputGroup>
             <InputGroupAddon>
               <SearchIcon />
             </InputGroupAddon>
-            <InputGroupInput placeholder="Search recipes" />
+            <InputGroupInput placeholder="Search friends" />
           </InputGroup>
           <InputGroup>
             <InputGroupAddon>
@@ -275,124 +394,129 @@ function ShowcasePage() {
               <InputGroupButton>Send</InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
-          <InputGroup>
-            <InputGroupAddon>
-              <InputGroupText>https://</InputGroupText>
-            </InputGroupAddon>
-            <InputGroupInput placeholder="example.com" />
-          </InputGroup>
+          <Combobox>
+            <ComboboxInput placeholder="Search units..." />
+            <ComboboxContent>
+              <ComboboxEmpty>No results found.</ComboboxEmpty>
+              <ComboboxList>
+                <ComboboxItem value="g">g</ComboboxItem>
+                <ComboboxItem value="ml">ml</ComboboxItem>
+                <ComboboxItem value="cup">cup</ComboboxItem>
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={ingredientChecked}
+              onCheckedChange={setIngredientChecked}
+              id="showcase-ingredient-checkbox"
+            />
+            2 cups flour
+          </label>
+          <Label htmlFor="showcase-switch" className="justify-between">
+            <span className="flex flex-col">
+              <span className="font-medium">Friends can view images</span>
+              <span className="text-sm text-muted-foreground">
+                Settings toggle pattern (Label wrapping a Switch)
+              </span>
+            </span>
+            <Switch
+              id="showcase-switch"
+              checked={switchOn}
+              onCheckedChange={setSwitchOn}
+            />
+          </Label>
         </div>
-      </Section>
-
-      <Section title="Select">
-        <Select defaultValue="breakfast">
-          <SelectTrigger>
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Meal type</SelectLabel>
-              <SelectItem value="breakfast">Breakfast</SelectItem>
-              <SelectItem value="lunch">Lunch</SelectItem>
-              <SelectItem value="dinner">Dinner</SelectItem>
-            </SelectGroup>
-            <SelectSeparator />
-            <SelectGroup>
-              <SelectLabel>Other</SelectLabel>
-              <SelectItem value="dessert">Dessert</SelectItem>
-              <SelectItem value="snack">Snack</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </Section>
-
-      <Section title="Radio group">
-        <RadioGroup
-          value={radioValue}
-          onValueChange={setRadioValue}
-          className="max-w-xs"
-        >
-          <label className="flex items-center gap-2 text-sm">
-            <RadioGroupItem value="one" /> Option one
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <RadioGroupItem value="two" /> Option two
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <RadioGroupItem value="three" /> Option three
-          </label>
-        </RadioGroup>
       </Section>
 
       <Section title="Tabs">
-        <Tabs defaultValue="ingredients" className="w-full max-w-md">
-          <TabsList>
-            <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
-            <TabsTrigger value="steps">Steps</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
+        <Tabs defaultValue="profile" className="w-full max-w-md">
+          <TabsList className="w-full">
+            <TabsTrigger value="profile" className="flex-1">
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="flex-1">
+              Categories
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="ingredients">
-            Flour, sugar, eggs, butter.
+          <TabsContent value="profile">Profile settings content.</TabsContent>
+          <TabsContent value="categories">
+            Category management content.
           </TabsContent>
-          <TabsContent value="steps">Mix, bake, cool, serve.</TabsContent>
-          <TabsContent value="notes">Tastes best fresh.</TabsContent>
         </Tabs>
       </Section>
 
-      <Section title="Toggle / toggle group">
-        <Toggle aria-label="Toggle bold">B</Toggle>
-        <Toggle variant="outline" aria-label="Toggle italic">
-          I
-        </Toggle>
-        <ToggleGroup type="single" defaultValue="grid" variant="outline">
-          <ToggleGroupItem value="grid" aria-label="Grid view">
-            <ImageIcon />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="list" aria-label="List view">
-            ☰
-          </ToggleGroupItem>
-        </ToggleGroup>
+      <Section title="Toggle group">
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-sm font-medium">Preferred language</span>
+          <ToggleGroup
+            variant="outline"
+            value={language}
+            onValueChange={(value) => value[0] && setLanguage(value)}
+          >
+            <ToggleGroupItem value="en">EN</ToggleGroupItem>
+            <ToggleGroupItem value="de">DE</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </Section>
 
-      <Section title="Back arrow options">
-        <div className="flex flex-col items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="ArrowBigLeft">
-            <ArrowBigLeft className="size-5" />
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            ArrowBigLeft (current)
-          </span>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="ArrowLeft">
-            <ArrowLeft className="size-5" />
-          </Button>
-          <span className="text-xs text-muted-foreground">ArrowLeft</span>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="ChevronLeft">
-            <ChevronLeft className="size-5" />
-          </Button>
-          <span className="text-xs text-muted-foreground">ChevronLeft</span>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="MoveLeft">
-            <MoveLeft className="size-5" />
-          </Button>
-          <span className="text-xs text-muted-foreground">MoveLeft</span>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="CircleArrowLeft">
-            <CircleArrowLeft className="size-5" />
-          </Button>
-          <span className="text-xs text-muted-foreground">CircleArrowLeft</span>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="ArrowLeftToLine">
-            <ArrowLeftToLine className="size-5" />
-          </Button>
-          <span className="text-xs text-muted-foreground">ArrowLeftToLine</span>
-        </div>
+      <Section title="Item">
+        <Item
+          variant="outline"
+          size="sm"
+          className="w-full max-w-sm items-start border-primary/50 bg-muted/20"
+        >
+          <ItemContent>
+            <ItemTitle className="text-base">Black beans</ItemTitle>
+            <ItemDescription className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span>8h soak</span>
+              <span>45min cook</span>
+            </ItemDescription>
+            <ItemDescription className="inline-flex items-center gap-1">
+              250g dry → 600g cooked
+              <Badge variant="outline" className="ml-1">
+                x2.4
+              </Badge>
+            </ItemDescription>
+          </ItemContent>
+        </Item>
+      </Section>
+
+      <Section title="Table">
+        <Table className="max-w-md">
+          <TableHeader>
+            <TableRow>
+              <TableHead />
+              <TableHead className="text-right">Per serving</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="pr-8">Calories</TableCell>
+              <TableCell className="text-right font-medium">320 kcal</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="pr-8">Protein</TableCell>
+              <TableCell className="text-right font-medium">12 g</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </Section>
+
+      <Section title="Accordion">
+        <Accordion
+          defaultValue={["nutrition-info"]}
+          className="w-full max-w-md"
+        >
+          <AccordionItem value="nutrition-info">
+            <AccordionTrigger>
+              <h3>Nutritional info:</h3>
+            </AccordionTrigger>
+            <AccordionContent>
+              Collapsible section used for the recipe nutrition panel.
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </Section>
 
       <Section title="Spinner">
@@ -409,6 +533,22 @@ function ShowcasePage() {
             content goes here.
           </p>
         </ScrollArea>
+      </Section>
+
+      <Section title="Separator">
+        <div className="flex w-full max-w-sm flex-col gap-2">
+          <span className="text-sm">Friends list</span>
+          <Separator />
+          <span className="text-sm">Pending requests</span>
+        </div>
+      </Section>
+
+      <Section title="Pagination">
+        <Pagination
+          currentPage={paginationPage}
+          totalPages={5}
+          onPageChange={setPaginationPage}
+        />
       </Section>
 
       <Section title="Empty state">

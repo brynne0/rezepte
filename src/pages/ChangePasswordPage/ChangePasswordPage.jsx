@@ -14,6 +14,7 @@ import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Field,
   FieldGroup,
@@ -52,6 +53,7 @@ const ChangePasswordPage = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidSession, setIsValidSession] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -147,6 +149,7 @@ const ChangePasswordPage = () => {
     setValidationErrors(errors);
 
     if (Object.keys(errors).length === 0) {
+      setIsSubmitting(true);
       try {
         // Double-check session right before password change
         const {
@@ -191,6 +194,8 @@ const ChangePasswordPage = () => {
         setTimeout(() => {
           setErrorMessage("");
         }, 3000);
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -407,7 +412,8 @@ const ChangePasswordPage = () => {
                     </FieldError>
                   </Field>
 
-                  <Button type="submit" size="lg">
+                  <Button type="submit" size="lg" disabled={isSubmitting}>
+                    {isSubmitting && <Spinner />}
                     {t("confirm")}
                   </Button>
                 </FieldGroup>

@@ -245,7 +245,7 @@ describe("Friends Service", () => {
   describe("getFriends", () => {
     test("returns empty array when user has no accepted friendships", async () => {
       supabase.from.mockReturnValue(mockChain({ data: [], error: null }));
-      expect(await getFriends()).toEqual([]);
+      expect(await getFriends(mockUser.id)).toEqual([]);
     });
 
     test("calls get_friend_profiles with correct IDs derived from both sides", async () => {
@@ -263,7 +263,7 @@ describe("Friends Service", () => {
         error: null,
       });
 
-      const result = await getFriends();
+      const result = await getFriends(mockUser.id);
 
       expect(supabase.rpc).toHaveBeenCalledWith("get_friend_profiles", {
         friend_ids: ["user-2", "user-3"],
@@ -273,8 +273,7 @@ describe("Friends Service", () => {
       ]);
     });
 
-    test("throws when user is not authenticated", async () => {
-      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+    test("throws when no userId is provided", async () => {
       await expect(getFriends()).rejects.toThrow("User not authenticated");
     });
   });
@@ -282,7 +281,7 @@ describe("Friends Service", () => {
   describe("getPendingRequests", () => {
     test("returns empty array when no pending requests", async () => {
       supabase.from.mockReturnValue(mockChain({ data: [], error: null }));
-      expect(await getPendingRequests()).toEqual([]);
+      expect(await getPendingRequests(mockUser.id)).toEqual([]);
     });
 
     test("calls get_profiles_by_ids with requester IDs", async () => {
@@ -300,7 +299,7 @@ describe("Friends Service", () => {
         error: null,
       });
 
-      const result = await getPendingRequests();
+      const result = await getPendingRequests(mockUser.id);
 
       expect(supabase.rpc).toHaveBeenCalledWith("get_profiles_by_ids", {
         user_ids: ["user-2", "user-3"],
@@ -308,8 +307,7 @@ describe("Friends Service", () => {
       expect(result).toHaveLength(2);
     });
 
-    test("throws when user is not authenticated", async () => {
-      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+    test("throws when no userId is provided", async () => {
       await expect(getPendingRequests()).rejects.toThrow(
         "User not authenticated"
       );

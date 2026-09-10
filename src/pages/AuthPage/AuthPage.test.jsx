@@ -117,7 +117,7 @@ describe("AuthPage", () => {
       const submitButton = screen.getByRole("button", {
         name: "submit-button",
       });
-      expect(submitButton).toHaveTextContent(/^(login|logging_in)$/);
+      expect(submitButton).toHaveTextContent("login");
 
       // Check for the form with the correct test id
       expect(screen.getByTestId("auth-form")).toBeInTheDocument();
@@ -151,7 +151,7 @@ describe("AuthPage", () => {
       const submitButton = screen.getByRole("button", {
         name: "submit-button",
       });
-      expect(submitButton).toHaveTextContent(/^(signup|signing_up)$/);
+      expect(submitButton).toHaveTextContent("signup");
     });
 
     it("switches back to login mode when login tab is clicked", () => {

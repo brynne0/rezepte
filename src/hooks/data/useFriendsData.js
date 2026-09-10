@@ -6,24 +6,28 @@ import {
   acceptFriendRequest,
   removeFriendship,
 } from "../../services/friendsService";
+import { useAuth } from "./useAuth";
 
 export const useFriendsData = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const {
     data,
     isLoading: isLoadingData,
     refetch,
   } = useQuery({
-    queryKey: ["friends"],
+    queryKey: ["friends", userId],
     queryFn: async () => {
       const [friends, pendingRequests, sentRequests] = await Promise.all([
-        getFriends(),
-        getPendingRequests(),
-        getSentRequests(),
+        getFriends(userId),
+        getPendingRequests(userId),
+        getSentRequests(userId),
       ]);
       return { friends, pendingRequests, sentRequests };
     },
+    enabled: !!userId,
   });
 
   const invalidateFriends = () =>

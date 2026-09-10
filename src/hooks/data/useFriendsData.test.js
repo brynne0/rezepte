@@ -11,6 +11,10 @@ vi.mock("../../services/friendsService", () => ({
   removeFriendship: vi.fn(),
 }));
 
+vi.mock("./useAuth", () => ({
+  useAuth: () => ({ user: { id: "current-user" } }),
+}));
+
 import {
   getFriends,
   getPendingRequests,

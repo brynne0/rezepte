@@ -231,14 +231,9 @@ export const changeEmail = async (new_email) => {
   }
 };
 
-export const getFirstName = async () => {
+export const getFirstName = async (userId) => {
   try {
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    if (!userId) {
       // Default display name for non-authenticated users
       return null;
     }
@@ -247,7 +242,7 @@ export const getFirstName = async () => {
     const { data, error } = await supabase
       .from("users")
       .select("first_name")
-      .eq("id", user.id)
+      .eq("id", userId)
       .single();
 
     if (error || !data?.first_name) {
