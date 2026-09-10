@@ -2,13 +2,7 @@ import { useState, useEffect, useMemo, useContext } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppStateContext } from "../../contexts/AppStateContext";
-import {
-  getUserByUsername,
-  checkFriendship,
-  getFriendProfile,
-  fetchFriendRecipes,
-} from "../../services/friendsService";
-import { getTranslatedRecipeTitle } from "../../services/translationService";
+import { useFriendRecipes } from "../../hooks/data/useFriendRecipes";
 import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -21,13 +15,19 @@ const PAGE_SIZE = 36;
 
 const FriendRecipes = () => {
   const { username } = useParams();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { setFriendBar } = useContext(AppStateContext);
 
-  const [friend, setFriend] = useState(null);
-  const [allRecipes, setAllRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const {
+    friend,
+    recipes: allRecipes,
+    friendCategories,
+    loading,
+    notFriends,
+    error: fetchError,
+  } = useFriendRecipes(username);
+  const error = notFriends ? "not_friends" : fetchError;
+
   const mainScrollRef = useMainScrollRef();
   useScrollRestoration(mainScrollRef, !loading);
 
@@ -35,73 +35,14 @@ const FriendRecipes = () => {
   const selectedCategory = searchParams.get("category") ?? "all_recipes";
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [friendCategories, setFriendCategories] = useState([]);
   const [sortBy, setSortBy] = useState("title_asc");
   const [showImages, setShowImages] = useState(true);
 
+  // Reset local filter/paging state when switching to a different friend
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      setSearchTerm("");
-      setCurrentPage(1);
-      try {
-        const user = await getUserByUsername(username);
-        const areFriends = await checkFriendship(user.id);
-        if (!areFriends) {
-          setError("not_friends");
-          return;
-        }
-        const currentLanguage = i18n.language.split("-")[0];
-        const [profile, recipes] = await Promise.all([
-          getFriendProfile(user.id),
-          fetchFriendRecipes(user.id),
-        ]);
-        setFriend(profile || user);
-
-        const translated = await Promise.all(
-          recipes.map((r) => getTranslatedRecipeTitle(r, currentLanguage))
-        );
-        setAllRecipes(translated);
-
-        const categoryTranslations = {};
-        translated.forEach((r) => {
-          Object.entries(r.categoryTranslations || {}).forEach(
-            ([name, translations]) => {
-              if (!categoryTranslations[name]) {
-                categoryTranslations[name] = translations;
-              }
-            }
-          );
-        });
-
-        const usedNames = Array.from(
-          new Set(translated.flatMap((r) => r.categories ?? []))
-        ).sort();
-
-        setFriendCategories([
-          {
-            value: "all_recipes",
-            label: currentLanguage === "de" ? "Alle Rezepte" : "All Recipes",
-            isSystem: true,
-          },
-          ...usedNames.map((name) => {
-            const translations = categoryTranslations[name];
-            let label = name.charAt(0).toUpperCase() + name.slice(1);
-            if (translations && translations[currentLanguage]) {
-              label = translations[currentLanguage];
-            }
-            return { value: name, label };
-          }),
-        ]);
-      } catch (err) {
-        setError(err.message || t("recipe_not_found"));
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [username, i18n.language, t]);
+    setSearchTerm("");
+    setCurrentPage(1);
+  }, [username]);
 
   // Show the "viewing a friend" back bar in Header while this page is open
   useEffect(() => {

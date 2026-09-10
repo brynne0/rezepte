@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useCategories } from "./useCategories";
+import { createQueryClientWrapper } from "../../test-utils/queryClient";
 
 // Mock react-i18next
 const mockUseTranslation = {
@@ -18,17 +19,14 @@ vi.mock("../../services/categoriesService", () => ({
   getCategoriesForUI: vi.fn(),
 }));
 
-vi.mock("../../lib/supabase", () => ({
-  default: {
-    auth: {
-      onAuthStateChange: vi.fn(() => ({
-        data: { subscription: { unsubscribe: vi.fn() } },
-      })),
-    },
-  },
+vi.mock("./useAuth", () => ({
+  useAuth: () => ({ user: { id: "user-1" } }),
 }));
 
 import { getCategoriesForUI } from "../../services/categoriesService";
+
+const renderUseCategories = () =>
+  renderHook(() => useCategories(), { wrapper: createQueryClientWrapper() });
 
 describe("useCategories", () => {
   beforeEach(() => {
@@ -46,7 +44,7 @@ describe("useCategories", () => {
 
     getCategoriesForUI.mockResolvedValue(mockCategories);
 
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderUseCategories();
 
     expect(result.current.loading).toBe(true);
 
@@ -63,7 +61,7 @@ describe("useCategories", () => {
     const errorMessage = "Complete failure";
     getCategoriesForUI.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderUseCategories();
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -89,7 +87,7 @@ describe("useCategories", () => {
       return Promise.resolve(mockEnglishCategories);
     });
 
-    const { result, rerender } = renderHook(() => useCategories());
+    const { result, rerender } = renderUseCategories();
 
     // Wait for initial English categories to load
     await waitFor(() => {
@@ -128,7 +126,7 @@ describe("useCategories", () => {
       .mockResolvedValueOnce(initialCategories)
       .mockResolvedValueOnce(refreshedCategories);
 
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderUseCategories();
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -153,7 +151,7 @@ describe("useCategories", () => {
 
     getCategoriesForUI.mockResolvedValue(mockCategories);
 
-    const { result, rerender } = renderHook(() => useCategories());
+    const { result, rerender } = renderUseCategories();
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -179,7 +177,7 @@ describe("useCategories", () => {
 
     getCategoriesForUI.mockResolvedValue(cachedCategories);
 
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderUseCategories();
 
     // No loading flash — cached data is available synchronously on mount
     expect(result.current.loading).toBe(false);
@@ -201,7 +199,7 @@ describe("useCategories", () => {
 
     getCategoriesForUI.mockRejectedValue(new Error("offline"));
 
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderUseCategories();
 
     await waitFor(() => {
       expect(result.current.error).toBe("offline");
@@ -217,7 +215,7 @@ describe("useCategories", () => {
     ];
     getCategoriesForUI.mockResolvedValue(mockCategories);
 
-    renderHook(() => useCategories());
+    renderUseCategories();
 
     await waitFor(() => {
       expect(JSON.parse(localStorage.getItem("categories-cache-en"))).toEqual(
@@ -233,7 +231,7 @@ describe("useCategories", () => {
 
     getCategoriesForUI.mockResolvedValue(mockCategories);
 
-    const { result } = renderHook(() => useCategories());
+    const { result } = renderUseCategories();
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);

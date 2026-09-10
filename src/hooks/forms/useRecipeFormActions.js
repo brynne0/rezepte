@@ -1,12 +1,12 @@
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 import { flushSync } from "react-dom";
 import { buildNutritionColumns } from "../../utils/nutritionUtils";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRecipeActions } from "../data/useRecipeActions";
 import { normaliseUnicodeFractions } from "../../utils/fractionUtils";
 import { toast } from "@/components/ui/toast";
-import { AppStateContext } from "../../contexts/AppStateContext";
 
 export const useRecipeFormActions = ({
   formData,
@@ -23,7 +23,7 @@ export const useRecipeFormActions = ({
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { refreshRecipes } = useContext(AppStateContext);
+  const queryClient = useQueryClient();
   const {
     createRecipe,
     updateRecipe,
@@ -315,8 +315,13 @@ export const useRecipeFormActions = ({
         }
 
         flushSync(() => setInitialFormData(formData));
-        refreshRecipes();
-        navigate(`/${result.id}/${result.slug}`);
+        queryClient.invalidateQueries({ queryKey: ["recipes"] });
+        queryClient.invalidateQueries({ queryKey: ["recipe"] });
+        if (initialRecipe) {
+          navigate(-1);
+        } else {
+          navigate(`/${result.id}/${result.slug}`, { replace: true });
+        }
       } catch (err) {
         console.error(
           `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
@@ -354,7 +359,7 @@ export const useRecipeFormActions = ({
       updateTranslation,
       navigate,
       setInitialFormData,
-      refreshRecipes,
+      queryClient,
       t,
       i18n,
     ]
@@ -370,13 +375,14 @@ export const useRecipeFormActions = ({
     if (!initialRecipe) return;
     try {
       await deleteRecipe(initialRecipe.id);
-      refreshRecipes();
+      queryClient.invalidateQueries({ queryKey: ["recipes"] });
+      queryClient.invalidateQueries({ queryKey: ["recipe"] });
       navigate("/");
     } catch (err) {
       console.error("Failed to delete recipe:", err);
       toast.add({ title: t("delete_recipe_failed"), type: "error" });
     }
-  }, [initialRecipe, deleteRecipe, navigate, refreshRecipes, t]);
+  }, [initialRecipe, deleteRecipe, navigate, queryClient, t]);
 
   return {
     handleImagesChange,

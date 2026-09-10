@@ -158,13 +158,9 @@ function ChangeEmailRoute() {
 }
 
 function SettingsRoute() {
-  const { refreshCategories, refreshRecipes } = useContext(AppStateContext);
   return (
     <ProtectedRoute>
-      <Settings
-        refreshCategories={refreshCategories}
-        refreshRecipes={refreshRecipes}
-      />
+      <Settings />
     </ProtectedRoute>
   );
 }
@@ -224,7 +220,6 @@ function App() {
     recipes,
     loading,
     isFetchingRecipes,
-    refreshRecipes,
     totalRecipeCount,
     paginationInfo,
   } = useRecipesPagination(
@@ -237,11 +232,16 @@ function App() {
   );
 
   // Categories from database
-  const {
-    categories,
-    loading: categoriesLoading,
-    refreshCategories,
-  } = useCategories();
+  const { categories, loading: categoriesLoading } = useCategories();
+
+  // Clear search/filter/paging state on logout
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setSearchTerm("");
+      setSelectedCategory("all_recipes");
+      setCurrentPage(1);
+    }
+  }, [isLoggedIn]);
 
   // Show loading screen only for home page where recipes and categories are needed
   const location = window.location;
@@ -330,8 +330,6 @@ function App() {
     paginationInfo,
     onPageChange: handlePageChange,
     onPageReset: handlePageReset,
-    refreshRecipes,
-    refreshCategories,
     isLoggedIn,
     friendBar,
     setFriendBar,

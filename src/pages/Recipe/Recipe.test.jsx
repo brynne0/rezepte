@@ -112,7 +112,6 @@ describe("Recipe Component", () => {
     mockLanguage = "en";
     mockAuth = {
       isLoggedIn: false,
-      isGuest: false,
       user: { id: "user-1" },
     };
     mockRecipeHook = {
