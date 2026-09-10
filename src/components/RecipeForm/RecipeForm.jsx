@@ -178,10 +178,10 @@ const RecipeForm = ({
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
+                  className="h-auto w-full items-start whitespace-normal py-1.5 text-center"
                   onClick={() => setShowPasteArea(true)}
                 >
-                  <Clipboard size={16} />
+                  <Clipboard size={16} className="mt-0.5" />
                   {t("autofill_recipe_cta")}
                 </Button>
               ))}

@@ -10,7 +10,6 @@ import {
 } from "../../services/imageService";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import ImageCropDialog from "../ImageCropDialog/ImageCropDialog";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
 import {
   Attachment,
@@ -310,7 +309,7 @@ const ImageUpload = ({
                           orientation="vertical"
                           state={isLoading ? "uploading" : "done"}
                           className={cn(
-                            "w-32",
+                            "w-34 md:w-42",
                             snapshot.isDragging && "shadow-lg"
                           )}
                         >
@@ -327,9 +326,7 @@ const ImageUpload = ({
                               onError={() => handleImageLoad(image.id)}
                             />
                             {index === 0 && (
-                              <Badge className="absolute top-1.5 left-1.5">
-                                {t("main")}
-                              </Badge>
+                              <span className="sr-only">{t("main")}</span>
                             )}
                           </AttachmentMedia>
                           <AttachmentActions>
@@ -337,6 +334,7 @@ const ImageUpload = ({
                               <TooltipTrigger
                                 render={
                                   <AttachmentAction
+                                    className="border-0 bg-[#342a24]/60 text-white backdrop-blur-sm hover:bg-[#342a24]/80 hover:text-white"
                                     onPointerDown={(e) => e.stopPropagation()}
                                     onClick={() => openRecrop(image)}
                                     aria-label={t("crop_image")}
@@ -352,7 +350,7 @@ const ImageUpload = ({
                               <TooltipTrigger
                                 render={
                                   <AttachmentAction
-                                    variant="ghost-destructive"
+                                    className="border-0 bg-[#342a24]/60 text-white backdrop-blur-sm hover:bg-accent-red/80! hover:text-white!"
                                     onPointerDown={(e) => e.stopPropagation()}
                                     onClick={() => handleDeleteImage(image)}
                                     aria-label={t("delete_image")}
@@ -379,7 +377,7 @@ const ImageUpload = ({
                 orientation="vertical"
                 state="idle"
                 className={cn(
-                  "w-32 cursor-pointer",
+                  "w-34 md:w-42 cursor-pointer",
                   disabled && "pointer-events-none opacity-50"
                 )}
                 onClick={openFilePicker}
