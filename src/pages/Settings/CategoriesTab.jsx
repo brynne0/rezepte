@@ -26,6 +26,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import {
   Tooltip,
@@ -776,7 +777,8 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
               !hasUnsavedChanges()
             }
           >
-            {preferencesLoading ? t("saving") : t("save_category_preferences")}
+            {preferencesLoading && <Spinner />}
+            {t("save_category_preferences")}
           </Button>
         </div>
       )}

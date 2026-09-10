@@ -557,11 +557,13 @@ describe("RecipeForm", () => {
 
       renderComponent();
 
-      const submitButton = screen.getByRole("button", { name: /creating/ });
+      const submitButton = screen.getByRole("button", {
+        name: /create_recipe/,
+      });
       expect(submitButton).toBeDisabled();
     });
 
-    it("shows loading text on submit button", () => {
+    it("shows loading spinner on submit button", () => {
       useRecipeForm.mockReturnValue({
         ...mockHookReturn,
         loading: true,
@@ -570,7 +572,9 @@ describe("RecipeForm", () => {
 
       renderComponent();
 
-      expect(screen.getByText("updating")).toBeInTheDocument();
+      expect(
+        screen.getByRole("status", { name: /loading/i })
+      ).toBeInTheDocument();
     });
   });
 
@@ -852,7 +856,7 @@ describe("RecipeForm", () => {
         expect(screen.getByText("update_translation")).toBeInTheDocument();
       });
 
-      it("shows correct loading text when updating translation", () => {
+      it("shows loading spinner when updating translation", () => {
         useRecipeForm.mockReturnValue({
           ...mockHookReturn,
           isEditMode: true,
@@ -861,7 +865,10 @@ describe("RecipeForm", () => {
 
         renderComponent({ isEditingTranslation: true });
 
-        expect(screen.getByText("updating_translation")).toBeInTheDocument();
+        expect(
+          screen.getByRole("status", { name: /loading/i })
+        ).toBeInTheDocument();
+        expect(screen.getByText("update_translation")).toBeInTheDocument();
       });
     });
 

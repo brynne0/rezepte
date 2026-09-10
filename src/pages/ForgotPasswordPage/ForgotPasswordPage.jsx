@@ -115,9 +115,7 @@ const ForgotPasswordPage = () => {
                 disabled={isResending}
               >
                 {isResending && <Spinner />}
-                {isResending
-                  ? t("resending_reset_email")
-                  : t("resend_reset_email")}
+                {t("resend_reset_email")}
               </Button>
               {resendMessage && (
                 <p className="text-xs text-muted-foreground">{resendMessage}</p>

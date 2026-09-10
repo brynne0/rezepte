@@ -15,6 +15,7 @@ import NutritionSection from "./NutritionSection";
 import RecipeAutofill from "./RecipeAutofill";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -368,17 +369,12 @@ const RecipeForm = ({
                 disabled={loading}
                 className="w-full sm:w-auto"
               >
-                {loading
-                  ? isEditMode
-                    ? isEditingTranslation
-                      ? t("updating_translation")
-                      : t("updating")
-                    : t("creating")
-                  : isEditMode
-                    ? isEditingTranslation
-                      ? t("update_translation")
-                      : t("update_recipe")
-                    : t("create_recipe")}
+                {loading && <Spinner />}
+                {isEditMode
+                  ? isEditingTranslation
+                    ? t("update_translation")
+                    : t("update_recipe")
+                  : t("create_recipe")}
               </Button>
             </div>
           </form>

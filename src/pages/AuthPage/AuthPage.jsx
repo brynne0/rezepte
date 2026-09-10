@@ -267,7 +267,7 @@ const AuthPage = () => {
                 disabled={isResending}
               >
                 {isResending && <Spinner />}
-                {isResending ? t("resending_email") : t("resend_email")}
+                {t("resend_email")}
               </Button>
             </div>
           ) : (
@@ -437,13 +437,7 @@ const AuthPage = () => {
                     disabled={isLoading}
                   >
                     {isLoading && <Spinner />}
-                    {isLoading
-                      ? isSignUpMode
-                        ? t("signing_up")
-                        : t("logging_in")
-                      : isSignUpMode
-                        ? t("signup")
-                        : t("login")}
+                    {isSignUpMode ? t("signup") : t("login")}
                   </Button>
                 </FieldGroup>
               </form>

@@ -222,10 +222,12 @@ describe("RecipeAutofill", () => {
     const submitButton = screen.getByRole("button", { name: /autofill/i });
     fireEvent.click(submitButton);
 
-    // Button should be disabled and show "autofilling" text
+    // Button should be disabled and show a loading spinner
     await waitFor(() => {
       expect(submitButton).toBeDisabled();
-      expect(screen.getByText(/autofilling/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole("status", { name: /loading/i })
+      ).toBeInTheDocument();
     });
   });
 

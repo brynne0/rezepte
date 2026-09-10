@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
@@ -178,7 +179,8 @@ const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
           onClick={parseRecipeWithAI}
           disabled={isParsing}
         >
-          {isParsing ? t("autofilling") : t("autofill")}
+          {isParsing && <Spinner />}
+          {t("autofill")}
         </Button>
       </div>
     </div>
