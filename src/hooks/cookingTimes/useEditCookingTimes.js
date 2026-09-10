@@ -18,6 +18,7 @@ export const useEditCookingTimes = ({
   t,
 }) => {
   const [editingSectionId, setEditingSectionId] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Unsaved changes detection
   const hasUnsavedChanges = useCallback(() => {
@@ -216,6 +217,7 @@ export const useEditCookingTimes = ({
 
   // Save all changes when Save Changes is clicked (like RecipeForm submit)
   const saveAllChanges = useCallback(async () => {
+    setIsSaving(true);
     try {
       // Get user's preferred language for new items
       const preferredLanguage = await getUserPreferredLanguage();
@@ -376,6 +378,8 @@ export const useEditCookingTimes = ({
     } catch (error) {
       console.error("Error saving changes:", error);
       alert(error.message || "Failed to save changes");
+    } finally {
+      setIsSaving(false);
     }
   }, [formData, originalData, loadData]);
 
@@ -545,6 +549,7 @@ export const useEditCookingTimes = ({
   return {
     editingSectionId,
     setEditingSectionId,
+    isSaving,
     hasUnsavedChanges,
     isUnsavedChangesModalOpen,
     confirmNavigation,

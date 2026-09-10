@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import CookingTimeRow from "../CookingTimeRow/CookingTimeRow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -34,6 +35,7 @@ const EditCookingTimes = ({
   removeCookingTime,
   handleCancelEdit,
   handleSaveEdit,
+  isSaving,
   showExitEditModeModal,
   handleConfirmExitEditMode,
   handleCancelExitEditMode,
@@ -282,6 +284,7 @@ const EditCookingTimes = ({
             variant="outline"
             className="w-full sm:w-auto"
             onClick={handleCancelEdit}
+            disabled={isSaving}
           >
             {t("cancel")}
           </Button>
@@ -289,7 +292,9 @@ const EditCookingTimes = ({
             type="button"
             className="w-full sm:w-auto"
             onClick={handleSaveEdit}
+            disabled={isSaving}
           >
+            {isSaving && <Spinner />}
             {t("save_changes", "Save Changes")}
           </Button>
         </div>
