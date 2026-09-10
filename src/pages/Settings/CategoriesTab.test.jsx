@@ -19,14 +19,12 @@ vi.mock("../../lib/supabase", () => ({
 }));
 
 // Mock services
-vi.mock("../../services/categoryPreferencesService", () => ({
-  getAllCategoriesForManagement: vi.fn(),
-  saveUserCategoryPreferences: vi.fn(),
-}));
-
 vi.mock("../../services/categoriesService", () => ({
+  getCategoriesForManagement: vi.fn(),
+  saveCategoryOrder: vi.fn(),
   createCategory: vi.fn(),
   updateCategoryName: vi.fn(),
+  deleteCategory: vi.fn(),
 }));
 
 // Mock components
@@ -50,8 +48,8 @@ vi.mock("react-i18next", () => ({
 }));
 
 describe("CategoriesTab - Adding Categories", () => {
-  let mockGetAllCategoriesForManagement;
-  let mockSaveUserCategoryPreferences;
+  let mockGetCategoriesForManagement;
+  let mockSaveCategoryOrder;
   let mockCreateCategory;
   let mockSupabase;
   let mockUser = { id: "user-123" };
@@ -68,16 +66,12 @@ describe("CategoriesTab - Adding Categories", () => {
       id: "1",
       value: "dinner",
       label: "Dinner",
-      isSystem: true,
-      isVisible: true,
       order: 0,
     },
     {
       id: "2",
       value: "lunch",
       label: "Lunch",
-      isSystem: true,
-      isVisible: true,
       order: 1,
     },
   ];
@@ -102,23 +96,19 @@ describe("CategoriesTab - Adding Categories", () => {
     vi.clearAllMocks();
 
     // Import mocked modules
-    const categoryPreferencesService = await import(
-      "../../services/categoryPreferencesService"
-    );
     const categoriesService = await import("../../services/categoriesService");
     const supabase = await import("../../lib/supabase");
 
-    mockGetAllCategoriesForManagement =
-      categoryPreferencesService.getAllCategoriesForManagement;
-    mockSaveUserCategoryPreferences =
-      categoryPreferencesService.saveUserCategoryPreferences;
+    mockGetCategoriesForManagement =
+      categoriesService.getCategoriesForManagement;
+    mockSaveCategoryOrder = categoriesService.saveCategoryOrder;
     mockCreateCategory = categoriesService.createCategory;
     mockSupabase = supabase.default;
 
     // Setup default mocks
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } });
-    mockGetAllCategoriesForManagement.mockResolvedValue(mockExistingCategories);
-    mockSaveUserCategoryPreferences.mockResolvedValue([]);
+    mockGetCategoriesForManagement.mockResolvedValue(mockExistingCategories);
+    mockSaveCategoryOrder.mockResolvedValue([]);
     mockCreateCategory.mockResolvedValue({ id: "3", name: "breakfast" });
 
     // Setup supabase query mocks for database category checks
@@ -224,13 +214,13 @@ describe("CategoriesTab - Adding Categories", () => {
       const existingCategory = {
         id: "4",
         name: "snacks",
-        is_system: false,
         translated_category: { en: "Snacks" },
       };
 
       const mockQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
+        ilike: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({ data: existingCategory }),
       };
       mockSupabase.from.mockReturnValue(mockQuery);
@@ -411,7 +401,7 @@ describe("CategoriesTab - Adding Categories", () => {
       });
 
       await waitFor(() => {
-        expect(mockSaveUserCategoryPreferences).toHaveBeenCalled();
+        expect(mockSaveCategoryOrder).toHaveBeenCalled();
         expect(mockProps.refreshCategories).toHaveBeenCalled();
         expect(mockProps.resetCategoryFilter).toHaveBeenCalled();
       });

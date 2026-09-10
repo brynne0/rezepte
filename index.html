@@ -82,36 +82,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Set initial theme color on page load
-      function setInitialThemeColor() {
-        let savedTheme = null;
-        try {
-          savedTheme = localStorage.getItem("theme");
-        } catch (e) {
-          // localStorage not available (private browsing, file:// protocol, etc.)
-        }
-
-        const systemPrefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        const isDark = savedTheme ? savedTheme === "dark" : systemPrefersDark;
-
-        const themeColor = isDark ? "#241d19" : "#f2e7d2";
-
-        // Update theme-color meta tags
-        const metaTags = document.querySelectorAll('meta[name="theme-color"]');
-        metaTags.forEach((tag) => tag.remove());
-
-        const newMetaTag = document.createElement("meta");
-        newMetaTag.name = "theme-color";
-        newMetaTag.content = themeColor;
-        document.head.appendChild(newMetaTag);
-      }
-
-      // Set initial theme color
-      setInitialThemeColor();
-    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

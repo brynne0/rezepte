@@ -14,6 +14,7 @@ vi.mock("@/components/ui/toast", () => ({
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key) => key, // Return the key as the translation for simplicity
+    i18n: { language: "en" },
   }),
 }));
 
@@ -449,7 +450,8 @@ describe("AuthPage", () => {
           "unique@example.com",
           "John",
           "uniqueuser",
-          "testpass"
+          "testpass",
+          "en"
         );
       });
     });
@@ -721,7 +723,8 @@ describe("AuthPage", () => {
           "test@example.com",
           "John",
           "testuser",
-          "testpass"
+          "testpass",
+          "en"
         );
       });
     });

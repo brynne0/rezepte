@@ -1,12 +1,24 @@
 import supabase from "../lib/supabase";
 import { translateText } from "./translationService";
 
-// Fetch all categories with their translations
+// Escape % and _ so a typed name isn't read as an ILIKE wildcard
+const escapeForIlike = (value) => value.replace(/[%_]/g, "\\$&");
+
+// Fetch the current user's categories, ordered for display
 export const fetchCategories = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("categories")
     .select("*")
-    .order("name");
+    .eq("user_id", user.id)
+    .order("display_order");
 
   if (error) {
     throw new Error(`Error fetching categories: ${error.message}`);
@@ -30,9 +42,10 @@ export const getCategoriesForUI = async (currentLanguage = "en") => {
 
   // Add database categories
   categories.forEach((category) => {
-    let label = category.name.charAt(0).toUpperCase() + category.name.slice(1);
+    // `name` is already the properly-cased original text; override it
+    // only when a translation exists for the current language
+    let label = category.name;
 
-    // Use translation if available for the current language
     if (
       category.translated_category &&
       category.translated_category[currentLanguage]
@@ -43,12 +56,35 @@ export const getCategoriesForUI = async (currentLanguage = "en") => {
     formattedCategories.push({
       value: category.name,
       label: label,
-      isSystem: category.is_system || false,
       id: category.id,
+      order: category.display_order,
     });
   });
 
   return formattedCategories;
+};
+
+// Get categories formatted for the Settings management UI
+export const getCategoriesForManagement = async (currentLanguage = "en") => {
+  const categories = await fetchCategories();
+
+  return categories.map((category) => {
+    let label = category.name;
+
+    if (
+      category.translated_category &&
+      category.translated_category[currentLanguage]
+    ) {
+      label = category.translated_category[currentLanguage];
+    }
+
+    return {
+      id: category.id,
+      value: category.name,
+      label,
+      order: category.display_order,
+    };
+  });
 };
 
 // Create a new category with translation
@@ -61,12 +97,15 @@ export const createCategory = async (name, translations = {}) => {
     throw new Error("User not authenticated");
   }
 
+  const trimmedName = name.trim();
+
   // Check if category already exists (handle RLS by ignoring errors)
   try {
     const { data: existingCategory } = await supabase
       .from("categories")
       .select("id")
-      .eq("name", name.toLowerCase())
+      .ilike("name", escapeForIlike(trimmedName))
+      .eq("user_id", user.id)
       .single();
 
     if (existingCategory) {
@@ -83,29 +122,39 @@ export const createCategory = async (name, translations = {}) => {
     }
   }
 
-  // Translate to the other language via DeepL
+  // translated_category only ever stores the non-original language
+  let translatedCategory = null;
+  const sourceLanguage =
+    Object.keys(translations).length > 0 ? Object.keys(translations)[0] : "en";
+
   if (Object.keys(translations).length > 0) {
-    const sourceLanguage = Object.keys(translations)[0];
+    const sourceText = translations[sourceLanguage];
     const targetLanguage = sourceLanguage === "en" ? "de" : "en";
 
     try {
       const translatedName = await translateText(
-        translations[sourceLanguage],
+        sourceText,
         targetLanguage,
         "Food category"
       );
-      translations[targetLanguage] = translatedName;
+      // An unchanged result means translateText silently failed and fell
+      // back to the original text - don't store that as a "translation"
+      if (
+        translatedName &&
+        translatedName.trim().toLowerCase() !== sourceText.trim().toLowerCase()
+      ) {
+        translatedCategory = { [targetLanguage]: translatedName };
+      }
     } catch (error) {
       console.warn("Failed to translate category name:", error);
     }
   }
 
   const categoryData = {
-    name: name.toLowerCase(),
-    is_system: false,
-    created_by: user.id,
-    translated_category:
-      Object.keys(translations).length > 0 ? translations : null,
+    name: trimmedName,
+    user_id: user.id,
+    original_language: sourceLanguage,
+    translated_category: translatedCategory,
   };
 
   const { data, error } = await supabase
@@ -154,7 +203,7 @@ export const updateCategoryName = async (
   // Check if category exists and user can edit it
   const { data: category } = await supabase
     .from("categories")
-    .select("is_system, created_by, name, translated_category")
+    .select("user_id, name")
     .eq("id", categoryId)
     .single();
 
@@ -162,20 +211,19 @@ export const updateCategoryName = async (
     throw new Error("Category not found");
   }
 
-  if (category.is_system) {
-    throw new Error("Cannot rename system categories");
-  }
-
-  if (category.created_by !== user.id) {
+  if (category.user_id !== user.id) {
     throw new Error("You can only rename categories you created");
   }
 
+  const trimmedName = newName.trim();
+
   // Check if new name already exists (if name is changing)
-  if (newName.toLowerCase() !== category.name) {
+  if (trimmedName.toLowerCase() !== category.name.toLowerCase()) {
     const { data: existingCategory } = await supabase
       .from("categories")
       .select("id")
-      .eq("name", newName.toLowerCase())
+      .ilike("name", escapeForIlike(trimmedName))
+      .eq("user_id", user.id)
       .single();
 
     if (existingCategory) {
@@ -183,33 +231,41 @@ export const updateCategoryName = async (
     }
   }
 
-  // Translate to the other language via DeepL and merge with existing translations
-  let mergedTranslations = { ...(category.translated_category || {}) };
+  // The rename's language becomes the new original; old translations are
+  // stale, so start fresh instead of merging with what was there before
+  let translatedCategory = null;
+  const sourceLanguage =
+    Object.keys(newTranslations).length > 0
+      ? Object.keys(newTranslations)[0]
+      : "en";
 
   if (Object.keys(newTranslations).length > 0) {
-    const sourceLanguage = Object.keys(newTranslations)[0];
+    const sourceText = newTranslations[sourceLanguage];
     const targetLanguage = sourceLanguage === "en" ? "de" : "en";
 
-    // Update the edited language
-    mergedTranslations[sourceLanguage] = newTranslations[sourceLanguage];
-
-    // Re-translate to the other language
     try {
       const translatedName = await translateText(
-        newTranslations[sourceLanguage],
+        sourceText,
         targetLanguage,
         "Food category"
       );
-      mergedTranslations[targetLanguage] = translatedName;
+      // An unchanged result means translateText silently failed and fell
+      // back to the original text - don't store that as a "translation"
+      if (
+        translatedName &&
+        translatedName.trim().toLowerCase() !== sourceText.trim().toLowerCase()
+      ) {
+        translatedCategory = { [targetLanguage]: translatedName };
+      }
     } catch (error) {
       console.warn("Failed to translate category name:", error);
     }
   }
 
   const updateData = {
-    name: newName.toLowerCase(),
-    translated_category:
-      Object.keys(mergedTranslations).length > 0 ? mergedTranslations : null,
+    name: trimmedName,
+    original_language: sourceLanguage,
+    translated_category: translatedCategory,
   };
 
   const { data, error } = await supabase
@@ -226,7 +282,7 @@ export const updateCategoryName = async (
   return data;
 };
 
-// Delete a category (only non-system categories by their creators)
+// Delete a category (only by its creator)
 export const deleteCategory = async (categoryId) => {
   const {
     data: { user },
@@ -239,7 +295,7 @@ export const deleteCategory = async (categoryId) => {
   // Check if category exists and user can delete it
   const { data: category } = await supabase
     .from("categories")
-    .select("is_system, created_by")
+    .select("user_id")
     .eq("id", categoryId)
     .single();
 
@@ -247,11 +303,7 @@ export const deleteCategory = async (categoryId) => {
     throw new Error("Category not found");
   }
 
-  if (category.is_system) {
-    throw new Error("Cannot delete system categories");
-  }
-
-  if (category.created_by !== user.id) {
+  if (category.user_id !== user.id) {
     throw new Error("You can only delete categories you created");
   }
 
@@ -267,13 +319,39 @@ export const deleteCategory = async (categoryId) => {
   return true;
 };
 
+// Persist display order for a set of categories (id -> order)
+export const saveCategoryOrder = async (orderedCategoryIds) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  await Promise.all(
+    orderedCategoryIds.map((categoryId, index) =>
+      supabase
+        .from("categories")
+        .update({ display_order: index })
+        .eq("id", categoryId)
+        .eq("user_id", user.id)
+    )
+  );
+};
+
 // Add recipe to category (for many-to-many relationship)
 export const addRecipeToCategory = async (recipeId, categoryName) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Get category by name
   const { data: category } = await supabase
     .from("categories")
     .select("id")
     .eq("name", categoryName)
+    .eq("user_id", user?.id)
     .single();
 
   if (!category) {
@@ -311,11 +389,16 @@ export const addRecipeToCategory = async (recipeId, categoryName) => {
 
 // Remove recipe from category
 export const removeRecipeFromCategory = async (recipeId, categoryName) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Get category by name
   const { data: category } = await supabase
     .from("categories")
     .select("id")
     .eq("name", categoryName)
+    .eq("user_id", user?.id)
     .single();
 
   if (!category) {
@@ -350,11 +433,16 @@ export const getRecipesByCategory = async (
       .range((page - 1) * limit, page * limit - 1);
   }
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Get category
   const { data: category } = await supabase
     .from("categories")
     .select("id")
     .eq("name", categoryName)
+    .eq("user_id", user?.id)
     .single();
 
   if (!category) {
