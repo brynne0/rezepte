@@ -108,10 +108,6 @@ const Recipe = () => {
   const isOwner = !!user?.id && recipe?.user_id === user?.id;
   const isPrivate = privateOverride ?? recipe?.private ?? false;
 
-  // Generate signed URLs for recipe images — only for the owner.
-  // Friends cannot generate signed URLs for another user's storage bucket path.
-  const { signedImages } = useSignedImageUrls(isOwner ? recipe?.images : []);
-
   // When viewing a friend's recipe, show the "viewing a friend" banner in
   // Header (fetching their profile for the name pill); hide it for your own.
   const showFriendBar = !!recipe && !isOwner;
@@ -121,6 +117,12 @@ const Recipe = () => {
     enabled: showFriendBar,
   });
 
+  // Show images for the owner, or for a friend who has image sharing enabled.
+  const canViewImages = isOwner || !!friendProfile?.friends_can_view_images;
+  const { signedImages } = useSignedImageUrls(
+    canViewImages ? recipe?.images : []
+  );
+
   useEffect(() => {
     if (!showFriendBar) {
       setFriendBar(null);
@@ -129,6 +131,7 @@ const Recipe = () => {
     setFriendBar({
       name: friendProfile?.first_name || null,
       loading: friendProfileLoading,
+      hideBack: true,
     });
     return () => setFriendBar(null);
   }, [showFriendBar, friendProfile, friendProfileLoading, setFriendBar]);
@@ -387,7 +390,7 @@ const Recipe = () => {
 
         <CardContent className="flex flex-col gap-4">
           {/* Recipe Images - floating within content - only show when logged in */}
-          {isOwner && signedImages && signedImages.length > 0 && (
+          {canViewImages && signedImages && signedImages.length > 0 && (
             <ImageGallery images={signedImages} />
           )}
 

@@ -118,7 +118,14 @@ import {
 } from "@/components/ui/empty";
 import { Toaster, toast } from "@/components/ui/toast";
 import Pagination from "@/components/Pagination/Pagination";
-import { SearchIcon, MailIcon, ArrowLeft, Trash2, Link } from "lucide-react";
+import {
+  SearchIcon,
+  MailIcon,
+  ArrowLeft,
+  Trash2,
+  Link,
+  User,
+} from "lucide-react";
 
 function Section({ title, children }) {
   return (
@@ -214,6 +221,22 @@ function ShowcasePage() {
             <SearchIcon />
           </Button>
         </ButtonGroup>
+      </Section>
+
+      <Section title="Badges">
+        <Badge size="lg">Default Large</Badge>
+        <Badge variant="secondary" size="lg">
+          Secondary Large
+        </Badge>
+        <Badge variant="outline" size="lg">
+          Outline Large
+        </Badge>
+        <Badge>Default</Badge>
+        <Badge variant="secondary">Secondary</Badge>
+        <Badge variant="outline">Outline</Badge>
+        <Badge variant="destructive">Destructive</Badge>
+        <Badge variant="ghost">Ghost</Badge>
+        <Badge variant="link">Link</Badge>
       </Section>
 
       <Section title="Card">
