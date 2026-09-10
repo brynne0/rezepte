@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "/fonts/fonts.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -15,7 +16,6 @@
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-body: var(--body-text);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
 
@@ -35,7 +35,7 @@
 
   --font-sans: "Gabarito", sans-serif;
   --font-heading: var(--font-sans);
-  --font-forta: "Forta", sans-serif;
+  --font-forta: "Forta", "Gabarito", sans-serif;
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -69,7 +69,6 @@
   --popover-foreground: #342a24;
   --primary: #55443c;
   --primary-foreground: oklch(0.985 0.001 106.423);
-  --body-text: #ccb3a3;
   --secondary: oklch(0.97 0.001 106.424);
   --secondary-foreground: oklch(0.216 0.006 56.043);
   --muted: #f8f2e6;
@@ -108,7 +107,6 @@
   --popover-foreground: #d4c2b3;
   --primary: #ccb3a3;
   --primary-foreground: oklch(0.216 0.006 56.043);
-  --body-text: #ccb3a3;
   --secondary: oklch(0.268 0.007 34.298);
   --secondary-foreground: oklch(0.985 0.001 106.423);
   --muted: #3e352f;
