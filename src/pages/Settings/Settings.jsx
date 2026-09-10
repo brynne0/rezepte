@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  getUserPreferredLanguage,
   updateUserPreferredLanguage,
   getUserProfile,
   updateUserProfile,
@@ -55,15 +54,8 @@ const Settings = ({ resetCategoryFilter }) => {
     const loadProfile = async () => {
       try {
         setLoading(true);
-        const [profileData, preferredLanguage] = await Promise.all([
-          getUserProfile(),
-          getUserPreferredLanguage(),
-        ]);
-
-        setProfileData({
-          ...profileData,
-          preferred_language: preferredLanguage,
-        });
+        const profileData = await getUserProfile();
+        setProfileData(profileData);
       } catch (err) {
         setError(err.message);
       } finally {
