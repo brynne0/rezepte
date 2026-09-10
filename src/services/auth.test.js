@@ -371,22 +371,15 @@ describe("Auth Service", () => {
 
   describe("getFirstName", () => {
     test("returns formatted display name for authenticated user", async () => {
-      const mockUser = { id: "123", email: "test@example.com" };
       const mockUserData = { first_name: "John" };
-
-      supabase.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      });
 
       supabase.single.mockResolvedValue({
         data: mockUserData,
         error: null,
       });
 
-      const result = await getFirstName();
+      const result = await getFirstName("123");
 
-      expect(supabase.auth.getUser).toHaveBeenCalled();
       expect(supabase.from).toHaveBeenCalledWith("users");
       expect(supabase.select).toHaveBeenCalledWith("first_name");
       expect(supabase.eq).toHaveBeenCalledWith("id", "123");
@@ -395,91 +388,56 @@ describe("Auth Service", () => {
       expect(result).toBe("John");
     });
 
-    test("returns null for non-authenticated users", async () => {
-      supabase.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: null,
-      });
-
+    test("returns null when no userId is provided", async () => {
       const result = await getFirstName();
 
       expect(result).toBeNull();
       expect(supabase.from).not.toHaveBeenCalled();
     });
 
-    test("returns null when auth getUser fails", async () => {
-      const mockError = { message: "Authentication failed" };
-      supabase.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: mockError,
-      });
-
-      const result = await getFirstName();
-
-      expect(result).toBeNull();
-    });
-
     test("returns null when user data query fails", async () => {
-      const mockUser = { id: "123", email: "test@example.com" };
       const mockError = { message: "User not found" };
-
-      supabase.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      });
 
       supabase.single.mockResolvedValue({
         data: null,
         error: mockError,
       });
 
-      const result = await getFirstName();
+      const result = await getFirstName("123");
 
       expect(result).toBeNull();
     });
 
     test("returns null when first_name is missing", async () => {
-      const mockUser = { id: "123", email: "test@example.com" };
       const mockUserData = { first_name: null };
-
-      supabase.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      });
 
       supabase.single.mockResolvedValue({
         data: mockUserData,
         error: null,
       });
 
-      const result = await getFirstName();
+      const result = await getFirstName("123");
 
       expect(result).toBeNull();
     });
 
     test("returns null when first_name is empty string", async () => {
-      const mockUser = { id: "123", email: "test@example.com" };
       const mockUserData = { first_name: "" };
-
-      supabase.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      });
 
       supabase.single.mockResolvedValue({
         data: mockUserData,
         error: null,
       });
 
-      const result = await getFirstName();
+      const result = await getFirstName("123");
 
       expect(result).toBeNull();
     });
 
     test("handles exceptions gracefully", async () => {
-      supabase.auth.getUser.mockRejectedValue(new Error("Network error"));
+      supabase.single.mockRejectedValue(new Error("Network error"));
 
-      const result = await getFirstName();
+      const result = await getFirstName("123");
 
       expect(result).toBeNull();
     });

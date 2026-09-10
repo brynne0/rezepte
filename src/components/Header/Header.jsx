@@ -50,7 +50,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
 
@@ -107,7 +107,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
   // Load display name on app startup
   useEffect(() => {
     const loadfirstName = async () => {
-      const name = await getFirstName();
+      const name = await getFirstName(user?.id);
       if (name) {
         setFirstName(name);
       }
@@ -118,7 +118,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
     } else {
       setFirstName("");
     }
-  }, [isLoggedIn, setFirstName]);
+  }, [isLoggedIn, user, setFirstName]);
 
   const handleLogout = async () => {
     await signOut();

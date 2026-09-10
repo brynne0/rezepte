@@ -105,23 +105,20 @@ export const removeFriendship = async (otherUserId) => {
 
 // Get accepted friends with first_name (server-side friendship check inside RPC).
 // Two-step: fetch friendship IDs from RLS-protected table, then call get_friend_profiles.
-export const getFriends = async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+export const getFriends = async (userId) => {
+  if (!userId) throw new Error("User not authenticated");
 
   const { data: friendships, error } = await supabase
     .from("friendships")
     .select("requester_id, addressee_id")
     .eq("status", "accepted")
-    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
 
   if (error) throw error;
   if (!friendships || friendships.length === 0) return [];
 
   const friendIds = friendships.map((f) =>
-    f.requester_id === user.id ? f.addressee_id : f.requester_id
+    f.requester_id === userId ? f.addressee_id : f.requester_id
   );
 
   const { data: profiles, error: profilesError } = await supabase.rpc(
@@ -135,16 +132,13 @@ export const getFriends = async () => {
 
 // Get pending incoming requests — returns (id, username) only, no first_name.
 // Two-step: fetch requester IDs, then look up their public profiles.
-export const getPendingRequests = async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+export const getPendingRequests = async (userId) => {
+  if (!userId) throw new Error("User not authenticated");
 
   const { data: pending, error } = await supabase
     .from("friendships")
     .select("requester_id")
-    .eq("addressee_id", user.id)
+    .eq("addressee_id", userId)
     .eq("status", "pending");
 
   if (error) throw error;
@@ -162,16 +156,13 @@ export const getPendingRequests = async () => {
 };
 
 // Get pending outgoing requests — returns (id, username) only, no first_name.
-export const getSentRequests = async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+export const getSentRequests = async (userId) => {
+  if (!userId) throw new Error("User not authenticated");
 
   const { data: pending, error } = await supabase
     .from("friendships")
     .select("addressee_id")
-    .eq("requester_id", user.id)
+    .eq("requester_id", userId)
     .eq("status", "pending");
 
   if (error) throw error;
