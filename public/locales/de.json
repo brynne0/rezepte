@@ -101,6 +101,7 @@
   "loading_recipes": "Lade Rezepte...",
   "welcome_add_recipe": "Willkommen! Füge dein erstes Rezept hinzu, um loszulegen.",
   "no_internet_connection": "Keine Internetverbindung",
+  "action_requires_internet": "Offline nicht verfügbar",
 
   "servings": "Portionen",
   "decrease_servings": "Portionen verringern",

@@ -47,6 +47,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 
 const Recipe = () => {
   const { id } = useParams();
@@ -60,6 +61,7 @@ const Recipe = () => {
   const [checkedIngredients, setCheckedIngredients] = useState({});
   const [privateOverride, setPrivateOverride] = useState(null);
   const recipeStorageKey = id;
+  const isOnline = useOnlineStatus();
 
   // Reset scale and privacy override when navigating to a different recipe
   useEffect(() => {
@@ -345,6 +347,7 @@ const Recipe = () => {
                           }
                           data-testid="edit-recipe-btn"
                           aria-label={t("edit_recipe")}
+                          disabled={!isOnline}
                         >
                           <Pencil />
                         </Button>
@@ -381,6 +384,7 @@ const Recipe = () => {
                               ? t("make_recipe_visible_to_friends")
                               : t("make_recipe_private")
                           }
+                          disabled={!isOnline}
                         >
                           {isPrivate ? <Lock /> : <LockOpen />}
                         </Button>

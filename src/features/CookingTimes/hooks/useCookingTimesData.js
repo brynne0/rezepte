@@ -1,8 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { getTranslatedCookingTimes } from "../../../services/cookingTimesTranslationService";
 import { getUserPreferredLanguage } from "../../../services/userService";
+import { useAuth } from "@/hooks/data/useAuth";
 
 export const useCookingTimesData = ({ isEditMode, i18n }) => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id;
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState("all");
   const originalUserLanguage = useRef(null);
@@ -70,11 +75,13 @@ export const useCookingTimesData = ({ isEditMode, i18n }) => {
       const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
       const preferredLanguage = await getUserPreferredLanguage();
 
-      // Fetch cooking times with translations
-      const cookingTimesData = await getTranslatedCookingTimes(
-        currentLanguage,
-        preferredLanguage // Use preferred language as fallback for items without original_language
-      );
+      // Fetch cooking times with translations (cached/persisted via TanStack
+      // Query so it's available offline, same as recipes/categories)
+      const cookingTimesData = await queryClient.fetchQuery({
+        queryKey: ["cookingTimes", userId, currentLanguage],
+        queryFn: () =>
+          getTranslatedCookingTimes(currentLanguage, preferredLanguage),
+      });
 
       // Organize data into sections exactly like RecipeForm
       organizeCookingTimesIntoSections(cookingTimesData);
@@ -83,7 +90,7 @@ export const useCookingTimesData = ({ isEditMode, i18n }) => {
     } finally {
       setLoading(false);
     }
-  }, [organizeCookingTimesIntoSections, i18n.language]);
+  }, [organizeCookingTimesIntoSections, i18n.language, queryClient, userId]);
 
   useEffect(() => {
     // Always load data on first render, then don't reload when in edit mode to preserve user's edits

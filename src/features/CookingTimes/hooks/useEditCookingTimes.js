@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createCookingTime,
   updateCookingTime,
@@ -17,6 +18,7 @@ export const useEditCookingTimes = ({
   loadData,
   t,
 }) => {
+  const queryClient = useQueryClient();
   const [editingSectionId, setEditingSectionId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -373,6 +375,10 @@ export const useEditCookingTimes = ({
         }
       }
 
+      // Invalidate the cached list so the reload below picks up the changes
+      // just made (fetchQuery would otherwise serve the stale cached copy).
+      await queryClient.invalidateQueries({ queryKey: ["cookingTimes"] });
+
       // Reload data after saving
       await loadData();
     } catch (error) {
@@ -381,7 +387,7 @@ export const useEditCookingTimes = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, originalData, loadData]);
+  }, [formData, originalData, loadData, queryClient]);
 
   // Handle field enter navigation (matches RecipeForm handleIngredientFieldEnter pattern)
   const handleCookingTimeFieldEnter = useCallback(

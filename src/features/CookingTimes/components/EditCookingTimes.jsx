@@ -36,6 +36,7 @@ const EditCookingTimes = ({
   handleCancelEdit,
   handleSaveEdit,
   isSaving,
+  isOnline,
   showExitEditModeModal,
   handleConfirmExitEditMode,
   handleCancelExitEditMode,
@@ -71,6 +72,7 @@ const EditCookingTimes = ({
           variant="dashed"
           className="w-full"
           onClick={addSection}
+          disabled={!isOnline}
         >
           <Plus size={16} />
           {t("add_section")}
@@ -118,6 +120,7 @@ const EditCookingTimes = ({
           variant="outline"
           className="w-full"
           onClick={() => addCookingTime("ungrouped")}
+          disabled={!isOnline}
         >
           <Plus size={16} data-testid="add-cooking-time-btn" />
           {t("add_cooking_time")}
@@ -204,6 +207,7 @@ const EditCookingTimes = ({
                                   variant="ghost-destructive"
                                   size="icon-sm"
                                   onClick={() => removeSection(section.id)}
+                                  disabled={!isOnline}
                                   aria-label={t("remove_section")}
                                 >
                                   <Trash2 size={16} />
@@ -259,6 +263,7 @@ const EditCookingTimes = ({
                           variant="outline"
                           className="mt-2 w-full"
                           onClick={() => addCookingTime(section.id)}
+                          disabled={!isOnline}
                           aria-label={t("add_cooking_time")}
                         >
                           <Plus
@@ -292,7 +297,7 @@ const EditCookingTimes = ({
             type="button"
             className="w-full sm:w-auto"
             onClick={handleSaveEdit}
-            disabled={isSaving}
+            disabled={isSaving || !isOnline}
           >
             {isSaving && <Spinner />}
             {t("save_changes", "Save Changes")}

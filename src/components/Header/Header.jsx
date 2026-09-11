@@ -34,6 +34,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "../../hooks/ui/useTheme";
 import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
+import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 import { cn } from "cn";
 import {
   AlertDialog,
@@ -53,6 +54,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
   const { isLoggedIn, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
+  const isOnline = useOnlineStatus();
 
   const [showInstallModal, setShowInstallModal] = useState(false);
 
@@ -214,11 +216,18 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
         <DropdownMenuContent align="center">
           {isLoggedIn ? (
             <>
-              <DropdownMenuItem onClick={() => navigate("/settings")}>
+              <DropdownMenuItem
+                onClick={() => navigate("/settings")}
+                disabled={!isOnline}
+              >
                 <Settings className="size-4" />
                 {t("settings")}
               </DropdownMenuItem>
-              <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={handleLogout}
+                disabled={!isOnline}
+              >
                 <LogOut className="size-4" />
                 {t("logout")}
               </DropdownMenuItem>
@@ -276,11 +285,14 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
             {isLoggedIn && (
               <>
                 <FriendsPanel
-                  tooltipLabel={t("friends")}
+                  tooltipLabel={
+                    isOnline ? t("friends") : t("action_requires_internet")
+                  }
                   renderTrigger={(pendingCount) => (
                     <Button
                       variant="ghost"
                       size="icon-lg"
+                      disabled={!isOnline}
                       className={
                         isFriendsPageActive
                           ? "relative text-accent-red"
@@ -308,6 +320,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
                         variant="ghost"
                         size="icon-lg"
                         onClick={() => navigate("/add-recipe")}
+                        disabled={!isOnline}
                         className={
                           isActivePage("/add-recipe") ? "text-accent-red" : ""
                         }
@@ -317,7 +330,11 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
                       </Button>
                     }
                   />
-                  <TooltipContent>{t("add_new_recipe")}</TooltipContent>
+                  <TooltipContent>
+                    {isOnline
+                      ? t("add_new_recipe")
+                      : t("action_requires_internet")}
+                  </TooltipContent>
                 </Tooltip>
                 {/* Cooking Times */}
                 <Tooltip>
@@ -377,6 +394,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          disabled={!isOnline}
                           className={
                             isFriendsPageActive
                               ? "w-full justify-start gap-1.5 text-accent-red"
@@ -399,6 +417,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
                     />
                     <DropdownMenuItem
                       onClick={() => navigate("/add-recipe")}
+                      disabled={!isOnline}
                       className={
                         isActivePage("/add-recipe") ? "text-accent-red" : ""
                       }

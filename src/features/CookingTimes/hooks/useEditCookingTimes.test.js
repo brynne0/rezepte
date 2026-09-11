@@ -8,6 +8,7 @@ import {
 } from "../../../services/cookingTimesService";
 import { updateCookingTimeTranslations } from "../../../services/cookingTimesTranslationService";
 import { getUserPreferredLanguage } from "../../../services/userService";
+import { createQueryClientWrapper } from "../../../test-utils/queryClient";
 
 vi.mock("../../../services/cookingTimesService", () => ({
   createCookingTime: vi.fn(),
@@ -63,16 +64,18 @@ const setup = (formDataOverrides = {}) => {
   const loadData = vi.fn().mockResolvedValue();
   const t = (key) => key;
 
-  const { result, rerender } = renderHook(() =>
-    useEditCookingTimes({
-      isEditMode: true,
-      formData,
-      setFormData,
-      originalData,
-      generateTempId,
-      loadData,
-      t,
-    })
+  const { result, rerender } = renderHook(
+    () =>
+      useEditCookingTimes({
+        isEditMode: true,
+        formData,
+        setFormData,
+        originalData,
+        generateTempId,
+        loadData,
+        t,
+      }),
+    { wrapper: createQueryClientWrapper() }
   );
 
   return {
@@ -238,16 +241,18 @@ describe("useEditCookingTimes", () => {
       const formData = { ungroupedCookingTimes: [], cookingTimeSections: [] };
       const setFormData = vi.fn();
 
-      const { result } = renderHook(() =>
-        useEditCookingTimes({
-          isEditMode: true,
-          formData,
-          setFormData,
-          originalData,
-          generateTempId: vi.fn(),
-          loadData: vi.fn().mockResolvedValue(),
-          t: (k) => k,
-        })
+      const { result } = renderHook(
+        () =>
+          useEditCookingTimes({
+            isEditMode: true,
+            formData,
+            setFormData,
+            originalData,
+            generateTempId: vi.fn(),
+            loadData: vi.fn().mockResolvedValue(),
+            t: (k) => k,
+          }),
+        { wrapper: createQueryClientWrapper() }
       );
 
       await act(async () => {
@@ -275,16 +280,18 @@ describe("useEditCookingTimes", () => {
         cookingTimeSections: [],
       };
 
-      const { result } = renderHook(() =>
-        useEditCookingTimes({
-          isEditMode: true,
-          formData,
-          setFormData: vi.fn(),
-          originalData,
-          generateTempId: vi.fn(),
-          loadData: vi.fn().mockResolvedValue(),
-          t: (k) => k,
-        })
+      const { result } = renderHook(
+        () =>
+          useEditCookingTimes({
+            isEditMode: true,
+            formData,
+            setFormData: vi.fn(),
+            originalData,
+            generateTempId: vi.fn(),
+            loadData: vi.fn().mockResolvedValue(),
+            t: (k) => k,
+          }),
+        { wrapper: createQueryClientWrapper() }
       );
 
       await act(async () => {
@@ -315,16 +322,18 @@ describe("useEditCookingTimes", () => {
         cookingTimeSections: [],
       };
 
-      const { result } = renderHook(() =>
-        useEditCookingTimes({
-          isEditMode: true,
-          formData,
-          setFormData: vi.fn(),
-          originalData,
-          generateTempId: vi.fn(),
-          loadData: vi.fn().mockResolvedValue(),
-          t: (k) => k,
-        })
+      const { result } = renderHook(
+        () =>
+          useEditCookingTimes({
+            isEditMode: true,
+            formData,
+            setFormData: vi.fn(),
+            originalData,
+            generateTempId: vi.fn(),
+            loadData: vi.fn().mockResolvedValue(),
+            t: (k) => k,
+          }),
+        { wrapper: createQueryClientWrapper() }
       );
 
       await act(async () => {
@@ -357,16 +366,18 @@ describe("useEditCookingTimes", () => {
         cookingTimeSections: [],
       };
 
-      const { result } = renderHook(() =>
-        useEditCookingTimes({
-          isEditMode: true,
-          formData,
-          setFormData: vi.fn(),
-          originalData,
-          generateTempId: vi.fn(),
-          loadData: vi.fn().mockResolvedValue(),
-          t: (k) => k,
-        })
+      const { result } = renderHook(
+        () =>
+          useEditCookingTimes({
+            isEditMode: true,
+            formData,
+            setFormData: vi.fn(),
+            originalData,
+            generateTempId: vi.fn(),
+            loadData: vi.fn().mockResolvedValue(),
+            t: (k) => k,
+          }),
+        { wrapper: createQueryClientWrapper() }
       );
 
       await act(async () => {
@@ -395,16 +406,18 @@ describe("useEditCookingTimes", () => {
         cookingTimeSections: [],
       };
 
-      const { result } = renderHook(() =>
-        useEditCookingTimes({
-          isEditMode: true,
-          formData,
-          setFormData: vi.fn(),
-          originalData,
-          generateTempId: vi.fn(),
-          loadData: vi.fn().mockResolvedValue(),
-          t: (k) => k,
-        })
+      const { result } = renderHook(
+        () =>
+          useEditCookingTimes({
+            isEditMode: true,
+            formData,
+            setFormData: vi.fn(),
+            originalData,
+            generateTempId: vi.fn(),
+            loadData: vi.fn().mockResolvedValue(),
+            t: (k) => k,
+          }),
+        { wrapper: createQueryClientWrapper() }
       );
 
       await act(async () => {

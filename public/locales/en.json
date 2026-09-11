@@ -101,6 +101,7 @@
   "loading_recipes": "Loading recipes...",
   "welcome_add_recipe": "Welcome! Add your first recipe to get started.",
   "no_internet_connection": "No internet connection",
+  "action_requires_internet": "Not available offline",
 
   "servings": "Servings",
   "decrease_servings": "Decrease servings",

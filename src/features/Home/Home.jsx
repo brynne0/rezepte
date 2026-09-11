@@ -29,21 +29,19 @@ function Home() {
 
   return (
     <>
-      {isOnline && (
-        <RecipeFilters
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSearchSubmit={() => navigate("/")}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          showImages={showImages}
-          setShowImages={setShowImages}
-          onPageReset={onPageReset}
-        />
-      )}
+      <RecipeFilters
+        categories={categories}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSearchSubmit={() => navigate("/")}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        showImages={showImages}
+        setShowImages={setShowImages}
+        onPageReset={onPageReset}
+      />
       <RecipeList
         selectedCategory={selectedCategory}
         recipes={recipes}
@@ -54,15 +52,13 @@ function Home() {
         loading={isFetchingRecipes}
         isOnline={isOnline}
       />
-      {isOnline && (
-        <Pagination
-          currentPage={paginationInfo.currentPage}
-          totalPages={paginationInfo.totalPages}
-          onPageChange={onPageChange}
-          hasNextPage={paginationInfo.hasNextPage}
-          hasPrevPage={paginationInfo.hasPrevPage}
-        />
-      )}
+      <Pagination
+        currentPage={paginationInfo.currentPage}
+        totalPages={paginationInfo.totalPages}
+        onPageChange={onPageChange}
+        hasNextPage={paginationInfo.hasNextPage}
+        hasPrevPage={paginationInfo.hasPrevPage}
+      />
     </>
   );
 }

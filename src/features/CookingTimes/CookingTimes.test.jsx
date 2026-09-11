@@ -4,11 +4,16 @@ import { createRoutesStub } from "react-router-dom";
 import CookingTimes from "./CookingTimes";
 import * as cookingTimesTranslationService from "../../services/cookingTimesTranslationService";
 import * as userService from "../../services/userService";
+import { createQueryClientWrapper } from "../../test-utils/queryClient";
 
 // Mock services
 vi.mock("../../services/cookingTimesService");
 vi.mock("../../services/cookingTimesTranslationService");
 vi.mock("../../services/userService");
+
+vi.mock("../../hooks/data/useAuth", () => ({
+  useAuth: () => ({ user: { id: "test-user-id" } }),
+}));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -132,7 +137,9 @@ describe("CookingTimes", () => {
         ),
       },
     ]);
-    return render(<Stub initialEntries={["/"]} />);
+    return render(<Stub initialEntries={["/"]} />, {
+      wrapper: createQueryClientWrapper(),
+    });
   };
 
   describe("Loading State", () => {

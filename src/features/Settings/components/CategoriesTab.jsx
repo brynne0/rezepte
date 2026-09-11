@@ -47,10 +47,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import { cn } from "cn";
 
 const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   const queryClient = useQueryClient();
+  const isOnline = useOnlineStatus();
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [isEditingCategories, setIsEditingCategories] = useState(false);
@@ -551,7 +553,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
               variant="ghost"
               size="sm"
               onClick={() => setIsEditingCategories(true)}
-              disabled={categoriesLoading}
+              disabled={categoriesLoading || !isOnline}
             >
               <Pencil />
               {t("edit_categories")}
@@ -571,7 +573,8 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
             disabled={
               isAddingCategory ||
               editingCategoryId !== null ||
-              i18n.language !== preferredLanguage
+              i18n.language !== preferredLanguage ||
+              !isOnline
             }
           >
             <Plus size={16} />
@@ -680,6 +683,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                           variant="ghost"
                                           size="icon-sm"
                                           onClick={handleSaveEditCategory}
+                                          disabled={!isOnline}
                                           aria-label={t("save_changes")}
                                         >
                                           <Check size={16} />
@@ -722,6 +726,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                             onClick={() =>
                                               handleEditCategory(category)
                                             }
+                                            disabled={!isOnline}
                                             aria-label={t("edit_category_name")}
                                           >
                                             <Pencil size={16} />
@@ -747,6 +752,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                                 category.label
                                               )
                                             }
+                                            disabled={!isOnline}
                                             aria-label={t("delete_category")}
                                           >
                                             <Trash2 size={16} />
@@ -797,7 +803,8 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
             disabled={
               preferencesLoading ||
               i18n.language !== preferredLanguage ||
-              !hasUnsavedChanges()
+              !hasUnsavedChanges() ||
+              !isOnline
             }
           >
             {preferencesLoading && <Spinner />}

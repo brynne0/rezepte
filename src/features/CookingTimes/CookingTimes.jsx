@@ -35,6 +35,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import { useCookingTimesData } from "./hooks/useCookingTimesData";
 import { useEditCookingTimes } from "./hooks/useEditCookingTimes";
+import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 
 const CookingTimes = ({
   isEditMode: externalIsEditMode,
@@ -42,6 +43,7 @@ const CookingTimes = ({
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const isOnline = useOnlineStatus();
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [showExitEditModeModal, setShowExitEditModeModal] = useState(false);
 
@@ -190,13 +192,18 @@ const CookingTimes = ({
                     size="icon-sm"
                     className="absolute right-0"
                     onClick={enterEditMode}
+                    disabled={!isOnline}
                     aria-label={t("edit_mode", "Edit Mode")}
                   >
                     <Pencil size={16} />
                   </Button>
                 }
               />
-              <TooltipContent>{t("edit_mode", "Edit Mode")}</TooltipContent>
+              <TooltipContent>
+                {isOnline
+                  ? t("edit_mode", "Edit Mode")
+                  : t("action_requires_internet")}
+              </TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -259,6 +266,7 @@ const CookingTimes = ({
             <EmptyContent>
               <Button
                 type="button"
+                disabled={!isOnline}
                 onClick={async () => {
                   setIsEditMode(true);
                   const preferredLanguage = await getUserPreferredLanguage();
@@ -302,6 +310,7 @@ const CookingTimes = ({
             handleCancelEdit={handleCancelEdit}
             handleSaveEdit={handleSaveEdit}
             isSaving={isSaving}
+            isOnline={isOnline}
             showExitEditModeModal={showExitEditModeModal}
             handleConfirmExitEditMode={handleConfirmExitEditMode}
             handleCancelExitEditMode={handleCancelExitEditMode}

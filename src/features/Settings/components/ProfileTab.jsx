@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 
 const ProfileTab = ({
   profileData,
@@ -39,6 +40,7 @@ const ProfileTab = ({
   setUsernameError,
   t,
 }) => {
+  const isOnline = useOnlineStatus();
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       handleSaveProfile();
@@ -52,7 +54,12 @@ const ProfileTab = ({
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">{t("profile")}</h2>
         {!isEditingProfile && (
-          <Button variant="ghost" size="sm" onClick={handleEditProfile}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleEditProfile}
+            disabled={!isOnline}
+          >
             <Pencil />
             {t("edit_profile")}
           </Button>
@@ -111,7 +118,7 @@ const ProfileTab = ({
             <InputGroupAddon align="inline-end">
               <InputGroupButton
                 onClick={handleChangeEmail}
-                disabled={isEditingProfile}
+                disabled={isEditingProfile || !isOnline}
               >
                 {t("change_email")}
               </InputGroupButton>
@@ -132,7 +139,7 @@ const ProfileTab = ({
             <InputGroupAddon align="inline-end">
               <InputGroupButton
                 onClick={handleChangePassword}
-                disabled={isEditingProfile}
+                disabled={isEditingProfile || !isOnline}
               >
                 {t("change_password")}
               </InputGroupButton>
@@ -150,7 +157,11 @@ const ProfileTab = ({
           >
             {t("cancel")}
           </Button>
-          <Button className="w-full sm:w-auto" onClick={handleSaveProfile}>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={handleSaveProfile}
+            disabled={!isOnline}
+          >
             {t("save_changes")}
           </Button>
         </div>
@@ -168,6 +179,7 @@ const ProfileTab = ({
               handleLanguageChange(groupValue[0]);
             }
           }}
+          disabled={!isOnline}
         >
           <ToggleGroupItem value="en">EN</ToggleGroupItem>
           <ToggleGroupItem value="de">DE</ToggleGroupItem>
@@ -188,6 +200,7 @@ const ProfileTab = ({
             id="friends-can-view-images"
             checked={!!profileData.friends_can_view_images}
             onCheckedChange={handleFriendsCanViewImagesChange}
+            disabled={!isOnline}
           />
         </Label>
       </div>
@@ -199,6 +212,7 @@ const ProfileTab = ({
           className="w-full sm:w-auto"
           variant="destructive"
           onClick={handleDeleteAccount}
+          disabled={!isOnline}
         >
           {t("delete_account")}
         </Button>
