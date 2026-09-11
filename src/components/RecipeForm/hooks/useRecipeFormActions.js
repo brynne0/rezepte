@@ -333,6 +333,12 @@ export const useRecipeFormActions = ({
         flushSync(() => setInitialFormData(formData));
         queryClient.invalidateQueries({ queryKey: ["recipes"] });
         queryClient.invalidateQueries({ queryKey: ["recipe"] });
+        toast.add({
+          title: t(
+            initialRecipe ? "recipe_updated_success" : "recipe_created_success"
+          ),
+          type: "success",
+        });
         if (initialRecipe) {
           navigate(-1);
         } else {

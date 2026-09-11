@@ -1550,9 +1550,10 @@ describe("RecipeForm", () => {
 
       renderComponent();
 
-      // Should still render the droppable area even with no instructions
-      const droppableArea = screen.getByTestId("droppable-instructions");
-      expect(droppableArea).toBeInTheDocument();
+      // Should not render the droppable area when there are no instructions,
+      // to avoid an empty bordered box collapsing into a stray line
+      const droppableArea = screen.queryByTestId("droppable-instructions");
+      expect(droppableArea).not.toBeInTheDocument();
 
       // Should not have any instruction drag handles
       const dragHandles = screen.queryAllByTestId(/draggable-instruction-/);

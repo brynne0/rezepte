@@ -225,6 +225,8 @@
   "no_categories": "No categories yet",
   "recipe_create_error": "Failed to create recipe. Please try again.",
   "recipe_update_error": "Failed to update recipe. Please try again.",
+  "recipe_created_success": "Recipe added successfully",
+  "recipe_updated_success": "Recipe updated successfully",
 
   "unsaved_changes_warning": "You have unsaved changes. Are you sure you want to leave this page?",
   "leave_page": "Leave page",
