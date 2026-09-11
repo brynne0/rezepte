@@ -549,7 +549,9 @@ describe("CategoriesTab - Adding Categories", () => {
         expect(mockGetUserPreferredLanguage).toHaveBeenCalled();
       });
 
-      expect(screen.getByText("edit_categories").closest("button")).toBeDisabled();
+      expect(
+        screen.getByText("edit_categories").closest("button")
+      ).toBeDisabled();
     });
 
     it("clicking the disabled edit button does not enter edit mode", async () => {

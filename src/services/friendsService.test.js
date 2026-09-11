@@ -345,9 +345,7 @@ describe("Friends Service", () => {
     });
 
     test("throws when no userId is provided", async () => {
-      await expect(getSentRequests()).rejects.toThrow(
-        "User not authenticated"
-      );
+      await expect(getSentRequests()).rejects.toThrow("User not authenticated");
     });
   });
 

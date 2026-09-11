@@ -202,53 +202,46 @@ export const validateRecipeForm = (formData, t) => {
   return errors;
 };
 
-// Username uniqueness validation for signup
-export const validateUsernameUnique = async (username, t) => {
+const validateUniqueness = async (checkExists, { label, errorKey }, t) => {
   try {
-    const { checkUsernameExistsForSignup } = await import(
-      "../services/userService"
-    );
-    const exists = await checkUsernameExistsForSignup(username);
-    if (exists) {
-      return t("username_already_exists");
-    }
-    return null;
+    const exists = await checkExists();
+    return exists ? t(errorKey) : null;
   } catch (error) {
-    console.error("Error checking username uniqueness:", error);
+    console.error(`Error checking ${label} uniqueness:`, error);
     return null; // Don't block submission if check fails
   }
+};
+
+// Username uniqueness validation for signup
+export const validateUsernameUnique = async (username, t) => {
+  const { checkUsernameExistsForSignup } = await import(
+    "../services/userService"
+  );
+  return validateUniqueness(
+    () => checkUsernameExistsForSignup(username),
+    { label: "username", errorKey: "username_already_exists" },
+    t
+  );
 };
 
 // Email uniqueness validation for signup
 export const validateEmailUnique = async (email, t) => {
-  try {
-    const { checkEmailExistsForSignup } = await import(
-      "../services/userService"
-    );
-    const exists = await checkEmailExistsForSignup(email);
-    if (exists) {
-      return t("email_already_exists");
-    }
-    return null;
-  } catch (error) {
-    console.error("Error checking email uniqueness:", error);
-    return null; // Don't block submission if check fails
-  }
+  const { checkEmailExistsForSignup } = await import("../services/userService");
+  return validateUniqueness(
+    () => checkEmailExistsForSignup(email),
+    { label: "email", errorKey: "email_already_exists" },
+    t
+  );
 };
 
 // Email uniqueness validation for changing email (excludes current user)
 export const validateEmailUniqueForChange = async (email, t) => {
-  try {
-    const { checkEmailExists } = await import("../services/userService");
-    const exists = await checkEmailExists(email);
-    if (exists) {
-      return t("email_already_exists");
-    }
-    return null;
-  } catch (error) {
-    console.error("Error checking email uniqueness:", error);
-    return null; // Don't block submission if check fails
-  }
+  const { checkEmailExists } = await import("../services/userService");
+  return validateUniqueness(
+    () => checkEmailExists(email),
+    { label: "email", errorKey: "email_already_exists" },
+    t
+  );
 };
 
 // Utility function to check if input is an email

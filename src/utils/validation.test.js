@@ -442,9 +442,7 @@ describe("Validation Utilities", () => {
 
       const result = await validateUsernameUnique("newuser", mockT);
       expect(result).toBeNull();
-      expect(mockCheckUsernameExistsForSignup).toHaveBeenCalledWith(
-        "newuser"
-      );
+      expect(mockCheckUsernameExistsForSignup).toHaveBeenCalledWith("newuser");
     });
 
     test("returns an error when the username is taken", async () => {
