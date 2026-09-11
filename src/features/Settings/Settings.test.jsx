@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
 import Settings from "./Settings";
+import { createTestQueryClient } from "../../test-utils/queryClient";
 
 // Create mock functions
 const mockNavigate = vi.fn();
@@ -41,6 +43,10 @@ vi.mock("../../hooks/ui/useUnsavedChanges", () => ({
   }),
 }));
 
+vi.mock("../../hooks/data/useAuth", () => ({
+  useAuth: () => ({ user: { id: "test-user-id" } }),
+}));
+
 const mockChangeLanguage = vi.fn();
 
 vi.mock("react-i18next", () => ({
@@ -55,16 +61,22 @@ vi.mock("react-i18next", () => ({
       return key;
     },
     i18n: {
+      language: "en",
       changeLanguage: mockChangeLanguage,
     },
   }),
 }));
 
-// Wrapper component for router context
+// Wrapper component for router context. testQueryClient is recreated per
+// test (see beforeEach) so a query left in-flight by one test (e.g. the
+// "never resolves" loading test) can't poison a later test's cache.
+let testQueryClient;
 const SettingsWrapper = () => (
-  <BrowserRouter>
-    <Settings />
-  </BrowserRouter>
+  <QueryClientProvider client={testQueryClient}>
+    <BrowserRouter>
+      <Settings />
+    </BrowserRouter>
+  </QueryClientProvider>
 );
 
 describe("Settings", () => {
@@ -93,6 +105,7 @@ describe("Settings", () => {
     // Reset all mocks
     vi.clearAllMocks();
     mockChangeLanguage.mockClear();
+    testQueryClient = createTestQueryClient();
 
     // Set up default mock return values
     mockGetUserProfile.mockResolvedValue({

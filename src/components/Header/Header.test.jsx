@@ -5,7 +5,8 @@ import { BrowserRouter, useNavigate, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import Header from "./Header";
 import { useAuth } from "../../hooks/data/useAuth";
-import { signOut, getFirstName } from "../../services/auth";
+import { signOut } from "../../services/auth";
+import { getUserProfile } from "../../services/userService";
 import { useTheme } from "../../hooks/ui/useTheme";
 import { createTestQueryClient } from "../../test-utils/queryClient";
 import "@testing-library/jest-dom";
@@ -13,6 +14,7 @@ import "@testing-library/jest-dom";
 // Mock the hooks and services
 vi.mock("../../hooks/data/useAuth");
 vi.mock("../../services/auth");
+vi.mock("../../services/userService");
 vi.mock("../../hooks/ui/useTheme", () => ({
   useTheme: vi.fn(() => ({
     theme: "light",
@@ -80,7 +82,7 @@ describe("Header Component", () => {
   let mockNavigate;
   let mockUseAuth;
   let mockSignOut;
-  let mockGetFirstName;
+  let mockGetUserProfile;
   let mockToggleTheme;
 
   const defaultProps = {
@@ -91,7 +93,7 @@ describe("Header Component", () => {
     // Setup mocks
     mockNavigate = vi.fn();
     mockSignOut = vi.fn().mockResolvedValue();
-    mockGetFirstName = vi.fn().mockResolvedValue("John");
+    mockGetUserProfile = vi.fn().mockResolvedValue({ first_name: "John" });
     mockToggleTheme = vi.fn();
 
     mockUseAuth = vi.fn().mockReturnValue({
@@ -103,7 +105,7 @@ describe("Header Component", () => {
     useLocation.mockReturnValue({ pathname: "/" });
     useAuth.mockImplementation(mockUseAuth);
     signOut.mockImplementation(mockSignOut);
-    getFirstName.mockImplementation(mockGetFirstName);
+    getUserProfile.mockImplementation(mockGetUserProfile);
     useTheme.mockReturnValue({
       theme: "light",
       toggleTheme: mockToggleTheme,
@@ -248,6 +250,7 @@ describe("Header Component", () => {
   test("displays user display name when logged in", async () => {
     mockUseAuth.mockReturnValue({
       isLoggedIn: true,
+      user: { id: "user-1" },
     });
 
     render(

@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   updateUserPreferredLanguage,
-  getUserProfile,
   updateUserProfile,
   checkUsernameExists,
   deleteUserAccount,
 } from "../../services/userService";
+import { useUserProfile } from "../../hooks/data/useUserProfile";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ProfileTab from "./components/ProfileTab";
@@ -31,8 +31,13 @@ import {
 
 const Settings = ({ resetCategoryFilter }) => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    profile: profileData,
+    loading: profileLoading,
+    error: profileError,
+    setProfile: setProfileData,
+  } = useUserProfile();
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
   const [usernameError, setUsernameError] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -49,22 +54,6 @@ const Settings = ({ resetCategoryFilter }) => {
   const profileContainerRef = useRef(null);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        setLoading(true);
-        const profileData = await getUserProfile();
-        setProfileData(profileData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProfile();
-  }, []);
 
   // Cancel editing when clicking outside the profile fields
   useEffect(() => {
@@ -90,8 +79,8 @@ const Settings = ({ resetCategoryFilter }) => {
   }, [isEditingProfile]);
 
   const handleEditProfile = () => {
-    setTempFirstName(profileData.first_name);
-    setTempUsername(profileData.username);
+    setTempFirstName(profileData?.first_name || "");
+    setTempUsername(profileData?.username || "");
     setUsernameError("");
     setIsEditingProfile(true);
     setTimeout(() => firstNameInputRef.current?.focus(), 0);
@@ -219,7 +208,7 @@ const Settings = ({ resetCategoryFilter }) => {
 
   const handleConfirmDelete = async () => {
     try {
-      setLoading(true);
+      setActionLoading(true);
 
       // Store account info before deletion
       const accountInfo = {
@@ -232,7 +221,7 @@ const Settings = ({ resetCategoryFilter }) => {
       setDeletedAccountInfo(accountInfo);
       setShowDeleteSuccess(true);
       setShowDeleteModal(false);
-      setLoading(false);
+      setActionLoading(false);
 
       // Clear any local storage or session data
       try {
@@ -245,18 +234,18 @@ const Settings = ({ resetCategoryFilter }) => {
       console.error("Failed to delete account:", err);
       setError(t("delete_account_error"));
       setShowDeleteModal(false);
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
-  if (loading) {
+  if (profileLoading || actionLoading) {
     return <LoadingAcorn />;
   }
-  if (error) {
+  if (error || (profileError && !profileData)) {
     return (
       <div className="max-w-2xl mx-auto">
         <Alert variant="destructive">
-          <AlertDescription>Error: {error}</AlertDescription>
+          <AlertDescription>Error: {error || profileError}</AlertDescription>
         </Alert>
       </div>
     );

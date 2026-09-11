@@ -28,8 +28,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import FriendsPanel from "../FriendsPanel/FriendsPanel";
-import { signOut, getFirstName } from "../../services/auth";
+import { signOut } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
+import { useUserProfile } from "../../hooks/data/useUserProfile";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../hooks/ui/useTheme";
 import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
@@ -51,7 +52,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
   const isOnline = useOnlineStatus();
@@ -103,29 +104,12 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
 
   const { t, i18n } = useTranslation();
 
-  // Display name
-  const [firstName, setFirstName] = useState("");
-
-  // Load display name on app startup
-  useEffect(() => {
-    const loadfirstName = async () => {
-      const name = await getFirstName(user?.id);
-      if (name) {
-        setFirstName(name);
-      }
-    };
-
-    if (isLoggedIn) {
-      loadfirstName();
-    } else {
-      setFirstName("");
-    }
-  }, [isLoggedIn, user, setFirstName]);
+  // Display name - cached offline via useUserProfile
+  const { profile } = useUserProfile();
+  const firstName = isLoggedIn ? profile?.first_name || "" : "";
 
   const handleLogout = async () => {
     await signOut();
-
-    setFirstName("");
     navigate("/");
   };
 

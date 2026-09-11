@@ -42,26 +42,22 @@ export const updateUserPreferredLanguage = async (language) => {
   }
 };
 
-// Get user profile data
+// Get user profile data. Throws on failure so useUserProfile can tell a
+// real fetch error apart from "no profile" and keep showing cached data.
 export const getUserProfile = async () => {
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
 
-    const { data: profile, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+  const { data: profile, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-    if (error) throw error;
-    return profile;
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
-    return null;
-  }
+  if (error) throw error;
+  return profile;
 };
 
 // Check if username already exists (excluding current user)

@@ -73,7 +73,9 @@ const ProfileTab = ({
             ref={firstNameInputRef}
             id="first_name"
             type="text"
-            value={isEditingProfile ? tempFirstName : profileData.first_name}
+            value={
+              isEditingProfile ? tempFirstName : profileData?.first_name || ""
+            }
             onChange={
               isEditingProfile
                 ? (e) => setTempFirstName(e.target.value)
@@ -89,7 +91,9 @@ const ProfileTab = ({
           <Input
             id="username"
             type="text"
-            value={isEditingProfile ? tempUsername : profileData.username}
+            value={
+              isEditingProfile ? tempUsername : profileData?.username || ""
+            }
             onChange={
               isEditingProfile
                 ? (e) => {
@@ -111,7 +115,7 @@ const ProfileTab = ({
             <InputGroupInput
               id="email"
               type="email"
-              value={profileData.email}
+              value={profileData?.email || ""}
               readOnly
               disabled={isEditingProfile}
             />
@@ -173,7 +177,7 @@ const ProfileTab = ({
         <span className="text-sm font-medium">{t("preferred_language")}</span>
         <ToggleGroup
           variant="outline"
-          value={[profileData.preferred_language || "en"]}
+          value={[profileData?.preferred_language || "en"]}
           onValueChange={(groupValue) => {
             if (groupValue[0]) {
               handleLanguageChange(groupValue[0]);
@@ -198,7 +202,7 @@ const ProfileTab = ({
           </span>
           <Switch
             id="friends-can-view-images"
-            checked={!!profileData.friends_can_view_images}
+            checked={!!profileData?.friends_can_view_images}
             onCheckedChange={handleFriendsCanViewImagesChange}
             disabled={!isOnline}
           />
