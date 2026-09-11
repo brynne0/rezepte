@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout backup repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: brynne0/rezepte-backups
           token: ${{ secrets.BACKUP_REPO_TOKEN }}
