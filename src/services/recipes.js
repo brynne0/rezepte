@@ -954,7 +954,7 @@ export const createRecipe = async (
         .update({ images: uploadedImages })
         .eq("id", recipe.id);
 
-      if (updateError) {
+      if (!updateError) {
         recipe.images = uploadedImages;
       }
     } catch {
