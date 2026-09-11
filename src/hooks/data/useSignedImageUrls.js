@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { getSignedImageUrls } from "../../services/imageService";
+import {
+  readCachedValue,
+  writeCachedValue,
+} from "../../utils/localStorageCache";
 
-// In-memory cache with expiration tracking
-const urlCache = new Map();
-const CACHE_DURATION = 50 * 60 * 1000; // 50 minutes (before 1-hour expiry)
+const STORAGE_PREFIX = "signedImageUrl:";
+const CACHE_DURATION = 6.5 * 24 * 60 * 60 * 1000; // 6.5 days (before 7-day expiry)
 
 export const useSignedImageUrls = (images) => {
   const [signedImages, setSignedImages] = useState([]);
@@ -34,16 +37,18 @@ export const useSignedImageUrls = (images) => {
     const fetchSignedUrls = async () => {
       try {
         setLoading(true);
-        const now = Date.now();
         const cachedResults = [];
         const imagesToFetch = [];
 
         // Check cache first
         images.forEach((image) => {
-          const cached = urlCache.get(image.path);
+          const cached = readCachedValue(
+            STORAGE_PREFIX + image.path,
+            CACHE_DURATION
+          );
 
-          if (cached && now - cached.timestamp < CACHE_DURATION) {
-            cachedResults.push(cached.image);
+          if (cached) {
+            cachedResults.push(cached);
           } else {
             imagesToFetch.push(image);
           }
@@ -56,7 +61,7 @@ export const useSignedImageUrls = (images) => {
 
           // Cache new URLs
           freshUrls.forEach((image) => {
-            urlCache.set(image.path, { image, timestamp: now });
+            writeCachedValue(STORAGE_PREFIX + image.path, image);
           });
 
           newSignedImages = [...newSignedImages, ...freshUrls];

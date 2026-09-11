@@ -172,7 +172,7 @@ describe("useCategories", () => {
     ];
     localStorage.setItem(
       "categories-cache-en",
-      JSON.stringify(cachedCategories)
+      JSON.stringify({ value: cachedCategories, timestamp: Date.now() })
     );
 
     getCategoriesForUI.mockResolvedValue(cachedCategories);
@@ -194,7 +194,7 @@ describe("useCategories", () => {
     ];
     localStorage.setItem(
       "categories-cache-en",
-      JSON.stringify(cachedCategories)
+      JSON.stringify({ value: cachedCategories, timestamp: Date.now() })
     );
 
     getCategoriesForUI.mockRejectedValue(new Error("offline"));
@@ -218,9 +218,9 @@ describe("useCategories", () => {
     renderUseCategories();
 
     await waitFor(() => {
-      expect(JSON.parse(localStorage.getItem("categories-cache-en"))).toEqual(
-        mockCategories
-      );
+      expect(
+        JSON.parse(localStorage.getItem("categories-cache-en")).value
+      ).toEqual(mockCategories);
     });
   });
 

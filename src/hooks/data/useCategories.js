@@ -2,29 +2,19 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategoriesForUI } from "../../services/categoriesService";
+import {
+  readCachedValue,
+  writeCachedValue,
+} from "../../utils/localStorageCache";
 import { useAuth } from "./useAuth";
 
 const CACHE_KEY_PREFIX = "categories-cache-";
 
-const readCachedCategories = (language) => {
-  try {
-    const stored = localStorage.getItem(`${CACHE_KEY_PREFIX}${language}`);
-    return stored ? JSON.parse(stored) : undefined;
-  } catch {
-    return undefined;
-  }
-};
+const readCachedCategories = (language) =>
+  readCachedValue(`${CACHE_KEY_PREFIX}${language}`);
 
-const writeCachedCategories = (language, categories) => {
-  try {
-    localStorage.setItem(
-      `${CACHE_KEY_PREFIX}${language}`,
-      JSON.stringify(categories)
-    );
-  } catch {
-    // Ignore storage errors (e.g. private browsing with storage disabled)
-  }
-};
+const writeCachedCategories = (language, categories) =>
+  writeCachedValue(`${CACHE_KEY_PREFIX}${language}`, categories);
 
 export const useCategories = () => {
   const { i18n } = useTranslation();
