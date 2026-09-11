@@ -7,7 +7,7 @@ import {
   getOptimizedImageUrl,
 } from "../../services/imageService";
 import { extractFirstUrl } from "../../utils/linkUtils";
-import useIntersectionObserver from "../../hooks/ui/useIntersectionObserver";
+import { useIntersectionObserver } from "../../hooks/ui/useIntersectionObserver";
 import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -5,7 +5,7 @@ import { useRender } from "@base-ui/react/use-render";
 import { cva } from "class-variance-authority";
 import { cn } from "cn";
 
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/ui/useMobile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -51,7 +51,7 @@ function SidebarProvider({
   children,
   ...props
 }) {
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
 
   // This is the internal state of the sidebar.

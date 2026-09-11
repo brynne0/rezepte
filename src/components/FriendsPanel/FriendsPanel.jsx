@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { UserPlus, Check, X, UserMinus, Search } from "lucide-react";
 import { searchUsers, sendFriendRequest } from "../../services/friendsService";
 import { useFriendsData } from "../../hooks/data/useFriendsData";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/ui/useMobile";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -36,7 +36,7 @@ import {
 const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
   const [isOpen, setIsOpen] = useState(false);
   const {
     friends,

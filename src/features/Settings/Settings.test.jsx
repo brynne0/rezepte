@@ -1,0 +1,556 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
+import Settings from "./Settings";
+
+// Create mock functions
+const mockNavigate = vi.fn();
+const { mockToastAdd } = vi.hoisted(() => ({ mockToastAdd: vi.fn() }));
+
+// Mock dependencies
+vi.mock("@/components/ui/toast", () => ({
+  toast: { add: mockToastAdd },
+}));
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+vi.mock("../../services/userService", () => ({
+  updateUserPreferredLanguage: vi.fn(),
+  getUserProfile: vi.fn(),
+  updateUserProfile: vi.fn(),
+  checkUsernameExists: vi.fn(),
+  deleteUserAccount: vi.fn(),
+}));
+
+vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
+  default: () => <div data-testid="loading-acorn">Loading...</div>,
+}));
+
+vi.mock("../../hooks/ui/useUnsavedChanges", () => ({
+  useUnsavedChanges: () => ({
+    isModalOpen: false,
+    confirmNavigation: vi.fn(),
+    cancelNavigation: vi.fn(),
+    message: "unsaved_changes_warning",
+  }),
+}));
+
+const mockChangeLanguage = vi.fn();
+
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key, options) => {
+      if (key === "account_deleted_goodbye" && options?.name) {
+        return `account_deleted_goodbye_${options.name}`;
+      }
+      if (options && options.name) {
+        return `${key}_${options.name}`;
+      }
+      return key;
+    },
+    i18n: {
+      changeLanguage: mockChangeLanguage,
+    },
+  }),
+}));
+
+// Wrapper component for router context
+const SettingsWrapper = () => (
+  <BrowserRouter>
+    <Settings />
+  </BrowserRouter>
+);
+
+describe("Settings", () => {
+  let mockGetUserProfile;
+  let mockUpdateUserProfile;
+  let mockUpdateUserPreferredLanguage;
+  let mockCheckUsernameExists;
+  let mockDeleteUserAccount;
+
+  beforeEach(async () => {
+    // Import the mocked modules
+    const {
+      getUserProfile,
+      updateUserProfile,
+      updateUserPreferredLanguage,
+      checkUsernameExists,
+      deleteUserAccount,
+    } = await import("../../services/userService");
+
+    mockGetUserProfile = getUserProfile;
+    mockUpdateUserProfile = updateUserProfile;
+    mockUpdateUserPreferredLanguage = updateUserPreferredLanguage;
+    mockCheckUsernameExists = checkUsernameExists;
+    mockDeleteUserAccount = deleteUserAccount;
+
+    // Reset all mocks
+    vi.clearAllMocks();
+    mockChangeLanguage.mockClear();
+
+    // Set up default mock return values
+    mockGetUserProfile.mockResolvedValue({
+      id: "test-user-id",
+      first_name: "John",
+      username: "johndoe",
+      email: "john@example.com",
+    });
+    mockUpdateUserProfile.mockResolvedValue(true);
+    mockUpdateUserPreferredLanguage.mockResolvedValue(true);
+    mockCheckUsernameExists.mockResolvedValue(false);
+
+    // Mock localStorage and sessionStorage
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
+    Object.defineProperty(window, "sessionStorage", {
+      value: {
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
+
+    // Mock window.location.href
+    delete window.location;
+    window.location = { href: "" };
+  });
+
+  describe("Component Rendering", () => {
+    it("renders loading state initially", async () => {
+      mockGetUserProfile.mockImplementation(
+        () => new Promise(() => {}) // Never resolves to keep loading
+      );
+
+      render(<SettingsWrapper />);
+
+      expect(screen.getByTestId("loading-acorn")).toBeInTheDocument();
+    });
+
+    it("renders error state when profile loading fails", async () => {
+      mockGetUserProfile.mockRejectedValue(new Error("Failed to load profile"));
+
+      render(<SettingsWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+      });
+    });
+
+    it("renders settings form when data loads successfully", async () => {
+      render(<SettingsWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByText("settings")).toBeInTheDocument();
+        expect(screen.getByDisplayValue("John")).toBeInTheDocument();
+        expect(screen.getByDisplayValue("johndoe")).toBeInTheDocument();
+        expect(
+          screen.getByDisplayValue("john@example.com")
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("renders back button that navigates to previous page", async () => {
+      render(<SettingsWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByText("settings")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "go_back" }));
+
+      expect(mockNavigate).toHaveBeenCalledWith(-1);
+    });
+  });
+
+  describe("Profile Editing", () => {
+    beforeEach(async () => {
+      render(<SettingsWrapper />);
+      await waitFor(() => {
+        expect(screen.getByDisplayValue("John")).toBeInTheDocument();
+      });
+    });
+
+    it("enables editing both fields when edit button is clicked", () => {
+      const firstNameInput = screen.getByDisplayValue("John");
+      const usernameInput = screen.getByDisplayValue("johndoe");
+      expect(firstNameInput).toHaveAttribute("readonly");
+      expect(usernameInput).toHaveAttribute("readonly");
+
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      expect(firstNameInput).not.toHaveAttribute("readonly");
+      expect(usernameInput).not.toHaveAttribute("readonly");
+    });
+
+    it("shows save and cancel buttons when editing", () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      expect(
+        screen.getByRole("button", { name: "save_changes" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "cancel" })
+      ).toBeInTheDocument();
+    });
+
+    it("updates first name and username together", async () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(screen.getByDisplayValue("John"), {
+        target: { value: "Jane" },
+      });
+      fireEvent.change(screen.getByDisplayValue("johndoe"), {
+        target: { value: "newusername" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+
+      await waitFor(() => {
+        expect(mockCheckUsernameExists).toHaveBeenCalledWith("newusername");
+        expect(mockUpdateUserProfile).toHaveBeenCalledWith({
+          first_name: "Jane",
+          username: "newusername",
+        });
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "successfully_updated_profile",
+          type: "success",
+        });
+      });
+    });
+
+    it("does not re-check username when it is unchanged", async () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(screen.getByDisplayValue("John"), {
+        target: { value: "Jane" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+
+      await waitFor(() => {
+        expect(mockUpdateUserProfile).toHaveBeenCalledWith({
+          first_name: "Jane",
+          username: "johndoe",
+        });
+      });
+
+      expect(mockCheckUsernameExists).not.toHaveBeenCalled();
+    });
+
+    it("shows error when username already exists", async () => {
+      mockCheckUsernameExists.mockResolvedValue(true);
+
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(screen.getByDisplayValue("johndoe"), {
+        target: { value: "existinguser" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+
+      await waitFor(() => {
+        expect(screen.getByText("username_already_exists")).toBeInTheDocument();
+      });
+
+      expect(mockUpdateUserProfile).not.toHaveBeenCalled();
+    });
+
+    it("clears username error when user types", async () => {
+      mockCheckUsernameExists.mockResolvedValue(true);
+
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      const usernameInput = screen.getByDisplayValue("johndoe");
+      fireEvent.change(usernameInput, { target: { value: "existinguser" } });
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+
+      await waitFor(() => {
+        expect(screen.getByText("username_already_exists")).toBeInTheDocument();
+      });
+
+      // Clear error by typing
+      fireEvent.change(usernameInput, { target: { value: "newuser" } });
+
+      expect(
+        screen.queryByText("username_already_exists")
+      ).not.toBeInTheDocument();
+    });
+
+    it("cancels editing when cancel button is clicked", () => {
+      const firstNameInput = screen.getByDisplayValue("John");
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(firstNameInput, { target: { value: "Jane" } });
+
+      fireEvent.click(screen.getByRole("button", { name: "cancel" }));
+
+      expect(firstNameInput).toHaveValue("John");
+      expect(firstNameInput).toHaveAttribute("readonly");
+    });
+  });
+
+  describe("Password", () => {
+    it("navigates to change password page when clicked", async () => {
+      render(<SettingsWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByText("password")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "change_password" }));
+
+      expect(mockNavigate).toHaveBeenCalledWith("/change-password", {
+        state: { fromSettings: true },
+      });
+    });
+  });
+
+  describe("Language Preferences", () => {
+    beforeEach(async () => {
+      render(<SettingsWrapper />);
+      await waitFor(() => {
+        expect(screen.getByText("preferred_language")).toBeInTheDocument();
+      });
+    });
+
+    it("displays current language selection", () => {
+      expect(screen.getByRole("button", { name: "EN" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DE" })).toBeInTheDocument();
+    });
+
+    it("updates language preference immediately when clicked", async () => {
+      fireEvent.click(screen.getByRole("button", { name: "DE" }));
+
+      await waitFor(() => {
+        expect(mockUpdateUserPreferredLanguage).toHaveBeenCalledWith("de");
+        expect(mockChangeLanguage).toHaveBeenCalledWith("de");
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "successfully_updated_language",
+          type: "success",
+        });
+      });
+    });
+  });
+
+  describe("Friends Can View Images", () => {
+    beforeEach(async () => {
+      render(<SettingsWrapper />);
+      await waitFor(() => {
+        expect(screen.getByText("preferred_language")).toBeInTheDocument();
+      });
+    });
+
+    it("reflects the current preference", () => {
+      expect(screen.getByRole("switch")).not.toBeChecked();
+    });
+
+    it("saves immediately when toggled on", async () => {
+      fireEvent.click(screen.getByRole("switch"));
+
+      await waitFor(() => {
+        expect(mockUpdateUserProfile).toHaveBeenCalledWith({
+          friends_can_view_images: true,
+        });
+      });
+      expect(screen.getByRole("switch")).toBeChecked();
+    });
+
+    it("shows an error message if saving fails", async () => {
+      mockUpdateUserProfile.mockRejectedValue(new Error("network error"));
+      fireEvent.click(screen.getByRole("switch"));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Delete Account", () => {
+    beforeEach(async () => {
+      render(<SettingsWrapper />);
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "delete_account" })
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("renders delete account button", () => {
+      expect(
+        screen.getByRole("button", { name: "delete_account" })
+      ).toBeInTheDocument();
+    });
+
+    it("opens confirmation dialog when delete button is clicked", () => {
+      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
+
+      expect(
+        screen.getByText(/delete_account_confirmation/)
+      ).toBeInTheDocument();
+    });
+
+    it("closes dialog when cancel button is clicked", async () => {
+      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
+      fireEvent.click(screen.getByRole("button", { name: "cancel" }));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(/delete_account_confirmation/)
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it("calls deleteUserAccount when confirmed", async () => {
+      mockDeleteUserAccount.mockResolvedValue();
+
+      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
+
+      await waitFor(() => {
+        expect(mockDeleteUserAccount).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("shows success message with user's name after successful deletion", async () => {
+      mockDeleteUserAccount.mockResolvedValue();
+
+      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("account_deleted_goodbye_John")
+        ).toBeInTheDocument();
+      });
+
+      expect(
+        screen.queryByText(/delete_account_confirmation/)
+      ).not.toBeInTheDocument();
+    });
+
+    it("clears localStorage and sessionStorage after successful deletion", async () => {
+      mockDeleteUserAccount.mockResolvedValue();
+
+      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
+
+      await waitFor(() => {
+        expect(window.localStorage.clear).toHaveBeenCalled();
+        expect(window.sessionStorage.clear).toHaveBeenCalled();
+      });
+    });
+
+    it("shows error message when deletion fails", async () => {
+      const errorMessage = "Failed to delete account";
+      mockDeleteUserAccount.mockRejectedValue(new Error(errorMessage));
+
+      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/delete_account_error/)).toBeInTheDocument();
+      });
+
+      expect(
+        screen.queryByText(/delete_account_confirmation/)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("account_deleted_goodbye_John")
+      ).not.toBeInTheDocument();
+    });
+
+    it("handles deletion error and keeps user on page", async () => {
+      mockDeleteUserAccount.mockRejectedValue(new Error("Network error"));
+
+      fireEvent.click(screen.getByRole("button", { name: "delete_account" }));
+      fireEvent.click(screen.getByRole("button", { name: "delete" }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/delete_account_error/)).toBeInTheDocument();
+      });
+
+      // After error, the full form is no longer displayed - just the error message
+      expect(
+        screen.queryByRole("button", { name: "delete_account" })
+      ).not.toBeInTheDocument();
+      expect(window.localStorage.clear).not.toHaveBeenCalled();
+      expect(window.sessionStorage.clear).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Success Messages", () => {
+    it("displays success messages temporarily", async () => {
+      render(<SettingsWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue("John")).toBeInTheDocument();
+      });
+
+      // Trigger a successful update
+      const firstNameInput = screen.getByDisplayValue("John");
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(firstNameInput, { target: { value: "Jane" } });
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+
+      await waitFor(() => {
+        expect(mockToastAdd).toHaveBeenCalledWith({
+          title: "successfully_updated_profile",
+          type: "success",
+        });
+      });
+    });
+  });
+
+  describe("Error Handling", () => {
+    it("handles service errors gracefully", async () => {
+      mockUpdateUserProfile.mockRejectedValue(new Error("Service unavailable"));
+
+      render(<SettingsWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue("John")).toBeInTheDocument();
+      });
+
+      const firstNameInput = screen.getByDisplayValue("John");
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
+      fireEvent.change(firstNameInput, { target: { value: "Jane" } });
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+      });
+    });
+
+    it("handles language update errors", async () => {
+      mockUpdateUserPreferredLanguage.mockRejectedValue(
+        new Error("Language service error")
+      );
+
+      render(<SettingsWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByText("preferred_language")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "DE" }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+      });
+    });
+  });
+});

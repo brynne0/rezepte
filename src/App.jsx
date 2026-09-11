@@ -12,7 +12,6 @@ import {
   RouterProvider,
   Outlet,
   useLocation,
-  useNavigate,
   Navigate,
 } from "react-router-dom";
 
@@ -30,90 +29,27 @@ import { MainScrollProvider } from "./contexts/MainScrollContext";
 import { AppStateContext } from "./contexts/AppStateContext";
 import { useMainScrollRef } from "./hooks/ui/useMainScrollRef";
 import Header from "./components/Header/Header";
-import RecipeFilters from "./components/RecipeFilters/RecipeFilters";
-import RecipeList from "./components/RecipeList/RecipeList";
-import Pagination from "./components/Pagination/Pagination";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { Squirrel } from "lucide-react";
 
-// Pages
-import AddRecipePage from "./pages/AddRecipe/AddRecipe";
-import EditRecipePage from "./pages/EditRecipe/EditRecipe";
-import CookingTimes from "./pages/CookingTimes/CookingTimes";
-import AuthPage from "./pages/AuthPage/AuthPage";
-import Recipe from "./pages/Recipe/Recipe";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
-import ChangePasswordPage from "./pages/ChangePasswordPage/ChangePasswordPage";
-import ChangeEmailPage from "./pages/ChangeEmailPage/ChangeEmailPage";
-import Settings from "./pages/Settings/Settings";
-import FriendRecipes from "./pages/FriendRecipes/FriendRecipes";
-import ShowcasePage from "./pages/ShowcasePage/ShowcasePage";
-
-function HomePage() {
-  const {
-    categories,
-    selectedCategory,
-    setSelectedCategory,
-    setSearchTerm,
-    recipes,
-    searchTerm,
-    sortBy,
-    setSortBy,
-    showImages,
-    setShowImages,
-    onPageReset,
-    totalRecipeCount,
-    isFetchingRecipes,
-    paginationInfo,
-    onPageChange,
-  } = useContext(AppStateContext);
-  const isOnline = useOnlineStatus();
-  const navigate = useNavigate();
-
-  return (
-    <>
-      {isOnline && (
-        <RecipeFilters
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSearchSubmit={() => navigate("/")}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          showImages={showImages}
-          setShowImages={setShowImages}
-          onPageReset={onPageReset}
-        />
-      )}
-      <RecipeList
-        selectedCategory={selectedCategory}
-        recipes={recipes}
-        searchTerm={searchTerm}
-        showImages={showImages}
-        totalRecipeCount={totalRecipeCount}
-        isPaginated={true}
-        loading={isFetchingRecipes}
-        isOnline={isOnline}
-      />
-      {isOnline && (
-        <Pagination
-          currentPage={paginationInfo.currentPage}
-          totalPages={paginationInfo.totalPages}
-          onPageChange={onPageChange}
-          hasNextPage={paginationInfo.hasNextPage}
-          hasPrevPage={paginationInfo.hasPrevPage}
-        />
-      )}
-    </>
-  );
-}
+// Features
+import Home from "./features/Home/Home";
+import AddRecipePage from "./features/AddRecipe/AddRecipe";
+import EditRecipePage from "./features/EditRecipe/EditRecipe";
+import CookingTimes from "./features/CookingTimes/CookingTimes";
+import Auth from "./features/Auth/Auth";
+import Recipe from "./features/Recipe/Recipe";
+import ForgotPassword from "./features/ForgotPassword/ForgotPassword";
+import ChangePassword from "./features/ChangePassword/ChangePassword";
+import ChangeEmail from "./features/ChangeEmail/ChangeEmail";
+import Settings from "./features/Settings/Settings";
+import FriendRecipes from "./features/FriendRecipes/FriendRecipes";
+import Showcase from "./features/Showcase/Showcase";
 
 function HomeRoute() {
   return (
     <ProtectedRoute>
-      <HomePage />
+      <Home />
     </ProtectedRoute>
   );
 }
@@ -152,7 +88,7 @@ function CookingTimesRoute() {
 function ChangeEmailRoute() {
   return (
     <ProtectedRoute>
-      <ChangeEmailPage />
+      <ChangeEmail />
     </ProtectedRoute>
   );
 }
@@ -283,10 +219,10 @@ function App() {
           { path: "/add-recipe", element: <AddRecipeRoute /> },
           { path: "/edit-recipe/:id/:slug", element: <EditRecipeRoute /> },
           { path: "/cooking-times", element: <CookingTimesRoute /> },
-          { path: "/showcase", element: <ShowcasePage /> },
-          { path: "/login", element: <AuthPage /> },
-          { path: "/forgot-password", element: <ForgotPasswordPage /> },
-          { path: "/change-password", element: <ChangePasswordPage /> },
+          { path: "/showcase", element: <Showcase /> },
+          { path: "/login", element: <Auth /> },
+          { path: "/forgot-password", element: <ForgotPassword /> },
+          { path: "/change-password", element: <ChangePassword /> },
           { path: "/change-email", element: <ChangeEmailRoute /> },
           { path: "/settings", element: <SettingsRoute /> },
           {

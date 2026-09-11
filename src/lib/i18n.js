@@ -10,6 +10,9 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: "en",
+    backend: {
+      loadPath: "/locales/{{lng}}.json",
+    },
     detection: {
       order: ["localStorage", "htmlTag", "navigator"],
       caches: ["localStorage"],
