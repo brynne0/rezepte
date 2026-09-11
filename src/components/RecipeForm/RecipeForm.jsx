@@ -212,286 +212,291 @@ const RecipeForm = ({
             className="flex flex-col gap-6"
             role="form"
           >
-            {/*  Recipe Paste Area  */}
-            {!isEditingTranslation &&
-              (showPasteArea ? (
-                <RecipeAutofill
-                  onAutofill={handleAutofill}
-                  onCancel={() => setShowPasteArea(false)}
-                  categories={categories}
-                />
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-auto w-full items-start whitespace-normal py-1.5 text-center"
-                  onClick={() => setShowPasteArea(true)}
-                >
-                  <Clipboard size={16} className="mt-0.5" />
-                  {t("autofill_recipe_cta")}
-                </Button>
-              ))}
-
-            {/* Recipe Title and Servings */}
-            <FieldGroup className="grid gap-4 sm:grid-cols-[1fr_140px]">
-              <Field data-invalid={!!validationErrors.title}>
-                <FieldLabel htmlFor="title">{t("recipe_title")}</FieldLabel>
-                <Input
-                  id="title"
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "title",
-                      e.target.value,
-                      !!validationErrors.title
-                    )
-                  }
-                  onBlur={(e) => {
-                    handleInputChange(
-                      "title",
-                      toTitleCase(e.target.value),
-                      !!validationErrors.title
-                    );
-                    handleTitleBlur();
-                  }}
-                  onKeyDown={handleEnterNav}
-                  data-enter-nav
-                  aria-invalid={!!validationErrors.title}
-                />
-                <FieldError>{validationErrors.title}</FieldError>
-              </Field>
-
-              <Field className={isEditingTranslation ? "opacity-50" : ""}>
-                <FieldLabel htmlFor="servings">{t("servings")}</FieldLabel>
-                <Input
-                  id="servings"
-                  type="text"
-                  value={formData.servings || ""}
-                  onChange={(e) =>
-                    handleInputChange("servings", e.target.value)
-                  }
-                  disabled={isEditingTranslation}
-                  onWheel={(e) => {
-                    e.target.blur();
-                  }}
-                  onKeyDown={handleEnterNav}
-                  data-enter-nav
-                />
-              </Field>
-            </FieldGroup>
-
-            {/* Category */}
-            <Field
-              data-invalid={!!validationErrors.category}
-              className={isEditingTranslation ? "opacity-50" : ""}
+            <fieldset
+              disabled={loading}
+              className="m-0 flex min-w-0 flex-col gap-6 border-0 p-0"
             >
-              <FieldLabel id="category-label">{t("category")}</FieldLabel>
-              <ToggleGroup
-                variant="outline"
-                multiple
-                value={selectedCategories}
-                onValueChange={(value) =>
-                  handleInputChange("categories", value, true)
-                }
-                aria-labelledby="category-label"
-                className="flex flex-wrap"
-                disabled={isEditingTranslation}
-              >
-                {categories
-                  ?.filter((category) => category.value !== "all_recipes")
-                  .map((category) => (
-                    <ToggleGroupItem
-                      key={category.value}
-                      value={category.value}
-                      className="aria-pressed:border-accent-red aria-pressed:bg-accent-red/10 aria-pressed:text-accent-red"
-                    >
-                      {category.label}
-                    </ToggleGroupItem>
-                  ))}
-              </ToggleGroup>
-              <FieldError>{validationErrors.category}</FieldError>
-
+              {/*  Recipe Paste Area  */}
               {!isEditingTranslation &&
-                (isAddingCategory ? (
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        autoFocus
-                        value={newCategoryName}
-                        onChange={(e) => {
-                          setNewCategoryName(e.target.value);
-                          if (addCategoryError) setAddCategoryError("");
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleSaveNewCategory();
-                          } else if (e.key === "Escape") {
-                            handleCancelAddCategory();
-                          }
-                        }}
-                        placeholder={t("category_name")}
-                        aria-invalid={!!addCategoryError}
-                        disabled={isSavingCategory}
-                      />
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={handleSaveNewCategory}
-                        disabled={isSavingCategory}
+                (showPasteArea ? (
+                  <RecipeAutofill
+                    onAutofill={handleAutofill}
+                    onCancel={() => setShowPasteArea(false)}
+                    categories={categories}
+                  />
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-auto w-full items-start whitespace-normal py-1.5 text-center"
+                    onClick={() => setShowPasteArea(true)}
+                  >
+                    <Clipboard size={16} className="mt-0.5" />
+                    {t("autofill_recipe_cta")}
+                  </Button>
+                ))}
+
+              {/* Recipe Title and Servings */}
+              <FieldGroup className="grid gap-4 sm:grid-cols-[1fr_140px]">
+                <Field data-invalid={!!validationErrors.title}>
+                  <FieldLabel htmlFor="title">{t("recipe_title")}</FieldLabel>
+                  <Input
+                    id="title"
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "title",
+                        e.target.value,
+                        !!validationErrors.title
+                      )
+                    }
+                    onBlur={(e) => {
+                      handleInputChange(
+                        "title",
+                        toTitleCase(e.target.value),
+                        !!validationErrors.title
+                      );
+                      handleTitleBlur();
+                    }}
+                    onKeyDown={handleEnterNav}
+                    data-enter-nav
+                    aria-invalid={!!validationErrors.title}
+                  />
+                  <FieldError>{validationErrors.title}</FieldError>
+                </Field>
+
+                <Field className={isEditingTranslation ? "opacity-50" : ""}>
+                  <FieldLabel htmlFor="servings">{t("servings")}</FieldLabel>
+                  <Input
+                    id="servings"
+                    type="text"
+                    value={formData.servings || ""}
+                    onChange={(e) =>
+                      handleInputChange("servings", e.target.value)
+                    }
+                    disabled={isEditingTranslation}
+                    onWheel={(e) => {
+                      e.target.blur();
+                    }}
+                    onKeyDown={handleEnterNav}
+                    data-enter-nav
+                  />
+                </Field>
+              </FieldGroup>
+
+              {/* Category */}
+              <Field
+                data-invalid={!!validationErrors.category}
+                className={isEditingTranslation ? "opacity-50" : ""}
+              >
+                <FieldLabel id="category-label">{t("category")}</FieldLabel>
+                <ToggleGroup
+                  variant="outline"
+                  multiple
+                  value={selectedCategories}
+                  onValueChange={(value) =>
+                    handleInputChange("categories", value, true)
+                  }
+                  aria-labelledby="category-label"
+                  className="flex flex-wrap"
+                  disabled={isEditingTranslation}
+                >
+                  {categories
+                    ?.filter((category) => category.value !== "all_recipes")
+                    .map((category) => (
+                      <ToggleGroupItem
+                        key={category.value}
+                        value={category.value}
+                        className="aria-pressed:border-accent-red aria-pressed:bg-accent-red/10 aria-pressed:text-accent-red"
                       >
-                        {isSavingCategory && <Spinner />}
-                        {t("add_category")}
-                      </Button>
+                        {category.label}
+                      </ToggleGroupItem>
+                    ))}
+                </ToggleGroup>
+                <FieldError>{validationErrors.category}</FieldError>
+
+                {!isEditingTranslation &&
+                  (isAddingCategory ? (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="text"
+                          autoFocus
+                          value={newCategoryName}
+                          onChange={(e) => {
+                            setNewCategoryName(e.target.value);
+                            if (addCategoryError) setAddCategoryError("");
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSaveNewCategory();
+                            } else if (e.key === "Escape") {
+                              handleCancelAddCategory();
+                            }
+                          }}
+                          placeholder={t("category_name")}
+                          aria-invalid={!!addCategoryError}
+                          disabled={isSavingCategory}
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleSaveNewCategory}
+                          disabled={isSavingCategory}
+                        >
+                          {isSavingCategory && <Spinner />}
+                          {t("add_category")}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleCancelAddCategory}
+                          disabled={isSavingCategory}
+                        >
+                          {t("cancel")}
+                        </Button>
+                      </div>
+                      {addCategoryError && (
+                        <span className="text-sm text-destructive">
+                          {addCategoryError}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={handleCancelAddCategory}
-                        disabled={isSavingCategory}
+                        onClick={handleStartAddCategory}
                       >
-                        {t("cancel")}
+                        <Plus size={16} />
+                        {t("add_category")}
                       </Button>
                     </div>
-                    {addCategoryError && (
-                      <span className="text-sm text-destructive">
-                        {addCategoryError}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleStartAddCategory}
-                    >
-                      <Plus size={16} />
-                      {t("add_category")}
-                    </Button>
-                  </div>
-                ))}
-            </Field>
+                  ))}
+              </Field>
 
-            <DragDropContext
-              onDragEnd={isEditingTranslation ? () => {} : handleDragEnd}
-            >
-              {/* Ingredients */}
-              <IngredientsSection
-                ungroupedIngredients={formData.ungroupedIngredients}
-                ingredientSections={formData.ingredientSections}
-                validationErrors={validationErrors}
+              <DragDropContext
+                onDragEnd={isEditingTranslation ? () => {} : handleDragEnd}
+              >
+                {/* Ingredients */}
+                <IngredientsSection
+                  ungroupedIngredients={formData.ungroupedIngredients}
+                  ingredientSections={formData.ingredientSections}
+                  validationErrors={validationErrors}
+                  isEditingTranslation={isEditingTranslation}
+                  addSection={addSection}
+                  addIngredient={addIngredient}
+                  removeSection={removeSection}
+                  handleSectionChange={handleSectionChange}
+                  handleIngredientChange={handleIngredientChange}
+                  handleOpenLinkDropdown={handleOpenLinkDropdown}
+                  removeIngredient={removeIngredient}
+                  getIngredientLink={getIngredientLink}
+                  removeIngredientLink={removeIngredientLink}
+                />
+                {/* Instructions */}
+                <InstructionsSection
+                  instructions={formData.instructions}
+                  isEditingTranslation={isEditingTranslation}
+                  handleInstructionChange={handleInstructionChange}
+                  removeInstruction={removeInstruction}
+                  addInstruction={addInstruction}
+                />
+              </DragDropContext>
+
+              {/* Recipe Images */}
+              <Field className={isEditingTranslation ? "opacity-50" : ""}>
+                <FieldLabel>{t("images")}</FieldLabel>
+                <ImageUpload
+                  images={formData.images}
+                  onChange={handleImagesChange}
+                  disabled={isEditingTranslation}
+                  uploadingImageIds={uploadingImageIds}
+                />
+              </Field>
+
+              {/* Source */}
+              <Field>
+                <FieldLabel htmlFor="source">{t("source")}</FieldLabel>
+                <Input
+                  id="source"
+                  type="text"
+                  value={formData.source || ""}
+                  onChange={(e) => handleInputChange("source", e.target.value)}
+                  placeholder={t("source_placeholder")}
+                  onKeyDown={handleEnterNav}
+                  data-enter-nav
+                />
+              </Field>
+
+              {/* Extra Notes */}
+              <Field>
+                <FieldLabel htmlFor="extra-notes">{t("notes")}</FieldLabel>
+                <Textarea
+                  id="extra-notes"
+                  value={formData.notes || ""}
+                  onChange={(e) => handleInputChange("notes", e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.stopPropagation();
+                    }
+                  }}
+                  // A nav target for Source's Enter, but keeps its own newline-on-Enter behavior above.
+                  data-enter-nav
+                  placeholder={t("notes")}
+                />
+              </Field>
+
+              {/* Nutrition */}
+              <NutritionSection
+                columns={formData.nutrition_columns}
+                onChange={(columns) =>
+                  handleInputChange("nutrition_columns", columns)
+                }
                 isEditingTranslation={isEditingTranslation}
-                addSection={addSection}
-                addIngredient={addIngredient}
-                removeSection={removeSection}
-                handleSectionChange={handleSectionChange}
-                handleIngredientChange={handleIngredientChange}
-                handleOpenLinkDropdown={handleOpenLinkDropdown}
-                removeIngredient={removeIngredient}
-                getIngredientLink={getIngredientLink}
-                removeIngredientLink={removeIngredientLink}
               />
-              {/* Instructions */}
-              <InstructionsSection
-                instructions={formData.instructions}
-                isEditingTranslation={isEditingTranslation}
-                handleInstructionChange={handleInstructionChange}
-                removeInstruction={removeInstruction}
-                addInstruction={addInstruction}
-              />
-            </DragDropContext>
 
-            {/* Recipe Images */}
-            <Field className={isEditingTranslation ? "opacity-50" : ""}>
-              <FieldLabel>{t("images")}</FieldLabel>
-              <ImageUpload
-                images={formData.images}
-                onChange={handleImagesChange}
-                disabled={isEditingTranslation}
-                uploadingImageIds={uploadingImageIds}
-              />
-            </Field>
-
-            {/* Source */}
-            <Field>
-              <FieldLabel htmlFor="source">{t("source")}</FieldLabel>
-              <Input
-                id="source"
-                type="text"
-                value={formData.source || ""}
-                onChange={(e) => handleInputChange("source", e.target.value)}
-                placeholder={t("source_placeholder")}
-                onKeyDown={handleEnterNav}
-                data-enter-nav
-              />
-            </Field>
-
-            {/* Extra Notes */}
-            <Field>
-              <FieldLabel htmlFor="extra-notes">{t("notes")}</FieldLabel>
-              <Textarea
-                id="extra-notes"
-                value={formData.notes || ""}
-                onChange={(e) => handleInputChange("notes", e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.stopPropagation();
-                  }
-                }}
-                // A nav target for Source's Enter, but keeps its own newline-on-Enter behavior above.
-                data-enter-nav
-                placeholder={t("notes")}
-              />
-            </Field>
-
-            {/* Nutrition */}
-            <NutritionSection
-              columns={formData.nutrition_columns}
-              onChange={(columns) =>
-                handleInputChange("nutrition_columns", columns)
-              }
-              isEditingTranslation={isEditingTranslation}
-            />
-
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              {/* Delete Button */}
-              {isEditMode && (
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                {/* Delete Button */}
+                {isEditMode && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="w-full sm:mr-auto sm:w-auto"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                  >
+                    {t("delete_recipe")}
+                  </Button>
+                )}
+                {/* Cancel Button */}
                 <Button
                   type="button"
-                  variant="destructive"
-                  className="w-full sm:mr-auto sm:w-auto"
-                  onClick={() => setIsDeleteModalOpen(true)}
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={() => navigate(-1)}
                 >
-                  {t("delete_recipe")}
+                  {t("cancel")}
                 </Button>
-              )}
-              {/* Cancel Button */}
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={() => navigate(-1)}
-              >
-                {t("cancel")}
-              </Button>
-              {/* Submit button */}
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full sm:w-auto"
-              >
-                {loading && <Spinner />}
-                {isEditMode
-                  ? isEditingTranslation
-                    ? t("update_translation")
-                    : t("update_recipe")
-                  : t("create_recipe")}
-              </Button>
-            </div>
+                {/* Submit button */}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full sm:w-auto"
+                >
+                  {loading && <Spinner />}
+                  {isEditMode
+                    ? isEditingTranslation
+                      ? t("update_translation")
+                      : t("update_recipe")
+                    : t("create_recipe")}
+                </Button>
+              </div>
+            </fieldset>
           </form>
         </CardContent>
       </Card>

@@ -51,12 +51,15 @@ const ImageCropDialog = ({ open, imageSrc, file, onCancel, onSave }) => {
         }
       }}
     >
-      <DialogContent className="max-w-md" showCloseButton={false}>
+      <DialogContent
+        className="max-w-[calc(100%-2rem)] sm:max-w-[min(42rem,calc(100%-4rem))]"
+        showCloseButton={false}
+      >
         <DialogHeader>
           <DialogTitle>{t("crop_image")}</DialogTitle>
         </DialogHeader>
 
-        <div className="relative h-72 w-full overflow-hidden rounded-lg bg-muted">
+        <div className="relative h-72 w-full overflow-hidden rounded-lg bg-muted sm:h-128">
           {imageSrc && (
             <Cropper
               image={imageSrc}

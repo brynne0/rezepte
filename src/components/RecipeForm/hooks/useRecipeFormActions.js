@@ -148,6 +148,11 @@ export const useRecipeFormActions = ({
     async (e) => {
       e.preventDefault();
 
+      // Guard against double-submit (e.g. double-click before re-render disables the button)
+      if (loading) {
+        return;
+      }
+
       // Clear any previous submission errors
       setSubmissionError("");
 
@@ -365,6 +370,7 @@ export const useRecipeFormActions = ({
       }
     },
     [
+      loading,
       formData,
       initialRecipe,
       isEditingTranslation,
