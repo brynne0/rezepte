@@ -152,12 +152,21 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
   // Title not cached, translate only the title
   const sourceLang = recipe.original_language || "en";
   try {
+    let translationFailed = false;
     const rawTranslatedTitle = await translateText(
       recipe.title,
       targetLanguage,
       null,
-      sourceLang
+      sourceLang,
+      () => {
+        translationFailed = true;
+      }
     );
+
+    if (translationFailed) {
+      return recipe;
+    }
+
     const translatedTitle =
       targetLanguage === "en"
         ? toTitleCase(rawTranslatedTitle)
@@ -221,11 +230,17 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
   ];
 
   const sourceLang = recipe.original_language || "en";
+  let hadFailure = false;
+  const onFailure = () => {
+    hadFailure = true;
+  };
+
   try {
     const translatedTexts = await translateTexts(
       textsToTranslate,
       targetLanguage,
-      sourceLang
+      sourceLang,
+      onFailure
     );
 
     // Translate category separately with food context for better accuracy
@@ -233,7 +248,8 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
       recipe.category,
       targetLanguage,
       "Food category",
-      sourceLang
+      sourceLang,
+      onFailure
     );
 
     const translatedData = {
@@ -246,6 +262,10 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
       source: isSourceUrl ? sourceText : translatedTexts[3] || null,
       instructions: translatedTexts.slice(4).map(normaliseInstruction),
     };
+
+    if (hadFailure) {
+      return { ...translatedData, translationUnavailable: true };
+    }
 
     // Save translation to database
     await saveRecipeTranslationToStorage(
@@ -263,6 +283,7 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
       category: recipe.category,
       instructions: recipe.instructions,
       notes: recipe.notes,
+      translationUnavailable: true,
     };
   }
 };
@@ -420,17 +441,30 @@ const getTranslatedIngredientNotes = async (
     }
 
     // Translation not cached, translate and store
-    const translatedNotes = await translateText(originalNotes, targetLanguage);
+    let translationFailed = false;
+    const translatedNotes = await translateText(
+      originalNotes,
+      targetLanguage,
+      null,
+      "auto",
+      () => {
+        translationFailed = true;
+      }
+    );
 
     // German notes keep DeepL's natural sentence casing; other languages are lowercased
     const finalTranslatedNotes =
       targetLanguage === "de" ? translatedNotes : translatedNotes.toLowerCase();
 
-    await saveIngredientNotesTranslation(
-      recipeIngredientId,
-      targetLanguage,
-      finalTranslatedNotes
-    );
+    // Don't cache a fallback (original text) as if it were a real
+    // translation - that would permanently skip retranslating these notes.
+    if (!translationFailed) {
+      await saveIngredientNotesTranslation(
+        recipeIngredientId,
+        targetLanguage,
+        finalTranslatedNotes
+      );
+    }
 
     return finalTranslatedNotes;
   } catch (error) {

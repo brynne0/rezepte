@@ -36,6 +36,7 @@ import { recipeToText } from "../../utils/recipeToText";
 import { useWakeLock } from "./hooks/useWakeLock";
 import NutritionPanel from "./components/NutritionPanel";
 import { toast } from "@/components/ui/toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -310,13 +311,7 @@ const Recipe = () => {
     <>
       <Card size="lg" className="mx-auto max-w-3xl text-left">
         <CardHeader>
-          <div
-            className={
-              isOwner
-                ? "flex flex-col gap-4 md:gap-2"
-                : "flex items-center gap-2"
-            }
-          >
+          <div className="flex flex-col gap-4 md:gap-2">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -399,6 +394,14 @@ const Recipe = () => {
                 </ButtonGroup>
               )}
             </div>
+
+            {recipe.translationUnavailable && (
+              <Alert>
+                <AlertDescription>
+                  {t("recipe_translation_unavailable")}
+                </AlertDescription>
+              </Alert>
+            )}
 
             {isOwner && (
               <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">

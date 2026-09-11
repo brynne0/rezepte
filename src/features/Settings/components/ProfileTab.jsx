@@ -1,4 +1,4 @@
-import { Pencil } from "lucide-react";
+import { Pencil, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -17,7 +17,9 @@ import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
+import { useOfflineDownload } from "../hooks/useOfflineDownload";
 
 const ProfileTab = ({
   profileData,
@@ -41,6 +43,13 @@ const ProfileTab = ({
   t,
 }) => {
   const isOnline = useOnlineStatus();
+  const {
+    isDownloading,
+    progress,
+    status: offlineDownloadStatus,
+    startDownload,
+    cancelDownload,
+  } = useOfflineDownload(t);
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       handleSaveProfile();
@@ -207,6 +216,75 @@ const ProfileTab = ({
             disabled={!isOnline}
           />
         </Label>
+      </div>
+
+      <Separator />
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex flex-col">
+            <span className="font-medium">{t("offline_access")}</span>
+            <span className="text-sm text-muted-foreground">
+              {t("offline_access_description")}
+            </span>
+          </span>
+          {isDownloading ? (
+            <Button variant="outline" size="sm" onClick={cancelDownload}>
+              <X />
+              {t("cancel_download")}
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={startDownload}
+              disabled={!isOnline}
+            >
+              <Download />
+              {t("download_recipes_for_offline")}
+            </Button>
+          )}
+        </div>
+
+        {isDownloading && progress && (
+          <div className="flex flex-col gap-1">
+            <Progress
+              value={
+                progress.total > 0
+                  ? Math.round((progress.current / progress.total) * 100)
+                  : 0
+              }
+            />
+            <span className="text-sm text-muted-foreground">
+              {progress.total > 0
+                ? t("offline_download_progress", {
+                    current: progress.current,
+                    total: progress.total,
+                    recipeTitle: progress.recipeTitle || "",
+                  })
+                : t("downloading_recipes_for_offline")}
+            </span>
+          </div>
+        )}
+
+        {!isDownloading && (
+          <span className="text-sm text-muted-foreground">
+            {offlineDownloadStatus
+              ? offlineDownloadStatus.failedCount > 0
+                ? t("offline_download_last_synced_with_failures", {
+                    date: new Date(
+                      offlineDownloadStatus.completedAt
+                    ).toLocaleString(),
+                    count: offlineDownloadStatus.failedCount,
+                  })
+                : t("offline_download_last_synced", {
+                    date: new Date(
+                      offlineDownloadStatus.completedAt
+                    ).toLocaleString(),
+                  })
+              : t("offline_download_never_synced")}
+          </span>
+        )}
       </div>
 
       <Separator />

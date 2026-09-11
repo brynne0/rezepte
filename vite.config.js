@@ -18,22 +18,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
+      includeAssets: ["locales/*.json"],
       workbox: {
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/sw\.js$/, /^\/manifest\.webmanifest$/],
         runtimeCaching: [
-          {
-            urlPattern: /^\/locales\/.*\.json$/,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "locales-cache",
-              expiration: {
-                maxEntries: 20,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
           {
             urlPattern: /^https:\/\/[^/]+\.supabase\.co\/rest\/v1\/.*/,
             method: "GET",
@@ -42,7 +31,7 @@ export default defineConfig({
               cacheName: "supabase-rest-cache",
               networkTimeoutSeconds: 4,
               expiration: {
-                maxEntries: 200,
+                maxEntries: 1000,
                 maxAgeSeconds: 60 * 60 * 24 * 7,
               },
               cacheableResponse: { statuses: [0, 200] },
@@ -57,7 +46,7 @@ export default defineConfig({
               cacheName: "recipe-images-cache",
               matchOptions: { ignoreSearch: true },
               expiration: {
-                maxEntries: 500,
+                maxEntries: 2000,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
               cacheableResponse: { statuses: [0, 200] },

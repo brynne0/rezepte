@@ -9,6 +9,9 @@ export const queryClient = new QueryClient({
       refetchOnReconnect: false,
       refetchOnMount: false,
       retry: 1,
+      // "online" (the default) skips fetching while navigator.onLine is
+      // false, which also skips the service worker's cache fallback.
+      networkMode: "offlineFirst",
     },
   },
 });
