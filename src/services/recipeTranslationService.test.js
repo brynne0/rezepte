@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, vi } from "vitest";
 import {
   getTranslatedRecipe,
   normaliseInstructions,
-} from "./translationService";
+} from "./recipeTranslationService";
 
 // Mock Supabase
 vi.mock("../lib/supabase", () => ({
@@ -496,7 +496,7 @@ describe("Translation Service", () => {
       const mockTranslateText = vi.fn().mockResolvedValue(mockTranslatedText);
 
       const simulateTranslationFlow = async (inputText, targetLanguage) => {
-        // Simulate the translation process from translationService.js
+        // Simulate the translation process from recipeTranslationService.js
         const translatedText = await mockTranslateText(
           inputText,
           targetLanguage

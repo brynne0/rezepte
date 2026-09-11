@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { fetchRecipe } from "../../services/recipes";
-import { getTranslatedRecipe } from "../../services/translationService";
+import { getTranslatedRecipe } from "../../services/recipeTranslationService";
 import { useAuth } from "./useAuth";
 import supabase from "../../lib/supabase";
 

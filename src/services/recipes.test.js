@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 
-vi.mock("./translationService", () => ({
+vi.mock("./recipeTranslationService", () => ({
   updateRecipeTranslations: vi.fn(),
 }));
 

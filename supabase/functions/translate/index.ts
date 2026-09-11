@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, target_lang, source_lang } = await req.json();
+    const { text, target_lang, source_lang, context } = await req.json();
     const DEEPL_API_KEY = Deno.env.get("DEEPL_API_KEY");
 
     // Return original text if no API key
@@ -78,6 +78,11 @@ serve(async (req) => {
       // Add source language if provided and not 'auto'
       if (source_lang && source_lang !== "auto") {
         requestBody.append("source_lang", source_lang.toUpperCase());
+      }
+
+      // Add context, if provided, to help DeepL disambiguate (e.g. food vs. other meanings)
+      if (context) {
+        requestBody.append("context", context);
       }
 
       const response = await fetch("https://api-free.deepl.com/v2/translate", {

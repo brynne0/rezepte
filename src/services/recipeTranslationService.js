@@ -4,6 +4,14 @@ import {
   resolveIngredientName,
   getIngredientNamesForLanguage,
 } from "../utils/ingredientFormatting";
+import {
+  translateText,
+  translateTexts,
+  capitalizeForLanguage,
+  mergeTranslatedField,
+} from "./translationCore";
+
+export { translateText };
 
 // Normalise instruction text to always end with exactly one full stop
 const normaliseInstruction = (instruction) => {
@@ -15,64 +23,6 @@ const normaliseInstruction = (instruction) => {
     return trimmed;
   }
   return trimmed + ".";
-};
-
-// DeepL translation function using Supabase Edge Function
-export const translateText = async (
-  text,
-  targetLanguage,
-  context = null,
-  sourceLang = "auto"
-) => {
-  if (!text || text.trim() === "") return text;
-
-  try {
-    const requestBody = {
-      text: text,
-      target_lang: targetLanguage,
-      source_lang: sourceLang,
-    };
-
-    // Add context if provided to help with disambiguation (e.g., food vs. other meanings)
-    if (context) {
-      requestBody.context = context;
-    }
-
-    const { data, error } = await supabase.functions.invoke("translate", {
-      body: requestBody,
-    });
-
-    if (error) {
-      throw new Error(`Translation error: ${error.message}`);
-    }
-
-    let result = data.translatedText || text;
-
-    // Post-process translated text: replace hyphens with spaces for better readability
-    // This handles DeepL's compound word formatting in German translations
-    result = result.replace(/-/g, " ");
-
-    return result;
-  } catch (error) {
-    console.error("Translation failed:", error);
-    return text; // Return original text if translation fails
-  }
-};
-
-// Translate an array of texts
-const translateTexts = async (texts, targetLanguage, sourceLang = "auto") => {
-  const nonEmptyTexts = texts.filter((text) => text && text.trim() !== "");
-  const promises = nonEmptyTexts.map((text) =>
-    translateText(text, targetLanguage, null, sourceLang)
-  );
-  const translatedResults = await Promise.all(promises);
-
-  // Map back to original array structure, preserving empty strings
-  let resultIndex = 0;
-  return texts.map((text) => {
-    if (!text || text.trim() === "") return text;
-    return translatedResults[resultIndex++];
-  });
 };
 
 // Get translated recipe with ingredients (for full recipe view)
@@ -361,15 +311,12 @@ const getIngredientDisplayName = async (
       translatedPlural.trim().toLowerCase() !==
         sourcePlural.trim().toLowerCase();
 
-    // German nouns are always capitalised; other languages use lowercase
-    const finalSingular =
-      targetLanguage === "de"
-        ? toTitleCase(translatedSingular)
-        : translatedSingular.toLowerCase();
+    const finalSingular = capitalizeForLanguage(
+      translatedSingular,
+      targetLanguage
+    );
     const finalPlural = pluralTranslated
-      ? targetLanguage === "de"
-        ? toTitleCase(translatedPlural)
-        : translatedPlural.toLowerCase()
+      ? capitalizeForLanguage(translatedPlural, targetLanguage)
       : finalSingular;
 
     // Save translation to database
@@ -475,7 +422,7 @@ const getTranslatedIngredientNotes = async (
     // Translation not cached, translate and store
     const translatedNotes = await translateText(originalNotes, targetLanguage);
 
-    // Preserve capitalisation for German, lowercase for other languages
+    // German notes keep DeepL's natural sentence casing; other languages are lowercased
     const finalTranslatedNotes =
       targetLanguage === "de" ? translatedNotes : translatedNotes.toLowerCase();
 
@@ -493,180 +440,60 @@ const getTranslatedIngredientNotes = async (
 };
 
 // Save recipe translation to database storage
-const saveRecipeTranslationToStorage = async (
-  recipeId,
-  language,
-  translatedData
-) => {
-  try {
-    // Clean the translatedData to ensure it's JSON serializable
-    const cleanTranslatedData = {
-      title: translatedData.title || null,
-      category: translatedData.category || null,
-      instructions: Array.isArray(translatedData.instructions)
-        ? translatedData.instructions
-        : [],
-      notes: translatedData.notes || null,
-      source: translatedData.source || null,
-    };
+const saveRecipeTranslationToStorage = (recipeId, language, translatedData) => {
+  // Clean the translatedData to ensure it's JSON serializable
+  const cleanTranslatedData = {
+    title: translatedData.title || null,
+    category: translatedData.category || null,
+    instructions: Array.isArray(translatedData.instructions)
+      ? translatedData.instructions
+      : [],
+    notes: translatedData.notes || null,
+    source: translatedData.source || null,
+  };
 
-    // Get current translated_recipe data
-    const { data: currentRecipe, error: fetchError } = await supabase
-      .from("recipes")
-      .select("translated_recipe")
-      .eq("id", recipeId)
-      .single();
-
-    if (fetchError) {
-      throw fetchError;
-    }
-
-    // Merge new translation with existing translations
-    const existingTranslations = currentRecipe.translated_recipe || {};
-    const updatedTranslations = {
-      ...existingTranslations,
-      [language]: cleanTranslatedData,
-    };
-
-    // Update the database
-    const { error: updateError } = await supabase
-      .from("recipes")
-      .update({ translated_recipe: updatedTranslations })
-      .eq("id", recipeId);
-
-    if (updateError) {
-      console.error("Update error:", updateError);
-      throw updateError;
-    }
-  } catch (error) {
-    console.error("Failed to store recipe translation:", error);
-    console.error("Recipe ID:", recipeId, "Language:", language);
-    console.error("Translation data:", translatedData);
-    // Don't throw error - translation worked, just storage failed
-  }
+  return mergeTranslatedField(
+    "recipes",
+    recipeId,
+    "translated_recipe",
+    language,
+    () => cleanTranslatedData
+  );
 };
 
-// Save just recipe title translation (for recipe lists)
-const saveRecipeTitleTranslation = async (
-  recipeId,
-  language,
-  translatedTitle
-) => {
-  try {
-    // Get current translated_recipe data
-    const { data: currentRecipe, error: fetchError } = await supabase
-      .from("recipes")
-      .select("translated_recipe")
-      .eq("id", recipeId)
-      .single();
-
-    if (fetchError) {
-      throw fetchError;
-    }
-
-    // Merge title with existing translations, keeping other fields intact
-    const existingTranslation =
-      currentRecipe.translated_recipe?.[language] || {};
-    const updatedTranslations = {
-      ...(currentRecipe.translated_recipe || {}),
-      [language]: {
-        ...existingTranslation,
-        title: translatedTitle,
-      },
-    };
-
-    // Update the database
-    const { error: updateError } = await supabase
-      .from("recipes")
-      .update({ translated_recipe: updatedTranslations })
-      .eq("id", recipeId);
-
-    if (updateError) {
-      throw updateError;
-    }
-  } catch (error) {
-    console.error("Failed to store recipe title:", error);
-    // Don't throw error - translation worked, just storage failed
-  }
-};
+// Save just recipe title translation (for recipe lists), keeping other fields intact
+const saveRecipeTitleTranslation = (recipeId, language, translatedTitle) =>
+  mergeTranslatedField(
+    "recipes",
+    recipeId,
+    "translated_recipe",
+    language,
+    (existing) => ({ ...existing, title: translatedTitle })
+  );
 
 // Save ingredient notes translation to database storage
-const saveIngredientNotesTranslation = async (
+const saveIngredientNotesTranslation = (
   recipeIngredientId,
   language,
   translatedNotes
-) => {
-  try {
-    // Get current translated_notes data
-    const { data: currentRecipeIngredient, error: fetchError } = await supabase
-      .from("recipe_ingredients")
-      .select("translated_notes")
-      .eq("id", recipeIngredientId)
-      .single();
-
-    if (fetchError) {
-      throw fetchError;
-    }
-
-    // Merge new translation with existing translations
-    const updatedTranslations = {
-      ...(currentRecipeIngredient.translated_notes || {}),
-      [language]: translatedNotes,
-    };
-
-    // Update the database
-    const { error: updateError } = await supabase
-      .from("recipe_ingredients")
-      .update({ translated_notes: updatedTranslations })
-      .eq("id", recipeIngredientId);
-
-    if (updateError) {
-      throw updateError;
-    }
-  } catch (error) {
-    console.error("Failed to store ingredient notes translation:", error);
-    // Don't throw error - translation worked, just storage failed
-  }
-};
+) =>
+  mergeTranslatedField(
+    "recipe_ingredients",
+    recipeIngredientId,
+    "translated_notes",
+    language,
+    () => translatedNotes
+  );
 
 // Save ingredient translation to database storage
-const saveIngredientTranslation = async (
-  ingredientId,
-  language,
-  translationData
-) => {
-  try {
-    // Get current translated_names data
-    const { data: currentIngredient, error: fetchError } = await supabase
-      .from("ingredients")
-      .select("translated_names")
-      .eq("id", ingredientId)
-      .single();
-
-    if (fetchError) {
-      throw fetchError;
-    }
-
-    // Merge new translation with existing translations
-    const updatedTranslations = {
-      ...(currentIngredient.translated_names || {}),
-      [language]: translationData,
-    };
-
-    // Update the database
-    const { error: updateError } = await supabase
-      .from("ingredients")
-      .update({ translated_names: updatedTranslations })
-      .eq("id", ingredientId);
-
-    if (updateError) {
-      throw updateError;
-    }
-  } catch (error) {
-    console.error("Failed to store ingredient translation:", error);
-    // Don't throw error - translation worked, just storage failed
-  }
-};
+const saveIngredientTranslation = (ingredientId, language, translationData) =>
+  mergeTranslatedField(
+    "ingredients",
+    ingredientId,
+    "translated_names",
+    language,
+    () => translationData
+  );
 
 // Smart update translations when recipe is edited
 export const updateRecipeTranslations = async (
@@ -687,76 +514,60 @@ export const updateRecipeTranslations = async (
     }
 
     const existingTranslations = currentRecipe.translated_recipe;
-    const updatedTranslations = { ...existingTranslations };
 
-    // Check each language and update only changed fields
-    for (const [language, translation] of Object.entries(
-      existingTranslations
-    )) {
-      const fieldsToUpdate = {};
-      let needsUpdate = false;
+    // Only fields that actually changed need retranslating; everything else
+    // is carried over from the existing cached translation.
+    const titleChanged = oldRecipeData.title !== newRecipeData.title;
+    const categoryChanged = oldRecipeData.category !== newRecipeData.category;
+    const notesChanged = oldRecipeData.notes !== newRecipeData.notes;
+    const sourceChanged = oldRecipeData.source !== newRecipeData.source;
+    const instructionsChanged =
+      JSON.stringify(oldRecipeData.instructions) !==
+      JSON.stringify(newRecipeData.instructions);
 
-      // Check each field for changes
-      if (oldRecipeData.title !== newRecipeData.title) {
-        fieldsToUpdate.title = await translateText(
-          newRecipeData.title,
-          language
-        );
-        needsUpdate = true;
-      } else {
-        fieldsToUpdate.title = translation.title;
-      }
+    // Translate for every language in parallel, and within each language
+    // translate every changed field in parallel too.
+    const perLanguageUpdates = await Promise.all(
+      Object.entries(existingTranslations).map(
+        async ([language, translation]) => {
+          const [title, category, notes, source, instructions] =
+            await Promise.all([
+              titleChanged
+                ? translateText(newRecipeData.title, language)
+                : translation.title,
+              categoryChanged
+                ? translateText(
+                    newRecipeData.category,
+                    language,
+                    "Food category"
+                  )
+                : translation.category,
+              notesChanged
+                ? newRecipeData.notes
+                  ? translateText(newRecipeData.notes, language)
+                  : null
+                : translation.notes,
+              sourceChanged
+                ? newRecipeData.source
+                  ? translateText(newRecipeData.source, language)
+                  : null
+                : translation.source,
+              instructionsChanged
+                ? translateTexts(newRecipeData.instructions, language).then(
+                    (texts) => texts.map(normaliseInstruction)
+                  )
+                : translation.instructions,
+            ]);
 
-      if (oldRecipeData.category !== newRecipeData.category) {
-        fieldsToUpdate.category = await translateText(
-          newRecipeData.category,
-          language,
-          "Food category"
-        );
-        needsUpdate = true;
-      } else {
-        fieldsToUpdate.category = translation.category;
-      }
+          return [language, { title, category, notes, source, instructions }];
+        }
+      )
+    );
 
-      if (oldRecipeData.notes !== newRecipeData.notes) {
-        fieldsToUpdate.notes = newRecipeData.notes
-          ? await translateText(newRecipeData.notes, language)
-          : null;
-        needsUpdate = true;
-      } else {
-        fieldsToUpdate.notes = translation.notes;
-      }
-
-      if (oldRecipeData.source !== newRecipeData.source) {
-        fieldsToUpdate.source = newRecipeData.source
-          ? await translateText(newRecipeData.source, language)
-          : null;
-        needsUpdate = true;
-      } else {
-        fieldsToUpdate.source = translation.source;
-      }
-
-      // Check instructions (compare arrays)
-      if (
-        JSON.stringify(oldRecipeData.instructions) !==
-        JSON.stringify(newRecipeData.instructions)
-      ) {
-        const translatedInstructions = await translateTexts(
-          newRecipeData.instructions,
-          language
-        );
-        fieldsToUpdate.instructions =
-          translatedInstructions.map(normaliseInstruction);
-        needsUpdate = true;
-      } else {
-        fieldsToUpdate.instructions = translation.instructions;
-      }
-
-      // Update translation if any field changed
-      if (needsUpdate) {
-        updatedTranslations[language] = fieldsToUpdate;
-      }
-    }
+    const updatedTranslations = {
+      ...existingTranslations,
+      ...Object.fromEntries(perLanguageUpdates),
+    };
 
     // Save updated translations
     const { error: updateError } = await supabase
@@ -833,83 +644,27 @@ export const updateTranslationOnly = async (
   }
 };
 
-// Clear all translations for a recipe (nuclear option)
-export const clearRecipeTranslations = async (recipeId) => {
-  try {
-    await supabase
-      .from("recipes")
-      .update({ translated_recipe: null })
-      .eq("id", recipeId);
-  } catch (error) {
-    console.error("Failed to clear recipe translations:", error);
-  }
-};
-
 // Update ingredient name overrides for translation editing
-const updateIngredientOverrides = async (ingredientOverrides) => {
-  try {
-    for (const override of ingredientOverrides) {
-      const { recipe_ingredient_id, name, language } = override;
-
-      // Get current name_overrides for this ingredient
-      const { data: currentIngredient, error: fetchError } = await supabase
-        .from("recipe_ingredients")
-        .select("name_overrides")
-        .eq("id", recipe_ingredient_id)
-        .single();
-
-      if (fetchError) {
-        console.error(
-          `Failed to fetch ingredient ${recipe_ingredient_id}:`,
-          fetchError
-        );
-        continue; // Skip this override and continue with others
-      }
-
-      // Merge the new override with existing overrides
-      const updatedOverrides = {
-        ...(currentIngredient.name_overrides || {}),
-        [language]: name,
-      };
-
-      // Update the database
-      const { error: updateError } = await supabase
-        .from("recipe_ingredients")
-        .update({ name_overrides: updatedOverrides })
-        .eq("id", recipe_ingredient_id);
-
-      if (updateError) {
-        console.error(
-          `Failed to update ingredient override ${recipe_ingredient_id}:`,
-          updateError
-        );
-        // Continue with other overrides even if one fails
-      }
-    }
-  } catch (error) {
-    console.error("Failed to update ingredient overrides:", error);
-    // Don't throw error - translation update should still succeed
-  }
-};
+const updateIngredientOverrides = (ingredientOverrides) =>
+  Promise.all(
+    ingredientOverrides.map(({ recipe_ingredient_id, name, language }) =>
+      mergeTranslatedField(
+        "recipe_ingredients",
+        recipe_ingredient_id,
+        "name_overrides",
+        language,
+        () => name
+      )
+    )
+  );
 
 // Update ingredient notes translations for translation editing
-const updateIngredientNotesTranslations = async (ingredientNotesUpdates) => {
-  try {
-    for (const notesUpdate of ingredientNotesUpdates) {
-      const { recipe_ingredient_id, notes, language } = notesUpdate;
-
-      // Use the existing saveIngredientNotesTranslation function
-      await saveIngredientNotesTranslation(
-        recipe_ingredient_id,
-        language,
-        notes
-      );
-    }
-  } catch (error) {
-    console.error("Failed to update ingredient notes translations:", error);
-    // Don't throw error - translation update should still succeed
-  }
-};
+const updateIngredientNotesTranslations = (ingredientNotesUpdates) =>
+  Promise.all(
+    ingredientNotesUpdates.map(({ recipe_ingredient_id, notes, language }) =>
+      saveIngredientNotesTranslation(recipe_ingredient_id, language, notes)
+    )
+  );
 
 // Normalise instructions to always end with full stops (for use with original/existing instructions)
 export const normaliseInstructions = (instructions) => {

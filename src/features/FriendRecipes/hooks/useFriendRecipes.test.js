@@ -19,7 +19,7 @@ vi.mock("../../../services/friendsService", () => ({
   fetchFriendRecipes: vi.fn(),
 }));
 
-vi.mock("../../../services/translationService", () => ({
+vi.mock("../../../services/recipeTranslationService", () => ({
   getTranslatedRecipeTitle: vi.fn((recipe) => Promise.resolve(recipe)),
 }));
 
@@ -29,7 +29,7 @@ import {
   getFriendProfile,
   fetchFriendRecipes,
 } from "../../../services/friendsService";
-import { getTranslatedRecipeTitle } from "../../../services/translationService";
+import { getTranslatedRecipeTitle } from "../../../services/recipeTranslationService";
 
 const renderUseFriendRecipes = (username) =>
   renderHook(() => useFriendRecipes(username), {

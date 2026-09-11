@@ -1,6 +1,9 @@
 import supabase from "../lib/supabase";
 import pluralize from "pluralize";
-import { translateText, updateRecipeTranslations } from "./translationService";
+import {
+  translateText,
+  updateRecipeTranslations,
+} from "./recipeTranslationService";
 import { uploadLocalImages, cleanupOrphanedImages } from "./imageService";
 
 // Translate an ingredient name to English

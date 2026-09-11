@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabase from "../../lib/supabase";
-import { getTranslatedRecipeTitle } from "../../services/translationService";
+import { getTranslatedRecipeTitle } from "../../services/recipeTranslationService";
 import { useAuth } from "./useAuth";
 
 // Fetch recipes with category information for the given user

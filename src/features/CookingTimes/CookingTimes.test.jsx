@@ -2,11 +2,12 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createRoutesStub } from "react-router-dom";
 import CookingTimes from "./CookingTimes";
-import * as cookingTimesService from "../../services/cookingTimesService";
+import * as cookingTimesTranslationService from "../../services/cookingTimesTranslationService";
 import * as userService from "../../services/userService";
 
 // Mock services
 vi.mock("../../services/cookingTimesService");
+vi.mock("../../services/cookingTimesTranslationService");
 vi.mock("../../services/userService");
 
 vi.mock("react-router-dom", async () => {
@@ -116,7 +117,7 @@ describe("CookingTimes", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    cookingTimesService.getTranslatedCookingTimes.mockResolvedValue(
+    cookingTimesTranslationService.getTranslatedCookingTimes.mockResolvedValue(
       mockCookingTimesData
     );
     userService.getUserPreferredLanguage.mockResolvedValue("en");
@@ -136,7 +137,7 @@ describe("CookingTimes", () => {
 
   describe("Loading State", () => {
     it("should show loading skeletons while fetching data", () => {
-      cookingTimesService.getTranslatedCookingTimes.mockImplementation(
+      cookingTimesTranslationService.getTranslatedCookingTimes.mockImplementation(
         () => new Promise(() => {})
       );
       const { container } = renderComponent();
@@ -225,7 +226,9 @@ describe("CookingTimes", () => {
 
   describe("Empty State", () => {
     it("should show empty state when no cooking times exist", async () => {
-      cookingTimesService.getTranslatedCookingTimes.mockResolvedValue([]);
+      cookingTimesTranslationService.getTranslatedCookingTimes.mockResolvedValue(
+        []
+      );
       renderComponent();
 
       await waitFor(() => {
@@ -234,7 +237,9 @@ describe("CookingTimes", () => {
     });
 
     it("should show add button in empty state", async () => {
-      cookingTimesService.getTranslatedCookingTimes.mockResolvedValue([]);
+      cookingTimesTranslationService.getTranslatedCookingTimes.mockResolvedValue(
+        []
+      );
       renderComponent();
 
       await waitFor(() => {
@@ -290,7 +295,7 @@ describe("CookingTimes", () => {
 
     it("should call setIsEditMode(false) when cancel is clicked", async () => {
       const setIsEditMode = vi.fn();
-      cookingTimesService.getTranslatedCookingTimes.mockResolvedValue(
+      cookingTimesTranslationService.getTranslatedCookingTimes.mockResolvedValue(
         mockCookingTimesData
       );
       renderComponent({ isEditMode: true, setIsEditMode });
@@ -318,7 +323,9 @@ describe("CookingTimes", () => {
     });
 
     it("should not show edit button when no cooking times exist", async () => {
-      cookingTimesService.getTranslatedCookingTimes.mockResolvedValue([]);
+      cookingTimesTranslationService.getTranslatedCookingTimes.mockResolvedValue(
+        []
+      );
       renderComponent();
 
       await waitFor(() => {

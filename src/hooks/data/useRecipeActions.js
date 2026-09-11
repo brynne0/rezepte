@@ -4,7 +4,7 @@ import {
   updateRecipe,
   deleteRecipe,
 } from "../../services/recipes";
-import { updateTranslationOnly } from "../../services/translationService";
+import { updateTranslationOnly } from "../../services/recipeTranslationService";
 
 // Hooks for manual CRUD operations
 export const useRecipeActions = () => {

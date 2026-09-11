@@ -3,8 +3,8 @@ import {
   createCookingTime,
   updateCookingTime,
   deleteCookingTime,
-  updateCookingTimeTranslations,
 } from "../../../services/cookingTimesService";
+import { updateCookingTimeTranslations } from "../../../services/cookingTimesTranslationService";
 import { getUserPreferredLanguage } from "../../../services/userService";
 import { useUnsavedChanges } from "../../../hooks/ui/useUnsavedChanges";
 

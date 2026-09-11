@@ -1,5 +1,5 @@
 import supabase from "../lib/supabase";
-import { translateText } from "./translationService";
+import { translateText } from "./recipeTranslationService";
 
 // Escape % and _ so a typed name isn't read as an ILIKE wildcard
 const escapeForIlike = (value) => value.replace(/[%_]/g, "\\$&");

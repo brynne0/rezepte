@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 
 import { fetchRecipes } from "../../../services/recipes";
-import { getTranslatedRecipeTitle } from "../../../services/translationService";
+import { getTranslatedRecipeTitle } from "../../../services/recipeTranslationService";
 import {
   Dialog,
   DialogContent,
