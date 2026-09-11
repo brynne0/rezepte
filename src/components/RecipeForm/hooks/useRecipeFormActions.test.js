@@ -21,6 +21,7 @@ vi.mock("react-router-dom", async () => {
 
 vi.mock("../../../hooks/data/useRecipeActions", () => ({
   useRecipeActions: vi.fn(),
+  OFFLINE_ERROR: "offline",
 }));
 
 const baseIngredient = (overrides = {}) => ({

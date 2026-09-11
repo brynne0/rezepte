@@ -8,8 +8,11 @@ import { useRecipeForm } from "./hooks/useRecipeForm";
 import { handleEnterNav } from "../../utils/enterKeyNavigation";
 import { useRecipeAutofill } from "./hooks/useRecipeAutofill";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
-import { useCategories } from "../../hooks/data/useCategories";
-import { createCategory } from "../../services/categoriesService";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ImageUpload from "../ImageUpload/ImageUpload";
 import RecipeLinkDropdown from "./components/RecipeLinkDropdown";
 import IngredientsSection from "./components/IngredientsSection";
@@ -46,9 +49,8 @@ const RecipeForm = ({
   title = "",
   isEditingTranslation = false,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const { refreshCategories } = useCategories();
 
   const {
     formData,
@@ -59,6 +61,7 @@ const RecipeForm = ({
     // error,
     isEditMode,
     hasUnsavedChanges,
+    isOnline,
 
     uploadingImageIds,
     handleInputChange,
@@ -92,7 +95,7 @@ const RecipeForm = ({
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [addCategoryError, setAddCategoryError] = useState("");
-  const [isSavingCategory, setIsSavingCategory] = useState(false);
+  const [pendingNewCategories, setPendingNewCategories] = useState([]);
 
   const handleAutofill = useRecipeAutofill({
     setFormData,
@@ -141,30 +144,35 @@ const RecipeForm = ({
     setAddCategoryError("");
   };
 
-  const handleSaveNewCategory = async () => {
+  // Categories rendered in the toggle group: real ones from the server plus
+  // any not-yet-created ones the user typed in this session.
+  const displayCategories = [
+    ...(categories || []),
+    ...pendingNewCategories
+      .filter((name) => !categories?.some((c) => c.value === name))
+      .map((name) => ({ value: name, label: name })),
+  ];
+
+  const handleSaveNewCategory = () => {
     const trimmedName = newCategoryName.trim();
     if (!trimmedName) {
       setAddCategoryError(t("category_name_required"));
       return;
     }
 
-    setIsSavingCategory(true);
-    setAddCategoryError("");
-    try {
-      await createCategory(trimmedName, { [i18n.language]: trimmedName });
-      await refreshCategories();
-      handleInputChange("categories", [...selectedCategories, trimmedName]);
-      setIsAddingCategory(false);
-      setNewCategoryName("");
-    } catch (error) {
-      setAddCategoryError(
-        error.message.includes("already exists")
-          ? t("category_name_already_exists")
-          : error.message
-      );
-    } finally {
-      setIsSavingCategory(false);
+    const isDuplicate = displayCategories.some(
+      (category) => category.label.toLowerCase() === trimmedName.toLowerCase()
+    );
+    if (isDuplicate) {
+      setAddCategoryError(t("category_name_already_exists"));
+      return;
     }
+
+    setPendingNewCategories((prev) => [...prev, trimmedName]);
+    handleInputChange("categories", [...selectedCategories, trimmedName]);
+    setIsAddingCategory(false);
+    setNewCategoryName("");
+    setAddCategoryError("");
   };
 
   return (
@@ -302,8 +310,8 @@ const RecipeForm = ({
                   className="flex flex-wrap"
                   disabled={isEditingTranslation}
                 >
-                  {categories
-                    ?.filter((category) => category.value !== "all_recipes")
+                  {displayCategories
+                    .filter((category) => category.value !== "all_recipes")
                     .map((category) => (
                       <ToggleGroupItem
                         key={category.value}
@@ -338,15 +346,12 @@ const RecipeForm = ({
                           }}
                           placeholder={t("category_name")}
                           aria-invalid={!!addCategoryError}
-                          disabled={isSavingCategory}
                         />
                         <Button
                           type="button"
                           size="sm"
                           onClick={handleSaveNewCategory}
-                          disabled={isSavingCategory}
                         >
-                          {isSavingCategory && <Spinner />}
                           {t("add_category")}
                         </Button>
                         <Button
@@ -354,7 +359,6 @@ const RecipeForm = ({
                           variant="outline"
                           size="sm"
                           onClick={handleCancelAddCategory}
-                          disabled={isSavingCategory}
                         >
                           {t("cancel")}
                         </Button>
@@ -464,14 +468,26 @@ const RecipeForm = ({
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 {/* Delete Button */}
                 {isEditMode && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="w-full sm:mr-auto sm:w-auto"
-                    onClick={() => setIsDeleteModalOpen(true)}
-                  >
-                    {t("delete_recipe")}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          className="w-full sm:mr-auto sm:w-auto"
+                          onClick={() => setIsDeleteModalOpen(true)}
+                          disabled={!isOnline}
+                        >
+                          {t("delete_recipe")}
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>
+                      {isOnline
+                        ? t("delete_recipe")
+                        : t("action_requires_internet")}
+                    </TooltipContent>
+                  </Tooltip>
                 )}
                 {/* Cancel Button */}
                 <Button
@@ -483,18 +499,33 @@ const RecipeForm = ({
                   {t("cancel")}
                 </Button>
                 {/* Submit button */}
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full sm:w-auto"
-                >
-                  {loading && <Spinner />}
-                  {isEditMode
-                    ? isEditingTranslation
-                      ? t("update_translation")
-                      : t("update_recipe")
-                    : t("create_recipe")}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="submit"
+                        disabled={loading || !isOnline}
+                        className="w-full sm:w-auto"
+                      >
+                        {loading && <Spinner />}
+                        {isEditMode
+                          ? isEditingTranslation
+                            ? t("update_translation")
+                            : t("update_recipe")
+                          : t("create_recipe")}
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>
+                    {isOnline
+                      ? isEditMode
+                        ? isEditingTranslation
+                          ? t("update_translation")
+                          : t("update_recipe")
+                        : t("create_recipe")
+                      : t("action_requires_internet")}
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </fieldset>
           </form>
@@ -512,8 +543,12 @@ const RecipeForm = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
-              {t("delete")}
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={!isOnline}
+            >
+              {isOnline ? t("delete") : t("action_requires_internet")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

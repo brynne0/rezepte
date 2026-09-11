@@ -5,16 +5,27 @@ import {
   deleteRecipe,
 } from "../../services/recipes";
 import { updateTranslationOnly } from "../../services/recipeTranslationService";
+import { useOnlineStatus } from "../ui/useOnlineStatus";
+
+export const OFFLINE_ERROR = "offline";
 
 // Hooks for manual CRUD operations
 export const useRecipeActions = () => {
+  const isOnline = useOnlineStatus();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const assertOnline = () => {
+    if (!isOnline) {
+      throw new Error(OFFLINE_ERROR);
+    }
+  };
 
   const handleCreateRecipe = async (
     recipeData,
     onImageUploadProgress = null
   ) => {
+    assertOnline();
     setLoading(true);
     setError(null);
 
@@ -35,6 +46,7 @@ export const useRecipeActions = () => {
     recipeData,
     onImageUploadProgress = null
   ) => {
+    assertOnline();
     setLoading(true);
     setError(null);
 
@@ -51,6 +63,7 @@ export const useRecipeActions = () => {
   };
 
   const handleDeleteRecipe = async (id) => {
+    assertOnline();
     setLoading(true);
     setError(null);
 
@@ -73,6 +86,7 @@ export const useRecipeActions = () => {
     ingredientOverrides = [],
     ingredientNotesUpdates = []
   ) => {
+    assertOnline();
     setLoading(true);
     setError(null);
 

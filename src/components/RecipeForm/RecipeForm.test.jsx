@@ -115,6 +115,7 @@ describe("RecipeForm", () => {
     validationErrors: {},
     loading: false,
     isEditMode: false,
+    isOnline: true,
     hasUnsavedChanges: vi.fn(() => false),
     handleInputChange: vi.fn(),
     handleTitleBlur: vi.fn(),

@@ -18,6 +18,11 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import { useOfflineDownload } from "../hooks/useOfflineDownload";
 
@@ -52,7 +57,7 @@ const ProfileTab = ({
   } = useOfflineDownload(t);
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      handleSaveProfile();
+      if (isOnline) handleSaveProfile();
     } else if (e.key === "Escape") {
       handleCancelProfile();
     }
@@ -63,12 +68,7 @@ const ProfileTab = ({
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">{t("profile")}</h2>
         {!isEditingProfile && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleEditProfile}
-            disabled={!isOnline}
-          >
+          <Button variant="ghost" size="sm" onClick={handleEditProfile}>
             <Pencil />
             {t("edit_profile")}
           </Button>
@@ -131,7 +131,7 @@ const ProfileTab = ({
             <InputGroupAddon align="inline-end">
               <InputGroupButton
                 onClick={handleChangeEmail}
-                disabled={isEditingProfile || !isOnline}
+                disabled={isEditingProfile}
               >
                 {t("change_email")}
               </InputGroupButton>
@@ -152,7 +152,7 @@ const ProfileTab = ({
             <InputGroupAddon align="inline-end">
               <InputGroupButton
                 onClick={handleChangePassword}
-                disabled={isEditingProfile || !isOnline}
+                disabled={isEditingProfile}
               >
                 {t("change_password")}
               </InputGroupButton>
@@ -170,13 +170,22 @@ const ProfileTab = ({
           >
             {t("cancel")}
           </Button>
-          <Button
-            className="w-full sm:w-auto"
-            onClick={handleSaveProfile}
-            disabled={!isOnline}
-          >
-            {t("save_changes")}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={handleSaveProfile}
+                  disabled={!isOnline}
+                >
+                  {t("save_changes")}
+                </Button>
+              }
+            />
+            <TooltipContent>
+              {isOnline ? t("save_changes") : t("action_requires_internet")}
+            </TooltipContent>
+          </Tooltip>
         </div>
       )}
 
@@ -184,19 +193,39 @@ const ProfileTab = ({
 
       <div className="flex flex-col items-center gap-2">
         <span className="text-sm font-medium">{t("preferred_language")}</span>
-        <ToggleGroup
-          variant="outline"
-          value={[profileData?.preferred_language || "en"]}
-          onValueChange={(groupValue) => {
-            if (groupValue[0]) {
-              handleLanguageChange(groupValue[0]);
-            }
-          }}
-          disabled={!isOnline}
-        >
-          <ToggleGroupItem value="en">EN</ToggleGroupItem>
-          <ToggleGroupItem value="de">DE</ToggleGroupItem>
-        </ToggleGroup>
+        {isOnline ? (
+          <ToggleGroup
+            variant="outline"
+            value={[profileData?.preferred_language || "en"]}
+            onValueChange={(groupValue) => {
+              if (groupValue[0]) {
+                handleLanguageChange(groupValue[0]);
+              }
+            }}
+          >
+            <ToggleGroupItem value="en">EN</ToggleGroupItem>
+            <ToggleGroupItem value="de">DE</ToggleGroupItem>
+          </ToggleGroup>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span tabIndex={0} className="inline-flex">
+                  <ToggleGroup
+                    variant="outline"
+                    value={[profileData?.preferred_language || "en"]}
+                    disabled
+                    className="pointer-events-none"
+                  >
+                    <ToggleGroupItem value="en">EN</ToggleGroupItem>
+                    <ToggleGroupItem value="de">DE</ToggleGroupItem>
+                  </ToggleGroup>
+                </span>
+              }
+            />
+            <TooltipContent>{t("action_requires_internet")}</TooltipContent>
+          </Tooltip>
+        )}
       </div>
 
       <Separator />
@@ -209,12 +238,29 @@ const ProfileTab = ({
               {t("friends_can_view_images_description")}
             </span>
           </span>
-          <Switch
-            id="friends-can-view-images"
-            checked={!!profileData?.friends_can_view_images}
-            onCheckedChange={handleFriendsCanViewImagesChange}
-            disabled={!isOnline}
-          />
+          {isOnline ? (
+            <Switch
+              id="friends-can-view-images"
+              checked={!!profileData?.friends_can_view_images}
+              onCheckedChange={handleFriendsCanViewImagesChange}
+            />
+          ) : (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span tabIndex={0} className="inline-flex">
+                    <Switch
+                      id="friends-can-view-images"
+                      checked={!!profileData?.friends_can_view_images}
+                      disabled
+                      className="pointer-events-none"
+                    />
+                  </span>
+                }
+              />
+              <TooltipContent>{t("action_requires_internet")}</TooltipContent>
+            </Tooltip>
+          )}
         </Label>
       </div>
 
@@ -234,15 +280,26 @@ const ProfileTab = ({
               {t("cancel_download")}
             </Button>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={startDownload}
-              disabled={!isOnline}
-            >
-              <Download />
-              {t("download_recipes_for_offline")}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={startDownload}
+                    disabled={!isOnline}
+                  >
+                    <Download />
+                    {t("download_recipes_for_offline")}
+                  </Button>
+                }
+              />
+              <TooltipContent>
+                {isOnline
+                  ? t("download_recipes_for_offline")
+                  : t("action_requires_internet")}
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
 
@@ -290,14 +347,23 @@ const ProfileTab = ({
       <Separator />
 
       <div className="flex justify-center">
-        <Button
-          className="w-full sm:w-auto"
-          variant="destructive"
-          onClick={handleDeleteAccount}
-          disabled={!isOnline}
-        >
-          {t("delete_account")}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                className="w-full sm:w-auto"
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={!isOnline}
+              >
+                {t("delete_account")}
+              </Button>
+            }
+          />
+          <TooltipContent>
+            {isOnline ? t("delete_account") : t("action_requires_internet")}
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

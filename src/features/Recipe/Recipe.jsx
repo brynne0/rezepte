@@ -348,7 +348,11 @@ const Recipe = () => {
                         </Button>
                       }
                     />
-                    <TooltipContent>{t("edit_recipe")}</TooltipContent>
+                    <TooltipContent>
+                      {isOnline
+                        ? t("edit_recipe")
+                        : t("action_requires_internet")}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger
@@ -386,9 +390,11 @@ const Recipe = () => {
                       }
                     />
                     <TooltipContent>
-                      {isPrivate
-                        ? t("make_recipe_visible_to_friends")
-                        : t("make_recipe_private")}
+                      {!isOnline
+                        ? t("action_requires_internet")
+                        : isPrivate
+                          ? t("make_recipe_visible_to_friends")
+                          : t("make_recipe_private")}
                     </TooltipContent>
                   </Tooltip>
                 </ButtonGroup>

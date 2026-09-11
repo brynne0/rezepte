@@ -4,9 +4,13 @@ import { buildNutritionColumns } from "../../../utils/nutritionUtils";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRecipeActions } from "../../../hooks/data/useRecipeActions";
+import {
+  useRecipeActions,
+  OFFLINE_ERROR,
+} from "../../../hooks/data/useRecipeActions";
 import { normaliseUnicodeFractions } from "../../../utils/fractionUtils";
 import { toast } from "@/components/ui/toast";
+import { useOnlineStatus } from "../../../hooks/ui/useOnlineStatus";
 
 export const useRecipeFormActions = ({
   formData,
@@ -24,6 +28,7 @@ export const useRecipeFormActions = ({
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isOnline = useOnlineStatus();
   const {
     createRecipe,
     updateRecipe,
@@ -338,6 +343,7 @@ export const useRecipeFormActions = ({
         flushSync(() => setInitialFormData(formData));
         queryClient.invalidateQueries({ queryKey: ["recipes"] });
         queryClient.invalidateQueries({ queryKey: ["recipe"] });
+        queryClient.invalidateQueries({ queryKey: ["categories"] });
         toast.add({
           title: t(
             initialRecipe ? "recipe_updated_success" : "recipe_created_success"
@@ -355,9 +361,12 @@ export const useRecipeFormActions = ({
           err
         );
         // Set user-friendly error message
-        const errorKey = initialRecipe
-          ? "recipe_update_error"
-          : "recipe_create_error";
+        const errorKey =
+          err.message === OFFLINE_ERROR
+            ? "action_requires_internet"
+            : initialRecipe
+              ? "recipe_update_error"
+              : "recipe_create_error";
         setSubmissionError(t(errorKey));
 
         // Scroll to top to show the error message
@@ -408,7 +417,11 @@ export const useRecipeFormActions = ({
       navigate("/");
     } catch (err) {
       console.error("Failed to delete recipe:", err);
-      toast.add({ title: t("delete_recipe_failed"), type: "error" });
+      const titleKey =
+        err.message === OFFLINE_ERROR
+          ? "action_requires_internet"
+          : "delete_recipe_failed";
+      toast.add({ title: t(titleKey), type: "error" });
     }
   }, [initialRecipe, deleteRecipe, navigate, queryClient, t]);
 
@@ -419,5 +432,6 @@ export const useRecipeFormActions = ({
     handleDelete,
     loading,
     error,
+    isOnline,
   };
 };

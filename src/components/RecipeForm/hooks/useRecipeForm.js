@@ -90,5 +90,6 @@ export const useRecipeForm = (options) => {
     handleDelete: actions.handleDelete,
     loading: actions.loading,
     error: actions.error,
+    isOnline: actions.isOnline,
   };
 };
