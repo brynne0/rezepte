@@ -230,16 +230,24 @@ describe("scaleUtils", () => {
         });
       });
 
-      test("l → ml below 0.1 l", () => {
+      test("l → ml below 1 l", () => {
         expect(scaleIngredient("1", "l", 0.05)).toEqual({
           quantity: "50",
           unit: "ml",
         });
+        expect(scaleIngredient("1", "l", 0.5)).toEqual({
+          quantity: "500",
+          unit: "ml",
+        });
       });
 
-      test("kg → g below 0.1 kg", () => {
+      test("kg → g below 1 kg", () => {
         expect(scaleIngredient("1", "kg", 0.05)).toEqual({
           quantity: "50",
+          unit: "g",
+        });
+        expect(scaleIngredient("1", "kg", 0.5)).toEqual({
+          quantity: "500",
           unit: "g",
         });
       });

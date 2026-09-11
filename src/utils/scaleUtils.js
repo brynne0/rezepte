@@ -12,8 +12,8 @@ const UNIT_UP = {
 const UNIT_DOWN = {
   "cup/s": { threshold: 0.25, factor: 16, unit: "tbsp" },
   tbsp: { threshold: 1 / 3, factor: 3, unit: "tsp" },
-  l: { threshold: 0.1, factor: 1000, unit: "ml" },
-  kg: { threshold: 0.1, factor: 1000, unit: "g" },
+  l: { threshold: 1, factor: 1000, unit: "ml" },
+  kg: { threshold: 1, factor: 1000, unit: "g" },
 };
 
 function convertUnit(value, unit) {
