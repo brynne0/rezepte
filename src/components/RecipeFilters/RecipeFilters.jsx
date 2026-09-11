@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ const RecipeFilters = ({
   const [currentSearchInput, setCurrentSearchInput] = useState(
     searchTerm || ""
   );
+  const searchInputRef = useRef(null);
 
   // Sync search input with external search term changes
   useEffect(() => {
@@ -59,6 +60,7 @@ const RecipeFilters = ({
               </InputGroupAddon>
               <InputGroupInput
                 id="search"
+                ref={searchInputRef}
                 type="text"
                 value={currentSearchInput}
                 onChange={(e) => {
@@ -83,6 +85,7 @@ const RecipeFilters = ({
                           onClick={() => {
                             setCurrentSearchInput("");
                             setSearchTerm("");
+                            searchInputRef.current?.focus();
                           }}
                         >
                           <X />

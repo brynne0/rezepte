@@ -179,25 +179,14 @@ export const validateRecipeTitleUnique = async (title, t, excludeId = null) => {
   }
 };
 
-export const validateRecipeCategory = (categories, t) => {
-  if (!categories || !Array.isArray(categories) || categories.length === 0) {
-    return t("category_required");
-  }
-  return null;
-};
-
 // Composite recipe validation function
 export const validateRecipeForm = (formData, t) => {
   const errors = {};
-  const { title, categories } = formData;
+  const { title } = formData;
 
   // Title validation
   const titleError = validateRecipeTitle(title, t);
   if (titleError) errors.title = titleError;
-
-  // Category validation
-  const categoryError = validateRecipeCategory(categories, t);
-  if (categoryError) errors.category = categoryError;
 
   return errors;
 };

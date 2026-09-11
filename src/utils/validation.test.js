@@ -9,7 +9,6 @@ import {
   validateChangePasswordForm,
   validateRecipeTitle,
   validateRecipeTitleUnique,
-  validateRecipeCategory,
   validateRecipeForm,
   checkPasswordLength,
   checkPasswordLowercase,
@@ -574,23 +573,6 @@ describe("Validation Utilities", () => {
     });
   });
 
-  describe("validateRecipeCategory", () => {
-    test("returns error when category is empty", () => {
-      expect(validateRecipeCategory([], mockT)).toBe("category_required");
-      expect(validateRecipeCategory(null, mockT)).toBe("category_required");
-      expect(validateRecipeCategory(undefined, mockT)).toBe(
-        "category_required"
-      );
-    });
-
-    test("returns null for valid category", () => {
-      expect(validateRecipeCategory(["desserts"], mockT)).toBeNull();
-      expect(
-        validateRecipeCategory(["main-course", "desserts"], mockT)
-      ).toBeNull();
-    });
-  });
-
   describe("validateRecipeForm", () => {
     const validFormData = {
       title: "Chocolate Cake",
@@ -609,13 +591,13 @@ describe("Validation Utilities", () => {
       expect(errors.title).toBe("title_required");
     });
 
-    test("returns category error when category is missing", () => {
+    test("returns no category error when category is missing", () => {
       const formData = { ...validFormData, categories: [] };
       const errors = validateRecipeForm(formData, mockT);
-      expect(errors.category).toBe("category_required");
+      expect(errors.category).toBeUndefined();
     });
 
-    test("returns multiple errors when multiple fields are invalid", () => {
+    test("returns title error when other fields are invalid too", () => {
       const formData = {
         title: "",
         categories: [],
@@ -623,7 +605,7 @@ describe("Validation Utilities", () => {
       const errors = validateRecipeForm(formData, mockT);
 
       expect(errors.title).toBe("title_required");
-      expect(errors.category).toBe("category_required");
+      expect(errors.category).toBeUndefined();
     });
 
     test("validates with ingredient sections structure", () => {

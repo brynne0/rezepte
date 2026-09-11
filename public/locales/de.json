@@ -223,7 +223,6 @@
 
   "title_required": "Rezepttitel ist erforderlich",
   "title_already_exists": "Ein Rezept mit diesem Titel existiert bereits",
-  "category_required": "Mindestens eine Kategorie ist erforderlich",
   "no_categories": "Noch keine Kategorien",
   "recipe_create_error": "Rezept konnte nicht erstellt werden. Bitte erneut versuchen.",
   "recipe_update_error": "Rezept konnte nicht aktualisiert werden. Bitte erneut versuchen.",

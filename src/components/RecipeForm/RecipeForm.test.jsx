@@ -57,6 +57,14 @@ vi.mock("./hooks/useRecipeForm", () => ({
   useRecipeForm: vi.fn(),
 }));
 
+vi.mock("../../hooks/data/useCategories", () => ({
+  useCategories: vi.fn(() => ({ refreshCategories: vi.fn() })),
+}));
+
+vi.mock("../../services/categoriesService", () => ({
+  createCategory: vi.fn(),
+}));
+
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {

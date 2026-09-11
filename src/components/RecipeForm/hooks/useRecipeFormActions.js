@@ -155,7 +155,23 @@ export const useRecipeFormActions = ({
       const errors = validateForm();
       if (Object.keys(errors).length > 0) {
         setValidationErrors(errors);
-        window.scrollTo(0, 0);
+        requestAnimationFrame(() => {
+          const invalidField = document.querySelector(
+            '[data-invalid="true"], [aria-invalid="true"]'
+          );
+          if (invalidField) {
+            invalidField.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+            const focusable = invalidField.matches("input, textarea, select")
+              ? invalidField
+              : invalidField.querySelector("input, textarea, select");
+            focusable?.focus({ preventScroll: true });
+          } else {
+            window.scrollTo(0, 0);
+          }
+        });
         return;
       }
 

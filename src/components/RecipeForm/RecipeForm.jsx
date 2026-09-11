@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Clipboard } from "lucide-react";
+import { ArrowLeft, Clipboard, Plus } from "lucide-react";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "./hooks/useRecipeForm";
 import { handleEnterNav } from "../../utils/enterKeyNavigation";
 import { useRecipeAutofill } from "./hooks/useRecipeAutofill";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
+import { useCategories } from "../../hooks/data/useCategories";
+import { createCategory } from "../../services/categoriesService";
 import ImageUpload from "../ImageUpload/ImageUpload";
 import RecipeLinkDropdown from "./components/RecipeLinkDropdown";
 import IngredientsSection from "./components/IngredientsSection";
@@ -44,8 +46,9 @@ const RecipeForm = ({
   title = "",
   isEditingTranslation = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { refreshCategories } = useCategories();
 
   const {
     formData,
@@ -86,6 +89,11 @@ const RecipeForm = ({
   const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
   const [linkingIngredient, setLinkingIngredient] = useState(null);
 
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [addCategoryError, setAddCategoryError] = useState("");
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
+
   const handleAutofill = useRecipeAutofill({
     setFormData,
     handleInputChange,
@@ -120,6 +128,44 @@ const RecipeForm = ({
   };
 
   const selectedCategories = formData.categories || [];
+
+  const handleStartAddCategory = () => {
+    setIsAddingCategory(true);
+    setNewCategoryName("");
+    setAddCategoryError("");
+  };
+
+  const handleCancelAddCategory = () => {
+    setIsAddingCategory(false);
+    setNewCategoryName("");
+    setAddCategoryError("");
+  };
+
+  const handleSaveNewCategory = async () => {
+    const trimmedName = newCategoryName.trim();
+    if (!trimmedName) {
+      setAddCategoryError(t("category_name_required"));
+      return;
+    }
+
+    setIsSavingCategory(true);
+    setAddCategoryError("");
+    try {
+      await createCategory(trimmedName, { [i18n.language]: trimmedName });
+      await refreshCategories();
+      handleInputChange("categories", [...selectedCategories, trimmedName]);
+      setIsAddingCategory(false);
+      setNewCategoryName("");
+    } catch (error) {
+      setAddCategoryError(
+        error.message.includes("already exists")
+          ? t("category_name_already_exists")
+          : error.message
+      );
+    } finally {
+      setIsSavingCategory(false);
+    }
+  };
 
   return (
     <>
@@ -265,6 +311,69 @@ const RecipeForm = ({
                   ))}
               </ToggleGroup>
               <FieldError>{validationErrors.category}</FieldError>
+
+              {!isEditingTranslation &&
+                (isAddingCategory ? (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        autoFocus
+                        value={newCategoryName}
+                        onChange={(e) => {
+                          setNewCategoryName(e.target.value);
+                          if (addCategoryError) setAddCategoryError("");
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSaveNewCategory();
+                          } else if (e.key === "Escape") {
+                            handleCancelAddCategory();
+                          }
+                        }}
+                        placeholder={t("category_name")}
+                        aria-invalid={!!addCategoryError}
+                        disabled={isSavingCategory}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleSaveNewCategory}
+                        disabled={isSavingCategory}
+                      >
+                        {isSavingCategory && <Spinner />}
+                        {t("add_category")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancelAddCategory}
+                        disabled={isSavingCategory}
+                      >
+                        {t("cancel")}
+                      </Button>
+                    </div>
+                    {addCategoryError && (
+                      <span className="text-sm text-destructive">
+                        {addCategoryError}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleStartAddCategory}
+                    >
+                      <Plus size={16} />
+                      {t("add_category")}
+                    </Button>
+                  </div>
+                ))}
             </Field>
 
             <DragDropContext
