@@ -13,6 +13,7 @@ vi.mock("../lib/supabase", () => ({
   default: {
     auth: { getUser: vi.fn() },
     from: vi.fn(),
+    rpc: vi.fn(),
     functions: { invoke: vi.fn() },
   },
 }));
@@ -350,6 +351,66 @@ describe("recipes service", () => {
       expect(imagesUpdateBuilder.update).toHaveBeenCalledWith({
         images: [{ id: "img1", path: "u/r1/a.jpg" }],
       });
+    });
+
+    test("reuses an existing ingredient matched by name via the server-side lookup", async () => {
+      supabase.rpc.mockResolvedValue({ data: "i1", error: null });
+      const ingredientsInsertBuilder = makeQueryBuilder({ error: null });
+      supabase.from
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: { id: "r1" }, error: null })
+        ) // recipes insert
+        .mockReturnValueOnce(ingredientsInsertBuilder); // recipe_ingredients insert
+
+      await createRecipe({
+        title: "Chili",
+        original_language: "en",
+        ungroupedIngredients: [
+          { name: "tofu", tempId: "t1", quantity: "1", unit: "block" },
+        ],
+      });
+
+      expect(supabase.rpc).toHaveBeenCalledWith("match_ingredient_by_english", {
+        p_candidates: ["tofu", "tofus"],
+      });
+      expect(ingredientsInsertBuilder.insert).toHaveBeenCalledWith([
+        expect.objectContaining({ ingredient_id: "i1" }),
+      ]);
+      // No new ingredient row created - the match was reused
+      expect(supabase.from).not.toHaveBeenCalledWith("ingredients");
+    });
+
+    test("creates a new ingredient when the server-side lookup finds no match", async () => {
+      supabase.rpc.mockResolvedValue({ data: null, error: null });
+      const ingredientCreateBuilder = makeQueryBuilder({
+        data: { id: "i9" },
+        error: null,
+      });
+      const ingredientsInsertBuilder = makeQueryBuilder({ error: null });
+      supabase.from
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: { id: "r1" }, error: null })
+        ) // recipes insert
+        .mockReturnValueOnce(ingredientCreateBuilder) // ingredients insert
+        .mockReturnValueOnce(ingredientsInsertBuilder); // recipe_ingredients insert
+
+      await createRecipe({
+        title: "Chili",
+        original_language: "en",
+        ungroupedIngredients: [
+          { name: "seitan", tempId: "t1", quantity: "1", unit: "block" },
+        ],
+      });
+
+      expect(ingredientCreateBuilder.insert).toHaveBeenCalledWith([
+        expect.objectContaining({
+          singular_name: "seitan",
+          plural_name: "seitans",
+        }),
+      ]);
+      expect(ingredientsInsertBuilder.insert).toHaveBeenCalledWith([
+        expect.objectContaining({ ingredient_id: "i9" }),
+      ]);
     });
   });
 

@@ -1,5 +1,9 @@
 import supabase from "../lib/supabase";
 import { toTitleCase } from "../utils/stringUtils";
+import {
+  resolveIngredientName,
+  getIngredientNamesForLanguage,
+} from "../utils/ingredientFormatting";
 
 // Normalise instruction text to always end with exactly one full stop
 const normaliseInstruction = (instruction) => {
@@ -321,69 +325,17 @@ const getIngredientDisplayName = async (
 ) => {
   const usePlural = ingredient.is_plural || false;
 
-  // Check for recipe-specific name overrides
-  if (ingredient.name_overrides && ingredient.name_overrides[targetLanguage]) {
-    return ingredient.name_overrides[targetLanguage];
-  }
+  // Override, or a same-language / already-cached translation, resolves without any API call
+  const resolved = resolveIngredientName(
+    ingredient,
+    targetLanguage,
+    sourceLanguage
+  );
+  if (resolved !== null) return resolved;
 
-  // If target language matches source language, use the appropriate source
-  if (targetLanguage === sourceLanguage) {
-    // If source is English, use database columns
-    if (sourceLanguage === "en") {
-      const result =
-        usePlural && ingredient.plural_name
-          ? ingredient.plural_name
-          : ingredient.singular_name;
-      return result;
-    }
-    // If source is another language, use translations
-    const translation = ingredient.translated_names?.[sourceLanguage];
-    if (translation && typeof translation === "object") {
-      const result =
-        usePlural && translation.plural_name
-          ? translation.plural_name
-          : translation.singular_name;
-      return result;
-    }
-    // Fallback to database columns if translation not found
-    const result =
-      usePlural && ingredient.plural_name
-        ? ingredient.plural_name
-        : ingredient.singular_name;
-    return result;
-  }
-
-  // Translation needed: sourceLanguage → targetLanguage
-  // First check if the target translation already exists
-  const targetTranslation = ingredient.translated_names?.[targetLanguage];
-  if (targetTranslation && typeof targetTranslation === "object") {
-    const result =
-      usePlural && targetTranslation.plural_name
-        ? targetTranslation.plural_name
-        : targetTranslation.singular_name;
-    return result;
-  }
-
-  // Need to translate from source to target
-  // Get the source text
-  let sourceSingular, sourcePlural;
-
-  if (sourceLanguage === "en") {
-    // Source is English, use database columns
-    sourceSingular = ingredient.singular_name;
-    sourcePlural = ingredient.plural_name;
-  } else {
-    // Source is another language, use translations
-    const sourceTranslation = ingredient.translated_names?.[sourceLanguage];
-    if (sourceTranslation && typeof sourceTranslation === "object") {
-      sourceSingular = sourceTranslation.singular_name;
-      sourcePlural = sourceTranslation.plural_name;
-    } else {
-      // Fallback to English if source translation not found
-      sourceSingular = ingredient.singular_name;
-      sourcePlural = ingredient.plural_name;
-    }
-  }
+  // Need to translate from source to target: get the source text
+  const { singular_name: sourceSingular, plural_name: sourcePlural } =
+    getIngredientNamesForLanguage(ingredient, sourceLanguage);
 
   try {
     // Translate both singular and plural forms from source to target with food context
@@ -396,15 +348,29 @@ const getIngredientDisplayName = async (
       ? await translateText(sourcePlural, targetLanguage, "Food ingredient")
       : translatedSingular;
 
-    // Only lowercase if not German
+    // Unchanged result means translateText silently failed - don't cache
+    // source-language text as if it were a real translation
+    const singularTranslated =
+      translatedSingular.trim().toLowerCase() !==
+      sourceSingular.trim().toLowerCase();
+    if (!singularTranslated) {
+      return usePlural && sourcePlural ? sourcePlural : sourceSingular;
+    }
+    const pluralTranslated =
+      !sourcePlural ||
+      translatedPlural.trim().toLowerCase() !==
+        sourcePlural.trim().toLowerCase();
+
+    // German nouns are always capitalised; other languages use lowercase
     const finalSingular =
       targetLanguage === "de"
-        ? translatedSingular
+        ? toTitleCase(translatedSingular)
         : translatedSingular.toLowerCase();
-    const finalPlural =
-      targetLanguage === "de"
-        ? translatedPlural
-        : translatedPlural.toLowerCase();
+    const finalPlural = pluralTranslated
+      ? targetLanguage === "de"
+        ? toTitleCase(translatedPlural)
+        : translatedPlural.toLowerCase()
+      : finalSingular;
 
     // Save translation to database
     const translationData = {

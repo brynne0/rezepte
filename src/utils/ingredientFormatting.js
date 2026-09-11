@@ -1,14 +1,10 @@
 import { shouldUsePlural, convertToUnicodeFractions } from "./fractionUtils";
 
-/**
- * Comprehensive ingredient formatting utility
- * Handles quantity formatting, unit translation/pluralization, and ingredient name logic
- */
+// Ingredient formatting: quantities, units, and names
 
-// Format quantity for input fields - returns as-is for editing
+// Return quantity as typed, for editing
 export const formatQuantityForUnit = (quantity) => {
-  // Accept any input: 1/2, 1.5, 2 1/4, 2-3 cups, etc.
-  // Users can enter whatever format they prefer
+  // Accepts any format: 1/2, 1.5, 2 1/4, 2-3 cups, etc.
   return quantity || "";
 };
 
@@ -16,20 +12,20 @@ export const formatQuantityForUnit = (quantity) => {
 export const formatQuantityForDisplay = (quantity) => {
   if (!quantity) return "";
 
-  // Convert regular fractions to Unicode for better display
+  // Use Unicode fractions for display
   return convertToUnicodeFractions(quantity);
 };
 
-// Get translated and pluralized unit display
+// Get the translated, pluralised unit label
 export const formatUnitDisplay = (unit, quantity, units) => {
   if (!unit) return "";
 
-  // Find the unit object - exact match only
+  // Exact match only
   const unitObj = units?.find((u) => u.value === unit);
 
   const translated = unitObj?.label || unit;
 
-  // Handle pluralization for units that support it
+  // Pluralise units that support it
   if (translated.includes("/")) {
     const [singular, pluralSuffix] = translated.split("/");
     return shouldUsePlural(quantity) ? singular + pluralSuffix : singular;
@@ -37,42 +33,86 @@ export const formatUnitDisplay = (unit, quantity, units) => {
   return translated;
 };
 
-// Get the correct ingredient name (singular vs plural) based on stored is_plural flag
+// Pick singular or plural form from a { singular_name, plural_name } pair
+const pickForm = (names, usePlural) => {
+  if (!names) return undefined;
+  return usePlural && names.plural_name
+    ? names.plural_name
+    : names.singular_name;
+};
+
+// Get a language's { singular_name, plural_name } pair from stored data only
+// (no live translation). Falls back to English if nothing is cached yet.
+export const getIngredientNamesForLanguage = (ingredient, language) => {
+  const ingredientData = ingredient.ingredients || ingredient;
+  const englishNames = {
+    singular_name: ingredientData.singular_name,
+    plural_name: ingredientData.plural_name,
+  };
+
+  if (language === "en") return englishNames;
+
+  const translation = ingredientData.translated_names?.[language];
+  if (translation && typeof translation === "object") return translation;
+
+  return englishNames;
+};
+
+// Resolve a name from stored data only (no live translation). Checks
+// overrides, then the source language, then a cached translation. Returns
+// null if nothing is cached and a live translation would be needed.
+export const resolveIngredientName = (
+  ingredient,
+  targetLanguage,
+  sourceLanguage = "en"
+) => {
+  const usePlural = ingredient.is_plural || false;
+
+  // Per-recipe override wins first
+  const override = ingredient.name_overrides?.[targetLanguage];
+  if (override) return override;
+
+  // English is canonical - read it from the columns, never translated_names
+  if (targetLanguage === "en") {
+    return (
+      pickForm(getIngredientNamesForLanguage(ingredient, "en"), usePlural) ||
+      "?"
+    );
+  }
+
+  if (targetLanguage === sourceLanguage) {
+    return (
+      pickForm(
+        getIngredientNamesForLanguage(ingredient, sourceLanguage),
+        usePlural
+      ) || "?"
+    );
+  }
+
+  const ingredientData = ingredient.ingredients || ingredient;
+  const targetTranslation = ingredientData.translated_names?.[targetLanguage];
+  if (targetTranslation && typeof targetTranslation === "object") {
+    return pickForm(targetTranslation, usePlural);
+  }
+
+  return null;
+};
+
+// Pick singular or plural using the stored is_plural flag
 export const getIngredientDisplayName = (
   ingredient,
   currentLanguage = "en"
 ) => {
-  // FIRST: Check if translation service has already processed this ingredient
-  // The translation service sets ingredient.name with the final result (including overrides)
+  // Already resolved by the translation service? Use that.
   if (ingredient.name) {
     return ingredient.name;
   }
 
-  // Handle nested ingredient structure from API
-  const ingredientData = ingredient.ingredients || ingredient;
+  const resolved = resolveIngredientName(ingredient, currentLanguage, "en");
+  if (resolved !== null) return resolved;
 
-  // All ingredients should now have is_plural flag
-  const shouldUseIngredientPlural = ingredient.is_plural || false;
-
-  // For English: use database fields
-  if (currentLanguage === "en") {
-    return shouldUseIngredientPlural && ingredientData.plural_name
-      ? ingredientData.plural_name
-      : ingredientData.singular_name || "?";
-  }
-
-  // For other languages: check for translated names in the ingredients data structure
-  const translation = ingredientData.translated_names?.[currentLanguage];
-  if (translation && typeof translation === "object") {
-    return shouldUseIngredientPlural && translation.plural_name
-      ? translation.plural_name
-      : translation.singular_name;
-  }
-
-  // Final fallback to English names
-  return shouldUseIngredientPlural && ingredientData.plural_name
-    ? ingredientData.plural_name
-    : ingredientData.singular_name || "?";
+  // No cached translation - fall back to English
+  return resolveIngredientName(ingredient, "en", "en");
 };
 
 // Format complete ingredient measurement (quantity + unit) for display

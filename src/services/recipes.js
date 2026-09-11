@@ -1,59 +1,35 @@
 import supabase from "../lib/supabase";
 import pluralize from "pluralize";
-import { updateRecipeTranslations } from "./translationService";
+import { translateText, updateRecipeTranslations } from "./translationService";
 import { uploadLocalImages, cleanupOrphanedImages } from "./imageService";
 
+// Translate an ingredient name to English
+const translateIngredientNameToEnglish = async (name, language) => {
+  const trimmed = name.trim();
+  if (language === "en") return trimmed;
+  return translateText(trimmed, "en", null, language);
+};
+
 // Helper function to determine if an ingredient name was entered as plural
-const determineIngredientPlurality = async (inputName, language = "en") => {
+const determineIngredientPlurality = async (
+  inputName,
+  language = "en",
+  precomputedTranslation = null
+) => {
   if (!inputName) {
     return false; // Default to singular if no input name
   }
 
-  const trimmedName = inputName.trim().toLowerCase();
-
   // If it's English, test directly
   if (language === "en") {
-    return pluralize.isPlural(trimmedName);
+    return pluralize.isPlural(inputName.trim().toLowerCase());
   }
 
   // For other languages, translate to English first then test plurality
-  try {
-    const translatedToEnglish = await translateText(
-      trimmedName,
-      "en",
-      language
-    );
-    return pluralize.isPlural(translatedToEnglish.toLowerCase());
-  } catch (error) {
-    console.error("Failed to translate for plurality check:", error);
-    // Fallback: assume singular if translation fails
-    return false;
-  }
-};
-
-// Import translateText from translation.js (the DeepL service)
-const translateText = async (text, targetLanguage, sourceLanguage = null) => {
-  if (!text || text.trim() === "") {
-    return text;
-  }
-
-  try {
-    const { data, error } = await supabase.functions.invoke("translate", {
-      body: {
-        text: text.trim(),
-        target_lang: targetLanguage.toUpperCase(),
-        source_lang: sourceLanguage ? sourceLanguage.toUpperCase() : null,
-      },
-    });
-
-    if (error) {
-      return text; // Return original text on error
-    }
-
-    return data?.translatedText || text;
-  } catch {
-    return text; // Return original text on error
-  }
+  const translatedToEnglish =
+    precomputedTranslation ??
+    (await translateIngredientNameToEnglish(inputName, language));
+  return pluralize.isPlural(translatedToEnglish.toLowerCase());
 };
 
 // Helper function to get English singular and plural forms
@@ -68,121 +44,69 @@ const getEnglishForms = (ingredientName) => {
   };
 };
 
-// Helper function to find ingredient by English name or translation and determine if plural
+// Canonicalise English text to its singular lemma, so an existing ingredient
+// is matched regardless of whether the input or the stored data is singular
+// or plural
+const toCanonicalSingular = (text) =>
+  pluralize.singular(text.trim().toLowerCase());
+
+// Canonical singular lemma plus its plural, for matching an English column
+// without needing to know which form is stored
+const englishLookupCandidates = (text) => {
+  const singular = toCanonicalSingular(text);
+  return [singular, pluralize.plural(singular)];
+};
+
+// Helper function to find ingredient by English name or translation and determine if plural.
 const findIngredientByNameOrTranslation = async (
   ingredientName,
-  currentLanguage
+  currentLanguage,
+  precomputedTranslation = null
 ) => {
   const trimmedName = ingredientName.trim();
   const searchName = trimmedName.toLowerCase();
 
-  // Get all ingredients with their English names and translations
-  const { data: ingredients, error } = await supabase
-    .from("ingredients")
-    .select("id, singular_name, plural_name, translated_names");
-
-  if (error) {
-    throw new Error(`Error looking up ingredients: ${error.message}`);
+  // English: match by canonical singular lemma
+  if (currentLanguage === "en") {
+    const { data: matchId, error } = await supabase.rpc(
+      "match_ingredient_by_english",
+      { p_candidates: englishLookupCandidates(searchName) }
+    );
+    if (error)
+      throw new Error(`Error looking up ingredients: ${error.message}`);
+    return matchId
+      ? { id: matchId, isPlural: pluralize.isPlural(searchName) }
+      : null;
   }
 
-  // If current language is English, search English names directly
-  if (currentLanguage === "en") {
-    for (const ingredient of ingredients) {
-      // Check singular first
-      if (ingredient.singular_name.toLowerCase() === searchName) {
-        return { id: ingredient.id, isPlural: false };
-      }
-      // Check plural
-      if (
-        ingredient.plural_name &&
-        ingredient.plural_name.toLowerCase() === searchName
-      ) {
-        return { id: ingredient.id, isPlural: true };
-      }
-    }
-  } else {
-    // For non-English languages, search translations first, then try English as fallback
-    for (const ingredient of ingredients) {
-      // Check translations for current language
-      const translation = ingredient.translated_names?.[currentLanguage];
-      if (translation && typeof translation === "object") {
-        // Check singular first
-        if (
-          translation.singular_name &&
-          translation.singular_name.toLowerCase() === searchName
-        ) {
-          return { id: ingredient.id, isPlural: false };
-        }
-        // Check plural
-        if (
-          translation.plural_name &&
-          translation.plural_name.toLowerCase() === searchName
-        ) {
-          return { id: ingredient.id, isPlural: true };
-        }
-      }
-    }
+  // Non-English: check the cached translation for this language first
+  const { data: cachedMatchId, error: cachedError } = await supabase.rpc(
+    "match_ingredient_by_translation",
+    { p_language: currentLanguage, p_search_name: searchName }
+  );
+  if (cachedError) {
+    throw new Error(`Error looking up ingredients: ${cachedError.message}`);
+  }
+  if (cachedMatchId) {
+    return { id: cachedMatchId, isPlural: pluralize.isPlural(searchName) };
+  }
 
-    // TODO - simplify these two fallbacks
-    // Fallback 1: try to find English ingredient that matches (user might have typed English name)
-    for (const ingredient of ingredients) {
-      // Check singular first
-      if (ingredient.singular_name.toLowerCase() === searchName) {
-        // Found English match, need to add translation for current language
-        await addTranslationToIngredient(
-          ingredient.id,
-          trimmedName,
-          currentLanguage
-        );
-        return { id: ingredient.id, isPlural: false };
-      }
-      // Check plural
-      if (
-        ingredient.plural_name &&
-        ingredient.plural_name.toLowerCase() === searchName
-      ) {
-        // Found English match, need to add translation for current language
-        await addTranslationToIngredient(
-          ingredient.id,
-          trimmedName,
-          currentLanguage
-        );
-        return { id: ingredient.id, isPlural: true };
-      }
-    }
+  // Not cached in this language yet - try the raw input and its English
+  // translation, matched by canonical singular lemma
+  const translatedToEnglish =
+    precomputedTranslation ??
+    (await translateIngredientNameToEnglish(trimmedName, currentLanguage));
 
-    // Fallback 2: translate to English and search for that
-    try {
-      const translatedToEnglish = await translateText(trimmedName, "en");
-      const englishSearchName = translatedToEnglish.toLowerCase();
-
-      for (const ingredient of ingredients) {
-        // Check singular first
-        if (ingredient.singular_name.toLowerCase() === englishSearchName) {
-          // Found English ingredient that matches the translation, add current language translation
-          await addTranslationToIngredient(
-            ingredient.id,
-            trimmedName,
-            currentLanguage
-          );
-          return { id: ingredient.id, isPlural: false };
-        }
-        // Check plural
-        if (
-          ingredient.plural_name &&
-          ingredient.plural_name.toLowerCase() === englishSearchName
-        ) {
-          // Found English ingredient that matches the translation, add current language translation
-          await addTranslationToIngredient(
-            ingredient.id,
-            trimmedName,
-            currentLanguage
-          );
-          return { id: ingredient.id, isPlural: true };
-        }
-      }
-    } catch {
-      // Translation failed, continue without fallback search
+  for (const candidate of [searchName, translatedToEnglish.toLowerCase()]) {
+    const { data: matchId, error } = await supabase.rpc(
+      "match_ingredient_by_english",
+      { p_candidates: englishLookupCandidates(candidate) }
+    );
+    if (error)
+      throw new Error(`Error looking up ingredients: ${error.message}`);
+    if (matchId) {
+      await addTranslationToIngredient(matchId, trimmedName, currentLanguage);
+      return { id: matchId, isPlural: pluralize.isPlural(searchName) };
     }
   }
 
@@ -211,14 +135,26 @@ const addTranslationToIngredient = async (
       targetLanguage
     );
 
-    const pluralTranslation = await translateText(
-      ingredient.plural_name,
-      targetLanguage
-    );
+    const pluralTranslation = ingredient.plural_name
+      ? await translateText(ingredient.plural_name, targetLanguage)
+      : null;
+
+    // Unchanged result means translateText silently failed - fall back to
+    // the user's own input instead of caching English as a "translation"
+    const fallbackName = originalInput.toLowerCase();
+    const singularTranslated =
+      singularTranslation &&
+      singularTranslation.trim().toLowerCase() !==
+        ingredient.singular_name.trim().toLowerCase();
+    const pluralTranslated =
+      pluralTranslation &&
+      ingredient.plural_name &&
+      pluralTranslation.trim().toLowerCase() !==
+        ingredient.plural_name.trim().toLowerCase();
 
     const newTranslation = {
-      singular_name: singularTranslation || originalInput.toLowerCase(),
-      plural_name: pluralTranslation,
+      singular_name: singularTranslated ? singularTranslation : fallbackName,
+      plural_name: pluralTranslated ? pluralTranslation : fallbackName,
     };
 
     const updatedTranslations = {
@@ -246,14 +182,16 @@ const addTranslationToIngredient = async (
 // Helper function to get or create ingredient by name
 const getOrCreateIngredient = async (
   ingredientName,
-  currentLanguage = "en"
+  currentLanguage = "en",
+  precomputedTranslation = null
 ) => {
   const trimmedName = ingredientName.trim();
 
   // First, try to find existing ingredient in current language
   let existingIngredient = await findIngredientByNameOrTranslation(
     trimmedName,
-    currentLanguage
+    currentLanguage,
+    precomputedTranslation
   );
 
   if (existingIngredient) {
@@ -294,7 +232,9 @@ const getOrCreateIngredient = async (
 
     try {
       // Translate the non-English ingredient to English
-      const translatedToEnglish = await translateText(trimmedName, "en");
+      const translatedToEnglish =
+        precomputedTranslation ??
+        (await translateIngredientNameToEnglish(trimmedName, currentLanguage));
 
       // Get proper English forms
       const { singular, plural } = getEnglishForms(translatedToEnglish);
@@ -316,16 +256,19 @@ const getOrCreateIngredient = async (
         const englishSingular = pluralize.singular(
           translatedToEnglish.toLowerCase()
         );
-        // Translate the English singular back to get proper singular form
-        try {
-          originalSingular = await translateText(
-            englishSingular,
-            currentLanguage,
-            "en"
-          );
-        } catch {
-          originalSingular = trimmedName; // Fallback to user input
-        }
+        // Translate the English singular back to get proper singular form.
+        // translateText silently falls back to englishSingular on failure
+        // (never throws), so check for that instead of catching an error.
+        const backTranslated = await translateText(
+          englishSingular,
+          currentLanguage,
+          null,
+          "en"
+        );
+        originalSingular =
+          backTranslated.trim().toLowerCase() !== englishSingular.toLowerCase()
+            ? backTranslated
+            : trimmedName; // translation failed - use user input
       } else {
         // The translated English is singular, so user input was singular
         originalSingular = trimmedName; // Keep user input as singular
@@ -334,21 +277,21 @@ const getOrCreateIngredient = async (
           translatedToEnglish.toLowerCase()
         );
         // Translate the English plural back to get proper plural form
-        try {
-          originalPlural = await translateText(
-            englishPlural,
-            currentLanguage,
-            "en"
-          );
-        } catch {
-          // Fallback to simple German pluralization rules
-          originalPlural =
-            currentLanguage === "de"
+        const backTranslated = await translateText(
+          englishPlural,
+          currentLanguage,
+          null,
+          "en"
+        );
+        originalPlural =
+          backTranslated.trim().toLowerCase() !== englishPlural.toLowerCase()
+            ? backTranslated
+            : // translation failed - simple German pluralization rule
+              currentLanguage === "de"
               ? trimmedName.endsWith("e")
                 ? trimmedName + "n"
                 : trimmedName + "e"
               : pluralize.plural(trimmedName);
-        }
       }
 
       translations = {
@@ -692,6 +635,7 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
       const translatedName = await translateText(
         trimmedName,
         targetLanguage,
+        null,
         sourceLanguage
       );
       // An unchanged result means translateText silently failed and fell
@@ -779,10 +723,19 @@ export const createRecipe = async (
     for (const ingredient of recipeData.ungroupedIngredients) {
       let ingredientId;
 
+      // Translate once, share it between the plurality check and lookup/creation
+      const translatedToEnglish = ingredient.name
+        ? await translateIngredientNameToEnglish(
+            ingredient.name,
+            recipeData.original_language
+          )
+        : null;
+
       // Determine if the input was plural based on the entered text
       const isPlural = await determineIngredientPlurality(
         ingredient.name,
-        recipeData.original_language
+        recipeData.original_language,
+        translatedToEnglish
       );
 
       if (ingredient.ingredient_id) {
@@ -790,7 +743,8 @@ export const createRecipe = async (
       } else if (ingredient.name) {
         const ingredientResult = await getOrCreateIngredient(
           ingredient.name,
-          recipeData.original_language
+          recipeData.original_language,
+          translatedToEnglish
         );
         ingredientId = ingredientResult.id;
       } else {
@@ -824,10 +778,19 @@ export const createRecipe = async (
       for (const ingredient of section.ingredients) {
         let ingredientId;
 
+        // Translate once, share it between the plurality check and lookup/creation
+        const translatedToEnglish = ingredient.name
+          ? await translateIngredientNameToEnglish(
+              ingredient.name,
+              recipeData.original_language
+            )
+          : null;
+
         // Determine if the input was plural based on the entered text
         const isPlural = await determineIngredientPlurality(
           ingredient.name,
-          recipeData.original_language
+          recipeData.original_language,
+          translatedToEnglish
         );
 
         if (ingredient.ingredient_id) {
@@ -835,7 +798,8 @@ export const createRecipe = async (
         } else if (ingredient.name) {
           const ingredientResult = await getOrCreateIngredient(
             ingredient.name,
-            recipeData.original_language
+            recipeData.original_language,
+            translatedToEnglish
           );
           ingredientId = ingredientResult.id;
         } else {
@@ -858,56 +822,6 @@ export const createRecipe = async (
           linked_recipe_id: linkedRecipe?.id || null,
         });
       }
-    }
-  }
-
-  // Fallback for backward compatibility
-  if (
-    recipeIngredientsToInsert.length === 0 &&
-    recipeData.ingredients &&
-    recipeData.ingredients.length > 0
-  ) {
-    // Fallback for backward compatibility with flat ingredient list
-    for (let i = 0; i < recipeData.ingredients.length; i++) {
-      const ingredient = recipeData.ingredients[i];
-      let ingredientId;
-
-      // Determine if the input was plural based on the entered text
-      const isPlural = await determineIngredientPlurality(
-        ingredient.name,
-        recipeData.original_language
-      );
-
-      if (ingredient.ingredient_id) {
-        ingredientId = ingredient.ingredient_id;
-      } else if (ingredient.name) {
-        const ingredientResult = await getOrCreateIngredient(
-          ingredient.name,
-          recipeData.original_language
-        );
-        ingredientId = ingredientResult.id;
-        // Note: we use our own determination rather than the one from getOrCreateIngredient
-        // because we want to respect what the user actually typed
-      } else {
-        throw new Error("Ingredient must have either ingredient_id or name");
-      }
-
-      // Check for linked recipe (fallback structure)
-      const sectionId = ingredient.subheading ? `section-${i}` : "ungrouped";
-      const linkKey = `${sectionId}-${ingredient.tempId}`;
-      const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
-
-      recipeIngredientsToInsert.push({
-        recipe_id: recipe.id,
-        ingredient_id: ingredientId,
-        quantity: ingredient.quantity,
-        unit: ingredient.unit,
-        notes: ingredient.notes,
-        subheading: ingredient.subheading || null,
-        order_index: i,
-        is_plural: isPlural,
-        linked_recipe_id: linkedRecipe?.id || null,
-      });
     }
   }
 
@@ -1040,6 +954,7 @@ export const updateRecipe = async (
     for (const ingredient of recipeData.ungroupedIngredients) {
       let ingredientId;
       let existingRecipe = null;
+      let translatedToEnglish = null;
 
       if (ingredient.ingredient_id) {
         ingredientId = ingredient.ingredient_id;
@@ -1058,9 +973,15 @@ export const updateRecipe = async (
           .eq("id", id)
           .single();
         existingRecipe = recipe;
-        const ingredientResult = await getOrCreateIngredient(
+        // Translate once, share it with the plurality check below
+        translatedToEnglish = await translateIngredientNameToEnglish(
           ingredient.name,
           existingRecipe?.original_language || "en"
+        );
+        const ingredientResult = await getOrCreateIngredient(
+          ingredient.name,
+          existingRecipe?.original_language || "en",
+          translatedToEnglish
         );
         ingredientId = ingredientResult.id;
       } else {
@@ -1070,7 +991,8 @@ export const updateRecipe = async (
       // Determine if the input was plural based on the entered text
       const isPlural = await determineIngredientPlurality(
         ingredient.name,
-        existingRecipe?.original_language || "en"
+        existingRecipe?.original_language || "en",
+        translatedToEnglish
       );
 
       // Check for linked recipe
@@ -1100,6 +1022,7 @@ export const updateRecipe = async (
       for (const ingredient of section.ingredients) {
         let ingredientId;
         let existingRecipe = null;
+        let translatedToEnglish = null;
 
         // Handle both cases: ingredient_id provided OR name provided
         if (ingredient.ingredient_id) {
@@ -1119,9 +1042,15 @@ export const updateRecipe = async (
             .eq("id", id)
             .single();
           existingRecipe = recipe;
-          const ingredientResult = await getOrCreateIngredient(
+          // Translate once, share it with the plurality check below
+          translatedToEnglish = await translateIngredientNameToEnglish(
             ingredient.name,
             existingRecipe?.original_language || "en"
+          );
+          const ingredientResult = await getOrCreateIngredient(
+            ingredient.name,
+            existingRecipe?.original_language || "en",
+            translatedToEnglish
           );
           ingredientId = ingredientResult.id;
         } else {
@@ -1131,7 +1060,8 @@ export const updateRecipe = async (
         // Determine if the input was plural based on the entered text
         const isPlural = await determineIngredientPlurality(
           ingredient.name,
-          existingRecipe?.original_language || "en"
+          existingRecipe?.original_language || "en",
+          translatedToEnglish
         );
 
         // Check for linked recipe
@@ -1150,70 +1080,6 @@ export const updateRecipe = async (
           linked_recipe_id: linkedRecipe?.id || null,
         });
       }
-    }
-  }
-
-  // Fallback for backward compatibility with flat ingredient list
-  if (
-    recipeIngredientsToInsert.length === 0 &&
-    recipeData.ingredients &&
-    recipeData.ingredients.length > 0
-  ) {
-    // Fallback for backward compatibility with flat ingredient list
-    for (let i = 0; i < recipeData.ingredients.length; i++) {
-      const ingredient = recipeData.ingredients[i];
-      let ingredientId;
-      let existingRecipe = null;
-
-      // Handle both cases: ingredient_id provided OR name provided
-      if (ingredient.ingredient_id) {
-        ingredientId = ingredient.ingredient_id;
-        // Still need to get the recipe language for plurality determination
-        const { data: recipe } = await supabase
-          .from("recipes")
-          .select("original_language")
-          .eq("id", id)
-          .single();
-        existingRecipe = recipe;
-      } else if (ingredient.name) {
-        // For updates, get the original language from the existing recipe
-        const { data: recipe } = await supabase
-          .from("recipes")
-          .select("original_language")
-          .eq("id", id)
-          .single();
-        existingRecipe = recipe;
-        const ingredientResult = await getOrCreateIngredient(
-          ingredient.name,
-          existingRecipe?.original_language || "en"
-        );
-        ingredientId = ingredientResult.id;
-      } else {
-        throw new Error("Ingredient must have either ingredient_id or name");
-      }
-
-      // Determine if the input was plural based on the entered text
-      const isPlural = await determineIngredientPlurality(
-        ingredient.name,
-        existingRecipe?.original_language || "en"
-      );
-
-      // Check for linked recipe (fallback structure)
-      const sectionId = ingredient.subheading ? `section-${i}` : "ungrouped";
-      const linkKey = `${sectionId}-${ingredient.tempId}`;
-      const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
-
-      recipeIngredientsToInsert.push({
-        recipe_id: id,
-        ingredient_id: ingredientId,
-        quantity: ingredient.quantity,
-        unit: ingredient.unit,
-        notes: ingredient.notes,
-        subheading: ingredient.subheading || null,
-        order_index: i,
-        is_plural: isPlural,
-        linked_recipe_id: linkedRecipe?.id || null,
-      });
     }
   }
 
