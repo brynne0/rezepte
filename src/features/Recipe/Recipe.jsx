@@ -324,7 +324,7 @@ const Recipe = () => {
               </Button>
 
               {!isOwner && (
-                <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+                <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl break-all">
                   {recipe.title}
                 </CardTitle>
               )}

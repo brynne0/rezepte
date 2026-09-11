@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useContext, lazy, Suspense } from "react";
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
 import { useAuth } from "./hooks/data/useAuth";
 import { useCategories } from "./hooks/data/useCategories";
+import { readCachedValue, writeCachedValue } from "./utils/localStorageCache";
 
 // Routing
 import {
@@ -166,10 +167,17 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("last_viewed_at_desc");
-  const [showImages, setShowImages] = useState(false);
+  const [showImages, setShowImages] = useState(
+    () => readCachedValue("show_images_preference") ?? false
+  );
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [friendBar, setFriendBar] = useState(null);
+
+  useEffect(() => {
+    writeCachedValue("show_images_preference", showImages);
+  }, [showImages]);
+
   const {
     recipes,
     loading,

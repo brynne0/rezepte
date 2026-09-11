@@ -74,10 +74,10 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
       className="cursor-pointer py-0 justify-between"
       onClick={() => onClick && onClick(recipe)}
     >
-      <CardHeader className="py-2">
+      <CardHeader className="py-2 ">
         <CardTitle
           className={cn(
-            "text-xs font-medium uppercase",
+            "min-w-0 text-xs font-medium uppercase wrap-break-word",
             !isSourceLinkHovered && "group-hover/card:text-accent-red"
           )}
         >
