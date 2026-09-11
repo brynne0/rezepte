@@ -19,15 +19,21 @@ describe("LoadingAcorn Component", () => {
     expect(nutIcons).toHaveLength(3);
   });
 
-  test("applies correct CSS classes to nut icons", () => {
+  test("applies bounce animation classes to nut icons", () => {
     render(<LoadingAcorn />);
 
     const nutIcons = screen.getAllByTestId("lucide-nut");
 
-    // Check that each icon has the base acorn-icon class and specific animation delay class
-    expect(nutIcons[0]).toHaveClass("acorn-icon", "acorn-1");
-    expect(nutIcons[1]).toHaveClass("acorn-icon", "acorn-2");
-    expect(nutIcons[2]).toHaveClass("acorn-icon", "acorn-3");
+    // Check that each icon bounces, staggered via animation delay
+    expect(nutIcons[0]).toHaveClass(
+      "animate-bounce",
+      "[animation-delay:-0.32s]"
+    );
+    expect(nutIcons[1]).toHaveClass(
+      "animate-bounce",
+      "[animation-delay:-0.16s]"
+    );
+    expect(nutIcons[2]).toHaveClass("animate-bounce");
   });
 
   test("uses default size when no size prop is provided", () => {
