@@ -23,6 +23,18 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/sw\.js$/, /^\/manifest\.webmanifest$/],
         runtimeCaching: [
           {
+            urlPattern: /^\/locales\/.*\.json$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "locales-cache",
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             urlPattern: /^https:\/\/[^/]+\.supabase\.co\/rest\/v1\/.*/,
             method: "GET",
             handler: "NetworkFirst",

@@ -30,6 +30,7 @@ import { AppStateContext } from "./contexts/AppStateContext";
 import { useMainScrollRef } from "./hooks/ui/useMainScrollRef";
 import Header from "./components/Header/Header";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import RouteError from "./components/RouteError/RouteError";
 import { Squirrel } from "lucide-react";
 
 // Features
@@ -209,6 +210,7 @@ function App() {
     createBrowserRouter([
       {
         element: <Layout />,
+        errorElement: <RouteError />,
         children: [
           { path: "/", element: <HomeRoute /> },
           {
@@ -237,7 +239,11 @@ function App() {
             ),
           },
           { path: "*", element: <Navigate to="/" replace /> },
-        ],
+        ].map((route) =>
+          route.path === "*"
+            ? route
+            : { ...route, errorElement: <RouteError /> }
+        ),
       },
     ])
   );

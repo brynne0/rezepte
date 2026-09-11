@@ -216,10 +216,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
         <DropdownMenuContent align="center">
           {isLoggedIn ? (
             <>
-              <DropdownMenuItem
-                onClick={() => navigate("/settings")}
-                disabled={!isOnline}
-              >
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <Settings className="size-4" />
                 {t("settings")}
               </DropdownMenuItem>

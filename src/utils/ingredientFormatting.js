@@ -20,8 +20,11 @@ export const formatQuantityForDisplay = (quantity) => {
 export const formatUnitDisplay = (unit, quantity, units) => {
   if (!unit) return "";
 
-  // Exact match only
-  const unitObj = units?.find((u) => u.value === unit);
+  // Exact match only - `units` may be a non-array if the translation
+  // hasn't loaded yet (e.g. offline and /locales/*.json wasn't cached)
+  const unitObj = Array.isArray(units)
+    ? units.find((u) => u.value === unit)
+    : undefined;
 
   const translated = unitObj?.label || unit;
 
