@@ -21,7 +21,6 @@ vi.mock("react-router-dom", async () => {
 });
 
 vi.mock("../../services/userService", () => ({
-  getUserPreferredLanguage: vi.fn(),
   updateUserPreferredLanguage: vi.fn(),
   getUserProfile: vi.fn(),
   updateUserProfile: vi.fn(),
@@ -70,7 +69,6 @@ const SettingsWrapper = () => (
 
 describe("Settings", () => {
   let mockGetUserProfile;
-  let mockGetUserPreferredLanguage;
   let mockUpdateUserProfile;
   let mockUpdateUserPreferredLanguage;
   let mockCheckUsernameExists;
@@ -80,7 +78,6 @@ describe("Settings", () => {
     // Import the mocked modules
     const {
       getUserProfile,
-      getUserPreferredLanguage,
       updateUserProfile,
       updateUserPreferredLanguage,
       checkUsernameExists,
@@ -88,7 +85,6 @@ describe("Settings", () => {
     } = await import("../../services/userService");
 
     mockGetUserProfile = getUserProfile;
-    mockGetUserPreferredLanguage = getUserPreferredLanguage;
     mockUpdateUserProfile = updateUserProfile;
     mockUpdateUserPreferredLanguage = updateUserPreferredLanguage;
     mockCheckUsernameExists = checkUsernameExists;
@@ -105,7 +101,6 @@ describe("Settings", () => {
       username: "johndoe",
       email: "john@example.com",
     });
-    mockGetUserPreferredLanguage.mockResolvedValue("en");
     mockUpdateUserProfile.mockResolvedValue(true);
     mockUpdateUserPreferredLanguage.mockResolvedValue(true);
     mockCheckUsernameExists.mockResolvedValue(false);

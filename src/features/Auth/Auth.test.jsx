@@ -30,6 +30,7 @@ vi.mock("react-router-dom", async () => {
 vi.mock("../../services/auth", () => ({
   signUp: vi.fn(),
   signIn: vi.fn(),
+  resendConfirmationEmail: vi.fn(),
 }));
 
 vi.mock("../../utils/validation", () => ({
@@ -57,18 +58,22 @@ describe("Auth", () => {
   // Get the mocked functions after import
   let mockSignUp;
   let mockSignIn;
+  let mockResendConfirmationEmail;
   let mockValidateAuthForm;
   let mockValidateUsernameUnique;
   let mockIsPasswordStrong;
 
   beforeEach(async () => {
     // Import the mocked functions
-    const { signUp, signIn } = await import("../../services/auth");
+    const { signUp, signIn, resendConfirmationEmail } = await import(
+      "../../services/auth"
+    );
     const { validateAuthForm, validateUsernameUnique, isPasswordStrong } =
       await import("../../utils/validation");
 
     mockSignUp = signUp;
     mockSignIn = signIn;
+    mockResendConfirmationEmail = resendConfirmationEmail;
     mockValidateAuthForm = validateAuthForm;
     mockValidateUsernameUnique = validateUsernameUnique;
     mockIsPasswordStrong = isPasswordStrong;
@@ -78,6 +83,7 @@ describe("Auth", () => {
     mockToastAdd.mockClear();
     mockSignUp.mockClear();
     mockSignIn.mockClear();
+    mockResendConfirmationEmail.mockClear();
     mockValidateAuthForm.mockClear();
     mockValidateUsernameUnique.mockClear();
     mockIsPasswordStrong.mockClear();
@@ -752,9 +758,9 @@ describe("Auth", () => {
       });
     });
 
-    it("handles sign up error", async () => {
+    it("handles a generic sign up error", async () => {
       mockValidateAuthForm.mockReturnValue({});
-      mockSignUp.mockResolvedValue({ error: "User already exists" });
+      mockSignUp.mockResolvedValue({ error: { message: "Server error" } });
 
       render(<AuthWrapper />);
 
@@ -767,6 +773,80 @@ describe("Auth", () => {
 
       await waitFor(() => {
         expect(screen.getByText("signup_failed")).toBeInTheDocument();
+      });
+    });
+
+    it("shows an email-taken validation error for an EMAIL_EXISTS sign up error", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignUp.mockResolvedValue({ error: { type: "EMAIL_EXISTS" } });
+
+      render(<AuthWrapper />);
+
+      const signUpTab = screen.getByRole("tab", { name: "signup" });
+      fireEvent.click(signUpTab);
+
+      fireEvent.submit(screen.getByTestId("auth-form"));
+
+      await waitFor(() => {
+        expect(screen.getByText("email_already_exists")).toBeInTheDocument();
+      });
+      expect(screen.queryByText("signup_failed")).not.toBeInTheDocument();
+    });
+
+    it("resends the confirmation email and shows a success toast", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignUp.mockResolvedValue({ error: null });
+      mockResendConfirmationEmail.mockResolvedValue({ error: null });
+
+      render(<AuthWrapper />);
+
+      fireEvent.click(screen.getByRole("tab", { name: "signup" }));
+      fireEvent.change(screen.getByLabelText("email"), {
+        target: { value: "test@example.com" },
+      });
+      fireEvent.submit(screen.getByTestId("auth-form"));
+
+      const resendButton = await screen.findByText("resend_email");
+      fireEvent.click(resendButton);
+
+      await waitFor(() => {
+        expect(mockResendConfirmationEmail).toHaveBeenCalledWith(
+          "test@example.com"
+        );
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "resend_email_sent",
+            type: "success",
+          })
+        );
+      });
+    });
+
+    it("shows an error toast when resending the confirmation email fails", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      mockSignUp.mockResolvedValue({ error: null });
+      mockResendConfirmationEmail.mockResolvedValue({
+        error: { message: "boom" },
+      });
+
+      render(<AuthWrapper />);
+
+      fireEvent.click(screen.getByRole("tab", { name: "signup" }));
+      fireEvent.change(screen.getByLabelText("email"), {
+        target: { value: "test@example.com" },
+      });
+      fireEvent.submit(screen.getByTestId("auth-form"));
+
+      const resendButton = await screen.findByText("resend_email");
+      fireEvent.click(resendButton);
+
+      await waitFor(() => {
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "resend_email_failed",
+            type: "error",
+          })
+        );
       });
     });
 

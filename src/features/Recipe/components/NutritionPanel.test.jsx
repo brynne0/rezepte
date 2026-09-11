@@ -8,7 +8,6 @@ vi.mock("react-i18next", () => ({
     t: (key) => {
       const translations = {
         nutritional_info: "Nutritional info",
-        nutrition_per_serving: "per serving",
         nutrition_calories: "Calories",
         nutrition_protein: "Protein",
         nutrition_fat: "Fat",

@@ -31,6 +31,10 @@ vi.mock("../../../services/categoriesService", () => ({
   deleteCategory: vi.fn(),
 }));
 
+vi.mock("../../../services/userService", () => ({
+  getUserPreferredLanguage: vi.fn(),
+}));
+
 // Mock components
 vi.mock("../../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
@@ -55,6 +59,7 @@ describe("CategoriesTab - Adding Categories", () => {
   let mockGetCategoriesForManagement;
   let mockSaveCategoryOrder;
   let mockCreateCategory;
+  let mockGetUserPreferredLanguage;
   let mockSupabase;
   let mockUser = { id: "user-123" };
 
@@ -112,15 +117,18 @@ describe("CategoriesTab - Adding Categories", () => {
       "../../../services/categoriesService"
     );
     const supabase = await import("../../../lib/supabase");
+    const userService = await import("../../../services/userService");
 
     mockGetCategoriesForManagement =
       categoriesService.getCategoriesForManagement;
     mockSaveCategoryOrder = categoriesService.saveCategoryOrder;
     mockCreateCategory = categoriesService.createCategory;
     mockSupabase = supabase.default;
+    mockGetUserPreferredLanguage = userService.getUserPreferredLanguage;
 
     // Setup default mocks
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } });
+    mockGetUserPreferredLanguage.mockResolvedValue("en");
     mockGetCategoriesForManagement.mockResolvedValue(mockExistingCategories);
     mockSaveCategoryOrder.mockResolvedValue([]);
     mockCreateCategory.mockResolvedValue({ id: "3", name: "breakfast" });
@@ -516,6 +524,46 @@ describe("CategoriesTab - Adding Categories", () => {
       expect(
         screen.getByRole("status", { name: /loading/i })
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("Preferred-language edit gating", () => {
+    it("enables the edit button once the UI language matches the preferred language", async () => {
+      mockGetUserPreferredLanguage.mockResolvedValue("en");
+
+      renderCategoriesTab();
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("edit_categories").closest("button")
+        ).not.toBeDisabled();
+      });
+    });
+
+    it("disables the edit button when the UI language differs from the preferred language", async () => {
+      mockGetUserPreferredLanguage.mockResolvedValue("de");
+
+      renderCategoriesTab();
+
+      await waitFor(() => {
+        expect(mockGetUserPreferredLanguage).toHaveBeenCalled();
+      });
+
+      expect(screen.getByText("edit_categories").closest("button")).toBeDisabled();
+    });
+
+    it("clicking the disabled edit button does not enter edit mode", async () => {
+      mockGetUserPreferredLanguage.mockResolvedValue("de");
+
+      renderCategoriesTab();
+
+      await waitFor(() => {
+        expect(mockGetUserPreferredLanguage).toHaveBeenCalled();
+      });
+
+      fireEvent.click(screen.getByText("edit_categories"));
+
+      expect(screen.queryByText("add_category")).not.toBeInTheDocument();
     });
   });
 });

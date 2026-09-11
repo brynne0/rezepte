@@ -10,7 +10,7 @@ vi.mock("../lib/supabase", () => ({
       resetPasswordForEmail: vi.fn(),
       updateUser: vi.fn(),
       getUser: vi.fn(),
-      linkIdentity: vi.fn(),
+      resend: vi.fn(),
     },
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
@@ -26,6 +26,9 @@ import {
   signOut,
   forgotPassword,
   changePassword,
+  resendConfirmationEmail,
+  verifyCurrentPassword,
+  changeEmail,
   getFirstName,
 } from "./auth";
 import supabase from "../lib/supabase";
@@ -265,6 +268,200 @@ describe("Auth Service", () => {
 
       expect(console.error).toHaveBeenCalledWith(
         "Password reset error:",
+        mockError
+      );
+      expect(result).toEqual({ error: mockError });
+    });
+  });
+
+  describe("resendConfirmationEmail", () => {
+    test("resends the signup confirmation email", async () => {
+      supabase.auth.resend.mockResolvedValue({ data: {}, error: null });
+
+      const result = await resendConfirmationEmail("test@example.com");
+
+      expect(supabase.auth.resend).toHaveBeenCalledWith({
+        type: "signup",
+        email: "test@example.com",
+      });
+      expect(result).toEqual({ data: {}, error: null });
+    });
+
+    test("returns the error when resending fails", async () => {
+      const mockError = { message: "Too many requests" };
+      supabase.auth.resend.mockResolvedValue({ data: null, error: mockError });
+
+      const result = await resendConfirmationEmail("test@example.com");
+
+      expect(result).toEqual({ data: null, error: mockError });
+    });
+
+    test("handles exceptions and logs them", async () => {
+      const mockError = new Error("Network error");
+      supabase.auth.resend.mockRejectedValue(mockError);
+
+      const result = await resendConfirmationEmail("test@example.com");
+
+      expect(console.error).toHaveBeenCalledWith(
+        "Resend confirmation email error:",
+        mockError
+      );
+      expect(result).toEqual({ error: mockError });
+    });
+  });
+
+  describe("verifyCurrentPassword", () => {
+    const mockUser = { id: "123" };
+
+    test("succeeds when the current password is correct", async () => {
+      supabase.auth.getUser.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+      supabase.single.mockResolvedValue({
+        data: { email: "test@example.com" },
+        error: null,
+      });
+      supabase.auth.signInWithPassword.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+
+      const result = await verifyCurrentPassword("correct-password");
+
+      expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
+        email: "test@example.com",
+        password: "correct-password",
+      });
+      expect(result).toEqual({ data: { user: mockUser }, error: null });
+    });
+
+    test("returns an error when there is no authenticated user", async () => {
+      supabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: null,
+      });
+
+      const result = await verifyCurrentPassword("anything");
+
+      expect(result).toEqual({
+        error: { message: "No authenticated user" },
+      });
+    });
+
+    test("returns an error when the user's email cannot be retrieved", async () => {
+      supabase.auth.getUser.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+      supabase.single.mockResolvedValue({ data: null, error: null });
+
+      const result = await verifyCurrentPassword("anything");
+
+      expect(result).toEqual({
+        error: { message: "Could not retrieve user email" },
+      });
+    });
+
+    test("returns an error when the password is incorrect", async () => {
+      supabase.auth.getUser.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+      supabase.single.mockResolvedValue({
+        data: { email: "test@example.com" },
+        error: null,
+      });
+      supabase.auth.signInWithPassword.mockResolvedValue({
+        data: null,
+        error: { message: "Invalid login credentials" },
+      });
+
+      const result = await verifyCurrentPassword("wrong-password");
+
+      expect(result).toEqual({
+        error: { message: "Current password is incorrect" },
+      });
+    });
+
+    test("handles exceptions and logs them", async () => {
+      const mockError = new Error("Network error");
+      supabase.auth.getUser.mockRejectedValue(mockError);
+
+      const result = await verifyCurrentPassword("anything");
+
+      expect(console.error).toHaveBeenCalledWith(
+        "Verify password service exception:",
+        mockError
+      );
+      expect(result).toEqual({ error: mockError });
+    });
+  });
+
+  describe("changeEmail", () => {
+    test("successfully changes email for an authenticated user", async () => {
+      const mockUser = { id: "123" };
+      supabase.auth.getUser.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+      supabase.auth.updateUser.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+
+      const result = await changeEmail("new@example.com");
+
+      expect(supabase.auth.updateUser).toHaveBeenCalledWith({
+        email: "new@example.com",
+      });
+      expect(result).toEqual({ data: { user: mockUser }, error: null });
+    });
+
+    test("returns an error when there is no authenticated user", async () => {
+      supabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: null,
+      });
+
+      const result = await changeEmail("new@example.com");
+
+      expect(console.error).toHaveBeenCalledWith("No authenticated user found");
+      expect(result).toEqual({
+        error: { message: "No authenticated user" },
+      });
+      expect(supabase.auth.updateUser).not.toHaveBeenCalled();
+    });
+
+    test("handles updateUser errors and logs them", async () => {
+      const mockUser = { id: "123" };
+      const mockError = { message: "Email already in use" };
+      supabase.auth.getUser.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+      supabase.auth.updateUser.mockResolvedValue({
+        data: null,
+        error: mockError,
+      });
+
+      const result = await changeEmail("new@example.com");
+
+      expect(console.error).toHaveBeenCalledWith(
+        "Supabase updateUser error:",
+        mockError
+      );
+      expect(result).toEqual({ data: null, error: mockError });
+    });
+
+    test("handles exceptions and logs them", async () => {
+      const mockError = new Error("Network error");
+      supabase.auth.getUser.mockRejectedValue(mockError);
+
+      const result = await changeEmail("new@example.com");
+
+      expect(console.error).toHaveBeenCalledWith(
+        "Change email service exception:",
         mockError
       );
       expect(result).toEqual({ error: mockError });

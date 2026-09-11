@@ -18,11 +18,23 @@ import {
   checkPasswordSymbol,
   validatePasswordStrength,
   isPasswordStrong,
+  isEmail,
+  validateUsernameUnique,
+  validateEmailUnique,
+  validateEmailUniqueForChange,
+  validateChangeEmailForm,
 } from "./validation";
 
 // Mock the recipes service
 vi.mock("../services/recipes", () => ({
   checkRecipeTitleExists: vi.fn(),
+}));
+
+// Mock the user service
+vi.mock("../services/userService", () => ({
+  checkUsernameExistsForSignup: vi.fn(),
+  checkEmailExistsForSignup: vi.fn(),
+  checkEmailExists: vi.fn(),
 }));
 
 describe("Validation Utilities", () => {
@@ -401,6 +413,166 @@ describe("Validation Utilities", () => {
       );
 
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe("isEmail", () => {
+    test("returns true for a valid email", () => {
+      expect(isEmail("test@example.com")).toBe(true);
+      expect(isEmail("  test@example.com  ")).toBe(true);
+    });
+
+    test("returns false for a non-email string", () => {
+      expect(isEmail("just-a-username")).toBe(false);
+      expect(isEmail("invalid@")).toBe(false);
+    });
+  });
+
+  describe("validateUsernameUnique", () => {
+    let mockCheckUsernameExistsForSignup;
+
+    beforeEach(async () => {
+      const userServiceModule = await import("../services/userService");
+      mockCheckUsernameExistsForSignup =
+        userServiceModule.checkUsernameExistsForSignup;
+    });
+
+    test("returns null when the username is unique", async () => {
+      mockCheckUsernameExistsForSignup.mockResolvedValue(false);
+
+      const result = await validateUsernameUnique("newuser", mockT);
+      expect(result).toBeNull();
+      expect(mockCheckUsernameExistsForSignup).toHaveBeenCalledWith(
+        "newuser"
+      );
+    });
+
+    test("returns an error when the username is taken", async () => {
+      mockCheckUsernameExistsForSignup.mockResolvedValue(true);
+
+      const result = await validateUsernameUnique("taken", mockT);
+      expect(result).toBe("username_already_exists");
+    });
+
+    test("returns null (does not block submission) when the check fails", async () => {
+      mockCheckUsernameExistsForSignup.mockRejectedValue(new Error("boom"));
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const result = await validateUsernameUnique("newuser", mockT);
+
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error checking username uniqueness:",
+        expect.any(Error)
+      );
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe("validateEmailUnique", () => {
+    let mockCheckEmailExistsForSignup;
+
+    beforeEach(async () => {
+      const userServiceModule = await import("../services/userService");
+      mockCheckEmailExistsForSignup =
+        userServiceModule.checkEmailExistsForSignup;
+    });
+
+    test("returns null when the email is unique", async () => {
+      mockCheckEmailExistsForSignup.mockResolvedValue(false);
+
+      const result = await validateEmailUnique("new@example.com", mockT);
+      expect(result).toBeNull();
+    });
+
+    test("returns an error when the email is taken", async () => {
+      mockCheckEmailExistsForSignup.mockResolvedValue(true);
+
+      const result = await validateEmailUnique("taken@example.com", mockT);
+      expect(result).toBe("email_already_exists");
+    });
+
+    test("returns null (does not block submission) when the check fails", async () => {
+      mockCheckEmailExistsForSignup.mockRejectedValue(new Error("boom"));
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const result = await validateEmailUnique("new@example.com", mockT);
+
+      expect(result).toBeNull();
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe("validateEmailUniqueForChange", () => {
+    let mockCheckEmailExists;
+
+    beforeEach(async () => {
+      const userServiceModule = await import("../services/userService");
+      mockCheckEmailExists = userServiceModule.checkEmailExists;
+    });
+
+    test("returns null when no other user has the email", async () => {
+      mockCheckEmailExists.mockResolvedValue(false);
+
+      const result = await validateEmailUniqueForChange(
+        "new@example.com",
+        mockT
+      );
+      expect(result).toBeNull();
+    });
+
+    test("returns an error when another user already has the email", async () => {
+      mockCheckEmailExists.mockResolvedValue(true);
+
+      const result = await validateEmailUniqueForChange(
+        "taken@example.com",
+        mockT
+      );
+      expect(result).toBe("email_already_exists");
+    });
+  });
+
+  describe("validateChangeEmailForm", () => {
+    test("returns errors for a blank current password and email", () => {
+      const errors = validateChangeEmailForm(
+        { currentPassword: "", newEmail: "", newEmailRepeat: "" },
+        mockT
+      );
+
+      expect(errors.currentPassword).toBeTruthy();
+      expect(errors.newEmail).toBeTruthy();
+      expect(errors.newEmailRepeat).toBe("email_repeat_required");
+    });
+
+    test("returns an error when the two email fields don't match", () => {
+      const errors = validateChangeEmailForm(
+        {
+          currentPassword: "password123",
+          newEmail: "new@example.com",
+          newEmailRepeat: "different@example.com",
+        },
+        mockT
+      );
+
+      expect(errors.newEmailRepeat).toBe("emails_do_not_match");
+      expect(errors.newEmail).toBeUndefined();
+    });
+
+    test("returns no errors for a valid, matching form", () => {
+      const errors = validateChangeEmailForm(
+        {
+          currentPassword: "password123",
+          newEmail: "new@example.com",
+          newEmailRepeat: "new@example.com",
+        },
+        mockT
+      );
+
+      expect(errors).toEqual({});
     });
   });
 

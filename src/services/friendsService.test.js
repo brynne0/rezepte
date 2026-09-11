@@ -33,6 +33,7 @@ import {
   removeFriendship,
   getFriends,
   getPendingRequests,
+  getSentRequests,
   getUserByUsername,
   checkFriendship,
   getFriendProfile,
@@ -309,6 +310,42 @@ describe("Friends Service", () => {
 
     test("throws when no userId is provided", async () => {
       await expect(getPendingRequests()).rejects.toThrow(
+        "User not authenticated"
+      );
+    });
+  });
+
+  describe("getSentRequests", () => {
+    test("returns empty array when no sent requests", async () => {
+      supabase.from.mockReturnValue(mockChain({ data: [], error: null }));
+      expect(await getSentRequests(mockUser.id)).toEqual([]);
+    });
+
+    test("calls get_profiles_by_ids with addressee IDs", async () => {
+      supabase.from.mockReturnValue(
+        mockChain({
+          data: [{ addressee_id: "user-2" }, { addressee_id: "user-3" }],
+          error: null,
+        })
+      );
+      supabase.rpc.mockResolvedValueOnce({
+        data: [
+          { id: "user-2", username: "alice" },
+          { id: "user-3", username: "bob" },
+        ],
+        error: null,
+      });
+
+      const result = await getSentRequests(mockUser.id);
+
+      expect(supabase.rpc).toHaveBeenCalledWith("get_profiles_by_ids", {
+        user_ids: ["user-2", "user-3"],
+      });
+      expect(result).toHaveLength(2);
+    });
+
+    test("throws when no userId is provided", async () => {
+      await expect(getSentRequests()).rejects.toThrow(
         "User not authenticated"
       );
     });

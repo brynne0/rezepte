@@ -36,21 +36,9 @@ vi.mock("../lib/supabase", () => ({
   },
 }));
 
-// Mock the translation API call
-const mockTranslateText = vi.fn();
-vi.mock("./translationService", async () => {
-  const actual = await vi.importActual("./translationService");
-  return {
-    ...actual,
-    // Override internal functions for testing
-    __esModule: true,
-  };
-});
-
 describe("Translation Service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTranslateText.mockReset();
   });
 
   const mockRecipeWithUngroupedIngredients = {
@@ -197,15 +185,6 @@ describe("Translation Service", () => {
 
   describe("Translation Required", () => {
     test("sets translation metadata when languages differ", async () => {
-      // Mock the translation functions to avoid actual API calls
-      vi.doMock("./translationService", () => ({
-        getTranslatedRecipe: vi.fn().mockResolvedValue({
-          ...mockRecipeWithUngroupedIngredients,
-          isTranslated: true,
-          translatedFrom: "en",
-        }),
-      }));
-
       const result = await getTranslatedRecipe(
         mockRecipeWithUngroupedIngredients,
         "de"
@@ -216,10 +195,25 @@ describe("Translation Service", () => {
       expect(result).toHaveProperty("translatedFrom", "en");
     });
 
-    test("handles translation errors gracefully", async () => {
-      // This is more of an integration test - actual error handling
-      // would need to be tested with proper mocking of the internal functions
-      expect(true).toBe(true); // Placeholder for error handling tests
+    test("falls back to the original text when the translation API fails", async () => {
+      const mockSupabase = await import("../lib/supabase");
+      mockSupabase.default.functions.invoke.mockResolvedValue({
+        data: null,
+        error: { message: "Translation service unavailable" },
+      });
+
+      const recipe = {
+        title: "Test Cucumber",
+        instructions: ["Mix the cucumber"],
+        original_language: "en",
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      // translateText swallows the error and returns the original text
+      // rather than throwing or corrupting the recipe.
+      expect(result.title).toBe("Test Cucumber");
+      expect(result.instructions[0]).toBe("Mix the cucumber.");
     });
   });
 

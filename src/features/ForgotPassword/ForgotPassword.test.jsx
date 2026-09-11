@@ -25,7 +25,7 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-vi.mock("../LoadingAcorn/LoadingAcorn", () => ({
+vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
   default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
