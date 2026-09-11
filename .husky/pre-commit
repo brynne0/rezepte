@@ -1,5 +1,5 @@
-# Format code with Prettier
-npm run format
+# Format staged files with Prettier and re-stage them
+npx lint-staged
 
 # Run linting
 npm run lint
