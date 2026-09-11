@@ -6,7 +6,7 @@ import {
   getFriendProfile,
   fetchFriendRecipes,
 } from "../../../services/friendsService";
-import { getTranslatedRecipeTitle } from "../../../services/translationService";
+import { getTranslatedRecipeTitle } from "../../../services/recipeTranslationService";
 
 const buildFriendCategories = (translatedRecipes, currentLanguage) => {
   const categoryTranslations = {};

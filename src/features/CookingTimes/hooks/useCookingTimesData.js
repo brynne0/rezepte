@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { getTranslatedCookingTimes } from "../../../services/cookingTimesService";
+import { getTranslatedCookingTimes } from "../../../services/cookingTimesTranslationService";
 import { getUserPreferredLanguage } from "../../../services/userService";
 
 export const useCookingTimesData = ({ isEditMode, i18n }) => {
