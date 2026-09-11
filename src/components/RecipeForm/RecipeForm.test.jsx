@@ -555,6 +555,114 @@ describe("RecipeForm", () => {
     });
   });
 
+  describe("Offline", () => {
+    it("disables the submit button when offline", () => {
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        isOnline: false,
+      });
+
+      renderComponent();
+
+      const submitButton = screen.getByRole("button", {
+        name: /create_recipe/,
+      });
+      expect(submitButton).toBeDisabled();
+    });
+
+    it("does not disable the submit button when online", () => {
+      renderComponent();
+
+      const submitButton = screen.getByRole("button", {
+        name: /create_recipe/,
+      });
+      expect(submitButton).not.toBeDisabled();
+    });
+
+    it("disables the delete button and confirm action when offline in edit mode", () => {
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        isEditMode: true,
+        isOnline: false,
+      });
+
+      renderComponent();
+
+      const deleteButton = screen.getByText("delete_recipe");
+      expect(deleteButton.closest("button")).toBeDisabled();
+    });
+  });
+
+  describe("Adding a category", () => {
+    it("shows an input for the new category name when add_category is clicked", () => {
+      renderComponent();
+
+      fireEvent.click(screen.getByText("add_category"));
+
+      expect(screen.getByPlaceholderText("category_name")).toBeInTheDocument();
+    });
+
+    it("adds the typed category locally without calling any service", () => {
+      renderComponent();
+
+      fireEvent.click(screen.getByText("add_category"));
+      fireEvent.change(screen.getByPlaceholderText("category_name"), {
+        target: { value: "Brunch" },
+      });
+      fireEvent.click(screen.getByText("add_category"));
+
+      expect(screen.getByText("Brunch")).toBeInTheDocument();
+      expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
+        "categories",
+        ["desserts", "Brunch"]
+      );
+    });
+
+    it("shows a required error when saving an empty category name", () => {
+      renderComponent();
+
+      fireEvent.click(screen.getByText("add_category"));
+      fireEvent.click(screen.getByText("add_category"));
+
+      expect(screen.getByText("category_name_required")).toBeInTheDocument();
+      expect(mockHookReturn.handleInputChange).not.toHaveBeenCalled();
+    });
+
+    it("shows a duplicate error when the category name already exists", () => {
+      renderComponent();
+
+      fireEvent.click(screen.getByText("add_category"));
+      fireEvent.change(screen.getByPlaceholderText("category_name"), {
+        target: { value: "desserts" },
+      });
+      fireEvent.click(screen.getByText("add_category"));
+
+      expect(
+        screen.getByText("category_name_already_exists")
+      ).toBeInTheDocument();
+      expect(mockHookReturn.handleInputChange).not.toHaveBeenCalled();
+    });
+
+    it("closes the input and clears the name when cancelled", () => {
+      renderComponent();
+
+      fireEvent.click(screen.getByText("add_category"));
+      const nameInput = screen.getByPlaceholderText("category_name");
+      fireEvent.change(nameInput, { target: { value: "Brunch" } });
+
+      const cancelButtons = screen.getAllByRole("button", { name: "cancel" });
+      const categoryCancelButton = cancelButtons.find((button) =>
+        nameInput.parentElement.contains(button)
+      );
+      fireEvent.click(categoryCancelButton);
+
+      expect(
+        screen.queryByPlaceholderText("category_name")
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Brunch")).not.toBeInTheDocument();
+    });
+  });
+
   describe("Loading State", () => {
     it("disables submit button when loading", () => {
       useRecipeForm.mockReturnValue({
