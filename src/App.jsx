@@ -94,9 +94,12 @@ function ChangeEmailRoute() {
 }
 
 function SettingsRoute() {
+  const { setSelectedCategory } = useContext(AppStateContext);
   return (
     <ProtectedRoute>
-      <Settings />
+      <Settings
+        resetCategoryFilter={() => setSelectedCategory("all_recipes")}
+      />
     </ProtectedRoute>
   );
 }
