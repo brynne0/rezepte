@@ -99,6 +99,7 @@
   "offline_download_last_synced": "Zuletzt heruntergeladen am {{date}}",
   "offline_download_last_synced_with_failures": "Zuletzt heruntergeladen am {{date}} ({{count}} fehlgeschlagen)",
   "offline_download_never_synced": "Noch nicht für offline heruntergeladen",
+  "offline_download_stale_suffix": "(vor {{days}} Tagen — erneutes Herunterladen empfohlen)",
   "offline_download_no_recipes": "Noch keine Rezepte zum Herunterladen",
   "delete_downloads": "Downloads löschen",
   "offline_download_deleted": "Heruntergeladene Rezepte von diesem Gerät entfernt",

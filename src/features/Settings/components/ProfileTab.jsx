@@ -26,6 +26,8 @@ import {
 import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import { useOfflineDownload } from "../hooks/useOfflineDownload";
 
+const STALE_DOWNLOAD_THRESHOLD_DAYS = 30;
+
 const ProfileTab = ({
   profileData,
   isEditingProfile,
@@ -56,6 +58,13 @@ const ProfileTab = ({
     cancelDownload,
     deleteDownloads,
   } = useOfflineDownload(t);
+  const daysSinceDownload = offlineDownloadStatus
+    ? Math.floor(
+        (Date.now() - new Date(offlineDownloadStatus.completedAt).getTime()) /
+          (24 * 60 * 60 * 1000)
+      )
+    : 0;
+  const isDownloadStale = daysSinceDownload > STALE_DOWNLOAD_THRESHOLD_DAYS;
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       handleSaveProfile();
@@ -290,6 +299,14 @@ const ProfileTab = ({
                       ).toLocaleString(),
                     })
                 : t("offline_download_never_synced")}
+              {isDownloadStale && (
+                <span className="text-destructive">
+                  {" "}
+                  {t("offline_download_stale_suffix", {
+                    days: daysSinceDownload,
+                  })}
+                </span>
+              )}
             </span>
             {offlineDownloadStatus && (
               <Button

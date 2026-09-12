@@ -99,6 +99,7 @@
   "offline_download_last_synced": "Last downloaded {{date}}",
   "offline_download_last_synced_with_failures": "Last downloaded {{date}} ({{count}} failed)",
   "offline_download_never_synced": "Not yet downloaded for offline use",
+  "offline_download_stale_suffix": "({{days}} days ago — consider redownloading)",
   "offline_download_no_recipes": "No recipes to download yet",
   "delete_downloads": "Delete downloads",
   "offline_download_deleted": "Downloaded recipes removed from this device",
