@@ -2,13 +2,13 @@ import { fetchRecipe } from "./recipes";
 import { getSignedImageUrls } from "./imageService";
 import { getUserProfile } from "./userService";
 import { getTranslatedCookingTimes } from "./cookingTimesTranslationService";
-import { getCategoriesForManagement } from "./categoriesService";
+import { getCategories, withAllRecipesOption } from "./categoriesService";
 import { writeCachedValue } from "../utils/localStorageCache";
 import {
   SUPPORTED_LANGUAGES,
   userProfileCacheKey,
   cookingTimesCacheKey,
-  categoriesManagementCacheKey,
+  categoriesCacheKey,
   signedImageUrlCacheKey,
 } from "../utils/offlineCacheKeys";
 
@@ -40,14 +40,15 @@ const downloadCookingTimes = async (userId) => {
   }
 };
 
-// Silently caches the Settings category-management list in every supported
-// language, same reasoning as cooking times: works offline even if that
-// tab was never opened online.
+// Silently caches categories in every supported language, same reasoning as
+// cooking times: works offline even if Home or Settings' category list was
+// never opened online. Shares its cache with useCategories.js (Home's
+// filter dropdown) and CategoriesTab.jsx (Settings) - same underlying data.
 const downloadCategories = async () => {
   for (const lang of SUPPORTED_LANGUAGES) {
     try {
-      const data = await getCategoriesForManagement(lang);
-      writeCachedValue(categoriesManagementCacheKey(lang), data);
+      const data = withAllRecipesOption(await getCategories(lang), lang);
+      writeCachedValue(categoriesCacheKey(lang), data);
     } catch (error) {
       console.error(`Failed to cache categories for ${lang}:`, error);
     }

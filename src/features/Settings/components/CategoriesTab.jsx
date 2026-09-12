@@ -1,12 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import supabase from "../../../lib/supabase";
-import {
-  readCachedValue,
-  writeCachedValue,
-} from "../../../utils/localStorageCache";
-import { categoriesManagementCacheKey } from "../../../utils/offlineCacheKeys";
+import { useCategories } from "../../../hooks/data/useCategories";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   GripVertical,
@@ -22,7 +18,6 @@ import {
   updateCategoryName,
   deleteCategory,
   saveCategoryOrder,
-  getCategoriesForManagement,
 } from "../../../services/categoriesService";
 import { getUserPreferredLanguage } from "../../../services/userService";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -54,27 +49,15 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "cn";
 
-const readCachedManagementCategories = (language) =>
-  readCachedValue(categoriesManagementCacheKey(language));
-
-const writeCachedManagementCategories = (language, categories) =>
-  writeCachedValue(categoriesManagementCacheKey(language), categories);
-
 const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   const queryClient = useQueryClient();
   const { i18n } = useTranslation();
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
-    queryKey: ["categoriesManagement", i18n.language],
-    queryFn: async () => {
-      const data = await getCategoriesForManagement(i18n.language);
-      writeCachedManagementCategories(i18n.language, data);
-      return data;
-    },
-    initialData: () => readCachedManagementCategories(i18n.language),
-    initialDataUpdatedAt: 0,
-    staleTime: 0,
-    refetchOnMount: true,
-  });
+  const { categories: allCategories, loading: categoriesLoading } =
+    useCategories();
+  const categories = useMemo(
+    () => allCategories.filter((category) => category.value !== "all_recipes"),
+    [allCategories]
+  );
   const [isEditingCategories, setIsEditingCategories] = useState(false);
   const [categoryPreferences, setCategoryPreferences] = useState([]);
   const [originalCategoryPreferences, setOriginalCategoryPreferences] =

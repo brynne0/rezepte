@@ -23,16 +23,24 @@ vi.mock("../../../lib/supabase", () => ({
 }));
 
 // Mock services
-vi.mock("../../../services/categoriesService", () => ({
-  getCategoriesForManagement: vi.fn(),
-  saveCategoryOrder: vi.fn(),
-  createCategory: vi.fn(),
-  updateCategoryName: vi.fn(),
-  deleteCategory: vi.fn(),
-}));
+vi.mock("../../../services/categoriesService", async () => {
+  const actual = await vi.importActual("../../../services/categoriesService");
+  return {
+    ...actual,
+    getCategories: vi.fn(),
+    saveCategoryOrder: vi.fn(),
+    createCategory: vi.fn(),
+    updateCategoryName: vi.fn(),
+    deleteCategory: vi.fn(),
+  };
+});
 
 vi.mock("../../../services/userService", () => ({
   getUserPreferredLanguage: vi.fn(),
+}));
+
+vi.mock("../../../hooks/data/useAuth", () => ({
+  useAuth: () => ({ user: { id: "user-123" } }),
 }));
 
 // Mock components
@@ -56,7 +64,7 @@ vi.mock("react-i18next", () => ({
 }));
 
 describe("CategoriesTab - Adding Categories", () => {
-  let mockGetCategoriesForManagement;
+  let mockGetCategories;
   let mockSaveCategoryOrder;
   let mockCreateCategory;
   let mockGetUserPreferredLanguage;
@@ -119,8 +127,7 @@ describe("CategoriesTab - Adding Categories", () => {
     const supabase = await import("../../../lib/supabase");
     const userService = await import("../../../services/userService");
 
-    mockGetCategoriesForManagement =
-      categoriesService.getCategoriesForManagement;
+    mockGetCategories = categoriesService.getCategories;
     mockSaveCategoryOrder = categoriesService.saveCategoryOrder;
     mockCreateCategory = categoriesService.createCategory;
     mockSupabase = supabase.default;
@@ -129,7 +136,7 @@ describe("CategoriesTab - Adding Categories", () => {
     // Setup default mocks
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } });
     mockGetUserPreferredLanguage.mockResolvedValue("en");
-    mockGetCategoriesForManagement.mockResolvedValue(mockExistingCategories);
+    mockGetCategories.mockResolvedValue(mockExistingCategories);
     mockSaveCategoryOrder.mockResolvedValue([]);
     mockCreateCategory.mockResolvedValue({ id: "3", name: "breakfast" });
 

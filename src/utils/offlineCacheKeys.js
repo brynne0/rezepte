@@ -9,9 +9,6 @@ export const userProfileCacheKey = (userId) => `user-profile-cache-${userId}`;
 export const cookingTimesCacheKey = (userId, language) =>
   `cooking-times-cache-${userId}-${language}`;
 
-export const categoriesManagementCacheKey = (language) =>
-  `categories-management-cache-${language}`;
-
 export const categoriesCacheKey = (language) => `categories-cache-${language}`;
 
 export const signedImageUrlCacheKey = (path) =>
@@ -25,7 +22,6 @@ export const clearOfflineCaches = (userId) => {
 
   for (const lang of SUPPORTED_LANGUAGES) {
     removeCachedValue(cookingTimesCacheKey(userId, lang));
-    removeCachedValue(categoriesManagementCacheKey(lang));
     removeCachedValue(categoriesCacheKey(lang));
   }
 

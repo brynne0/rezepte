@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCategoriesForUI } from "../../services/categoriesService";
+import {
+  getCategories,
+  withAllRecipesOption,
+} from "../../services/categoriesService";
 import {
   readCachedValue,
   writeCachedValue,
@@ -33,7 +36,10 @@ export const useCategories = () => {
     enabled: !!userId,
     queryFn: async () => {
       try {
-        const categoriesData = await getCategoriesForUI(currentLanguage);
+        const categoriesData = withAllRecipesOption(
+          await getCategories(currentLanguage),
+          currentLanguage
+        );
         writeCachedCategories(currentLanguage, categoriesData);
         return categoriesData;
       } catch (err) {
