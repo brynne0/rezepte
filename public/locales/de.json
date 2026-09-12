@@ -228,6 +228,7 @@
   "paste_text_too_long": "Rezepttext ist zu lang. Bitte auf {{max}} Zeichen oder weniger kürzen.",
   "parse_error": "Fehler beim Parsen des Rezepts. Bitte erneut versuchen.",
   "parse_error_rate_limit": "Zu viele Anfragen. Bitte einen Moment warten und erneut versuchen.",
+  "parse_error_daily_limit": "Du hast das heutige Autofill-Limit erreicht. Bitte morgen erneut versuchen.",
   "parse_error_server": "Der Autofill-Dienst ist vorübergehend nicht verfügbar. Bitte später erneut versuchen.",
   "parse_error_network": "Netzwerkfehler. Bitte deine Verbindung überprüfen und erneut versuchen.",
   "parse_error_blocked": "Die Website blockiert den automatisierten Zugriff. Bitte den Rezepttext direkt kopieren und einfügen.",

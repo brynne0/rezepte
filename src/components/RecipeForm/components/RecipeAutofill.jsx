@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import supabase from "../../../lib/supabase";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -54,6 +55,10 @@ const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       const trimmedText = pastedText.trim();
       const isUrlInput = isUrl(trimmedText);
 
@@ -66,7 +71,9 @@ const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${supabaseAnonKey}`,
+          // Send the user's own session token (not the shared anon key) so
+          // the function can identify the caller for per-user rate limiting.
+          Authorization: `Bearer ${session?.access_token || supabaseAnonKey}`,
         },
         body: JSON.stringify({
           pastedText: isUrlInput ? null : trimmedText,
@@ -79,7 +86,9 @@ const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
 
       if (!response.ok || !data.success) {
         // Handle specific error cases
-        if (response.status === 429) {
+        if (data.error === "DAILY_LIMIT_EXCEEDED") {
+          throw new Error("DAILY_LIMIT_EXCEEDED");
+        } else if (response.status === 429) {
           throw new Error("RATE_LIMIT");
         } else if (response.status >= 500) {
           throw new Error("SERVER_ERROR");
@@ -100,7 +109,9 @@ const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
       console.error("Error parsing recipe:", error);
 
       // Map error types to translation keys
-      if (error.message === "RATE_LIMIT") {
+      if (error.message === "DAILY_LIMIT_EXCEEDED") {
+        setParseError(t("parse_error_daily_limit"));
+      } else if (error.message === "RATE_LIMIT") {
         setParseError(t("parse_error_rate_limit"));
       } else if (error.message === "SERVER_ERROR") {
         setParseError(t("parse_error_server"));

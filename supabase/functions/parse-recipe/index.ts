@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,6 +7,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+// Per-user daily cap on autofill (AI recipe parsing) calls.
+const DAILY_AUTOFILL_LIMIT = 50;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -18,9 +22,9 @@ serve(async (req) => {
       recipeUrl,
       availableCategories = [],
     } = await req.json();
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 
-    if (!GEMINI_API_KEY) {
+    if (!ANTHROPIC_API_KEY) {
       return new Response(
         JSON.stringify({ success: false, error: "API key not configured" }),
         {
@@ -28,6 +32,49 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
+    }
+
+    // Identify the calling user from their session token and enforce a
+    // daily quota so one user can't run up the AI bill unbounded.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const userClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const {
+      data: { user },
+    } = await userClient.auth.getUser();
+
+    if (user) {
+      const adminClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: allowed, error: usageError } = await adminClient.rpc(
+        "try_increment_autofill_usage",
+        {
+          p_user_id: user.id,
+          p_usage_date: today,
+          p_limit: DAILY_AUTOFILL_LIMIT,
+        }
+      );
+
+      if (usageError) {
+        console.log(`Autofill usage check failed: ${usageError.message}`);
+      } else if (!allowed) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "DAILY_LIMIT_EXCEEDED",
+          }),
+          {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
     }
 
     if (!pastedText?.trim() && !recipeUrl?.trim()) {
@@ -200,14 +247,6 @@ serve(async (req) => {
       }
     }
 
-    // Model fallback configuration: try models in order until one succeeds
-    const models = [
-      "gemini-3.5-flash-lite", // Most cost-effective current model - try first
-      "gemini-3.1-flash-lite", // Frontier-class fallback
-      "gemini-2.5-flash", // Established backup
-      "gemini-2.5-flash-lite", // Cheaper established backup
-    ];
-
     const promptText = `Parse this recipe text and return ONLY a JSON object (no markdown, no explanation):
 
 ${textToProcess.trim()}
@@ -245,72 +284,39 @@ Important rules:
 - categories: ONLY use categories from this list: ${availableCategories.length > 0 ? availableCategories.join(", ") : "breakfast, lunch, dinner, dessert, snack"}. Select 1-3 most relevant categories. Use exact category names from the list.
 - Only use ingredientSections if the original recipe explicitly has sections (like "For the dough:", "For the topping:", etc.). Otherwise use flat ingredients array.`;
 
-    let response;
-    let lastError = null;
-    let usedModel = null;
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 2048,
+        messages: [{ role: "user", content: promptText }],
+      }),
+    });
 
-    // Try each model in sequence until one works
-    for (const model of models) {
-      try {
-        console.log(`Attempting to use model: ${model}`);
-        response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [{ text: promptText }],
-                },
-              ],
-            }),
-          }
-        );
-
-        // Check if we got a rate limit error (429) or resource exhausted
-        if (response.status === 429) {
-          const errorData = await response.json();
-          console.log(
-            `Model ${model} rate limited: ${JSON.stringify(errorData)}`
-          );
-          lastError = `Rate limit exceeded for ${model}`;
-          continue; // Try next model
-        }
-
-        if (response.ok) {
-          usedModel = model;
-          console.log(`Successfully used model: ${model}`);
-          break; // Success! Exit the loop
-        }
-
-        // Other error - try next model
-        const errorData = await response.json();
-        console.log(`Model ${model} failed: ${JSON.stringify(errorData)}`);
-        lastError = `${model} failed: ${errorData.error?.message || "Unknown error"}`;
-      } catch (error) {
-        console.log(`Exception with model ${model}: ${error.message}`);
-        lastError = `${model} exception: ${error.message}`;
-        continue; // Try next model
-      }
-    }
-
-    // If all models failed, return error
-    if (!response || !response.ok) {
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.log(`Claude request failed: ${JSON.stringify(errorData)}`);
       return new Response(
         JSON.stringify({
           success: false,
-          error: `All AI models failed. Last error: ${lastError || "Unknown error"}. Please try again later.`,
+          error: `Recipe parsing failed: ${errorData.error?.message || "Unknown error"}. Please try again later.`,
         }),
         {
-          status: 503,
+          status: response.status === 429 ? 503 : response.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
     const data = await response.json();
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let text =
+      data.content?.find((block: { type: string }) => block.type === "text")
+        ?.text || "";
 
     // Clean markdown formatting
     text = text
