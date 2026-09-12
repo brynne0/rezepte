@@ -84,7 +84,7 @@ export const clearOfflineDownloadStatus = () => {
 // Deliberately does NOT translate - translation happens client-side at
 // view time regardless of language, using this same cached raw response,
 // so pre-translating here would just be an unnecessary API cost.
-const downloadRecipe = async (recipe) => {
+const downloadRecipe = async (recipe, userId) => {
   const originalRecipe = await fetchRecipe(recipe.id);
 
   const images = originalRecipe?.images || [];
@@ -97,7 +97,7 @@ const downloadRecipe = async (recipe) => {
     // signed URL requires network, which won't be available.
     signedImages.forEach((image) => {
       if (image.url) {
-        writeCachedValue(signedImageUrlCacheKey(image.path), image);
+        writeCachedValue(signedImageUrlCacheKey(userId, image.path), image);
       }
     });
 
@@ -127,7 +127,7 @@ export const downloadAllRecipesForOffline = async ({
     onProgress?.({ current: i, total, recipeTitle: recipe.title });
 
     try {
-      await downloadRecipe(recipe);
+      await downloadRecipe(recipe, userId);
     } catch (error) {
       console.error(`Failed to download recipe ${recipe.id}:`, error);
       failed.push(recipe.id);

@@ -11,8 +11,8 @@ export const cookingTimesCacheKey = (userId, language) =>
 
 export const categoriesCacheKey = (language) => `categories-cache-${language}`;
 
-export const signedImageUrlCacheKey = (path) =>
-  `${SIGNED_IMAGE_URL_CACHE_PREFIX}${path}`;
+export const signedImageUrlCacheKey = (userId, path) =>
+  `${SIGNED_IMAGE_URL_CACHE_PREFIX}${userId}:${path}`;
 
 // Removes every offline cache tied to a user session, so a previous user's
 // data can't linger (or briefly flash) for the next person signing in on
@@ -25,11 +25,12 @@ export const clearOfflineCaches = (userId) => {
     removeCachedValue(categoriesCacheKey(lang));
   }
 
-  // Signed image URLs are keyed per image path, not per user, so they can't
-  // be targeted individually - clear every cached one on sign-out instead.
+  // Signed image URLs are keyed per user + image path, so they can be swept
+  // for just this user without touching another account's cached entries.
+  const userSignedImagePrefix = `${SIGNED_IMAGE_URL_CACHE_PREFIX}${userId}:`;
   try {
     for (const key of Object.keys(localStorage)) {
-      if (key.startsWith(SIGNED_IMAGE_URL_CACHE_PREFIX)) {
+      if (key.startsWith(userSignedImagePrefix)) {
         removeCachedValue(key);
       }
     }
