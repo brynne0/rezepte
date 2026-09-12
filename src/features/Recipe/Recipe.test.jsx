@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
@@ -6,6 +7,10 @@ import "@testing-library/jest-dom";
 import Recipe from "./Recipe";
 import { AppStateContext } from "../../contexts/AppStateContext";
 import { createTestQueryClient } from "../../test-utils/queryClient";
+import {
+  readCachedValue,
+  writeCachedValue,
+} from "../../utils/localStorageCache";
 
 // Mock dependencies
 vi.mock("react-router-dom", async () => {
@@ -503,23 +508,103 @@ describe("Recipe Component", () => {
       const firstCheckbox = screen.getAllByRole("checkbox")[0];
       fireEvent.click(firstCheckbox);
 
-      const stored = JSON.parse(
-        localStorage.getItem("checked-ingredients-test-recipe-id")
-      );
+      const stored = readCachedValue("checked-ingredients-test-recipe-id");
       expect(stored).toEqual({ "ri-1": true });
     });
 
     test("restores checked ingredients from localStorage on mount", () => {
-      localStorage.setItem(
-        "checked-ingredients-test-recipe-id",
-        JSON.stringify({ "ri-1": true })
-      );
+      writeCachedValue("checked-ingredients-test-recipe-id", {
+        "ri-1": true,
+      });
 
       renderRecipe();
 
       const [firstCheckbox, secondCheckbox] = screen.getAllByRole("checkbox");
       expect(firstCheckbox).toHaveAttribute("aria-checked", "true");
       expect(secondCheckbox).toHaveAttribute("aria-checked", "false");
+    });
+
+    test("does not restore checked ingredients older than 24 hours", () => {
+      localStorage.setItem(
+        "checked-ingredients-test-recipe-id",
+        JSON.stringify({
+          value: { "ri-1": true },
+          timestamp: Date.now() - 25 * 60 * 60 * 1000,
+        })
+      );
+
+      renderRecipe();
+
+      const [firstCheckbox] = screen.getAllByRole("checkbox");
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "false");
+    });
+
+    test("persists scale multiplier to localStorage", () => {
+      renderRecipe();
+      const increaseButton = screen.getByLabelText("increase_servings");
+      fireEvent.click(increaseButton);
+      fireEvent.click(increaseButton);
+
+      expect(readCachedValue("scale-test-recipe-id")).not.toBe(1);
+    });
+
+    test("restores scale multiplier from localStorage on mount", () => {
+      writeCachedValue("scale-test-recipe-id", 2);
+      renderRecipe();
+
+      expect(screen.getByText("8")).toBeInTheDocument();
+    });
+
+    test("does not restore scale multiplier older than 24 hours", () => {
+      localStorage.setItem(
+        "scale-test-recipe-id",
+        JSON.stringify({
+          value: 2,
+          timestamp: Date.now() - 25 * 60 * 60 * 1000,
+        })
+      );
+
+      renderRecipe();
+
+      expect(screen.getByText("4")).toBeInTheDocument();
+    });
+
+    const renderRecipeInStrictMode = () => {
+      const client = createTestQueryClient();
+      render(
+        <StrictMode>
+          <QueryClientProvider client={client}>
+            <BrowserRouter>
+              <AppStateContext.Provider
+                value={{ setFriendBar: mockSetFriendBar }}
+              >
+                <Recipe />
+              </AppStateContext.Provider>
+            </BrowserRouter>
+          </QueryClientProvider>
+        </StrictMode>
+      );
+    };
+
+    test("restores scale multiplier from localStorage under StrictMode's double-effect mount", () => {
+      writeCachedValue("scale-test-recipe-id", 2);
+      renderRecipeInStrictMode();
+
+      expect(readCachedValue("scale-test-recipe-id")).toBe(2);
+      expect(screen.getByText("8")).toBeInTheDocument();
+    });
+
+    test("restores checked ingredients under StrictMode's double-effect mount", () => {
+      writeCachedValue("checked-ingredients-test-recipe-id", {
+        "ri-1": true,
+      });
+      renderRecipeInStrictMode();
+
+      expect(readCachedValue("checked-ingredients-test-recipe-id")).toEqual({
+        "ri-1": true,
+      });
+      const firstCheckbox = screen.getAllByRole("checkbox")[0];
+      expect(firstCheckbox).toHaveAttribute("aria-checked", "true");
     });
   });
 

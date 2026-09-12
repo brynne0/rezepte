@@ -56,6 +56,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
+import {
+  readCachedValue,
+  writeCachedValue,
+} from "../../utils/localStorageCache";
+
+const RECIPE_STATE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const Recipe = () => {
   const { id } = useParams();
@@ -71,43 +77,51 @@ const Recipe = () => {
   const recipeStorageKey = id;
   const isOnline = useOnlineStatus();
 
-  // Reset scale and privacy override when navigating to a different recipe
+  // Reset privacy override when navigating to a different recipe
   useEffect(() => {
-    setMultiplier(1);
     setPrivateOverride(null);
   }, [id]);
 
-  // Restore ticked-off ingredients for this recipe from localStorage
+  // Restore ticked-off ingredients for this recipe (ignored once older than
+  // RECIPE_STATE_MAX_AGE_MS, so a stale cooking session doesn't linger)
   useEffect(() => {
     if (!recipeStorageKey) return;
-    try {
-      const stored = localStorage.getItem(
-        `checked-ingredients-${recipeStorageKey}`
-      );
-      setCheckedIngredients(stored ? JSON.parse(stored) : {});
-    } catch {
-      setCheckedIngredients({});
-    }
+    setCheckedIngredients(
+      readCachedValue(
+        `checked-ingredients-${recipeStorageKey}`,
+        RECIPE_STATE_MAX_AGE_MS
+      ) ?? {}
+    );
   }, [recipeStorageKey]);
 
-  // Persist ticked-off ingredients as they change
+  // Restore scale multiplier for this recipe, same expiry as above
   useEffect(() => {
     if (!recipeStorageKey) return;
-    try {
-      localStorage.setItem(
-        `checked-ingredients-${recipeStorageKey}`,
-        JSON.stringify(checkedIngredients)
-      );
-    } catch {
-      // Ignore storage errors (e.g. private browsing with storage disabled)
-    }
-  }, [recipeStorageKey, checkedIngredients]);
+    setMultiplier(
+      readCachedValue(`scale-${recipeStorageKey}`, RECIPE_STATE_MAX_AGE_MS) ?? 1
+    );
+  }, [recipeStorageKey]);
 
+  // Persisting on change (not via an effect keyed on multiplier) avoids
+  // clobbering the value restored above with a stale write on mount.
+  const updateMultiplier = (value) => {
+    setMultiplier(value);
+    if (!recipeStorageKey) return;
+    writeCachedValue(`scale-${recipeStorageKey}`, value);
+  };
+
+  // Same reasoning as updateMultiplier: persist on change, not via an effect.
   const handleCheckboxChange = (ingredientId) => {
-    setCheckedIngredients((prev) => ({
-      ...prev,
-      [ingredientId]: !prev[ingredientId],
-    }));
+    setCheckedIngredients((prev) => {
+      const next = {
+        ...prev,
+        [ingredientId]: !prev[ingredientId],
+      };
+      if (recipeStorageKey) {
+        writeCachedValue(`checked-ingredients-${recipeStorageKey}`, next);
+      }
+      return next;
+    });
   };
 
   const navigate = useNavigate();
@@ -222,14 +236,14 @@ const Recipe = () => {
         1,
         Math.round(servingsInfo.base * multiplier) + delta
       );
-      setMultiplier(next / servingsInfo.base);
+      updateMultiplier(next / servingsInfo.base);
     } else {
       handleMultiplierChange(delta > 0 ? 1 : -1);
     }
   };
 
   const handleMultiplierChange = (direction) => {
-    setMultiplier((prev) => getNextMultiplierStep(prev, direction));
+    updateMultiplier(getNextMultiplierStep(multiplier, direction));
   };
 
   // Apply scale to an ingredient before rendering
@@ -496,7 +510,7 @@ const Recipe = () => {
                       variant="ghost"
                       size="icon"
                       className="text-muted-foreground hover:text-accent-red"
-                      onClick={() => setMultiplier(1)}
+                      onClick={() => updateMultiplier(1)}
                       aria-label={t("reset_servings")}
                     >
                       <RotateCcw strokeWidth={2} />
@@ -504,7 +518,7 @@ const Recipe = () => {
                   )}
                 </>
               ) : (
-                recipe.servings
+                <span className="ml-2">{recipe.servings}</span>
               )}
             </div>
           )}
@@ -542,7 +556,7 @@ const Recipe = () => {
                         variant="ghost"
                         size="icon"
                         className="text-muted-foreground hover:text-accent-red"
-                        onClick={() => setMultiplier(1)}
+                        onClick={() => updateMultiplier(1)}
                         aria-label={t("reset_scale")}
                       >
                         <RotateCcw strokeWidth={2} />
