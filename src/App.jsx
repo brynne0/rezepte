@@ -184,23 +184,18 @@ function App() {
     writeCachedValue("show_images_preference", showImages);
   }, [showImages]);
 
-  const {
-    recipes,
-    loading,
-    isFetchingRecipes,
-    totalRecipeCount,
-    paginationInfo,
-  } = useRecipesPagination(
-    currentPage,
-    36,
-    selectedCategory,
-    searchTerm,
-    sortBy,
-    isLoggedIn
-  );
+  const { recipes, isFetchingRecipes, totalRecipeCount, paginationInfo } =
+    useRecipesPagination(
+      currentPage,
+      36,
+      selectedCategory,
+      searchTerm,
+      sortBy,
+      isLoggedIn
+    );
 
   // Categories from database
-  const { categories, loading: categoriesLoading } = useCategories();
+  const { categories } = useCategories();
 
   // Clear search/filter/paging state on logout
   useEffect(() => {
@@ -210,10 +205,6 @@ function App() {
       setCurrentPage(1);
     }
   }, [isLoggedIn]);
-
-  // Show loading screen only for home page where recipes and categories are needed
-  const location = window.location;
-  const isHomePage = location.pathname === "/";
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -275,14 +266,6 @@ function App() {
       },
     ])
   );
-
-  if (isHomePage && (loading || categoriesLoading)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Squirrel className="h-20 w-20 text-foreground" />
-      </div>
-    );
-  }
 
   const appStateValue = {
     setSelectedCategory: handleCategoryChange,

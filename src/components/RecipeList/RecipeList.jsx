@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ChefHat, WifiOff } from "lucide-react";
 import RecipeCard from "../RecipeCard/RecipeCard";
+import LoadingAcorn from "../LoadingAcorn/LoadingAcorn";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +47,9 @@ const RecipeList = ({
 
   return (
     <>
+      {loading && filteredRecipes.length === 0 && (
+        <LoadingAcorn fullPage={false} className="mt-40" />
+      )}
       {/* Display all recipes in selected category */}
       <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4">
         {filteredRecipes.map((r) => (

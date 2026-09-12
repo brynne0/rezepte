@@ -99,19 +99,19 @@ describe("App", () => {
     setPath("/");
   });
 
-  test("shows a loading state on the home page while recipes or categories are loading", () => {
+  test("renders the header and home page immediately while recipes are still loading", () => {
     useRecipesPagination.mockReturnValue({
       recipes: [],
       loading: true,
-      isFetchingRecipes: false,
+      isFetchingRecipes: true,
       totalRecipeCount: 0,
       paginationInfo: basePaginationInfo,
     });
 
     render(<App />);
 
-    expect(screen.queryByTestId("header")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("home-page")).not.toBeInTheDocument();
+    expect(screen.getByTestId("header")).toBeInTheDocument();
+    expect(screen.getByTestId("home-page")).toBeInTheDocument();
   });
 
   test("renders the header and the routed page once loaded", async () => {
