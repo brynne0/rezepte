@@ -102,6 +102,7 @@
   "offline_download_stale_suffix": "(vor {{days}} Tagen — erneutes Herunterladen empfohlen)",
   "offline_download_no_recipes": "Noch keine Rezepte zum Herunterladen",
   "delete_downloads": "Downloads löschen",
+  "delete_downloads_confirmation": "Möchtest du deine heruntergeladenen Rezepte wirklich löschen? Du musst sie erneut herunterladen, um sie offline anzusehen.",
   "offline_download_deleted": "Heruntergeladene Rezepte von diesem Gerät entfernt",
   "delete_account": "Konto löschen",
   "delete_account_confirmation": "Möchtest du dein Konto wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden und alle deine Rezepte werden gelöscht.",

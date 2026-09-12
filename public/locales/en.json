@@ -102,6 +102,7 @@
   "offline_download_stale_suffix": "({{days}} days ago — consider redownloading)",
   "offline_download_no_recipes": "No recipes to download yet",
   "delete_downloads": "Delete downloads",
+  "delete_downloads_confirmation": "Are you sure you want to delete your downloaded recipes? You'll need to download them again to view them offline.",
   "offline_download_deleted": "Downloaded recipes removed from this device",
   "delete_account": "Delete account",
   "delete_account_confirmation": "Are you sure you want to delete your account? This cannot be undone and all your recipes will be deleted.",

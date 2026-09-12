@@ -25,6 +25,17 @@ import {
 } from "@/components/ui/tooltip";
 import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import { useOfflineDownload } from "../hooks/useOfflineDownload";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 const STALE_DOWNLOAD_THRESHOLD_DAYS = 30;
 
@@ -50,6 +61,8 @@ const ProfileTab = ({
   t,
 }) => {
   const isOnline = useOnlineStatus();
+  const [showDeleteDownloadsModal, setShowDeleteDownloadsModal] =
+    useState(false);
   const {
     isDownloading,
     progress,
@@ -283,7 +296,7 @@ const ProfileTab = ({
         )}
 
         {!isDownloading && (
-          <div className="mt-1 flex items-center justify-between gap-2">
+          <div className="mt-1 flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-muted-foreground">
               {offlineDownloadStatus
                 ? offlineDownloadStatus.failedCount > 0
@@ -309,18 +322,53 @@ const ProfileTab = ({
               )}
             </span>
             {offlineDownloadStatus && (
-              <Button
-                variant="ghost-destructive"
-                size="sm"
-                onClick={deleteDownloads}
-              >
-                <Trash2 />
-                {t("delete_downloads")}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost-destructive"
+                      size="icon-sm"
+                      className="self-end sm:self-auto"
+                      onClick={() => setShowDeleteDownloadsModal(true)}
+                      aria-label={t("delete_downloads")}
+                    >
+                      <Trash2 />
+                    </Button>
+                  }
+                />
+                <TooltipContent>{t("delete_downloads")}</TooltipContent>
+              </Tooltip>
             )}
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={showDeleteDownloadsModal}
+        onOpenChange={setShowDeleteDownloadsModal}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_downloads")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_downloads_confirmation")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                deleteDownloads();
+                setShowDeleteDownloadsModal(false);
+              }}
+            >
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Separator />
 
