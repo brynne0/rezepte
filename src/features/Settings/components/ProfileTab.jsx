@@ -377,13 +377,23 @@ const ProfileTab = ({
       <Separator />
 
       <div className="flex justify-center">
-        <Button
-          className="w-full sm:w-auto"
-          variant="destructive"
-          onClick={handleDeleteAccount}
-        >
-          {t("delete_account")}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                className="w-full sm:w-auto"
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={!isOnline}
+              >
+                {t("delete_account")}
+              </Button>
+            }
+          />
+          <TooltipContent>
+            {isOnline ? t("delete_account") : t("action_requires_internet")}
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
