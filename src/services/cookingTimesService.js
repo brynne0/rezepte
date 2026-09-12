@@ -1,14 +1,9 @@
 import supabase from "../lib/supabase";
+import { getAuthenticatedUser } from "./authHelpers";
 
 // Fetch all cooking times for the current user
 export const fetchUserCookingTimes = async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   const { data, error } = await supabase
     .from("user_cooking_times")
@@ -30,13 +25,7 @@ export const createCookingTime = async (
   orderIndex = 0,
   originalLanguage = "en"
 ) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   const cleanData = {
     user_id: user.id,
@@ -66,13 +55,7 @@ export const createCookingTime = async (
 
 // Update an existing cooking time
 export const updateCookingTime = async (id, cookingTimeData) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   const cleanData = {
     ingredient_name: cookingTimeData.ingredient_name.trim(),
@@ -102,13 +85,7 @@ export const updateCookingTime = async (id, cookingTimeData) => {
 
 // Delete a cooking time
 export const deleteCookingTime = async (id) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   const { error } = await supabase
     .from("user_cooking_times")
@@ -125,13 +102,7 @@ export const deleteCookingTime = async (id) => {
 
 // Search cooking times by ingredient name
 export const searchCookingTimes = async (query) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   const { data, error } = await supabase
     .from("user_cooking_times")
@@ -149,13 +120,7 @@ export const searchCookingTimes = async (query) => {
 
 // Update cooking times order (for drag and drop)
 export const updateCookingTimesOrder = async (cookingTimes) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  await getAuthenticatedUser();
 
   try {
     // Update each cooking time with new order and section
@@ -179,13 +144,7 @@ export const updateCookingTimesOrder = async (cookingTimes) => {
 
 // Create a new section by updating existing items
 export const createSection = async (sectionName, selectedItemIds = []) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   try {
     // Update selected items to be part of the new section
@@ -209,13 +168,7 @@ export const createSection = async (sectionName, selectedItemIds = []) => {
 
 // Remove section (move items back to ungrouped)
 export const removeSection = async (sectionName) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   try {
     const { error } = await supabase

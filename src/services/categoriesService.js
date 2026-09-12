@@ -1,5 +1,6 @@
 import supabase from "../lib/supabase";
 import { translateText } from "./recipeTranslationService";
+import { getAuthenticatedUser } from "./authHelpers";
 
 // Escape % and _ so a typed name isn't read as an ILIKE wildcard
 const escapeForIlike = (value) => value.replace(/[%_]/g, "\\$&");
@@ -61,13 +62,7 @@ export const withAllRecipesOption = (categories, currentLanguage = "en") => [
 
 // Create a new category with translation
 export const createCategory = async (name, translations = {}) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   const trimmedName = name.trim();
 
@@ -164,13 +159,7 @@ export const updateCategoryName = async (
   newName,
   newTranslations = {}
 ) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   // Check if category exists and user can edit it
   const { data: category } = await supabase
@@ -256,13 +245,7 @@ export const updateCategoryName = async (
 
 // Delete a category (only by its creator)
 export const deleteCategory = async (categoryId) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   // Check if category exists and user can delete it
   const { data: category } = await supabase
@@ -293,13 +276,7 @@ export const deleteCategory = async (categoryId) => {
 
 // Persist display order for a set of categories (id -> order)
 export const saveCategoryOrder = async (orderedCategoryIds) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
+  const user = await getAuthenticatedUser();
 
   await Promise.all(
     orderedCategoryIds.map((categoryId, index) =>

@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { getAuthenticatedUser } from "./authHelpers";
 
 // Get user's preferred language from database
 export const getUserPreferredLanguage = async () => {
@@ -24,10 +25,7 @@ export const getUserPreferredLanguage = async () => {
 // Update user's preferred language
 export const updateUserPreferredLanguage = async (language) => {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
+    const user = await getAuthenticatedUser();
 
     const { error } = await supabase
       .from("users")
@@ -63,10 +61,7 @@ export const getUserProfile = async () => {
 // Check if username already exists (excluding current user)
 export const checkUsernameExists = async (username) => {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
+    const user = await getAuthenticatedUser();
 
     const { data, error } = await supabase
       .from("users")
@@ -86,10 +81,7 @@ export const checkUsernameExists = async (username) => {
 // Check if email already exists (excluding current user)
 export const checkEmailExists = async (email) => {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
+    const user = await getAuthenticatedUser();
 
     const { data, error } = await supabase
       .from("users")
@@ -143,10 +135,7 @@ export const checkEmailExistsForSignup = async (email) => {
 // Update user profile data
 export const updateUserProfile = async (updates) => {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
+    const user = await getAuthenticatedUser();
 
     const { error } = await supabase
       .from("users")
@@ -164,10 +153,7 @@ export const updateUserProfile = async (updates) => {
 // Delete user account
 export const deleteUserAccount = async () => {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
+    const user = await getAuthenticatedUser();
 
     // Delete user data from users table (this should trigger auth user deletion via database trigger)
     const { error: profileError } = await supabase

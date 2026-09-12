@@ -1,14 +1,12 @@
 import supabase from "../lib/supabase";
+import { getAuthenticatedUser } from "./authHelpers";
 
 // Search users by username (partial match, ≥3 chars enforced server-side).
 // Returns (id, username) only — first_name is not exposed to strangers.
 export const searchUsers = async (query) => {
   if (!query || query.trim().length < 3) return [];
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+  const user = await getAuthenticatedUser();
 
   const { data: users, error } = await supabase.rpc(
     "search_users_by_username",
@@ -55,10 +53,7 @@ export const searchUsers = async (query) => {
 
 // Send a friend request
 export const sendFriendRequest = async (addresseeId) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+  const user = await getAuthenticatedUser();
 
   const { error } = await supabase.from("friendships").insert({
     requester_id: user.id,
@@ -71,10 +66,7 @@ export const sendFriendRequest = async (addresseeId) => {
 
 // Accept a friend request (current user is the addressee)
 export const acceptFriendRequest = async (requesterId) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+  const user = await getAuthenticatedUser();
 
   const { error } = await supabase
     .from("friendships")
@@ -88,10 +80,7 @@ export const acceptFriendRequest = async (requesterId) => {
 
 // Decline or cancel a friend request / remove a friendship (works for either party)
 export const removeFriendship = async (otherUserId) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+  const user = await getAuthenticatedUser();
 
   const { error } = await supabase
     .from("friendships")

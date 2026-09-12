@@ -123,6 +123,7 @@
   "loading_recipes": "Loading recipes...",
   "welcome_add_recipe": "Welcome! Add your first recipe to get started.",
   "no_internet_connection": "No internet connection",
+  "user_not_authenticated": "User not authenticated",
   "route_error_offline_message": "This page couldn't load without an internet connection. Reconnect and try again.",
   "action_requires_internet": "Not available offline",
   "something_went_wrong": "Something went wrong",
