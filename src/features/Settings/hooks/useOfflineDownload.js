@@ -7,9 +7,7 @@ import {
   clearOfflineDownloadStatus,
 } from "../../../services/offlineDownloadService";
 import { fetchRecipesWithCategories } from "../../../hooks/data/useRecipesPagination";
-import { clearOfflineCaches } from "../../../utils/offlineCacheKeys";
-
-const RUNTIME_CACHE_NAMES = ["supabase-rest-cache", "recipe-images-cache"];
+import { clearDownloadedRecipeCaches } from "../../../utils/offlineCacheKeys";
 
 export const useOfflineDownload = (t) => {
   const { user } = useAuth();
@@ -76,17 +74,14 @@ export const useOfflineDownload = (t) => {
   const deleteDownloads = useCallback(async () => {
     if (!userId) return;
 
-    clearOfflineCaches(userId);
+    // Note: this only clears the signed-image-URL bookkeeping and download
+    // status - it deliberately does not touch the service worker's shared
+    // recipe-images-cache/supabase-rest-cache, since those are populated by
+    // ordinary browsing too (any recipe viewed online, downloaded or not)
+    // and aren't specific to what this feature downloaded.
+    clearDownloadedRecipeCaches(userId);
     clearOfflineDownloadStatus();
     setStatus(null);
-
-    // Also free the service worker's runtime caches (image bytes + API
-    // responses), not just the localStorage bookkeeping above.
-    try {
-      await Promise.all(RUNTIME_CACHE_NAMES.map((name) => caches.delete(name)));
-    } catch {
-      // Cache API unavailable
-    }
 
     toast.add({ title: t("offline_download_deleted"), type: "success" });
   }, [userId, t]);

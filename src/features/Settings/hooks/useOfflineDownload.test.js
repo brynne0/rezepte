@@ -23,7 +23,7 @@ vi.mock("../../../hooks/data/useRecipesPagination", () => ({
 }));
 
 vi.mock("../../../utils/offlineCacheKeys", () => ({
-  clearOfflineCaches: vi.fn(),
+  clearDownloadedRecipeCaches: vi.fn(),
 }));
 
 import { useAuth } from "@/hooks/data/useAuth";
@@ -33,7 +33,7 @@ import {
   clearOfflineDownloadStatus,
 } from "../../../services/offlineDownloadService";
 import { fetchRecipesWithCategories } from "../../../hooks/data/useRecipesPagination";
-import { clearOfflineCaches } from "../../../utils/offlineCacheKeys";
+import { clearDownloadedRecipeCaches } from "../../../utils/offlineCacheKeys";
 
 const t = (key, opts) => (opts ? `${key}:${JSON.stringify(opts)}` : key);
 
@@ -206,7 +206,7 @@ describe("useOfflineDownload", () => {
       await result.current.deleteDownloads();
     });
 
-    expect(clearOfflineCaches).toHaveBeenCalledWith("user-1");
+    expect(clearDownloadedRecipeCaches).toHaveBeenCalledWith("user-1");
     expect(clearOfflineDownloadStatus).toHaveBeenCalled();
     expect(result.current.status).toBeNull();
     expect(mockToastAdd).toHaveBeenCalledWith({
@@ -223,7 +223,7 @@ describe("useOfflineDownload", () => {
       await result.current.deleteDownloads();
     });
 
-    expect(clearOfflineCaches).not.toHaveBeenCalled();
+    expect(clearDownloadedRecipeCaches).not.toHaveBeenCalled();
     expect(clearOfflineDownloadStatus).not.toHaveBeenCalled();
   });
 
