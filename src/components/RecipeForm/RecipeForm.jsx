@@ -79,6 +79,9 @@ const RecipeForm = ({
     handleDragEnd,
     handleSubmit,
     handleDelete,
+    showCategoryConfirm,
+    confirmSaveWithoutCategory,
+    cancelCategoryConfirm,
     toTitleCase,
     handleIngredientLink,
     removeIngredientLink,
@@ -574,6 +577,31 @@ const RecipeForm = ({
             <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
             <AlertDialogAction onClick={cancelNavigation}>
               {t("stay")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* No Category Confirmation Modal */}
+      <AlertDialog
+        open={showCategoryConfirm}
+        onOpenChange={(open) => {
+          if (!open) cancelCategoryConfirm();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("save_without_category_title")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("save_without_category_description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmSaveWithoutCategory}>
+              {t("save_anyway")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

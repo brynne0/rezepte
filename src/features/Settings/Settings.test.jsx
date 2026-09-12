@@ -336,22 +336,48 @@ describe("Settings", () => {
       });
     });
 
-    it("displays current language selection", () => {
+    it("displays current language as read-only text when not editing", () => {
+      expect(screen.getByText("EN")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "DE" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows the language toggle only while editing the profile", () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+
       expect(screen.getByRole("button", { name: "EN" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "DE" })).toBeInTheDocument();
     });
 
-    it("updates language preference immediately when clicked", async () => {
+    it("switches the displayed language immediately but only saves it when profile is saved", async () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
       fireEvent.click(screen.getByRole("button", { name: "DE" }));
+
+      expect(mockChangeLanguage).toHaveBeenCalledWith("de");
+      expect(mockUpdateUserPreferredLanguage).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
         expect(mockUpdateUserPreferredLanguage).toHaveBeenCalledWith("de");
-        expect(mockChangeLanguage).toHaveBeenCalledWith("de");
         expect(mockToastAdd).toHaveBeenCalledWith({
-          title: "successfully_updated_language",
+          title: "successfully_updated_profile",
           type: "success",
         });
       });
+    });
+
+    it("reverts the displayed language and does not save when editing is cancelled", () => {
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+      fireEvent.click(screen.getByRole("button", { name: "DE" }));
+
+      mockChangeLanguage.mockClear();
+
+      fireEvent.click(screen.getByRole("button", { name: "cancel" }));
+
+      expect(mockChangeLanguage).toHaveBeenCalledWith("en");
+      expect(mockUpdateUserPreferredLanguage).not.toHaveBeenCalled();
     });
   });
 
@@ -567,7 +593,9 @@ describe("Settings", () => {
         expect(screen.getByText("preferred_language")).toBeInTheDocument();
       });
 
+      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
       fireEvent.click(screen.getByRole("button", { name: "DE" }));
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
         expect(mockToastAdd).toHaveBeenCalledWith(

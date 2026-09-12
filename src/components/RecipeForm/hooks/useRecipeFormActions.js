@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { buildNutritionColumns } from "../../../utils/nutritionUtils";
 import { useTranslation } from "react-i18next";
@@ -148,6 +148,220 @@ export const useRecipeFormActions = ({
     };
   }, [formData]);
 
+  // Whether the user has already confirmed saving without a category this session
+  const categoryConfirmedRef = useRef(false);
+  const [showCategoryConfirm, setShowCategoryConfirm] = useState(false);
+
+  // Perform the actual save (called directly, or after confirming no-category save)
+  const performSubmit = useCallback(async () => {
+    const recipeData = transformFormDataForSubmission();
+    const hasLocalImages = formData.images?.some((img) => img.file);
+
+    try {
+      let result;
+
+      if (initialRecipe) {
+        if (isEditingTranslation) {
+          // Translation editing mode
+          const currentLanguage = i18n.language;
+
+          // Prepare translation data
+          const translationData = {
+            title: recipeData.title,
+            source: recipeData.source,
+            notes: recipeData.notes,
+            instructions: recipeData.instructions,
+          };
+
+          // Collect ingredient name overrides and notes updates
+          const ingredientOverrides = [];
+          const ingredientNotesUpdates = [];
+
+          // Helper functions
+          const getOriginalDisplayName = (originalIngredient) => {
+            const overrides = originalIngredient.name_overrides || [];
+            const override = overrides.find(
+              (o) => o.language === currentLanguage
+            );
+            return (
+              override?.name ||
+              originalIngredient.singular_name ||
+              originalIngredient.name ||
+              ""
+            );
+          };
+
+          const getOriginalDisplayNotes = (originalIngredient) => {
+            const notes = originalIngredient.notes_by_language || {};
+            return notes[currentLanguage] || originalIngredient.notes || "";
+          };
+
+          // Process ungrouped ingredients
+          formData.ungroupedIngredients.forEach((ingredient) => {
+            if (ingredient.recipe_ingredient_id) {
+              const originalIngredient =
+                initialRecipe.ungroupedIngredients?.find(
+                  (orig) =>
+                    orig.recipe_ingredient_id ===
+                    ingredient.recipe_ingredient_id
+                );
+
+              if (originalIngredient) {
+                // Handle name overrides
+                if (ingredient.name) {
+                  const originalDisplayName =
+                    getOriginalDisplayName(originalIngredient);
+                  if (originalDisplayName !== ingredient.name) {
+                    ingredientOverrides.push({
+                      recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                      name: ingredient.name,
+                      language: currentLanguage,
+                    });
+                  }
+                }
+
+                // Handle notes updates
+                const originalDisplayNotes =
+                  getOriginalDisplayNotes(originalIngredient);
+                const currentNotes = ingredient.notes || "";
+                if (originalDisplayNotes !== currentNotes) {
+                  ingredientNotesUpdates.push({
+                    recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                    notes: currentNotes,
+                    language: currentLanguage,
+                  });
+                }
+              }
+            }
+          });
+
+          // Process ingredient sections
+          formData.ingredientSections.forEach((section) => {
+            section.ingredients.forEach((ingredient) => {
+              if (ingredient.recipe_ingredient_id) {
+                const originalSection = initialRecipe.ingredientSections?.find(
+                  (origSection) => origSection.id === section.id
+                );
+                const originalIngredient = originalSection?.ingredients?.find(
+                  (orig) =>
+                    orig.recipe_ingredient_id ===
+                    ingredient.recipe_ingredient_id
+                );
+
+                if (originalIngredient) {
+                  // Handle name overrides
+                  if (ingredient.name) {
+                    const originalDisplayName =
+                      getOriginalDisplayName(originalIngredient);
+                    if (originalDisplayName !== ingredient.name) {
+                      ingredientOverrides.push({
+                        recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                        name: ingredient.name,
+                        language: currentLanguage,
+                      });
+                    }
+                  }
+
+                  // Handle notes updates
+                  const originalDisplayNotes =
+                    getOriginalDisplayNotes(originalIngredient);
+                  const currentNotes = ingredient.notes || "";
+                  if (originalDisplayNotes !== currentNotes) {
+                    ingredientNotesUpdates.push({
+                      recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                      notes: currentNotes,
+                      language: currentLanguage,
+                    });
+                  }
+                }
+              }
+            });
+          });
+
+          await updateTranslation(
+            initialRecipe.id,
+            currentLanguage,
+            translationData,
+            ingredientOverrides,
+            ingredientNotesUpdates
+          );
+          result = initialRecipe; // Return original recipe data
+        } else {
+          // Normal recipe editing - update the original recipe
+          result = await updateRecipe(
+            initialRecipe.id,
+            recipeData,
+            hasLocalImages ? handleImageUploadProgress : null
+          );
+        }
+      } else {
+        // Create mode - set original_language based on current UI language
+        const currentLanguage = i18n.language?.split("-")[0] || "en";
+        recipeData.original_language = currentLanguage;
+
+        result = await createRecipe(
+          recipeData,
+          hasLocalImages ? handleImageUploadProgress : null
+        );
+      }
+
+      flushSync(() => setInitialFormData(formData));
+      queryClient.invalidateQueries({ queryKey: ["recipes"] });
+      queryClient.invalidateQueries({ queryKey: ["recipe"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.add({
+        title: t(
+          initialRecipe ? "recipe_updated_success" : "recipe_created_success"
+        ),
+        type: "success",
+      });
+      if (initialRecipe) {
+        navigate(-1);
+      } else {
+        navigate(`/${result.id}/${result.slug}`, { replace: true });
+      }
+    } catch (err) {
+      console.error(
+        `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
+        err
+      );
+      // Set user-friendly error message
+      const errorKey =
+        err.message === OFFLINE_ERROR
+          ? "action_requires_internet"
+          : initialRecipe
+            ? "recipe_update_error"
+            : "recipe_create_error";
+      setSubmissionError(t(errorKey));
+
+      // Scroll to top to show the error message
+      window.scrollTo(0, 0);
+    } finally {
+      // Clean up upload state
+      setIsUploadingImages(false);
+      setUploadProgress(null);
+      setUploadingImageIds(new Set());
+    }
+  }, [
+    formData,
+    initialRecipe,
+    isEditingTranslation,
+    transformFormDataForSubmission,
+    handleImageUploadProgress,
+    setSubmissionError,
+    setIsUploadingImages,
+    setUploadProgress,
+    setUploadingImageIds,
+    createRecipe,
+    updateRecipe,
+    updateTranslation,
+    navigate,
+    setInitialFormData,
+    queryClient,
+    t,
+    i18n,
+  ]);
+
   // Handle form submission
   const handleSubmit = useCallback(
     async (e) => {
@@ -188,219 +402,39 @@ export const useRecipeFormActions = ({
       // Clear validation errors if form is valid
       setValidationErrors({});
 
-      const recipeData = transformFormDataForSubmission();
-      const hasLocalImages = formData.images?.some((img) => img.file);
-
-      try {
-        let result;
-
-        if (initialRecipe) {
-          if (isEditingTranslation) {
-            // Translation editing mode
-            const currentLanguage = i18n.language;
-
-            // Prepare translation data
-            const translationData = {
-              title: recipeData.title,
-              source: recipeData.source,
-              notes: recipeData.notes,
-              instructions: recipeData.instructions,
-            };
-
-            // Collect ingredient name overrides and notes updates
-            const ingredientOverrides = [];
-            const ingredientNotesUpdates = [];
-
-            // Helper functions
-            const getOriginalDisplayName = (originalIngredient) => {
-              const overrides = originalIngredient.name_overrides || [];
-              const override = overrides.find(
-                (o) => o.language === currentLanguage
-              );
-              return (
-                override?.name ||
-                originalIngredient.singular_name ||
-                originalIngredient.name ||
-                ""
-              );
-            };
-
-            const getOriginalDisplayNotes = (originalIngredient) => {
-              const notes = originalIngredient.notes_by_language || {};
-              return notes[currentLanguage] || originalIngredient.notes || "";
-            };
-
-            // Process ungrouped ingredients
-            formData.ungroupedIngredients.forEach((ingredient) => {
-              if (ingredient.recipe_ingredient_id) {
-                const originalIngredient =
-                  initialRecipe.ungroupedIngredients?.find(
-                    (orig) =>
-                      orig.recipe_ingredient_id ===
-                      ingredient.recipe_ingredient_id
-                  );
-
-                if (originalIngredient) {
-                  // Handle name overrides
-                  if (ingredient.name) {
-                    const originalDisplayName =
-                      getOriginalDisplayName(originalIngredient);
-                    if (originalDisplayName !== ingredient.name) {
-                      ingredientOverrides.push({
-                        recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                        name: ingredient.name,
-                        language: currentLanguage,
-                      });
-                    }
-                  }
-
-                  // Handle notes updates
-                  const originalDisplayNotes =
-                    getOriginalDisplayNotes(originalIngredient);
-                  const currentNotes = ingredient.notes || "";
-                  if (originalDisplayNotes !== currentNotes) {
-                    ingredientNotesUpdates.push({
-                      recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                      notes: currentNotes,
-                      language: currentLanguage,
-                    });
-                  }
-                }
-              }
-            });
-
-            // Process ingredient sections
-            formData.ingredientSections.forEach((section) => {
-              section.ingredients.forEach((ingredient) => {
-                if (ingredient.recipe_ingredient_id) {
-                  const originalSection =
-                    initialRecipe.ingredientSections?.find(
-                      (origSection) => origSection.id === section.id
-                    );
-                  const originalIngredient = originalSection?.ingredients?.find(
-                    (orig) =>
-                      orig.recipe_ingredient_id ===
-                      ingredient.recipe_ingredient_id
-                  );
-
-                  if (originalIngredient) {
-                    // Handle name overrides
-                    if (ingredient.name) {
-                      const originalDisplayName =
-                        getOriginalDisplayName(originalIngredient);
-                      if (originalDisplayName !== ingredient.name) {
-                        ingredientOverrides.push({
-                          recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                          name: ingredient.name,
-                          language: currentLanguage,
-                        });
-                      }
-                    }
-
-                    // Handle notes updates
-                    const originalDisplayNotes =
-                      getOriginalDisplayNotes(originalIngredient);
-                    const currentNotes = ingredient.notes || "";
-                    if (originalDisplayNotes !== currentNotes) {
-                      ingredientNotesUpdates.push({
-                        recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                        notes: currentNotes,
-                        language: currentLanguage,
-                      });
-                    }
-                  }
-                }
-              });
-            });
-
-            await updateTranslation(
-              initialRecipe.id,
-              currentLanguage,
-              translationData,
-              ingredientOverrides,
-              ingredientNotesUpdates
-            );
-            result = initialRecipe; // Return original recipe data
-          } else {
-            // Normal recipe editing - update the original recipe
-            result = await updateRecipe(
-              initialRecipe.id,
-              recipeData,
-              hasLocalImages ? handleImageUploadProgress : null
-            );
-          }
-        } else {
-          // Create mode - set original_language based on current UI language
-          const currentLanguage = i18n.language?.split("-")[0] || "en";
-          recipeData.original_language = currentLanguage;
-
-          result = await createRecipe(
-            recipeData,
-            hasLocalImages ? handleImageUploadProgress : null
-          );
-        }
-
-        flushSync(() => setInitialFormData(formData));
-        queryClient.invalidateQueries({ queryKey: ["recipes"] });
-        queryClient.invalidateQueries({ queryKey: ["recipe"] });
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-        toast.add({
-          title: t(
-            initialRecipe ? "recipe_updated_success" : "recipe_created_success"
-          ),
-          type: "success",
-        });
-        if (initialRecipe) {
-          navigate(-1);
-        } else {
-          navigate(`/${result.id}/${result.slug}`, { replace: true });
-        }
-      } catch (err) {
-        console.error(
-          `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
-          err
-        );
-        // Set user-friendly error message
-        const errorKey =
-          err.message === OFFLINE_ERROR
-            ? "action_requires_internet"
-            : initialRecipe
-              ? "recipe_update_error"
-              : "recipe_create_error";
-        setSubmissionError(t(errorKey));
-
-        // Scroll to top to show the error message
-        window.scrollTo(0, 0);
-      } finally {
-        // Clean up upload state
-        setIsUploadingImages(false);
-        setUploadProgress(null);
-        setUploadingImageIds(new Set());
+      if (
+        !isEditingTranslation &&
+        (formData.categories?.length ?? 0) === 0 &&
+        !categoryConfirmedRef.current
+      ) {
+        setShowCategoryConfirm(true);
+        return;
       }
+
+      await performSubmit();
     },
     [
       loading,
       formData,
-      initialRecipe,
       isEditingTranslation,
       validateForm,
-      transformFormDataForSubmission,
-      handleImageUploadProgress,
       setSubmissionError,
       setValidationErrors,
-      setIsUploadingImages,
-      setUploadProgress,
-      setUploadingImageIds,
-      createRecipe,
-      updateRecipe,
-      updateTranslation,
-      navigate,
-      setInitialFormData,
-      queryClient,
-      t,
-      i18n,
+      performSubmit,
     ]
   );
+
+  // Confirm saving the recipe without a category
+  const confirmSaveWithoutCategory = useCallback(async () => {
+    categoryConfirmedRef.current = true;
+    setShowCategoryConfirm(false);
+    await performSubmit();
+  }, [performSubmit]);
+
+  // Dismiss the no-category confirmation, returning to the form
+  const cancelCategoryConfirm = useCallback(() => {
+    setShowCategoryConfirm(false);
+  }, []);
 
   // Handle cancel action
   const handleCancel = useCallback(() => {
@@ -433,5 +467,8 @@ export const useRecipeFormActions = ({
     loading,
     error,
     isOnline,
+    showCategoryConfirm,
+    confirmSaveWithoutCategory,
+    cancelCategoryConfirm,
   };
 };

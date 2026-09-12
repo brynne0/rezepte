@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -51,6 +51,7 @@ const Settings = ({ resetCategoryFilter }) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [tempFirstName, setTempFirstName] = useState("");
   const [tempUsername, setTempUsername] = useState("");
+  const [tempPreferredLanguage, setTempPreferredLanguage] = useState("en");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deletedAccountInfo, setDeletedAccountInfo] = useState(null);
@@ -62,6 +63,59 @@ const Settings = ({ resetCategoryFilter }) => {
   const profileContainerRef = useRef(null);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+
+  const handleEditProfile = () => {
+    setTempFirstName(profileData?.first_name || "");
+    setTempUsername(profileData?.username || "");
+    setTempPreferredLanguage(profileData?.preferred_language || "en");
+    setUsernameError("");
+    setIsEditingProfile(true);
+    setTimeout(() => firstNameInputRef.current?.focus(), 0);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setUsernameError("");
+
+      if (tempUsername !== profileData.username) {
+        const usernameExists = await checkUsernameExists(tempUsername);
+        if (usernameExists) {
+          setUsernameError(t("username_already_exists"));
+          return;
+        }
+      }
+
+      const languageChanged =
+        tempPreferredLanguage !== (profileData?.preferred_language || "en");
+
+      await updateUserProfile({
+        first_name: tempFirstName,
+        username: tempUsername,
+      });
+      if (languageChanged) {
+        await updateUserPreferredLanguage(tempPreferredLanguage);
+      }
+      setProfileData({
+        ...profileData,
+        first_name: tempFirstName,
+        username: tempUsername,
+        preferred_language: tempPreferredLanguage,
+      });
+      setIsEditingProfile(false);
+      toast.add({ title: t("successfully_updated_profile"), type: "success" });
+    } catch (err) {
+      toast.add({ title: err.message, type: "error" });
+    }
+  };
+
+  const handleCancelProfile = useCallback(() => {
+    i18n.changeLanguage(profileData?.preferred_language || "en");
+    setTempFirstName("");
+    setTempUsername("");
+    setTempPreferredLanguage(profileData?.preferred_language || "en");
+    setUsernameError("");
+    setIsEditingProfile(false);
+  }, [i18n, profileData]);
 
   // Cancel editing when clicking outside the profile fields
   useEffect(() => {
@@ -84,50 +138,7 @@ const Settings = ({ resetCategoryFilter }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isEditingProfile]);
-
-  const handleEditProfile = () => {
-    setTempFirstName(profileData?.first_name || "");
-    setTempUsername(profileData?.username || "");
-    setUsernameError("");
-    setIsEditingProfile(true);
-    setTimeout(() => firstNameInputRef.current?.focus(), 0);
-  };
-
-  const handleSaveProfile = async () => {
-    try {
-      setUsernameError("");
-
-      if (tempUsername !== profileData.username) {
-        const usernameExists = await checkUsernameExists(tempUsername);
-        if (usernameExists) {
-          setUsernameError(t("username_already_exists"));
-          return;
-        }
-      }
-
-      await updateUserProfile({
-        first_name: tempFirstName,
-        username: tempUsername,
-      });
-      setProfileData({
-        ...profileData,
-        first_name: tempFirstName,
-        username: tempUsername,
-      });
-      setIsEditingProfile(false);
-      toast.add({ title: t("successfully_updated_profile"), type: "success" });
-    } catch (err) {
-      toast.add({ title: err.message, type: "error" });
-    }
-  };
-
-  const handleCancelProfile = () => {
-    setTempFirstName("");
-    setTempUsername("");
-    setUsernameError("");
-    setIsEditingProfile(false);
-  };
+  }, [isEditingProfile, handleCancelProfile]);
 
   const handleChangePassword = () => {
     navigate("/change-password", { state: { fromSettings: true } });
@@ -137,19 +148,9 @@ const Settings = ({ resetCategoryFilter }) => {
     navigate("/change-email", { state: { fromSettings: true } });
   };
 
-  const handleLanguageChange = async (language) => {
-    try {
-      await updateUserPreferredLanguage(language);
-      setProfileData({ ...profileData, preferred_language: language });
-      await i18n.changeLanguage(language);
-      toast.add({ title: t("successfully_updated_language"), type: "success" });
-    } catch (err) {
-      toast.add({
-        title: `${t("failed_to_update_language")}: ${err.message}`,
-        type: "error",
-      });
-      console.error("Language save error:", err);
-    }
+  const handleLanguageChange = (language) => {
+    setTempPreferredLanguage(language);
+    i18n.changeLanguage(language);
   };
 
   const handleFriendsCanViewImagesChange = async (friendsCanViewImages) => {
@@ -326,6 +327,7 @@ const Settings = ({ resetCategoryFilter }) => {
                     isEditingProfile={isEditingProfile}
                     tempFirstName={tempFirstName}
                     tempUsername={tempUsername}
+                    tempPreferredLanguage={tempPreferredLanguage}
                     usernameError={usernameError}
                     firstNameInputRef={firstNameInputRef}
                     profileContainerRef={profileContainerRef}

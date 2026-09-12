@@ -91,5 +91,8 @@ export const useRecipeForm = (options) => {
     loading: actions.loading,
     error: actions.error,
     isOnline: actions.isOnline,
+    showCategoryConfirm: actions.showCategoryConfirm,
+    confirmSaveWithoutCategory: actions.confirmSaveWithoutCategory,
+    cancelCategoryConfirm: actions.cancelCategoryConfirm,
   };
 };

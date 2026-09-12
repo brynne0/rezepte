@@ -44,6 +44,7 @@ const ProfileTab = ({
   isEditingProfile,
   tempFirstName,
   tempUsername,
+  tempPreferredLanguage,
   usernameError,
   firstNameInputRef,
   profileContainerRef,
@@ -184,6 +185,28 @@ const ProfileTab = ({
         </Field>
       </FieldGroup>
 
+      <div className="flex flex-col items-center gap-2">
+        <span className="text-sm font-medium">{t("preferred_language")}</span>
+        {isEditingProfile ? (
+          <ToggleGroup
+            variant="outline"
+            value={[tempPreferredLanguage || "en"]}
+            onValueChange={(groupValue) => {
+              if (groupValue[0]) {
+                handleLanguageChange(groupValue[0]);
+              }
+            }}
+          >
+            <ToggleGroupItem value="en">EN</ToggleGroupItem>
+            <ToggleGroupItem value="de">DE</ToggleGroupItem>
+          </ToggleGroup>
+        ) : (
+          <span className="text-sm text-muted-foreground">
+            {(profileData?.preferred_language || "en").toUpperCase()}
+          </span>
+        )}
+      </div>
+
       {isEditingProfile && (
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button
@@ -198,24 +221,6 @@ const ProfileTab = ({
           </Button>
         </div>
       )}
-
-      {isEditingProfile && <Separator />}
-
-      <div className="flex flex-col items-center gap-2">
-        <span className="text-sm font-medium">{t("preferred_language")}</span>
-        <ToggleGroup
-          variant="outline"
-          value={[profileData?.preferred_language || "en"]}
-          onValueChange={(groupValue) => {
-            if (groupValue[0]) {
-              handleLanguageChange(groupValue[0]);
-            }
-          }}
-        >
-          <ToggleGroupItem value="en">EN</ToggleGroupItem>
-          <ToggleGroupItem value="de">DE</ToggleGroupItem>
-        </ToggleGroup>
-      </div>
 
       <Separator />
 
@@ -296,7 +301,7 @@ const ProfileTab = ({
         )}
 
         {!isDownloading && (
-          <div className="mt-1 flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-1 flex gap-2 rounded-lg border border-border bg-card p-3 items-center justify-between">
             <span className="text-sm text-muted-foreground">
               {offlineDownloadStatus
                 ? offlineDownloadStatus.failedCount > 0
@@ -328,7 +333,6 @@ const ProfileTab = ({
                     <Button
                       variant="ghost-destructive"
                       size="icon-sm"
-                      className="self-end sm:self-auto"
                       onClick={() => setShowDeleteDownloadsModal(true)}
                       aria-label={t("delete_downloads")}
                     >
