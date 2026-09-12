@@ -4,15 +4,14 @@ import {
   readCachedValue,
   writeCachedValue,
 } from "../../utils/localStorageCache";
+import { userProfileCacheKey } from "../../utils/offlineCacheKeys";
 import { useAuth } from "./useAuth";
 
-const CACHE_KEY_PREFIX = "user-profile-cache-";
-
 const readCachedProfile = (userId) =>
-  readCachedValue(`${CACHE_KEY_PREFIX}${userId}`);
+  readCachedValue(userProfileCacheKey(userId));
 
 const writeCachedProfile = (userId, profile) =>
-  writeCachedValue(`${CACHE_KEY_PREFIX}${userId}`, profile);
+  writeCachedValue(userProfileCacheKey(userId), profile);
 
 export const useUserProfile = () => {
   const { user } = useAuth();

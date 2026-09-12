@@ -28,44 +28,7 @@ export const fetchCategories = async () => {
 };
 
 // Get categories formatted for use in components (with translated labels)
-export const getCategoriesForUI = async (currentLanguage = "en") => {
-  const categories = await fetchCategories();
-
-  // Always include "all_recipes" as the first option
-  const formattedCategories = [
-    {
-      value: "all_recipes",
-      label: currentLanguage === "de" ? "Alle Rezepte" : "All Recipes",
-      isSystem: true,
-    },
-  ];
-
-  // Add database categories
-  categories.forEach((category) => {
-    // `name` is already the properly-cased original text; override it
-    // only when a translation exists for the current language
-    let label = category.name;
-
-    if (
-      category.translated_category &&
-      category.translated_category[currentLanguage]
-    ) {
-      label = category.translated_category[currentLanguage];
-    }
-
-    formattedCategories.push({
-      value: category.name,
-      label: label,
-      id: category.id,
-      order: category.display_order,
-    });
-  });
-
-  return formattedCategories;
-};
-
-// Get categories formatted for the Settings management UI
-export const getCategoriesForManagement = async (currentLanguage = "en") => {
+export const getCategories = async (currentLanguage = "en") => {
   const categories = await fetchCategories();
 
   return categories.map((category) => {
@@ -86,6 +49,15 @@ export const getCategoriesForManagement = async (currentLanguage = "en") => {
     };
   });
 };
+
+export const withAllRecipesOption = (categories, currentLanguage = "en") => [
+  {
+    value: "all_recipes",
+    label: currentLanguage === "de" ? "Alle Rezepte" : "All Recipes",
+    isSystem: true,
+  },
+  ...categories,
+];
 
 // Create a new category with translation
 export const createCategory = async (name, translations = {}) => {

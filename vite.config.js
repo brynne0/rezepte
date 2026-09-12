@@ -32,7 +32,7 @@ export default defineConfig({
               networkTimeoutSeconds: 4,
               expiration: {
                 maxEntries: 1000,
-                maxAgeSeconds: 60 * 60 * 24 * 7,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
               cacheableResponse: { statuses: [0, 200] },
             },
@@ -47,7 +47,7 @@ export default defineConfig({
               matchOptions: { ignoreSearch: true },
               expiration: {
                 maxEntries: 2000,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
               cacheableResponse: { statuses: [0, 200] },
             },

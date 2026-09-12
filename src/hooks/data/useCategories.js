@@ -1,20 +1,22 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCategoriesForUI } from "../../services/categoriesService";
+import {
+  getCategories,
+  withAllRecipesOption,
+} from "../../services/categoriesService";
 import {
   readCachedValue,
   writeCachedValue,
 } from "../../utils/localStorageCache";
+import { categoriesCacheKey } from "../../utils/offlineCacheKeys";
 import { useAuth } from "./useAuth";
 
-const CACHE_KEY_PREFIX = "categories-cache-";
-
 const readCachedCategories = (language) =>
-  readCachedValue(`${CACHE_KEY_PREFIX}${language}`);
+  readCachedValue(categoriesCacheKey(language));
 
 const writeCachedCategories = (language, categories) =>
-  writeCachedValue(`${CACHE_KEY_PREFIX}${language}`, categories);
+  writeCachedValue(categoriesCacheKey(language), categories);
 
 export const useCategories = () => {
   const { i18n } = useTranslation();
@@ -34,7 +36,10 @@ export const useCategories = () => {
     enabled: !!userId,
     queryFn: async () => {
       try {
-        const categoriesData = await getCategoriesForUI(currentLanguage);
+        const categoriesData = withAllRecipesOption(
+          await getCategories(currentLanguage),
+          currentLanguage
+        );
         writeCachedCategories(currentLanguage, categoriesData);
         return categoriesData;
       } catch (err) {

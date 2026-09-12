@@ -4,8 +4,10 @@ import { toast } from "@/components/ui/toast";
 import {
   downloadAllRecipesForOffline,
   getOfflineDownloadStatus,
+  clearOfflineDownloadStatus,
 } from "../../../services/offlineDownloadService";
 import { fetchRecipesWithCategories } from "../../../hooks/data/useRecipesPagination";
+import { clearDownloadedRecipeCaches } from "../../../utils/offlineCacheKeys";
 
 export const useOfflineDownload = (t) => {
   const { user } = useAuth();
@@ -36,6 +38,7 @@ export const useOfflineDownload = (t) => {
 
       const result = await downloadAllRecipesForOffline({
         recipes,
+        userId,
         onProgress: setProgress,
         signal: controller.signal,
       });
@@ -68,5 +71,27 @@ export const useOfflineDownload = (t) => {
     abortControllerRef.current?.abort();
   }, []);
 
-  return { isDownloading, progress, status, startDownload, cancelDownload };
+  const deleteDownloads = useCallback(async () => {
+    if (!userId) return;
+
+    // Note: this only clears the signed-image-URL bookkeeping and download
+    // status - it deliberately does not touch the service worker's shared
+    // recipe-images-cache/supabase-rest-cache, since those are populated by
+    // ordinary browsing too (any recipe viewed online, downloaded or not)
+    // and aren't specific to what this feature downloaded.
+    clearDownloadedRecipeCaches(userId);
+    clearOfflineDownloadStatus();
+    setStatus(null);
+
+    toast.add({ title: t("offline_download_deleted"), type: "success" });
+  }, [userId, t]);
+
+  return {
+    isDownloading,
+    progress,
+    status,
+    startDownload,
+    cancelDownload,
+    deleteDownloads,
+  };
 };

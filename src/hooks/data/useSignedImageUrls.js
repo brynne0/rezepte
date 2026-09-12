@@ -4,11 +4,14 @@ import {
   readCachedValue,
   writeCachedValue,
 } from "../../utils/localStorageCache";
+import { signedImageUrlCacheKey } from "../../utils/offlineCacheKeys";
+import { useAuth } from "./useAuth";
 
-const STORAGE_PREFIX = "signedImageUrl:";
 const CACHE_DURATION = 6.5 * 24 * 60 * 60 * 1000; // 6.5 days (before 7-day expiry)
 
 export const useSignedImageUrls = (images) => {
+  const { user } = useAuth();
+  const userId = user?.id;
   const [signedImages, setSignedImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -40,12 +43,14 @@ export const useSignedImageUrls = (images) => {
         const cachedResults = [];
         const imagesToFetch = [];
 
-        // Check cache first
+        // Check cache first (only when we know whose cache to read)
         images.forEach((image) => {
-          const cached = readCachedValue(
-            STORAGE_PREFIX + image.path,
-            CACHE_DURATION
-          );
+          const cached = userId
+            ? readCachedValue(
+                signedImageUrlCacheKey(userId, image.path),
+                CACHE_DURATION
+              )
+            : null;
 
           if (cached) {
             cachedResults.push(cached);
@@ -60,9 +65,14 @@ export const useSignedImageUrls = (images) => {
           const freshUrls = await getSignedImageUrls(imagesToFetch);
 
           // Cache new URLs
-          freshUrls.forEach((image) => {
-            writeCachedValue(STORAGE_PREFIX + image.path, image);
-          });
+          if (userId) {
+            freshUrls.forEach((image) => {
+              writeCachedValue(
+                signedImageUrlCacheKey(userId, image.path),
+                image
+              );
+            });
+          }
 
           newSignedImages = [...newSignedImages, ...freshUrls];
         }
@@ -86,7 +96,7 @@ export const useSignedImageUrls = (images) => {
 
     fetchSignedUrls();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imagesKey]); // Use imagesKey instead of images to prevent infinite loops
+  }, [imagesKey, userId]); // Use imagesKey instead of images to prevent infinite loops
 
   return { signedImages, loading, error };
 };

@@ -1,4 +1,4 @@
-import { Pencil, Download, X } from "lucide-react";
+import { Pencil, Download, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -25,6 +25,19 @@ import {
 } from "@/components/ui/tooltip";
 import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import { useOfflineDownload } from "../hooks/useOfflineDownload";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+
+const STALE_DOWNLOAD_THRESHOLD_DAYS = 30;
 
 const ProfileTab = ({
   profileData,
@@ -48,16 +61,26 @@ const ProfileTab = ({
   t,
 }) => {
   const isOnline = useOnlineStatus();
+  const [showDeleteDownloadsModal, setShowDeleteDownloadsModal] =
+    useState(false);
   const {
     isDownloading,
     progress,
     status: offlineDownloadStatus,
     startDownload,
     cancelDownload,
+    deleteDownloads,
   } = useOfflineDownload(t);
+  const daysSinceDownload = offlineDownloadStatus
+    ? Math.floor(
+        (Date.now() - new Date(offlineDownloadStatus.completedAt).getTime()) /
+          (24 * 60 * 60 * 1000)
+      )
+    : 0;
+  const isDownloadStale = daysSinceDownload > STALE_DOWNLOAD_THRESHOLD_DAYS;
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      if (isOnline) handleSaveProfile();
+      handleSaveProfile();
     } else if (e.key === "Escape") {
       handleCancelProfile();
     }
@@ -170,22 +193,9 @@ const ProfileTab = ({
           >
             {t("cancel")}
           </Button>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  className="w-full sm:w-auto"
-                  onClick={handleSaveProfile}
-                  disabled={!isOnline}
-                >
-                  {t("save_changes")}
-                </Button>
-              }
-            />
-            <TooltipContent>
-              {isOnline ? t("save_changes") : t("action_requires_internet")}
-            </TooltipContent>
-          </Tooltip>
+          <Button className="w-full sm:w-auto" onClick={handleSaveProfile}>
+            {t("save_changes")}
+          </Button>
         </div>
       )}
 
@@ -193,39 +203,18 @@ const ProfileTab = ({
 
       <div className="flex flex-col items-center gap-2">
         <span className="text-sm font-medium">{t("preferred_language")}</span>
-        {isOnline ? (
-          <ToggleGroup
-            variant="outline"
-            value={[profileData?.preferred_language || "en"]}
-            onValueChange={(groupValue) => {
-              if (groupValue[0]) {
-                handleLanguageChange(groupValue[0]);
-              }
-            }}
-          >
-            <ToggleGroupItem value="en">EN</ToggleGroupItem>
-            <ToggleGroupItem value="de">DE</ToggleGroupItem>
-          </ToggleGroup>
-        ) : (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span tabIndex={0} className="inline-flex">
-                  <ToggleGroup
-                    variant="outline"
-                    value={[profileData?.preferred_language || "en"]}
-                    disabled
-                    className="pointer-events-none"
-                  >
-                    <ToggleGroupItem value="en">EN</ToggleGroupItem>
-                    <ToggleGroupItem value="de">DE</ToggleGroupItem>
-                  </ToggleGroup>
-                </span>
-              }
-            />
-            <TooltipContent>{t("action_requires_internet")}</TooltipContent>
-          </Tooltip>
-        )}
+        <ToggleGroup
+          variant="outline"
+          value={[profileData?.preferred_language || "en"]}
+          onValueChange={(groupValue) => {
+            if (groupValue[0]) {
+              handleLanguageChange(groupValue[0]);
+            }
+          }}
+        >
+          <ToggleGroupItem value="en">EN</ToggleGroupItem>
+          <ToggleGroupItem value="de">DE</ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       <Separator />
@@ -238,29 +227,11 @@ const ProfileTab = ({
               {t("friends_can_view_images_description")}
             </span>
           </span>
-          {isOnline ? (
-            <Switch
-              id="friends-can-view-images"
-              checked={!!profileData?.friends_can_view_images}
-              onCheckedChange={handleFriendsCanViewImagesChange}
-            />
-          ) : (
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <span tabIndex={0} className="inline-flex">
-                    <Switch
-                      id="friends-can-view-images"
-                      checked={!!profileData?.friends_can_view_images}
-                      disabled
-                      className="pointer-events-none"
-                    />
-                  </span>
-                }
-              />
-              <TooltipContent>{t("action_requires_internet")}</TooltipContent>
-            </Tooltip>
-          )}
+          <Switch
+            id="friends-can-view-images"
+            checked={!!profileData?.friends_can_view_images}
+            onCheckedChange={handleFriendsCanViewImagesChange}
+          />
         </Label>
       </div>
 
@@ -312,7 +283,7 @@ const ProfileTab = ({
                   : 0
               }
             />
-            <span className="text-sm text-muted-foreground">
+            <span className="mt-1 text-sm text-muted-foreground">
               {progress.total > 0
                 ? t("offline_download_progress", {
                     current: progress.current,
@@ -325,45 +296,90 @@ const ProfileTab = ({
         )}
 
         {!isDownloading && (
-          <span className="text-sm text-muted-foreground">
-            {offlineDownloadStatus
-              ? offlineDownloadStatus.failedCount > 0
-                ? t("offline_download_last_synced_with_failures", {
-                    date: new Date(
-                      offlineDownloadStatus.completedAt
-                    ).toLocaleString(),
-                    count: offlineDownloadStatus.failedCount,
-                  })
-                : t("offline_download_last_synced", {
-                    date: new Date(
-                      offlineDownloadStatus.completedAt
-                    ).toLocaleString(),
-                  })
-              : t("offline_download_never_synced")}
-          </span>
+          <div className="mt-1 flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-sm text-muted-foreground">
+              {offlineDownloadStatus
+                ? offlineDownloadStatus.failedCount > 0
+                  ? t("offline_download_last_synced_with_failures", {
+                      date: new Date(
+                        offlineDownloadStatus.completedAt
+                      ).toLocaleString(),
+                      count: offlineDownloadStatus.failedCount,
+                    })
+                  : t("offline_download_last_synced", {
+                      date: new Date(
+                        offlineDownloadStatus.completedAt
+                      ).toLocaleString(),
+                    })
+                : t("offline_download_never_synced")}
+              {isDownloadStale && (
+                <span className="text-destructive">
+                  {" "}
+                  {t("offline_download_stale_suffix", {
+                    days: daysSinceDownload,
+                  })}
+                </span>
+              )}
+            </span>
+            {offlineDownloadStatus && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost-destructive"
+                      size="icon-sm"
+                      className="self-end sm:self-auto"
+                      onClick={() => setShowDeleteDownloadsModal(true)}
+                      aria-label={t("delete_downloads")}
+                    >
+                      <Trash2 />
+                    </Button>
+                  }
+                />
+                <TooltipContent>{t("delete_downloads")}</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         )}
       </div>
+
+      <AlertDialog
+        open={showDeleteDownloadsModal}
+        onOpenChange={setShowDeleteDownloadsModal}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_downloads")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_downloads_confirmation")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                deleteDownloads();
+                setShowDeleteDownloadsModal(false);
+              }}
+            >
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Separator />
 
       <div className="flex justify-center">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                className="w-full sm:w-auto"
-                variant="destructive"
-                onClick={handleDeleteAccount}
-                disabled={!isOnline}
-              >
-                {t("delete_account")}
-              </Button>
-            }
-          />
-          <TooltipContent>
-            {isOnline ? t("delete_account") : t("action_requires_internet")}
-          </TooltipContent>
-        </Tooltip>
+        <Button
+          className="w-full sm:w-auto"
+          variant="destructive"
+          onClick={handleDeleteAccount}
+        >
+          {t("delete_account")}
+        </Button>
       </div>
     </div>
   );

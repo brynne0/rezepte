@@ -23,3 +23,11 @@ export const writeCachedValue = (key, value) => {
     // Ignore storage errors (e.g. private browsing with storage disabled)
   }
 };
+
+export const removeCachedValue = (key) => {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage errors (e.g. private browsing with storage disabled)
+  }
+};

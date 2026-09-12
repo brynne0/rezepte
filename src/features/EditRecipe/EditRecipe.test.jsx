@@ -1,11 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { useRecipe } from "../../hooks/data/useRecipe";
+import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 import { useTranslation } from "react-i18next";
 import EditRecipePage from "./EditRecipe";
 
 vi.mock("react-router-dom", () => ({
   useParams: vi.fn(() => ({ id: "123" })),
+}));
+
+vi.mock("../../hooks/ui/useOnlineStatus", () => ({
+  useOnlineStatus: vi.fn(() => true),
 }));
 
 const mockChangeLanguage = vi.fn();
@@ -79,13 +84,23 @@ describe("EditRecipePage", () => {
     expect(title).toBeInTheDocument();
   });
 
-  it("renders 'Recipe not found' when recipe is null", () => {
+  it("renders a not-found message when recipe is null", () => {
     vi.mocked(useRecipe).mockReturnValueOnce({ recipe: null, loading: false });
 
     render(<EditRecipePage categories={mockCategories} />);
 
-    const notFoundMessage = screen.getByText("Recipe not found");
+    const notFoundMessage = screen.getByText("recipe_not_found");
     expect(notFoundMessage).toBeInTheDocument();
+  });
+
+  it("renders an offline-aware message when recipe is null while offline", () => {
+    vi.mocked(useOnlineStatus).mockReturnValueOnce(false);
+    vi.mocked(useRecipe).mockReturnValueOnce({ recipe: null, loading: false });
+
+    render(<EditRecipePage categories={mockCategories} />);
+
+    expect(screen.getByText("recipe_unavailable_offline")).toBeInTheDocument();
+    expect(screen.queryByText("recipe_not_found")).not.toBeInTheDocument();
   });
 
   describe("Language Preservation", () => {

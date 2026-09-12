@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Minus,
   Plus,
+  WifiOff,
 } from "lucide-react";
 
 import { AppStateContext } from "../../contexts/AppStateContext";
@@ -41,6 +42,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -294,6 +301,18 @@ const Recipe = () => {
     return <LoadingAcorn />;
   }
   if (error) {
+    if (!isOnline) {
+      return (
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyMedia>
+              <WifiOff />
+            </EmptyMedia>
+            <EmptyTitle>{t("recipe_unavailable_offline")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      );
+    }
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
         {error}

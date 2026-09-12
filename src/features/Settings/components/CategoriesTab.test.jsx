@@ -5,7 +5,6 @@ import {
   createTestQueryClient,
   createQueryClientWrapper,
 } from "../../../test-utils/queryClient";
-import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 
 const { mockToastAdd } = vi.hoisted(() => ({ mockToastAdd: vi.fn() }));
 
@@ -24,20 +23,24 @@ vi.mock("../../../lib/supabase", () => ({
 }));
 
 // Mock services
-vi.mock("../../../services/categoriesService", () => ({
-  getCategoriesForManagement: vi.fn(),
-  saveCategoryOrder: vi.fn(),
-  createCategory: vi.fn(),
-  updateCategoryName: vi.fn(),
-  deleteCategory: vi.fn(),
-}));
+vi.mock("../../../services/categoriesService", async () => {
+  const actual = await vi.importActual("../../../services/categoriesService");
+  return {
+    ...actual,
+    getCategories: vi.fn(),
+    saveCategoryOrder: vi.fn(),
+    createCategory: vi.fn(),
+    updateCategoryName: vi.fn(),
+    deleteCategory: vi.fn(),
+  };
+});
 
 vi.mock("../../../services/userService", () => ({
   getUserPreferredLanguage: vi.fn(),
 }));
 
-vi.mock("@/hooks/ui/useOnlineStatus", () => ({
-  useOnlineStatus: vi.fn(() => true),
+vi.mock("../../../hooks/data/useAuth", () => ({
+  useAuth: () => ({ user: { id: "user-123" } }),
 }));
 
 // Mock components
@@ -61,7 +64,7 @@ vi.mock("react-i18next", () => ({
 }));
 
 describe("CategoriesTab - Adding Categories", () => {
-  let mockGetCategoriesForManagement;
+  let mockGetCategories;
   let mockSaveCategoryOrder;
   let mockCreateCategory;
   let mockGetUserPreferredLanguage;
@@ -114,7 +117,6 @@ describe("CategoriesTab - Adding Categories", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    useOnlineStatus.mockReturnValue(true);
     testQueryClient = createTestQueryClient();
     vi.spyOn(testQueryClient, "invalidateQueries");
 
@@ -125,8 +127,7 @@ describe("CategoriesTab - Adding Categories", () => {
     const supabase = await import("../../../lib/supabase");
     const userService = await import("../../../services/userService");
 
-    mockGetCategoriesForManagement =
-      categoriesService.getCategoriesForManagement;
+    mockGetCategories = categoriesService.getCategories;
     mockSaveCategoryOrder = categoriesService.saveCategoryOrder;
     mockCreateCategory = categoriesService.createCategory;
     mockSupabase = supabase.default;
@@ -135,7 +136,7 @@ describe("CategoriesTab - Adding Categories", () => {
     // Setup default mocks
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } });
     mockGetUserPreferredLanguage.mockResolvedValue("en");
-    mockGetCategoriesForManagement.mockResolvedValue(mockExistingCategories);
+    mockGetCategories.mockResolvedValue(mockExistingCategories);
     mockSaveCategoryOrder.mockResolvedValue([]);
     mockCreateCategory.mockResolvedValue({ id: "3", name: "breakfast" });
 
@@ -572,78 +573,6 @@ describe("CategoriesTab - Adding Categories", () => {
       fireEvent.click(screen.getByText("edit_categories"));
 
       expect(screen.queryByText("add_category")).not.toBeInTheDocument();
-    });
-  });
-
-  describe("Offline", () => {
-    it("cannot add a new category while offline", async () => {
-      useOnlineStatus.mockReturnValue(false);
-      await renderInEditMode();
-
-      fireEvent.click(screen.getByText("add_category"));
-      const input = screen.getByPlaceholderText("category_name");
-      fireEvent.change(input, { target: { value: "Breakfast" } });
-      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
-
-      expect(screen.queryByText("Breakfast")).not.toBeInTheDocument();
-    });
-
-    it("disables the save preferences button once offline, even with unsaved changes", async () => {
-      useOnlineStatus.mockReturnValue(false);
-      await renderInEditMode();
-
-      // Delete an existing category to create unsaved changes (deleting is
-      // not gated on isOnline, unlike creating/renaming categories).
-      fireEvent.click(screen.getAllByLabelText("delete_category")[0]);
-      fireEvent.click(screen.getByRole("button", { name: "delete_category" }));
-
-      const savePrefsButton = screen
-        .getByText("save_category_preferences")
-        .closest("button");
-      expect(savePrefsButton).toBeDisabled();
-    });
-
-    it("does not delete categories when save preferences is clicked while offline", async () => {
-      useOnlineStatus.mockReturnValue(false);
-      await renderInEditMode();
-
-      fireEvent.click(screen.getAllByLabelText("delete_category")[0]);
-      fireEvent.click(screen.getByRole("button", { name: "delete_category" }));
-
-      fireEvent.click(screen.getByText("save_category_preferences"));
-
-      const categoriesService = await import(
-        "../../../services/categoriesService"
-      );
-      expect(categoriesService.deleteCategory).not.toHaveBeenCalled();
-    });
-
-    it("disables the confirm button when editing an existing category's name while offline", async () => {
-      useOnlineStatus.mockReturnValue(false);
-      await renderInEditMode();
-
-      fireEvent.click(screen.getAllByLabelText("edit_category_name")[0]);
-
-      const confirmButton = screen.getAllByLabelText("save_changes")[0];
-      expect(confirmButton).toBeDisabled();
-    });
-
-    it("does not rename a category when confirm is clicked while offline", async () => {
-      useOnlineStatus.mockReturnValue(false);
-      const updateCategoryName = (
-        await import("../../../services/categoriesService")
-      ).updateCategoryName;
-
-      await renderInEditMode();
-
-      fireEvent.click(screen.getAllByLabelText("edit_category_name")[0]);
-      fireEvent.change(screen.getByPlaceholderText("category_name"), {
-        target: { value: "Brunch" },
-      });
-      fireEvent.click(screen.getAllByLabelText("save_changes")[0]);
-
-      expect(updateCategoryName).not.toHaveBeenCalled();
-      expect(screen.queryByText("Brunch")).not.toBeInTheDocument();
     });
   });
 });

@@ -23,6 +23,11 @@ vi.mock("../../../services/recipeTranslationService", () => ({
   getTranslatedRecipeTitle: vi.fn((recipe) => Promise.resolve(recipe)),
 }));
 
+const mockUseOnlineStatus = vi.fn(() => true);
+vi.mock("../../../hooks/ui/useOnlineStatus", () => ({
+  useOnlineStatus: () => mockUseOnlineStatus(),
+}));
+
 import {
   getUserByUsername,
   checkFriendship,
@@ -40,6 +45,7 @@ describe("useFriendRecipes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseTranslation.i18n.language = "en";
+    mockUseOnlineStatus.mockReturnValue(true);
   });
 
   test("loads a friend's profile and recipes once the friendship is confirmed", async () => {
@@ -99,6 +105,19 @@ describe("useFriendRecipes", () => {
 
     expect(result.current.error).toBe("User not found");
     expect(result.current.notFriends).toBe(false);
+  });
+
+  test("reports a distinct offline error instead of a raw message when offline", async () => {
+    mockUseOnlineStatus.mockReturnValue(false);
+    getUserByUsername.mockRejectedValue(new Error("Network error"));
+
+    const { result } = renderUseFriendRecipes("alice");
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe("offline");
   });
 
   test("switching language re-translates recipes without refetching the friend, friendship, or raw recipes", async () => {

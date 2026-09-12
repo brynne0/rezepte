@@ -3,6 +3,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import RecipeForm from "./RecipeForm";
 
 // Mock dependencies
+vi.mock("../../hooks/data/useAuth", () => ({
+  useAuth: () => ({ user: { id: "user-1" } }),
+}));
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key) => {

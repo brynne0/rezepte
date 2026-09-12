@@ -15,18 +15,25 @@ vi.mock("@/hooks/data/useAuth", () => ({
 vi.mock("../../../services/offlineDownloadService", () => ({
   downloadAllRecipesForOffline: vi.fn(),
   getOfflineDownloadStatus: vi.fn(() => null),
+  clearOfflineDownloadStatus: vi.fn(),
 }));
 
 vi.mock("../../../hooks/data/useRecipesPagination", () => ({
   fetchRecipesWithCategories: vi.fn(),
 }));
 
+vi.mock("../../../utils/offlineCacheKeys", () => ({
+  clearDownloadedRecipeCaches: vi.fn(),
+}));
+
 import { useAuth } from "@/hooks/data/useAuth";
 import {
   downloadAllRecipesForOffline,
   getOfflineDownloadStatus,
+  clearOfflineDownloadStatus,
 } from "../../../services/offlineDownloadService";
 import { fetchRecipesWithCategories } from "../../../hooks/data/useRecipesPagination";
+import { clearDownloadedRecipeCaches } from "../../../utils/offlineCacheKeys";
 
 const t = (key, opts) => (opts ? `${key}:${JSON.stringify(opts)}` : key);
 
@@ -189,6 +196,35 @@ describe("useOfflineDownload", () => {
     const { result } = renderHook(() => useOfflineDownload(t));
 
     expect(() => result.current.cancelDownload()).not.toThrow();
+  });
+
+  test("deleteDownloads clears caches and status, and shows a confirmation toast", async () => {
+    getOfflineDownloadStatus.mockReturnValue({ total: 2, failedCount: 0 });
+    const { result } = renderHook(() => useOfflineDownload(t));
+
+    await act(async () => {
+      await result.current.deleteDownloads();
+    });
+
+    expect(clearDownloadedRecipeCaches).toHaveBeenCalledWith("user-1");
+    expect(clearOfflineDownloadStatus).toHaveBeenCalled();
+    expect(result.current.status).toBeNull();
+    expect(mockToastAdd).toHaveBeenCalledWith({
+      title: "offline_download_deleted",
+      type: "success",
+    });
+  });
+
+  test("deleteDownloads does nothing when there is no logged in user", async () => {
+    useAuth.mockReturnValue({ user: null });
+    const { result } = renderHook(() => useOfflineDownload(t));
+
+    await act(async () => {
+      await result.current.deleteDownloads();
+    });
+
+    expect(clearDownloadedRecipeCaches).not.toHaveBeenCalled();
+    expect(clearOfflineDownloadStatus).not.toHaveBeenCalled();
   });
 
   test("exposes progress updates reported during the download", async () => {

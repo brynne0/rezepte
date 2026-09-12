@@ -9,7 +9,13 @@ import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
 import RecipeFilters from "../../components/RecipeFilters/RecipeFilters";
-import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { WifiOff } from "lucide-react";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 
 const PAGE_SIZE = 36;
 
@@ -102,6 +108,19 @@ const FriendRecipes = () => {
       <Empty className="mt-20">
         <EmptyHeader>
           <EmptyTitle>{t("friends_not_friends", { username })}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  if (error === "offline") {
+    return (
+      <Empty className="mt-20">
+        <EmptyHeader>
+          <EmptyMedia>
+            <WifiOff />
+          </EmptyMedia>
+          <EmptyTitle>{t("friend_recipes_unavailable_offline")}</EmptyTitle>
         </EmptyHeader>
       </Empty>
     );
