@@ -6,7 +6,7 @@ import { getTranslatedRecipeTitle } from "../../services/recipeTranslationServic
 import { useAuth } from "./useAuth";
 
 // Fetch recipes with category information for the given user
-const fetchRecipesWithCategories = async (userId) => {
+export const fetchRecipesWithCategories = async (userId) => {
   if (!userId) return [];
 
   const { data: recipes, error } = await supabase

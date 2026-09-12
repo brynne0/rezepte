@@ -36,6 +36,7 @@ import { recipeToText } from "../../utils/recipeToText";
 import { useWakeLock } from "./hooks/useWakeLock";
 import NutritionPanel from "./components/NutritionPanel";
 import { toast } from "@/components/ui/toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -47,6 +48,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 
 const Recipe = () => {
   const { id } = useParams();
@@ -60,6 +62,7 @@ const Recipe = () => {
   const [checkedIngredients, setCheckedIngredients] = useState({});
   const [privateOverride, setPrivateOverride] = useState(null);
   const recipeStorageKey = id;
+  const isOnline = useOnlineStatus();
 
   // Reset scale and privacy override when navigating to a different recipe
   useEffect(() => {
@@ -308,13 +311,7 @@ const Recipe = () => {
     <>
       <Card size="lg" className="mx-auto max-w-3xl text-left">
         <CardHeader>
-          <div
-            className={
-              isOwner
-                ? "flex flex-col gap-4 md:gap-2"
-                : "flex items-center gap-2"
-            }
-          >
+          <div className="flex flex-col gap-4 md:gap-2">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -327,7 +324,7 @@ const Recipe = () => {
               </Button>
 
               {!isOwner && (
-                <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+                <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl break-all">
                   {recipe.title}
                 </CardTitle>
               )}
@@ -345,12 +342,17 @@ const Recipe = () => {
                           }
                           data-testid="edit-recipe-btn"
                           aria-label={t("edit_recipe")}
+                          disabled={!isOnline}
                         >
                           <Pencil />
                         </Button>
                       }
                     />
-                    <TooltipContent>{t("edit_recipe")}</TooltipContent>
+                    <TooltipContent>
+                      {isOnline
+                        ? t("edit_recipe")
+                        : t("action_requires_internet")}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger
@@ -381,20 +383,31 @@ const Recipe = () => {
                               ? t("make_recipe_visible_to_friends")
                               : t("make_recipe_private")
                           }
+                          disabled={!isOnline}
                         >
                           {isPrivate ? <Lock /> : <LockOpen />}
                         </Button>
                       }
                     />
                     <TooltipContent>
-                      {isPrivate
-                        ? t("make_recipe_visible_to_friends")
-                        : t("make_recipe_private")}
+                      {!isOnline
+                        ? t("action_requires_internet")
+                        : isPrivate
+                          ? t("make_recipe_visible_to_friends")
+                          : t("make_recipe_private")}
                     </TooltipContent>
                   </Tooltip>
                 </ButtonGroup>
               )}
             </div>
+
+            {recipe.translationUnavailable && (
+              <Alert>
+                <AlertDescription>
+                  {t("recipe_translation_unavailable")}
+                </AlertDescription>
+              </Alert>
+            )}
 
             {isOwner && (
               <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">

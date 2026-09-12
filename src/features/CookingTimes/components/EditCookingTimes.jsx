@@ -36,6 +36,7 @@ const EditCookingTimes = ({
   handleCancelEdit,
   handleSaveEdit,
   isSaving,
+  isOnline,
   showExitEditModeModal,
   handleConfirmExitEditMode,
   handleCancelExitEditMode,
@@ -288,15 +289,26 @@ const EditCookingTimes = ({
           >
             {t("cancel")}
           </Button>
-          <Button
-            type="button"
-            className="w-full sm:w-auto"
-            onClick={handleSaveEdit}
-            disabled={isSaving}
-          >
-            {isSaving && <Spinner />}
-            {t("save_changes", "Save Changes")}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  className="w-full sm:w-auto"
+                  onClick={handleSaveEdit}
+                  disabled={isSaving || !isOnline}
+                >
+                  {isSaving && <Spinner />}
+                  {t("save_changes", "Save Changes")}
+                </Button>
+              }
+            />
+            <TooltipContent>
+              {isOnline
+                ? t("save_changes", "Save Changes")
+                : t("action_requires_internet")}
+            </TooltipContent>
+          </Tooltip>
         </div>
       </DragDropContext>
 

@@ -18,6 +18,42 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
+      includeAssets: ["locales/*.json"],
+      workbox: {
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/sw\.js$/, /^\/manifest\.webmanifest$/],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/[^/]+\.supabase\.co\/rest\/v1\/.*/,
+            method: "GET",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "supabase-rest-cache",
+              networkTimeoutSeconds: 4,
+              expiration: {
+                maxEntries: 1000,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern:
+              /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/sign\/recipe-images\/.*/,
+            method: "GET",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "recipe-images-cache",
+              matchOptions: { ignoreSearch: true },
+              expiration: {
+                maxEntries: 2000,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
       manifest: {
         name: "Rezepte",
         short_name: "Rezepte",

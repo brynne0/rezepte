@@ -1,5 +1,4 @@
 import { Nut } from "lucide-react";
-import "./LoadingAcorn.css";
 import { cn } from "cn";
 
 const LoadingAcorn = ({ size = 25, className = "", fullPage = true }) => {
@@ -14,19 +13,15 @@ const LoadingAcorn = ({ size = 25, className = "", fullPage = true }) => {
     >
       <Nut
         size={size}
-        className="acorn-icon acorn-1"
+        className="animate-bounce [animation-delay:-0.32s]"
         data-testid="lucide-nut"
       />
       <Nut
         size={size}
-        className="acorn-icon acorn-2"
+        className="animate-bounce [animation-delay:-0.16s]"
         data-testid="lucide-nut"
       />
-      <Nut
-        size={size}
-        className="acorn-icon acorn-3"
-        data-testid="lucide-nut"
-      />
+      <Nut size={size} className="animate-bounce" data-testid="lucide-nut" />
     </div>
   );
 };

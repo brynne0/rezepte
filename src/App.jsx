@@ -1,10 +1,11 @@
 // React & hooks
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef, useContext, lazy, Suspense } from "react";
 
 // Data hooks
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
 import { useAuth } from "./hooks/data/useAuth";
 import { useCategories } from "./hooks/data/useCategories";
+import { readCachedValue, writeCachedValue } from "./utils/localStorageCache";
 
 // Routing
 import {
@@ -30,21 +31,28 @@ import { AppStateContext } from "./contexts/AppStateContext";
 import { useMainScrollRef } from "./hooks/ui/useMainScrollRef";
 import Header from "./components/Header/Header";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import RouteError from "./components/RouteError/RouteError";
 import { Squirrel } from "lucide-react";
 
 // Features
 import Home from "./features/Home/Home";
-import AddRecipePage from "./features/AddRecipe/AddRecipe";
-import EditRecipePage from "./features/EditRecipe/EditRecipe";
-import CookingTimes from "./features/CookingTimes/CookingTimes";
-import Auth from "./features/Auth/Auth";
-import Recipe from "./features/Recipe/Recipe";
-import ForgotPassword from "./features/ForgotPassword/ForgotPassword";
-import ChangePassword from "./features/ChangePassword/ChangePassword";
-import ChangeEmail from "./features/ChangeEmail/ChangeEmail";
-import Settings from "./features/Settings/Settings";
-import FriendRecipes from "./features/FriendRecipes/FriendRecipes";
-import Showcase from "./features/Showcase/Showcase";
+const AddRecipePage = lazy(() => import("./features/AddRecipe/AddRecipe"));
+const EditRecipePage = lazy(() => import("./features/EditRecipe/EditRecipe"));
+const CookingTimes = lazy(() => import("./features/CookingTimes/CookingTimes"));
+const Auth = lazy(() => import("./features/Auth/Auth"));
+const Recipe = lazy(() => import("./features/Recipe/Recipe"));
+const ForgotPassword = lazy(
+  () => import("./features/ForgotPassword/ForgotPassword")
+);
+const ChangePassword = lazy(
+  () => import("./features/ChangePassword/ChangePassword")
+);
+const ChangeEmail = lazy(() => import("./features/ChangeEmail/ChangeEmail"));
+const Settings = lazy(() => import("./features/Settings/Settings"));
+const FriendRecipes = lazy(
+  () => import("./features/FriendRecipes/FriendRecipes")
+);
+const Showcase = lazy(() => import("./features/Showcase/Showcase"));
 
 function HomeRoute() {
   return (
@@ -137,7 +145,15 @@ function Layout() {
         viewportRef={mainScrollRef}
       >
         <div className="mx-auto w-full max-w-7xl px-3 pt-3 md:px-8 md:pt-4">
-          <Outlet />
+          <Suspense
+            fallback={
+              <div className="flex min-h-[50vh] items-center justify-center">
+                <Squirrel className="h-20 w-20 text-foreground" />
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </div>
       </ScrollArea>
     </>
@@ -151,10 +167,17 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("last_viewed_at_desc");
-  const [showImages, setShowImages] = useState(false);
+  const [showImages, setShowImages] = useState(
+    () => readCachedValue("show_images_preference") ?? false
+  );
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [friendBar, setFriendBar] = useState(null);
+
+  useEffect(() => {
+    writeCachedValue("show_images_preference", showImages);
+  }, [showImages]);
+
   const {
     recipes,
     loading,
@@ -209,6 +232,7 @@ function App() {
     createBrowserRouter([
       {
         element: <Layout />,
+        errorElement: <RouteError />,
         children: [
           { path: "/", element: <HomeRoute /> },
           {
@@ -237,15 +261,19 @@ function App() {
             ),
           },
           { path: "*", element: <Navigate to="/" replace /> },
-        ],
+        ].map((route) =>
+          route.path === "*"
+            ? route
+            : { ...route, errorElement: <RouteError /> }
+        ),
       },
     ])
   );
 
   if (isHomePage && (loading || categoriesLoading)) {
     return (
-      <div className="loading-squirrel">
-        <Squirrel />
+      <div className="flex min-h-screen items-center justify-center">
+        <Squirrel className="h-20 w-20 text-foreground" />
       </div>
     );
   }

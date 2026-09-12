@@ -47,10 +47,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import { cn } from "cn";
 
 const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   const queryClient = useQueryClient();
+  const isOnline = useOnlineStatus();
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [isEditingCategories, setIsEditingCategories] = useState(false);
@@ -149,6 +151,8 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   };
 
   const handleSavePreferences = async () => {
+    if (!isOnline) return;
+
     try {
       setPreferencesLoading(true);
 
@@ -391,6 +395,8 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   };
 
   const handleSaveEditCategory = async () => {
+    if (!isOnline) return;
+
     if (!editingCategoryName.trim()) {
       setCategoryError(t("category_name_required"));
       return;
@@ -655,6 +661,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                 autoFocus
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") {
+                                    e.preventDefault();
                                     handleSaveEditCategory();
                                   } else if (e.key === "Escape") {
                                     handleCancelEditCategory();
@@ -680,6 +687,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                           variant="ghost"
                                           size="icon-sm"
                                           onClick={handleSaveEditCategory}
+                                          disabled={!isOnline}
                                           aria-label={t("save_changes")}
                                         >
                                           <Check size={16} />
@@ -687,7 +695,9 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                       }
                                     />
                                     <TooltipContent>
-                                      {t("save_changes")}
+                                      {isOnline
+                                        ? t("save_changes")
+                                        : t("action_requires_internet")}
                                     </TooltipContent>
                                   </Tooltip>
                                   <Tooltip>
@@ -790,19 +800,31 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
           >
             {t("cancel")}
           </Button>
-          <Button
-            className="w-full sm:w-auto"
-            type="button"
-            onClick={handleSavePreferences}
-            disabled={
-              preferencesLoading ||
-              i18n.language !== preferredLanguage ||
-              !hasUnsavedChanges()
-            }
-          >
-            {preferencesLoading && <Spinner />}
-            {t("save_category_preferences")}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  className="w-full sm:w-auto"
+                  type="button"
+                  onClick={handleSavePreferences}
+                  disabled={
+                    preferencesLoading ||
+                    i18n.language !== preferredLanguage ||
+                    !hasUnsavedChanges() ||
+                    !isOnline
+                  }
+                >
+                  {preferencesLoading && <Spinner />}
+                  {t("save_category_preferences")}
+                </Button>
+              }
+            />
+            <TooltipContent>
+              {isOnline
+                ? t("save_category_preferences")
+                : t("action_requires_internet")}
+            </TooltipContent>
+          </Tooltip>
         </div>
       )}
 

@@ -1,3 +1,10 @@
+import { checkRecipeTitleExists } from "../services/recipes";
+import {
+  checkUsernameExistsForSignup,
+  checkEmailExistsForSignup,
+  checkEmailExists,
+} from "../services/userService";
+
 export const validateEmail = (email, t) => {
   if (!email.trim()) {
     return t("email_required");
@@ -167,7 +174,6 @@ export const validateRecipeTitle = (title, t) => {
 
 export const validateRecipeTitleUnique = async (title, t, excludeId = null) => {
   try {
-    const { checkRecipeTitleExists } = await import("../services/recipes");
     const exists = await checkRecipeTitleExists(title, excludeId);
     if (exists) {
       return t("title_already_exists");
@@ -203,9 +209,6 @@ const validateUniqueness = async (checkExists, { label, errorKey }, t) => {
 
 // Username uniqueness validation for signup
 export const validateUsernameUnique = async (username, t) => {
-  const { checkUsernameExistsForSignup } = await import(
-    "../services/userService"
-  );
   return validateUniqueness(
     () => checkUsernameExistsForSignup(username),
     { label: "username", errorKey: "username_already_exists" },
@@ -215,7 +218,6 @@ export const validateUsernameUnique = async (username, t) => {
 
 // Email uniqueness validation for signup
 export const validateEmailUnique = async (email, t) => {
-  const { checkEmailExistsForSignup } = await import("../services/userService");
   return validateUniqueness(
     () => checkEmailExistsForSignup(email),
     { label: "email", errorKey: "email_already_exists" },
@@ -225,7 +227,6 @@ export const validateEmailUnique = async (email, t) => {
 
 // Email uniqueness validation for changing email (excludes current user)
 export const validateEmailUniqueForChange = async (email, t) => {
-  const { checkEmailExists } = await import("../services/userService");
   return validateUniqueness(
     () => checkEmailExists(email),
     { label: "email", errorKey: "email_already_exists" },

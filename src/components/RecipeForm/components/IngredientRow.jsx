@@ -35,7 +35,8 @@ const IngredientRow = ({
   removeIngredientLink,
 }) => {
   const { t, i18n } = useTranslation();
-  const units = t("units", { returnObjects: true }) || [];
+  const rawUnits = t("units", { returnObjects: true });
+  const units = Array.isArray(rawUnits) ? rawUnits : [];
   const unitOptions = units.filter((unit) => unit.value !== "");
   const linkedRecipe = getIngredientLink(sectionId, ingredient.tempId);
 

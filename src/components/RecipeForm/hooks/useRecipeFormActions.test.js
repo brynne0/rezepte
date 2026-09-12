@@ -1,7 +1,10 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useRecipeFormActions } from "./useRecipeFormActions";
-import { createQueryClientWrapper } from "../../../test-utils/queryClient";
+import {
+  createQueryClientWrapper,
+  createTestQueryClient,
+} from "../../../test-utils/queryClient";
 import { useRecipeActions } from "../../../hooks/data/useRecipeActions";
 
 const mockNavigate = vi.fn();
@@ -21,6 +24,7 @@ vi.mock("react-router-dom", async () => {
 
 vi.mock("../../../hooks/data/useRecipeActions", () => ({
   useRecipeActions: vi.fn(),
+  OFFLINE_ERROR: "offline",
 }));
 
 const baseIngredient = (overrides = {}) => ({
@@ -55,6 +59,7 @@ const setup = ({
   isEditingTranslation = false,
   validateForm = vi.fn(() => ({})),
   recipeActionsOverrides = {},
+  queryClient = createTestQueryClient(),
 } = {}) => {
   useRecipeActions.mockReturnValue({
     createRecipe: vi.fn().mockResolvedValue({ id: "new-id", slug: "chili" }),
@@ -89,7 +94,7 @@ const setup = ({
         validateForm,
         setInitialFormData,
       }),
-    { wrapper: createQueryClientWrapper() }
+    { wrapper: createQueryClientWrapper(queryClient) }
   );
 
   return {
@@ -183,6 +188,52 @@ describe("useRecipeFormActions", () => {
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
+    test("shows an offline-specific error when creating fails because the device is offline", async () => {
+      const createRecipe = vi.fn().mockRejectedValue(new Error("offline"));
+      const { result, setSubmissionError } = setup({
+        recipeActionsOverrides: { createRecipe },
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      expect(setSubmissionError).toHaveBeenCalledWith(
+        "action_requires_internet"
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    test("shows an offline-specific error when updating fails because the device is offline", async () => {
+      const updateRecipe = vi.fn().mockRejectedValue(new Error("offline"));
+      const { result, setSubmissionError } = setup({
+        initialRecipe: { id: "recipe-1" },
+        recipeActionsOverrides: { updateRecipe },
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      expect(setSubmissionError).toHaveBeenCalledWith(
+        "action_requires_internet"
+      );
+    });
+
+    test("invalidates the categories query on a successful save", async () => {
+      const queryClient = createTestQueryClient();
+      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+      const { result } = setup({ queryClient });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: ["categories"],
+      });
+    });
+
     test("resets upload state in a finally block after submission", async () => {
       const {
         result,
@@ -251,6 +302,32 @@ describe("useRecipeFormActions", () => {
         type: "error",
       });
       expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    test("shows an offline-specific toast when deletion fails because the device is offline", async () => {
+      const deleteRecipe = vi.fn().mockRejectedValue(new Error("offline"));
+      const { result } = setup({
+        initialRecipe: { id: "recipe-1" },
+        recipeActionsOverrides: { deleteRecipe },
+      });
+
+      await act(async () => {
+        await result.current.handleDelete();
+      });
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        title: "action_requires_internet",
+        type: "error",
+      });
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("isOnline", () => {
+    test("exposes the current online status", () => {
+      const { result } = setup();
+
+      expect(result.current.isOnline).toBe(navigator.onLine);
     });
   });
 });

@@ -1,12 +1,16 @@
 import supabase from "../lib/supabase";
 import { toTitleCase } from "../utils/stringUtils";
 
-// DeepL translation function using Supabase Edge Function
+// DeepL translation function using Supabase Edge Function.
+// `onFailure`, if given, is called (not thrown) when translation couldn't
+// be performed (e.g. offline) - the function still resolves with the
+// original text either way, so callers that don't care can ignore it.
 export const translateText = async (
   text,
   targetLanguage,
   context = null,
-  sourceLang = "auto"
+  sourceLang = "auto",
+  onFailure = null
 ) => {
   if (!text || text.trim() === "") return text;
 
@@ -39,6 +43,7 @@ export const translateText = async (
     return result;
   } catch (error) {
     console.error("Translation failed:", error);
+    onFailure?.();
     return text; // Return original text if translation fails
   }
 };
@@ -47,11 +52,12 @@ export const translateText = async (
 export const translateTexts = async (
   texts,
   targetLanguage,
-  sourceLang = "auto"
+  sourceLang = "auto",
+  onFailure = null
 ) => {
   const nonEmptyTexts = texts.filter((text) => text && text.trim() !== "");
   const promises = nonEmptyTexts.map((text) =>
-    translateText(text, targetLanguage, null, sourceLang)
+    translateText(text, targetLanguage, null, sourceLang, onFailure)
   );
   const translatedResults = await Promise.all(promises);
 

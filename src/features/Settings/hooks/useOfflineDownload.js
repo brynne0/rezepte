@@ -1,0 +1,72 @@
+import { useState, useRef, useCallback } from "react";
+import { useAuth } from "@/hooks/data/useAuth";
+import { toast } from "@/components/ui/toast";
+import {
+  downloadAllRecipesForOffline,
+  getOfflineDownloadStatus,
+} from "../../../services/offlineDownloadService";
+import { fetchRecipesWithCategories } from "../../../hooks/data/useRecipesPagination";
+
+export const useOfflineDownload = (t) => {
+  const { user } = useAuth();
+  const userId = user?.id;
+
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [progress, setProgress] = useState(null);
+  const [status, setStatus] = useState(() => getOfflineDownloadStatus());
+  const abortControllerRef = useRef(null);
+
+  const startDownload = useCallback(async () => {
+    if (!userId) return;
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    setIsDownloading(true);
+    setProgress({ current: 0, total: 0, recipeTitle: null });
+
+    try {
+      // Fetch the list fresh rather than reading TanStack's cache, so the
+      // download always sees the current recipe collection.
+      const recipes = await fetchRecipesWithCategories(userId);
+
+      if (recipes.length === 0) {
+        toast.add({ title: t("offline_download_no_recipes"), type: "info" });
+        return;
+      }
+
+      const result = await downloadAllRecipesForOffline({
+        recipes,
+        onProgress: setProgress,
+        signal: controller.signal,
+      });
+
+      setStatus(getOfflineDownloadStatus());
+
+      if (result.aborted) {
+        toast.add({ title: t("offline_download_cancelled"), type: "info" });
+      } else if (result.failed.length > 0) {
+        toast.add({
+          title: t("offline_download_partial", {
+            count: result.failed.length,
+          }),
+          type: "error",
+        });
+      } else {
+        toast.add({ title: t("offline_download_success"), type: "success" });
+      }
+    } catch (error) {
+      console.error("Offline download failed:", error);
+      toast.add({ title: t("offline_download_error"), type: "error" });
+    } finally {
+      setIsDownloading(false);
+      setProgress(null);
+      abortControllerRef.current = null;
+    }
+  }, [userId, t]);
+
+  const cancelDownload = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
+
+  return { isDownloading, progress, status, startDownload, cancelDownload };
+};
