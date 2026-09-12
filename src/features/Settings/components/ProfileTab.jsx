@@ -1,4 +1,4 @@
-import { Pencil, Download, X } from "lucide-react";
+import { Pencil, Download, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -54,6 +54,7 @@ const ProfileTab = ({
     status: offlineDownloadStatus,
     startDownload,
     cancelDownload,
+    deleteDownloads,
   } = useOfflineDownload(t);
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -273,22 +274,34 @@ const ProfileTab = ({
         )}
 
         {!isDownloading && (
-          <span className="mt-1 text-sm text-muted-foreground">
-            {offlineDownloadStatus
-              ? offlineDownloadStatus.failedCount > 0
-                ? t("offline_download_last_synced_with_failures", {
-                    date: new Date(
-                      offlineDownloadStatus.completedAt
-                    ).toLocaleString(),
-                    count: offlineDownloadStatus.failedCount,
-                  })
-                : t("offline_download_last_synced", {
-                    date: new Date(
-                      offlineDownloadStatus.completedAt
-                    ).toLocaleString(),
-                  })
-              : t("offline_download_never_synced")}
-          </span>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <span className="text-sm text-muted-foreground">
+              {offlineDownloadStatus
+                ? offlineDownloadStatus.failedCount > 0
+                  ? t("offline_download_last_synced_with_failures", {
+                      date: new Date(
+                        offlineDownloadStatus.completedAt
+                      ).toLocaleString(),
+                      count: offlineDownloadStatus.failedCount,
+                    })
+                  : t("offline_download_last_synced", {
+                      date: new Date(
+                        offlineDownloadStatus.completedAt
+                      ).toLocaleString(),
+                    })
+                : t("offline_download_never_synced")}
+            </span>
+            {offlineDownloadStatus && (
+              <Button
+                variant="ghost-destructive"
+                size="sm"
+                onClick={deleteDownloads}
+              >
+                <Trash2 />
+                {t("delete_downloads")}
+              </Button>
+            )}
+          </div>
         )}
       </div>
 

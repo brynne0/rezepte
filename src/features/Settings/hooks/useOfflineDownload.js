@@ -4,8 +4,12 @@ import { toast } from "@/components/ui/toast";
 import {
   downloadAllRecipesForOffline,
   getOfflineDownloadStatus,
+  clearOfflineDownloadStatus,
 } from "../../../services/offlineDownloadService";
 import { fetchRecipesWithCategories } from "../../../hooks/data/useRecipesPagination";
+import { clearOfflineCaches } from "../../../utils/offlineCacheKeys";
+
+const RUNTIME_CACHE_NAMES = ["supabase-rest-cache", "recipe-images-cache"];
 
 export const useOfflineDownload = (t) => {
   const { user } = useAuth();
@@ -69,5 +73,30 @@ export const useOfflineDownload = (t) => {
     abortControllerRef.current?.abort();
   }, []);
 
-  return { isDownloading, progress, status, startDownload, cancelDownload };
+  const deleteDownloads = useCallback(async () => {
+    if (!userId) return;
+
+    clearOfflineCaches(userId);
+    clearOfflineDownloadStatus();
+    setStatus(null);
+
+    // Also free the service worker's runtime caches (image bytes + API
+    // responses), not just the localStorage bookkeeping above.
+    try {
+      await Promise.all(RUNTIME_CACHE_NAMES.map((name) => caches.delete(name)));
+    } catch {
+      // Cache API unavailable
+    }
+
+    toast.add({ title: t("offline_download_deleted"), type: "success" });
+  }, [userId, t]);
+
+  return {
+    isDownloading,
+    progress,
+    status,
+    startDownload,
+    cancelDownload,
+    deleteDownloads,
+  };
 };

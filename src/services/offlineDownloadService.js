@@ -72,6 +72,14 @@ const setOfflineDownloadStatus = (status) => {
   }
 };
 
+export const clearOfflineDownloadStatus = () => {
+  try {
+    localStorage.removeItem(OFFLINE_DOWNLOAD_STATUS_KEY);
+  } catch {
+    // Ignore storage failures - this is just status text, not the offline data itself.
+  }
+};
+
 // Warms the service worker's cache for one recipe's raw data + images.
 // Deliberately does NOT translate - translation happens client-side at
 // view time regardless of language, using this same cached raw response,
