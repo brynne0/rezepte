@@ -36,6 +36,7 @@ export const useOfflineDownload = (t) => {
 
       const result = await downloadAllRecipesForOffline({
         recipes,
+        userId,
         onProgress: setProgress,
         signal: controller.signal,
       });

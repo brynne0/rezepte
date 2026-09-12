@@ -6,15 +6,14 @@ import {
   readCachedValue,
   writeCachedValue,
 } from "../../utils/localStorageCache";
+import { categoriesCacheKey } from "../../utils/offlineCacheKeys";
 import { useAuth } from "./useAuth";
 
-const CACHE_KEY_PREFIX = "categories-cache-";
-
 const readCachedCategories = (language) =>
-  readCachedValue(`${CACHE_KEY_PREFIX}${language}`);
+  readCachedValue(categoriesCacheKey(language));
 
 const writeCachedCategories = (language, categories) =>
-  writeCachedValue(`${CACHE_KEY_PREFIX}${language}`, categories);
+  writeCachedValue(categoriesCacheKey(language), categories);
 
 export const useCategories = () => {
   const { i18n } = useTranslation();

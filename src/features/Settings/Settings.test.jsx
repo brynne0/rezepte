@@ -378,12 +378,14 @@ describe("Settings", () => {
       expect(screen.getByRole("switch")).toBeChecked();
     });
 
-    it("shows an error message if saving fails", async () => {
+    it("shows an error toast if saving fails", async () => {
       mockUpdateUserProfile.mockRejectedValue(new Error("network error"));
       fireEvent.click(screen.getByRole("switch"));
 
       await waitFor(() => {
-        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
       });
     });
   });
@@ -463,7 +465,7 @@ describe("Settings", () => {
       });
     });
 
-    it("shows error message when deletion fails", async () => {
+    it("shows an error toast when deletion fails", async () => {
       const errorMessage = "Failed to delete account";
       mockDeleteUserAccount.mockRejectedValue(new Error(errorMessage));
 
@@ -471,7 +473,9 @@ describe("Settings", () => {
       fireEvent.click(screen.getByRole("button", { name: "delete" }));
 
       await waitFor(() => {
-        expect(screen.getByText(/delete_account_error/)).toBeInTheDocument();
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
       });
 
       expect(
@@ -489,13 +493,15 @@ describe("Settings", () => {
       fireEvent.click(screen.getByRole("button", { name: "delete" }));
 
       await waitFor(() => {
-        expect(screen.getByText(/delete_account_error/)).toBeInTheDocument();
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
       });
 
-      // After error, the full form is no longer displayed - just the error message
+      // After a failed deletion, the user stays on the same Settings page
       expect(
-        screen.queryByRole("button", { name: "delete_account" })
-      ).not.toBeInTheDocument();
+        screen.getByRole("button", { name: "delete_account" })
+      ).toBeInTheDocument();
       expect(window.localStorage.clear).not.toHaveBeenCalled();
       expect(window.sessionStorage.clear).not.toHaveBeenCalled();
     });
@@ -544,7 +550,9 @@ describe("Settings", () => {
       fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
 
       await waitFor(() => {
-        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
       });
     });
 
@@ -562,7 +570,9 @@ describe("Settings", () => {
       fireEvent.click(screen.getByRole("button", { name: "DE" }));
 
       await waitFor(() => {
-        expect(screen.getByText(/Error:/)).toBeInTheDocument();
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
       });
     });
   });

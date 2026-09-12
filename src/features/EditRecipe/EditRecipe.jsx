@@ -1,14 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { WifiOff } from "lucide-react";
 import { useRecipe } from "../../hooks/data/useRecipe";
+import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 import RecipeForm from "../../components/RecipeForm/RecipeForm";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 
 const EditRecipePage = ({ categories }) => {
   const { id } = useParams();
   const { recipe, loading } = useRecipe(id);
   const { t, i18n } = useTranslation();
+  const isOnline = useOnlineStatus();
   const originalUserLanguage = useRef(null);
   const [isEditingTranslation, setIsEditingTranslation] = useState(false);
 
@@ -43,7 +52,19 @@ const EditRecipePage = ({ categories }) => {
   }
 
   if (!recipe) {
-    return <div>Recipe not found</div>;
+    if (!isOnline) {
+      return (
+        <Empty className="mt-20">
+          <EmptyHeader>
+            <EmptyMedia>
+              <WifiOff />
+            </EmptyMedia>
+            <EmptyTitle>{t("recipe_unavailable_offline")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      );
+    }
+    return <div>{t("recipe_not_found")}</div>;
   }
 
   return (

@@ -1,7 +1,58 @@
 import { fetchRecipe } from "./recipes";
 import { getSignedImageUrls } from "./imageService";
+import { getUserProfile } from "./userService";
+import { getTranslatedCookingTimes } from "./cookingTimesTranslationService";
+import { getCategoriesForManagement } from "./categoriesService";
+import { writeCachedValue } from "../utils/localStorageCache";
+import {
+  SUPPORTED_LANGUAGES,
+  userProfileCacheKey,
+  cookingTimesCacheKey,
+  categoriesManagementCacheKey,
+  signedImageUrlCacheKey,
+} from "../utils/offlineCacheKeys";
 
 export const OFFLINE_DOWNLOAD_STATUS_KEY = "offline-download-status";
+
+// Silently caches the user's profile so Settings shows correct info offline
+// even if the user never opened Settings while online.
+const downloadProfile = async (userId) => {
+  try {
+    const profile = await getUserProfile();
+    writeCachedValue(userProfileCacheKey(userId), profile);
+  } catch (error) {
+    console.error("Failed to cache profile for offline use:", error);
+  }
+};
+
+// Silently caches cooking times in every supported language so the Cooking
+// Times screen works offline even if it was never opened online, and stays
+// correct if the user switches app language while offline.
+const downloadCookingTimes = async (userId) => {
+  for (const lang of SUPPORTED_LANGUAGES) {
+    try {
+      const fallback = SUPPORTED_LANGUAGES.find((l) => l !== lang);
+      const data = await getTranslatedCookingTimes(lang, fallback);
+      writeCachedValue(cookingTimesCacheKey(userId, lang), data);
+    } catch (error) {
+      console.error(`Failed to cache cooking times for ${lang}:`, error);
+    }
+  }
+};
+
+// Silently caches the Settings category-management list in every supported
+// language, same reasoning as cooking times: works offline even if that
+// tab was never opened online.
+const downloadCategories = async () => {
+  for (const lang of SUPPORTED_LANGUAGES) {
+    try {
+      const data = await getCategoriesForManagement(lang);
+      writeCachedValue(categoriesManagementCacheKey(lang), data);
+    } catch (error) {
+      console.error(`Failed to cache categories for ${lang}:`, error);
+    }
+  }
+};
 
 export const getOfflineDownloadStatus = () => {
   try {
@@ -30,6 +81,17 @@ const downloadRecipe = async (recipe) => {
   const images = originalRecipe?.images || [];
   if (images.length > 0) {
     const signedImages = await getSignedImageUrls(images);
+
+    // Persist the signed URLs themselves (not just the image bytes), so a
+    // recipe downloaded but never viewed online can still reconstruct a
+    // valid request for its images while offline - generating a fresh
+    // signed URL requires network, which won't be available.
+    signedImages.forEach((image) => {
+      if (image.url) {
+        writeCachedValue(signedImageUrlCacheKey(image.path), image);
+      }
+    });
+
     await Promise.all(
       signedImages
         .filter((image) => image.url)
@@ -42,6 +104,7 @@ const downloadRecipe = async (recipe) => {
 // parallel, to avoid firing a burst of simultaneous requests.
 export const downloadAllRecipesForOffline = async ({
   recipes,
+  userId,
   onProgress,
   signal,
 }) => {
@@ -60,6 +123,12 @@ export const downloadAllRecipesForOffline = async ({
       console.error(`Failed to download recipe ${recipe.id}:`, error);
       failed.push(recipe.id);
     }
+  }
+
+  if (!signal?.aborted && userId) {
+    await downloadProfile(userId);
+    await downloadCookingTimes(userId);
+    await downloadCategories();
   }
 
   const aborted = !!signal?.aborted;

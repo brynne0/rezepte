@@ -10,11 +10,19 @@ import {
 } from "../../services/userService";
 import { useUserProfile } from "../../hooks/data/useUserProfile";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
+import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ProfileTab from "./components/ProfileTab";
 import CategoriesTab from "./components/CategoriesTab";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { WifiOff } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const Settings = ({ resetCategoryFilter }) => {
+  const isOnline = useOnlineStatus();
   const [activeTab, setActiveTab] = useState("profile");
   const {
     profile: profileData,
@@ -38,7 +47,6 @@ const Settings = ({ resetCategoryFilter }) => {
     setProfile: setProfileData,
   } = useUserProfile();
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [usernameError, setUsernameError] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [tempFirstName, setTempFirstName] = useState("");
@@ -110,7 +118,7 @@ const Settings = ({ resetCategoryFilter }) => {
       setIsEditingProfile(false);
       toast.add({ title: t("successfully_updated_profile"), type: "success" });
     } catch (err) {
-      setError(err.message);
+      toast.add({ title: err.message, type: "error" });
     }
   };
 
@@ -136,7 +144,10 @@ const Settings = ({ resetCategoryFilter }) => {
       await i18n.changeLanguage(language);
       toast.add({ title: t("successfully_updated_language"), type: "success" });
     } catch (err) {
-      setError(`Failed to update language: ${err.message}`);
+      toast.add({
+        title: `${t("failed_to_update_language")}: ${err.message}`,
+        type: "error",
+      });
       console.error("Language save error:", err);
     }
   };
@@ -157,7 +168,10 @@ const Settings = ({ resetCategoryFilter }) => {
       });
     } catch (err) {
       setProfileData({ ...profileData, friends_can_view_images: previous });
-      setError(`Failed to update friends image visibility: ${err.message}`);
+      toast.add({
+        title: `${t("failed_to_update_friends_can_view_images")}: ${err.message}`,
+        type: "error",
+      });
       console.error("Friends image visibility save error:", err);
     }
   };
@@ -232,7 +246,7 @@ const Settings = ({ resetCategoryFilter }) => {
       }
     } catch (err) {
       console.error("Failed to delete account:", err);
-      setError(t("delete_account_error"));
+      toast.add({ title: t("delete_account_error"), type: "error" });
       setShowDeleteModal(false);
       setActionLoading(false);
     }
@@ -241,11 +255,25 @@ const Settings = ({ resetCategoryFilter }) => {
   if (profileLoading || actionLoading) {
     return <LoadingAcorn />;
   }
-  if (error || (profileError && !profileData)) {
+  if (!isOnline && profileError && !profileData) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <Empty className="rounded-lg border border-border bg-card">
+          <EmptyHeader>
+            <EmptyMedia>
+              <WifiOff />
+            </EmptyMedia>
+            <EmptyTitle>{t("profile_unavailable_offline")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      </div>
+    );
+  }
+  if (profileError && !profileData) {
     return (
       <div className="max-w-2xl mx-auto">
         <Alert variant="destructive">
-          <AlertDescription>Error: {error || profileError}</AlertDescription>
+          <AlertDescription>Error: {profileError}</AlertDescription>
         </Alert>
       </div>
     );

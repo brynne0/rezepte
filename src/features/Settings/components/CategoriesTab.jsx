@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabase from "../../../lib/supabase";
+import {
+  readCachedValue,
+  writeCachedValue,
+} from "../../../utils/localStorageCache";
+import { categoriesManagementCacheKey } from "../../../utils/offlineCacheKeys";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   GripVertical,
@@ -47,14 +52,29 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import { cn } from "cn";
+
+const readCachedManagementCategories = (language) =>
+  readCachedValue(categoriesManagementCacheKey(language));
+
+const writeCachedManagementCategories = (language, categories) =>
+  writeCachedValue(categoriesManagementCacheKey(language), categories);
 
 const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   const queryClient = useQueryClient();
-  const isOnline = useOnlineStatus();
-  const [categories, setCategories] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const { i18n } = useTranslation();
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categoriesManagement", i18n.language],
+    queryFn: async () => {
+      const data = await getCategoriesForManagement(i18n.language);
+      writeCachedManagementCategories(i18n.language, data);
+      return data;
+    },
+    initialData: () => readCachedManagementCategories(i18n.language),
+    initialDataUpdatedAt: 0,
+    staleTime: 0,
+    refetchOnMount: true,
+  });
   const [isEditingCategories, setIsEditingCategories] = useState(false);
   const [categoryPreferences, setCategoryPreferences] = useState([]);
   const [originalCategoryPreferences, setOriginalCategoryPreferences] =
@@ -68,24 +88,6 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   const [deleteCategoryName, setDeleteCategoryName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [preferredLanguage, setPreferredLanguage] = useState(null);
-  const { i18n } = useTranslation();
-
-  // Load all categories for management (including hidden ones)
-  useEffect(() => {
-    const loadAllCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const allCategories = await getCategoriesForManagement(i18n.language);
-        setCategories(allCategories);
-      } catch (error) {
-        console.error("Error loading categories for management:", error);
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    loadAllCategories();
-  }, [i18n.language]);
 
   useEffect(() => {
     const loadPreferredLanguage = async () => {
@@ -151,8 +153,6 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   };
 
   const handleSavePreferences = async () => {
-    if (!isOnline) return;
-
     try {
       setPreferencesLoading(true);
 
@@ -395,8 +395,6 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   };
 
   const handleSaveEditCategory = async () => {
-    if (!isOnline) return;
-
     if (!editingCategoryName.trim()) {
       setCategoryError(t("category_name_required"));
       return;
@@ -687,7 +685,6 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                           variant="ghost"
                                           size="icon-sm"
                                           onClick={handleSaveEditCategory}
-                                          disabled={!isOnline}
                                           aria-label={t("save_changes")}
                                         >
                                           <Check size={16} />
@@ -695,9 +692,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                       }
                                     />
                                     <TooltipContent>
-                                      {isOnline
-                                        ? t("save_changes")
-                                        : t("action_requires_internet")}
+                                      {t("save_changes")}
                                     </TooltipContent>
                                   </Tooltip>
                                   <Tooltip>
@@ -800,31 +795,19 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
           >
             {t("cancel")}
           </Button>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  className="w-full sm:w-auto"
-                  type="button"
-                  onClick={handleSavePreferences}
-                  disabled={
-                    preferencesLoading ||
-                    i18n.language !== preferredLanguage ||
-                    !hasUnsavedChanges() ||
-                    !isOnline
-                  }
-                >
-                  {preferencesLoading && <Spinner />}
-                  {t("save_category_preferences")}
-                </Button>
-              }
-            />
-            <TooltipContent>
-              {isOnline
-                ? t("save_category_preferences")
-                : t("action_requires_internet")}
-            </TooltipContent>
-          </Tooltip>
+          <Button
+            className="w-full sm:w-auto"
+            type="button"
+            onClick={handleSavePreferences}
+            disabled={
+              preferencesLoading ||
+              i18n.language !== preferredLanguage ||
+              !hasUnsavedChanges()
+            }
+          >
+            {preferencesLoading && <Spinner />}
+            {t("save_category_preferences")}
+          </Button>
         </div>
       )}
 

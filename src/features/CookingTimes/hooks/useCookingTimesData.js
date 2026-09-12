@@ -2,6 +2,11 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getTranslatedCookingTimes } from "../../../services/cookingTimesTranslationService";
 import { getUserPreferredLanguage } from "../../../services/userService";
+import {
+  readCachedValue,
+  writeCachedValue,
+} from "../../../utils/localStorageCache";
+import { cookingTimesCacheKey } from "../../../utils/offlineCacheKeys";
 import { useAuth } from "@/hooks/data/useAuth";
 
 export const useCookingTimesData = ({ isEditMode, i18n }) => {
@@ -74,14 +79,24 @@ export const useCookingTimesData = ({ isEditMode, i18n }) => {
       setLoading(true);
       const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
       const preferredLanguage = await getUserPreferredLanguage();
+      const cacheKey = cookingTimesCacheKey(userId, currentLanguage);
 
-      // Fetch cooking times with translations (cached/persisted via TanStack
-      // Query so it's available offline, same as recipes/categories)
-      const cookingTimesData = await queryClient.fetchQuery({
-        queryKey: ["cookingTimes", userId, currentLanguage],
-        queryFn: () =>
-          getTranslatedCookingTimes(currentLanguage, preferredLanguage),
-      });
+      // Fetch cooking times with translations - write to localStorage
+      // on success, fall back to the last cached value if the fetch fails
+      // (e.g. offline), since TanStack Query's own cache doesn't survive
+      // a reload.
+      let cookingTimesData;
+      try {
+        cookingTimesData = await queryClient.query({
+          queryKey: ["cookingTimes", userId, currentLanguage],
+          queryFn: () =>
+            getTranslatedCookingTimes(currentLanguage, preferredLanguage),
+        });
+        writeCachedValue(cacheKey, cookingTimesData);
+      } catch (error) {
+        console.error("Error fetching cooking times:", error);
+        cookingTimesData = readCachedValue(cacheKey) ?? [];
+      }
 
       // Organize data into sections exactly like RecipeForm
       organizeCookingTimesIntoSections(cookingTimesData);

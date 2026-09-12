@@ -7,6 +7,7 @@ import {
   fetchFriendRecipes,
 } from "../../../services/friendsService";
 import { getTranslatedRecipeTitle } from "../../../services/recipeTranslationService";
+import { useOnlineStatus } from "../../../hooks/ui/useOnlineStatus";
 
 const buildFriendCategories = (translatedRecipes, currentLanguage) => {
   const categoryTranslations = {};
@@ -46,6 +47,7 @@ const buildFriendCategories = (translatedRecipes, currentLanguage) => {
 export const useFriendRecipes = (username) => {
   const { i18n, t } = useTranslation();
   const currentLanguage = i18n.language.split("-")[0];
+  const isOnline = useOnlineStatus();
 
   const {
     data: friendUser,
@@ -109,14 +111,22 @@ export const useFriendRecipes = (username) => {
     (isFriend === true &&
       (profileLoading || recipesLoading || translationLoading));
 
-  const error =
-    userError?.message ||
-    profileError?.message ||
-    recipesError?.message ||
-    translationError?.message ||
-    (userError || profileError || recipesError || translationError
-      ? t("recipe_not_found")
-      : "");
+  const hasError = !!(
+    userError ||
+    profileError ||
+    recipesError ||
+    translationError
+  );
+
+  const error = !hasError
+    ? ""
+    : !isOnline
+      ? "offline"
+      : userError?.message ||
+        profileError?.message ||
+        recipesError?.message ||
+        translationError?.message ||
+        t("recipe_not_found");
 
   return {
     friend: profile || friendUser || null,

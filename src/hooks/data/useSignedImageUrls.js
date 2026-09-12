@@ -4,8 +4,8 @@ import {
   readCachedValue,
   writeCachedValue,
 } from "../../utils/localStorageCache";
+import { signedImageUrlCacheKey } from "../../utils/offlineCacheKeys";
 
-const STORAGE_PREFIX = "signedImageUrl:";
 const CACHE_DURATION = 6.5 * 24 * 60 * 60 * 1000; // 6.5 days (before 7-day expiry)
 
 export const useSignedImageUrls = (images) => {
@@ -43,7 +43,7 @@ export const useSignedImageUrls = (images) => {
         // Check cache first
         images.forEach((image) => {
           const cached = readCachedValue(
-            STORAGE_PREFIX + image.path,
+            signedImageUrlCacheKey(image.path),
             CACHE_DURATION
           );
 
@@ -61,7 +61,7 @@ export const useSignedImageUrls = (images) => {
 
           // Cache new URLs
           freshUrls.forEach((image) => {
-            writeCachedValue(STORAGE_PREFIX + image.path, image);
+            writeCachedValue(signedImageUrlCacheKey(image.path), image);
           });
 
           newSignedImages = [...newSignedImages, ...freshUrls];
