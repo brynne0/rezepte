@@ -139,6 +139,8 @@
     { "value": "l", "label": "l" },
     { "value": "g", "label": "g" },
     { "value": "kg", "label": "kg" },
+    { "value": "oz", "label": "oz" },
+    { "value": "lb", "label": "lb" },
     { "value": "tsp", "label": "TL" },
     { "value": "tbsp", "label": "EL" },
     { "value": "cup/s", "label": "Tasse/n" },
@@ -220,7 +222,7 @@
   "remove_instruction": "Anweisung entfernen",
  
   "autofill_recipe": "Rezept automatisch ausfüllen",
-  "autofill_warning": "Dadurch werden alle aktuellen Angaben im Formular ersetzt.",
+  "autofill_warning": "Die meisten Felder im Formular werden ersetzt – Quelle, Notizen und Bilder bleiben erhalten.",
   "paste_recipe_placeholder": "Hier ein Rezept oder einen Link einfügen (Text bevorzugt)",
   "paste_text_required": "Bitte füge zuerst den Rezepttext ein.",
   "paste_text_too_long": "Rezepttext ist zu lang. Bitte auf {{max}} Zeichen oder weniger kürzen.",

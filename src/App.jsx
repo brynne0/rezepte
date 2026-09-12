@@ -166,13 +166,19 @@ function App() {
   const mainScrollRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState("all_recipes");
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("last_viewed_at_desc");
+  const [sortBy, setSortBy] = useState(
+    () => readCachedValue("recipe_sort_preference") ?? "last_viewed_at_desc"
+  );
   const [showImages, setShowImages] = useState(
     () => readCachedValue("show_images_preference") ?? false
   );
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [friendBar, setFriendBar] = useState(null);
+
+  useEffect(() => {
+    writeCachedValue("recipe_sort_preference", sortBy);
+  }, [sortBy]);
 
   useEffect(() => {
     writeCachedValue("show_images_preference", showImages);

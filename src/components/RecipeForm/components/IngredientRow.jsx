@@ -144,6 +144,7 @@ const IngredientRow = ({
             }
             isItemEqualToValue={(a, b) => a.value === b.value}
             disabled={isEditingTranslation}
+            autoHighlight
           >
             <ComboboxInput
               id={`ingredient-unit-${sectionId}-${index}-${ingredient.tempId}`}

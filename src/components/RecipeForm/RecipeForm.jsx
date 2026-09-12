@@ -384,6 +384,17 @@ const RecipeForm = ({
                   ))}
               </Field>
 
+              {/* Recipe Images */}
+              <Field className={isEditingTranslation ? "opacity-50" : ""}>
+                <FieldLabel>{t("images")}</FieldLabel>
+                <ImageUpload
+                  images={formData.images}
+                  onChange={handleImagesChange}
+                  disabled={isEditingTranslation}
+                  uploadingImageIds={uploadingImageIds}
+                />
+              </Field>
+
               <DragDropContext
                 onDragEnd={isEditingTranslation ? () => {} : handleDragEnd}
               >
@@ -412,17 +423,6 @@ const RecipeForm = ({
                   addInstruction={addInstruction}
                 />
               </DragDropContext>
-
-              {/* Recipe Images */}
-              <Field className={isEditingTranslation ? "opacity-50" : ""}>
-                <FieldLabel>{t("images")}</FieldLabel>
-                <ImageUpload
-                  images={formData.images}
-                  onChange={handleImagesChange}
-                  disabled={isEditingTranslation}
-                  uploadingImageIds={uploadingImageIds}
-                />
-              </Field>
 
               {/* Source */}
               <Field>

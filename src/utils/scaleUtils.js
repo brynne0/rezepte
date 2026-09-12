@@ -6,6 +6,7 @@ const UNIT_UP = {
   tbsp: { threshold: 4, factor: 1 / 16, unit: "cup/s" },
   ml: { threshold: 1000, factor: 1 / 1000, unit: "l" },
   g: { threshold: 1000, factor: 1 / 1000, unit: "kg" },
+  oz: { threshold: 16, factor: 1 / 16, unit: "lb" },
 };
 
 // Scale down: if scaled value < threshold, convert to smaller unit
@@ -14,6 +15,7 @@ const UNIT_DOWN = {
   tbsp: { threshold: 1 / 3, factor: 3, unit: "tsp" },
   l: { threshold: 1, factor: 1000, unit: "ml" },
   kg: { threshold: 1, factor: 1000, unit: "g" },
+  lb: { threshold: 1, factor: 16, unit: "oz" },
 };
 
 function convertUnit(value, unit) {

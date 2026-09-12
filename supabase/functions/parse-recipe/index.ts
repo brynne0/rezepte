@@ -202,11 +202,10 @@ serve(async (req) => {
 
     // Model fallback configuration: try models in order until one succeeds
     const models = [
-      "gemini-2.5-flash", // Current stable model - try first
-      "gemini-2.5-flash-lite", // Lighter fallback
-      "gemini-1.5-flash", // Older stable version
-      "gemini-1.5-flash-latest", // Latest 1.5 variant
-      "gemini-1.5-pro", // More capable but slower fallback
+      "gemini-3.5-flash-lite", // Most cost-effective current model - try first
+      "gemini-3.1-flash-lite", // Frontier-class fallback
+      "gemini-2.5-flash", // Established backup
+      "gemini-2.5-flash-lite", // Cheaper established backup
     ];
 
     const promptText = `Parse this recipe text and return ONLY a JSON object (no markdown, no explanation):
@@ -239,7 +238,7 @@ JSON format for recipes WITH ingredient sections (only use if original text has 
 Important rules:
 - servings: Extract the actual number of servings as a string (e.g., "4", "6-8"). If no servings mentioned, use "" (empty string). DO NOT use the word "number".
 - Extract quantity as a number or fraction string (e.g., "2", "1/2", "1.5")
-- Extract unit using ONLY these values: "", "ml", "l", "g", "kg", "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"
+- Extract unit using ONLY these values: "", "ml", "l", "g", "kg", "oz" (ounces), "lb" (pounds), "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"
 - If no specific unit, use "" (empty string)
 - name is the ingredient name only (e.g., "flour", "chicken breast")
 - notes are for preparation details like "chopped", "diced", "at room temperature" (can be empty string if not applicable)

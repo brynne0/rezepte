@@ -139,6 +139,8 @@
     { "value": "l", "label": "l" },
     { "value": "g", "label": "g" },
     { "value": "kg", "label": "kg" },
+    { "value": "oz", "label": "oz" },
+    { "value": "lb", "label": "lb" },
     { "value": "tsp", "label": "tsp" },
     { "value": "tbsp", "label": "tbsp" },
     { "value": "cup/s", "label": "cup/s" },
@@ -220,7 +222,7 @@
   "remove_instruction": "Remove instruction",
 
   "autofill_recipe": "Autofill Recipe",
-  "autofill_warning": "This will replace everything currently in the form.",
+  "autofill_warning": "This will replace most fields in the form — source, notes, and images are kept.",
   "paste_recipe_placeholder": "Paste a recipe or link here (text preferred)",
   "paste_text_required": "Please paste recipe text first",
   "paste_text_too_long": "Recipe text is too long. Please shorten to {{max}} characters or less.",
