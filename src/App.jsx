@@ -32,7 +32,7 @@ import { useMainScrollRef } from "./hooks/ui/useMainScrollRef";
 import Header from "./components/Header/Header";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import RouteError from "./components/RouteError/RouteError";
-import { Squirrel } from "lucide-react";
+import LoadingAcorn from "./components/LoadingAcorn/LoadingAcorn";
 
 // Features
 import Home from "./features/Home/Home";
@@ -146,11 +146,7 @@ function Layout() {
       >
         <div className="mx-auto w-full max-w-7xl px-3 pt-3 md:px-8 md:pt-4">
           <Suspense
-            fallback={
-              <div className="flex min-h-[50vh] items-center justify-center">
-                <Squirrel className="h-20 w-20 text-foreground" />
-              </div>
-            }
+            fallback={<LoadingAcorn fullPage={false} className="mt-40" />}
           >
             <Outlet />
           </Suspense>
