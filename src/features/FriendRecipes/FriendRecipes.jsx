@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppStateContext } from "../../contexts/AppStateContext";
 import { useFriendRecipes } from "./hooks/useFriendRecipes";
-import { useScrollRestoration } from "./hooks/useScrollRestoration";
+import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";

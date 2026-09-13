@@ -45,15 +45,15 @@ export const useSignedImageUrls = (images) => {
         const cachedResults = [];
         const imagesToFetch = [];
 
-        // Check cache first (only when we know whose cache to read)
+        // Check cache first (signed URLs are valid for days, so reuse them
+        // even while online to avoid needless refetches and image reloads)
         images.forEach((image) => {
-          const cached =
-            userId && !isOnline
-              ? readCachedValue(
-                  signedImageUrlCacheKey(userId, image.path),
-                  CACHE_DURATION
-                )
-              : null;
+          const cached = userId
+            ? readCachedValue(
+                signedImageUrlCacheKey(userId, image.path),
+                CACHE_DURATION
+              )
+            : null;
 
           if (cached) {
             cachedResults.push(cached);

@@ -2,6 +2,8 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppStateContext } from "../../contexts/AppStateContext";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
+import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
+import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import RecipeFilters from "../../components/RecipeFilters/RecipeFilters";
 import RecipeList from "../../components/RecipeList/RecipeList";
 import Pagination from "../../components/Pagination/Pagination";
@@ -26,6 +28,8 @@ function Home() {
   } = useContext(AppStateContext);
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
+  const mainScrollRef = useMainScrollRef();
+  useScrollRestoration(mainScrollRef, !isFetchingRecipes);
 
   return (
     <>
