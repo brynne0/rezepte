@@ -4,6 +4,7 @@ import {
   translateText,
   updateRecipeTranslations,
 } from "./recipeTranslationService";
+import { translateTexts } from "./translationCore";
 import { uploadLocalImages, cleanupOrphanedImages } from "./imageService";
 
 // Translate an ingredient name to English
@@ -11,6 +12,13 @@ const translateIngredientNameToEnglish = async (name, language) => {
   const trimmed = name.trim();
   if (language === "en") return trimmed;
   return translateText(trimmed, "en", null, language);
+};
+
+// Translate ingredient names in parallel rather than one at a time per ingredient
+const translateIngredientNamesToEnglish = async (names, language) => {
+  const trimmedNames = names.map((name) => (name ? name.trim() : ""));
+  if (language === "en") return trimmedNames;
+  return translateTexts(trimmedNames, "en", language);
 };
 
 // Helper function to determine if an ingredient name was entered as plural
@@ -723,15 +731,19 @@ export const createRecipe = async (
     recipeData.ungroupedIngredients &&
     recipeData.ungroupedIngredients.length > 0
   ) {
-    for (const ingredient of recipeData.ungroupedIngredients) {
+    const ungroupedTranslations = await translateIngredientNamesToEnglish(
+      recipeData.ungroupedIngredients.map((ingredient) => ingredient.name),
+      recipeData.original_language
+    );
+
+    for (const [
+      index,
+      ingredient,
+    ] of recipeData.ungroupedIngredients.entries()) {
       let ingredientId;
 
-      // Translate once, share it between the plurality check and lookup/creation
       const translatedToEnglish = ingredient.name
-        ? await translateIngredientNameToEnglish(
-            ingredient.name,
-            recipeData.original_language
-          )
+        ? ungroupedTranslations[index]
         : null;
 
       // Determine if the input was plural based on the entered text
@@ -778,15 +790,16 @@ export const createRecipe = async (
     recipeData.ingredientSections.length > 0
   ) {
     for (const section of recipeData.ingredientSections) {
-      for (const ingredient of section.ingredients) {
+      const sectionTranslations = await translateIngredientNamesToEnglish(
+        section.ingredients.map((ingredient) => ingredient.name),
+        recipeData.original_language
+      );
+
+      for (const [index, ingredient] of section.ingredients.entries()) {
         let ingredientId;
 
-        // Translate once, share it between the plurality check and lookup/creation
         const translatedToEnglish = ingredient.name
-          ? await translateIngredientNameToEnglish(
-              ingredient.name,
-              recipeData.original_language
-            )
+          ? sectionTranslations[index]
           : null;
 
         // Determine if the input was plural based on the entered text
@@ -1154,6 +1167,7 @@ export const updateRecipe = async (
 
         if (updateError) {
           console.error("Failed to update recipe with images:", updateError);
+          recipe.imageUpdateFailed = true;
         } else {
           recipe.images = uploadedImages;
         }
@@ -1166,12 +1180,14 @@ export const updateRecipe = async (
 
         if (updateError) {
           console.error("Failed to clear recipe images:", updateError);
+          recipe.imageUpdateFailed = true;
         } else {
           recipe.images = [];
         }
       }
-    } catch {
-      console.error("Failed to process images");
+    } catch (imageError) {
+      console.error("Failed to process images:", imageError);
+      recipe.imageUpdateFailed = true;
     }
   }
 

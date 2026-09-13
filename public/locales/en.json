@@ -261,6 +261,7 @@
   "recipe_update_error": "Failed to update recipe. Please try again.",
   "recipe_created_success": "Recipe added successfully",
   "recipe_updated_success": "Recipe updated successfully",
+  "recipe_saved_image_failed": "Recipe saved, but the photo failed to update - please try again",
 
   "unsaved_changes_warning": "You have unsaved changes. Are you sure you want to leave this page?",
   "leave_page": "Leave page",
@@ -282,6 +283,13 @@
   "weight": "Weight",
   "temperature": "Temperature",
   "canned_translation": "400g can = 240g cooked",
+  "3 tsp = 1 tbsp": "3 tsp = 1 tbsp",
+  "4 tbsp = 1/4 cup": "4 tbsp = 1/4 cup",
+  "1 cup = 16 tbsp": "1 cup = 16 tbsp",
+  "1 tsp = 5 ml": "1 tsp = 5 ml",
+  "1 tbsp = 15 ml": "1 tbsp = 15 ml",
+  "1 oz = 28 g": "1 oz = 28 g",
+  "1 lb = 454 g": "1 lb = 454 g",
 
   "no_cooking_times_title": "No cooking times yet",
   "add_first_cooking_time": "Add your first cooking time",

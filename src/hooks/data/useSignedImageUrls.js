@@ -6,12 +6,14 @@ import {
 } from "../../utils/localStorageCache";
 import { signedImageUrlCacheKey } from "../../utils/offlineCacheKeys";
 import { useAuth } from "./useAuth";
+import { useOnlineStatus } from "../ui/useOnlineStatus";
 
 const CACHE_DURATION = 6.5 * 24 * 60 * 60 * 1000; // 6.5 days (before 7-day expiry)
 
 export const useSignedImageUrls = (images) => {
   const { user } = useAuth();
   const userId = user?.id;
+  const isOnline = useOnlineStatus();
   const [signedImages, setSignedImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,12 +47,13 @@ export const useSignedImageUrls = (images) => {
 
         // Check cache first (only when we know whose cache to read)
         images.forEach((image) => {
-          const cached = userId
-            ? readCachedValue(
-                signedImageUrlCacheKey(userId, image.path),
-                CACHE_DURATION
-              )
-            : null;
+          const cached =
+            userId && !isOnline
+              ? readCachedValue(
+                  signedImageUrlCacheKey(userId, image.path),
+                  CACHE_DURATION
+                )
+              : null;
 
           if (cached) {
             cachedResults.push(cached);
@@ -96,7 +99,7 @@ export const useSignedImageUrls = (images) => {
 
     fetchSignedUrls();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imagesKey, userId]); // Use imagesKey instead of images to prevent infinite loops
+  }, [imagesKey, userId, isOnline]); // Use imagesKey instead of images to prevent infinite loops
 
   return { signedImages, loading, error };
 };

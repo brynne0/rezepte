@@ -24,6 +24,7 @@ vi.mock("../../../hooks/data/useRecipesPagination", () => ({
 
 vi.mock("../../../utils/offlineCacheKeys", () => ({
   clearDownloadedRecipeCaches: vi.fn(),
+  clearRecipeImagesCache: vi.fn(),
 }));
 
 import { useAuth } from "@/hooks/data/useAuth";

@@ -306,15 +306,28 @@ export const useRecipeFormActions = ({
       }
 
       flushSync(() => setInitialFormData(formData));
-      queryClient.invalidateQueries({ queryKey: ["recipes"] });
-      queryClient.invalidateQueries({ queryKey: ["recipe"] });
+
+      // String(id): useRecipe() keys its query off the route param (a string)
+      await Promise.all([
+        queryClient.refetchQueries({
+          queryKey: ["recipe", String(result.id)],
+        }),
+        queryClient.refetchQueries({ queryKey: ["recipes"] }),
+      ]);
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.add({
-        title: t(
-          initialRecipe ? "recipe_updated_success" : "recipe_created_success"
-        ),
-        type: "success",
-      });
+      if (result.imageUpdateFailed) {
+        toast.add({
+          title: t("recipe_saved_image_failed"),
+          type: "error",
+        });
+      } else {
+        toast.add({
+          title: t(
+            initialRecipe ? "recipe_updated_success" : "recipe_created_success"
+          ),
+          type: "success",
+        });
+      }
       if (initialRecipe) {
         navigate(-1);
       } else {
@@ -446,8 +459,10 @@ export const useRecipeFormActions = ({
     if (!initialRecipe) return;
     try {
       await deleteRecipe(initialRecipe.id);
-      queryClient.invalidateQueries({ queryKey: ["recipes"] });
-      queryClient.invalidateQueries({ queryKey: ["recipe"] });
+      await queryClient.refetchQueries({ queryKey: ["recipes"] });
+      queryClient.removeQueries({
+        queryKey: ["recipe", String(initialRecipe.id)],
+      });
       navigate("/");
     } catch (err) {
       console.error("Failed to delete recipe:", err);

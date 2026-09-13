@@ -7,7 +7,10 @@ import {
   clearOfflineDownloadStatus,
 } from "../../../services/offlineDownloadService";
 import { fetchRecipesWithCategories } from "../../../hooks/data/useRecipesPagination";
-import { clearDownloadedRecipeCaches } from "../../../utils/offlineCacheKeys";
+import {
+  clearDownloadedRecipeCaches,
+  clearRecipeImagesCache,
+} from "../../../utils/offlineCacheKeys";
 
 export const useOfflineDownload = (t) => {
   const { user } = useAuth();
@@ -74,12 +77,8 @@ export const useOfflineDownload = (t) => {
   const deleteDownloads = useCallback(async () => {
     if (!userId) return;
 
-    // Note: this only clears the signed-image-URL bookkeeping and download
-    // status - it deliberately does not touch the service worker's shared
-    // recipe-images-cache/supabase-rest-cache, since those are populated by
-    // ordinary browsing too (any recipe viewed online, downloaded or not)
-    // and aren't specific to what this feature downloaded.
     clearDownloadedRecipeCaches(userId);
+    await clearRecipeImagesCache();
     clearOfflineDownloadStatus();
     setStatus(null);
 
