@@ -41,10 +41,10 @@ export default defineConfig({
             urlPattern:
               /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/sign\/recipe-images\/.*/,
             method: "GET",
-            handler: "CacheFirst",
+            // Revalidates in the background instead of caching images forever
+            handler: "StaleWhileRevalidate",
             options: {
               cacheName: "recipe-images-cache",
-              matchOptions: { ignoreSearch: true },
               expiration: {
                 maxEntries: 2000,
                 maxAgeSeconds: 60 * 60 * 24 * 365,

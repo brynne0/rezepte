@@ -21,7 +21,7 @@ import NutritionSection from "./components/NutritionSection";
 import RecipeAutofill from "./components/RecipeAutofill";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -56,13 +56,13 @@ const RecipeForm = ({
     formData,
     setFormData,
     validationErrors,
-    submissionError,
     loading,
     // error,
     isEditMode,
     hasUnsavedChanges,
     isOnline,
 
+    submitStatus,
     uploadingImageIds,
     handleInputChange,
     handleTitleBlur,
@@ -205,11 +205,6 @@ const RecipeForm = ({
                 {t("editing_translation_notice")}
               </AlertDescription>
             </Alert>
-          )}
-
-          {/* Submission Error Message */}
-          {submissionError && (
-            <div className="text-sm text-destructive">{submissionError}</div>
           )}
 
           <form
@@ -468,30 +463,63 @@ const RecipeForm = ({
                 isEditingTranslation={isEditingTranslation}
               />
 
+              {loading &&
+                (() => {
+                  const phaseLabel = submitStatus?.phase
+                    ? t(`submit_progress_${submitStatus.phase}`, {
+                        current: submitStatus.phaseCompleted,
+                        total: submitStatus.phaseTotal,
+                      })
+                    : null;
+                  return (
+                    <div className="flex flex-col gap-1">
+                      {phaseLabel && (
+                        <p className="text-sm text-muted-foreground">
+                          {phaseLabel}
+                        </p>
+                      )}
+                      <Progress
+                        value={submitStatus?.percent}
+                        aria-label={
+                          phaseLabel ||
+                          t(isEditMode ? "update_recipe" : "create_recipe")
+                        }
+                      />
+                    </div>
+                  );
+                })()}
+
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 {/* Delete Button */}
-                {isEditMode && (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          className="w-full sm:mr-auto sm:w-auto"
-                          onClick={() => setIsDeleteModalOpen(true)}
-                          disabled={!isOnline}
-                        >
-                          {t("delete_recipe")}
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>
-                      {isOnline
-                        ? t("delete_recipe")
-                        : t("action_requires_internet")}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                {isEditMode &&
+                  (isOnline ? (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      className="w-full sm:mr-auto sm:w-auto"
+                      onClick={() => setIsDeleteModalOpen(true)}
+                    >
+                      {t("delete_recipe")}
+                    </Button>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            className="w-full sm:mr-auto sm:w-auto"
+                            disabled
+                          >
+                            {t("delete_recipe")}
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>
+                        {t("action_requires_internet")}
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
                 {/* Cancel Button */}
                 <Button
                   type="button"
@@ -502,33 +530,40 @@ const RecipeForm = ({
                   {t("cancel")}
                 </Button>
                 {/* Submit button */}
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        type="submit"
-                        disabled={loading || !isOnline}
-                        className="w-full sm:w-auto"
-                      >
-                        {loading && <Spinner />}
-                        {isEditMode
-                          ? isEditingTranslation
-                            ? t("update_translation")
-                            : t("update_recipe")
-                          : t("create_recipe")}
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>
-                    {isOnline
-                      ? isEditMode
-                        ? isEditingTranslation
-                          ? t("update_translation")
-                          : t("update_recipe")
-                        : t("create_recipe")
-                      : t("action_requires_internet")}
-                  </TooltipContent>
-                </Tooltip>
+                {isOnline ? (
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full sm:w-auto"
+                  >
+                    {isEditMode
+                      ? isEditingTranslation
+                        ? t("update_translation")
+                        : t("update_recipe")
+                      : t("create_recipe")}
+                  </Button>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          type="submit"
+                          disabled
+                          className="w-full sm:w-auto"
+                        >
+                          {isEditMode
+                            ? isEditingTranslation
+                              ? t("update_translation")
+                              : t("update_recipe")
+                            : t("create_recipe")}
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>
+                      {t("action_requires_internet")}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
             </fieldset>
           </form>

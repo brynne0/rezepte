@@ -458,6 +458,28 @@ describe("recipes service", () => {
       ]);
     });
 
+    test("leaves ingredients and categories untouched when omitted from recipeData", async () => {
+      const fetchOriginalBuilder = makeQueryBuilder({
+        data: { title: "Old", images: [] },
+        error: null,
+      });
+      const updateBuilder = makeQueryBuilder({
+        data: { id: "r1", title: "New" },
+        error: null,
+      });
+
+      supabase.from
+        .mockReturnValueOnce(fetchOriginalBuilder) // fetch original recipe
+        .mockReturnValueOnce(updateBuilder); // update recipe
+
+      const result = await updateRecipe("r1", { title: "New" });
+
+      expect(result).toEqual({ id: "r1", title: "New" });
+      // Only the two calls above - no recipe_ingredients or
+      // recipe_categories touched since neither field was provided
+      expect(supabase.from).toHaveBeenCalledTimes(2);
+    });
+
     test("throws when the recipe update fails", async () => {
       supabase.from
         .mockReturnValueOnce(

@@ -22,6 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ImageUpload = ({
   images = [],
@@ -317,10 +318,14 @@ const ImageUpload = ({
                             variant="image"
                             className="aspect-3/2 *:[img]:aspect-3/2"
                           >
+                            {isLoading && (
+                              <Skeleton className="absolute inset-0 rounded-none" />
+                            )}
                             <img
                               src={getDisplayUrl(image)}
                               alt={image.filename}
                               loading="lazy"
+                              className={isLoading ? "invisible" : undefined}
                               onLoadStart={() => handleImageLoadStart(image.id)}
                               onLoad={() => handleImageLoad(image.id)}
                               onError={() => handleImageLoad(image.id)}

@@ -255,26 +255,22 @@ const ProfileTab = ({
               <X />
               {t("cancel_download")}
             </Button>
+          ) : isOnline ? (
+            <Button variant="outline" size="sm" onClick={startDownload}>
+              <Download />
+              {t("download_recipes_for_offline")}
+            </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={startDownload}
-                    disabled={!isOnline}
-                  >
+                  <Button variant="outline" size="sm" disabled>
                     <Download />
                     {t("download_recipes_for_offline")}
                   </Button>
                 }
               />
-              <TooltipContent>
-                {isOnline
-                  ? t("download_recipes_for_offline")
-                  : t("action_requires_internet")}
-              </TooltipContent>
+              <TooltipContent>{t("action_requires_internet")}</TooltipContent>
             </Tooltip>
           )}
         </div>

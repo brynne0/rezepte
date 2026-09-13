@@ -26,9 +26,16 @@ export const translateText = async (
       requestBody.context = context;
     }
 
-    const { data, error } = await supabase.functions.invoke("translate", {
-      body: requestBody,
-    });
+    const TIMEOUT_MS = 10_000;
+    const { data, error } = await Promise.race([
+      supabase.functions.invoke("translate", { body: requestBody }),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Translation request timed out")),
+          TIMEOUT_MS
+        )
+      ),
+    ]);
 
     if (error) {
       throw new Error(`Translation error: ${error.message}`);

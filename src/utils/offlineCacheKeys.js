@@ -50,3 +50,13 @@ export const clearOfflineCaches = (userId) => {
 export const clearDownloadedRecipeCaches = (userId) => {
   clearSignedImageUrlCaches(userId);
 };
+
+// Clears the service worker's shared recipe-images-cache (see vite.config.js)
+export const clearRecipeImagesCache = async () => {
+  if (typeof caches === "undefined") return;
+  try {
+    await caches.delete("recipe-images-cache");
+  } catch {
+    // Ignore Cache Storage errors (e.g. unsupported/disabled in this browser)
+  }
+};

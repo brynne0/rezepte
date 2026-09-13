@@ -682,7 +682,7 @@ describe("RecipeForm", () => {
       expect(submitButton).toBeDisabled();
     });
 
-    it("shows loading spinner on submit button", () => {
+    it("shows a progress bar while submitting", () => {
       useRecipeForm.mockReturnValue({
         ...mockHookReturn,
         loading: true,
@@ -691,9 +691,7 @@ describe("RecipeForm", () => {
 
       renderComponent();
 
-      expect(
-        screen.getByRole("status", { name: /loading/i })
-      ).toBeInTheDocument();
+      expect(screen.getByRole("progressbar")).toBeInTheDocument();
     });
   });
 
@@ -984,9 +982,7 @@ describe("RecipeForm", () => {
 
         renderComponent({ isEditingTranslation: true });
 
-        expect(
-          screen.getByRole("status", { name: /loading/i })
-        ).toBeInTheDocument();
+        expect(screen.getByRole("progressbar")).toBeInTheDocument();
         expect(screen.getByText("update_translation")).toBeInTheDocument();
       });
     });
