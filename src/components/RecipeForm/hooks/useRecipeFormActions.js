@@ -12,13 +12,41 @@ import { normaliseUnicodeFractions } from "../../../utils/fractionUtils";
 import { toast } from "@/components/ui/toast";
 import { useOnlineStatus } from "../../../hooks/ui/useOnlineStatus";
 
+// Scroll to and focus the first invalid field, or the page top as a fallback
+const scrollToInvalidField = () => {
+  requestAnimationFrame(() => {
+    const invalidField = document.querySelector(
+      '[data-invalid="true"], [aria-invalid="true"]'
+    );
+    if (invalidField) {
+      invalidField.scrollIntoView({ behavior: "smooth", block: "center" });
+      const focusable = invalidField.matches("input, textarea, select")
+        ? invalidField
+        : invalidField.querySelector("input, textarea, select");
+      focusable?.focus({ preventScroll: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  });
+};
+
+// Postgres's unique_user_recipe_title constraint on (user_id, title)
+const isDuplicateTitleError = (err) =>
+  err.message?.includes("unique_user_recipe_title");
+
+// recipe_categories is unordered, so sort before comparing
+const normaliseCategories = (categories) =>
+  (categories || [])
+    .filter((name) => name && name !== "all_recipes")
+    .slice()
+    .sort();
+
 export const useRecipeFormActions = ({
   formData,
   setFormData,
-  setSubmissionError,
+  initialFormData,
   setValidationErrors,
-  setIsUploadingImages,
-  setUploadProgress,
+  setSubmitStatus,
   setUploadingImageIds,
   initialRecipe,
   isEditingTranslation,
@@ -46,32 +74,37 @@ export const useRecipeFormActions = ({
     [setFormData]
   );
 
-  // Handle image upload progress
-  const handleImageUploadProgress = useCallback(
-    (imageId, progress) => {
-      if (progress === 0) {
-        // Starting upload
-        setIsUploadingImages(true);
-        setUploadingImageIds((prev) => new Set([...prev, imageId]));
-      } else if (progress === 100) {
-        // Upload complete
+  // Reports progress across recipe write, ingredients, categories, images
+  const handleSubmitProgress = useCallback(
+    ({
+      completed,
+      total,
+      phase,
+      phaseCompleted,
+      phaseTotal,
+      imageId,
+      uploading,
+    }) => {
+      setSubmitStatus({
+        percent: Math.round((completed / total) * 100),
+        phase,
+        phaseCompleted,
+        phaseTotal,
+      });
+
+      if (imageId !== undefined) {
         setUploadingImageIds((prev) => {
-          const newSet = new Set([...prev]);
-          newSet.delete(imageId);
+          const newSet = new Set(prev);
+          if (uploading) {
+            newSet.add(imageId);
+          } else {
+            newSet.delete(imageId);
+          }
           return newSet;
         });
-
-        if (setUploadingImageIds.size === 1) {
-          // This was the last upload
-          setIsUploadingImages(false);
-          setUploadProgress(null);
-        }
-      } else {
-        // Progress update
-        setUploadProgress(progress);
       }
     },
-    [setIsUploadingImages, setUploadProgress, setUploadingImageIds]
+    [setSubmitStatus, setUploadingImageIds]
   );
 
   // Transform form data for submission
@@ -148,14 +181,13 @@ export const useRecipeFormActions = ({
     };
   }, [formData]);
 
-  // Whether the user has already confirmed saving without a category this session
+  // Confirmed saving without a category, for this session
   const categoryConfirmedRef = useRef(false);
   const [showCategoryConfirm, setShowCategoryConfirm] = useState(false);
 
-  // Perform the actual save (called directly, or after confirming no-category save)
+  // Called directly, or after confirming a no-category save
   const performSubmit = useCallback(async () => {
     const recipeData = transformFormDataForSubmission();
-    const hasLocalImages = formData.images?.some((img) => img.file);
 
     try {
       let result;
@@ -285,13 +317,32 @@ export const useRecipeFormActions = ({
             ingredientOverrides,
             ingredientNotesUpdates
           );
-          result = initialRecipe; // Return original recipe data
+          result = initialRecipe;
         } else {
-          // Normal recipe editing - update the original recipe
+          // Normal recipe editing - update the original recipe.
+          // Omit ingredients/categories when unchanged, so updateRecipe leaves them untouched.
+          const ingredientsUnchanged =
+            JSON.stringify(formData.ungroupedIngredients) ===
+              JSON.stringify(initialFormData.ungroupedIngredients) &&
+            JSON.stringify(formData.ingredientSections) ===
+              JSON.stringify(initialFormData.ingredientSections);
+          const categoriesUnchanged =
+            JSON.stringify(normaliseCategories(formData.categories)) ===
+            JSON.stringify(normaliseCategories(initialFormData.categories));
+
+          const updateData = { ...recipeData };
+          if (ingredientsUnchanged) {
+            delete updateData.ungroupedIngredients;
+            delete updateData.ingredientSections;
+          }
+          if (categoriesUnchanged) {
+            delete updateData.categories;
+          }
+
           result = await updateRecipe(
             initialRecipe.id,
-            recipeData,
-            hasLocalImages ? handleImageUploadProgress : null
+            updateData,
+            handleSubmitProgress
           );
         }
       } else {
@@ -299,15 +350,12 @@ export const useRecipeFormActions = ({
         const currentLanguage = i18n.language?.split("-")[0] || "en";
         recipeData.original_language = currentLanguage;
 
-        result = await createRecipe(
-          recipeData,
-          hasLocalImages ? handleImageUploadProgress : null
-        );
+        result = await createRecipe(recipeData, handleSubmitProgress);
       }
 
       flushSync(() => setInitialFormData(formData));
 
-      // String(id): useRecipe() keys its query off the route param (a string)
+      // String(id): useRecipe() keys its query off the route param, a string
       await Promise.all([
         queryClient.refetchQueries({
           queryKey: ["recipe", String(result.id)],
@@ -338,32 +386,33 @@ export const useRecipeFormActions = ({
         `Failed to ${initialRecipe ? "update" : "create"} recipe:`,
         err
       );
-      // Set user-friendly error message
-      const errorKey =
-        err.message === OFFLINE_ERROR
-          ? "action_requires_internet"
-          : initialRecipe
-            ? "recipe_update_error"
-            : "recipe_create_error";
-      setSubmissionError(t(errorKey));
 
-      // Scroll to top to show the error message
-      window.scrollTo(0, 0);
+      if (isDuplicateTitleError(err)) {
+        // Treat as a field error, not a generic failure - the fix is the title
+        setValidationErrors({ title: t("title_already_exists") });
+        scrollToInvalidField();
+      } else {
+        const errorKey =
+          err.message === OFFLINE_ERROR
+            ? "action_requires_internet"
+            : initialRecipe
+              ? "recipe_update_error"
+              : "recipe_create_error";
+        toast.add({ title: t(errorKey), type: "error" });
+      }
     } finally {
-      // Clean up upload state
-      setIsUploadingImages(false);
-      setUploadProgress(null);
+      setSubmitStatus(null);
       setUploadingImageIds(new Set());
     }
   }, [
     formData,
+    initialFormData,
     initialRecipe,
     isEditingTranslation,
     transformFormDataForSubmission,
-    handleImageUploadProgress,
-    setSubmissionError,
-    setIsUploadingImages,
-    setUploadProgress,
+    handleSubmitProgress,
+    setValidationErrors,
+    setSubmitStatus,
     setUploadingImageIds,
     createRecipe,
     updateRecipe,
@@ -380,35 +429,16 @@ export const useRecipeFormActions = ({
     async (e) => {
       e.preventDefault();
 
-      // Guard against double-submit (e.g. double-click before re-render disables the button)
+      // Guard double-click before the button re-renders as disabled
       if (loading) {
         return;
       }
-
-      // Clear any previous submission errors
-      setSubmissionError("");
 
       // Validate form
       const errors = validateForm();
       if (Object.keys(errors).length > 0) {
         setValidationErrors(errors);
-        requestAnimationFrame(() => {
-          const invalidField = document.querySelector(
-            '[data-invalid="true"], [aria-invalid="true"]'
-          );
-          if (invalidField) {
-            invalidField.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-            });
-            const focusable = invalidField.matches("input, textarea, select")
-              ? invalidField
-              : invalidField.querySelector("input, textarea, select");
-            focusable?.focus({ preventScroll: true });
-          } else {
-            window.scrollTo(0, 0);
-          }
-        });
+        scrollToInvalidField();
         return;
       }
 
@@ -431,7 +461,6 @@ export const useRecipeFormActions = ({
       formData,
       isEditingTranslation,
       validateForm,
-      setSubmissionError,
       setValidationErrors,
       performSubmit,
     ]

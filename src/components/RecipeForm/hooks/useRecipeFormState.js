@@ -161,9 +161,7 @@ export const useRecipeFormState = ({ initialRecipe = null }) => {
   const [initialFormData, setInitialFormData] = useState(getInitialFormData);
   const [formData, setFormData] = useState(initialFormData);
   const [validationErrors, setValidationErrors] = useState({});
-  const [submissionError, setSubmissionError] = useState("");
-  const [uploadProgress, setUploadProgress] = useState(null);
-  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
   const [uploadingImageIds, setUploadingImageIds] = useState(new Set());
 
   // Update form data when initialRecipe changes (for edit mode)
@@ -203,14 +201,10 @@ export const useRecipeFormState = ({ initialRecipe = null }) => {
     setFormData,
     validationErrors,
     setValidationErrors,
-    submissionError,
-    setSubmissionError,
     initialFormData,
     setInitialFormData,
-    uploadProgress,
-    setUploadProgress,
-    isUploadingImages,
-    setIsUploadingImages,
+    submitStatus,
+    setSubmitStatus,
     uploadingImageIds,
     setUploadingImageIds,
 

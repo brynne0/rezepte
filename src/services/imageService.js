@@ -240,6 +240,8 @@ export const uploadLocalImages = async (
             current: uploadedCount,
             total: totalImages,
             currentFile: image.filename,
+            imageId: image.id,
+            uploading: true,
             progress: Math.round((uploadedCount / totalImages) * 100),
           });
         }
@@ -274,6 +276,8 @@ export const uploadLocalImages = async (
             current: uploadedCount,
             total: totalImages,
             currentFile: image.filename,
+            imageId: image.id,
+            uploading: false,
             progress: Math.round((uploadedCount / totalImages) * 100),
           });
         }

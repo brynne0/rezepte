@@ -263,6 +263,11 @@
   "recipe_updated_success": "Recipe updated successfully",
   "recipe_saved_image_failed": "Recipe saved, but the photo failed to update - please try again",
 
+  "submit_progress_recipe": "Saving recipe",
+  "submit_progress_ingredients": "Saving ingredients ({{current}} of {{total}})",
+  "submit_progress_categories": "Saving categories ({{current}} of {{total}})",
+  "submit_progress_images": "Uploading photos ({{current}} of {{total}})",
+
   "unsaved_changes_warning": "You have unsaved changes. Are you sure you want to leave this page?",
   "leave_page": "Leave page",
   "stay": "Stay",

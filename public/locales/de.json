@@ -264,6 +264,11 @@
   "recipe_updated_success": "Rezept erfolgreich aktualisiert",
   "recipe_saved_image_failed": "Rezept gespeichert, aber das Foto konnte nicht aktualisiert werden - bitte erneut versuchen",
 
+  "submit_progress_recipe": "Rezept wird gespeichert",
+  "submit_progress_ingredients": "Zutaten werden gespeichert ({{current}} von {{total}})",
+  "submit_progress_categories": "Kategorien werden gespeichert ({{current}} von {{total}})",
+  "submit_progress_images": "Fotos werden hochgeladen ({{current}} von {{total}})",
+
   "unsaved_changes_warning": "Du hast ungespeicherte Änderungen. Möchtest du diese Seite wirklich verlassen?",
   "leave_page": "Seite verlassen",
   "stay": "Bleiben",

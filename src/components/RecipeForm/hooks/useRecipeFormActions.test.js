@@ -55,15 +55,17 @@ const buildFormData = (overrides = {}) => ({
 
 const setup = ({
   formData = buildFormData(),
+  initialFormData = formData,
   initialRecipe = null,
   isEditingTranslation = false,
   validateForm = vi.fn(() => ({})),
   recipeActionsOverrides = {},
   queryClient = createTestQueryClient(),
 } = {}) => {
+  const updateRecipeMock = vi.fn().mockResolvedValue({ id: initialRecipe?.id });
   useRecipeActions.mockReturnValue({
     createRecipe: vi.fn().mockResolvedValue({ id: "new-id", slug: "chili" }),
-    updateRecipe: vi.fn().mockResolvedValue({ id: initialRecipe?.id }),
+    updateRecipe: updateRecipeMock,
     updateTranslation: vi.fn().mockResolvedValue(),
     deleteRecipe: vi.fn().mockResolvedValue(),
     loading: false,
@@ -72,10 +74,8 @@ const setup = ({
   });
 
   const setFormData = vi.fn();
-  const setSubmissionError = vi.fn();
   const setValidationErrors = vi.fn();
-  const setIsUploadingImages = vi.fn();
-  const setUploadProgress = vi.fn();
+  const setSubmitStatus = vi.fn();
   const setUploadingImageIds = vi.fn();
   const setInitialFormData = vi.fn();
 
@@ -83,11 +83,10 @@ const setup = ({
     () =>
       useRecipeFormActions({
         formData,
+        initialFormData,
         setFormData,
-        setSubmissionError,
         setValidationErrors,
-        setIsUploadingImages,
-        setUploadProgress,
+        setSubmitStatus,
         setUploadingImageIds,
         initialRecipe,
         isEditingTranslation,
@@ -99,11 +98,10 @@ const setup = ({
 
   return {
     result,
+    updateRecipeMock,
     setFormData,
-    setSubmissionError,
     setValidationErrors,
-    setIsUploadingImages,
-    setUploadProgress,
+    setSubmitStatus,
     setUploadingImageIds,
     setInitialFormData,
   };
@@ -172,9 +170,67 @@ describe("useRecipeFormActions", () => {
       expect(mockNavigate).toHaveBeenCalledWith(-1);
     });
 
-    test("sets a submission error and scrolls to top when saving fails", async () => {
+    test("omits ingredients and categories from the update payload when unchanged", async () => {
+      const formData = buildFormData();
+      const { result, updateRecipeMock } = setup({
+        formData,
+        initialFormData: formData,
+        initialRecipe: { id: "recipe-1" },
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      const [, payload] = updateRecipeMock.mock.calls[0];
+      expect(payload).not.toHaveProperty("ungroupedIngredients");
+      expect(payload).not.toHaveProperty("ingredientSections");
+      expect(payload).not.toHaveProperty("categories");
+    });
+
+    test("includes ingredients and categories in the update payload when changed", async () => {
+      const initialFormData = buildFormData();
+      const formData = buildFormData({
+        categories: ["Dinner", "Vegan"],
+        ungroupedIngredients: [baseIngredient({ name: "Seitan" })],
+      });
+      const { result, updateRecipeMock } = setup({
+        formData,
+        initialFormData,
+        initialRecipe: { id: "recipe-1" },
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      const [, payload] = updateRecipeMock.mock.calls[0];
+      expect(payload).toHaveProperty("ungroupedIngredients");
+      expect(payload).toHaveProperty("categories", ["Dinner", "Vegan"]);
+    });
+
+    test("treats reordered categories as unchanged", async () => {
+      const formData = buildFormData({ categories: ["Dinner", "Vegan"] });
+      const initialFormData = buildFormData({
+        categories: ["Vegan", "Dinner"],
+      });
+      const { result, updateRecipeMock } = setup({
+        formData,
+        initialFormData,
+        initialRecipe: { id: "recipe-1" },
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      const [, payload] = updateRecipeMock.mock.calls[0];
+      expect(payload).not.toHaveProperty("categories");
+    });
+
+    test("shows a toast when saving fails", async () => {
       const updateRecipe = vi.fn().mockRejectedValue(new Error("boom"));
-      const { result, setSubmissionError } = setup({
+      const { result } = setup({
         initialRecipe: { id: "recipe-1" },
         recipeActionsOverrides: { updateRecipe },
       });
@@ -183,14 +239,22 @@ describe("useRecipeFormActions", () => {
         await result.current.handleSubmit(fakeSubmitEvent());
       });
 
-      expect(setSubmissionError).toHaveBeenCalledWith("recipe_update_error");
-      expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        title: "recipe_update_error",
+        type: "error",
+      });
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
-    test("shows an offline-specific error when creating fails because the device is offline", async () => {
-      const createRecipe = vi.fn().mockRejectedValue(new Error("offline"));
-      const { result, setSubmissionError } = setup({
+    test("shows a duplicate-title validation error and scrolls to the field instead of a toast", async () => {
+      const createRecipe = vi
+        .fn()
+        .mockRejectedValue(
+          new Error(
+            'duplicate key value violates unique constraint "unique_user_recipe_title"'
+          )
+        );
+      const { result, setValidationErrors } = setup({
         recipeActionsOverrides: { createRecipe },
       });
 
@@ -198,15 +262,33 @@ describe("useRecipeFormActions", () => {
         await result.current.handleSubmit(fakeSubmitEvent());
       });
 
-      expect(setSubmissionError).toHaveBeenCalledWith(
-        "action_requires_internet"
-      );
+      expect(setValidationErrors).toHaveBeenCalledWith({
+        title: "title_already_exists",
+      });
+      expect(mockToastAdd).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
-    test("shows an offline-specific error when updating fails because the device is offline", async () => {
+    test("shows an offline-specific toast when creating fails because the device is offline", async () => {
+      const createRecipe = vi.fn().mockRejectedValue(new Error("offline"));
+      const { result } = setup({
+        recipeActionsOverrides: { createRecipe },
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        title: "action_requires_internet",
+        type: "error",
+      });
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    test("shows an offline-specific toast when updating fails because the device is offline", async () => {
       const updateRecipe = vi.fn().mockRejectedValue(new Error("offline"));
-      const { result, setSubmissionError } = setup({
+      const { result } = setup({
         initialRecipe: { id: "recipe-1" },
         recipeActionsOverrides: { updateRecipe },
       });
@@ -215,9 +297,10 @@ describe("useRecipeFormActions", () => {
         await result.current.handleSubmit(fakeSubmitEvent());
       });
 
-      expect(setSubmissionError).toHaveBeenCalledWith(
-        "action_requires_internet"
-      );
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        title: "action_requires_internet",
+        type: "error",
+      });
     });
 
     test("invalidates the categories query on a successful save", async () => {
@@ -235,19 +318,13 @@ describe("useRecipeFormActions", () => {
     });
 
     test("resets upload state in a finally block after submission", async () => {
-      const {
-        result,
-        setIsUploadingImages,
-        setUploadProgress,
-        setUploadingImageIds,
-      } = setup();
+      const { result, setSubmitStatus, setUploadingImageIds } = setup();
 
       await act(async () => {
         await result.current.handleSubmit(fakeSubmitEvent());
       });
 
-      expect(setIsUploadingImages).toHaveBeenCalledWith(false);
-      expect(setUploadProgress).toHaveBeenCalledWith(null);
+      expect(setSubmitStatus).toHaveBeenCalledWith(null);
       expect(setUploadingImageIds).toHaveBeenCalledWith(new Set());
     });
   });
