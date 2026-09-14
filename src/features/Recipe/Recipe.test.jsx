@@ -1,5 +1,11 @@
 import { StrictMode } from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -84,13 +90,23 @@ vi.mock("@/components/ui/toast", () => ({
 }));
 
 const mockSetRecipePrivate = vi.fn();
+const mockCopyRecipeFromFriend = vi.fn();
+const mockFindCopiedRecipe = vi.fn();
 vi.mock("../../services/recipes", () => ({
   setRecipePrivate: (...args) => mockSetRecipePrivate(...args),
+  copyRecipeFromFriend: (...args) => mockCopyRecipeFromFriend(...args),
+  findCopiedRecipe: (...args) => mockFindCopiedRecipe(...args),
 }));
 
 const mockGetFriendProfile = vi.fn();
 vi.mock("../../services/friendsService", () => ({
   getFriendProfile: (...args) => mockGetFriendProfile(...args),
+}));
+
+vi.mock("@/hooks/data/useCategories", () => ({
+  useCategories: () => ({
+    categories: [{ value: "dinner", label: "Dinner" }],
+  }),
 }));
 
 // Mock variables
@@ -123,6 +139,7 @@ describe("Recipe Component", () => {
     };
     mockSetFriendBar = vi.fn();
     mockGetFriendProfile.mockResolvedValue(null);
+    mockFindCopiedRecipe.mockResolvedValue(null);
   });
 
   const renderRecipe = () => {
@@ -349,6 +366,115 @@ describe("Recipe Component", () => {
           expect.objectContaining({ type: "error" })
         );
       });
+    });
+  });
+
+  describe("Add to My Recipes", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = mockRecipeData;
+      mockAuth.user = { id: "some-other-user" };
+      mockGetFriendProfile.mockResolvedValue({
+        first_name: "Alice",
+        username: "alice",
+      });
+    });
+
+    test("shows the add button and not the already-saved button when no copy exists yet", async () => {
+      renderRecipe();
+
+      expect(
+        await screen.findByTestId("add-to-my-recipes-btn")
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "recipe_already_saved" })
+      ).not.toBeInTheDocument();
+    });
+
+    test("shows the already-saved button and navigates straight to the existing copy when clicked", async () => {
+      mockFindCopiedRecipe.mockResolvedValue({
+        id: "copy-1",
+        slug: "test-recipe",
+        created_at: "2026-09-14T00:00:00Z",
+      });
+      renderRecipe();
+
+      const savedButton = await screen.findByRole("button", {
+        name: "recipe_already_saved",
+      });
+      fireEvent.click(savedButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith("/copy-1/test-recipe");
+      expect(mockCopyRecipeFromFriend).not.toHaveBeenCalled();
+    });
+
+    test("opens the category modal, creates the copy, and navigates to it on confirm", async () => {
+      mockCopyRecipeFromFriend.mockResolvedValue({
+        id: "copy-2",
+        slug: "test-recipe",
+      });
+      renderRecipe();
+
+      fireEvent.click(await screen.findByTestId("add-to-my-recipes-btn"));
+
+      fireEvent.click(await screen.findByText("Dinner"));
+      const dialog = screen.getByRole("dialog");
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "add_to_my_recipes" })
+      );
+
+      await waitFor(() => {
+        expect(mockCopyRecipeFromFriend).toHaveBeenCalledWith("recipe-1", {
+          categoryNames: ["dinner"],
+          friendFirstName: "Alice",
+        });
+      });
+      expect(mockNavigate).toHaveBeenCalledWith("/copy-2/test-recipe");
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "success" })
+      );
+    });
+
+    test("shows an error toast and keeps the modal open when the copy fails", async () => {
+      mockCopyRecipeFromFriend.mockRejectedValue(new Error("db down"));
+      renderRecipe();
+
+      fireEvent.click(await screen.findByTestId("add-to-my-recipes-btn"));
+      fireEvent.click(await screen.findByText("Dinner"));
+      const dialog = screen.getByRole("dialog");
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "add_to_my_recipes" })
+      );
+
+      await waitFor(() => {
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
+      });
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(
+        screen.getByText("add_to_my_recipes_modal_title")
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("Copied-From Banner", () => {
+    test("shows the copied-from kicker above the title on your own copy", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        copied_from_name: "Jane",
+      };
+
+      renderRecipe();
+
+      expect(screen.getByText("recipe_owner_kicker")).toBeInTheDocument();
+    });
+
+    test("does not show the kicker when the recipe has no copied_from_name", () => {
+      mockRecipeHook.recipe = mockRecipeData;
+
+      renderRecipe();
+
+      expect(screen.queryByText("recipe_owner_kicker")).not.toBeInTheDocument();
     });
   });
 

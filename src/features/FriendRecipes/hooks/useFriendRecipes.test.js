@@ -23,6 +23,10 @@ vi.mock("../../../services/recipeTranslationService", () => ({
   getTranslatedRecipeTitle: vi.fn((recipe) => Promise.resolve(recipe)),
 }));
 
+vi.mock("../../../services/recipes", () => ({
+  fetchCopiedRecipeIds: vi.fn(() => Promise.resolve(new Set())),
+}));
+
 const mockUseOnlineStatus = vi.fn(() => true);
 vi.mock("../../../hooks/ui/useOnlineStatus", () => ({
   useOnlineStatus: () => mockUseOnlineStatus(),
@@ -35,6 +39,7 @@ import {
   fetchFriendRecipes,
 } from "../../../services/friendsService";
 import { getTranslatedRecipeTitle } from "../../../services/recipeTranslationService";
+import { fetchCopiedRecipeIds } from "../../../services/recipes";
 
 const renderUseFriendRecipes = (username) =>
   renderHook(() => useFriendRecipes(username), {
@@ -71,11 +76,37 @@ describe("useFriendRecipes", () => {
     expect(result.current.notFriends).toBe(false);
     expect(result.current.friend.first_name).toBe("Alice");
     expect(result.current.recipes).toEqual([
-      { id: "r1", title: "Soup", categories: ["dinner"] },
+      { id: "r1", title: "Soup", categories: ["dinner"], alreadySaved: false },
     ]);
     expect(result.current.friendCategories.map((c) => c.value)).toEqual([
       "all_recipes",
       "dinner",
+    ]);
+  });
+
+  test("flags recipes the current user has already copied", async () => {
+    getUserByUsername.mockResolvedValue({ id: "friend-1", username: "alice" });
+    checkFriendship.mockResolvedValue(true);
+    getFriendProfile.mockResolvedValue({
+      id: "friend-1",
+      username: "alice",
+      first_name: "Alice",
+    });
+    fetchFriendRecipes.mockResolvedValue([
+      { id: "r1", title: "Soup", categories: ["dinner"] },
+      { id: "r2", title: "Stew", categories: ["dinner"] },
+    ]);
+    fetchCopiedRecipeIds.mockResolvedValue(new Set(["r1"]));
+
+    const { result } = renderUseFriendRecipes("alice");
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.recipes).toEqual([
+      { id: "r1", title: "Soup", categories: ["dinner"], alreadySaved: true },
+      { id: "r2", title: "Stew", categories: ["dinner"], alreadySaved: false },
     ]);
   });
 

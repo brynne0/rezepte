@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "lucide-react";
+import { Link, BookmarkCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import {
@@ -96,31 +96,48 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           {recipe.title}
         </CardTitle>
 
-        {sourceUrl && hasNoContent && (
-          <CardAction className="row-span-1 self-center">
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <a
-                    href={sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-accent-red"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering the card click
-                    }}
-                    onMouseEnter={() => setIsSourceLinkHovered(true)}
-                    onMouseLeave={() => setIsSourceLinkHovered(false)}
-                    onFocus={() => setIsSourceLinkHovered(true)}
-                    onBlur={() => setIsSourceLinkHovered(false)}
-                    aria-label={t("open_recipe_source_link")}
-                  >
-                    <Link size={16} />
-                  </a>
-                }
-              />
-              <TooltipContent>{t("open_recipe_source_link")}</TooltipContent>
-            </Tooltip>
+        {(recipe.alreadySaved || (sourceUrl && hasNoContent)) && (
+          <CardAction className="row-span-1 flex items-center gap-1.5 self-center">
+            {recipe.alreadySaved && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <BookmarkCheck
+                      size={16}
+                      className="text-accent-red"
+                      role="img"
+                      aria-label={t("recipe_already_saved")}
+                    />
+                  }
+                />
+                <TooltipContent>{t("recipe_already_saved")}</TooltipContent>
+              </Tooltip>
+            )}
+            {sourceUrl && hasNoContent && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <a
+                      href={sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-colors hover:text-accent-red"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering the card click
+                      }}
+                      onMouseEnter={() => setIsSourceLinkHovered(true)}
+                      onMouseLeave={() => setIsSourceLinkHovered(false)}
+                      onFocus={() => setIsSourceLinkHovered(true)}
+                      onBlur={() => setIsSourceLinkHovered(false)}
+                      aria-label={t("open_recipe_source_link")}
+                    >
+                      <Link size={16} />
+                    </a>
+                  }
+                />
+                <TooltipContent>{t("open_recipe_source_link")}</TooltipContent>
+              </Tooltip>
+            )}
           </CardAction>
         )}
       </CardHeader>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Pencil,
@@ -12,12 +12,19 @@ import {
   Minus,
   Plus,
   WifiOff,
+  BookmarkPlus,
+  BookmarkCheck,
 } from "lucide-react";
 
 import { AppStateContext } from "../../contexts/AppStateContext";
 import { useRecipe } from "../../hooks/data/useRecipe";
-import { setRecipePrivate } from "../../services/recipes";
+import {
+  setRecipePrivate,
+  copyRecipeFromFriend,
+  findCopiedRecipe,
+} from "../../services/recipes";
 import { getFriendProfile } from "../../services/friendsService";
+import AddToMyRecipesModal from "../../components/AddToMyRecipesModal/AddToMyRecipesModal";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -128,6 +135,10 @@ const Recipe = () => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const { setFriendBar } = useContext(AppStateContext);
+  const queryClient = useQueryClient();
+
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
 
   const isOwner = !!user?.id && recipe?.user_id === user?.id;
   const isPrivate = privateOverride ?? recipe?.private ?? false;
@@ -146,6 +157,13 @@ const Recipe = () => {
   const { signedImages } = useSignedImageUrls(
     canViewImages ? recipe?.images : []
   );
+
+  // Whether the user already copied this friend's recipe.
+  const { data: existingCopy } = useQuery({
+    queryKey: ["copiedRecipe", recipe?.id],
+    queryFn: () => findCopiedRecipe(recipe.id),
+    enabled: showFriendBar,
+  });
 
   useEffect(() => {
     if (!showFriendBar) {
@@ -177,6 +195,33 @@ const Recipe = () => {
         title: t("recipe_privacy_update_failed"),
         type: "error",
       });
+    }
+  };
+
+  const handleConfirmCopy = async (categoryNames) => {
+    setIsCopying(true);
+    try {
+      const newRecipe = await copyRecipeFromFriend(recipe.id, {
+        categoryNames,
+        friendFirstName: friendProfile?.first_name,
+      });
+      queryClient.invalidateQueries({ queryKey: ["recipes"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["copiedRecipe"] });
+      queryClient.invalidateQueries({ queryKey: ["copiedRecipeIds"] });
+      toast.add({
+        title: t("recipe_copied_to_my_recipes"),
+        type: "success",
+      });
+      setShowCopyModal(false);
+      navigate(`/${newRecipe.id}/${newRecipe.slug}`);
+    } catch {
+      toast.add({
+        title: t("recipe_copy_to_my_recipes_failed"),
+        type: "error",
+      });
+    } finally {
+      setIsCopying(false);
     }
   };
 
@@ -356,12 +401,6 @@ const Recipe = () => {
                 <ArrowLeft />
               </Button>
 
-              {!isOwner && (
-                <CardTitle className="text-accent-red font-forta min-w-0 flex-1 [word-wrap:break-word] text-2xl leading-tight md:text-3xl break-all">
-                  {recipe.title}
-                </CardTitle>
-              )}
-
               {isOwner && (
                 <ButtonGroup className="ml-auto shrink-0">
                   <Tooltip>
@@ -432,6 +471,61 @@ const Recipe = () => {
                   </Tooltip>
                 </ButtonGroup>
               )}
+
+              {!isOwner && (
+                <div className="ml-auto flex shrink-0 items-center gap-2">
+                  {existingCopy && (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="lg"
+                            onClick={() =>
+                              navigate(
+                                `/${existingCopy.id}/${existingCopy.slug}`
+                              )
+                            }
+                            aria-label={t("recipe_already_saved")}
+                          >
+                            <BookmarkCheck className="text-accent-red" />
+                            {new Date(
+                              existingCopy.created_at
+                            ).toLocaleDateString(i18n.language, {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>
+                        {t("recipe_already_saved_go_to_copy")}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="dashed"
+                          size="icon-lg"
+                          onClick={() => setShowCopyModal(true)}
+                          data-testid="add-to-my-recipes-btn"
+                          aria-label={t("add_to_my_recipes")}
+                          disabled={!isOnline}
+                        >
+                          <BookmarkPlus />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>
+                      {isOnline
+                        ? t("add_to_my_recipes")
+                        : t("action_requires_internet")}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              )}
             </div>
 
             {recipe.translationUnavailable && (
@@ -442,11 +536,19 @@ const Recipe = () => {
               </Alert>
             )}
 
-            {isOwner && (
+            <div className="flex flex-col gap-0.5">
+              {isOwner && recipe.copied_from_name && (
+                <span className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+                  <BookmarkCheck size={14} />
+                  {t("recipe_owner_kicker", {
+                    name: recipe.copied_from_name,
+                  })}
+                </span>
+              )}
               <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
                 {recipe.title}
               </CardTitle>
-            )}
+            </div>
           </div>
         </CardHeader>
 
@@ -619,7 +721,7 @@ const Recipe = () => {
           {recipe.source && (
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
               <h2>{t("source")}:</h2>
-              <span className="[word-wrap:break-word]">
+              <span className="[word-wrap:break-word] whitespace-pre-wrap">
                 {linkifyText(recipe.source)}
               </span>
             </div>
@@ -639,6 +741,15 @@ const Recipe = () => {
           <NutritionPanel recipe={recipe} />
         </CardContent>
       </Card>
+
+      {!isOwner && (
+        <AddToMyRecipesModal
+          open={showCopyModal}
+          onOpenChange={setShowCopyModal}
+          isSaving={isCopying}
+          onConfirm={handleConfirmCopy}
+        />
+      )}
     </>
   );
 };

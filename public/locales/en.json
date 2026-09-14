@@ -186,6 +186,15 @@
   "recipe_visible_to_friends": "Recipe visible to friends",
   "recipe_privacy_update_failed": "Failed to update recipe privacy",
 
+  "add_to_my_recipes": "Add to My Recipes",
+  "add_to_my_recipes_modal_title": "Add to My Recipes",
+  "add_to_my_recipes_select_category": "Choose a category to save this recipe under.",
+  "recipe_copied_to_my_recipes": "Recipe added to your recipes",
+  "recipe_copy_to_my_recipes_failed": "Failed to add recipe to your recipes",
+  "recipe_owner_kicker": "{{name}}'s",
+  "recipe_already_saved": "Already in your recipes",
+  "recipe_already_saved_go_to_copy": "View your copy",
+
   "profile": "Profile",
   "categories": "Categories",
   "category_management_description": "Reorder categories and choose which ones to display.",

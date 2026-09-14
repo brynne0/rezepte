@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, vi } from "vitest";
 
 vi.mock("./recipeTranslationService", () => ({
   updateRecipeTranslations: vi.fn(),
+  translateText: vi.fn((text) => Promise.resolve(text)),
 }));
 
 vi.mock("./imageService", () => ({
@@ -26,6 +27,9 @@ import {
   createRecipe,
   updateRecipe,
   deleteRecipe,
+  copyRecipeFromFriend,
+  findCopiedRecipe,
+  fetchCopiedRecipeIds,
 } from "./recipes";
 import supabase from "../lib/supabase";
 import { uploadLocalImages } from "./imageService";
@@ -46,10 +50,13 @@ const makeQueryBuilder = (result) => {
     "ilike",
     "order",
     "range",
+    "not",
+    "limit",
   ].forEach((method) => {
     builder[method] = vi.fn(() => builder);
   });
   builder.single = vi.fn(() => Promise.resolve(result));
+  builder.maybeSingle = vi.fn(() => Promise.resolve(result));
   builder.then = (resolve, reject) =>
     Promise.resolve(result).then(resolve, reject);
   return builder;
@@ -529,6 +536,205 @@ describe("recipes service", () => {
         );
 
       await expect(deleteRecipe("r1")).rejects.toThrow("db down");
+    });
+  });
+
+  describe("copyRecipeFromFriend", () => {
+    test("throws when there is no logged-in user", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+
+      await expect(copyRecipeFromFriend("r1", {})).rejects.toThrow(
+        "User not authenticated"
+      );
+    });
+
+    test("throws when copying your own recipe", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({
+          data: {
+            id: "r1",
+            user_id: currentUser.id,
+            recipe_ingredients: [],
+            recipe_categories: [],
+          },
+          error: null,
+        })
+      );
+
+      await expect(copyRecipeFromFriend("r1", {})).rejects.toThrow(
+        "Cannot copy your own recipe"
+      );
+    });
+
+    test("creates an independent copy without images, reusing ingredients by id and dropping recipe links", async () => {
+      const friendRecipe = {
+        id: "r1",
+        user_id: "friend-1",
+        title: "Soup",
+        servings: "4",
+        instructions: ["Boil"],
+        source: "Grandma's book",
+        notes: "Extra salt",
+        original_language: "en",
+        images: [{ id: "img1", path: "friend/r1/a.jpg" }],
+        nutrition: { calories: 200 },
+        recipe_ingredients: [
+          {
+            id: "ri1",
+            order_index: 0,
+            subheading: null,
+            quantity: "1",
+            unit: "can",
+            notes: null,
+            is_plural: false,
+            linked_recipe_id: "other-recipe",
+            ingredients: {
+              id: "i1",
+              singular_name: "tomato",
+              plural_name: "tomatoes",
+            },
+          },
+        ],
+        recipe_categories: [],
+      };
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: friendRecipe, error: null })
+      ); // fetchRecipe
+      const insertBuilder = makeQueryBuilder({
+        data: { id: "new1", slug: "soup" },
+        error: null,
+      });
+      const ingredientsInsertBuilder = makeQueryBuilder({ error: null });
+      supabase.from
+        .mockReturnValueOnce(insertBuilder) // recipes insert
+        .mockReturnValueOnce(ingredientsInsertBuilder); // recipe_ingredients insert
+
+      const result = await copyRecipeFromFriend("r1", {
+        categoryNames: [],
+        friendFirstName: "Jane",
+      });
+
+      expect(result).toEqual({ id: "new1", slug: "soup" });
+      expect(insertBuilder.insert).toHaveBeenCalledWith([
+        expect.objectContaining({
+          title: "Soup",
+          source: "Grandma's book",
+          user_id: currentUser.id,
+          images: [],
+          private: false,
+          copied_from_recipe_id: "r1",
+          copied_from_name: "Jane",
+        }),
+      ]);
+      expect(insertBuilder.insert.mock.calls[0][0][0]).not.toHaveProperty(
+        "translated_recipe"
+      );
+      expect(ingredientsInsertBuilder.insert).toHaveBeenCalledWith([
+        expect.objectContaining({
+          recipe_id: "new1",
+          ingredient_id: "i1",
+          linked_recipe_id: null,
+        }),
+      ]);
+    });
+
+    test("assigns categories to the copy using the current user's own categories", async () => {
+      const friendRecipe = {
+        id: "r1",
+        user_id: "friend-1",
+        title: "Soup",
+        original_language: "en",
+        images: [],
+        recipe_ingredients: [],
+        recipe_categories: [],
+      };
+      const insertBuilder = makeQueryBuilder({
+        data: { id: "new1", slug: "soup" },
+        error: null,
+      });
+      const recipeCategoriesInsertBuilder = makeQueryBuilder({ error: null });
+      supabase.from
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: friendRecipe, error: null })
+        ) // fetchRecipe
+        .mockReturnValueOnce(insertBuilder) // recipes insert
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: { id: "c1" }, error: null })
+        ) // getOrCreateCategory: existing category lookup
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: { id: "c1" }, error: null })
+        ) // addRecipeToCategory: category lookup
+        .mockReturnValueOnce(recipeCategoriesInsertBuilder); // recipe_categories insert
+
+      await copyRecipeFromFriend("r1", { categoryNames: ["Dinner"] });
+
+      expect(recipeCategoriesInsertBuilder.insert).toHaveBeenCalledWith({
+        recipe_id: "new1",
+        categoriy_id: "c1",
+      });
+    });
+  });
+
+  describe("findCopiedRecipe", () => {
+    test("returns null when there is no logged-in user", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+
+      expect(await findCopiedRecipe("r1")).toBeNull();
+    });
+
+    test("returns the current user's most recent copy of the recipe", async () => {
+      const builder = makeQueryBuilder({
+        data: { id: "c1", slug: "soup", created_at: "2026-01-01" },
+        error: null,
+      });
+      supabase.from.mockReturnValueOnce(builder);
+
+      const result = await findCopiedRecipe("r1");
+
+      expect(result).toEqual({
+        id: "c1",
+        slug: "soup",
+        created_at: "2026-01-01",
+      });
+      expect(builder.eq).toHaveBeenCalledWith("copied_from_recipe_id", "r1");
+    });
+
+    test("throws when the query fails", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: null, error: { message: "db down" } })
+      );
+
+      await expect(findCopiedRecipe("r1")).rejects.toThrow("db down");
+    });
+  });
+
+  describe("fetchCopiedRecipeIds", () => {
+    test("returns an empty set when there is no logged-in user", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+
+      expect(await fetchCopiedRecipeIds()).toEqual(new Set());
+    });
+
+    test("returns the set of recipe ids the user has already copied", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({
+          data: [
+            { copied_from_recipe_id: "r1" },
+            { copied_from_recipe_id: "r2" },
+          ],
+          error: null,
+        })
+      );
+
+      expect(await fetchCopiedRecipeIds()).toEqual(new Set(["r1", "r2"]));
+    });
+
+    test("throws when the query fails", async () => {
+      supabase.from.mockReturnValueOnce(
+        makeQueryBuilder({ data: null, error: { message: "db down" } })
+      );
+
+      await expect(fetchCopiedRecipeIds()).rejects.toThrow("db down");
     });
   });
 });

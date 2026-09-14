@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -7,6 +8,7 @@ import {
   fetchFriendRecipes,
 } from "../../../services/friendsService";
 import { getTranslatedRecipeTitle } from "../../../services/recipeTranslationService";
+import { fetchCopiedRecipeIds } from "../../../services/recipes";
 import { useOnlineStatus } from "../../../hooks/ui/useOnlineStatus";
 
 const buildFriendCategories = (translatedRecipes, currentLanguage) => {
@@ -86,6 +88,13 @@ export const useFriendRecipes = (username) => {
     enabled: !!friendUserId && isFriend === true,
   });
 
+  // Recipes the user has already copied, for the "already saved" badge.
+  const { data: copiedRecipeIds, isLoading: copiedIdsLoading } = useQuery({
+    queryKey: ["copiedRecipeIds"],
+    queryFn: fetchCopiedRecipeIds,
+    enabled: !!friendUserId && isFriend === true,
+  });
+
   const {
     data: translatedData,
     isLoading: translationLoading,
@@ -104,12 +113,25 @@ export const useFriendRecipes = (username) => {
     enabled: !!rawRecipes,
   });
 
+  // Kept separate from translation so this doesn't force a re-translate.
+  const recipesWithSavedFlag = useMemo(
+    () =>
+      (translatedData?.recipes ?? []).map((r) => ({
+        ...r,
+        alreadySaved: !!copiedRecipeIds?.has(r.id),
+      })),
+    [translatedData, copiedRecipeIds]
+  );
+
   const notFriends = !!friendUserId && isFriend === false;
   const loading =
     userLoading ||
     friendshipLoading ||
     (isFriend === true &&
-      (profileLoading || recipesLoading || translationLoading));
+      (profileLoading ||
+        recipesLoading ||
+        copiedIdsLoading ||
+        translationLoading));
 
   const hasError = !!(
     userError ||
@@ -130,7 +152,7 @@ export const useFriendRecipes = (username) => {
 
   return {
     friend: profile || friendUser || null,
-    recipes: translatedData?.recipes ?? [],
+    recipes: recipesWithSavedFlag,
     friendCategories: translatedData?.friendCategories ?? [],
     loading,
     notFriends,

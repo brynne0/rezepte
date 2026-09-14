@@ -618,7 +618,8 @@ describe("RecipeForm", () => {
       expect(screen.getByText("Brunch")).toBeInTheDocument();
       expect(mockHookReturn.handleInputChange).toHaveBeenCalledWith(
         "categories",
-        ["desserts", "Brunch"]
+        ["desserts", "Brunch"],
+        true
       );
     });
 

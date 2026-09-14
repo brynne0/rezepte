@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Clipboard, Plus } from "lucide-react";
+import { ArrowLeft, Clipboard } from "lucide-react";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "./hooks/useRecipeForm";
@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ImageUpload from "../ImageUpload/ImageUpload";
+import CategoryPicker from "../CategoryPicker/CategoryPicker";
 import RecipeLinkDropdown from "./components/RecipeLinkDropdown";
 import IngredientsSection from "./components/IngredientsSection";
 import InstructionsSection from "./components/InstructionsSection";
@@ -30,7 +31,6 @@ import {
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -95,11 +95,6 @@ const RecipeForm = ({
   const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
   const [linkingIngredient, setLinkingIngredient] = useState(null);
 
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [addCategoryError, setAddCategoryError] = useState("");
-  const [pendingNewCategories, setPendingNewCategories] = useState([]);
-
   const handleAutofill = useRecipeAutofill({
     setFormData,
     handleInputChange,
@@ -134,49 +129,6 @@ const RecipeForm = ({
   };
 
   const selectedCategories = formData.categories || [];
-
-  const handleStartAddCategory = () => {
-    setIsAddingCategory(true);
-    setNewCategoryName("");
-    setAddCategoryError("");
-  };
-
-  const handleCancelAddCategory = () => {
-    setIsAddingCategory(false);
-    setNewCategoryName("");
-    setAddCategoryError("");
-  };
-
-  // Categories rendered in the toggle group: real ones from the server plus
-  // any not-yet-created ones the user typed in this session.
-  const displayCategories = [
-    ...(categories || []),
-    ...pendingNewCategories
-      .filter((name) => !categories?.some((c) => c.value === name))
-      .map((name) => ({ value: name, label: name })),
-  ];
-
-  const handleSaveNewCategory = () => {
-    const trimmedName = newCategoryName.trim();
-    if (!trimmedName) {
-      setAddCategoryError(t("category_name_required"));
-      return;
-    }
-
-    const isDuplicate = displayCategories.some(
-      (category) => category.label.toLowerCase() === trimmedName.toLowerCase()
-    );
-    if (isDuplicate) {
-      setAddCategoryError(t("category_name_already_exists"));
-      return;
-    }
-
-    setPendingNewCategories((prev) => [...prev, trimmedName]);
-    handleInputChange("categories", [...selectedCategories, trimmedName]);
-    setIsAddingCategory(false);
-    setNewCategoryName("");
-    setAddCategoryError("");
-  };
 
   return (
     <>
@@ -297,89 +249,16 @@ const RecipeForm = ({
                 className={isEditingTranslation ? "opacity-50" : ""}
               >
                 <FieldLabel id="category-label">{t("category")}</FieldLabel>
-                <ToggleGroup
-                  variant="outline"
-                  multiple
-                  value={selectedCategories}
-                  onValueChange={(value) =>
+                <CategoryPicker
+                  categories={categories}
+                  selected={selectedCategories}
+                  onChange={(value) =>
                     handleInputChange("categories", value, true)
                   }
-                  aria-labelledby="category-label"
-                  className="flex flex-wrap"
                   disabled={isEditingTranslation}
-                >
-                  {displayCategories
-                    .filter((category) => category.value !== "all_recipes")
-                    .map((category) => (
-                      <ToggleGroupItem
-                        key={category.value}
-                        value={category.value}
-                        className="aria-pressed:border-accent-red aria-pressed:bg-accent-red/10 aria-pressed:text-accent-red"
-                      >
-                        {category.label}
-                      </ToggleGroupItem>
-                    ))}
-                </ToggleGroup>
+                  labelledBy="category-label"
+                />
                 <FieldError>{validationErrors.category}</FieldError>
-
-                {!isEditingTranslation &&
-                  (isAddingCategory ? (
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="text"
-                          autoFocus
-                          value={newCategoryName}
-                          onChange={(e) => {
-                            setNewCategoryName(e.target.value);
-                            if (addCategoryError) setAddCategoryError("");
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleSaveNewCategory();
-                            } else if (e.key === "Escape") {
-                              handleCancelAddCategory();
-                            }
-                          }}
-                          placeholder={t("category_name")}
-                          aria-invalid={!!addCategoryError}
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={handleSaveNewCategory}
-                        >
-                          {t("add_category")}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleCancelAddCategory}
-                        >
-                          {t("cancel")}
-                        </Button>
-                      </div>
-                      {addCategoryError && (
-                        <span className="text-sm text-destructive">
-                          {addCategoryError}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleStartAddCategory}
-                      >
-                        <Plus size={16} />
-                        {t("add_category")}
-                      </Button>
-                    </div>
-                  ))}
               </Field>
 
               {/* Recipe Images */}

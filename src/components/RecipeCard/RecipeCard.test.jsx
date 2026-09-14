@@ -319,6 +319,55 @@ describe("RecipeCard", () => {
     });
   });
 
+  describe("Already Saved Badge", () => {
+    it("shows the saved badge when recipe.alreadySaved is true", () => {
+      const savedRecipe = {
+        id: 1,
+        title: "Already Saved Recipe",
+        alreadySaved: true,
+      };
+
+      render(<RecipeCard recipe={savedRecipe} onClick={mockOnClick} />);
+
+      expect(
+        screen.getByRole("img", { name: "recipe_already_saved" })
+      ).toBeInTheDocument();
+    });
+
+    it("does not show the saved badge when recipe.alreadySaved is false", () => {
+      const unsavedRecipe = {
+        id: 1,
+        title: "Not Saved Recipe",
+        alreadySaved: false,
+      };
+
+      render(<RecipeCard recipe={unsavedRecipe} onClick={mockOnClick} />);
+
+      expect(
+        screen.queryByRole("img", { name: "recipe_already_saved" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows both the saved badge and the source link icon together", () => {
+      const savedRecipeWithLink = {
+        id: 1,
+        title: "Saved With Link",
+        alreadySaved: true,
+        source: "https://example.com",
+        hasIngredients: false,
+      };
+
+      render(<RecipeCard recipe={savedRecipeWithLink} onClick={mockOnClick} />);
+
+      expect(
+        screen.getByRole("img", { name: "recipe_already_saved" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "open_recipe_source_link" })
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("Image Display Toggle", () => {
     const recipeWithImage = {
       id: 1,

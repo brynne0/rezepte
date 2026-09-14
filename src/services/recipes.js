@@ -684,6 +684,29 @@ const getOrCreateCategory = async (categoryName, currentLanguage = "en") => {
   }
 };
 
+// Resolve/create categories and attach them to a recipe. Shared by
+// createRecipe and copyRecipeFromFriend.
+const assignCategories = async (
+  recipeId,
+  categoryNames,
+  originalLanguage = "en",
+  onEachAssigned = null
+) => {
+  const validNames = (categoryNames || []).filter(
+    (name) => name && name !== "all_recipes"
+  );
+
+  let categoriesDone = 0;
+  for (const categoryName of validNames) {
+    const category = await getOrCreateCategory(categoryName, originalLanguage);
+    if (category) {
+      await addRecipeToCategory(recipeId, categoryName);
+    }
+    categoriesDone++;
+    onEachAssigned?.(categoriesDone, validNames.length);
+  }
+};
+
 // Create a new recipe
 export const createRecipe = async (recipeData, onProgress = null) => {
   const {
@@ -710,7 +733,6 @@ export const createRecipe = async (recipeData, onProgress = null) => {
   const totalSteps = 1 + ingredientCount + categoryCount + localImageCount;
   let completedSteps = 0;
   let ingredientsDone = 0;
-  let categoriesDone = 0;
   const reportProgress = (phase, phaseCompleted, phaseTotal) =>
     onProgress?.({
       completed: completedSteps,
@@ -890,22 +912,15 @@ export const createRecipe = async (recipeData, onProgress = null) => {
 
   // Handle category assignment using new many-to-many system
   if (recipeData.categories && recipeData.categories.length > 0) {
-    for (const categoryName of recipeData.categories) {
-      if (categoryName && categoryName !== "all_recipes") {
-        // First, try to get or create the category
-        const category = await getOrCreateCategory(
-          categoryName,
-          recipeData.original_language || "en"
-        );
-        if (category) {
-          await addRecipeToCategory(recipe.id, categoryName);
-        }
-
+    await assignCategories(
+      recipe.id,
+      recipeData.categories,
+      recipeData.original_language || "en",
+      (done, total) => {
         completedSteps++;
-        categoriesDone++;
-        reportProgress("categories", categoriesDone, categoryCount);
+        reportProgress("categories", done, total);
       }
-    }
+    );
   }
 
   if (recipeData.images && recipeData.images.length > 0) {
@@ -972,7 +987,6 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
   const totalSteps = 1 + ingredientCount + categoryCount + localImageCount;
   let completedSteps = 0;
   let ingredientsDone = 0;
-  let categoriesDone = 0;
   const reportProgress = (phase, phaseCompleted, phaseTotal) =>
     onProgress?.({
       completed: completedSteps,
@@ -1218,21 +1232,15 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
         .eq("id", id)
         .single();
 
-      for (const categoryName of recipeData.categories) {
-        if (categoryName && categoryName !== "all_recipes") {
-          const category = await getOrCreateCategory(
-            categoryName,
-            recipeLanguage?.original_language || "en"
-          );
-          if (category) {
-            await addRecipeToCategory(id, categoryName);
-          }
-
+      await assignCategories(
+        id,
+        recipeData.categories,
+        recipeLanguage?.original_language || "en",
+        (done, total) => {
           completedSteps++;
-          categoriesDone++;
-          reportProgress("categories", categoriesDone, categoryCount);
+          reportProgress("categories", done, total);
         }
-      }
+      );
     }
   }
 
@@ -1345,4 +1353,148 @@ export const setRecipePrivate = async (id, isPrivate) => {
   }
 
   return true;
+};
+
+// Create an independent copy of a friend's recipe for the current user.
+// Ingredients are reused by id, no images are copied, and attribution is
+// stored separately in copied_from_name rather than in the source field.
+export const copyRecipeFromFriend = async (
+  friendRecipeId,
+  { categoryNames, friendFirstName } = {}
+) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const original = await fetchRecipe(friendRecipeId);
+
+  if (original.user_id === user.id) {
+    throw new Error("Cannot copy your own recipe");
+  }
+
+  const { data: newRecipe, error: recipeError } = await supabase
+    .from("recipes")
+    .insert([
+      {
+        title: original.title,
+        servings: original.servings,
+        instructions: original.instructions,
+        source: original.source,
+        user_id: user.id,
+        notes: original.notes,
+        original_language: original.original_language,
+        images: [],
+        nutrition: original.nutrition,
+        private: false,
+        copied_from_recipe_id: friendRecipeId,
+        copied_from_name: friendFirstName || null,
+      },
+    ])
+    .select()
+    .single();
+
+  if (recipeError) {
+    throw new Error(recipeError.message);
+  }
+
+  const allIngredients = [
+    ...original.ungroupedIngredients.map((ingredient) => ({
+      ...ingredient,
+      subheading: null,
+    })),
+    ...original.ingredientSections.flatMap((section) =>
+      section.ingredients.map((ingredient) => ({
+        ...ingredient,
+        subheading: section.subheading || null,
+      }))
+    ),
+  ];
+
+  if (allIngredients.length > 0) {
+    const recipeIngredientsToInsert = allIngredients.map(
+      (ingredient, index) => ({
+        recipe_id: newRecipe.id,
+        ingredient_id: ingredient.id,
+        quantity: ingredient.quantity,
+        unit: ingredient.unit,
+        notes: ingredient.notes,
+        subheading: ingredient.subheading,
+        order_index: index,
+        is_plural: ingredient.is_plural,
+        // Friend's linked recipe can't carry over - keep as a plain ingredient.
+        linked_recipe_id: null,
+      })
+    );
+
+    const { error: ingredientsError } = await supabase
+      .from("recipe_ingredients")
+      .insert(recipeIngredientsToInsert);
+
+    if (ingredientsError) {
+      throw new Error(
+        `Recipe copied but failed to add ingredients: ${ingredientsError.message}`
+      );
+    }
+  }
+
+  if (categoryNames && categoryNames.length > 0) {
+    await assignCategories(
+      newRecipe.id,
+      categoryNames,
+      original.original_language || "en"
+    );
+  }
+
+  return newRecipe;
+};
+
+// The user's most recent copy of this friend's recipe, if any. Returns
+// { id, slug, created_at } or null.
+export const findCopiedRecipe = async (friendRecipeId) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("id, slug, created_at")
+    .eq("user_id", user.id)
+    .eq("copied_from_recipe_id", friendRecipeId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
+// Recipe ids the user has already copied, for badging a friend's recipe
+// list without one query per card.
+export const fetchCopiedRecipeIds = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return new Set();
+
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("copied_from_recipe_id")
+    .eq("user_id", user.id)
+    .not("copied_from_recipe_id", "is", null);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return new Set((data || []).map((r) => r.copied_from_recipe_id));
 };

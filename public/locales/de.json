@@ -186,6 +186,15 @@
   "recipe_visible_to_friends": "Rezept für Freunde sichtbar",
   "recipe_privacy_update_failed": "Privatsphäre-Einstellung konnte nicht aktualisiert werden",
 
+  "add_to_my_recipes": "Zu meinen Rezepten hinzufügen",
+  "add_to_my_recipes_modal_title": "Zu meinen Rezepten hinzufügen",
+  "add_to_my_recipes_select_category": "Wähle eine Kategorie, unter der dieses Rezept gespeichert werden soll.",
+  "recipe_copied_to_my_recipes": "Rezept zu deinen Rezepten hinzugefügt",
+  "recipe_copy_to_my_recipes_failed": "Rezept konnte nicht hinzugefügt werden",
+  "recipe_owner_kicker": "Rezept von {{name}}",
+  "recipe_already_saved": "Bereits in deinen Rezepten",
+  "recipe_already_saved_go_to_copy": "Deine Kopie ansehen",
+
   "profile": "Profil",
   "categories": "Kategorien",
   "category_management_description": "Kategorien neu anordnen und auswählen, welche angezeigt werden sollen.",
