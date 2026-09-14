@@ -232,6 +232,11 @@ const Settings = ({ resetCategoryFilter }) => {
 
       await deleteUserAccount();
 
+      toast.add({
+        title: t("account_deleted_goodbye", { name: accountInfo.firstName }),
+        type: "success",
+      });
+
       // Show success message with account details
       setDeletedAccountInfo(accountInfo);
       setShowDeleteSuccess(true);
