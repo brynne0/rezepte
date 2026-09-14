@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <title>Confirm It's You</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: "Gabarito", Calibri, sans-serif;
+        line-height: 1.6;
+        color: #342a24;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 56px 24px;
+        background-color: #f2e7d2;
+        font-size: 16px;
+      }
+      .letterhead {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+        color: #7a6a5c;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .letterhead svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+      }
+      .icon-stroke {
+        stroke: #7a6a5c;
+      }
+      hr {
+        border: none;
+        border-top: 1px solid #523f1955;
+        margin: 0 0 32px;
+      }
+      h1 {
+        margin: 0 0 16px;
+        font-size: 20px;
+        font-weight: 700;
+        color: #342a24;
+      }
+      p.description {
+        margin: 0 0 24px;
+        color: #342a24;
+      }
+      .code {
+        display: inline-block;
+        background-color: #f8f2e6;
+        border: 1px solid #523f1955;
+        border-radius: 10px;
+        padding: 14px 24px;
+        font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: #342a24;
+        margin: 0 0 28px;
+      }
+      .footer-text {
+        margin: 40px 0 0;
+        font-size: 13px;
+        color: #7a6a5c;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #241d19;
+          color: #f0e8e0;
+        }
+        .letterhead {
+          color: #b7aca2;
+        }
+        .icon-stroke {
+          stroke: #b7aca2;
+        }
+        hr {
+          border-top-color: rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+          color: #f0e8e0;
+        }
+        p.description {
+          color: #f0e8e0;
+        }
+        .code {
+          background-color: #3e352f;
+          border-color: rgba(255, 255, 255, 0.1);
+          color: #f0e8e0;
+        }
+        .footer-text {
+          color: #b7aca2;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        body {
+          padding: 32px 16px;
+        }
+        .code {
+          font-size: 21px;
+          padding: 12px 18px;
+          letter-spacing: 0.2em;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="letterhead">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path class="icon-stroke" d="M15.236 22a3 3 0 0 0-2.2-5"></path>
+        <path
+          class="icon-stroke"
+          d="M16 20a3 3 0 0 1 3-3h1a2 2 0 0 0 2-2v-2a4 4 0 0 0-4-4V4"
+        ></path>
+        <path class="icon-stroke" d="M18 13h.01"></path>
+        <path
+          class="icon-stroke"
+          d="M18 6a4 4 0 0 0-4 4 7 7 0 0 0-7 7c0-5 4-5 4-10.5a4.5 4.5 0 1 0-9 0 2.5 2.5 0 0 0 5 0C7 10 3 11 3 17c0 2.8 2.2 5 5 5h10"
+        ></path>
+      </svg>
+      Rezepte
+    </div>
+    <hr />
+
+    <h1>Confirm It's You</h1>
+    <p class="description">
+      Enter this code to confirm the change to your Rezepte account:
+    </p>
+
+    <div class="code">{{ .Token }}</div>
+
+    <p class="footer-text">
+      This code will expire soon. If you didn't request this, you can safely
+      ignore this email.
+    </p>
+  </body>
+</html>
