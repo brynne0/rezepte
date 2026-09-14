@@ -3,7 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Lock, Eye, EyeOff } from "lucide-react";
 import supabase from "../../lib/supabase";
-import { changePassword, verifyCurrentPassword } from "../../services/auth";
+import {
+  changePassword,
+  verifyCurrentPassword,
+  signOut,
+} from "../../services/auth";
 import {
   validateChangePasswordForm,
   isPasswordStrong,
@@ -179,6 +183,7 @@ const ChangePassword = () => {
         if (error) {
           setErrorMessage(`${t("password_change_failed")}: ${error.message}`);
         } else {
+          await signOut();
           setShowSuccessMessage(true);
           setNewPassword("");
           setNewPasswordRepeat("");

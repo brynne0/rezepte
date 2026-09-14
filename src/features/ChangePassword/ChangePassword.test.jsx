@@ -33,6 +33,7 @@ vi.mock("../../lib/supabase", () => ({
 vi.mock("../../services/auth", () => ({
   changePassword: vi.fn(),
   verifyCurrentPassword: vi.fn(),
+  signOut: vi.fn(),
 }));
 
 vi.mock("../../utils/validation", () => ({
