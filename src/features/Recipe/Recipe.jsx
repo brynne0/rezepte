@@ -165,6 +165,19 @@ const Recipe = () => {
     enabled: showFriendBar,
   });
 
+  const existingCopyDate = existingCopy
+    ? (() => {
+        const copiedAt = new Date(existingCopy.created_at);
+        const isCurrentYear =
+          copiedAt.getFullYear() === new Date().getFullYear();
+        return copiedAt.toLocaleDateString(i18n.language, {
+          month: "short",
+          day: "numeric",
+          year: isCurrentYear ? undefined : "numeric",
+        });
+      })()
+    : null;
+
   useEffect(() => {
     if (!showFriendBar) {
       setFriendBar(null);
@@ -473,13 +486,13 @@ const Recipe = () => {
               )}
 
               {!isOwner && (
-                <div className="ml-auto flex shrink-0 items-center gap-2">
+                <ButtonGroup className="ml-auto shrink-0">
                   {existingCopy && (
                     <Tooltip>
                       <TooltipTrigger
                         render={
                           <Button
-                            variant="ghost"
+                            variant="dashed"
                             size="lg"
                             onClick={() =>
                               navigate(
@@ -489,12 +502,7 @@ const Recipe = () => {
                             aria-label={t("recipe_already_saved")}
                           >
                             <BookmarkCheck className="text-accent-red" />
-                            {new Date(
-                              existingCopy.created_at
-                            ).toLocaleDateString(i18n.language, {
-                              month: "short",
-                              day: "numeric",
-                            })}
+                            {existingCopyDate}
                           </Button>
                         }
                       />
@@ -524,7 +532,7 @@ const Recipe = () => {
                         : t("action_requires_internet")}
                     </TooltipContent>
                   </Tooltip>
-                </div>
+                </ButtonGroup>
               )}
             </div>
 
