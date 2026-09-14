@@ -20,6 +20,13 @@ vi.mock("../lib/supabase", () => ({
   },
 }));
 
+// Mock i18n - controls the language read by forgotPassword, resend, and changeEmail
+vi.mock("../lib/i18n", () => ({
+  default: {
+    language: "en",
+  },
+}));
+
 import {
   signUp,
   signIn,
@@ -32,6 +39,7 @@ import {
   getFirstName,
 } from "./auth";
 import supabase from "../lib/supabase";
+import i18n from "../lib/i18n";
 
 // Mock window.location
 const mockLocation = {
@@ -48,6 +56,8 @@ describe("Auth Service", () => {
     vi.clearAllMocks();
     // Reset console.error mock
     vi.spyOn(console, "error").mockImplementation(() => {});
+    // Reset current language between tests
+    i18n.language = "en";
   });
 
   describe("signUp", () => {
@@ -81,12 +91,42 @@ describe("Auth Service", () => {
             username: "johndoe",
             language: "en",
           },
+          emailRedirectTo: "https://example.com/?lang=en",
         },
       });
 
       expect(result).toEqual({
         data: mockData,
         error: null,
+      });
+    });
+
+    test("calls supabase auth.signUp with German language and redirect", async () => {
+      const mockData = {
+        user: {
+          id: "123",
+          email: "test@example.com",
+          identities: [{ id: "identity-1" }],
+        },
+      };
+      supabase.auth.signUp.mockResolvedValue({
+        data: mockData,
+        error: null,
+      });
+
+      await signUp("test@example.com", "Jan", "jandoe", "password123", "de");
+
+      expect(supabase.auth.signUp).toHaveBeenCalledWith({
+        email: "test@example.com",
+        password: "password123",
+        options: {
+          data: {
+            first_name: "Jan",
+            username: "jandoe",
+            language: "de",
+          },
+          emailRedirectTo: "https://example.com/?lang=de",
+        },
       });
     });
 
@@ -235,7 +275,7 @@ describe("Auth Service", () => {
       expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
         "test@example.com",
         {
-          redirectTo: "https://example.com/change-password",
+          redirectTo: "https://example.com/change-password?lang=en",
         }
       );
 
@@ -258,6 +298,40 @@ describe("Auth Service", () => {
         data: null,
         error: mockError,
       });
+    });
+
+    test("uses the current German language in the redirect URL", async () => {
+      i18n.language = "de";
+      supabase.auth.resetPasswordForEmail.mockResolvedValue({
+        data: {},
+        error: null,
+      });
+
+      await forgotPassword("test@example.com");
+
+      expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
+        "test@example.com",
+        {
+          redirectTo: "https://example.com/change-password?lang=de",
+        }
+      );
+    });
+
+    test("normalizes a regional German locale (de-DE) to de", async () => {
+      i18n.language = "de-DE";
+      supabase.auth.resetPasswordForEmail.mockResolvedValue({
+        data: {},
+        error: null,
+      });
+
+      await forgotPassword("test@example.com");
+
+      expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
+        "test@example.com",
+        {
+          redirectTo: "https://example.com/change-password?lang=de",
+        }
+      );
     });
 
     test("handles exceptions and logs errors", async () => {
@@ -283,6 +357,9 @@ describe("Auth Service", () => {
       expect(supabase.auth.resend).toHaveBeenCalledWith({
         type: "signup",
         email: "test@example.com",
+        options: {
+          emailRedirectTo: "https://example.com/?lang=en",
+        },
       });
       expect(result).toEqual({ data: {}, error: null });
     });
@@ -294,6 +371,21 @@ describe("Auth Service", () => {
       const result = await resendConfirmationEmail("test@example.com");
 
       expect(result).toEqual({ data: null, error: mockError });
+    });
+
+    test("uses the current German language in the redirect URL", async () => {
+      i18n.language = "de";
+      supabase.auth.resend.mockResolvedValue({ data: {}, error: null });
+
+      await resendConfirmationEmail("test@example.com");
+
+      expect(supabase.auth.resend).toHaveBeenCalledWith({
+        type: "signup",
+        email: "test@example.com",
+        options: {
+          emailRedirectTo: "https://example.com/?lang=de",
+        },
+      });
     });
 
     test("handles exceptions and logs them", async () => {
@@ -412,9 +504,10 @@ describe("Auth Service", () => {
 
       const result = await changeEmail("new@example.com");
 
-      expect(supabase.auth.updateUser).toHaveBeenCalledWith({
-        email: "new@example.com",
-      });
+      expect(supabase.auth.updateUser).toHaveBeenCalledWith(
+        { email: "new@example.com" },
+        { emailRedirectTo: "https://example.com/?lang=en" }
+      );
       expect(result).toEqual({ data: { user: mockUser }, error: null });
     });
 
@@ -431,6 +524,26 @@ describe("Auth Service", () => {
         error: { message: "No authenticated user" },
       });
       expect(supabase.auth.updateUser).not.toHaveBeenCalled();
+    });
+
+    test("uses the current German language in the redirect URL", async () => {
+      i18n.language = "de";
+      const mockUser = { id: "123" };
+      supabase.auth.getUser.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+      supabase.auth.updateUser.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+
+      await changeEmail("new@example.com");
+
+      expect(supabase.auth.updateUser).toHaveBeenCalledWith(
+        { email: "new@example.com" },
+        { emailRedirectTo: "https://example.com/?lang=de" }
+      );
     });
 
     test("handles updateUser errors and logs them", async () => {

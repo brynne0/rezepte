@@ -146,7 +146,7 @@ function Layout() {
 }
 
 function App() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isLoggedIn } = useAuth();
   const mainScrollRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState("all_recipes");
@@ -164,6 +164,24 @@ function App() {
   // Remove the static HTML splash once React has mounted and painted
   useEffect(() => {
     document.getElementById("splash")?.remove();
+  }, []);
+
+  // Apply the language requested by an auth email link (e.g. ?lang=de), then
+  // drop the param so it doesn't linger in the address bar.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const lang = params.get("lang");
+    if (lang && ["en", "de"].includes(lang)) {
+      i18n.changeLanguage(lang);
+      params.delete("lang");
+      const query = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname + (query ? `?${query}` : "")
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

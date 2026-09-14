@@ -66,6 +66,7 @@ vi.mock("react-i18next", () => ({
     i18n: mockI18n,
   }),
   I18nextProvider: ({ children }) => children,
+  initReactI18next: { type: "3rdParty", init: () => {} },
 }));
 
 // Create a test wrapper component

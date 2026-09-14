@@ -1,11 +1,14 @@
 <!doctype html>
-<html>
+<html lang="{{ if eq .Data.language `de` }}de{{ else }}en{{ end }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
-    <title>Confirm Your Email Address</title>
+    <title>
+      {{ if eq .Data.language "de" }}Bestätige deine E-Mail-Adresse{{ else
+      }}Confirm Your Email Address{{ end }}
+    </title>
     <style>
       :root {
         color-scheme: light dark;
@@ -131,6 +134,20 @@
     </div>
     <hr />
 
+    {{ if eq .Data.language "de" }}
+    <h1>Bestätige deine E-Mail-Adresse</h1>
+    <p class="description">
+      Danke, dass du dich bei Rezepte registriert hast. Bestätige diese
+      E-Mail-Adresse, um dein Konto zu aktivieren und Rezepte zu speichern.
+    </p>
+
+    <a href="{{ .ConfirmationURL }}" class="link-cta">Konto aktivieren →</a>
+
+    <p class="footer-text">
+      Falls du kein Rezepte-Konto erstellt hast, kannst du diese E-Mail
+      ignorieren.
+    </p>
+    {{ else }}
     <h1>Confirm Your Email Address</h1>
     <p class="description">
       Thanks for signing up for Rezepte. Confirm this email address to activate
@@ -142,5 +159,6 @@
     <p class="footer-text">
       If you didn't create a Rezepte account, you can safely ignore this email.
     </p>
+    {{ end }}
   </body>
 </html>

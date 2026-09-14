@@ -1,11 +1,14 @@
 <!doctype html>
-<html>
+<html lang="{{ if eq .Data.language `de` }}de{{ else }}en{{ end }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
-    <title>Confirm Your New Email</title>
+    <title>
+      {{ if eq .Data.language "de" }}Bestätige deine neue E-Mail-Adresse{{ else
+      }}Confirm Your New Email{{ end }}
+    </title>
     <style>
       :root {
         color-scheme: light dark;
@@ -131,6 +134,21 @@
     </div>
     <hr />
 
+    {{ if eq .Data.language "de" }}
+    <h1>Bestätige deine neue E-Mail-Adresse</h1>
+    <p class="description">
+      Du hast angefragt, die E-Mail-Adresse deines Rezepte-Kontos zu
+      <strong>{{ .NewEmail }}</strong> zu ändern. Bestätige diese Änderung
+      unten.
+    </p>
+
+    <a href="{{ .ConfirmationURL }}" class="link-cta">Änderung bestätigen →</a>
+
+    <p class="footer-text">
+      Falls du diese Änderung nicht angefordert hast, sichere dein Konto oder
+      kontaktiere den Support.
+    </p>
+    {{ else }}
     <h1>Confirm Your New Email</h1>
     <p class="description">
       You requested to change the email on your Rezepte account to
@@ -143,5 +161,6 @@
       If you didn't request this change, please secure your account or contact
       support.
     </p>
+    {{ end }}
   </body>
 </html>

@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import i18n from "../lib/i18n";
 
 export const signUp = async (
   email,
@@ -16,6 +17,7 @@ export const signUp = async (
         username,
         language,
       },
+      emailRedirectTo: `${window.location.origin}/?lang=${language}`,
     },
   });
 
@@ -28,9 +30,13 @@ export const signUp = async (
 
 export const resendConfirmationEmail = async (email) => {
   try {
+    const language = i18n.language.split("-")[0];
     const { data, error } = await supabase.auth.resend({
       type: "signup",
       email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/?lang=${language}`,
+      },
     });
 
     return { data, error };
@@ -125,8 +131,9 @@ export const signOut = async () => {
 
 export const forgotPassword = async (email) => {
   try {
+    const language = i18n.language.split("-")[0];
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/change-password`,
+      redirectTo: `${window.location.origin}/change-password?lang=${language}`,
     });
 
     return { data, error };
@@ -216,9 +223,11 @@ export const changeEmail = async (new_email) => {
       return { error: { message: "No authenticated user" } };
     }
 
-    const { data, error } = await supabase.auth.updateUser({
-      email: new_email,
-    });
+    const language = i18n.language.split("-")[0];
+    const { data, error } = await supabase.auth.updateUser(
+      { email: new_email },
+      { emailRedirectTo: `${window.location.origin}/?lang=${language}` }
+    );
 
     if (error) {
       console.error("Supabase updateUser error:", error);

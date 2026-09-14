@@ -1,11 +1,14 @@
 <!doctype html>
-<html>
+<html lang="{{ if eq .Data.language `de` }}de{{ else }}en{{ end }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
-    <title>Sign In to Rezepte</title>
+    <title>
+      {{ if eq .Data.language "de" }}Bei Rezepte anmelden{{ else }}Sign In to
+      Rezepte{{ end }}
+    </title>
     <style>
       :root {
         color-scheme: light dark;
@@ -131,6 +134,18 @@
     </div>
     <hr />
 
+    {{ if eq .Data.language "de" }}
+    <h1>Bei Rezepte anmelden</h1>
+    <p class="description">
+      Klicke unten, um dich anzumelden. Dieser Link läuft in Kürze ab.
+    </p>
+
+    <a href="{{ .ConfirmationURL }}" class="link-cta">Anmelden →</a>
+
+    <p class="footer-text">
+      Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren.
+    </p>
+    {{ else }}
     <h1>Sign In to Rezepte</h1>
     <p class="description">
       Click below to sign in. This link will expire shortly.
@@ -141,5 +156,6 @@
     <p class="footer-text">
       If you didn't request this, you can safely ignore this email.
     </p>
+    {{ end }}
   </body>
 </html>

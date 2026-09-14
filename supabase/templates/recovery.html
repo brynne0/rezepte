@@ -1,11 +1,14 @@
 <!doctype html>
-<html>
+<html lang="{{ if eq .Data.language `de` }}de{{ else }}en{{ end }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
-    <title>Reset Your Password</title>
+    <title>
+      {{ if eq .Data.language "de" }}Passwort zurücksetzen{{ else }}Reset Your
+      Password{{ end }}
+    </title>
     <style>
       :root {
         color-scheme: light dark;
@@ -131,6 +134,21 @@
     </div>
     <hr />
 
+    {{ if eq .Data.language "de" }}
+    <h1>Passwort zurücksetzen</h1>
+    <p class="description">
+      Wir haben eine Anfrage erhalten, das Passwort für dein Rezepte-Konto
+      zurückzusetzen. Klicke unten, um ein neues Passwort festzulegen.
+    </p>
+
+    <a href="{{ .ConfirmationURL }}" class="link-cta"
+      >Passwort zurücksetzen →</a
+    >
+
+    <p class="footer-text">
+      Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren.
+    </p>
+    {{ else }}
     <h1>Reset Your Password</h1>
     <p class="description">
       We received a request to reset the password for your Rezepte account.
@@ -142,5 +160,6 @@
     <p class="footer-text">
       If you didn't request a password reset, you can safely ignore this email.
     </p>
+    {{ end }}
   </body>
 </html>

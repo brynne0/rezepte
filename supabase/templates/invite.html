@@ -1,11 +1,14 @@
 <!doctype html>
-<html>
+<html lang="{{ if eq .Data.language `de` }}de{{ else }}en{{ end }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
-    <title>You're Invited to Rezepte</title>
+    <title>
+      {{ if eq .Data.language "de" }}Du bist zu Rezepte eingeladen{{ else
+      }}You're Invited to Rezepte{{ end }}
+    </title>
     <style>
       :root {
         color-scheme: light dark;
@@ -131,6 +134,20 @@
     </div>
     <hr />
 
+    {{ if eq .Data.language "de" }}
+    <h1>Du bist zu Rezepte eingeladen</h1>
+    <p class="description">
+      Du wurdest eingeladen, Rezepte beizutreten. Klicke unten, um die Einladung
+      anzunehmen und dein Konto zu erstellen.
+    </p>
+
+    <a href="{{ .ConfirmationURL }}" class="link-cta">Einladung annehmen →</a>
+
+    <p class="footer-text">
+      Falls du diese Einladung nicht erwartet hast, kannst du diese E-Mail
+      ignorieren.
+    </p>
+    {{ else }}
     <h1>You're Invited to Rezepte</h1>
     <p class="description">
       You've been invited to join Rezepte. Click below to accept the invitation
@@ -143,5 +160,6 @@
       If you weren't expecting this invitation, you can safely ignore this
       email.
     </p>
+    {{ end }}
   </body>
 </html>

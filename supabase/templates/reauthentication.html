@@ -1,11 +1,14 @@
 <!doctype html>
-<html>
+<html lang="{{ if eq .Data.language `de` }}de{{ else }}en{{ end }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
-    <title>Confirm It's You</title>
+    <title>
+      {{ if eq .Data.language "de" }}Bestätige, dass du es bist{{ else }}Confirm
+      It's You{{ end }}
+    </title>
     <style>
       :root {
         color-scheme: light dark;
@@ -141,6 +144,19 @@
     </div>
     <hr />
 
+    {{ if eq .Data.language "de" }}
+    <h1>Bestätige, dass du es bist</h1>
+    <p class="description">
+      Gib diesen Code ein, um die Änderung deines Rezepte-Kontos zu bestätigen:
+    </p>
+
+    <div class="code">{{ .Token }}</div>
+
+    <p class="footer-text">
+      Dieser Code läuft bald ab. Falls du das nicht angefordert hast, kannst du
+      diese E-Mail ignorieren.
+    </p>
+    {{ else }}
     <h1>Confirm It's You</h1>
     <p class="description">
       Enter this code to confirm the change to your Rezepte account:
@@ -152,5 +168,6 @@
       This code will expire soon. If you didn't request this, you can safely
       ignore this email.
     </p>
+    {{ end }}
   </body>
 </html>
