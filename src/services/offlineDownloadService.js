@@ -109,21 +109,35 @@ const downloadRecipe = async (recipe, userId) => {
   }
 };
 
+// updated_at is only set by the DB's UPDATE trigger, so a never-edited
+// recipe falls back to created_at.
+const isChangedSince = (recipe, sinceIso) => {
+  const changedAt = recipe.updated_at || recipe.created_at;
+  if (!changedAt) return true;
+  return new Date(changedAt) > new Date(sinceIso);
+};
+
 // Downloads every recipe's detail + images, one at a time rather than in
-// parallel, to avoid firing a burst of simultaneous requests.
+// parallel, to avoid firing a burst of simultaneous requests. `since`
+// limits this to recipes changed after that point.
 export const downloadAllRecipesForOffline = async ({
   recipes,
   userId,
   onProgress,
   signal,
+  since,
 }) => {
-  const total = recipes.length;
+  const recipesToDownload = since
+    ? recipes.filter((recipe) => isChangedSince(recipe, since))
+    : recipes;
+
+  const total = recipesToDownload.length;
   const failed = [];
 
   for (let i = 0; i < total; i++) {
     if (signal?.aborted) break;
 
-    const recipe = recipes[i];
+    const recipe = recipesToDownload[i];
     onProgress?.({ current: i, total, recipeTitle: recipe.title });
 
     try {
@@ -146,7 +160,7 @@ export const downloadAllRecipesForOffline = async ({
 
   const status = {
     completedAt: new Date().toISOString(),
-    total,
+    total: recipes.length,
     failedCount: failed.length,
     aborted,
   };

@@ -39,11 +39,21 @@ export const useOfflineDownload = (t) => {
         return;
       }
 
+      // Only skip unchanged recipes if the last download fully succeeded.
+      const previousStatus = getOfflineDownloadStatus();
+      const since =
+        previousStatus &&
+        !previousStatus.aborted &&
+        previousStatus.failedCount === 0
+          ? previousStatus.completedAt
+          : undefined;
+
       const result = await downloadAllRecipesForOffline({
         recipes,
         userId,
         onProgress: setProgress,
         signal: controller.signal,
+        since,
       });
 
       setStatus(getOfflineDownloadStatus());
@@ -57,6 +67,8 @@ export const useOfflineDownload = (t) => {
           }),
           type: "error",
         });
+      } else if (result.total === 0) {
+        toast.add({ title: t("offline_download_up_to_date"), type: "success" });
       } else {
         toast.add({ title: t("offline_download_success"), type: "success" });
       }

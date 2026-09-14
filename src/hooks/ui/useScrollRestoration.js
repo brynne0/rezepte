@@ -1,7 +1,13 @@
 import { useEffect } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 
-export const useScrollRestoration = (scrollRef, ready = true) => {
+// `canRestore` should be false when the list's order can change based on the
+// visit itself (e.g. sorting by most-recently-viewed)
+export const useScrollRestoration = (
+  scrollRef,
+  ready = true,
+  canRestore = true
+) => {
   const location = useLocation();
   const navigationType = useNavigationType();
 
@@ -24,11 +30,11 @@ export const useScrollRestoration = (scrollRef, ready = true) => {
     const el = scrollRef?.current;
     if (!el) return;
 
-    if (navigationType === "POP") {
+    if (navigationType === "POP" && canRestore) {
       const saved = sessionStorage.getItem(`scroll-${location.key}`);
       el.scrollTo(0, saved ? parseInt(saved, 10) : 0);
     } else {
       el.scrollTo(0, 0);
     }
-  }, [ready, location.key, navigationType, scrollRef]);
+  }, [ready, location.key, navigationType, scrollRef, canRestore]);
 };

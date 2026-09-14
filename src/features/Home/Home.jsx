@@ -29,7 +29,13 @@ function Home() {
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
   const mainScrollRef = useMainScrollRef();
-  useScrollRestoration(mainScrollRef, !isFetchingRecipes);
+  const isSortedByLastViewed =
+    sortBy === "last_viewed_at_asc" || sortBy === "last_viewed_at_desc";
+  useScrollRestoration(
+    mainScrollRef,
+    !isFetchingRecipes,
+    !isSortedByLastViewed
+  );
 
   return (
     <>
