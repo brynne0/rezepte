@@ -45,7 +45,6 @@ import ChangePassword from "./features/ChangePassword/ChangePassword";
 import ChangeEmail from "./features/ChangeEmail/ChangeEmail";
 import Settings from "./features/Settings/Settings";
 import FriendRecipes from "./features/FriendRecipes/FriendRecipes";
-import Showcase from "./features/Showcase/Showcase";
 
 function HomeRoute() {
   return (
@@ -251,7 +250,6 @@ function App() {
           { path: "/add-recipe", element: <AddRecipeRoute /> },
           { path: "/edit-recipe/:id/:slug", element: <EditRecipeRoute /> },
           { path: "/cooking-times", element: <CookingTimesRoute /> },
-          { path: "/showcase", element: <Showcase /> },
           { path: "/login", element: <Auth /> },
           { path: "/forgot-password", element: <ForgotPassword /> },
           { path: "/change-password", element: <ChangePassword /> },

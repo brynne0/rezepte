@@ -63,9 +63,6 @@ vi.mock("./features/Settings/Settings", () => ({
 vi.mock("./features/FriendRecipes/FriendRecipes", () => ({
   default: () => <div data-testid="friend-recipes-page">Friend Recipes</div>,
 }));
-vi.mock("./features/Showcase/Showcase", () => ({
-  default: () => <div data-testid="showcase-page">Showcase</div>,
-}));
 
 const basePaginationInfo = {
   totalCount: 0,
