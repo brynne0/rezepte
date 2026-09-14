@@ -1,5 +1,5 @@
 // React & hooks
-import { useState, useEffect, useRef, useContext, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 
 // Data hooks
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
@@ -32,27 +32,20 @@ import { useMainScrollRef } from "./hooks/ui/useMainScrollRef";
 import Header from "./components/Header/Header";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import RouteError from "./components/RouteError/RouteError";
-import LoadingAcorn from "./components/LoadingAcorn/LoadingAcorn";
 
 // Features
 import Home from "./features/Home/Home";
-const AddRecipePage = lazy(() => import("./features/AddRecipe/AddRecipe"));
-const EditRecipePage = lazy(() => import("./features/EditRecipe/EditRecipe"));
-const CookingTimes = lazy(() => import("./features/CookingTimes/CookingTimes"));
-const Auth = lazy(() => import("./features/Auth/Auth"));
-const Recipe = lazy(() => import("./features/Recipe/Recipe"));
-const ForgotPassword = lazy(
-  () => import("./features/ForgotPassword/ForgotPassword")
-);
-const ChangePassword = lazy(
-  () => import("./features/ChangePassword/ChangePassword")
-);
-const ChangeEmail = lazy(() => import("./features/ChangeEmail/ChangeEmail"));
-const Settings = lazy(() => import("./features/Settings/Settings"));
-const FriendRecipes = lazy(
-  () => import("./features/FriendRecipes/FriendRecipes")
-);
-const Showcase = lazy(() => import("./features/Showcase/Showcase"));
+import AddRecipePage from "./features/AddRecipe/AddRecipe";
+import EditRecipePage from "./features/EditRecipe/EditRecipe";
+import CookingTimes from "./features/CookingTimes/CookingTimes";
+import Auth from "./features/Auth/Auth";
+import Recipe from "./features/Recipe/Recipe";
+import ForgotPassword from "./features/ForgotPassword/ForgotPassword";
+import ChangePassword from "./features/ChangePassword/ChangePassword";
+import ChangeEmail from "./features/ChangeEmail/ChangeEmail";
+import Settings from "./features/Settings/Settings";
+import FriendRecipes from "./features/FriendRecipes/FriendRecipes";
+import Showcase from "./features/Showcase/Showcase";
 
 function HomeRoute() {
   return (
@@ -145,11 +138,7 @@ function Layout() {
         viewportRef={mainScrollRef}
       >
         <div className="mx-auto w-full max-w-7xl px-3 pt-3 md:px-8 md:pt-4">
-          <Suspense
-            fallback={<LoadingAcorn fullPage={false} className="mt-40" />}
-          >
-            <Outlet />
-          </Suspense>
+          <Outlet />
         </div>
       </ScrollArea>
     </>
@@ -171,6 +160,11 @@ function App() {
   const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [friendBar, setFriendBar] = useState(null);
+
+  // Remove the static HTML splash once React has mounted and painted
+  useEffect(() => {
+    document.getElementById("splash")?.remove();
+  }, []);
 
   useEffect(() => {
     writeCachedValue("recipe_sort_preference", sortBy);

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
@@ -17,6 +17,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "cn";
+
+const loadedImageUrls = new Set();
 
 const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   const { t } = useTranslation();
@@ -49,7 +51,17 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   // Only show images if showImages is true AND card has been visible
   const shouldShowImages = showImages && hasBeenVisible;
 
+  // Skip the skeleton/fade-in for images we've already loaded this session
+  useEffect(() => {
+    if (optimizedImageUrl && loadedImageUrls.has(optimizedImageUrl)) {
+      setImageLoaded(true);
+    }
+  }, [optimizedImageUrl]);
+
   const handleImageLoad = () => {
+    if (optimizedImageUrl) {
+      loadedImageUrls.add(optimizedImageUrl);
+    }
     setImageLoaded(true);
     setImageError(false);
   };
