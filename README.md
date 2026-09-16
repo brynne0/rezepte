@@ -5,7 +5,7 @@ Built to have all my recipes in one place.
 
 ## Tech Stack
 
-- **Frontend:** React
+- **Frontend:** React, Tailwind CSS, shadcn/ui
 - **Backend:** Node.js
 - **Database:** Supabase
 
@@ -13,34 +13,29 @@ Built to have all my recipes in one place.
 
 ### Current functionality:
 
-- Login/signup and account management functionality
+- Login/signup and account management
 - Filter, search and sort recipes
 - Users can view, add, edit and delete their own recipes
-- Users can add images and toggle image visibility on home page (images hidden when not logged in)
-- Users can share recipe using individual shared links
-- Responsive design for mobiles (drop down menu)
-- Multi-language interface (German and English)
-- Cooking times page to display common cooking times and conversions (e.g. cup to tbsp)
+- Autofill a recipe by pasting a URL or raw text into the add recipe form
+- Users can add and crop images, and toggle image visibility on the home page
 - Category Management - add, remove and reorder recipe categories
+- Friend system - add friends, browse their recipes, and add friends' recipes to your own collection
+- Offline mode - download recipes from Settings to use the app without a connection on that device
+- Cooking times page to display common cooking times and conversions (e.g. cup to tbsp)
+- Multi-language interface (German and English)
 - Light and dark mode
-
-### In Progress/Future functionality:
-
-- Friend system - add friends and browse their recipes
-- Shared link management - bulk select and alter if recipes are public
-- Imaging cropping - crop and reposition recipe images
+- Mobile and desktop 
 
 ### Screenshots:
+<img width="200" alt="Login" src="https://github.com/user-attachments/assets/2128308c-05d1-44ce-9b11-291205a8cca5" />
+<img width="200" alt="Light Mode" src="https://github.com/user-attachments/assets/9b6c102b-d3f7-4041-9a66-5700c23190a5" />
+<img width="200" alt="Home Page" src="https://github.com/user-attachments/assets/41ec68fd-1121-45a9-994e-047c996bd36a" />
+<img width="200" alt="No Internet" src="https://github.com/user-attachments/assets/a6ae2cd6-907c-4a48-bbde-ab1c3f600a7b" />
+<img width="200" alt="Recipe" src="https://github.com/user-attachments/assets/a4514c19-cec9-4d9d-b8fd-60c289991711" />
+<img width="200" alt="Add Recipe" src="https://github.com/user-attachments/assets/564bb7c8-c3da-4d82-8a67-745a27072fae" />
+<img width="200" alt="Cooking Times" src="https://github.com/user-attachments/assets/55233310-4faa-4494-a704-913e60105df8" />
+<img width="200" alt="Conversions" src="https://github.com/user-attachments/assets/b043a504-246d-42dd-a5d6-fb8b1c3e7dc2" />
 
-<img width="200" alt="Mobile Homepage" src="https://github.com/user-attachments/assets/3db0bbcf-5700-4e3c-ae0f-0ad8a6fd70ec" />
-<img width="200" alt="Mobile Recipe" src="https://github.com/user-attachments/assets/bd4f90ca-ecc2-4175-87b1-7875d5ccaf27" />
-<img width="200" alt="Login/Signup" src="https://github.com/user-attachments/assets/564674f9-4728-46e7-ae7d-5d6144f7cc6d" />
-<img width="200" alt="Share Recipe" src="https://github.com/user-attachments/assets/ebf903ba-0e69-4006-aaa1-f37f9f6b2b3a" />
-<img width="400" alt="Desktop Homepage" src="https://github.com/user-attachments/assets/f7fc5696-d339-4f45-b3ad-86b452340d5f" />
-<img width="400" alt="Desktop Recipe" src="https://github.com/user-attachments/assets/d4162af4-137b-4af9-87b0-644e0dc12eec" />
-<img width="400" alt="Conversion Page" src="https://github.com/user-attachments/assets/a29e3b7b-bbd0-4c65-b470-11703f5ea9f6" />
-<img width="400" alt="Category Management" src="https://github.com/user-attachments/assets/189a0dc0-5c61-4104-970f-a1cbba6af73d" />
-<img width="400" alt="Add Recipe Page" src="https://github.com/user-attachments/assets/0a59b9e5-9138-4833-a754-7a03cebaa4a4" />
 
 ### Deployment:
 
