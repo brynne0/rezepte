@@ -216,8 +216,9 @@ export const fetchFriendRecipes = async (friendUserId) => {
   const { data, error } = await supabase
     .from("recipes")
     .select(
-      `id, title, slug, images, source, created_at, updated_at, last_viewed_at,
-       recipe_categories(categoriy_id, categories(name, translated_category))`
+      `id, title, slug, images, source, instructions, created_at, updated_at, last_viewed_at,
+       recipe_categories(categoriy_id, categories(name, translated_category)),
+       recipe_ingredients!recipe_ingredients_recipe_id_fkey(id)`
     )
     .eq("user_id", friendUserId)
     .order("created_at", { ascending: false });
@@ -233,5 +234,6 @@ export const fetchFriendRecipes = async (friendUserId) => {
         .filter((rc) => rc.categories?.name)
         .map((rc) => [rc.categories.name, rc.categories.translated_category])
     ),
+    hasIngredients: recipe.recipe_ingredients?.length > 0,
   }));
 };

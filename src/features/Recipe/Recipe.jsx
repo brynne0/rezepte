@@ -333,7 +333,7 @@ const Recipe = () => {
     return (
       <li
         key={`${keyPrefix}-${index}-${ingredient.id}`}
-        className="flex items-center gap-2 py-0.5"
+        className="flex items-start gap-2 py-0.5"
       >
         <Checkbox
           checked={checkedIngredients[ingredient.recipe_ingredient_id] || false}
@@ -341,6 +341,7 @@ const Recipe = () => {
             handleCheckboxChange(ingredient.recipe_ingredient_id)
           }
           id={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
+          className="mt-0.5"
         />
         <label
           htmlFor={`ingredient-${keyPrefix}-${index}-${ingredient.id}`}
