@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppStateContext } from "../../contexts/AppStateContext";
 import { useFriendRecipes } from "./hooks/useFriendRecipes";
+import { filterSortPaginateRecipes } from "../../utils/recipeListFiltering";
 import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -56,36 +57,18 @@ const FriendRecipes = () => {
     return () => setFriendBar(null);
   }, [friend, loading, setFriendBar]);
 
-  const { recipes, totalPages } = useMemo(() => {
-    const searched = searchTerm
-      ? allRecipes.filter((r) =>
-          r.title?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      : allRecipes;
-
-    const filtered =
-      searchTerm || selectedCategory === "all_recipes"
-        ? searched
-        : searched.filter((r) => r.categories?.includes(selectedCategory));
-
-    const sorted = [...filtered].sort((a, b) => {
-      if (sortBy === "title_desc") {
-        return (b.title || "").localeCompare(a.title || "");
-      }
-      if (sortBy === "last_viewed_at_asc" || sortBy === "last_viewed_at_desc") {
-        const aTime = a.last_viewed_at ? new Date(a.last_viewed_at) : 0;
-        const bTime = b.last_viewed_at ? new Date(b.last_viewed_at) : 0;
-        return sortBy === "last_viewed_at_asc" ? aTime - bTime : bTime - aTime;
-      }
-      return (a.title || "").localeCompare(b.title || "");
-    });
-
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return {
-      recipes: sorted.slice(start, start + PAGE_SIZE),
-      totalPages: Math.ceil(sorted.length / PAGE_SIZE),
-    };
-  }, [allRecipes, searchTerm, selectedCategory, sortBy, currentPage]);
+  const { recipes, totalPages } = useMemo(
+    () =>
+      filterSortPaginateRecipes({
+        recipes: allRecipes,
+        searchTerm,
+        category: selectedCategory,
+        sortBy,
+        page: currentPage,
+        limit: PAGE_SIZE,
+      }),
+    [allRecipes, searchTerm, selectedCategory, sortBy, currentPage]
+  );
 
   const handleCategoryChange = (category) => {
     setSearchParams(category === "all_recipes" ? {} : { category }, {
@@ -144,13 +127,13 @@ const FriendRecipes = () => {
         setSelectedCategory={handleCategoryChange}
         searchTerm={searchTerm}
         setSearchTerm={handleSearchChange}
-        resetCategoryOnSearch={false}
         sortBy={sortBy}
         setSortBy={setSortBy}
         showImages={showImages}
         setShowImages={setShowImages}
         onPageReset={() => setCurrentPage(1)}
         showImageToggle={!!friend?.friends_can_view_images}
+        showRecentSort={false}
       />
 
       {allRecipes.length === 0 ? (

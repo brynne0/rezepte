@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabase from "../../lib/supabase";
 import { getTranslatedRecipeTitle } from "../../services/recipeTranslationService";
+import { filterSortPaginateRecipes } from "../../utils/recipeListFiltering";
 import { useAuth } from "./useAuth";
 
 // Fetch recipes with category information for the given user
@@ -41,7 +42,7 @@ export const fetchRecipesWithCategories = async (userId) => {
 // Fetch all recipes using client-side pagination and filtering
 export const useRecipesPagination = (
   page = 1,
-  limit = 12,
+  limit,
   category = "all_recipes",
   searchTerm = "",
   sortBy = "created_at_desc",
@@ -72,52 +73,18 @@ export const useRecipesPagination = (
     queryClient.invalidateQueries({ queryKey: ["recipes"] });
 
   // Client-side filtering, sorting and pagination
-  const paginatedData = useMemo(() => {
-    // First filter by search term if it exists
-    const searchFilteredRecipes = searchTerm
-      ? allRecipes.filter((recipe) =>
-          recipe.title?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      : allRecipes;
-
-    // Then filter by category (only if not searching or if all recipes are selected)
-    const filteredRecipes = searchTerm
-      ? searchFilteredRecipes // When searching, show all search results regardless of category
-      : category === "all_recipes"
-        ? allRecipes
-        : allRecipes.filter(
-            (r) => r.categories && r.categories.includes(category)
-          );
-
-    // Then sort the filtered results
-    const sortedRecipes = [...filteredRecipes].sort((a, b) => {
-      switch (sortBy) {
-        case "title_asc":
-          return (a.title || "").localeCompare(b.title || "");
-        case "title_desc":
-          return (b.title || "").localeCompare(a.title || "");
-        case "last_viewed_at_asc":
-          return new Date(a.last_viewed_at) - new Date(b.last_viewed_at);
-        case "last_viewed_at_desc":
-        default:
-          return new Date(b.last_viewed_at) - new Date(a.last_viewed_at);
-      }
-    });
-
-    // Then paginate the sorted results
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedRecipes = sortedRecipes.slice(startIndex, endIndex);
-
-    return {
-      recipes: paginatedRecipes,
-      totalCount: sortedRecipes.length,
-      totalPages: Math.ceil(sortedRecipes.length / limit),
-      currentPage: page,
-      hasNextPage: page < Math.ceil(sortedRecipes.length / limit),
-      hasPrevPage: page > 1,
-    };
-  }, [allRecipes, page, limit, category, searchTerm, sortBy]);
+  const paginatedData = useMemo(
+    () =>
+      filterSortPaginateRecipes({
+        recipes: allRecipes,
+        searchTerm,
+        category,
+        sortBy,
+        page,
+        limit,
+      }),
+    [allRecipes, page, limit, category, searchTerm, sortBy]
+  );
 
   return {
     recipes: paginatedData.recipes,

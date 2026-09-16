@@ -216,7 +216,7 @@ export const fetchFriendRecipes = async (friendUserId) => {
   const { data, error } = await supabase
     .from("recipes")
     .select(
-      `id, title, slug, images, source, instructions, created_at, updated_at, last_viewed_at,
+      `id, title, slug, images, source, instructions, created_at, updated_at,
        recipe_categories(categoriy_id, categories(name, translated_category)),
        recipe_ingredients!recipe_ingredients_recipe_id_fkey(id)`
     )

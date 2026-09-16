@@ -82,7 +82,7 @@ describe("RecipeFilters Component", () => {
       expect(mockSetSearchTerm).toHaveBeenCalledWith("soup");
     });
 
-    test("resets category to all_recipes when typing, by default", () => {
+    test("resets category to all_recipes when typing", () => {
       render(<RecipeFilters {...defaultProps} selectedCategory="brunch" />);
 
       fireEvent.change(screen.getByPlaceholderText("search"), {
@@ -90,22 +90,6 @@ describe("RecipeFilters Component", () => {
       });
 
       expect(mockSetSelectedCategory).toHaveBeenCalledWith("all_recipes");
-    });
-
-    test("does not reset category when resetCategoryOnSearch is false", () => {
-      render(
-        <RecipeFilters
-          {...defaultProps}
-          selectedCategory="brunch"
-          resetCategoryOnSearch={false}
-        />
-      );
-
-      fireEvent.change(screen.getByPlaceholderText("search"), {
-        target: { value: "soup" },
-      });
-
-      expect(mockSetSelectedCategory).not.toHaveBeenCalled();
     });
 
     test("clears the search input via the clear button", () => {

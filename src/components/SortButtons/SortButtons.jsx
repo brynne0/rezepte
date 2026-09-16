@@ -23,6 +23,7 @@ const SortButtons = ({
   onShowImagesChange,
   onPageReset,
   showImageToggle = true,
+  showRecentSort = true,
 }) => {
   const { t } = useTranslation();
 
@@ -71,20 +72,22 @@ const SortButtons = ({
         value={isRecentActive ? ["recent"] : isTitleActive ? ["title"] : []}
         variant="outline"
       >
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <ToggleGroupItem
-                value="recent"
-                onClick={handleRecentSort}
-                aria-label={t("sort_by_recently_used")}
-              >
-                {getRecentIcon()}
-              </ToggleGroupItem>
-            }
-          />
-          <TooltipContent>{t("sort_by_recently_used")}</TooltipContent>
-        </Tooltip>
+        {showRecentSort && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <ToggleGroupItem
+                  value="recent"
+                  onClick={handleRecentSort}
+                  aria-label={t("sort_by_recently_used")}
+                >
+                  {getRecentIcon()}
+                </ToggleGroupItem>
+              }
+            />
+            <TooltipContent>{t("sort_by_recently_used")}</TooltipContent>
+          </Tooltip>
+        )}
         <Tooltip>
           <TooltipTrigger
             render={

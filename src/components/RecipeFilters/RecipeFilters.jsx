@@ -22,13 +22,13 @@ const RecipeFilters = ({
   searchTerm,
   setSearchTerm,
   onSearchSubmit,
-  resetCategoryOnSearch = true,
   sortBy,
   setSortBy,
   showImages,
   setShowImages,
   onPageReset,
   showImageToggle = true,
+  showRecentSort = true,
 }) => {
   const { t } = useTranslation();
 
@@ -66,7 +66,7 @@ const RecipeFilters = ({
                 onChange={(e) => {
                   setCurrentSearchInput(e.target.value);
                   setSearchTerm(e.target.value);
-                  if (resetCategoryOnSearch && e.target.value.length > 0) {
+                  if (e.target.value.length > 0) {
                     setSelectedCategory("all_recipes");
                   }
                 }}
@@ -105,6 +105,7 @@ const RecipeFilters = ({
             onShowImagesChange={setShowImages}
             onPageReset={onPageReset}
             showImageToggle={showImageToggle}
+            showRecentSort={showRecentSort}
           />
         </div>
       </div>
