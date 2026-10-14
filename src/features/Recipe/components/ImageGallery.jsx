@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { getOptimizedImageUrl } from "../../../services/imageService";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Carousel,
@@ -13,25 +12,6 @@ const ImageGallery = ({ images = [] }) => {
   const [api, setApi] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState(new Set());
-
-  // Memoize optimized URLs to prevent refetching - smaller sizes for better performance
-  const optimizedUrls = useMemo(() => {
-    return images.reduce((acc, image) => {
-      acc[image.id] = {
-        main: getOptimizedImageUrl(image.url, {
-          width: 400,
-          height: 267,
-          quality: 55,
-        }),
-        thumb: getOptimizedImageUrl(image.url, {
-          width: 80,
-          height: 53,
-          quality: 45,
-        }),
-      };
-      return acc;
-    }, {});
-  }, [images]);
 
   // Reorder images so main image appears first
   const reorderedImages = useMemo(() => {
@@ -78,7 +58,7 @@ const ImageGallery = ({ images = [] }) => {
                     <Skeleton className="absolute inset-0 rounded-lg" />
                   )}
                   <img
-                    src={optimizedUrls[image.id]?.main}
+                    src={image.url}
                     alt={image.filename || "Recipe image"}
                     className={cn(
                       "size-full object-cover transition-opacity duration-200",
@@ -115,7 +95,7 @@ const ImageGallery = ({ images = [] }) => {
                   <Skeleton className="absolute inset-0 rounded-none" />
                 )}
                 <img
-                  src={optimizedUrls[image.id]?.thumb}
+                  src={image.url}
                   alt={image.filename || `Recipe image ${index + 1}`}
                   className={cn(
                     "size-full object-cover transition-opacity duration-200",

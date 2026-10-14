@@ -1,4 +1,5 @@
 import supabase from "../lib/supabase";
+import { compressImage } from "../utils/compressImage";
 
 // Configuration
 const STORAGE_BUCKET = "recipe-images";
@@ -65,6 +66,16 @@ export const validateImageFile = (file) => {
   return true;
 };
 
+// Never block a save on compression failure.
+const compressForUpload = async (file) => {
+  try {
+    return await compressImage(file);
+  } catch (error) {
+    console.error("Image compression failed, uploading original:", error);
+    return file;
+  }
+};
+
 // Generate unique filename
 const generateFileName = (originalName) => {
   const timestamp = Date.now();
@@ -85,13 +96,14 @@ export const uploadRecipeImage = async (
   try {
     validateImageFile(file);
 
-    const fileName = generateFileName(file.name);
+    const uploadFile = await compressForUpload(file);
+    const fileName = generateFileName(uploadFile.name);
     const filePath = `${userId}/${recipeId}/${fileName}`;
 
     // Upload file to storage
     const { error } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .upload(filePath, file, {
+      .upload(filePath, uploadFile, {
         cacheControl: "public, max-age=31536000, immutable", // Cache for 1 year (images are immutable due to unique filenames)
         upsert: false,
       });
@@ -103,12 +115,13 @@ export const uploadRecipeImage = async (
     let originalPath = existingOriginalPath || null;
     if (!originalPath && originalFile) {
       validateImageFile(originalFile);
-      const originalFileName = generateFileName(originalFile.name);
+      const uploadOriginal = await compressForUpload(originalFile);
+      const originalFileName = generateFileName(uploadOriginal.name);
       originalPath = `${userId}/${recipeId}/originals/${originalFileName}`;
 
       const { error: originalError } = await supabase.storage
         .from(STORAGE_BUCKET)
-        .upload(originalPath, originalFile, {
+        .upload(originalPath, uploadOriginal, {
           cacheControl: "public, max-age=31536000, immutable",
           upsert: false,
         });
@@ -125,8 +138,8 @@ export const uploadRecipeImage = async (
       original_path: originalPath,
       url: "", // Empty - generated on-demand
       filename: file.name,
-      size: file.size,
-      type: file.type,
+      size: uploadFile.size,
+      type: uploadFile.type,
       is_main: false,
       caption: "",
     };
@@ -152,6 +165,58 @@ export const deleteRecipeImage = async (imagePath) => {
   }
 };
 
+// Files directly in a folder, excluding subfolders.
+const listFilePaths = async (folder) => {
+  const { data, error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .list(folder, { limit: 1000 });
+
+  if (error) {
+    throw new Error(`List failed: ${error.message}`);
+  }
+
+  return (data || [])
+    .filter((item) => item.id)
+    .map((item) => `${folder}/${item.name}`);
+};
+
+// Deletes all files for a recipe, including originals.
+export const deleteRecipeImageFolder = async (userId, recipeId) => {
+  const folder = `${userId}/${recipeId}`;
+  const paths = [
+    ...(await listFilePaths(folder)),
+    ...(await listFilePaths(`${folder}/originals`)),
+  ];
+
+  if (paths.length === 0) return;
+
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).remove(paths);
+
+  if (error) {
+    throw new Error(`Delete failed: ${error.message}`);
+  }
+};
+
+// Deletes all of a user's images.
+export const deleteAllUserImages = async (userId) => {
+  const { data, error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .list(userId, { limit: 1000 });
+
+  if (error) {
+    throw new Error(`List failed: ${error.message}`);
+  }
+
+  // Subfolders (null id) are recipe folders.
+  const recipeIds = (data || [])
+    .filter((item) => !item.id)
+    .map((item) => item.name);
+
+  for (const recipeId of recipeIds) {
+    await deleteRecipeImageFolder(userId, recipeId);
+  }
+};
+
 // Update recipe images in database
 export const updateRecipeImages = async (recipeId, images) => {
   try {
@@ -168,30 +233,6 @@ export const updateRecipeImages = async (recipeId, images) => {
   } catch (error) {
     throw new Error(`Failed to update recipe images: ${error.message}`);
   }
-};
-
-// Get optimized image URL (for thumbnails, etc.)
-// Works with both public and signed URLs
-export const getOptimizedImageUrl = (signedUrl, options = {}) => {
-  if (!signedUrl) return null;
-
-  const { width, height, quality = 60 } = options; // Lower default quality for better performance
-
-  // If using Supabase storage, we can add transform parameters
-  if (signedUrl.includes("supabase")) {
-    const url = new URL(signedUrl);
-
-    // Add transform parameters to the URL
-    // For signed URLs, these get appended to existing query params (including the token)
-    if (width) url.searchParams.set("width", width);
-    if (height) url.searchParams.set("height", height);
-    url.searchParams.set("quality", quality);
-    url.searchParams.set("format", "origin"); // Use original format instead of WebP to preserve brightness consistency
-
-    return url.toString();
-  }
-
-  return signedUrl;
 };
 
 // Helper to get main image from images array
@@ -263,6 +304,7 @@ export const uploadLocalImages = async (
           id: image.id,
           is_main: image.is_main,
           caption: image.caption,
+          crop_area: image.crop_area,
         });
 
         // Clean up the local preview URL
@@ -303,7 +345,9 @@ export const cleanupOrphanedImages = async (oldImages, newImages) => {
 
   const newImageIds = new Set(newImages.map((img) => img.id));
   const pathsStillInUse = new Set(
-    newImages.flatMap((img) => [img.path, img.original_path].filter(Boolean))
+    newImages.flatMap((img) =>
+      [img.path, img.original_path, img.existingOriginalPath].filter(Boolean)
+    )
   );
   const imagesToDelete = oldImages.filter((img) => !newImageIds.has(img.id));
 

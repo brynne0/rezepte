@@ -5,7 +5,11 @@ import {
   updateRecipeTranslations,
 } from "./recipeTranslationService";
 import { translateTexts } from "./translationCore";
-import { uploadLocalImages, cleanupOrphanedImages } from "./imageService";
+import {
+  uploadLocalImages,
+  cleanupOrphanedImages,
+  deleteRecipeImageFolder,
+} from "./imageService";
 
 // Translate an ingredient name to English
 const translateIngredientNameToEnglish = async (name, language) => {
@@ -1328,13 +1332,24 @@ export const deleteRecipe = async (id) => {
   }
 
   // Delete the recipe
-  const { error: recipeError } = await supabase
+  const { data: deletedRecipes, error: recipeError } = await supabase
     .from("recipes")
     .delete()
-    .eq("id", id);
+    .eq("id", id)
+    .select("user_id");
 
   if (recipeError) {
     throw new Error(recipeError.message);
+  }
+
+  // Recipe is already gone, so don't throw on image cleanup failure.
+  const userId = deletedRecipes?.[0]?.user_id;
+  if (userId) {
+    try {
+      await deleteRecipeImageFolder(userId, id);
+    } catch (error) {
+      console.error(`Failed to delete images for recipe ${id}:`, error);
+    }
   }
 
   return true;

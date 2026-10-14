@@ -71,7 +71,7 @@ const ImageUpload = ({
   const [cropQueue, setCropQueue] = useState([]);
   const [cropSrc, setCropSrc] = useState(null);
 
-  const addImage = (file, originalFile) => {
+  const addImage = (file, originalFile, cropArea) => {
     const imageId = crypto.randomUUID();
     setLoadingImages((prev) => new Set(prev).add(imageId));
 
@@ -80,6 +80,7 @@ const ImageUpload = ({
       id: imageId,
       file,
       originalFile,
+      crop_area: cropArea,
       url: previewUrl,
       filename: file.name,
       size: file.size,
@@ -104,8 +105,8 @@ const ImageUpload = ({
     setCropSrc(remaining.length > 0 ? URL.createObjectURL(remaining[0]) : null);
   };
 
-  const handleCropSave = (croppedFile) => {
-    addImage(croppedFile, cropQueue[0]);
+  const handleCropSave = (croppedFile, cropArea) => {
+    addImage(croppedFile, cropQueue[0], cropArea);
     advanceCropQueue(cropQueue.slice(1));
   };
 
@@ -119,39 +120,41 @@ const ImageUpload = ({
   // (uncropped) photo, not the current display, so re-crops don't compound.
   const [recropTarget, setRecropTarget] = useState(null);
   const [recropSrc, setRecropSrc] = useState(null);
+  // Without an original, the saved crop area wouldn't match the next source.
+  const [recropFromOriginal, setRecropFromOriginal] = useState(false);
 
   const openRecrop = async (image) => {
-    if (image.isLocal) {
+    if (image.originalFile) {
       setRecropTarget(image);
-      setRecropSrc(URL.createObjectURL(image.originalFile || image.file));
+      setRecropFromOriginal(true);
+      setRecropSrc(URL.createObjectURL(image.originalFile));
       return;
     }
 
-    const src = image.original_path
-      ? await getSignedImageUrl(image.original_path)
-      : null;
+    // A local re-crop of a saved image still has its original in storage.
+    const originalPath = image.original_path || image.existingOriginalPath;
+    const src = originalPath ? await getSignedImageUrl(originalPath) : null;
     setRecropTarget(image);
+    setRecropFromOriginal(!!src);
     setRecropSrc(src || getDisplayUrl(image));
   };
 
   const closeRecrop = () => {
-    if (recropTarget?.isLocal) {
+    if (recropTarget?.originalFile) {
       URL.revokeObjectURL(recropSrc);
     }
     setRecropTarget(null);
     setRecropSrc(null);
   };
 
-  const handleRecropSave = (croppedFile) => {
+  const handleRecropSave = (croppedFile, cropArea) => {
     const replacement = {
       id: crypto.randomUUID(),
       file: croppedFile,
-      originalFile: recropTarget.isLocal
-        ? recropTarget.originalFile || recropTarget.file
-        : undefined,
-      existingOriginalPath: recropTarget.isLocal
-        ? undefined
-        : recropTarget.original_path,
+      crop_area: recropFromOriginal ? cropArea : undefined,
+      originalFile: recropTarget.originalFile,
+      existingOriginalPath:
+        recropTarget.original_path || recropTarget.existingOriginalPath,
       url: URL.createObjectURL(croppedFile),
       filename: croppedFile.name,
       size: croppedFile.size,
@@ -420,6 +423,9 @@ const ImageUpload = ({
             name: recropTarget.filename,
             type: recropTarget.type,
           }
+        }
+        initialCropArea={
+          recropFromOriginal ? recropTarget?.crop_area : undefined
         }
         onCancel={handleRecropCancel}
         onSave={handleRecropSave}

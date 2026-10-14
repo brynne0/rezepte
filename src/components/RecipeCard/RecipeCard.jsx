@@ -1,11 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, BookmarkCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
-import {
-  getMainImage,
-  getOptimizedImageUrl,
-} from "../../services/imageService";
+import { getMainImage } from "../../services/imageService";
 import { extractFirstUrl } from "../../utils/linkUtils";
 import { useIntersectionObserver } from "../../hooks/ui/useIntersectionObserver";
 import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
@@ -38,29 +35,21 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   );
   const signedMainImage = signedImages[0];
 
-  // Memoize optimised URL using stable primitive values to enable proper caching
-  const optimizedImageUrl = useMemo(() => {
-    if (!signedMainImage?.url) return null;
-    return getOptimizedImageUrl(signedMainImage.url, {
-      width: 240,
-      height: 160,
-      quality: 50,
-    });
-  }, [signedMainImage?.url]);
+  const imageUrl = signedMainImage?.url || null;
 
   // Only show images if showImages is true AND card has been visible
   const shouldShowImages = showImages && hasBeenVisible;
 
   // Skip the skeleton/fade-in for images we've already loaded this session
   useEffect(() => {
-    if (optimizedImageUrl && loadedImageUrls.has(optimizedImageUrl)) {
+    if (imageUrl && loadedImageUrls.has(imageUrl)) {
       setImageLoaded(true);
     }
-  }, [optimizedImageUrl]);
+  }, [imageUrl]);
 
   const handleImageLoad = () => {
-    if (optimizedImageUrl) {
-      loadedImageUrls.add(optimizedImageUrl);
+    if (imageUrl) {
+      loadedImageUrls.add(imageUrl);
     }
     setImageLoaded(true);
     setImageError(false);
@@ -141,31 +130,26 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
           </CardAction>
         )}
       </CardHeader>
-      {shouldShowImages &&
-        signedMainImage &&
-        !imageError &&
-        optimizedImageUrl && (
-          <AspectRatio
-            ratio={3 / 2}
-            className="mx-2 mb-2 overflow-hidden rounded-lg"
-          >
-            {!imageLoaded && (
-              <Skeleton className="absolute inset-0 rounded-lg" />
+      {shouldShowImages && signedMainImage && !imageError && imageUrl && (
+        <AspectRatio
+          ratio={3 / 2}
+          className="mx-2 mb-2 overflow-hidden rounded-lg"
+        >
+          {!imageLoaded && <Skeleton className="absolute inset-0 rounded-lg" />}
+          <img
+            className={cn(
+              "size-full object-cover transition-opacity duration-200 will-change-[opacity]",
+              imageLoaded ? "opacity-100" : "opacity-0"
             )}
-            <img
-              className={cn(
-                "size-full object-cover transition-opacity duration-200 will-change-[opacity]",
-                imageLoaded ? "opacity-100" : "opacity-0"
-              )}
-              src={optimizedImageUrl}
-              alt={recipe.title}
-              loading="lazy"
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              key={signedMainImage?.id}
-            />
-          </AspectRatio>
-        )}
+            src={imageUrl}
+            alt={recipe.title}
+            loading="lazy"
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            key={signedMainImage?.id}
+          />
+        </AspectRatio>
+      )}
     </Card>
   );
 };

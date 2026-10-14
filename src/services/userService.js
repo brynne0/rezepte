@@ -1,5 +1,6 @@
 import supabase from "../lib/supabase";
 import { getAuthenticatedUser } from "./authHelpers";
+import { deleteAllUserImages } from "./imageService";
 
 // Get user's preferred language from database
 export const getUserPreferredLanguage = async () => {
@@ -154,6 +155,13 @@ export const updateUserProfile = async (updates) => {
 export const deleteUserAccount = async () => {
   try {
     const user = await getAuthenticatedUser();
+
+    // Before the delete, while the session is still valid.
+    try {
+      await deleteAllUserImages(user.id);
+    } catch (error) {
+      console.error("Failed to delete user images:", error);
+    }
 
     // Delete user data from users table (this should trigger auth user deletion via database trigger)
     const { error: profileError } = await supabase

@@ -11,15 +11,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { getCroppedImageFile } from "../../utils/cropImage";
 
-const ImageCropDialog = ({ open, imageSrc, file, onCancel, onSave }) => {
+const ImageCropDialog = ({
+  open,
+  imageSrc,
+  file,
+  initialCropArea,
+  onCancel,
+  onSave,
+}) => {
   const { t } = useTranslation();
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [croppedArea, setCroppedArea] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const handleCropComplete = useCallback((_croppedArea, croppedAreaPx) => {
-    setCroppedAreaPixels(croppedAreaPx);
+  const handleCropComplete = useCallback((area, areaPixels) => {
+    setCroppedArea(area);
+    setCroppedAreaPixels(areaPixels);
   }, []);
 
   const handleSave = async () => {
@@ -31,7 +40,7 @@ const ImageCropDialog = ({ open, imageSrc, file, onCancel, onSave }) => {
         croppedAreaPixels,
         file
       );
-      onSave(croppedFile);
+      onSave(croppedFile, croppedArea);
     } finally {
       setSaving(false);
     }
@@ -69,6 +78,7 @@ const ImageCropDialog = ({ open, imageSrc, file, onCancel, onSave }) => {
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={handleCropComplete}
+              initialCroppedAreaPercentages={initialCropArea}
             />
           )}
         </div>

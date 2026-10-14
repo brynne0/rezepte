@@ -8,6 +8,7 @@ vi.mock("./recipeTranslationService", () => ({
 vi.mock("./imageService", () => ({
   uploadLocalImages: vi.fn(),
   cleanupOrphanedImages: vi.fn(),
+  deleteRecipeImageFolder: vi.fn(),
 }));
 
 vi.mock("../lib/supabase", () => ({
@@ -32,7 +33,7 @@ import {
   fetchCopiedRecipeIds,
 } from "./recipes";
 import supabase from "../lib/supabase";
-import { uploadLocalImages } from "./imageService";
+import { uploadLocalImages, deleteRecipeImageFolder } from "./imageService";
 
 // Supabase's real query builder is itself thenable, so `await` resolves at
 // any point in the chain. Every chain method returns the same builder, and
@@ -518,6 +519,29 @@ describe("recipes service", () => {
       expect(deleteRecipeBuilder.eq).toHaveBeenCalledWith("id", "r1");
     });
 
+    test("deletes the recipe's stored images after deleting the recipe", async () => {
+      supabase.from
+        .mockReturnValueOnce(makeQueryBuilder({ error: null }))
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: [{ user_id: "u1" }], error: null })
+        );
+
+      await expect(deleteRecipe("r1")).resolves.toBe(true);
+      expect(deleteRecipeImageFolder).toHaveBeenCalledWith("u1", "r1");
+    });
+
+    test("still resolves when deleting the stored images fails", async () => {
+      supabase.from
+        .mockReturnValueOnce(makeQueryBuilder({ error: null }))
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: [{ user_id: "u1" }], error: null })
+        );
+      deleteRecipeImageFolder.mockRejectedValueOnce(new Error("storage down"));
+      vi.spyOn(console, "error").mockImplementation(() => {});
+
+      await expect(deleteRecipe("r1")).resolves.toBe(true);
+    });
+
     test("throws when deleting the recipe's ingredients fails", async () => {
       supabase.from.mockReturnValueOnce(
         makeQueryBuilder({ error: { message: "db down" } })
@@ -536,6 +560,7 @@ describe("recipes service", () => {
         );
 
       await expect(deleteRecipe("r1")).rejects.toThrow("db down");
+      expect(deleteRecipeImageFolder).not.toHaveBeenCalled();
     });
   });
 
