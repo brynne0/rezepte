@@ -21,7 +21,9 @@ serve(async (req) => {
       pastedText,
       recipeUrl,
       availableCategories = [],
+      language = "en",
     } = await req.json();
+    const outputLanguage = language === "de" ? "German" : "English";
     const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 
     if (!ANTHROPIC_API_KEY) {
@@ -275,6 +277,7 @@ JSON format for recipes WITH ingredient sections (only use if original text has 
 }
 
 Important rules:
+- language: Write the title, ingredient names, notes, section subheadings and instructions in ${outputLanguage}, translating from the original if needed. Keep the JSON keys, unit values and category names exactly as specified below.
 - servings: Extract the actual number of servings as a string (e.g., "4", "6-8"). If no servings mentioned, use "" (empty string). DO NOT use the word "number".
 - Extract quantity as a number or fraction string (e.g., "2", "1/2", "1.5")
 - Extract unit using ONLY these values: "", "ml", "l", "g", "kg", "oz" (ounces), "lb" (pounds), "tsp", "tbsp", "cup/s", "can/s", "piece/s", "pinch/es"

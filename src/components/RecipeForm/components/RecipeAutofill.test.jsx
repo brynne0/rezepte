@@ -119,6 +119,7 @@ describe("RecipeAutofill", () => {
             pastedText: "Test recipe text",
             recipeUrl: null,
             availableCategories: ["breakfast", "lunch", "dinner", "dessert"],
+            language: "en",
           }),
         })
       );
@@ -259,6 +260,7 @@ describe("RecipeAutofill", () => {
               pastedText: "Test recipe text",
               recipeUrl: null,
               availableCategories: ["breakfast", "lunch", "dinner", "dessert"],
+              language: "en",
             })
           ),
         })
@@ -294,6 +296,7 @@ describe("RecipeAutofill", () => {
               pastedText: null,
               recipeUrl: "https://example.com/recipe",
               availableCategories: [],
+              language: "en",
             })
           ),
         })
@@ -327,6 +330,7 @@ describe("RecipeAutofill", () => {
               pastedText: null,
               recipeUrl: "www.example.com/recipe",
               availableCategories: [],
+              language: "en",
             })
           ),
         })
@@ -362,6 +366,7 @@ describe("RecipeAutofill", () => {
               pastedText: "Just some recipe text",
               recipeUrl: null,
               availableCategories: [],
+              language: "en",
             })
           ),
         })

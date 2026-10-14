@@ -8,7 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [pastedText, setPastedText] = useState("");
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState("");
@@ -79,6 +79,7 @@ const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
           pastedText: isUrlInput ? null : trimmedText,
           recipeUrl: isUrlInput ? trimmedText : null,
           availableCategories: availableCategories,
+          language: i18n.language?.split("-")[0] || "en",
         }),
       });
 

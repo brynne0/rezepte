@@ -118,6 +118,15 @@ describe("fractionUtils", () => {
       expect(formatQuantity(3.333)).toBe("3 1/3");
     });
 
+    test("formats sixths and fifths", () => {
+      expect(formatQuantity(1 / 6)).toBe("1/6");
+      expect(formatQuantity(0.17)).toBe("1/6");
+      expect(formatQuantity(5 / 6)).toBe("5/6");
+      expect(formatQuantity(1 + 1 / 6)).toBe("1 1/6");
+      expect(formatQuantity(0.2)).toBe("1/5");
+      expect(formatQuantity(2.4)).toBe("2 2/5");
+    });
+
     test("handles whole numbers", () => {
       expect(formatQuantity(1)).toBe("1");
       expect(formatQuantity(2)).toBe("2");

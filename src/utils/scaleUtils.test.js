@@ -93,6 +93,22 @@ describe("scaleUtils", () => {
       });
     });
 
+    test("uses decimals rather than fractions for metric units", () => {
+      expect(scaleIngredient("1", "kg", 1.5)).toEqual({
+        quantity: "1.5",
+        unit: "kg",
+      });
+      expect(scaleIngredient("1-2", "l", 1.2)).toEqual({
+        quantity: "1.2 - 2.4",
+        unit: "l",
+      });
+      // Non-metric units still get fractions
+      expect(scaleIngredient("2", "cup/s", 7 / 12)).toEqual({
+        quantity: "1 1/6",
+        unit: "cup/s",
+      });
+    });
+
     describe("~ prefix (approximate quantities)", () => {
       test("preserves ~ prefix after scaling", () => {
         // 400ml x 2 = 800ml — below the 1000ml threshold, stays as ml

@@ -18,6 +18,14 @@ const UNIT_DOWN = {
   lb: { threshold: 1, factor: 16, unit: "oz" },
 };
 
+// Metric amounts read naturally as decimals (1.2 l, not 1 1/5 l)
+const METRIC_UNITS = new Set(["ml", "l", "g", "kg"]);
+
+function formatScaledQuantity(value, unit) {
+  if (METRIC_UNITS.has(unit)) return parseFloat(value.toFixed(2)).toString();
+  return formatQuantity(value);
+}
+
 function convertUnit(value, unit) {
   let up = UNIT_UP[unit];
   while (up && value >= up.threshold) {
@@ -54,7 +62,7 @@ export function scaleIngredient(quantity, unit, multiplier) {
     if (typeof startVal === "number" && typeof endVal === "number") {
       // Scale both ends but keep the original unit (unit conversion is ambiguous for ranges)
       return {
-        quantity: `${formatQuantity(startVal * multiplier)} ${sep} ${formatQuantity(endVal * multiplier)}`,
+        quantity: `${formatScaledQuantity(startVal * multiplier, unit)} ${sep} ${formatScaledQuantity(endVal * multiplier, unit)}`,
         unit,
       };
     }
@@ -77,7 +85,7 @@ export function scaleIngredient(quantity, unit, multiplier) {
   );
 
   return {
-    quantity: prefix + formatQuantity(value),
+    quantity: prefix + formatScaledQuantity(value, convertedUnit || unit),
     unit: convertedUnit || unit,
   };
 }
