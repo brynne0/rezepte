@@ -25,6 +25,7 @@ const ImageCropDialog = ({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [croppedArea, setCroppedArea] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [opened, setOpened] = useState(false);
 
   const handleCropComplete = useCallback((area, areaPixels) => {
     setCroppedArea(area);
@@ -49,6 +50,7 @@ const ImageCropDialog = ({
   return (
     <Dialog
       open={open}
+      onOpenChangeComplete={setOpened}
       onOpenChange={(next, eventDetails) => {
         if (next) return;
         if (
@@ -69,7 +71,7 @@ const ImageCropDialog = ({
         </DialogHeader>
 
         <div className="relative h-72 w-full overflow-hidden rounded-lg bg-muted sm:h-128">
-          {imageSrc && (
+          {imageSrc && opened && (
             <Cropper
               image={imageSrc}
               crop={crop}
