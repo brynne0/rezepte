@@ -7,8 +7,6 @@ import {
   Menu,
   User,
   Users,
-  Sun,
-  Moon,
   Clock,
   Settings,
   LogOut,
@@ -32,7 +30,6 @@ import { signOut } from "../../services/auth";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useUserProfile } from "../../hooks/data/useUserProfile";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "../../hooks/ui/useTheme";
 import { useInstallPrompt } from "../../hooks/ui/useInstallPrompt";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
@@ -53,7 +50,6 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
   const location = useLocation();
 
   const { isLoggedIn } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
   const isOnline = useOnlineStatus();
 
@@ -156,26 +152,6 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
     );
   };
 
-  // Theme toggle
-  const getThemeIcon = () => {
-    return theme === "light" ? (
-      <Moon className="size-5" />
-    ) : (
-      <Sun className="size-5" />
-    );
-  };
-
-  const ThemeToggle = () => (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => toggleTheme()}
-      aria-label={theme === "light" ? t("theme_dark") : t("theme_light")}
-    >
-      {getThemeIcon()}
-    </Button>
-  );
-
   // Shared user dropdown menu
   const UserMenu = () => (
     <Tooltip>
@@ -233,11 +209,10 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
         )}
       >
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-6 md:pb-6">
-          {/* Language and Theme Selection */}
+          {/* Language Selection */}
           <div className="flex shrink-0 items-center md:gap-2">
             {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
             <LanguageSelector />
-            <ThemeToggle />
           </div>
 
           {/* Title */}

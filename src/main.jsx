@@ -7,8 +7,11 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { queryClient } from "./lib/queryClient";
+import { initTheme } from "./hooks/ui/useTheme";
 import "./lib/i18n";
 import "./style.css";
+
+initTheme();
 
 registerSW({
   immediate: true,

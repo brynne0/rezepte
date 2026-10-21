@@ -76,8 +76,11 @@
   "password_requirements_not_met": "Passwort muss alle Anforderungen erfüllen",
 
   "settings": "Einstellungen",
+  "preferences": "Präferenzen",
   "theme_light": "Hell",
   "theme_dark": "Dunkel",
+  "theme_system": "System",
+  "appearance": "Darstellung",
   "preferred_language": "Bevorzugte Sprache",
   "successfully_updated_profile": "Profil erfolgreich aktualisiert",
   "successfully_updated_language": "Bevorzugte Sprache erfolgreich aktualisiert",

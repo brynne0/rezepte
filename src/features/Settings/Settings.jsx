@@ -13,6 +13,7 @@ import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ProfileTab from "./components/ProfileTab";
+import PreferencesTab from "./components/PreferencesTab";
 import CategoriesTab from "./components/CategoriesTab";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -51,7 +52,6 @@ const Settings = ({ resetCategoryFilter }) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [tempFirstName, setTempFirstName] = useState("");
   const [tempUsername, setTempUsername] = useState("");
-  const [tempPreferredLanguage, setTempPreferredLanguage] = useState("en");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deletedAccountInfo, setDeletedAccountInfo] = useState(null);
@@ -67,7 +67,6 @@ const Settings = ({ resetCategoryFilter }) => {
   const handleEditProfile = () => {
     setTempFirstName(profileData?.first_name || "");
     setTempUsername(profileData?.username || "");
-    setTempPreferredLanguage(profileData?.preferred_language || "en");
     setUsernameError("");
     setIsEditingProfile(true);
     setTimeout(() => firstNameInputRef.current?.focus(), 0);
@@ -85,21 +84,14 @@ const Settings = ({ resetCategoryFilter }) => {
         }
       }
 
-      const languageChanged =
-        tempPreferredLanguage !== (profileData?.preferred_language || "en");
-
       await updateUserProfile({
         first_name: tempFirstName,
         username: tempUsername,
       });
-      if (languageChanged) {
-        await updateUserPreferredLanguage(tempPreferredLanguage);
-      }
       setProfileData({
         ...profileData,
         first_name: tempFirstName,
         username: tempUsername,
-        preferred_language: tempPreferredLanguage,
       });
       setIsEditingProfile(false);
       toast.add({ title: t("successfully_updated_profile"), type: "success" });
@@ -109,13 +101,11 @@ const Settings = ({ resetCategoryFilter }) => {
   };
 
   const handleCancelProfile = useCallback(() => {
-    i18n.changeLanguage(profileData?.preferred_language || "en");
     setTempFirstName("");
     setTempUsername("");
-    setTempPreferredLanguage(profileData?.preferred_language || "en");
     setUsernameError("");
     setIsEditingProfile(false);
-  }, [i18n, profileData]);
+  }, []);
 
   // Cancel editing when clicking outside the profile fields
   useEffect(() => {
@@ -148,9 +138,22 @@ const Settings = ({ resetCategoryFilter }) => {
     navigate("/change-email", { state: { fromSettings: true } });
   };
 
-  const handleLanguageChange = (language) => {
-    setTempPreferredLanguage(language);
+  const handleLanguageChange = async (language) => {
+    const previous = profileData?.preferred_language || "en";
+    if (language === previous) return;
+    setProfileData({ ...profileData, preferred_language: language });
     i18n.changeLanguage(language);
+    try {
+      await updateUserPreferredLanguage(language);
+      toast.add({ title: t("successfully_updated_language"), type: "success" });
+    } catch (err) {
+      setProfileData({ ...profileData, preferred_language: previous });
+      i18n.changeLanguage(previous);
+      toast.add({
+        title: `${t("failed_to_update_language")}: ${err.message}`,
+        type: "error",
+      });
+    }
   };
 
   const handleFriendsCanViewImagesChange = async (friendsCanViewImages) => {
@@ -317,6 +320,9 @@ const Settings = ({ resetCategoryFilter }) => {
                   <TabsTrigger value="profile" className="flex-1">
                     {t("profile")}
                   </TabsTrigger>
+                  <TabsTrigger value="preferences" className="flex-1">
+                    {t("preferences")}
+                  </TabsTrigger>
                   <TabsTrigger value="categories" className="flex-1">
                     {t("categories")}
                   </TabsTrigger>
@@ -326,32 +332,35 @@ const Settings = ({ resetCategoryFilter }) => {
 
             <CardContent>
               {activeTab === "profile" && (
-                <>
-                  <ProfileTab
-                    profileData={profileData}
-                    isEditingProfile={isEditingProfile}
-                    tempFirstName={tempFirstName}
-                    tempUsername={tempUsername}
-                    tempPreferredLanguage={tempPreferredLanguage}
-                    usernameError={usernameError}
-                    firstNameInputRef={firstNameInputRef}
-                    profileContainerRef={profileContainerRef}
-                    handleEditProfile={handleEditProfile}
-                    handleSaveProfile={handleSaveProfile}
-                    handleCancelProfile={handleCancelProfile}
-                    handleChangePassword={handleChangePassword}
-                    handleChangeEmail={handleChangeEmail}
-                    handleLanguageChange={handleLanguageChange}
-                    handleFriendsCanViewImagesChange={
-                      handleFriendsCanViewImagesChange
-                    }
-                    handleDeleteAccount={handleDeleteAccount}
-                    setTempFirstName={setTempFirstName}
-                    setTempUsername={setTempUsername}
-                    setUsernameError={setUsernameError}
-                    t={t}
-                  />
-                </>
+                <ProfileTab
+                  profileData={profileData}
+                  isEditingProfile={isEditingProfile}
+                  tempFirstName={tempFirstName}
+                  tempUsername={tempUsername}
+                  usernameError={usernameError}
+                  firstNameInputRef={firstNameInputRef}
+                  profileContainerRef={profileContainerRef}
+                  handleEditProfile={handleEditProfile}
+                  handleSaveProfile={handleSaveProfile}
+                  handleCancelProfile={handleCancelProfile}
+                  handleChangePassword={handleChangePassword}
+                  handleChangeEmail={handleChangeEmail}
+                  handleDeleteAccount={handleDeleteAccount}
+                  setTempFirstName={setTempFirstName}
+                  setTempUsername={setTempUsername}
+                  setUsernameError={setUsernameError}
+                  t={t}
+                />
+              )}
+              {activeTab === "preferences" && (
+                <PreferencesTab
+                  profileData={profileData}
+                  handleLanguageChange={handleLanguageChange}
+                  handleFriendsCanViewImagesChange={
+                    handleFriendsCanViewImagesChange
+                  }
+                  t={t}
+                />
               )}
               {activeTab === "categories" && (
                 <CategoriesTab

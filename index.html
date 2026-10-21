@@ -83,7 +83,9 @@
         const systemPrefersDark = window.matchMedia(
           "(prefers-color-scheme: dark)"
         ).matches;
-        const isDark = savedTheme ? savedTheme === "dark" : systemPrefersDark;
+        const isDark =
+          savedTheme === "dark" ||
+          (savedTheme !== "light" && systemPrefersDark);
 
         if (isDark) {
           document.documentElement.classList.add("dark");
