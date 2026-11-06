@@ -10,6 +10,7 @@ import {
   capitalizeForLanguage,
   mergeTranslatedField,
 } from "./translationCore";
+import { splitTextAndUrls } from "../utils/linkUtils";
 
 export { translateText };
 
@@ -191,6 +192,27 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
   }
 };
 
+// Rejoins translated text pieces with the original links.
+const rebuildSource = (sourceParts, sourceTextParts, translatedParts) => {
+  if (sourceParts.length === 0) return null;
+  return sourceParts
+    .map((part) => {
+      const index = sourceTextParts.indexOf(part);
+      if (index === -1) return part.text;
+      const translated = translatedParts[index] || part.text.trim();
+      const leading = part.text.match(/^\s*/)[0];
+      const trailing = part.text.match(/\s*$/)[0];
+      return `${leading}${translated}${trailing}`;
+    })
+    .join("");
+};
+
+// Old cached translations may contain mangled links.
+const sourceLinksIntact = (originalSource, cachedSource) => {
+  const urls = splitTextAndUrls(originalSource).filter((part) => part.isUrl);
+  return urls.every((url) => cachedSource?.includes(url.text));
+};
+
 // Get translated recipe data (title, instructions, notes, category, source)
 const getTranslatedRecipeData = async (recipe, targetLanguage) => {
   // Check if translation exists in storage
@@ -206,27 +228,26 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
         category: cachedTranslation.category,
         instructions: cachedTranslation.instructions,
         notes: cachedTranslation.notes,
-        source: cachedTranslation.source,
+        source: sourceLinksIntact(recipe.source, cachedTranslation.source)
+          ? cachedTranslation.source
+          : recipe.source,
       };
     }
   }
 
-  // Translation not stored, need to translate
-  // Check if source is a URL - URLs should not be translated
-  const sourceText = recipe.source || "";
-  const isSourceUrl =
-    sourceText.startsWith("http://") ||
-    sourceText.startsWith("https://") ||
-    sourceText.startsWith("www.");
+  // Only translate the text parts of the source, never links
+  const sourceParts = splitTextAndUrls(recipe.source);
+  const sourceTextParts = sourceParts.filter(
+    (part) => !part.isUrl && part.text.trim()
+  );
 
-  // Build translation array - always include source position for consistency
+  const instructionCount = recipe.instructions.length;
   const textsToTranslate = [
     recipe.title,
     recipe.category,
     recipe.notes || "",
-    // Always include source in the array, but use empty string for URLs
-    isSourceUrl ? "" : sourceText || "",
     ...recipe.instructions,
+    ...sourceTextParts.map((part) => part.text.trim()),
   ];
 
   const sourceLang = recipe.original_language || "en";
@@ -259,8 +280,14 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
           : translatedTexts[0],
       category: translatedCategory,
       notes: translatedTexts[2] || null,
-      source: isSourceUrl ? sourceText : translatedTexts[3] || null,
-      instructions: translatedTexts.slice(4).map(normaliseInstruction),
+      source: rebuildSource(
+        sourceParts,
+        sourceTextParts,
+        translatedTexts.slice(3 + instructionCount)
+      ),
+      instructions: translatedTexts
+        .slice(3, 3 + instructionCount)
+        .map(normaliseInstruction),
     };
 
     if (hadFailure) {

@@ -657,4 +657,66 @@ describe("Translation Service", () => {
       expect(result.instructions[0]).toBe("Mischen Sie die Zutaten.");
     });
   });
+
+  describe("Source Translation", () => {
+    const mockTranslator = async () => {
+      const mockSupabase = await import("../lib/supabase");
+      mockSupabase.default.functions.invoke.mockImplementation(
+        (_name, { body }) =>
+          Promise.resolve({
+            data: { translatedText: `T(${body.text})` },
+            error: null,
+          })
+      );
+    };
+
+    test("keeps links unchanged and translates surrounding text", async () => {
+      await mockTranslator();
+      const recipe = {
+        title: "Cake",
+        instructions: ["Bake"],
+        original_language: "en",
+        source: "From Grandma https://example.com/Cake-Recipe?id=1 thanks",
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      expect(result.source).toContain("https://example.com/Cake-Recipe?id=1");
+      expect(result.source).not.toContain("T(https");
+    });
+
+    test("leaves a link-only source untouched", async () => {
+      await mockTranslator();
+      const recipe = {
+        title: "Cake",
+        instructions: ["Bake"],
+        original_language: "en",
+        source: "www.example.com/Cake",
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      expect(result.source).toBe("www.example.com/Cake");
+    });
+
+    test("falls back to original source if cached link is mangled", async () => {
+      const recipe = {
+        title: "Cake",
+        instructions: ["Bake"],
+        original_language: "en",
+        source: "See https://example.com/Cake",
+        translated_recipe: {
+          de: {
+            title: "Kuchen",
+            instructions: ["Backen."],
+            source: "Siehe https://beispiel.com/Kuchen",
+          },
+        },
+      };
+
+      const result = await getTranslatedRecipe(recipe, "de");
+
+      expect(result.source).toBe("See https://example.com/Cake");
+    });
+  });
 });

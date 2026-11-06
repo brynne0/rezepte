@@ -10,6 +10,15 @@ const normalizeUrl = (url) => {
   return trimmed.startsWith("www.") ? `https://${trimmed}` : trimmed;
 };
 
+// Splits text into plain-text and URL pieces.
+export const splitTextAndUrls = (text) => {
+  if (!text) return [];
+  return text
+    .split(URL_REGEX)
+    .filter((part) => part !== "")
+    .map((part) => ({ text: part, isUrl: /^(https?:\/\/|www\.)/.test(part) }));
+};
+
 // Finds the first URL anywhere in a string of text.
 export const extractFirstUrl = (text) => {
   if (!text) return null;
