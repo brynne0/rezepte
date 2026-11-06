@@ -204,7 +204,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
     <>
       <header
         className={cn(
-          "sticky top-0 z-20 border-b",
+          "sticky top-0 z-20 border-b bg-background",
           isScrolled && !friendBar ? "border-border/60" : "border-transparent"
         )}
       >
