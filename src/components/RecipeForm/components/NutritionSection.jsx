@@ -48,7 +48,7 @@ const NutritionSection = ({ columns, onChange, isEditingTranslation }) => {
           <AccordionTrigger>{t("nutritional_info")}</AccordionTrigger>
           <AccordionContent>
             <div className="flex flex-col gap-3">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto p-1">
                 <div
                   className="grid items-center gap-x-2 gap-y-2"
                   style={{
