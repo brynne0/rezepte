@@ -405,13 +405,12 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
           <div className="relative mx-auto flex max-w-7xl items-center justify-center px-3 pt-2 pb-2 md:px-8">
             {!friendBar.hideBack && (
               <Button
-                variant="ghost"
-                size="icon-sm"
-                className="absolute left-3 md:left-8"
+                variant="printed"
+                className="absolute left-0.5 md:left-5.5"
                 onClick={() => navigate("/")}
-                aria-label={t("go_back")}
               >
                 <ArrowLeft />
+                {t("my_recipes")}
               </Button>
             )}
             {friendBar.loading ? (

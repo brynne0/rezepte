@@ -560,7 +560,8 @@ describe("Recipe Component", () => {
         );
       });
 
-      expect(toggleButton).toHaveAttribute("aria-label", "make_recipe_private");
+      // Reverted to visible to friends: the button reads what it shows
+      expect(toggleButton).toHaveAccessibleName("recipe_status_friends");
     });
   });
 

@@ -449,47 +449,31 @@ const Recipe = () => {
               </CardTitle>
             </div>
 
-            {/* Actions printed as text links under the title */}
+            {/* Actions printed as text links under the title. Only the privacy
+                link has a tooltip: its label shows the state, the tooltip says
+                what tapping it does. */}
             <div className="-ml-2.5 flex flex-wrap items-center">
               {isOwner && (
-                <div className="flex flex-wrap items-center">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="printed"
-                          onClick={() =>
-                            navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
-                          }
-                          data-testid="edit-recipe-btn"
-                          aria-label={t("edit_recipe")}
-                          disabled={!isOnline}
-                        >
-                          {t("recipe_action_edit")}
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>
-                      {isOnline
-                        ? t("edit_recipe")
-                        : t("action_requires_internet")}
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="printed"
-                          onClick={handleShare}
-                          data-testid="share-recipe-btn"
-                          aria-label={t("copy_recipe")}
-                        >
-                          {t("recipe_action_copy")}
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>{t("copy_recipe")}</TooltipContent>
-                  </Tooltip>
+                <>
+                  <Button
+                    variant="printed"
+                    onClick={() =>
+                      navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                    }
+                    data-testid="edit-recipe-btn"
+                    aria-label={t("edit_recipe")}
+                    disabled={!isOnline}
+                  >
+                    {t("recipe_action_edit")}
+                  </Button>
+                  <Button
+                    variant="printed"
+                    onClick={handleShare}
+                    data-testid="share-recipe-btn"
+                    aria-label={t("copy_recipe")}
+                  >
+                    {t("recipe_action_copy")}
+                  </Button>
                   <Tooltip>
                     <TooltipTrigger
                       render={
@@ -497,11 +481,6 @@ const Recipe = () => {
                           variant="printed"
                           onClick={handleTogglePrivate}
                           data-testid="toggle-private-btn"
-                          aria-label={
-                            isPrivate
-                              ? t("make_recipe_visible_to_friends")
-                              : t("make_recipe_private")
-                          }
                           disabled={!isOnline}
                         >
                           {isPrivate ? <Lock /> : <LockOpen />}
@@ -512,66 +491,40 @@ const Recipe = () => {
                       }
                     />
                     <TooltipContent>
-                      {!isOnline
-                        ? t("action_requires_internet")
-                        : isPrivate
-                          ? t("make_recipe_visible_to_friends")
-                          : t("make_recipe_private")}
+                      {isPrivate
+                        ? t("make_recipe_visible_to_friends")
+                        : t("make_recipe_private")}
                     </TooltipContent>
                   </Tooltip>
-                </div>
+                </>
               )}
 
               {!isOwner && (
-                <div className="flex flex-wrap items-center">
+                <>
                   {existingCopy && (
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <Button
-                            variant="printed"
-                            onClick={() =>
-                              navigate(
-                                `/${existingCopy.id}/${existingCopy.slug}`
-                              )
-                            }
-                            aria-label={t("recipe_already_saved")}
-                          >
-                            <BookmarkCheck />
-                            {t("recipe_status_saved", {
-                              date: existingCopyDate,
-                            })}
-                          </Button>
-                        }
-                      />
-                      <TooltipContent>
-                        {t("recipe_already_saved_go_to_copy")}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="printed"
-                          onClick={() => setShowCopyModal(true)}
-                          data-testid="add-to-my-recipes-btn"
-                          aria-label={t("add_to_my_recipes")}
-                          disabled={!isOnline}
-                          className="text-foreground"
-                        >
-                          <BookmarkPlus />
-                          {t("save")}
-                        </Button>
+                    <Button
+                      variant="printed"
+                      onClick={() =>
+                        navigate(`/${existingCopy.id}/${existingCopy.slug}`)
                       }
-                    />
-                    <TooltipContent>
-                      {isOnline
-                        ? t("add_to_my_recipes")
-                        : t("action_requires_internet")}
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
+                      aria-label={t("recipe_already_saved")}
+                    >
+                      <BookmarkCheck />
+                      {t("recipe_status_saved", { date: existingCopyDate })}
+                    </Button>
+                  )}
+                  <Button
+                    variant="printed"
+                    onClick={() => setShowCopyModal(true)}
+                    data-testid="add-to-my-recipes-btn"
+                    aria-label={t("add_to_my_recipes")}
+                    disabled={!isOnline}
+                    className="text-foreground"
+                  >
+                    <BookmarkPlus />
+                    {t("save")}
+                  </Button>
+                </>
               )}
             </div>
           </div>
