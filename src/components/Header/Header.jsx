@@ -208,7 +208,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
           isScrolled && !friendBar ? "border-border/60" : "border-transparent"
         )}
       >
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-6 md:pb-6">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-8 md:pb-6">
           {/* Language Selection */}
           <div className="flex shrink-0 items-center md:gap-2">
             {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
