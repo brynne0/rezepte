@@ -4,7 +4,12 @@ import CookingTimeRow from "./CookingTimeRow";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key, fallback) => fallback || key,
+    t: (key, opt) =>
+      typeof opt === "string"
+        ? opt
+        : opt?.defaultValue
+          ? opt.defaultValue.replace(/{{(\w+)}}/g, (_, k) => opt[k])
+          : key,
     i18n: {
       language: "en",
     },
@@ -44,7 +49,7 @@ describe("CookingTimeRow", () => {
     it("should display cooking time and soaking time", () => {
       render(<CookingTimeRow {...defaultProps} />);
       expect(screen.getByText(/45 min/)).toBeInTheDocument();
-      expect(screen.getByText(/30 h soak/)).toBeInTheDocument();
+      expect(screen.getByText(/Soak 30 h/)).toBeInTheDocument();
     });
 
     it("should display weight conversion with ratio", () => {
@@ -64,7 +69,7 @@ describe("CookingTimeRow", () => {
       const itemWithoutSoaking = { ...mockItem, soaking_time: 0 };
       render(<CookingTimeRow {...defaultProps} item={itemWithoutSoaking} />);
 
-      expect(screen.queryByText(/soak/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/soak/i)).not.toBeInTheDocument();
       expect(screen.getByText(/45 min/)).toBeInTheDocument();
     });
 
@@ -102,8 +107,10 @@ describe("CookingTimeRow", () => {
       );
       expect(screen.getByPlaceholderText("Cooking (min)")).toHaveValue("45");
       expect(screen.getByPlaceholderText("Soaking (hrs)")).toHaveValue("30");
-      expect(screen.getByPlaceholderText("Dry weight (g)")).toHaveValue(100);
-      expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue(300);
+      expect(screen.getByPlaceholderText("Dry weight (g)")).toHaveValue("100");
+      expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue(
+        "300"
+      );
       expect(screen.getByPlaceholderText("Optional notes")).toHaveValue(
         "Simmer covered until tender"
       );
@@ -222,10 +229,8 @@ describe("CookingTimeRow", () => {
       expect(screen.getByPlaceholderText("Ingredient name")).toHaveValue("");
       expect(screen.getByPlaceholderText("Cooking (min)")).toHaveValue("");
       expect(screen.getByPlaceholderText("Soaking (hrs)")).toHaveValue("");
-      expect(screen.getByPlaceholderText("Dry weight (g)")).toHaveValue(null);
-      expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue(
-        null
-      );
+      expect(screen.getByPlaceholderText("Dry weight (g)")).toHaveValue("");
+      expect(screen.getByPlaceholderText("Cooked weight (g)")).toHaveValue("");
     });
   });
 
@@ -262,7 +267,7 @@ describe("CookingTimeRow", () => {
       render(<CookingTimeRow {...defaultProps} item={itemWithLargeTimes} />);
 
       expect(screen.getByText(/120 min/)).toBeInTheDocument();
-      expect(screen.getByText(/8 h soak/)).toBeInTheDocument();
+      expect(screen.getByText(/Soak 8 h/)).toBeInTheDocument();
     });
 
     it("should handle zero cooking time", () => {
@@ -276,7 +281,7 @@ describe("CookingTimeRow", () => {
 
       // Should not display cooking time but should display soaking time
       expect(screen.queryByText(/45 min/)).not.toBeInTheDocument();
-      expect(screen.getByText(/30 h soak/)).toBeInTheDocument();
+      expect(screen.getByText(/Soak 30 h/)).toBeInTheDocument();
     });
 
     it("should format numeric ranges with appropriate units", () => {
@@ -288,7 +293,7 @@ describe("CookingTimeRow", () => {
       render(<CookingTimeRow {...defaultProps} item={itemWithRange} />);
 
       expect(screen.getByText(/40-50 min/)).toBeInTheDocument();
-      expect(screen.getByText(/8-12 h soak/)).toBeInTheDocument();
+      expect(screen.getByText(/Soak 8-12 h/)).toBeInTheDocument();
     });
 
     it("should display text values as-is without modification", () => {
@@ -300,7 +305,7 @@ describe("CookingTimeRow", () => {
       render(<CookingTimeRow {...defaultProps} item={itemWithText} />);
 
       expect(screen.getByText("until tender")).toBeInTheDocument();
-      expect(screen.getByText(/overnight soak/)).toBeInTheDocument();
+      expect(screen.getByText("Soak overnight")).toBeInTheDocument();
     });
   });
 

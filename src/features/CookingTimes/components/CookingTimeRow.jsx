@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Trash2, GripVertical, Scale } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -8,6 +9,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "cn";
+
+const OVERNIGHT = "overnight";
+const isOvernight = (value) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase() === OVERNIGHT;
+
+const onlyTime = (value) => value.replace(/[^\d.,\s-]/g, "");
+const onlyNumber = (value) => value.replace(/[^\d.,]/g, "");
 
 const CookingTimeRow = ({
   item,
@@ -50,9 +60,14 @@ const CookingTimeRow = ({
   };
 
   if (!isEditMode) {
-    const soakText = item.soaking_time
-      ? `${formatTime(item.soaking_time, t("hours_short", "h"))} ${t("soak", "soak")}`
-      : null;
+    const soakText = !item.soaking_time
+      ? null
+      : isOvernight(item.soaking_time)
+        ? t("overnight_soak", "Soak overnight")
+        : t("soak_time", {
+            time: formatTime(item.soaking_time, t("hours_short", "h")),
+            defaultValue: "Soak {{time}}",
+          });
     const cookText = item.cooking_time
       ? formatTime(item.cooking_time, t("minutes_short", "min"))
       : null;
@@ -108,6 +123,7 @@ const CookingTimeRow = ({
   }
 
   // Edit mode - display as editable row
+  const overnight = isOvernight(item.soaking_time);
   return (
     <div
       ref={provided?.innerRef}
@@ -173,13 +189,14 @@ const CookingTimeRow = ({
           <Input
             id={`cooking-time-cooking-time-${sectionId}-${index}-${item.tempId}`}
             type="text"
+            inputMode="decimal"
             value={item.cooking_time || ""}
             onChange={(e) =>
               handleItemChange(
                 sectionId,
                 item.tempId,
                 "cooking_time",
-                e.target.value
+                onlyTime(e.target.value)
               )
             }
             onKeyDown={(e) =>
@@ -193,43 +210,62 @@ const CookingTimeRow = ({
             }
             placeholder={t("cooking_time_minutes", "Cooking (min)")}
           />
-          <Input
-            id={`cooking-time-soaking-time-${sectionId}-${index}-${item.tempId}`}
-            type="text"
-            value={item.soaking_time || ""}
-            onChange={(e) =>
-              handleItemChange(
-                sectionId,
-                item.tempId,
-                "soaking_time",
-                e.target.value
-              )
-            }
-            onKeyDown={(e) =>
-              handleItemFieldEnter?.(
-                e,
-                "soaking_time",
-                sectionId,
-                item.tempId,
-                index
-              )
-            }
-            placeholder={t("soaking_time_minutes", "Soaking (hrs)")}
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              id={`cooking-time-soaking-time-${sectionId}-${index}-${item.tempId}`}
+              type="text"
+              inputMode="decimal"
+              value={overnight ? "" : item.soaking_time || ""}
+              onChange={(e) =>
+                handleItemChange(
+                  sectionId,
+                  item.tempId,
+                  "soaking_time",
+                  onlyTime(e.target.value)
+                )
+              }
+              onKeyDown={(e) =>
+                handleItemFieldEnter?.(
+                  e,
+                  "soaking_time",
+                  sectionId,
+                  item.tempId,
+                  index
+                )
+              }
+              placeholder={t("soaking_time_minutes", "Soaking (hrs)")}
+              disabled={overnight}
+              className="min-w-0 flex-1"
+            />
+            <label className="flex shrink-0 items-center gap-1.5 text-sm">
+              <Checkbox
+                checked={overnight}
+                onCheckedChange={(checked) =>
+                  handleItemChange(
+                    sectionId,
+                    item.tempId,
+                    "soaking_time",
+                    checked ? OVERNIGHT : ""
+                  )
+                }
+              />
+              {t("overnight", "Overnight")}
+            </label>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <Input
             id={`cooking-time-dry-weight-${sectionId}-${index}-${item.tempId}`}
-            type="number"
-            min="0"
+            type="text"
+            inputMode="decimal"
             value={item.dry_weight > 0 ? item.dry_weight : ""}
             onChange={(e) =>
               handleItemChange(
                 sectionId,
                 item.tempId,
                 "dry_weight",
-                e.target.value
+                onlyNumber(e.target.value)
               )
             }
             onKeyDown={(e) =>
@@ -242,19 +278,18 @@ const CookingTimeRow = ({
               )
             }
             placeholder={t("dry_weight", "Dry weight (g)")}
-            onWheel={(e) => e.target.blur()}
           />
           <Input
             id={`cooking-time-cooked-weight-${sectionId}-${index}-${item.tempId}`}
-            type="number"
-            min="0"
+            type="text"
+            inputMode="decimal"
             value={item.cooked_weight > 0 ? item.cooked_weight : ""}
             onChange={(e) =>
               handleItemChange(
                 sectionId,
                 item.tempId,
                 "cooked_weight",
-                e.target.value
+                onlyNumber(e.target.value)
               )
             }
             onKeyDown={(e) =>
@@ -267,7 +302,6 @@ const CookingTimeRow = ({
               )
             }
             placeholder={t("cooked_weight", "Cooked weight (g)")}
-            onWheel={(e) => e.target.blur()}
           />
         </div>
 
