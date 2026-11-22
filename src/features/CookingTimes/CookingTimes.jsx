@@ -237,7 +237,7 @@ const CookingTimes = ({
               {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={index}
-                  className="flex flex-col gap-2 rounded-lg border border-primary/50 bg-muted/20 p-3"
+                  className="flex flex-col gap-2 rounded-lg border border-border bg-muted/20 p-3"
                 >
                   <Skeleton className="h-5 w-2/3" />
                   <Skeleton className="h-4 w-1/2" />

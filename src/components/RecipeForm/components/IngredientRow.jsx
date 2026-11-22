@@ -48,7 +48,7 @@ const IngredientRow = ({
         "flex flex-wrap items-start gap-2 p-2 transition-colors",
         index > 0 && "border-t border-border",
         snapshot.isDragging &&
-          "rounded-lg border border-primary/50 bg-card shadow-md"
+          "rounded-lg border border-border bg-card shadow-md"
       )}
     >
       {/* Ingredient Drag Handle */}

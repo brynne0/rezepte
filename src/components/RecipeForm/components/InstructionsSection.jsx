@@ -31,7 +31,7 @@ const InstructionsSection = ({
           {(provided, snapshot) => (
             <div
               className={cn(
-                "flex flex-col overflow-hidden rounded-lg border border-primary/50 bg-card",
+                "flex flex-col overflow-hidden rounded-lg border border-border bg-card",
                 snapshot.isDraggingOver && "bg-muted/50"
               )}
               {...provided.droppableProps}
@@ -53,7 +53,7 @@ const InstructionsSection = ({
                         "flex items-start gap-2 p-2 transition-colors",
                         index > 0 && "border-t border-border",
                         snapshot.isDragging &&
-                          "rounded-lg border border-primary/50 bg-card shadow-md"
+                          "rounded-lg border border-border bg-card shadow-md"
                       )}
                     >
                       <div className="flex flex-col items-center gap-1 pt-1.5">
