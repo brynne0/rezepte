@@ -233,7 +233,7 @@ const CookingTimes = ({
 
         <CardContent className="flex flex-col gap-4">
           {loading ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3">
               {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={index}
@@ -316,7 +316,7 @@ const CookingTimes = ({
             <>
               {/* Ungrouped Cooking Times */}
               {filteredData.ungroupedCookingTimes.length > 0 && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex flex-col">
                   {filteredData.ungroupedCookingTimes.map((item, index) => (
                     <CookingTimeRow
                       key={item.tempId || item.id}
@@ -337,7 +337,7 @@ const CookingTimes = ({
                       {section.subheading}
                     </h2>
                   )}
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="flex flex-col">
                     {section.cookingTimes.map((item, itemIndex) => (
                       <CookingTimeRow
                         key={item.tempId || item.id}

@@ -1,14 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { Trash2, GripVertical, Timer, Droplet, Scale } from "lucide-react";
+import { Trash2, GripVertical, Scale } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Item,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-} from "@/components/ui/item";
-import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -61,7 +54,7 @@ const CookingTimeRow = ({
       ? `${formatTime(item.soaking_time, t("hours_short", "h"))} ${t("soak", "soak")}`
       : null;
     const cookText = item.cooking_time
-      ? `${formatTime(item.cooking_time, t("minutes_short", "min"))} ${t("cook", "cook")}`
+      ? formatTime(item.cooking_time, t("minutes_short", "min"))
       : null;
 
     let weightText = null;
@@ -77,46 +70,40 @@ const CookingTimeRow = ({
     }
     const ratio = getConversionRatio(item.dry_weight, item.cooked_weight);
 
+    // One row per ingredient: name on the left, cooking time on the right with
+    // soaking time underneath it, weights and notes in a grey line below
     return (
-      <Item
-        variant="outline"
-        size="sm"
-        className="items-start border-border bg-muted/20"
-      >
-        <ItemContent>
-          <ItemTitle className="text-base">{item.ingredient_name}</ItemTitle>
-          {(soakText || cookText) && (
-            <ItemDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-foreground">
-              {soakText && (
-                <span className="inline-flex items-center gap-1">
-                  <Droplet className="size-3.5" />
-                  {soakText}
-                </span>
-              )}
-              {cookText && (
-                <span className="inline-flex items-center gap-1">
-                  <Timer className="size-3.5" />
-                  {cookText}
-                </span>
-              )}
-            </ItemDescription>
-          )}
-          {weightText && (
-            <ItemDescription className="inline-flex items-center gap-1 text-foreground">
-              <Scale className="size-3.5" />
-              {weightText}
-              {ratio && (
-                <Badge variant="outline" className="ml-1">
-                  {ratio}
-                </Badge>
-              )}
-            </ItemDescription>
-          )}
-          {item.notes && (
-            <ItemDescription className="italic">{item.notes}</ItemDescription>
-          )}
-        </ItemContent>
-      </Item>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-0.5 py-2">
+        <span className="text-base font-medium [word-break:break-word]">
+          {item.ingredient_name}
+        </span>
+
+        {(cookText || soakText) && (
+          <span className="row-span-2 grid content-start justify-items-end text-right">
+            {cookText && (
+              <span className="font-medium tabular-nums">{cookText}</span>
+            )}
+            {soakText && (
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {soakText}
+              </span>
+            )}
+          </span>
+        )}
+
+        {(weightText || item.notes) && (
+          <span className="col-start-1 flex flex-wrap items-center gap-x-3.5 gap-y-0.5 text-sm text-muted-foreground">
+            {weightText && (
+              <span className="inline-flex items-center gap-1 tabular-nums">
+                <Scale className="size-3.5" />
+                {weightText}
+                {ratio && <span>{ratio}</span>}
+              </span>
+            )}
+            {item.notes && <span className="italic">{item.notes}</span>}
+          </span>
+        )}
+      </div>
     );
   }
 
