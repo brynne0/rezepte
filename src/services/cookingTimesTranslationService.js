@@ -32,7 +32,7 @@ export const getTranslatedCookingTime = async (
       notes: cachedTranslation.notes,
       section_name: cachedTranslation.section_name,
       cooking_time: cachedTranslation.cooking_time ?? cookingTime.cooking_time,
-      soaking_time: cachedTranslation.soaking_time ?? cookingTime.soaking_time,
+      soaking_time: cookingTime.soaking_time,
       isTranslated: true,
       translatedFrom: originalLanguage,
     };
@@ -67,9 +67,7 @@ export const getTranslatedCookingTime = async (
       cookingTime.cooking_time && isTranslatable(cookingTime.cooking_time)
         ? translateText(cookingTime.cooking_time, targetLanguage)
         : cookingTime.cooking_time,
-      cookingTime.soaking_time && isTranslatable(cookingTime.soaking_time)
-        ? translateText(cookingTime.soaking_time, targetLanguage)
-        : cookingTime.soaking_time,
+      cookingTime.soaking_time,
     ]);
 
     const translatedData = {
@@ -171,21 +169,15 @@ export const updateCookingTimeTranslations = async (
       languagesToTranslate.map(async (language) => {
         const translation = existingTranslations[language] || {};
 
-        const [
-          ingredientNameChanged,
-          sectionNameChanged,
-          cookingTimeChanged,
-          soakingTimeChanged,
-        ] = [
-          translation.ingredient_name === undefined ||
-            oldData.ingredient_name !== newData.ingredient_name,
-          translation.section_name === undefined ||
-            oldData.section_name !== newData.section_name,
-          translation.cooking_time === undefined ||
-            oldData.cooking_time !== newData.cooking_time,
-          translation.soaking_time === undefined ||
-            oldData.soaking_time !== newData.soaking_time,
-        ];
+        const [ingredientNameChanged, sectionNameChanged, cookingTimeChanged] =
+          [
+            translation.ingredient_name === undefined ||
+              oldData.ingredient_name !== newData.ingredient_name,
+            translation.section_name === undefined ||
+              oldData.section_name !== newData.section_name,
+            translation.cooking_time === undefined ||
+              oldData.cooking_time !== newData.cooking_time,
+          ];
         const notesChanged =
           translation.notes === undefined || oldData.notes !== newData.notes;
 
@@ -218,11 +210,7 @@ export const updateCookingTimeTranslations = async (
               ? translateText(newData.cooking_time, language)
               : newData.cooking_time
             : translation.cooking_time,
-          soakingTimeChanged
-            ? newData.soaking_time && isTranslatable(newData.soaking_time)
-              ? translateText(newData.soaking_time, language)
-              : newData.soaking_time
-            : translation.soaking_time,
+          newData.soaking_time,
         ]);
 
         return [

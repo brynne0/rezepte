@@ -51,7 +51,7 @@ const RecipeList = ({
         <LoadingAcorn fullPage={false} className="mt-40" />
       )}
       {/* Display all recipes in selected category */}
-      <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-2.5 gap-y-6 py-2 md:grid-cols-4 md:gap-x-3.5 md:gap-y-7">
         {filteredRecipes.map((r) => (
           <RecipeCard
             key={r.id}
@@ -81,7 +81,7 @@ const RecipeList = ({
         </Empty>
       )}
       {isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
-        <Empty className="mx-auto mt-20 w-fit border border-primary bg-card shadow-sm">
+        <Empty className="mx-auto mt-20 w-fit border border-border bg-card">
           <EmptyHeader>
             <EmptyTitle>{t("welcome_add_recipe")}</EmptyTitle>
           </EmptyHeader>

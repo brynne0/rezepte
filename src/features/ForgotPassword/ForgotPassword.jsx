@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Mail, ArrowLeft } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Mail } from "lucide-react";
 import { forgotPassword } from "../../services/auth";
 import { validateForgotPasswordForm } from "../../utils/validation";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
@@ -20,6 +20,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import BackLink from "../../components/BackLink/BackLink";
 
 const ForgotPassword = () => {
   const location = useLocation();
@@ -32,7 +33,6 @@ const ForgotPassword = () => {
   const [isResending, setIsResending] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
@@ -88,18 +88,10 @@ const ForgotPassword = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-sm">
+      <BackLink fallback="/login" />
       <Card className="w-full">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="relative flex w-full items-center justify-center">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="absolute left-0"
-              onClick={() => navigate(-1)}
-              aria-label={t("go_back")}
-            >
-              <ArrowLeft className="size-5" />
-            </Button>
             <h1 className="text-lg font-semibold">{t("reset_password")}</h1>
           </div>
         </CardHeader>

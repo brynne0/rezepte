@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Lock, Eye, EyeOff } from "lucide-react";
+import { Lock, Eye, EyeOff } from "lucide-react";
 import supabase from "../../lib/supabase";
 import {
   changePassword,
@@ -45,6 +45,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import BackLink from "../../components/BackLink/BackLink";
 
 const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -220,18 +221,10 @@ const ChangePassword = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-sm">
+      <BackLink fallback="/settings" />
       <Card className="w-full">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="relative flex w-full items-center justify-center">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="absolute left-0"
-              onClick={() => navigate(-1)}
-              aria-label={t("go_back")}
-            >
-              <ArrowLeft />
-            </Button>
             <h1 className="text-lg font-semibold">{t("set_new_password")}</h1>
           </div>
         </CardHeader>

@@ -60,6 +60,17 @@ describe("RecipeCard", () => {
     expect(mockOnClick).toHaveBeenCalledWith(mockRecipe);
   });
 
+  it("renders as a receipt-style card", () => {
+    const { container } = render(
+      <RecipeCard recipe={mockRecipe} onClick={mockOnClick} />
+    );
+
+    expect(container.querySelector('[data-slot="card"]')).toHaveAttribute(
+      "data-variant",
+      "receipt"
+    );
+  });
+
   it("handles missing recipe title gracefully", () => {
     const recipeWithoutTitle = { id: 2, image: "test.jpg" };
     const { container } = render(

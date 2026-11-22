@@ -2,18 +2,16 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { cn } from "cn";
 import {
-  ArrowLeft,
-  Pencil,
-  Copy,
-  Lock,
-  LockOpen,
   RotateCcw,
   Minus,
   Plus,
   WifiOff,
-  BookmarkPlus,
+  Lock,
+  LockOpen,
   BookmarkCheck,
+  BookmarkPlus,
 } from "lucide-react";
 
 import { AppStateContext } from "../../contexts/AppStateContext";
@@ -24,6 +22,7 @@ import {
   findCopiedRecipe,
 } from "../../services/recipes";
 import { getFriendProfile } from "../../services/friendsService";
+import BackLink from "../../components/BackLink/BackLink";
 import AddToMyRecipesModal from "../../components/AddToMyRecipesModal/AddToMyRecipesModal";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
@@ -47,7 +46,6 @@ import { toast } from "@/components/ui/toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Empty,
@@ -399,144 +397,37 @@ const Recipe = () => {
     (recipe.ingredientSections && recipe.ingredientSections.length > 0) ||
     (recipe.ingredients && recipe.ingredients.length > 0);
 
+  // Receipt styling: small printed section labels, dashed rules between sections
+  const sectionLabel =
+    "font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase";
+  const sectionRule = "border-t border-dashed border-muted-foreground/40 pt-4";
+
+  // Back link names where it leads: your recipes, or the friend's
+  const friendName = !isOwner ? friendProfile?.first_name : null;
+  const backLabel = friendName
+    ? t("recipe_action_back_friend", { name: friendName })
+    : t("recipe_action_back");
+  const backFallback =
+    !isOwner && friendProfile?.username
+      ? `/friends/${friendProfile.username}`
+      : "/";
+
   return (
     <>
-      <Card size="lg" className="mx-auto max-w-3xl text-left">
+      {/* Navigation sits off the paper; the receipt only holds the recipe */}
+      <BackLink
+        label={backLabel}
+        fallback={backFallback}
+        className="mx-auto max-w-3xl"
+      />
+
+      <Card
+        size="lg"
+        variant="receipt"
+        className="mx-auto my-2 w-full max-w-3xl text-left"
+      >
         <CardHeader>
-          <div className="flex flex-col gap-4 md:gap-2">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="shrink-0"
-                onClick={() => navigate(-1)}
-                aria-label={t("go_back")}
-              >
-                <ArrowLeft />
-              </Button>
-
-              {isOwner && (
-                <ButtonGroup className="ml-auto shrink-0">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="dashed"
-                          size="icon-lg"
-                          onClick={() =>
-                            navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
-                          }
-                          data-testid="edit-recipe-btn"
-                          aria-label={t("edit_recipe")}
-                          disabled={!isOnline}
-                        >
-                          <Pencil />
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>
-                      {isOnline
-                        ? t("edit_recipe")
-                        : t("action_requires_internet")}
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="dashed"
-                          size="icon-lg"
-                          onClick={handleShare}
-                          data-testid="share-recipe-btn"
-                          aria-label={t("copy_recipe")}
-                        >
-                          <Copy />
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>{t("copy_recipe")}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="dashed"
-                          size="icon-lg"
-                          onClick={handleTogglePrivate}
-                          data-testid="toggle-private-btn"
-                          aria-label={
-                            isPrivate
-                              ? t("make_recipe_visible_to_friends")
-                              : t("make_recipe_private")
-                          }
-                          disabled={!isOnline}
-                        >
-                          {isPrivate ? <Lock /> : <LockOpen />}
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>
-                      {!isOnline
-                        ? t("action_requires_internet")
-                        : isPrivate
-                          ? t("make_recipe_visible_to_friends")
-                          : t("make_recipe_private")}
-                    </TooltipContent>
-                  </Tooltip>
-                </ButtonGroup>
-              )}
-
-              {!isOwner && (
-                <ButtonGroup className="ml-auto shrink-0">
-                  {existingCopy && (
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <Button
-                            variant="dashed"
-                            size="lg"
-                            onClick={() =>
-                              navigate(
-                                `/${existingCopy.id}/${existingCopy.slug}`
-                              )
-                            }
-                            aria-label={t("recipe_already_saved")}
-                          >
-                            <BookmarkCheck className="text-accent-red" />
-                            {existingCopyDate}
-                          </Button>
-                        }
-                      />
-                      <TooltipContent>
-                        {t("recipe_already_saved_go_to_copy")}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="dashed"
-                          size="icon-lg"
-                          onClick={() => setShowCopyModal(true)}
-                          data-testid="add-to-my-recipes-btn"
-                          aria-label={t("add_to_my_recipes")}
-                          disabled={!isOnline}
-                        >
-                          <BookmarkPlus />
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>
-                      {isOnline
-                        ? t("add_to_my_recipes")
-                        : t("action_requires_internet")}
-                    </TooltipContent>
-                  </Tooltip>
-                </ButtonGroup>
-              )}
-            </div>
-
+          <div className="flex flex-col gap-3">
             {recipe.translationUnavailable && (
               <Alert>
                 <AlertDescription>
@@ -547,16 +438,94 @@ const Recipe = () => {
 
             <div className="flex flex-col gap-0.5">
               {isOwner && recipe.copied_from_name && (
-                <span className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
-                  <BookmarkCheck size={14} />
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("recipe_owner_kicker", {
                     name: recipe.copied_from_name,
                   })}
                 </span>
               )}
-              <CardTitle className="text-accent-red font-forta [word-wrap:break-word] text-2xl leading-tight md:text-3xl">
+              <CardTitle className="text-accent-red font-receipt [word-wrap:break-word] text-xl leading-snug font-semibold md:text-2xl">
                 {recipe.title}
               </CardTitle>
+            </div>
+
+            {/* Actions printed as text links under the title. Only the privacy
+                link has a tooltip: its label shows the state, the tooltip says
+                what tapping it does. */}
+            <div className="-ml-2.5 flex flex-wrap items-center">
+              {isOwner && (
+                <>
+                  <Button
+                    variant="printed"
+                    onClick={() =>
+                      navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                    }
+                    data-testid="edit-recipe-btn"
+                    aria-label={t("edit_recipe")}
+                    disabled={!isOnline}
+                  >
+                    {t("recipe_action_edit")}
+                  </Button>
+                  <Button
+                    variant="printed"
+                    onClick={handleShare}
+                    data-testid="share-recipe-btn"
+                    aria-label={t("copy_recipe")}
+                  >
+                    {t("recipe_action_copy")}
+                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="printed"
+                          onClick={handleTogglePrivate}
+                          data-testid="toggle-private-btn"
+                          disabled={!isOnline}
+                        >
+                          {isPrivate ? <Lock /> : <LockOpen />}
+                          {isPrivate
+                            ? t("recipe_status_private")
+                            : t("recipe_status_friends")}
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>
+                      {isPrivate
+                        ? t("make_recipe_visible_to_friends")
+                        : t("make_recipe_private")}
+                    </TooltipContent>
+                  </Tooltip>
+                </>
+              )}
+
+              {!isOwner && (
+                <>
+                  {existingCopy && (
+                    <Button
+                      variant="printed"
+                      onClick={() =>
+                        navigate(`/${existingCopy.id}/${existingCopy.slug}`)
+                      }
+                      aria-label={t("recipe_already_saved")}
+                    >
+                      <BookmarkCheck />
+                      {t("recipe_status_saved", { date: existingCopyDate })}
+                    </Button>
+                  )}
+                  <Button
+                    variant="printed"
+                    onClick={() => setShowCopyModal(true)}
+                    data-testid="add-to-my-recipes-btn"
+                    aria-label={t("add_to_my_recipes")}
+                    disabled={!isOnline}
+                    className="text-foreground"
+                  >
+                    <BookmarkPlus />
+                    {t("save")}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -580,8 +549,10 @@ const Recipe = () => {
 
           {/* Servings */}
           {recipe.servings && (
-            <div className="flex flex-wrap items-center">
-              <h2>{t("servings")}:</h2>
+            <div
+              className={cn("flex flex-wrap items-center gap-x-2", sectionRule)}
+            >
+              <h2 className={sectionLabel}>{t("servings")}</h2>
               {hasIngredients ? (
                 <>
                   <div className="flex items-center gap-2">
@@ -636,9 +607,14 @@ const Recipe = () => {
 
           {/* Ingredients */}
           {hasIngredients && (
-            <div className="flex flex-col gap-2">
+            <div
+              className={cn(
+                "flex flex-col gap-2",
+                !recipe.servings && sectionRule
+              )}
+            >
               <div className="flex flex-wrap items-center gap-2">
-                <h2>{t("ingredients")}:</h2>
+                <h2 className={sectionLabel}>{t("ingredients")}</h2>
                 {!recipe.servings && (
                   <div className="flex items-center gap-2">
                     <Button
@@ -715,8 +691,8 @@ const Recipe = () => {
 
           {/* Instructions */}
           {recipe.instructions && recipe.instructions.length > 0 && (
-            <div>
-              <h2>{t("instructions")}:</h2>
+            <div className={cn("flex flex-col gap-2", sectionRule)}>
+              <h2 className={sectionLabel}>{t("instructions")}</h2>
 
               <ol className="list-decimal space-y-1 pl-8">
                 {recipe.instructions.map((instruction, i) => (
@@ -728,8 +704,13 @@ const Recipe = () => {
 
           {/* Source */}
           {recipe.source && (
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-              <h2>{t("source")}:</h2>
+            <div
+              className={cn(
+                "flex flex-wrap items-baseline gap-x-2 gap-y-0",
+                sectionRule
+              )}
+            >
+              <h2 className={sectionLabel}>{t("source")}</h2>
               <span className="[word-wrap:break-word] whitespace-pre-wrap">
                 {linkifyText(recipe.source)}
               </span>
@@ -738,8 +719,13 @@ const Recipe = () => {
 
           {/* Extra Notes */}
           {recipe.notes && recipe.notes.length > 0 && (
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-              <h2>{t("notes")}:</h2>
+            <div
+              className={cn(
+                "flex flex-wrap items-baseline gap-x-2 gap-y-0",
+                !recipe.source && sectionRule
+              )}
+            >
+              <h2 className={sectionLabel}>{t("notes")}</h2>
               <div className="[word-break:break-word] whitespace-pre-wrap">
                 {recipe.notes}
               </div>

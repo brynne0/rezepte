@@ -13,7 +13,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import SortButtons from "../SortButtons/SortButtons";
 
 const RecipeFilters = ({
   categories,
@@ -22,13 +21,6 @@ const RecipeFilters = ({
   searchTerm,
   setSearchTerm,
   onSearchSubmit,
-  sortBy,
-  setSortBy,
-  showImages,
-  setShowImages,
-  onPageReset,
-  showImageToggle = true,
-  showRecentSort = true,
 }) => {
   const { t } = useTranslation();
 
@@ -54,7 +46,7 @@ const RecipeFilters = ({
               onSearchSubmit?.();
             }}
           >
-            <InputGroup className="h-10">
+            <InputGroup variant="paper" className="h-10">
               <InputGroupAddon align="inline-start">
                 <Search className="size-5" />
               </InputGroupAddon>
@@ -98,15 +90,6 @@ const RecipeFilters = ({
               )}
             </InputGroup>
           </form>
-          <SortButtons
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-            showImages={showImages}
-            onShowImagesChange={setShowImages}
-            onPageReset={onPageReset}
-            showImageToggle={showImageToggle}
-            showRecentSort={showRecentSort}
-          />
         </div>
       </div>
 
@@ -124,7 +107,9 @@ const RecipeFilters = ({
               setSelectedCategory(category.value);
             }}
           >
-            <h3 className="font-forta uppercase">{category.label}</h3>
+            <h3 className="font-receipt text-[13px] font-normal tracking-wider uppercase">
+              {category.label}
+            </h3>
           </Button>
         ))}
       </div>

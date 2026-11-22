@@ -8,6 +8,7 @@ import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import RecipeList from "../../components/RecipeList/RecipeList";
+import ResultsBar from "../../components/ResultsBar/ResultsBar";
 import Pagination from "../../components/Pagination/Pagination";
 import RecipeFilters from "../../components/RecipeFilters/RecipeFilters";
 import { WifiOff } from "lucide-react";
@@ -57,7 +58,7 @@ const FriendRecipes = () => {
     return () => setFriendBar(null);
   }, [friend, loading, setFriendBar]);
 
-  const { recipes, totalPages } = useMemo(
+  const { recipes, totalPages, totalCount } = useMemo(
     () =>
       filterSortPaginateRecipes({
         recipes: allRecipes,
@@ -127,14 +128,19 @@ const FriendRecipes = () => {
         setSelectedCategory={handleCategoryChange}
         searchTerm={searchTerm}
         setSearchTerm={handleSearchChange}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        showImages={showImages}
-        setShowImages={setShowImages}
-        onPageReset={() => setCurrentPage(1)}
-        showImageToggle={!!friend?.friends_can_view_images}
-        showRecentSort={false}
       />
+      {allRecipes.length > 0 && (
+        <ResultsBar
+          count={totalCount}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          onPageReset={() => setCurrentPage(1)}
+          showImages={showImages}
+          onShowImagesChange={setShowImages}
+          showImageToggle={!!friend?.friends_can_view_images}
+          showRecentSort={false}
+        />
+      )}
 
       {allRecipes.length === 0 ? (
         <Empty className="mt-20">

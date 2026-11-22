@@ -1,20 +1,23 @@
 import { useTranslation } from "react-i18next";
-import { Trash2, GripVertical, Timer, Droplet, Scale } from "lucide-react";
+import { Trash2, GripVertical, Scale } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import {
-  Item,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-} from "@/components/ui/item";
-import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "cn";
+
+const OVERNIGHT = "overnight";
+const isOvernight = (value) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase() === OVERNIGHT;
+
+const onlyTime = (value) => value.replace(/[^\d.,\s-]/g, "");
+const onlyNumber = (value) => value.replace(/[^\d.,]/g, "");
 
 const CookingTimeRow = ({
   item,
@@ -57,11 +60,16 @@ const CookingTimeRow = ({
   };
 
   if (!isEditMode) {
-    const soakText = item.soaking_time
-      ? `${formatTime(item.soaking_time, t("hours_short", "h"))} ${t("soak", "soak")}`
-      : null;
+    const soakText = !item.soaking_time
+      ? null
+      : isOvernight(item.soaking_time)
+        ? t("overnight_soak", "Soak overnight")
+        : t("soak_time", {
+            time: formatTime(item.soaking_time, t("hours_short", "h")),
+            defaultValue: "Soak {{time}}",
+          });
     const cookText = item.cooking_time
-      ? `${formatTime(item.cooking_time, t("minutes_short", "min"))} ${t("cook", "cook")}`
+      ? formatTime(item.cooking_time, t("minutes_short", "min"))
       : null;
 
     let weightText = null;
@@ -77,56 +85,51 @@ const CookingTimeRow = ({
     }
     const ratio = getConversionRatio(item.dry_weight, item.cooked_weight);
 
+    // One row per ingredient: name on the left, cooking time on the right with
+    // soaking time underneath it, weights and notes in a grey line below
     return (
-      <Item
-        variant="outline"
-        size="sm"
-        className="items-start border-primary/50 bg-muted/20"
-      >
-        <ItemContent>
-          <ItemTitle className="text-base">{item.ingredient_name}</ItemTitle>
-          {(soakText || cookText) && (
-            <ItemDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-foreground">
-              {soakText && (
-                <span className="inline-flex items-center gap-1">
-                  <Droplet className="size-3.5" />
-                  {soakText}
-                </span>
-              )}
-              {cookText && (
-                <span className="inline-flex items-center gap-1">
-                  <Timer className="size-3.5" />
-                  {cookText}
-                </span>
-              )}
-            </ItemDescription>
-          )}
-          {weightText && (
-            <ItemDescription className="inline-flex items-center gap-1 text-foreground">
-              <Scale className="size-3.5" />
-              {weightText}
-              {ratio && (
-                <Badge variant="outline" className="ml-1">
-                  {ratio}
-                </Badge>
-              )}
-            </ItemDescription>
-          )}
-          {item.notes && (
-            <ItemDescription className="italic">{item.notes}</ItemDescription>
-          )}
-        </ItemContent>
-      </Item>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-0.5 py-2">
+        <span className="text-base font-medium [word-break:break-word]">
+          {item.ingredient_name}
+        </span>
+
+        {(cookText || soakText) && (
+          <span className="row-span-2 grid content-start justify-items-end text-right">
+            {cookText && (
+              <span className="font-medium tabular-nums">{cookText}</span>
+            )}
+            {soakText && (
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {soakText}
+              </span>
+            )}
+          </span>
+        )}
+
+        {(weightText || item.notes) && (
+          <span className="col-start-1 flex flex-wrap items-center gap-x-3.5 gap-y-0.5 text-sm text-muted-foreground">
+            {weightText && (
+              <span className="inline-flex items-center gap-1 tabular-nums">
+                <Scale className="size-3.5" />
+                {weightText}
+                {ratio && <span>{ratio}</span>}
+              </span>
+            )}
+            {item.notes && <span className="italic">{item.notes}</span>}
+          </span>
+        )}
+      </div>
     );
   }
 
   // Edit mode - display as editable row
+  const overnight = isOvernight(item.soaking_time);
   return (
     <div
       ref={provided?.innerRef}
       {...provided?.draggableProps}
       className={cn(
-        "flex items-start gap-2 rounded-lg border border-primary/50 bg-muted/20 p-3 transition-colors",
+        "flex items-start gap-2 rounded-lg border border-border bg-muted/20 p-3 transition-colors",
         snapshot?.isDragging && "border-ring bg-muted/50 shadow-sm"
       )}
     >
@@ -186,13 +189,14 @@ const CookingTimeRow = ({
           <Input
             id={`cooking-time-cooking-time-${sectionId}-${index}-${item.tempId}`}
             type="text"
+            inputMode="decimal"
             value={item.cooking_time || ""}
             onChange={(e) =>
               handleItemChange(
                 sectionId,
                 item.tempId,
                 "cooking_time",
-                e.target.value
+                onlyTime(e.target.value)
               )
             }
             onKeyDown={(e) =>
@@ -206,43 +210,62 @@ const CookingTimeRow = ({
             }
             placeholder={t("cooking_time_minutes", "Cooking (min)")}
           />
-          <Input
-            id={`cooking-time-soaking-time-${sectionId}-${index}-${item.tempId}`}
-            type="text"
-            value={item.soaking_time || ""}
-            onChange={(e) =>
-              handleItemChange(
-                sectionId,
-                item.tempId,
-                "soaking_time",
-                e.target.value
-              )
-            }
-            onKeyDown={(e) =>
-              handleItemFieldEnter?.(
-                e,
-                "soaking_time",
-                sectionId,
-                item.tempId,
-                index
-              )
-            }
-            placeholder={t("soaking_time_minutes", "Soaking (hrs)")}
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              id={`cooking-time-soaking-time-${sectionId}-${index}-${item.tempId}`}
+              type="text"
+              inputMode="decimal"
+              value={overnight ? "" : item.soaking_time || ""}
+              onChange={(e) =>
+                handleItemChange(
+                  sectionId,
+                  item.tempId,
+                  "soaking_time",
+                  onlyTime(e.target.value)
+                )
+              }
+              onKeyDown={(e) =>
+                handleItemFieldEnter?.(
+                  e,
+                  "soaking_time",
+                  sectionId,
+                  item.tempId,
+                  index
+                )
+              }
+              placeholder={t("soaking_time_minutes", "Soaking (hrs)")}
+              disabled={overnight}
+              className="min-w-0 flex-1"
+            />
+            <label className="flex shrink-0 items-center gap-1.5 text-sm">
+              <Checkbox
+                checked={overnight}
+                onCheckedChange={(checked) =>
+                  handleItemChange(
+                    sectionId,
+                    item.tempId,
+                    "soaking_time",
+                    checked ? OVERNIGHT : ""
+                  )
+                }
+              />
+              {t("overnight", "Overnight")}
+            </label>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <Input
             id={`cooking-time-dry-weight-${sectionId}-${index}-${item.tempId}`}
-            type="number"
-            min="0"
+            type="text"
+            inputMode="decimal"
             value={item.dry_weight > 0 ? item.dry_weight : ""}
             onChange={(e) =>
               handleItemChange(
                 sectionId,
                 item.tempId,
                 "dry_weight",
-                e.target.value
+                onlyNumber(e.target.value)
               )
             }
             onKeyDown={(e) =>
@@ -255,19 +278,18 @@ const CookingTimeRow = ({
               )
             }
             placeholder={t("dry_weight", "Dry weight (g)")}
-            onWheel={(e) => e.target.blur()}
           />
           <Input
             id={`cooking-time-cooked-weight-${sectionId}-${index}-${item.tempId}`}
-            type="number"
-            min="0"
+            type="text"
+            inputMode="decimal"
             value={item.cooked_weight > 0 ? item.cooked_weight : ""}
             onChange={(e) =>
               handleItemChange(
                 sectionId,
                 item.tempId,
                 "cooked_weight",
-                e.target.value
+                onlyNumber(e.target.value)
               )
             }
             onKeyDown={(e) =>
@@ -280,7 +302,6 @@ const CookingTimeRow = ({
               )
             }
             placeholder={t("cooked_weight", "Cooked weight (g)")}
-            onWheel={(e) => e.target.blur()}
           />
         </div>
 

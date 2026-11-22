@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Beaker, Scale, Thermometer } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 // Quick reference guide for cooking measurements
 const conversions = {
@@ -53,19 +53,15 @@ const ConversionsTab = () => {
         if (data.items.length === 0) return null;
 
         return (
-          <Card
-            key={category}
-            size="sm"
-            className="border-primary/50 bg-muted/20"
-          >
+          <Card key={category} size="sm" className="bg-muted/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <h3 className="flex items-center gap-2 font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase">
                 <data.icon className="size-4 text-muted-foreground" />
                 {t(
                   category,
                   category.charAt(0).toUpperCase() + category.slice(1)
                 )}
-              </CardTitle>
+              </h3>
             </CardHeader>
             <CardContent className="flex flex-col gap-1.5 text-sm text-foreground">
               {data.items.map((conversion, index) => (
