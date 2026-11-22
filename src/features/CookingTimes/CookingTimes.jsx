@@ -216,7 +216,7 @@ const CookingTimes = ({
               aria-pressed={selectedSection === "all"}
               onClick={() => setSelectedSection("all")}
             >
-              <span className="font-receipt text-xs tracking-widest uppercase">
+              <span className="font-receipt text-sm tracking-wider uppercase">
                 {t("all", "All")}
               </span>
             </Button>
@@ -227,7 +227,7 @@ const CookingTimes = ({
                 aria-pressed={selectedSection === section.subheading}
                 onClick={() => setSelectedSection(section.subheading)}
               >
-                <span className="font-receipt text-xs tracking-widest uppercase">
+                <span className="font-receipt text-sm tracking-wider uppercase">
                   {section.subheading}
                 </span>
               </Button>
