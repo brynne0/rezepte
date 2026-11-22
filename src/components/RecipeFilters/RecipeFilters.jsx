@@ -107,7 +107,7 @@ const RecipeFilters = ({
               setSelectedCategory(category.value);
             }}
           >
-            <h3 className="font-receipt text-sm font-normal tracking-wider uppercase">
+            <h3 className="font-receipt text-[13px] font-normal tracking-wider uppercase">
               {category.label}
             </h3>
           </Button>
