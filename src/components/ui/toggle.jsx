@@ -9,6 +9,8 @@ const toggleVariants = cva(
       variant: {
         default: "bg-transparent",
         outline: "border border-input bg-transparent hover:bg-muted",
+        segment:
+          "bg-transparent text-muted-foreground hover:bg-transparent group-data-[variant=segment]/toggle-group:aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-xs",
       },
       size: {
         default:

@@ -446,8 +446,7 @@ const Recipe = () => {
 
             <div className="flex flex-col gap-0.5">
               {isOwner && recipe.copied_from_name && (
-                <span className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
-                  <BookmarkCheck size={14} />
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("recipe_owner_kicker", {
                     name: recipe.copied_from_name,
                   })}

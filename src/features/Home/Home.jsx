@@ -6,6 +6,7 @@ import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
 import RecipeFilters from "../../components/RecipeFilters/RecipeFilters";
 import RecipeList from "../../components/RecipeList/RecipeList";
+import ResultsBar from "../../components/ResultsBar/ResultsBar";
 import Pagination from "../../components/Pagination/Pagination";
 
 function Home() {
@@ -46,12 +47,17 @@ function Home() {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         onSearchSubmit={() => navigate("/")}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        showImages={showImages}
-        setShowImages={setShowImages}
-        onPageReset={onPageReset}
       />
+      {totalRecipeCount > 0 && (
+        <ResultsBar
+          count={paginationInfo.totalCount}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          onPageReset={onPageReset}
+          showImages={showImages}
+          onShowImagesChange={setShowImages}
+        />
+      )}
       <RecipeList
         selectedCategory={selectedCategory}
         recipes={recipes}
