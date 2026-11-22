@@ -190,6 +190,7 @@
   "create_recipe": "Create Recipe",
   "editing_translation_notice": "Editing translation only - only recipe text can be changed, will not affect original",
   "go_back": "Go back",
+  "back": "Back",
   "edit_list": "Edit list",
   "open_recipe_source_link": "Open recipe source link",
 

@@ -81,7 +81,7 @@ const RecipeList = ({
         </Empty>
       )}
       {isOnline && totalRecipeCount === 0 && !searchTerm && !loading && (
-        <Empty className="mx-auto mt-20 w-fit border border-primary bg-card shadow-sm">
+        <Empty className="mx-auto mt-20 w-fit border border-border bg-card">
           <EmptyHeader>
             <EmptyTitle>{t("welcome_add_recipe")}</EmptyTitle>
           </EmptyHeader>

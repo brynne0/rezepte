@@ -8,11 +8,7 @@ const cardVariants = cva(
     variants: {
       variant: {
         default:
-          "overflow-hidden rounded-xl border border-primary *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
-        // Torn-off receipt stub: no border or radius, scalloped tear on the
-        // top and bottom edges drawn in the card colour. Large receipts keep
-        // their roomy padding (narrower on phones) but a tighter gap between
-        // header and content.
+          "overflow-hidden rounded-xl border border-border *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
         receipt: [
           "relative rounded-none [--card-spacing:--spacing(3.5)] data-[size=lg]:gap-4 max-md:data-[size=lg]:[--card-spacing:--spacing(5)]",
           "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-[7px] before:content-['']",

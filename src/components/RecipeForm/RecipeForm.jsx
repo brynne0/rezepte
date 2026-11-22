@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Clipboard } from "lucide-react";
+import { Clipboard } from "lucide-react";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "./hooks/useRecipeForm";
@@ -42,6 +42,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import BackLink from "../BackLink/BackLink";
 
 const RecipeForm = ({
   categories,
@@ -132,19 +133,10 @@ const RecipeForm = ({
 
   return (
     <>
+      <BackLink className="mx-auto max-w-3xl" />
       <Card className="max-w-3xl mx-auto">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="relative flex w-full items-center justify-center">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="absolute left-0"
-              onClick={() => navigate(-1)}
-              data-testid="back-arrow"
-              aria-label={t("go_back")}
-            >
-              <ArrowLeft />
-            </Button>
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
         </CardHeader>

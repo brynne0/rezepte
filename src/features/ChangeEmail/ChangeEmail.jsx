@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import supabase from "../../lib/supabase";
 import { changeEmail, verifyCurrentPassword } from "../../services/auth";
 import {
@@ -39,6 +39,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import BackLink from "../../components/BackLink/BackLink";
 
 const ChangeEmail = () => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -135,18 +136,10 @@ const ChangeEmail = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-sm">
+      <BackLink fallback="/settings" />
       <Card className="w-full">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="relative flex w-full items-center justify-center">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="absolute left-0"
-              onClick={() => navigate(-1)}
-              aria-label={t("go_back")}
-            >
-              <ArrowLeft />
-            </Button>
             <h1 className="text-lg font-semibold">{t("change_email")}</h1>
           </div>
         </CardHeader>

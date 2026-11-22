@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -37,6 +36,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import BackLink from "../../components/BackLink/BackLink";
 
 const Settings = ({ resetCategoryFilter }) => {
   const isOnline = useOnlineStatus();
@@ -300,18 +300,10 @@ const Settings = ({ resetCategoryFilter }) => {
         </div>
       ) : (
         <>
+          <BackLink />
           <Card className="w-full">
             <CardHeader className="flex flex-col items-stretch gap-4">
               <div className="relative flex w-full items-center justify-center">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="absolute left-0"
-                  onClick={() => navigate(-1)}
-                  aria-label={t("go_back")}
-                >
-                  <ArrowLeft />
-                </Button>
                 <h1 className="text-lg font-semibold">{t("settings")}</h1>
               </div>
 

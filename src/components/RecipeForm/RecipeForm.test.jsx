@@ -74,6 +74,7 @@ vi.mock("react-router-dom", async () => {
   return {
     ...actual,
     useNavigate: () => vi.fn(),
+    useLocation: () => ({ key: "default", pathname: "/", state: null }),
     useBlocker: () => ({ state: "unblocked" }),
   };
 });
@@ -304,7 +305,7 @@ describe("RecipeForm", () => {
     it("navigates when back arrow is clicked with no unsaved changes", () => {
       renderComponent();
 
-      const backButton = screen.getByTestId("back-arrow");
+      const backButton = screen.getByRole("button", { name: "back" });
       fireEvent.click(backButton);
 
       // With no unsaved changes (mock returns false), it should navigate directly

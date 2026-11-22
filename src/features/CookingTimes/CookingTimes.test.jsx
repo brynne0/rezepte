@@ -280,7 +280,7 @@ describe("CookingTimes", () => {
       expect(screen.getByTestId("conversions-tab")).toBeInTheDocument();
 
       // Click back
-      const backButton = screen.getByLabelText("Go Back");
+      const backButton = screen.getByRole("button", { name: "back" });
       fireEvent.click(backButton);
 
       // Should be back on cooking times tab
@@ -354,7 +354,7 @@ describe("CookingTimes", () => {
       });
 
       // Click back button
-      const backButton = screen.getByLabelText("Go Back");
+      const backButton = screen.getByRole("button", { name: "back" });
       fireEvent.click(backButton);
 
       // Should exit edit mode immediately without showing modal
@@ -384,7 +384,7 @@ describe("CookingTimes", () => {
       });
 
       // Click back button
-      const backButton = screen.getByLabelText("Go Back");
+      const backButton = screen.getByRole("button", { name: "back" });
       fireEvent.click(backButton);
 
       // Should show confirmation modal
@@ -412,7 +412,7 @@ describe("CookingTimes", () => {
       });
 
       // Click back button
-      const backButton = screen.getByLabelText("Go Back");
+      const backButton = screen.getByRole("button", { name: "back" });
       fireEvent.click(backButton);
 
       // Wait for modal to appear
@@ -446,7 +446,7 @@ describe("CookingTimes", () => {
       });
 
       // Click back button
-      const backButton = screen.getByLabelText("Go Back");
+      const backButton = screen.getByRole("button", { name: "back" });
       fireEvent.click(backButton);
 
       // Wait for modal to appear

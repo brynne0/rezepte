@@ -1,10 +1,9 @@
 import { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "cn";
 import {
-  ArrowLeft,
   RotateCcw,
   Minus,
   Plus,
@@ -23,6 +22,7 @@ import {
   findCopiedRecipe,
 } from "../../services/recipes";
 import { getFriendProfile } from "../../services/friendsService";
+import BackLink from "../../components/BackLink/BackLink";
 import AddToMyRecipesModal from "../../components/AddToMyRecipesModal/AddToMyRecipesModal";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
@@ -130,7 +130,6 @@ const Recipe = () => {
   };
 
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const { setFriendBar } = useContext(AppStateContext);
@@ -403,9 +402,7 @@ const Recipe = () => {
     "font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase";
   const sectionRule = "border-t border-dashed border-muted-foreground/40 pt-4";
 
-  // Back link: names where it leads (your recipes or the friend's). Goes back in
-  // history when we came from inside the app (keeps scroll and filters);
-  // otherwise, e.g. opened from a shared link, goes to that list directly.
+  // Back link names where it leads: your recipes, or the friend's
   const friendName = !isOwner ? friendProfile?.first_name : null;
   const backLabel = friendName
     ? t("recipe_action_back_friend", { name: friendName })
@@ -414,20 +411,15 @@ const Recipe = () => {
     !isOwner && friendProfile?.username
       ? `/friends/${friendProfile.username}`
       : "/";
-  const handleBack = () => {
-    if (location.key !== "default") navigate(-1);
-    else navigate(backFallback);
-  };
 
   return (
     <>
       {/* Navigation sits off the paper; the receipt only holds the recipe */}
-      <div className="mx-auto w-full max-w-3xl">
-        <Button variant="printed" className="-ml-2.5" onClick={handleBack}>
-          <ArrowLeft />
-          {backLabel}
-        </Button>
-      </div>
+      <BackLink
+        label={backLabel}
+        fallback={backFallback}
+        className="mx-auto max-w-3xl"
+      />
 
       <Card
         size="lg"

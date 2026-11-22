@@ -171,16 +171,16 @@ describe("Settings", () => {
       });
     });
 
-    it("renders back button that navigates to previous page", async () => {
+    it("renders a back link that goes home when the page was opened directly", async () => {
       render(<SettingsWrapper />);
 
       await waitFor(() => {
         expect(screen.getByText("settings")).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByRole("button", { name: "go_back" }));
+      fireEvent.click(screen.getByRole("button", { name: "back" }));
 
-      expect(mockNavigate).toHaveBeenCalledWith(-1);
+      expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });
 
