@@ -72,13 +72,14 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
   return (
     <Card
       ref={cardRef}
-      className="cursor-pointer py-0 justify-between"
+      variant="receipt"
+      className="h-full cursor-pointer pb-3"
       onClick={() => onClick && onClick(recipe)}
     >
-      <CardHeader className="py-2 ">
+      <CardHeader>
         <CardTitle
           className={cn(
-            "min-w-0 text-xs font-medium uppercase wrap-break-word",
+            "min-w-0 font-receipt text-sm leading-snug font-semibold wrap-break-word md:text-[15px]",
             !isSourceLinkHovered && "group-hover/card:text-accent-red"
           )}
         >
@@ -86,7 +87,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
         </CardTitle>
 
         {(recipe.alreadySaved || (sourceUrl && hasNoContent)) && (
-          <CardAction className="row-span-1 flex items-center gap-1.5 self-center">
+          <CardAction className="row-span-1 flex items-center gap-1.5 pt-0.5 text-muted-foreground">
             {recipe.alreadySaved && (
               <Tooltip>
                 <TooltipTrigger
@@ -131,24 +132,26 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
         )}
       </CardHeader>
       {shouldShowImages && signedMainImage && !imageError && imageUrl && (
-        <AspectRatio
-          ratio={3 / 2}
-          className="mx-2 mb-2 overflow-hidden rounded-lg"
-        >
-          {!imageLoaded && <Skeleton className="absolute inset-0 rounded-lg" />}
-          <img
-            className={cn(
-              "size-full object-cover transition-opacity duration-200 will-change-[opacity]",
-              imageLoaded ? "opacity-100" : "opacity-0"
+        // mt-auto pins the photo to the bottom so photos line up across a row
+        <div className="mt-auto px-(--card-spacing)">
+          <AspectRatio ratio={4 / 3} className="overflow-hidden">
+            {!imageLoaded && (
+              <Skeleton className="absolute inset-0 rounded-none" />
             )}
-            src={imageUrl}
-            alt={recipe.title}
-            loading="lazy"
-            onLoad={handleImageLoad}
-            onError={handleImageError}
-            key={signedMainImage?.id}
-          />
-        </AspectRatio>
+            <img
+              className={cn(
+                "size-full object-cover transition-opacity duration-200 will-change-[opacity]",
+                imageLoaded ? "opacity-100" : "opacity-0"
+              )}
+              src={imageUrl}
+              alt={recipe.title}
+              loading="lazy"
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              key={signedMainImage?.id}
+            />
+          </AspectRatio>
+        </div>
       )}
     </Card>
   );
