@@ -224,13 +224,17 @@ describe("Recipe Component", () => {
 
     test("renders servings information", () => {
       renderRecipe();
-      expect(screen.getByText("servings:")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "servings" })
+      ).toBeInTheDocument();
       expect(screen.getByText("4")).toBeInTheDocument();
     });
 
     test("renders instructions", () => {
       renderRecipe();
-      expect(screen.getByText("instructions:")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "instructions" })
+      ).toBeInTheDocument();
       expect(screen.getByText("Step 1")).toBeInTheDocument();
       expect(screen.getByText("Step 2")).toBeInTheDocument();
       expect(screen.getByText("Step 3")).toBeInTheDocument();
@@ -238,7 +242,9 @@ describe("Recipe Component", () => {
 
     test("renders source as link when it's a URL", () => {
       renderRecipe();
-      expect(screen.getByText("source:")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "source" })
+      ).toBeInTheDocument();
 
       const sourceLink = screen.getByRole("link");
       expect(sourceLink).toHaveAttribute("href", "https://example.com/recipe");
@@ -253,14 +259,18 @@ describe("Recipe Component", () => {
       };
       renderRecipe();
 
-      expect(screen.getByText("source:")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "source" })
+      ).toBeInTheDocument();
       expect(screen.getByText("My sister's recipe")).toBeInTheDocument();
       expect(screen.queryByRole("link")).not.toBeInTheDocument();
     });
 
     test("renders notes", () => {
       renderRecipe();
-      expect(screen.getByText("notes:")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "notes" })
+      ).toBeInTheDocument();
       expect(screen.getByText("Some extra notes")).toBeInTheDocument();
     });
 
@@ -325,6 +335,37 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(mockSetFriendBar).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe("Back Link", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = mockRecipeData;
+    });
+
+    test("links back to your recipes, falling back to home when opened directly", () => {
+      renderRecipe();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "recipe_action_back" })
+      );
+      expect(mockNavigate).toHaveBeenCalledWith("/");
+    });
+
+    test("links back to the friend's recipes when viewing a friend's recipe", async () => {
+      mockAuth.user = { id: "some-other-user" };
+      mockGetFriendProfile.mockResolvedValue({
+        first_name: "Alice",
+        username: "alice",
+      });
+      renderRecipe();
+
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: "recipe_action_back_friend",
+        })
+      );
+      expect(mockNavigate).toHaveBeenCalledWith("/friends/alice");
     });
   });
 
@@ -582,7 +623,9 @@ describe("Recipe Component", () => {
     test("renders ungrouped ingredients", () => {
       renderRecipe();
 
-      expect(screen.getByText("ingredients:")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "ingredients" })
+      ).toBeInTheDocument();
       expect(screen.getByText("2 cups")).toBeInTheDocument();
       expect(screen.getByText("flour")).toBeInTheDocument();
       expect(screen.getByText(/sifted/)).toBeInTheDocument();

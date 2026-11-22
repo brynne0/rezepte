@@ -10,9 +10,10 @@ const cardVariants = cva(
         default:
           "overflow-hidden rounded-xl border border-primary *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
         // Torn-off receipt stub: no border or radius, scalloped tear on the
-        // top and bottom edges drawn in the card colour.
+        // top and bottom edges drawn in the card colour. Large receipts keep
+        // their roomy padding but a tighter gap between header and content.
         receipt: [
-          "relative rounded-none [--card-spacing:--spacing(3.5)]",
+          "relative rounded-none [--card-spacing:--spacing(3.5)] data-[size=lg]:gap-4",
           "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-[7px] before:content-['']",
           "before:bg-[radial-gradient(circle_at_6px_7px,var(--card)_6px,transparent_6.5px)] before:bg-size-[12px_7px] before:bg-repeat-x",
           "after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-[7px] after:content-['']",

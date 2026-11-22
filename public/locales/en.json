@@ -197,6 +197,13 @@
   "recipe_owner_kicker": "{{name}}'s",
   "recipe_already_saved": "Already in your recipes",
   "recipe_already_saved_go_to_copy": "View your copy",
+  "recipe_action_back": "Recipes",
+  "recipe_action_back_friend": "{{name}}'s recipes",
+  "recipe_action_edit": "Edit",
+  "recipe_action_copy": "Copy",
+  "recipe_status_private": "Private",
+  "recipe_status_friends": "Friends can see",
+  "recipe_status_saved": "Saved {{date}}",
 
   "profile": "Profile",
   "categories": "Categories",

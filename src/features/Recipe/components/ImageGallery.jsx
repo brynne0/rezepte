@@ -44,18 +44,19 @@ const ImageGallery = ({ images = [] }) => {
 
   return (
     <>
-      <Carousel setApi={setApi}>
+      {/* Only allow swiping when there's more than one image */}
+      <Carousel
+        setApi={setApi}
+        opts={{ watchDrag: reorderedImages.length > 1 }}
+      >
         <CarouselContent>
           {reorderedImages.map((image) => {
             const isLoaded = loadedImages.has(image.id);
             return (
               <CarouselItem key={image.id}>
-                <AspectRatio
-                  ratio={3 / 2}
-                  className="overflow-hidden rounded-lg"
-                >
+                <AspectRatio ratio={16 / 9} className="overflow-hidden">
                   {!isLoaded && (
-                    <Skeleton className="absolute inset-0 rounded-lg" />
+                    <Skeleton className="absolute inset-0 rounded-none" />
                   )}
                   <img
                     src={image.url}
@@ -85,7 +86,7 @@ const ImageGallery = ({ images = [] }) => {
                 type="button"
                 onClick={() => api?.scrollTo(index)}
                 className={cn(
-                  "relative size-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors",
+                  "relative size-16 shrink-0 overflow-hidden rounded-sm border-2 transition-colors",
                   index === selectedIndex
                     ? "border-accent-red"
                     : "border-transparent hover:border-muted-foreground"

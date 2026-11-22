@@ -216,7 +216,9 @@ const CookingTimes = ({
               aria-pressed={selectedSection === "all"}
               onClick={() => setSelectedSection("all")}
             >
-              <span className="font-forta uppercase">{t("all", "All")}</span>
+              <span className="font-receipt text-xs tracking-widest uppercase">
+                {t("all", "All")}
+              </span>
             </Button>
             {formData.cookingTimeSections.map((section) => (
               <Button
@@ -225,7 +227,7 @@ const CookingTimes = ({
                 aria-pressed={selectedSection === section.subheading}
                 onClick={() => setSelectedSection(section.subheading)}
               >
-                <span className="font-forta uppercase">
+                <span className="font-receipt text-xs tracking-widest uppercase">
                   {section.subheading}
                 </span>
               </Button>
