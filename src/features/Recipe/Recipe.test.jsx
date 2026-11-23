@@ -335,7 +335,7 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(mockSetFriendBar).toHaveBeenCalledWith(
-        expect.objectContaining({ hideBack: true })
+        expect.objectContaining({ loading: expect.any(Boolean) })
       );
     });
 

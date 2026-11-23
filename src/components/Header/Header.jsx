@@ -374,16 +374,14 @@ const Header = ({ friendBar }) => {
       {friendBar && (
         <div className="border-t border-b">
           <div className="relative mx-auto flex max-w-7xl items-center justify-center px-3 pt-2 pb-2 md:px-8">
-            {!friendBar.hideBack && (
-              <Button
-                variant="printed"
-                className="absolute left-0.5 md:left-5.5"
-                onClick={() => navigate("/")}
-              >
-                <ArrowLeft />
-                {t("my_recipes")}
-              </Button>
-            )}
+            <Button
+              variant="printed"
+              className="absolute left-0.5 md:left-5.5"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft />
+              {t("my_recipes")}
+            </Button>
             {friendBar.loading ? (
               <Skeleton className="h-7 w-40 rounded-full" />
             ) : (

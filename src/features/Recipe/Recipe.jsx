@@ -202,7 +202,6 @@ const Recipe = () => {
     setFriendBar({
       name: friendProfile?.first_name || null,
       loading: friendProfileLoading,
-      hideBack: true,
     });
     return () => setFriendBar(null);
   }, [showFriendBar, friendProfile, friendProfileLoading, setFriendBar]);
