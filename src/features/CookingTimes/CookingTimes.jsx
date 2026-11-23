@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FilterStrip from "../../components/FilterStrip/FilterStrip";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Plus, Timer, ArrowLeftRight, Pencil } from "lucide-react";
@@ -205,29 +206,19 @@ const CookingTimes = ({
 
           {/* Section Filter Chips - Only for cooking times tab */}
           {activeTab === "cooking-times" && !isEditMode && hasAnyItems && (
-            <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
-              <Button
-                variant="text"
-                aria-pressed={selectedSection === "all"}
-                onClick={() => setSelectedSection("all")}
-              >
-                <span className="font-receipt text-sm tracking-wider uppercase">
-                  {t("all", "All")}
-                </span>
-              </Button>
-              {formData.cookingTimeSections.map((section) => (
-                <Button
-                  key={section.id}
-                  variant="text"
-                  aria-pressed={selectedSection === section.subheading}
-                  onClick={() => setSelectedSection(section.subheading)}
-                >
-                  <span className="font-receipt text-sm tracking-wider uppercase">
-                    {section.subheading}
-                  </span>
-                </Button>
-              ))}
-            </div>
+            <FilterStrip
+              className="pb-1"
+              items={[
+                { value: "all", label: t("all", "All") },
+                ...formData.cookingTimeSections.map((section) => ({
+                  key: section.id,
+                  value: section.subheading,
+                  label: section.subheading,
+                })),
+              ]}
+              selected={selectedSection}
+              onSelect={setSelectedSection}
+            />
           )}
         </CardHeader>
 
