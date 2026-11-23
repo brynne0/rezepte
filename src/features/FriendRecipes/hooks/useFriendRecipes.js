@@ -103,7 +103,10 @@ export const useFriendRecipes = (username) => {
     queryKey: ["friendRecipesTranslated", friendUserId, currentLanguage],
     queryFn: async () => {
       const translated = await Promise.all(
-        rawRecipes.map((r) => getTranslatedRecipeTitle(r, currentLanguage))
+        // Only the owner can save translations onto their recipes
+        rawRecipes.map((r) =>
+          getTranslatedRecipeTitle(r, currentLanguage, { persist: false })
+        )
       );
       return {
         recipes: translated,

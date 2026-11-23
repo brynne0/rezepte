@@ -1,12 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 import { useTranslation } from "react-i18next";
 import EditRecipePage from "./EditRecipe";
 
+let mockSearchParams = new URLSearchParams();
 vi.mock("react-router-dom", () => ({
   useParams: vi.fn(() => ({ id: "123" })),
+  useSearchParams: vi.fn(() => [mockSearchParams]),
 }));
 
 vi.mock("../../hooks/ui/useOnlineStatus", () => ({
@@ -38,20 +40,30 @@ vi.mock("../../hooks/data/useRecipe", () => ({
 
 vi.mock("../../components/RecipeForm/RecipeForm", () => ({
   __esModule: true,
-  default: vi.fn(({ title, categories, isEditingTranslation }) => (
-    <div
-      data-testid="recipe-form-mock"
-      data-categories={categories ? JSON.stringify(categories) : undefined}
-      data-is-editing-translation={isEditingTranslation}
-    >
-      {title}
-      {isEditingTranslation && (
-        <div data-testid="translation-editing-indicator">
-          Translation editing mode
-        </div>
-      )}
-    </div>
-  )),
+  default: vi.fn(
+    ({
+      title,
+      categories,
+      isEditingTranslation,
+      isEditingOriginal,
+      contentLanguage,
+    }) => (
+      <div
+        data-testid="recipe-form-mock"
+        data-categories={categories ? JSON.stringify(categories) : undefined}
+        data-is-editing-translation={isEditingTranslation}
+        data-is-editing-original={isEditingOriginal}
+        data-content-language={contentLanguage}
+      >
+        {title}
+        {isEditingTranslation && (
+          <div data-testid="translation-editing-indicator">
+            Translation editing mode
+          </div>
+        )}
+      </div>
+    )
+  ),
 }));
 
 vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
@@ -64,6 +76,10 @@ describe("EditRecipePage", () => {
     { value: "desserts", label: "Desserts" },
     { value: "main-dishes", label: "Main Dishes" },
   ];
+
+  beforeEach(() => {
+    mockSearchParams = new URLSearchParams();
+  });
 
   it("renders LoadingAcorn when loading", () => {
     vi.mocked(useRecipe).mockReturnValueOnce({ recipe: null, loading: true });
@@ -103,44 +119,57 @@ describe("EditRecipePage", () => {
     expect(screen.queryByText("recipe_not_found")).not.toBeInTheDocument();
   });
 
-  describe("Language Preservation", () => {
-    it("preserves language restoration functionality when component unmounts", () => {
-      // Test that the component has the language restoration logic without breaking
-      vi.mocked(useRecipe).mockReturnValueOnce({
-        recipe: {
-          id: "123",
-          title: "Test Recipe",
-          original_language: "de", // Different language to trigger switching
-        },
-        loading: false,
+  describe("Editing the original", () => {
+    const germanRecipe = {
+      recipe: { id: "123", title: "Testrezept", original_language: "de" },
+      loading: false,
+    };
+
+    beforeEach(() => {
+      vi.mocked(useTranslation).mockReturnValue({
+        t: (key) => key,
+        i18n: { language: "en", changeLanguage: mockChangeLanguage },
       });
-
-      const { unmount } = render(
-        <EditRecipePage categories={mockCategories} />
-      );
-
-      // Component should render without errors
-      expect(screen.getByTestId("recipe-form-mock")).toBeInTheDocument();
-
-      // Unmount should not cause errors (cleanup effect should work)
-      expect(() => unmount()).not.toThrow();
     });
 
-    it("renders correctly with language preservation code when languages match", () => {
-      vi.mocked(useRecipe).mockReturnValueOnce({
-        recipe: {
-          id: "123",
-          title: "Test Recipe",
-          original_language: "en", // Same as current mock language
-        },
+    it("loads the untranslated recipe and edits it in full with ?original=1", () => {
+      mockSearchParams = new URLSearchParams("original=1");
+      vi.mocked(useRecipe).mockReturnValue(germanRecipe);
+
+      render(<EditRecipePage categories={mockCategories} />);
+
+      expect(useRecipe).toHaveBeenCalledWith("123", { original: true });
+      const recipeForm = screen.getByTestId("recipe-form-mock");
+      expect(recipeForm).toHaveAttribute(
+        "data-is-editing-translation",
+        "false"
+      );
+      expect(recipeForm).toHaveAttribute("data-is-editing-original", "true");
+      expect(recipeForm).toHaveAttribute("data-content-language", "de");
+    });
+
+    it("edits the translation by default for a recipe in another language", () => {
+      vi.mocked(useRecipe).mockReturnValue(germanRecipe);
+
+      render(<EditRecipePage categories={mockCategories} />);
+
+      expect(useRecipe).toHaveBeenCalledWith("123", { original: false });
+      const recipeForm = screen.getByTestId("recipe-form-mock");
+      expect(recipeForm).toHaveAttribute("data-is-editing-translation", "true");
+      expect(recipeForm).toHaveAttribute("data-is-editing-original", "false");
+    });
+
+    it("does not flag original editing when the recipe is already in your language", () => {
+      mockSearchParams = new URLSearchParams("original=1");
+      vi.mocked(useRecipe).mockReturnValue({
+        recipe: { id: "123", title: "Test Recipe", original_language: "en" },
         loading: false,
       });
 
       render(<EditRecipePage categories={mockCategories} />);
 
-      // Component should render edit form correctly
-      expect(screen.getByTestId("recipe-form-mock")).toBeInTheDocument();
-      expect(screen.getByText("edit_recipe")).toBeInTheDocument();
+      const recipeForm = screen.getByTestId("recipe-form-mock");
+      expect(recipeForm).toHaveAttribute("data-is-editing-original", "false");
     });
   });
 

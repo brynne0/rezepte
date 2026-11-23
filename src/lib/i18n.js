@@ -10,6 +10,7 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: "en",
+    preload: ["en", "de"],
     backend: {
       loadPath: "/locales/{{lng}}.json",
     },

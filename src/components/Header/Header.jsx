@@ -45,7 +45,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-const Header = ({ disableLanguageSwitch = false, friendBar }) => {
+const Header = ({ friendBar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -109,48 +109,20 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
     navigate("/");
   };
 
-  // Language toggle
-  const LanguageSelector = ({ onLanguageChange = null }) => {
-    const nextLanguage = i18n.language === "en" ? "de" : "en";
-    const label =
-      nextLanguage === "en" ? t("switch_to_english") : t("switch_to_german");
-
-    const button = (
-      <Button
-        variant="ghost"
-        className="text-base"
-        onClick={() => {
-          if (!disableLanguageSwitch) {
-            i18n.changeLanguage(nextLanguage);
-            if (onLanguageChange) onLanguageChange();
-          }
-        }}
-        disabled={disableLanguageSwitch}
-        aria-label={label}
-      >
-        {nextLanguage.toUpperCase()}
-      </Button>
-    );
-
-    if (!disableLanguageSwitch) {
-      return button;
-    }
-
-    return (
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <span tabIndex={0} className="inline-flex">
-              {button}
-            </span>
-          }
-        />
-        <TooltipContent>
-          {t("cooking_times_language_locked_hint")}
-        </TooltipContent>
-      </Tooltip>
-    );
-  };
+  // Logged-out only; logged in, the language comes from Settings
+  const nextLanguage = i18n.language === "en" ? "de" : "en";
+  const languageToggle = !isLoggedIn && (
+    <Button
+      variant="ghost"
+      className="text-base"
+      onClick={() => i18n.changeLanguage(nextLanguage)}
+      aria-label={
+        nextLanguage === "en" ? t("switch_to_english") : t("switch_to_german")
+      }
+    >
+      {nextLanguage.toUpperCase()}
+    </Button>
+  );
 
   // Shared user dropdown menu
   const UserMenu = () => (
@@ -212,7 +184,7 @@ const Header = ({ disableLanguageSwitch = false, friendBar }) => {
           {/* Language Selection */}
           <div className="flex shrink-0 items-center md:gap-2">
             {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
-            <LanguageSelector />
+            {languageToggle}
           </div>
 
           {/* Title */}

@@ -3,13 +3,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createRoutesStub } from "react-router-dom";
 import CookingTimes from "./CookingTimes";
 import * as cookingTimesTranslationService from "../../services/cookingTimesTranslationService";
-import * as userService from "../../services/userService";
 import { createQueryClientWrapper } from "../../test-utils/queryClient";
 
 // Mock services
 vi.mock("../../services/cookingTimesService");
 vi.mock("../../services/cookingTimesTranslationService");
-vi.mock("../../services/userService");
 
 vi.mock("../../hooks/data/useAuth", () => ({
   useAuth: () => ({ user: { id: "test-user-id" } }),
@@ -125,22 +123,32 @@ describe("CookingTimes", () => {
     cookingTimesTranslationService.getTranslatedCookingTimes.mockResolvedValue(
       mockCookingTimesData
     );
-    userService.getUserPreferredLanguage.mockResolvedValue("en");
   });
 
   const renderComponent = (props = {}) => {
     const Stub = createRoutesStub([
       {
         path: "/",
-        Component: () => (
-          <CookingTimes isEditMode={false} setIsEditMode={vi.fn()} {...props} />
-        ),
+        Component: () => <CookingTimes {...props} />,
       },
     ]);
     return render(<Stub initialEntries={["/"]} />, {
       wrapper: createQueryClientWrapper(),
     });
   };
+
+  // Edit mode is local state, so enter it the way a user would
+  const renderInEditMode = async () => {
+    const result = renderComponent();
+    fireEvent.click(await screen.findByLabelText("Edit Mode"));
+    await screen.findByText("add_section");
+    return result;
+  };
+
+  const expectEditModeExited = () =>
+    waitFor(() => {
+      expect(screen.queryByText("add_section")).not.toBeInTheDocument();
+    });
 
   describe("Loading State", () => {
     it("should show loading skeletons while fetching data", () => {
@@ -214,7 +222,7 @@ describe("CookingTimes", () => {
 
   describe("Edit Mode", () => {
     it("should show add section button in edit mode", async () => {
-      renderComponent({ isEditMode: true });
+      await renderInEditMode();
 
       await waitFor(() => {
         expect(screen.getByText("add_section")).toBeInTheDocument();
@@ -222,7 +230,7 @@ describe("CookingTimes", () => {
     });
 
     it("should show add cooking time buttons in edit mode", async () => {
-      renderComponent({ isEditMode: true });
+      await renderInEditMode();
 
       await waitFor(() => {
         const addButtons = screen.getAllByTestId(/add.*cooking-time-btn/);
@@ -292,7 +300,7 @@ describe("CookingTimes", () => {
 
   describe("Save and Cancel", () => {
     it("should show save and cancel buttons in edit mode", async () => {
-      renderComponent({ isEditMode: true });
+      await renderInEditMode();
 
       await waitFor(() => {
         expect(screen.getByText("cancel")).toBeInTheDocument();
@@ -300,12 +308,11 @@ describe("CookingTimes", () => {
       });
     });
 
-    it("should call setIsEditMode(false) when cancel is clicked", async () => {
-      const setIsEditMode = vi.fn();
+    it("should exit edit mode when cancel is clicked", async () => {
       cookingTimesTranslationService.getTranslatedCookingTimes.mockResolvedValue(
         mockCookingTimesData
       );
-      renderComponent({ isEditMode: true, setIsEditMode });
+      await renderInEditMode();
 
       await waitFor(() => {
         expect(screen.getByText("cancel")).toBeInTheDocument();
@@ -314,9 +321,7 @@ describe("CookingTimes", () => {
       const cancelButton = screen.getByText("cancel");
       fireEvent.click(cancelButton);
 
-      await waitFor(() => {
-        expect(setIsEditMode).toHaveBeenCalledWith(false);
-      });
+      await expectEditModeExited();
     });
   });
 
@@ -345,8 +350,7 @@ describe("CookingTimes", () => {
 
   describe("Unsaved Changes Warning", () => {
     it("should not show warning when exiting edit mode without changes", async () => {
-      const setIsEditMode = vi.fn();
-      renderComponent({ isEditMode: true, setIsEditMode });
+      await renderInEditMode();
 
       // Wait for data to load - look for add section button instead
       await waitFor(() => {
@@ -358,9 +362,7 @@ describe("CookingTimes", () => {
       fireEvent.click(backButton);
 
       // Should exit edit mode immediately without showing modal
-      await waitFor(() => {
-        expect(setIsEditMode).toHaveBeenCalledWith(false);
-      });
+      await expectEditModeExited();
 
       // Modal should not appear
       expect(
@@ -369,8 +371,7 @@ describe("CookingTimes", () => {
     });
 
     it("should show warning when clicking back with unsaved changes", async () => {
-      const setIsEditMode = vi.fn();
-      renderComponent({ isEditMode: true, setIsEditMode });
+      await renderInEditMode();
 
       // Wait for data to load
       await waitFor(() => {
@@ -393,12 +394,11 @@ describe("CookingTimes", () => {
       });
 
       // Should not have exited edit mode yet
-      expect(setIsEditMode).not.toHaveBeenCalled();
+      expect(screen.getByText("add_section")).toBeInTheDocument();
     });
 
     it("should exit edit mode when confirming unsaved changes warning", async () => {
-      const setIsEditMode = vi.fn();
-      renderComponent({ isEditMode: true, setIsEditMode });
+      await renderInEditMode();
 
       // Wait for data to load
       await waitFor(() => {
@@ -425,14 +425,11 @@ describe("CookingTimes", () => {
       fireEvent.click(confirmButton);
 
       // Should exit edit mode
-      await waitFor(() => {
-        expect(setIsEditMode).toHaveBeenCalledWith(false);
-      });
+      await expectEditModeExited();
     });
 
     it("should stay in edit mode when canceling unsaved changes warning", async () => {
-      const setIsEditMode = vi.fn();
-      renderComponent({ isEditMode: true, setIsEditMode });
+      await renderInEditMode();
 
       // Wait for data to load
       await waitFor(() => {
@@ -464,12 +461,11 @@ describe("CookingTimes", () => {
           screen.queryByText("unsaved_changes_warning")
         ).not.toBeInTheDocument();
       });
-      expect(setIsEditMode).not.toHaveBeenCalled();
+      expect(screen.getByText("add_section")).toBeInTheDocument();
     });
 
     it("should show warning when clicking cancel button with unsaved changes", async () => {
-      const setIsEditMode = vi.fn();
-      renderComponent({ isEditMode: true, setIsEditMode });
+      await renderInEditMode();
 
       // Wait for data to load
       await waitFor(() => {
@@ -492,12 +488,11 @@ describe("CookingTimes", () => {
       });
 
       // Should not have exited edit mode yet
-      expect(setIsEditMode).not.toHaveBeenCalled();
+      expect(screen.getByText("add_section")).toBeInTheDocument();
     });
 
     it("should not show warning when clicking cancel button without changes", async () => {
-      const setIsEditMode = vi.fn();
-      renderComponent({ isEditMode: true, setIsEditMode });
+      await renderInEditMode();
 
       // Wait for data to load
       await waitFor(() => {
@@ -509,9 +504,7 @@ describe("CookingTimes", () => {
       fireEvent.click(cancelButton);
 
       // Should exit edit mode immediately without showing modal
-      await waitFor(() => {
-        expect(setIsEditMode).toHaveBeenCalledWith(false);
-      });
+      await expectEditModeExited();
 
       // Modal should not appear
       expect(

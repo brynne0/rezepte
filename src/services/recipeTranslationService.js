@@ -126,8 +126,12 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
   return translatedResult;
 };
 
-// Get translated recipe title only (for recipe lists)
-export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
+// Get translated recipe title only (for recipe lists); `persist: false` skips saving
+export const getTranslatedRecipeTitle = async (
+  recipe,
+  targetLanguage,
+  { persist = true } = {}
+) => {
   // If original language is same as target (default to "en" if unknown), return without translating
   if ((recipe.original_language || "en") === targetLanguage) {
     const processedResult = { ...recipe };
@@ -174,11 +178,13 @@ export const getTranslatedRecipeTitle = async (recipe, targetLanguage) => {
         : rawTranslatedTitle;
 
     // Save just the title translation (don't overwrite other fields)
-    await saveRecipeTitleTranslation(
-      recipe.id,
-      targetLanguage,
-      translatedTitle
-    );
+    if (persist) {
+      await saveRecipeTitleTranslation(
+        recipe.id,
+        targetLanguage,
+        translatedTitle
+      );
+    }
 
     return {
       ...recipe,
@@ -315,25 +321,15 @@ const getTranslatedRecipeData = async (recipe, targetLanguage) => {
   }
 };
 
-// Helper function to get the correct ingredient name for display
-const getIngredientDisplayName = async (
+// Translates an ingredient's names and stores them; null if translation failed
+export const translateIngredientNames = async (
   ingredient,
   targetLanguage,
   sourceLanguage = "en"
 ) => {
-  const usePlural = ingredient.is_plural || false;
-
-  // Override, or a same-language / already-cached translation, resolves without any API call
-  const resolved = resolveIngredientName(
-    ingredient,
-    targetLanguage,
-    sourceLanguage
-  );
-  if (resolved !== null) return resolved;
-
-  // Need to translate from source to target: get the source text
   const { singular_name: sourceSingular, plural_name: sourcePlural } =
     getIngredientNamesForLanguage(ingredient, sourceLanguage);
+  if (!sourceSingular) return null;
 
   try {
     // Translate both singular and plural forms from source to target with food context
@@ -348,11 +344,11 @@ const getIngredientDisplayName = async (
 
     // Unchanged result means translateText silently failed - don't cache
     // source-language text as if it were a real translation
-    const singularTranslated =
-      translatedSingular.trim().toLowerCase() !==
-      sourceSingular.trim().toLowerCase();
-    if (!singularTranslated) {
-      return usePlural && sourcePlural ? sourcePlural : sourceSingular;
+    if (
+      translatedSingular.trim().toLowerCase() ===
+      sourceSingular.trim().toLowerCase()
+    ) {
+      return null;
     }
     const pluralTranslated =
       !sourcePlural ||
@@ -363,14 +359,11 @@ const getIngredientDisplayName = async (
       translatedSingular,
       targetLanguage
     );
-    const finalPlural = pluralTranslated
-      ? capitalizeForLanguage(translatedPlural, targetLanguage)
-      : finalSingular;
-
-    // Save translation to database
     const translationData = {
       singular_name: finalSingular,
-      plural_name: finalPlural,
+      plural_name: pluralTranslated
+        ? capitalizeForLanguage(translatedPlural, targetLanguage)
+        : finalSingular,
     };
 
     try {
@@ -387,16 +380,39 @@ const getIngredientDisplayName = async (
       // Continue anyway - translation will work for this session
     }
 
-    // Return the appropriate form
-    const result = usePlural ? finalPlural : finalSingular;
-    return result;
+    return translationData;
   } catch (error) {
     console.error(`Failed to create translation for ${sourceSingular}:`, error);
-
-    // Fallback to source text if translation fails
-    const result = usePlural && sourcePlural ? sourcePlural : sourceSingular;
-    return result;
+    return null;
   }
+};
+
+// Helper function to get the correct ingredient name for display
+const getIngredientDisplayName = async (
+  ingredient,
+  targetLanguage,
+  sourceLanguage = "en"
+) => {
+  const usePlural = ingredient.is_plural || false;
+
+  // Override, or a same-language / already-cached translation, resolves without any API call
+  const resolved = resolveIngredientName(
+    ingredient,
+    targetLanguage,
+    sourceLanguage
+  );
+  if (resolved !== null) return resolved;
+
+  const translated = await translateIngredientNames(
+    ingredient,
+    targetLanguage,
+    sourceLanguage
+  );
+  const names =
+    translated || getIngredientNamesForLanguage(ingredient, sourceLanguage);
+  return usePlural && names.plural_name
+    ? names.plural_name
+    : names.singular_name;
 };
 
 // Get translated ingredients

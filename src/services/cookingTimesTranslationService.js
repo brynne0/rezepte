@@ -22,12 +22,22 @@ export const getTranslatedCookingTime = async (
     return cookingTime;
   }
 
+  // Kept so an edit can make the shown language the new original without loss
+  const untranslated = {
+    ingredient_name: cookingTime.ingredient_name,
+    notes: cookingTime.notes,
+    section_name: cookingTime.section_name,
+    cooking_time: cookingTime.cooking_time,
+    soaking_time: cookingTime.soaking_time,
+  };
+
   // Check if translation exists in storage
   const cachedTranslation =
     cookingTime.translated_cooking_time?.[targetLanguage];
   if (cachedTranslation) {
     return {
       ...cookingTime,
+      untranslated,
       ingredient_name: cachedTranslation.ingredient_name,
       notes: cachedTranslation.notes,
       section_name: cachedTranslation.section_name,
@@ -89,6 +99,7 @@ export const getTranslatedCookingTime = async (
 
     return {
       ...cookingTime,
+      untranslated,
       ingredient_name: translatedData.ingredient_name,
       notes: translatedData.notes,
       section_name: translatedData.section_name,

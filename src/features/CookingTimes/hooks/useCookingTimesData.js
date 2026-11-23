@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getTranslatedCookingTimes } from "../../../services/cookingTimesTranslationService";
-import { getUserPreferredLanguage } from "../../../services/userService";
 import {
   readCachedValue,
   writeCachedValue,
@@ -15,7 +14,6 @@ export const useCookingTimesData = ({ isEditMode, i18n }) => {
   const userId = user?.id;
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState("all");
-  const originalUserLanguage = useRef(null);
   const HAS_LOADED_ONCE = useRef(false);
 
   const [formData, setFormData] = useState({
@@ -78,7 +76,6 @@ export const useCookingTimesData = ({ isEditMode, i18n }) => {
     try {
       setLoading(true);
       const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
-      const preferredLanguage = await getUserPreferredLanguage();
       const cacheKey = cookingTimesCacheKey(userId, currentLanguage);
 
       // Fetch cooking times with translations - write to localStorage
@@ -90,7 +87,7 @@ export const useCookingTimesData = ({ isEditMode, i18n }) => {
         cookingTimesData = await queryClient.query({
           queryKey: ["cookingTimes", userId, currentLanguage],
           queryFn: () =>
-            getTranslatedCookingTimes(currentLanguage, preferredLanguage),
+            getTranslatedCookingTimes(currentLanguage, currentLanguage),
         });
         writeCachedValue(cacheKey, cookingTimesData);
       } catch (error) {
@@ -118,20 +115,6 @@ export const useCookingTimesData = ({ isEditMode, i18n }) => {
       HAS_LOADED_ONCE.current = true;
     }
   }, [loadData, isEditMode]); // Reload when language changes (unless in edit mode)
-
-  // Restore original language when exiting edit mode
-  useEffect(() => {
-    return () => {
-      // On unmount, restore original language if it was changed
-      if (
-        originalUserLanguage.current &&
-        originalUserLanguage.current !== i18n.language
-      ) {
-        i18n.changeLanguage(originalUserLanguage.current);
-        originalUserLanguage.current = null; // Clear the stored language
-      }
-    };
-  }, [i18n]);
 
   // Filter data based on selected section
   useEffect(() => {
@@ -166,6 +149,5 @@ export const useCookingTimesData = ({ isEditMode, i18n }) => {
     hasAnyItems,
     generateTempId,
     loadData,
-    originalUserLanguage,
   };
 };

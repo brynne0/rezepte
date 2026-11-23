@@ -1,8 +1,11 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import {
   getTranslatedRecipe,
+  getTranslatedRecipeTitle,
+  translateIngredientNames,
   normaliseInstructions,
 } from "./recipeTranslationService";
+import supabase from "../lib/supabase";
 
 // Mock Supabase
 vi.mock("../lib/supabase", () => ({
@@ -717,6 +720,81 @@ describe("Translation Service", () => {
       const result = await getTranslatedRecipe(recipe, "de");
 
       expect(result.source).toBe("See https://example.com/Cake");
+    });
+  });
+
+  describe("Recipe Title Translation", () => {
+    const germanRecipe = {
+      id: "recipe-de",
+      title: "Linsensuppe",
+      original_language: "de",
+    };
+
+    test("reuses a saved title translation without calling the API", async () => {
+      const result = await getTranslatedRecipeTitle(
+        {
+          ...germanRecipe,
+          translated_recipe: { en: { title: "Lentil Soup" } },
+        },
+        "en"
+      );
+
+      expect(result.title).toBe("Lentil Soup");
+      expect(supabase.functions.invoke).not.toHaveBeenCalled();
+    });
+
+    test("saves a new title translation by default", async () => {
+      await getTranslatedRecipeTitle(germanRecipe, "en");
+
+      expect(supabase.from).toHaveBeenCalledWith("recipes");
+    });
+
+    test("does not save when persist is false", async () => {
+      const result = await getTranslatedRecipeTitle(germanRecipe, "en", {
+        persist: false,
+      });
+
+      expect(result.isTranslated).toBe(true);
+      expect(supabase.functions.invoke).toHaveBeenCalled();
+      expect(supabase.from).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Ingredient Name Translation", () => {
+    test("translates both forms and saves them on the ingredient", async () => {
+      supabase.functions.invoke
+        .mockResolvedValueOnce({
+          data: { translatedText: "mehl" },
+          error: null,
+        })
+        .mockResolvedValueOnce({
+          data: { translatedText: "mehle" },
+          error: null,
+        });
+
+      const names = await translateIngredientNames(
+        { id: "ing-flour", singular_name: "flour", plural_name: "flours" },
+        "de"
+      );
+
+      // German nouns are capitalised
+      expect(names).toEqual({ singular_name: "Mehl", plural_name: "Mehle" });
+      expect(supabase.from).toHaveBeenCalledWith("ingredients");
+    });
+
+    test("returns null without saving when translation fails", async () => {
+      supabase.functions.invoke.mockResolvedValueOnce({
+        data: { translatedText: "flour" },
+        error: null,
+      });
+
+      const names = await translateIngredientNames(
+        { id: "ing-flour", singular_name: "flour" },
+        "de"
+      );
+
+      expect(names).toBeNull();
+      expect(supabase.from).not.toHaveBeenCalled();
     });
   });
 });

@@ -2,27 +2,6 @@ import supabase from "../lib/supabase";
 import { getAuthenticatedUser } from "./authHelpers";
 import { deleteAllUserImages } from "./imageService";
 
-// Get user's preferred language from database
-export const getUserPreferredLanguage = async () => {
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return "en";
-
-    const { data: userData } = await supabase
-      .from("users")
-      .select("preferred_language")
-      .eq("id", user.id)
-      .single();
-
-    return userData?.preferred_language || "en";
-  } catch (error) {
-    console.error("Error fetching user preferred language:", error);
-    return "en"; // Default fallback
-  }
-};
-
 // Update user's preferred language
 export const updateUserPreferredLanguage = async (language) => {
   try {

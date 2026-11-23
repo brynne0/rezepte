@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { Plus, Timer, ArrowLeftRight, Pencil } from "lucide-react";
 import CookingTimeRow from "./components/CookingTimeRow";
 import EditCookingTimes from "./components/EditCookingTimes";
-import { getUserPreferredLanguage } from "../../services/userService";
 import ConversionsTab from "./components/ConversionsTab";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,28 +32,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "@/components/ui/toast";
 import { useCookingTimesData } from "./hooks/useCookingTimesData";
 import { useEditCookingTimes } from "./hooks/useEditCookingTimes";
 import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 import BackLink from "../../components/BackLink/BackLink";
 
-const CookingTimes = ({
-  isEditMode: externalIsEditMode,
-  setIsEditMode: externalSetIsEditMode,
-}) => {
+const CookingTimes = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const isOnline = useOnlineStatus();
   const [activeTab, setActiveTab] = useState("cooking-times");
   const [showExitEditModeModal, setShowExitEditModeModal] = useState(false);
-
-  // Use external edit mode state from App.jsx (for disabling language switching)
-  // or internal state if not provided (for standalone usage)
-  const [internalIsEditMode, setInternalIsEditMode] = useState(false);
-  const isEditMode =
-    externalIsEditMode !== undefined ? externalIsEditMode : internalIsEditMode;
-  const setIsEditMode = externalSetIsEditMode || setInternalIsEditMode;
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const {
     loading,
@@ -67,7 +56,6 @@ const CookingTimes = ({
     hasAnyItems,
     generateTempId,
     loadData,
-    originalUserLanguage,
   } = useCookingTimesData({ isEditMode, i18n });
 
   const {
@@ -98,19 +86,7 @@ const CookingTimes = ({
     t,
   });
 
-  const enterEditMode = async () => {
-    // Switch to preferred language first, then enter edit mode
-    const preferredLanguage = await getUserPreferredLanguage();
-    if (i18n.language !== preferredLanguage) {
-      originalUserLanguage.current = i18n.language;
-      await i18n.changeLanguage(preferredLanguage);
-      // Wait for data to reload in new language before entering edit mode
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      toast.add({
-        title: t("switched_to_preferred_language_for_editing"),
-        type: "info",
-      });
-    }
+  const enterEditMode = () => {
     setIsEditMode(true);
     setSelectedSection("all");
   };
@@ -264,18 +240,8 @@ const CookingTimes = ({
                 <Button
                   type="button"
                   disabled={!isOnline}
-                  onClick={async () => {
+                  onClick={() => {
                     setIsEditMode(true);
-                    const preferredLanguage = await getUserPreferredLanguage();
-                    if (i18n.language !== preferredLanguage) {
-                      originalUserLanguage.current = i18n.language;
-                      await i18n.changeLanguage(preferredLanguage);
-                      await new Promise((resolve) => setTimeout(resolve, 50));
-                      toast.add({
-                        title: t("switched_to_preferred_language_for_editing"),
-                        type: "info",
-                      });
-                    }
                     addCookingTime("ungrouped");
                     setSelectedSection("all");
                   }}

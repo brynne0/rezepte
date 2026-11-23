@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { WifiOff } from "lucide-react";
 import { useRecipe } from "../../hooks/data/useRecipe";
@@ -15,37 +14,16 @@ import {
 
 const EditRecipePage = ({ categories }) => {
   const { id } = useParams();
-  const { recipe, loading } = useRecipe(id);
+  const [searchParams] = useSearchParams();
+  const editOriginal = searchParams.get("original") === "1";
+  const { recipe, loading } = useRecipe(id, { original: editOriginal });
   const { t, i18n } = useTranslation();
   const isOnline = useOnlineStatus();
-  const originalUserLanguage = useRef(null);
-  const [isEditingTranslation, setIsEditingTranslation] = useState(false);
 
-  // Determine if editing a recipe translation
-  useEffect(() => {
-    if (
-      recipe &&
-      recipe.original_language &&
-      recipe.original_language !== i18n.language.split("-")[0] // Normalize region codes
-    ) {
-      setIsEditingTranslation(true);
-      originalUserLanguage.current = i18n.language;
-    } else {
-      setIsEditingTranslation(false);
-    }
-  }, [recipe, i18n]);
-
-  // Restore user's original language when component unmounts
-  useEffect(() => {
-    return () => {
-      if (
-        originalUserLanguage.current &&
-        originalUserLanguage.current !== i18n.language
-      ) {
-        i18n.changeLanguage(originalUserLanguage.current);
-      }
-    };
-  }, [i18n]);
+  // A recipe in another language edits your translation, unless editing the original
+  const recipeLanguage = recipe?.original_language || "en";
+  const isForeignRecipe = recipeLanguage !== i18n.language.split("-")[0];
+  const isEditingTranslation = !!recipe && isForeignRecipe && !editOriginal;
 
   if (loading) {
     return <LoadingAcorn />;
@@ -73,6 +51,8 @@ const EditRecipePage = ({ categories }) => {
       initialRecipe={recipe}
       title={t("edit_recipe")}
       isEditingTranslation={isEditingTranslation}
+      isEditingOriginal={editOriginal && isForeignRecipe}
+      contentLanguage={recipeLanguage}
     />
   );
 };

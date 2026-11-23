@@ -218,6 +218,7 @@ export const fetchFriendRecipes = async (friendUserId) => {
     .from("recipes")
     .select(
       `id, title, slug, images, source, instructions, created_at, updated_at,
+       original_language, translated_recipe,
        recipe_categories(categoriy_id, categories(name, translated_category)),
        ${RECIPE_INGREDIENT_NAMES_SELECT}`
     )

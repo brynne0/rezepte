@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useContext } from "react";
 // Data hooks
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
 import { useAuth } from "./hooks/data/useAuth";
+import { useUserProfile } from "./hooks/data/useUserProfile";
 import { useCategories } from "./hooks/data/useCategories";
 import { readCachedValue, writeCachedValue } from "./utils/localStorageCache";
 
@@ -12,7 +13,6 @@ import {
   createBrowserRouter,
   RouterProvider,
   Outlet,
-  useLocation,
   Navigate,
 } from "react-router-dom";
 
@@ -73,14 +73,9 @@ function EditRecipeRoute() {
 }
 
 function CookingTimesRoute() {
-  const { isCookingTimesEditing, setIsCookingTimesEditing } =
-    useContext(AppStateContext);
   return (
     <ProtectedRoute>
-      <CookingTimes
-        isEditMode={isCookingTimesEditing}
-        setIsEditMode={setIsCookingTimesEditing}
-      />
+      <CookingTimes />
     </ProtectedRoute>
   );
 }
@@ -105,27 +100,13 @@ function SettingsRoute() {
 }
 
 function Layout() {
-  const { t, isCookingTimesEditing, setIsCookingTimesEditing, friendBar } =
-    useContext(AppStateContext);
-  const location = useLocation();
+  const { t, friendBar } = useContext(AppStateContext);
   const mainScrollRef = useMainScrollRef();
-  const isCookingTimesPage = location.pathname === "/cooking-times";
   const isOnline = useOnlineStatus();
-
-  // Reset cooking times editing state when leaving the cooking times page
-  useEffect(() => {
-    if (!isCookingTimesPage && isCookingTimesEditing) {
-      setIsCookingTimesEditing(false);
-    }
-  }, [isCookingTimesPage, isCookingTimesEditing, setIsCookingTimesEditing]);
 
   return (
     <>
-      <Header
-        t={t}
-        disableLanguageSwitch={isCookingTimesEditing}
-        friendBar={friendBar}
-      />
+      <Header friendBar={friendBar} />
       {!isOnline && (
         <Alert variant="destructive" className="rounded-none border-x-0">
           <AlertDescription>{t("no_internet_connection")}</AlertDescription>
@@ -156,7 +137,6 @@ function App() {
   const [showImages, setShowImages] = useState(
     () => readCachedValue("show_images_preference") ?? false
   );
-  const [isCookingTimesEditing, setIsCookingTimesEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [friendBar, setFriendBar] = useState(null);
 
@@ -182,6 +162,14 @@ function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const { profile } = useUserProfile();
+  const userLanguage = isLoggedIn ? profile?.preferred_language : null;
+  useEffect(() => {
+    if (userLanguage && userLanguage !== i18n.language) {
+      i18n.changeLanguage(userLanguage);
+    }
+  }, [userLanguage, i18n]);
 
   useEffect(() => {
     writeCachedValue("recipe_sort_preference", sortBy);
@@ -287,8 +275,6 @@ function App() {
     totalRecipeCount,
     searchTerm,
     isFetchingRecipes,
-    isCookingTimesEditing,
-    setIsCookingTimesEditing,
     paginationInfo,
     onPageChange: handlePageChange,
     onPageReset: handlePageReset,

@@ -11,6 +11,7 @@ import {
   LockOpen,
   BookmarkCheck,
   BookmarkPlus,
+  Languages,
 } from "lucide-react";
 
 import { AppStateContext } from "../../contexts/AppStateContext";
@@ -70,7 +71,13 @@ const RECIPE_STATE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const Recipe = () => {
   const { id } = useParams();
-  const { recipe, loading, error } = useRecipe(id);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const {
+    recipe,
+    loading,
+    switching: switchingVersion,
+    error,
+  } = useRecipe(id, { original: showOriginal });
   const {
     active: wakeLockActive,
     supported: wakeLockSupported,
@@ -82,9 +89,10 @@ const Recipe = () => {
   const recipeStorageKey = id;
   const isOnline = useOnlineStatus();
 
-  // Reset privacy override when navigating to a different recipe
+  // Reset per-recipe view state when navigating to a different recipe
   useEffect(() => {
     setPrivateOverride(null);
+    setShowOriginal(false);
   }, [id]);
 
   // Restore ticked-off ingredients for this recipe (ignored once older than
@@ -140,6 +148,16 @@ const Recipe = () => {
 
   const isOwner = !!user?.id && recipe?.user_id === user?.id;
   const isPrivate = privateOverride ?? recipe?.private ?? false;
+
+  // Recipes written in another language can be flipped back to the original
+  const appLanguage = i18n.language.split("-")[0];
+  const recipeLanguage = recipe?.original_language || "en";
+  const isForeignRecipe = !!recipe && recipeLanguage !== appLanguage;
+  const displayLanguage = showOriginal ? recipeLanguage : appLanguage;
+  // For recipe content (units, copied text), which follows the shown version
+  const tContent = (key, options) =>
+    t(key, { ...options, lng: displayLanguage });
+  const unitLabels = tContent("units", { returnObjects: true });
 
   // When viewing a friend's recipe, show the "viewing a friend" banner in
   // Header (fetching their profile for the name pill); hide it for your own.
@@ -240,9 +258,9 @@ const Recipe = () => {
     try {
       await navigator.clipboard.writeText(
         recipeToText(recipe, {
-          t,
-          units: t("units", { returnObjects: true }),
-          language: i18n.language,
+          t: tContent,
+          units: unitLabels,
+          language: displayLanguage,
         })
       );
       toast.add({
@@ -326,7 +344,7 @@ const Recipe = () => {
     const measurement = formatIngredientMeasurement(
       scaled.quantity,
       scaled.unit,
-      t("units", { returnObjects: true })
+      unitLabels
     );
     return (
       <li
@@ -354,10 +372,10 @@ const Recipe = () => {
               href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
               onClick={(e) => e.stopPropagation()}
             >
-              {getIngredientDisplayName(scaled, i18n.language)}
+              {getIngredientDisplayName(scaled, displayLanguage)}
             </a>
           ) : (
-            getIngredientDisplayName(scaled, i18n.language)
+            getIngredientDisplayName(scaled, displayLanguage)
           )}
 
           {ingredient.notes && (
@@ -453,7 +471,11 @@ const Recipe = () => {
                   <Button
                     variant="printed"
                     onClick={() =>
-                      navigate(`/edit-recipe/${recipe.id}/${recipe.slug}`)
+                      navigate(
+                        `/edit-recipe/${recipe.id}/${recipe.slug}${
+                          showOriginal && isForeignRecipe ? "?original=1" : ""
+                        }`
+                      )
                     }
                     data-testid="edit-recipe-btn"
                     aria-label={t("edit_recipe")}
@@ -520,6 +542,21 @@ const Recipe = () => {
                     {t("save")}
                   </Button>
                 </>
+              )}
+
+              {isForeignRecipe && (
+                <Button
+                  variant="printed"
+                  onClick={() => setShowOriginal((prev) => !prev)}
+                  disabled={switchingVersion}
+                  aria-pressed={showOriginal}
+                  data-testid="toggle-original-btn"
+                >
+                  <Languages />
+                  {showOriginal
+                    ? t("recipe_action_show_translation")
+                    : t("recipe_action_show_original")}
+                </Button>
               )}
             </div>
           </div>

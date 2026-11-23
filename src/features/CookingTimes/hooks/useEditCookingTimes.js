@@ -6,8 +6,8 @@ import {
   deleteCookingTime,
 } from "../../../services/cookingTimesService";
 import { updateCookingTimeTranslations } from "../../../services/cookingTimesTranslationService";
-import { getUserPreferredLanguage } from "../../../services/userService";
 import { useUnsavedChanges } from "../../../hooks/ui/useUnsavedChanges";
+import { useTranslation } from "react-i18next";
 
 export const useEditCookingTimes = ({
   isEditMode,
@@ -19,6 +19,7 @@ export const useEditCookingTimes = ({
   t,
 }) => {
   const queryClient = useQueryClient();
+  const { i18n } = useTranslation();
   const [editingSectionId, setEditingSectionId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -221,8 +222,8 @@ export const useEditCookingTimes = ({
   const saveAllChanges = useCallback(async () => {
     setIsSaving(true);
     try {
-      // Get user's preferred language for new items
-      const preferredLanguage = await getUserPreferredLanguage();
+      // New items are stored in the user's language
+      const userLanguage = i18n.language.split("-")[0];
 
       // Step 1: Build a complete list of all current items with their positions
       let globalOrderIndex = 0;
@@ -337,7 +338,7 @@ export const useEditCookingTimes = ({
           cookingTimeData,
           item.section_name,
           item.order_index,
-          preferredLanguage
+          userLanguage
         );
       }
 
@@ -358,6 +359,20 @@ export const useEditCookingTimes = ({
           section_name: item.section_name,
           order_index: item.order_index,
         };
+
+        // Edited in another language: what you see becomes the original, and
+        // the old original stays as that language's translation
+        const sourceLanguage = originalItem?.original_language;
+        if (
+          sourceLanguage &&
+          sourceLanguage !== userLanguage &&
+          originalItem.untranslated
+        ) {
+          cookingTimeData.original_language = userLanguage;
+          cookingTimeData.translated_cooking_time = {
+            [sourceLanguage]: originalItem.untranslated,
+          };
+        }
 
         console.log("Updating cooking time:", item.id, cookingTimeData);
         await updateCookingTime(item.id, cookingTimeData);
@@ -387,7 +402,7 @@ export const useEditCookingTimes = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, originalData, loadData, queryClient]);
+  }, [formData, originalData, loadData, queryClient, i18n.language]);
 
   // Handle field enter navigation (matches RecipeForm handleIngredientFieldEnter pattern)
   const handleCookingTimeFieldEnter = useCallback(

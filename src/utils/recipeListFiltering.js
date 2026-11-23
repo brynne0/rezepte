@@ -4,7 +4,7 @@ import { getIngredientNamesForLanguage } from "./ingredientFormatting";
 export const RECIPE_INGREDIENT_NAMES_SELECT = `recipe_ingredients!recipe_ingredients_recipe_id_fkey(
   id,
   name_overrides,
-  ingredients(singular_name, plural_name, translated_names)
+  ingredients(id, singular_name, plural_name, translated_names)
 )`;
 
 // Ingredient names in the given language, lowercased

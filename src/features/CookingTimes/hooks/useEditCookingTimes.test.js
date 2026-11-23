@@ -7,7 +7,6 @@ import {
   deleteCookingTime,
 } from "../../../services/cookingTimesService";
 import { updateCookingTimeTranslations } from "../../../services/cookingTimesTranslationService";
-import { getUserPreferredLanguage } from "../../../services/userService";
 import { createQueryClientWrapper } from "../../../test-utils/queryClient";
 
 vi.mock("../../../services/cookingTimesService", () => ({
@@ -18,10 +17,6 @@ vi.mock("../../../services/cookingTimesService", () => ({
 
 vi.mock("../../../services/cookingTimesTranslationService", () => ({
   updateCookingTimeTranslations: vi.fn(),
-}));
-
-vi.mock("../../../services/userService", () => ({
-  getUserPreferredLanguage: vi.fn(),
 }));
 
 vi.mock("../../../hooks/ui/useUnsavedChanges", () => ({
@@ -90,7 +85,6 @@ const setup = (formDataOverrides = {}) => {
 describe("useEditCookingTimes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getUserPreferredLanguage.mockResolvedValue("en");
   });
 
   test("addCookingTime appends a new item to the ungrouped list", () => {
@@ -345,6 +339,100 @@ describe("useEditCookingTimes", () => {
         originalItem,
         expect.objectContaining({ ingredient_name: "Tempeh" })
       );
+    });
+
+    describe("items written in another language", () => {
+      // Shown in English (the user's language), stored with a German original
+      const germanUntranslated = {
+        ingredient_name: "Linsen",
+        notes: null,
+        section_name: null,
+        cooking_time: "20 Min.",
+        soaking_time: null,
+      };
+      const germanItem = {
+        id: "de-1",
+        tempId: "t-de",
+        ingredient_name: "Lentils",
+        cooking_time: "20 min",
+        section_name: null,
+        order_index: 0,
+        original_language: "de",
+        untranslated: germanUntranslated,
+      };
+
+      const saveWith = async (originalItem, editedItem) => {
+        const { result } = renderHook(
+          () =>
+            useEditCookingTimes({
+              isEditMode: true,
+              formData: {
+                ungroupedCookingTimes: [editedItem],
+                cookingTimeSections: [],
+              },
+              setFormData: vi.fn(),
+              originalData: {
+                ungroupedCookingTimes: [originalItem],
+                cookingTimeSections: [],
+              },
+              generateTempId: vi.fn(),
+              loadData: vi.fn().mockResolvedValue(),
+              t: (k) => k,
+            }),
+          { wrapper: createQueryClientWrapper() }
+        );
+        await act(async () => {
+          await result.current.saveAllChanges();
+        });
+      };
+
+      test("makes the edit the new original and keeps the old one as a translation", async () => {
+        await saveWith(germanItem, { ...germanItem, notes: "Rinse first" });
+
+        expect(updateCookingTime).toHaveBeenCalledWith(
+          "de-1",
+          expect.objectContaining({
+            ingredient_name: "Lentils",
+            notes: "Rinse first",
+            original_language: "en",
+            translated_cooking_time: { de: germanUntranslated },
+          })
+        );
+        // Only the changed note needs translating back into German
+        expect(updateCookingTimeTranslations).toHaveBeenCalledWith(
+          "de-1",
+          germanItem,
+          expect.objectContaining({ notes: "Rinse first" })
+        );
+      });
+
+      test("keeps the German wording when the item is only reordered", async () => {
+        // Saving renumbers positions, so a stored index of 3 becomes 0
+        const movedItem = { ...germanItem, order_index: 3 };
+        await saveWith(movedItem, movedItem);
+
+        expect(updateCookingTime).toHaveBeenCalledWith(
+          "de-1",
+          expect.objectContaining({
+            original_language: "en",
+            translated_cooking_time: { de: germanUntranslated },
+          })
+        );
+        expect(updateCookingTimeTranslations).not.toHaveBeenCalled();
+      });
+
+      test("leaves the language alone for an item already in the user's language", async () => {
+        const englishItem = {
+          ...germanItem,
+          original_language: "en",
+          untranslated: undefined,
+        };
+        await saveWith(englishItem, { ...englishItem, notes: "Rinse first" });
+
+        const [, data] = updateCookingTime.mock.calls[0];
+        expect(data).not.toHaveProperty("original_language");
+        expect(data).not.toHaveProperty("translated_cooking_time");
+      });
     });
 
     test("does not update translations when only a non-translatable field changes", async () => {

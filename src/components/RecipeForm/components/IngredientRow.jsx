@@ -26,6 +26,7 @@ const IngredientRow = ({
   sectionId,
   validationErrors,
   isEditingTranslation,
+  contentLanguage,
   provided,
   snapshot,
   handleIngredientChange,
@@ -83,7 +84,7 @@ const IngredientRow = ({
           data-enter-nav
           onBlur={(e) => {
             const value =
-              i18n.language === "de"
+              (contentLanguage || i18n.language) === "de"
                 ? e.target.value
                     .split(" ")
                     .map(

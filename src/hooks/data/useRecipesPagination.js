@@ -8,6 +8,7 @@ import {
   RECIPE_INGREDIENT_NAMES_SELECT,
 } from "../../utils/recipeListFiltering";
 import { useAuth } from "./useAuth";
+import { useIngredientNameBackfill } from "./useIngredientNameBackfill";
 
 // Fetch recipes with category information for the given user
 export const fetchRecipesWithCategories = async (userId) => {
@@ -75,11 +76,16 @@ export const useRecipesPagination = (
   const refreshRecipes = () =>
     queryClient.invalidateQueries({ queryKey: ["recipes"] });
 
+  const searchableRecipes = useIngredientNameBackfill(
+    allRecipes,
+    currentLanguage
+  );
+
   // Client-side filtering, sorting and pagination
   const paginatedData = useMemo(
     () =>
       filterSortPaginateRecipes({
-        recipes: allRecipes,
+        recipes: searchableRecipes,
         searchTerm,
         language: currentLanguage,
         category,
@@ -87,7 +93,15 @@ export const useRecipesPagination = (
         page,
         limit,
       }),
-    [allRecipes, page, limit, category, searchTerm, sortBy, currentLanguage]
+    [
+      searchableRecipes,
+      page,
+      limit,
+      category,
+      searchTerm,
+      sortBy,
+      currentLanguage,
+    ]
   );
 
   return {

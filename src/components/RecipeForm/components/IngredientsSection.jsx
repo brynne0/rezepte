@@ -19,6 +19,7 @@ const IngredientsSection = ({
   ingredientSections,
   validationErrors,
   isEditingTranslation,
+  contentLanguage,
   addSection,
   addIngredient,
   removeSection,
@@ -74,6 +75,7 @@ const IngredientsSection = ({
                       sectionId="ungrouped"
                       validationErrors={validationErrors}
                       isEditingTranslation={isEditingTranslation}
+                      contentLanguage={contentLanguage}
                       provided={provided}
                       snapshot={snapshot}
                       handleIngredientChange={handleIngredientChange}
@@ -236,6 +238,7 @@ const IngredientsSection = ({
                                       isEditingTranslation={
                                         isEditingTranslation
                                       }
+                                      contentLanguage={contentLanguage}
                                       provided={provided}
                                       snapshot={snapshot}
                                       handleIngredientChange={

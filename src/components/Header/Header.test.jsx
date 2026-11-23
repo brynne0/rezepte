@@ -76,9 +76,7 @@ describe("Header Component", () => {
   let mockSignOut;
   let mockGetUserProfile;
 
-  const defaultProps = {
-    disableLanguageSwitch: false,
-  };
+  const defaultProps = {};
 
   beforeEach(() => {
     // Setup mocks
@@ -168,15 +166,18 @@ describe("Header Component", () => {
     expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
   });
 
-  test("does not change language when disableLanguageSwitch is true", () => {
+  test("hides the language toggle when logged in", () => {
+    mockUseAuth.mockReturnValue({ isLoggedIn: true });
+
     render(
       <TestWrapper>
-        <Header {...defaultProps} disableLanguageSwitch={true} />
+        <Header {...defaultProps} />
       </TestWrapper>
     );
 
-    fireEvent.click(screen.getByText("DE"));
-    expect(mockI18n.changeLanguage).not.toHaveBeenCalled();
+    // Logged-in users set their language in Settings instead
+    expect(screen.queryByText("DE")).not.toBeInTheDocument();
+    expect(screen.queryByText("EN")).not.toBeInTheDocument();
   });
 
   test("shows chef hat icon", () => {
@@ -351,62 +352,9 @@ describe("Header Component", () => {
 
       expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
     });
-
-    test("disables language switching when disableLanguageSwitch is true", () => {
-      mockI18n.language = "en";
-
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} disableLanguageSwitch={true} />
-        </TestWrapper>
-      );
-
-      const toggle = screen.getByText("DE");
-      expect(toggle).toBeDisabled();
-
-      // Language change should not be called when disabled
-      fireEvent.click(toggle);
-      expect(mockI18n.changeLanguage).not.toHaveBeenCalled();
-    });
-
-    test("shows correct target language label even when disabled", () => {
-      mockI18n.language = "de";
-
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} disableLanguageSwitch={true} />
-        </TestWrapper>
-      );
-
-      const toggle = screen.getByText("EN");
-
-      expect(toggle).toBeDisabled();
-    });
   });
 
   describe("Language Integration with Recipe Translation", () => {
-    test("language change triggers recipe re-fetch through i18n dependency", async () => {
-      // Integration test that verifies the language change
-      // will trigger useRecipe hook re-execution due to i18n.language dependency
-
-      render(
-        <TestWrapper>
-          <Header {...defaultProps} />
-        </TestWrapper>
-      );
-
-      // Change language
-      fireEvent.click(screen.getByText("DE"));
-
-      // Verify changeLanguage was called
-      expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
-
-      // 1. i18n.language changes to "de"
-      // 2. useRecipe hook dependency [id, i18n.language] triggers re-fetch
-      // 3. getTranslatedRecipe is called with new language
-      // 4. Ingredients get translated and displayed in German
-    });
-
     test("language toggle label reflects i18n current language", () => {
       // Test that the UI correctly shows the current language state for German
       mockI18n.language = "de";

@@ -49,6 +49,8 @@ const RecipeForm = ({
   initialRecipe = null,
   title = "",
   isEditingTranslation = false,
+  isEditingOriginal = false,
+  contentLanguage,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -147,6 +149,13 @@ const RecipeForm = ({
             <Alert variant="destructive">
               <AlertDescription>
                 {t("editing_translation_notice")}
+              </AlertDescription>
+            </Alert>
+          )}
+          {isEditingOriginal && (
+            <Alert>
+              <AlertDescription>
+                {t("editing_original_notice")}
               </AlertDescription>
             </Alert>
           )}
@@ -273,6 +282,7 @@ const RecipeForm = ({
                   ingredientSections={formData.ingredientSections}
                   validationErrors={validationErrors}
                   isEditingTranslation={isEditingTranslation}
+                  contentLanguage={contentLanguage}
                   addSection={addSection}
                   addIngredient={addIngredient}
                   removeSection={removeSection}

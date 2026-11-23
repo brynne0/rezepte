@@ -39,6 +39,7 @@ vi.mock("../../lib/supabase", () => ({
 }));
 
 import { fetchRecipe } from "../../services/recipes";
+import { getTranslatedRecipe } from "../../services/recipeTranslationService";
 import { useAuth } from "./useAuth";
 import { useOnlineStatus } from "../ui/useOnlineStatus";
 
@@ -79,6 +80,62 @@ describe("useRecipe", () => {
 
     expect(result.current.recipe).toEqual({ id: "r1", user_id: "user-1" });
     expect(result.current.error).toBeNull();
+  });
+
+  test("translates to the app language by default", async () => {
+    fetchRecipe.mockResolvedValue({ id: "r1", original_language: "de" });
+
+    const { result } = renderHook(() => useRecipe("r1"), {
+      wrapper: createQueryClientWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(getTranslatedRecipe).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "r1" }),
+      "en"
+    );
+  });
+
+  test("keeps the recipe in its own language with original", async () => {
+    fetchRecipe.mockResolvedValue({ id: "r1", original_language: "de" });
+
+    const { result } = renderHook(() => useRecipe("r1", { original: true }), {
+      wrapper: createQueryClientWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(getTranslatedRecipe).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "r1" }),
+      "de"
+    );
+  });
+
+  test("keeps showing the current recipe while switching version", async () => {
+    fetchRecipe.mockResolvedValueOnce({ id: "r1", title: "Translated" });
+    let resolveOriginal;
+    fetchRecipe.mockImplementationOnce(
+      () => new Promise((resolve) => (resolveOriginal = resolve))
+    );
+
+    const { result, rerender } = renderHook(
+      ({ original }) => useRecipe("r1", { original }),
+      {
+        wrapper: createQueryClientWrapper(),
+        initialProps: { original: false },
+      }
+    );
+    await waitFor(() =>
+      expect(result.current.recipe?.title).toBe("Translated")
+    );
+
+    rerender({ original: true });
+
+    expect(result.current.recipe?.title).toBe("Translated");
+    expect(result.current.switching).toBe(true);
+
+    resolveOriginal({ id: "r1", title: "Original" });
+    await waitFor(() => expect(result.current.recipe?.title).toBe("Original"));
+    expect(result.current.switching).toBe(false);
   });
 
   test("surfaces a fetch error", async () => {

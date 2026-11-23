@@ -19,7 +19,6 @@ import {
   deleteCategory,
   saveCategoryOrder,
 } from "../../../services/categoriesService";
-import { getUserPreferredLanguage } from "../../../services/userService";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Empty,
@@ -37,7 +36,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -70,21 +68,6 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
   const [deleteCategoryName, setDeleteCategoryName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [preferredLanguage, setPreferredLanguage] = useState(null);
-
-  useEffect(() => {
-    const loadPreferredLanguage = async () => {
-      try {
-        const lang = await getUserPreferredLanguage();
-        setPreferredLanguage(lang);
-      } catch (error) {
-        console.error("Error loading preferred language:", error);
-      }
-    };
-
-    loadPreferredLanguage();
-  }, []);
-
   useEffect(() => {
     // Categories already come with preference data from getAllCategoriesForManagement
     if (categories.length > 0) {
@@ -499,51 +482,19 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
         e.preventDefault();
       }}
     >
-      {isEditingCategories && i18n.language !== preferredLanguage && (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {t("category_edit_preferred_language_hint")}
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{t("categories")}</h2>
-        {!isEditingCategories &&
-          (i18n.language !== preferredLanguage ? (
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  // A disabled button blocks pointer events entirely, so the
-                  // hover target has to be this wrapping span instead.
-                  <span tabIndex={0} className="inline-flex">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled
-                      className="pointer-events-none"
-                    >
-                      <Pencil />
-                      {t("edit_categories")}
-                    </Button>
-                  </span>
-                }
-              />
-              <TooltipContent>
-                {t("category_edit_preferred_language_hint")}
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditingCategories(true)}
-              disabled={categoriesLoading}
-            >
-              <Pencil />
-              {t("edit_categories")}
-            </Button>
-          ))}
+        {!isEditingCategories && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditingCategories(true)}
+            disabled={categoriesLoading}
+          >
+            <Pencil />
+            {t("edit_categories")}
+          </Button>
+        )}
       </div>
       <div className="-mt-4 flex items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
@@ -555,11 +506,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
             variant="outline"
             size="sm"
             onClick={handleAddCategory}
-            disabled={
-              isAddingCategory ||
-              editingCategoryId !== null ||
-              i18n.language !== preferredLanguage
-            }
+            disabled={isAddingCategory || editingCategoryId !== null}
           >
             <Plus size={16} />
             {t("add_category")}
@@ -699,28 +646,26 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                 </>
                               ) : (
                                 <>
-                                  {i18n.language === preferredLanguage && (
-                                    <Tooltip>
-                                      <TooltipTrigger
-                                        render={
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            onClick={() =>
-                                              handleEditCategory(category)
-                                            }
-                                            aria-label={t("edit_category_name")}
-                                          >
-                                            <Pencil size={16} />
-                                          </Button>
-                                        }
-                                      />
-                                      <TooltipContent>
-                                        {t("edit_category_name")}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  )}
+                                  <Tooltip>
+                                    <TooltipTrigger
+                                      render={
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon-sm"
+                                          onClick={() =>
+                                            handleEditCategory(category)
+                                          }
+                                          aria-label={t("edit_category_name")}
+                                        >
+                                          <Pencil size={16} />
+                                        </Button>
+                                      }
+                                    />
+                                    <TooltipContent>
+                                      {t("edit_category_name")}
+                                    </TooltipContent>
+                                  </Tooltip>
                                   {!category.isTemp && (
                                     <Tooltip>
                                       <TooltipTrigger
@@ -782,11 +727,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
             className="w-full sm:w-auto"
             type="button"
             onClick={handleSavePreferences}
-            disabled={
-              preferencesLoading ||
-              i18n.language !== preferredLanguage ||
-              !hasUnsavedChanges()
-            }
+            disabled={preferencesLoading || !hasUnsavedChanges()}
           >
             {preferencesLoading && <Spinner />}
             {t("save_category_preferences")}

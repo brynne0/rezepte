@@ -39,13 +39,17 @@ const mockUnits = [
   { value: "piece/s", label: "piece/s" },
 ];
 
+const mockUnitsDe = mockUnits.map((unit) =>
+  unit.value === "tsp" ? { ...unit, label: "TL" } : unit
+);
+
 let mockLanguage = "en";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key, options) => {
       if (key === "units" && options?.returnObjects) {
-        return mockUnits;
+        return options?.lng === "de" ? mockUnitsDe : mockUnits;
       }
       return key;
     },
@@ -55,8 +59,12 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
+const mockUseRecipe = vi.fn();
 vi.mock("../../hooks/data/useRecipe", () => ({
-  useRecipe: () => mockRecipeHook,
+  useRecipe: (...args) => {
+    mockUseRecipe(...args);
+    return mockRecipeHook;
+  },
 }));
 
 vi.mock("../../hooks/data/useAuth", () => ({
@@ -335,6 +343,87 @@ describe("Recipe Component", () => {
       renderRecipe();
 
       expect(mockSetFriendBar).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe("Show Original Toggle", () => {
+    const germanRecipe = { ...mockRecipeData, original_language: "de" };
+
+    test("is hidden when the recipe is already in your language", () => {
+      mockRecipeHook.recipe = { ...mockRecipeData, original_language: "en" };
+      renderRecipe();
+
+      expect(
+        screen.queryByTestId("toggle-original-btn")
+      ).not.toBeInTheDocument();
+    });
+
+    test("flips between the translation and the original", () => {
+      mockRecipeHook.recipe = germanRecipe;
+      renderRecipe();
+
+      expect(mockUseRecipe).toHaveBeenLastCalledWith("test-recipe-id", {
+        original: false,
+      });
+      const toggle = screen.getByTestId("toggle-original-btn");
+      expect(toggle).toHaveTextContent("recipe_action_show_original");
+
+      fireEvent.click(toggle);
+
+      expect(mockUseRecipe).toHaveBeenLastCalledWith("test-recipe-id", {
+        original: true,
+      });
+      expect(toggle).toHaveTextContent("recipe_action_show_translation");
+      expect(toggle).toHaveAttribute("aria-pressed", "true");
+    });
+
+    test("shows units in the language of the version on screen", () => {
+      mockRecipeHook.recipe = germanRecipe;
+      renderRecipe();
+
+      expect(screen.getByText(/1 tsp/)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId("toggle-original-btn"));
+
+      expect(screen.getByText(/1 TL/)).toBeInTheDocument();
+    });
+
+    test("is shown on a friend's recipe too", () => {
+      mockRecipeHook.recipe = { ...germanRecipe, user_id: "someone-else" };
+      renderRecipe();
+
+      expect(screen.getByTestId("toggle-original-btn")).toBeInTheDocument();
+    });
+
+    test("is disabled while the other version loads", () => {
+      mockRecipeHook.recipe = germanRecipe;
+      mockRecipeHook.switching = true;
+      renderRecipe();
+
+      expect(screen.getByTestId("toggle-original-btn")).toBeDisabled();
+    });
+
+    test("edits the original when it is showing", () => {
+      mockRecipeHook.recipe = germanRecipe;
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("toggle-original-btn"));
+      fireEvent.click(screen.getByTestId("edit-recipe-btn"));
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        "/edit-recipe/recipe-1/test-recipe?original=1"
+      );
+    });
+
+    test("edits the translation when the translation is showing", () => {
+      mockRecipeHook.recipe = germanRecipe;
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("edit-recipe-btn"));
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        "/edit-recipe/recipe-1/test-recipe"
+      );
     });
   });
 
@@ -1000,7 +1089,7 @@ describe("Recipe Component", () => {
 
       expect(screen.getByText("2 cups")).toBeInTheDocument();
       expect(screen.getByText("Mehl")).toBeInTheDocument();
-      expect(screen.getByText("1 tsp")).toBeInTheDocument();
+      expect(screen.getByText("1 TL")).toBeInTheDocument();
       expect(screen.getByText("Salz")).toBeInTheDocument();
       expect(screen.queryByText(/flour/)).not.toBeInTheDocument();
       expect(screen.queryByText(/salt/)).not.toBeInTheDocument();

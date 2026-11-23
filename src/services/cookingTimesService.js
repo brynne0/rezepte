@@ -67,6 +67,11 @@ export const updateCookingTime = async (id, cookingTimeData) => {
     section_name: cookingTimeData.section_name,
     order_index: cookingTimeData.order_index,
   };
+  // Set when an edit switches the item to another original language
+  if (cookingTimeData.original_language) {
+    cleanData.original_language = cookingTimeData.original_language;
+    cleanData.translated_cooking_time = cookingTimeData.translated_cooking_time;
+  }
 
   const { data, error } = await supabase
     .from("user_cooking_times")

@@ -5,9 +5,19 @@ import { useAuth } from "./hooks/data/useAuth";
 import { useCategories } from "./hooks/data/useCategories";
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
 import { useOnlineStatus } from "./hooks/ui/useOnlineStatus";
+import { useUserProfile } from "./hooks/data/useUserProfile";
+
+const mockI18n = { language: "en", changeLanguage: vi.fn() };
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (key) => key, i18n: mockI18n }),
+}));
 
 vi.mock("./hooks/data/useAuth", () => ({
   useAuth: vi.fn(),
+}));
+
+vi.mock("./hooks/data/useUserProfile", () => ({
+  useUserProfile: vi.fn(() => ({ profile: null })),
 }));
 
 vi.mock("./hooks/data/useCategories", () => ({
@@ -93,6 +103,8 @@ describe("App", () => {
       paginationInfo: basePaginationInfo,
     });
     useOnlineStatus.mockReturnValue(true);
+    useUserProfile.mockReturnValue({ profile: null });
+    mockI18n.language = "en";
     setPath("/");
   });
 
@@ -186,5 +198,43 @@ describe("App", () => {
     render(<App />);
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+  });
+
+  describe("user language", () => {
+    test("applies the profile language when logged in", () => {
+      useUserProfile.mockReturnValue({
+        profile: { preferred_language: "de" },
+      });
+
+      render(<App />);
+
+      expect(mockI18n.changeLanguage).toHaveBeenCalledWith("de");
+    });
+
+    test("does nothing when the profile language already matches", () => {
+      useUserProfile.mockReturnValue({
+        profile: { preferred_language: "en" },
+      });
+
+      render(<App />);
+
+      expect(mockI18n.changeLanguage).not.toHaveBeenCalled();
+    });
+
+    test("ignores a cached profile when logged out", () => {
+      useAuth.mockReturnValue({
+        isLoggedIn: false,
+        loading: false,
+        user: null,
+      });
+      useUserProfile.mockReturnValue({
+        profile: { preferred_language: "de" },
+      });
+      setPath("/login");
+
+      render(<App />);
+
+      expect(mockI18n.changeLanguage).not.toHaveBeenCalled();
+    });
   });
 });

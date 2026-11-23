@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppStateContext } from "../../contexts/AppStateContext";
 import { useFriendRecipes } from "./hooks/useFriendRecipes";
+import { useIngredientNameBackfill } from "../../hooks/data/useIngredientNameBackfill";
 import { filterSortPaginateRecipes } from "../../utils/recipeListFiltering";
 import { useScrollRestoration } from "../../hooks/ui/useScrollRestoration";
 import { useMainScrollRef } from "../../hooks/ui/useMainScrollRef";
@@ -58,24 +59,27 @@ const FriendRecipes = () => {
     return () => setFriendBar(null);
   }, [friend, loading, setFriendBar]);
 
+  const language = i18n.language.split("-")[0];
+  const searchableRecipes = useIngredientNameBackfill(allRecipes, language);
+
   const { recipes, totalPages, totalCount } = useMemo(
     () =>
       filterSortPaginateRecipes({
-        recipes: allRecipes,
+        recipes: searchableRecipes,
         searchTerm,
-        language: i18n.language.split("-")[0],
+        language,
         category: selectedCategory,
         sortBy,
         page: currentPage,
         limit: PAGE_SIZE,
       }),
     [
-      allRecipes,
+      searchableRecipes,
       searchTerm,
       selectedCategory,
       sortBy,
       currentPage,
-      i18n.language,
+      language,
     ]
   );
 

@@ -7,8 +7,8 @@ import { useAuth } from "./useAuth";
 import supabase from "../../lib/supabase";
 import { useOnlineStatus } from "../ui/useOnlineStatus";
 
-// Fetches a single recipe and all associated data with translation
-export const useRecipe = (id) => {
+// Fetches a recipe translated to the app language, or untranslated with `original`
+export const useRecipe = (id, { original = false } = {}) => {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language.split("-")[0]; // Normalize region codes
   const { isLoggedIn, loading: authLoading, user } = useAuth();
@@ -19,19 +19,26 @@ export const useRecipe = (id) => {
   const {
     data: recipe = null,
     isLoading: queryLoading,
+    isPlaceholderData: switching,
     error,
   } = useQuery({
-    queryKey: ["recipe", id, currentLanguage],
+    queryKey: ["recipe", id, original ? "original" : currentLanguage],
     queryFn: async () => {
       try {
         const originalRecipe = await fetchRecipe(id);
-        return await getTranslatedRecipe(originalRecipe, currentLanguage);
+        const targetLanguage = original
+          ? originalRecipe.original_language || "en"
+          : currentLanguage;
+        return await getTranslatedRecipe(originalRecipe, targetLanguage);
       } catch (err) {
         console.error("Error fetching recipe:", err);
         throw err;
       }
     },
     enabled: !authLoading && isLoggedIn && !!id,
+    // Keep showing this recipe while flipping between original and translated
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[1] === id ? previous : undefined,
   });
 
   // Wait for the auth check before deciding there's nothing to load
@@ -72,6 +79,7 @@ export const useRecipe = (id) => {
   return {
     recipe: isLoggedIn && id ? recipe : null,
     loading,
+    switching,
     error: error ? error.message || "Failed to fetch recipe" : null,
   };
 };
