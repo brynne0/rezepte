@@ -28,11 +28,23 @@ const RecipeFilters = ({
     searchTerm || ""
   );
   const searchInputRef = useRef(null);
+  const categoryStripRef = useRef(null);
 
   // Sync search input with external search term changes
   useEffect(() => {
     setCurrentSearchInput(searchTerm || "");
   }, [searchTerm]);
+
+  useEffect(() => {
+    const strip = categoryStripRef.current;
+    const selected = strip?.querySelector('[aria-pressed="true"]');
+    if (!strip || !selected || strip.scrollWidth <= strip.clientWidth) return;
+    strip.scrollTo?.({
+      left:
+        selected.offsetLeft - (strip.clientWidth - selected.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  }, [selectedCategory]);
 
   return (
     <>
@@ -94,12 +106,14 @@ const RecipeFilters = ({
       </div>
 
       <div
-        className="flex flex-wrap justify-center gap-x-2 gap-y-2 pb-4 md:gap-x-4"
+        ref={categoryStripRef}
+        className="relative flex gap-x-1 overflow-x-auto px-2 pt-1 pb-4 scrollbar-none mask-[linear-gradient(to_right,black_calc(100%-48px),transparent)] md:flex-wrap md:justify-center md:gap-x-4 md:gap-y-2 md:overflow-visible md:px-0 md:pt-0 md:mask-none [&::-webkit-scrollbar]:hidden"
         data-nosnippet
       >
         {categories.map((category) => (
           <Button
             key={category.value}
+            className="shrink-0"
             variant="text"
             aria-pressed={category.value === selectedCategory}
             onClick={() => {
@@ -107,7 +121,7 @@ const RecipeFilters = ({
               setSelectedCategory(category.value);
             }}
           >
-            <h3 className="font-receipt text-[13px] font-normal tracking-wider uppercase">
+            <h3 className="font-receipt text-sm font-semibold tracking-wider uppercase">
               {category.label}
             </h3>
           </Button>
