@@ -222,6 +222,49 @@ describe("Translation Service", () => {
     });
   });
 
+  describe("Saved Translations", () => {
+    const germanRecipe = (translated_recipe) => ({
+      id: "recipe-saved",
+      title: "Linsensuppe",
+      instructions: ["Linsen kochen"],
+      original_language: "de",
+      translated_recipe,
+    });
+
+    test("uses a complete saved translation without calling the API", async () => {
+      const result = await getTranslatedRecipe(
+        germanRecipe({
+          en: { title: "Lentil Soup", instructions: ["Cook the lentils."] },
+        }),
+        "en"
+      );
+
+      expect(result.title).toBe("Lentil Soup");
+      expect(result.instructions).toEqual(["Cook the lentils."]);
+      expect(supabase.functions.invoke).not.toHaveBeenCalled();
+    });
+
+    test("translates in full when only a title and headings were saved", async () => {
+      supabase.functions.invoke.mockResolvedValue({
+        data: { translatedText: "Cook the lentils" },
+        error: null,
+      });
+
+      const result = await getTranslatedRecipe(
+        germanRecipe({
+          en: {
+            title: "Lentil Soup",
+            section_subheadings: { source: [""], translated: [""] },
+          },
+        }),
+        "en"
+      );
+
+      expect(supabase.functions.invoke).toHaveBeenCalled();
+      expect(result.instructions).toHaveLength(1);
+    });
+  });
+
   describe("Ingredient Display Name Logic", () => {
     test("uses name_overrides first before other logic", async () => {
       const recipe = {

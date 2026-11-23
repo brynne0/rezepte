@@ -307,22 +307,16 @@ export const getTranslatedSubheadings = async (recipe, targetLanguage) => {
 const getTranslatedRecipeData = async (recipe, targetLanguage) => {
   // Check if translation exists in storage
   const cachedTranslation = recipe.translated_recipe?.[targetLanguage];
-  if (cachedTranslation) {
-    // Check if this is an old/incomplete cached translation (only has title)
-    const fieldCount = Object.keys(cachedTranslation).length;
-    if (fieldCount === 1 && cachedTranslation.title) {
-      // Incomplete cached translation, will retranslate
-    } else {
-      return {
-        title: cachedTranslation.title,
-        category: cachedTranslation.category,
-        instructions: cachedTranslation.instructions,
-        notes: cachedTranslation.notes,
-        source: sourceLinksIntact(recipe.source, cachedTranslation.source)
-          ? cachedTranslation.source
-          : recipe.source,
-      };
-    }
+  if (Array.isArray(cachedTranslation?.instructions)) {
+    return {
+      title: cachedTranslation.title,
+      category: cachedTranslation.category,
+      instructions: cachedTranslation.instructions,
+      notes: cachedTranslation.notes,
+      source: sourceLinksIntact(recipe.source, cachedTranslation.source)
+        ? cachedTranslation.source
+        : recipe.source,
+    };
   }
 
   // Only translate the text parts of the source, never links
