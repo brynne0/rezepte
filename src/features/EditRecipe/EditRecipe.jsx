@@ -14,9 +14,11 @@ import {
 
 const EditRecipePage = ({ categories }) => {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const editOriginal = searchParams.get("original") === "1";
-  const { recipe, loading } = useRecipe(id, { original: editOriginal });
+  const { recipe, loading, switching } = useRecipe(id, {
+    original: editOriginal,
+  });
   const { t, i18n } = useTranslation();
   const isOnline = useOnlineStatus();
 
@@ -25,7 +27,8 @@ const EditRecipePage = ({ categories }) => {
   const isForeignRecipe = recipeLanguage !== i18n.language.split("-")[0];
   const isEditingTranslation = !!recipe && isForeignRecipe && !editOriginal;
 
-  if (loading) {
+  // Wait for the other version rather than filling the form with the old one
+  if (loading || switching) {
     return <LoadingAcorn />;
   }
 
@@ -47,12 +50,18 @@ const EditRecipePage = ({ categories }) => {
 
   return (
     <RecipeForm
+      key={editOriginal ? "original" : "translation"}
       categories={categories}
       initialRecipe={recipe}
       title={t("edit_recipe")}
       isEditingTranslation={isEditingTranslation}
       isEditingOriginal={editOriginal && isForeignRecipe}
       contentLanguage={recipeLanguage}
+      onSwitchEditVersion={(version) =>
+        setSearchParams(version === "original" ? { original: "1" } : {}, {
+          replace: true,
+        })
+      }
     />
   );
 };

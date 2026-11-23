@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Clipboard } from "lucide-react";
+import { Clipboard, Languages } from "lucide-react";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { useRecipeForm } from "./hooks/useRecipeForm";
@@ -51,6 +51,7 @@ const RecipeForm = ({
   isEditingTranslation = false,
   isEditingOriginal = false,
   contentLanguage,
+  onSwitchEditVersion,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -93,6 +94,18 @@ const RecipeForm = ({
   } = useRecipeForm({ initialRecipe, isEditingTranslation });
 
   const [showPasteArea, setShowPasteArea] = useState(false);
+  const [pendingEditVersion, setPendingEditVersion] = useState(null);
+
+  // Foreign recipes can switch between editing your translation and the original
+  const canSwitchEditVersion =
+    !!onSwitchEditVersion && (isEditingTranslation || isEditingOriginal);
+  const requestEditVersion = (version) => {
+    if (hasUnsavedChanges()) {
+      setPendingEditVersion(version);
+    } else {
+      onSwitchEditVersion(version);
+    }
+  };
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
@@ -141,12 +154,32 @@ const RecipeForm = ({
           <div className="relative flex w-full items-center justify-center">
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
+          {/* Same printed link as "Show original" on the recipe page */}
+          {canSwitchEditVersion && (
+            <div className="flex justify-center">
+              <Button
+                type="button"
+                variant="printed"
+                onClick={() =>
+                  requestEditVersion(
+                    isEditingOriginal ? "translation" : "original"
+                  )
+                }
+                data-testid="switch-edit-version-btn"
+              >
+                <Languages />
+                {isEditingOriginal
+                  ? t("edit_version_switch_to_translation")
+                  : t("edit_version_switch_to_original")}
+              </Button>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="flex flex-col gap-6">
           {/* Translation Editing Notice */}
           {isEditingTranslation && (
-            <Alert variant="destructive">
+            <Alert>
               <AlertDescription>
                 {t("editing_translation_notice")}
               </AlertDescription>
@@ -489,6 +522,36 @@ const RecipeForm = ({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
             <AlertDialogAction onClick={cancelNavigation}>
+              {t("stay")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Switching edit version would drop unsaved changes */}
+      <AlertDialog
+        open={!!pendingEditVersion}
+        onOpenChange={(open) => {
+          if (!open) setPendingEditVersion(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("switch_edit_version_warning")}
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                const version = pendingEditVersion;
+                setPendingEditVersion(null);
+                onSwitchEditVersion(version);
+              }}
+            >
+              {t("switch_edit_version_discard")}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => setPendingEditVersion(null)}>
               {t("stay")}
             </AlertDialogAction>
           </AlertDialogFooter>

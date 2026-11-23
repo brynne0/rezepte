@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useRecipe } from "../../hooks/data/useRecipe";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
@@ -6,9 +6,10 @@ import { useTranslation } from "react-i18next";
 import EditRecipePage from "./EditRecipe";
 
 let mockSearchParams = new URLSearchParams();
+const mockSetSearchParams = vi.fn();
 vi.mock("react-router-dom", () => ({
   useParams: vi.fn(() => ({ id: "123" })),
-  useSearchParams: vi.fn(() => [mockSearchParams]),
+  useSearchParams: vi.fn(() => [mockSearchParams, mockSetSearchParams]),
 }));
 
 vi.mock("../../hooks/ui/useOnlineStatus", () => ({
@@ -47,6 +48,7 @@ vi.mock("../../components/RecipeForm/RecipeForm", () => ({
       isEditingTranslation,
       isEditingOriginal,
       contentLanguage,
+      onSwitchEditVersion,
     }) => (
       <div
         data-testid="recipe-form-mock"
@@ -56,6 +58,12 @@ vi.mock("../../components/RecipeForm/RecipeForm", () => ({
         data-content-language={contentLanguage}
       >
         {title}
+        <button onClick={() => onSwitchEditVersion("original")}>
+          switch-to-original
+        </button>
+        <button onClick={() => onSwitchEditVersion("translation")}>
+          switch-to-translation
+        </button>
         {isEditingTranslation && (
           <div data-testid="translation-editing-indicator">
             Translation editing mode
@@ -157,6 +165,35 @@ describe("EditRecipePage", () => {
       const recipeForm = screen.getByTestId("recipe-form-mock");
       expect(recipeForm).toHaveAttribute("data-is-editing-translation", "true");
       expect(recipeForm).toHaveAttribute("data-is-editing-original", "false");
+    });
+
+    it("switches version via the URL so the right recipe loads", () => {
+      vi.mocked(useRecipe).mockReturnValue(germanRecipe);
+      render(<EditRecipePage categories={mockCategories} />);
+
+      fireEvent.click(screen.getByText("switch-to-original"));
+      expect(mockSetSearchParams).toHaveBeenLastCalledWith(
+        { original: "1" },
+        { replace: true }
+      );
+
+      fireEvent.click(screen.getByText("switch-to-translation"));
+      expect(mockSetSearchParams).toHaveBeenLastCalledWith(
+        {},
+        { replace: true }
+      );
+    });
+
+    it("shows loading instead of the old version while switching", () => {
+      vi.mocked(useRecipe).mockReturnValue({
+        ...germanRecipe,
+        switching: true,
+      });
+
+      render(<EditRecipePage categories={mockCategories} />);
+
+      expect(screen.getByTestId("loading-acorn-mock")).toBeInTheDocument();
+      expect(screen.queryByTestId("recipe-form-mock")).not.toBeInTheDocument();
     });
 
     it("does not flag original editing when the recipe is already in your language", () => {

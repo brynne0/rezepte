@@ -714,6 +714,68 @@ describe("RecipeForm", () => {
     });
   });
 
+  describe("Edit Version Toggle", () => {
+    it("is hidden for a recipe in your own language", () => {
+      renderComponent({ onSwitchEditVersion: vi.fn() });
+
+      expect(
+        screen.queryByTestId("switch-edit-version-btn")
+      ).not.toBeInTheDocument();
+    });
+
+    it("switches from your translation to the original", () => {
+      const onSwitchEditVersion = vi.fn();
+      renderComponent({ isEditingTranslation: true, onSwitchEditVersion });
+
+      fireEvent.click(screen.getByText("edit_version_switch_to_original"));
+
+      expect(onSwitchEditVersion).toHaveBeenCalledWith("original");
+    });
+
+    it("switches from the original back to your translation", () => {
+      const onSwitchEditVersion = vi.fn();
+      renderComponent({ isEditingOriginal: true, onSwitchEditVersion });
+
+      fireEvent.click(screen.getByText("edit_version_switch_to_translation"));
+
+      expect(onSwitchEditVersion).toHaveBeenCalledWith("translation");
+    });
+
+    it("asks before discarding unsaved changes", async () => {
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        hasUnsavedChanges: vi.fn(() => true),
+      });
+      const onSwitchEditVersion = vi.fn();
+      renderComponent({ isEditingTranslation: true, onSwitchEditVersion });
+
+      fireEvent.click(screen.getByText("edit_version_switch_to_original"));
+
+      expect(
+        await screen.findByText("switch_edit_version_warning")
+      ).toBeInTheDocument();
+      expect(onSwitchEditVersion).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByText("switch_edit_version_discard"));
+
+      expect(onSwitchEditVersion).toHaveBeenCalledWith("original");
+    });
+
+    it("stays on the current version when choosing to stay", async () => {
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        hasUnsavedChanges: vi.fn(() => true),
+      });
+      const onSwitchEditVersion = vi.fn();
+      renderComponent({ isEditingTranslation: true, onSwitchEditVersion });
+
+      fireEvent.click(screen.getByText("edit_version_switch_to_original"));
+      fireEvent.click(await screen.findByText("stay"));
+
+      expect(onSwitchEditVersion).not.toHaveBeenCalled();
+    });
+  });
+
   describe("Translation Editing Mode", () => {
     describe("Translation Notice", () => {
       it("shows translation notice when isEditingTranslation is true", () => {
@@ -724,11 +786,23 @@ describe("RecipeForm", () => {
         ).toBeInTheDocument();
       });
 
+      it("warns that editing the original replaces translation edits", () => {
+        renderComponent({ isEditingOriginal: true });
+
+        expect(screen.getByText("editing_original_notice")).toBeInTheDocument();
+        expect(
+          screen.queryByText("editing_translation_notice")
+        ).not.toBeInTheDocument();
+      });
+
       it("does not show translation notice when isEditingTranslation is false", () => {
         renderComponent({ isEditingTranslation: false });
 
         expect(
           screen.queryByText("editing_translation_notice")
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText("editing_original_notice")
         ).not.toBeInTheDocument();
       });
     });
