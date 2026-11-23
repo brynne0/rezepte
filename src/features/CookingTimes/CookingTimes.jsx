@@ -224,18 +224,27 @@ const CookingTimes = ({
 
         <CardContent className="flex flex-col gap-4">
           {loading ? (
-            <div className="grid grid-cols-1 gap-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col gap-2 rounded-lg border border-border bg-muted/20 p-3"
-                >
-                  <Skeleton className="h-5 w-2/3" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-4 w-1/3" />
-                </div>
+            <>
+              {[3, 2].map((rows, index) => (
+                <Card key={index} size="sm" className="gap-0 bg-muted/20 pb-0">
+                  <CardHeader>
+                    <Skeleton className="h-4 w-24" />
+                  </CardHeader>
+                  <CardContent className="flex flex-col divide-y divide-border">
+                    {Array.from({ length: rows }).map((_, rowIndex) => (
+                      <div
+                        key={rowIndex}
+                        className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 py-2"
+                      >
+                        <Skeleton className="h-5 w-2/3" />
+                        <Skeleton className="h-5 w-14" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
               ))}
-            </div>
+            </>
           ) : activeTab === "conversions" ? (
             <ConversionsTab />
           ) : !hasAnyItems && !isEditMode ? (
@@ -307,28 +316,34 @@ const CookingTimes = ({
             <>
               {/* Ungrouped Cooking Times */}
               {filteredData.ungroupedCookingTimes.length > 0 && (
-                <div className="flex flex-col">
-                  {filteredData.ungroupedCookingTimes.map((item, index) => (
-                    <CookingTimeRow
-                      key={item.tempId || item.id}
-                      item={item}
-                      index={index}
-                      sectionId="ungrouped"
-                      isEditMode={false}
-                    />
-                  ))}
-                </div>
+                <Card size="sm" className="bg-muted/20 py-0">
+                  <CardContent className="flex flex-col divide-y divide-border">
+                    {filteredData.ungroupedCookingTimes.map((item, index) => (
+                      <CookingTimeRow
+                        key={item.tempId || item.id}
+                        item={item}
+                        index={index}
+                        sectionId="ungrouped"
+                        isEditMode={false}
+                      />
+                    ))}
+                  </CardContent>
+                </Card>
               )}
 
-              {/* Cooking Time Sections */}
+              {/* Cooking Time Sections: panels matching the Conversions tab */}
               {filteredData.cookingTimeSections.map((section) => (
-                <div key={section.id}>
-                  {selectedSection === "all" && (
-                    <h2 className="mb-2 flex items-center gap-3 font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase [word-break:break-word] after:h-px after:flex-1 after:bg-border after:content-['']">
+                <Card
+                  key={section.id}
+                  size="sm"
+                  className="gap-0 bg-muted/20 pb-0"
+                >
+                  <CardHeader>
+                    <h2 className="font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase [word-break:break-word]">
                       {section.subheading}
                     </h2>
-                  )}
-                  <div className="flex flex-col">
+                  </CardHeader>
+                  <CardContent className="flex flex-col divide-y divide-border">
                     {section.cookingTimes.map((item, itemIndex) => (
                       <CookingTimeRow
                         key={item.tempId || item.id}
@@ -338,8 +353,8 @@ const CookingTimes = ({
                         isEditMode={false}
                       />
                     ))}
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </>
           )}
