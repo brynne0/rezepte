@@ -2,7 +2,10 @@ import { useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, X } from "lucide-react";
 
-import { emptyNutritionColumn } from "../../../utils/nutritionUtils";
+import {
+  emptyNutritionColumn,
+  sanitizeNutritionInput,
+} from "../../../utils/nutritionUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
@@ -19,22 +22,22 @@ import {
 } from "@/components/ui/tooltip";
 
 const NUTRITION_FORM_FIELDS = [
-  { key: "calories", labelKey: "nutrition_calories", unit: "kcal", step: "1" },
-  { key: "fiber", labelKey: "nutrition_fiber", unit: "g", step: "0.1" },
-  { key: "protein", labelKey: "nutrition_protein", unit: "g", step: "0.1" },
-  { key: "sodium", labelKey: "nutrition_sodium", unit: "mg", step: "1" },
-  { key: "carbs", labelKey: "nutrition_carbs", unit: "g", step: "0.1" },
-  { key: "sugar", labelKey: "nutrition_sugar", unit: "g", step: "0.1" },
-  { key: "fat", labelKey: "nutrition_fat", unit: "g", step: "0.1" },
+  { key: "calories", labelKey: "nutrition_calories", unit: "kcal" },
+  { key: "fiber", labelKey: "nutrition_fiber", unit: "g" },
+  { key: "protein", labelKey: "nutrition_protein", unit: "g" },
+  { key: "sodium", labelKey: "nutrition_sodium", unit: "mg" },
+  { key: "carbs", labelKey: "nutrition_carbs", unit: "g" },
+  { key: "sugar", labelKey: "nutrition_sugar", unit: "g" },
+  { key: "fat", labelKey: "nutrition_fat", unit: "g" },
 ];
 
 const NutritionSection = ({ columns, onChange, isEditingTranslation }) => {
   const { t } = useTranslation();
+
+  // Open when there are values to edit, collapsed when empty
   const [showNutrition, setShowNutrition] = useState(() =>
     columns.some((col) =>
-      ["calories", "protein", "fat", "carbs", "fiber", "sugar", "sodium"].some(
-        (k) => col[k] != null
-      )
+      NUTRITION_FORM_FIELDS.some(({ key }) => col[key] != null)
     )
   );
 
@@ -106,44 +109,39 @@ const NutritionSection = ({ columns, onChange, isEditingTranslation }) => {
                   ))}
                   <span />
                   {/* Data rows */}
-                  {NUTRITION_FORM_FIELDS.map(
-                    ({ key, labelKey, unit, step }) => (
-                      <Fragment key={key}>
-                        <span className="text-sm text-muted-foreground">
-                          {t(labelKey)}
-                        </span>
-                        {columns.map((col, colIdx) => (
-                          <Input
-                            key={`${key}-${colIdx}`}
-                            type="number"
-                            min="0"
-                            step={step}
-                            value={col[key] ?? ""}
-                            onChange={(e) => {
-                              const updated = columns.map((c, i) =>
-                                i === colIdx
-                                  ? {
-                                      ...c,
-                                      [key]:
-                                        e.target.value === ""
-                                          ? null
-                                          : e.target.value,
-                                    }
-                                  : c
-                              );
-                              onChange(updated);
-                            }}
-                            placeholder="–"
-                            disabled={isEditingTranslation}
-                            onWheel={(e) => e.target.blur()}
-                          />
-                        ))}
-                        <span className="text-sm text-muted-foreground">
-                          {unit}
-                        </span>
-                      </Fragment>
-                    )
-                  )}
+                  {NUTRITION_FORM_FIELDS.map(({ key, labelKey, unit }) => (
+                    <Fragment key={key}>
+                      <span className="text-sm text-muted-foreground">
+                        {t(labelKey)}
+                      </span>
+                      {columns.map((col, colIdx) => (
+                        // Text input so every browser rejects letters; decimal keypad on phones
+                        <Input
+                          key={`${key}-${colIdx}`}
+                          type="text"
+                          inputMode="decimal"
+                          aria-label={`${t(labelKey)} (${unit})`}
+                          value={col[key] ?? ""}
+                          onChange={(e) => {
+                            const value = sanitizeNutritionInput(
+                              e.target.value
+                            );
+                            const updated = columns.map((c, i) =>
+                              i === colIdx
+                                ? { ...c, [key]: value === "" ? null : value }
+                                : c
+                            );
+                            onChange(updated);
+                          }}
+                          placeholder="–"
+                          disabled={isEditingTranslation}
+                        />
+                      ))}
+                      <span className="text-sm text-muted-foreground">
+                        {unit}
+                      </span>
+                    </Fragment>
+                  ))}
                 </div>
               </div>
               <Button

@@ -63,10 +63,7 @@ const NutritionPanel = ({ recipe }) => {
   const nutrientKeys = collectNutrientKeys(columns);
 
   return (
-    <Accordion
-      defaultValue={["nutrition-info"]}
-      className="border-t border-dashed border-muted-foreground/40"
-    >
+    <Accordion className="border-t border-dashed border-muted-foreground/40">
       <AccordionItem value="nutrition-info">
         <AccordionTrigger>
           <RecipeSectionLabel>{t("nutritional_info")}</RecipeSectionLabel>

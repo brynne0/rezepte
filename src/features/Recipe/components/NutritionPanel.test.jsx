@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
 import "@testing-library/jest-dom";
 import NutritionPanel from "./NutritionPanel";
@@ -21,7 +21,20 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
+// The panel starts collapsed, so open it before checking its contents
+const renderOpen = (recipe) => {
+  render(<NutritionPanel recipe={recipe} />);
+  fireEvent.click(screen.getByText("Nutritional info"));
+};
+
 describe("NutritionPanel", () => {
+  test("starts collapsed", () => {
+    render(<NutritionPanel recipe={{ nutrition: { calories: 300 } }} />);
+
+    expect(screen.getByText("Nutritional info")).toBeInTheDocument();
+    expect(screen.queryByText("300 kcal")).not.toBeInTheDocument();
+  });
+
   test("renders nothing when recipe.nutrition is null", () => {
     const { container } = render(
       <NutritionPanel recipe={{ nutrition: null }} />
@@ -37,7 +50,7 @@ describe("NutritionPanel", () => {
   // Single-column (old flat format)
   test("renders old flat format as single column", () => {
     const recipe = { nutrition: { calories: 300, protein: 20 } };
-    render(<NutritionPanel recipe={recipe} />);
+    renderOpen(recipe);
 
     expect(screen.getByText("Calories")).toBeInTheDocument();
     expect(screen.getByText("Protein")).toBeInTheDocument();
@@ -48,7 +61,7 @@ describe("NutritionPanel", () => {
     const recipe = {
       nutrition: { calories: 350, protein: 25, sodium: 600 },
     };
-    render(<NutritionPanel recipe={recipe} />);
+    renderOpen(recipe);
 
     expect(screen.getByText("350 kcal")).toBeInTheDocument();
     expect(screen.getByText("25 g")).toBeInTheDocument();
@@ -57,7 +70,7 @@ describe("NutritionPanel", () => {
 
   test("shows no header when single column has no label", () => {
     const recipe = { nutrition: { calories: 100 } };
-    render(<NutritionPanel recipe={recipe} />);
+    renderOpen(recipe);
 
     expect(screen.queryByText("per serving")).not.toBeInTheDocument();
   });
@@ -66,7 +79,7 @@ describe("NutritionPanel", () => {
     const recipe = {
       nutrition: { columns: [{ label: "Per Bowl", calories: 400 }] },
     };
-    render(<NutritionPanel recipe={recipe} />);
+    renderOpen(recipe);
 
     expect(screen.getByText("Per Bowl")).toBeInTheDocument();
   });
@@ -81,7 +94,7 @@ describe("NutritionPanel", () => {
         ],
       },
     };
-    render(<NutritionPanel recipe={recipe} />);
+    renderOpen(recipe);
 
     expect(screen.getByText("Per Serving")).toBeInTheDocument();
     expect(screen.getByText("Per 100g")).toBeInTheDocument();
@@ -100,7 +113,7 @@ describe("NutritionPanel", () => {
         ],
       },
     };
-    render(<NutritionPanel recipe={recipe} />);
+    renderOpen(recipe);
 
     expect(screen.queryByText("Protein")).not.toBeInTheDocument();
     expect(screen.queryByText("Fat")).not.toBeInTheDocument();
@@ -115,7 +128,7 @@ describe("NutritionPanel", () => {
         ],
       },
     };
-    render(<NutritionPanel recipe={recipe} />);
+    renderOpen(recipe);
 
     expect(screen.getByText("10 g")).toBeInTheDocument();
     expect(screen.getByText("–")).toBeInTheDocument();

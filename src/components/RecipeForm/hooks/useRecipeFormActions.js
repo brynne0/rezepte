@@ -1,6 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { buildNutritionColumns } from "../../../utils/nutritionUtils";
+import {
+  buildNutritionColumns,
+  toNutritionValue,
+} from "../../../utils/nutritionUtils";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -151,9 +154,6 @@ export const useRecipeFormActions = ({
           .filter((ing) => ing.name.trim() !== "")
           .map((ing) => prepareIngredientData(ing, section.id)),
       }));
-
-    const toNutritionValue = (v) =>
-      v !== "" && v !== null && v !== undefined ? parseFloat(v) : null;
 
     const parsedColumns = (formData.nutrition_columns || []).map((col) => ({
       label: col.label || "",

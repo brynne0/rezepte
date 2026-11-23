@@ -3,6 +3,8 @@ import {
   buildNutritionColumns,
   parseNutritionColumns,
   emptyNutritionColumn,
+  sanitizeNutritionInput,
+  toNutritionValue,
 } from "./nutritionUtils";
 
 describe("buildNutritionColumns", () => {
@@ -152,5 +154,40 @@ describe("parseNutritionColumns", () => {
     const result = parseNutritionColumns(nutrition);
     expect(result[0].protein).toBeNull();
     expect(result[0].sodium).toBeNull();
+  });
+});
+
+describe("sanitizeNutritionInput", () => {
+  test.each([
+    ["12", "12"],
+    ["12.5", "12.5"],
+    ["12,5", "12,5"],
+    ["abc", ""],
+    ["12.5 g", "12.5"],
+    ["1e5", "15"],
+    ["-3", "3"],
+    ["1.2.3", "1.23"],
+    ["1,2.3", "1,23"],
+    ["", ""],
+  ])("%j becomes %j", (input, expected) => {
+    expect(sanitizeNutritionInput(input)).toBe(expected);
+  });
+});
+
+describe("toNutritionValue", () => {
+  test("parses a decimal point or comma", () => {
+    expect(toNutritionValue("12.5")).toBe(12.5);
+    expect(toNutritionValue("12,5")).toBe(12.5);
+  });
+
+  test("keeps numbers as they are", () => {
+    expect(toNutritionValue(7)).toBe(7);
+  });
+
+  test("returns null for empty or non-numeric values", () => {
+    expect(toNutritionValue("")).toBeNull();
+    expect(toNutritionValue(null)).toBeNull();
+    expect(toNutritionValue(undefined)).toBeNull();
+    expect(toNutritionValue(".")).toBeNull();
   });
 });

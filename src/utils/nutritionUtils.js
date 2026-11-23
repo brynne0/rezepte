@@ -8,6 +8,24 @@ const NUTRITION_KEYS = [
   "sodium",
 ];
 
+// Keeps digits and the first decimal separator (. or ,), so "12.5 g" -> "12.5"
+export const sanitizeNutritionInput = (value) => {
+  const cleaned = String(value ?? "").replace(/[^\d.,]/g, "");
+  const separatorIndex = cleaned.search(/[.,]/);
+  if (separatorIndex === -1) return cleaned;
+  return (
+    cleaned.slice(0, separatorIndex + 1) +
+    cleaned.slice(separatorIndex + 1).replace(/[.,]/g, "")
+  );
+};
+
+// Form value to number for saving; accepts a decimal comma, null if not a number
+export const toNutritionValue = (value) => {
+  if (value === "" || value === null || value === undefined) return null;
+  const number = parseFloat(String(value).replace(",", "."));
+  return Number.isFinite(number) ? number : null;
+};
+
 export const emptyNutritionColumn = () => ({
   label: "",
   calories: null,
