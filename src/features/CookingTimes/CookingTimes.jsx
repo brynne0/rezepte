@@ -2,7 +2,7 @@ import { useState } from "react";
 import FilterStrip from "../../components/FilterStrip/FilterStrip";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Plus, Timer, ArrowLeftRight, Pencil } from "lucide-react";
+import { Plus, Timer, ArrowLeftRight } from "lucide-react";
 import CookingTimeRow from "./components/CookingTimeRow";
 import EditCookingTimes from "./components/EditCookingTimes";
 import ConversionsTab from "./components/ConversionsTab";
@@ -135,50 +135,62 @@ const CookingTimes = () => {
       <BackLink className="mx-auto max-w-3xl" onClick={handleBackNavigation} />
       <Card className="mx-auto max-w-3xl">
         <CardHeader className="flex flex-col items-stretch gap-4">
-          <div className="relative flex w-full items-center justify-center">
-            {isEditMode ? (
+          {isEditMode ? (
+            <div className="flex w-full items-center justify-center">
               <h1 className="text-lg font-semibold">
-                {t("cooking_times_tab")}
+                {t("edit_cooking_times")}
               </h1>
-            ) : (
+            </div>
+          ) : (
+            <div className="grid w-full grid-cols-[1fr_minmax(0,24rem)_1fr] items-center gap-2">
+              <span aria-hidden="true" />
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList>
-                  <TabsTrigger value="cooking-times">
+                <TabsList className="w-full">
+                  <TabsTrigger value="cooking-times" className="flex-1">
                     <Timer />
                     {t("cooking_times_tab")}
                   </TabsTrigger>
-                  <TabsTrigger value="conversions">
+                  <TabsTrigger value="conversions" className="flex-1">
                     <ArrowLeftRight />
                     {t("conversions_tab")}
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-            )}
 
-            {activeTab === "cooking-times" && !isEditMode && hasAnyItems && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="absolute right-0"
-                      onClick={enterEditMode}
-                      disabled={!isOnline}
-                      aria-label={t("edit_mode", "Edit Mode")}
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                  }
-                />
-                <TooltipContent>
-                  {isOnline
-                    ? t("edit_mode", "Edit Mode")
-                    : t("action_requires_internet")}
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
+              {activeTab === "cooking-times" &&
+                hasAnyItems &&
+                (isOnline ? (
+                  <Button
+                    variant="printed"
+                    className="-mr-2.5 justify-self-end"
+                    onClick={enterEditMode}
+                    aria-label={t("edit_cooking_times")}
+                    data-testid="edit-cooking-times-btn"
+                  >
+                    {t("recipe_action_edit")}
+                  </Button>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="printed"
+                          className="-mr-2.5 justify-self-end"
+                          disabled
+                          aria-label={t("edit_cooking_times")}
+                          data-testid="edit-cooking-times-btn"
+                        >
+                          {t("recipe_action_edit")}
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>
+                      {t("action_requires_internet")}
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+            </div>
+          )}
 
           {/* Section Filter Chips - Only for cooking times tab */}
           {activeTab === "cooking-times" && !isEditMode && hasAnyItems && (

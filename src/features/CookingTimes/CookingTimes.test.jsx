@@ -140,7 +140,7 @@ describe("CookingTimes", () => {
   // Edit mode is local state, so enter it the way a user would
   const renderInEditMode = async () => {
     const result = renderComponent();
-    fireEvent.click(await screen.findByLabelText("Edit Mode"));
+    fireEvent.click(await screen.findByTestId("edit-cooking-times-btn"));
     await screen.findByText("add_section");
     return result;
   };
@@ -330,7 +330,9 @@ describe("CookingTimes", () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByLabelText("Edit Mode")).toBeInTheDocument();
+        expect(
+          screen.getByTestId("edit-cooking-times-btn")
+        ).toBeInTheDocument();
       });
     });
 
@@ -344,7 +346,9 @@ describe("CookingTimes", () => {
         expect(screen.getByText("No cooking times yet")).toBeInTheDocument();
       });
 
-      expect(screen.queryByLabelText("Edit Mode")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("edit-cooking-times-btn")
+      ).not.toBeInTheDocument();
     });
   });
 

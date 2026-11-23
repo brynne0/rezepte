@@ -89,7 +89,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
 
     return categoryPreferences.some((pref, index) => {
       const original = originalCategoryPreferences[index];
-      return pref.id !== original.id;
+      return pref.id !== original.id || pref.label !== original.label;
     });
   }, [
     categoryPreferences,
@@ -130,6 +130,22 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
 
       for (const categoryId of removedIds) {
         await deleteCategory(categoryId);
+      }
+
+      // Save renames of existing categories
+      const originalLabels = new Map(
+        originalCategoryPreferences.map((cat) => [cat.id, cat.label])
+      );
+      for (const cat of categoryPreferences) {
+        if (
+          !cat.isTemp &&
+          originalLabels.has(cat.id) &&
+          originalLabels.get(cat.id) !== cat.label
+        ) {
+          await updateCategoryName(cat.id, cat.label, {
+            [i18n.language]: cat.label,
+          });
+        }
       }
 
       // Then, create any pending categories in the database
@@ -386,38 +402,15 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
       return;
     }
 
-    try {
-      setCategoryError("");
-
-      // Update category with new name and translation
-      const translations = {
-        [i18n.language]: editingCategoryName.trim(),
-      };
-
-      await updateCategoryName(
-        editingCategoryId,
-        editingCategoryName.trim(),
-        translations
-      );
-
-      // Update in preferences list
-      setCategoryPreferences((prev) =>
-        prev.map((cat) =>
-          cat.id === editingCategoryId
-            ? { ...cat, label: editingCategoryName.trim() }
-            : cat
-        )
-      );
-
-      // Reset edit state
-      setEditingCategoryId(null);
-      setEditingCategoryName("");
-
-      // Note: Don't auto-refresh - let user save preferences manually
-    } catch (error) {
-      console.error("Error updating category:", error);
-      setCategoryError(error.message);
-    }
+    // Rename locally only; it's written to the database on save
+    setCategoryError("");
+    setCategoryPreferences((prev) =>
+      prev.map((cat) =>
+        cat.id === editingCategoryId ? { ...cat, label: trimmedName } : cat
+      )
+    );
+    setEditingCategoryId(null);
+    setEditingCategoryName("");
   };
 
   const handleCancelEditCategory = () => {

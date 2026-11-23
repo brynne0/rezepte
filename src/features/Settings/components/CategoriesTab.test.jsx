@@ -138,7 +138,6 @@ describe("CategoriesTab - Adding Categories", () => {
     it("shows management controls without an edit step", async () => {
       await renderInEditMode();
 
-      expect(screen.queryByText("edit_categories")).not.toBeInTheDocument();
       expect(
         screen.getAllByRole("button", { name: "edit_category_name" })
       ).toHaveLength(2);
@@ -393,6 +392,54 @@ describe("CategoriesTab - Adding Categories", () => {
   });
 
   describe("Category Persistence", () => {
+    it("only saves a rename once preferences are saved", async () => {
+      const categoriesService = await import(
+        "../../../services/categoriesService"
+      );
+      await renderInEditMode();
+
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "edit_category_name" })[0]
+      );
+      fireEvent.change(screen.getByDisplayValue("Dinner"), {
+        target: { value: "Supper" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+
+      expect(screen.getByText("Supper")).toBeInTheDocument();
+      expect(categoriesService.updateCategoryName).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByText("save_category_preferences"));
+
+      await waitFor(() => {
+        expect(categoriesService.updateCategoryName).toHaveBeenCalledWith(
+          "1",
+          "Supper",
+          { en: "Supper" }
+        );
+      });
+    });
+
+    it("discards a rename on cancel", async () => {
+      const categoriesService = await import(
+        "../../../services/categoriesService"
+      );
+      await renderInEditMode();
+
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "edit_category_name" })[0]
+      );
+      fireEvent.change(screen.getByDisplayValue("Dinner"), {
+        target: { value: "Supper" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "save_changes" }));
+      fireEvent.click(screen.getByRole("button", { name: "cancel" }));
+
+      expect(screen.getByText("Dinner")).toBeInTheDocument();
+      expect(screen.queryByText("Supper")).not.toBeInTheDocument();
+      expect(categoriesService.updateCategoryName).not.toHaveBeenCalled();
+    });
+
     it("creates categories in database when preferences are saved", async () => {
       await renderInEditMode();
 

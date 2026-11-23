@@ -129,13 +129,16 @@ const CookingTimeRow = ({
       ref={provided?.innerRef}
       {...provided?.draggableProps}
       className={cn(
-        "flex items-start gap-2 rounded-lg border border-border bg-muted/20 p-3 transition-colors",
-        snapshot?.isDragging && "border-ring bg-muted/50 shadow-sm"
+        "flex items-start gap-2 p-2 transition-colors",
+        index > 0 && "border-t border-border",
+        snapshot?.isDragging &&
+          "rounded-lg border border-border bg-card shadow-md"
       )}
     >
       <div
         {...provided?.dragHandleProps}
-        className="mt-2.5 shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
+        data-slot="drag-handle"
+        className="flex h-8 shrink-0 cursor-grab items-center text-muted-foreground active:cursor-grabbing"
       >
         <GripVertical size={16} />
       </div>

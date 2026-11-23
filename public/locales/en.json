@@ -239,8 +239,6 @@
   "show_category": "Show category",
   "save_category_preferences": "Save Preferences",
   "system": "System",
-  "edit_profile": "Edit profile",
-  "edit_categories": "Edit categories",
   "save_changes": "Save changes",
   "change_password": "Change password",
   "user_menu": "User menu",
@@ -342,7 +340,7 @@
 
   "no_cooking_times_title": "No cooking times yet",
   "add_first_cooking_time": "Add your first cooking time",
-  "edit_mode": "Edit Mode",
+  "edit_cooking_times": "Edit Cooking Times",
   "add_cooking_time": "Add cooking time",
   "no_search_results": "No results found for your search.",
   "cook": "cook",

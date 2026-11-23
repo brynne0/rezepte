@@ -239,8 +239,6 @@
   "show_category": "Kategorie anzeigen",
   "save_category_preferences": "Einstellungen speichern",
   "system": "System",
-  "edit_profile": "Profil bearbeiten",
-  "edit_categories": "Kategorien bearbeiten",
   "save_changes": "Änderungen speichern",
   "change_password": "Passwort ändern",
   "user_menu": "Benutzermenü",
@@ -343,7 +341,7 @@
 
   "no_cooking_times_title": "Noch keine Garzeiten",
   "add_first_cooking_time": "Füge deine erste Garzeit hinzu",
-  "edit_mode": "Bearbeitungsmodus",
+  "edit_cooking_times": "Garzeiten bearbeiten",
   "add_cooking_time": "Garzeit hinzufügen",
   "no_search_results": "Keine Ergebnisse für deine Suche gefunden.",
   "cook": "kochen",

@@ -356,7 +356,7 @@ describe("CookingTimeRow", () => {
         />
       );
 
-      const rowElement = container.querySelector(".border-ring");
+      const rowElement = container.querySelector(".shadow-md");
       expect(rowElement).toBeInTheDocument();
     });
   });
