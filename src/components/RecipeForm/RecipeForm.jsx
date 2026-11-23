@@ -474,10 +474,7 @@ const RecipeForm = ({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("unsaved_changes_warning")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {unsavedChangesMessage}
-            </AlertDialogDescription>
+            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
