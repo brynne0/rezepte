@@ -13,6 +13,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import { RecipeSectionLabel } from "./RecipeSection";
 
 // Known fields get a translated label and a unit; any other key present in
 // the data still renders, just with its raw name and no unit.
@@ -68,9 +69,7 @@ const NutritionPanel = ({ recipe }) => {
     >
       <AccordionItem value="nutrition-info">
         <AccordionTrigger>
-          <h2 className="font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase">
-            {t("nutritional_info")}
-          </h2>
+          <RecipeSectionLabel>{t("nutritional_info")}</RecipeSectionLabel>
         </AccordionTrigger>
         <AccordionContent>
           <Table className="md:w-fit">
