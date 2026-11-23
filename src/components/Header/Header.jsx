@@ -91,7 +91,7 @@ const Header = ({ friendBar }) => {
     triggerInstall();
   };
 
-  const isAuthPage = location.pathname === "/login";
+  const isAuthPage = ["/login", "/forgot-password"].includes(location.pathname);
 
   const isActivePage = (path) => location.pathname === path;
   const isFriendsPageActive = location.pathname.startsWith("/friends/");
@@ -125,7 +125,7 @@ const Header = ({ friendBar }) => {
   );
 
   // Shared user dropdown menu
-  const UserMenu = () => (
+  const UserMenu = ({ align = "center" }) => (
     <Tooltip>
       <DropdownMenu>
         <DropdownMenuTrigger
@@ -145,7 +145,7 @@ const Header = ({ friendBar }) => {
             />
           }
         />
-        <DropdownMenuContent align="center">
+        <DropdownMenuContent align={align}>
           {isLoggedIn ? (
             <>
               <DropdownMenuItem onClick={() => navigate("/settings")}>
@@ -181,11 +181,16 @@ const Header = ({ friendBar }) => {
         )}
       >
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-8 md:pb-6">
-          {/* Language Selection */}
-          <div className="flex shrink-0 items-center md:gap-2">
+          {/* User Icon, always on the left; min-h keeps header height stable */}
+          <div className="flex min-h-9 shrink-0 items-center">
             {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
-            {languageToggle}
+            {!isAuthPage && <UserMenu align="start" />}
           </div>
+
+          {/* Language Selection, logged out only */}
+          {!isLoggedIn && (
+            <div className="flex shrink-0 items-center">{languageToggle}</div>
+          )}
 
           {/* Title */}
           <div className="absolute inset-0 m-auto flex h-max w-max flex-col items-center">
@@ -206,11 +211,8 @@ const Header = ({ friendBar }) => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-2 md:flex md:gap-4">
-            {/* Desktop User Icon */}
-            {!isAuthPage && <UserMenu />}
-
-            {isLoggedIn && (
+          {isLoggedIn && (
+            <nav className="hidden items-center gap-2 md:flex md:gap-4">
               <>
                 <FriendsPanel
                   tooltipLabel={
@@ -289,15 +291,12 @@ const Header = ({ friendBar }) => {
                   </TooltipContent>
                 </Tooltip>
               </>
-            )}
-          </nav>
+            </nav>
+          )}
 
-          {/* Mobile User and Menu Icons */}
-          <div className="flex items-center md:hidden">
-            {/* Mobile User Icon */}
-            {!isAuthPage && <UserMenu />}
-
-            {isLoggedIn && (
+          {/* Mobile Menu */}
+          {isLoggedIn && (
+            <div className="flex items-center md:hidden">
               <Tooltip>
                 <DropdownMenu open={showNavMenu} onOpenChange={setShowNavMenu}>
                   <DropdownMenuTrigger
@@ -315,7 +314,7 @@ const Header = ({ friendBar }) => {
                       />
                     }
                   />
-                  <DropdownMenuContent align="center">
+                  <DropdownMenuContent align="end">
                     <FriendsPanel
                       onNavigate={() => setShowNavMenu(false)}
                       renderTrigger={(pendingCount) => (
@@ -366,8 +365,8 @@ const Header = ({ friendBar }) => {
                 </DropdownMenu>
                 <TooltipContent>Menu</TooltipContent>
               </Tooltip>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </header>
 
