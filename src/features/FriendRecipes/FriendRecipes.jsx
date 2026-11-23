@@ -23,7 +23,7 @@ const PAGE_SIZE = 36;
 
 const FriendRecipes = () => {
   const { username } = useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { setFriendBar } = useContext(AppStateContext);
 
   const {
@@ -63,12 +63,20 @@ const FriendRecipes = () => {
       filterSortPaginateRecipes({
         recipes: allRecipes,
         searchTerm,
+        language: i18n.language.split("-")[0],
         category: selectedCategory,
         sortBy,
         page: currentPage,
         limit: PAGE_SIZE,
       }),
-    [allRecipes, searchTerm, selectedCategory, sortBy, currentPage]
+    [
+      allRecipes,
+      searchTerm,
+      selectedCategory,
+      sortBy,
+      currentPage,
+      i18n.language,
+    ]
   );
 
   const handleCategoryChange = (category) => {

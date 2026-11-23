@@ -1,5 +1,6 @@
 import supabase from "../lib/supabase";
 import { getAuthenticatedUser } from "./authHelpers";
+import { RECIPE_INGREDIENT_NAMES_SELECT } from "../utils/recipeListFiltering";
 
 // Search users by username (partial match, ≥3 chars enforced server-side).
 // Returns (id, username) only — first_name is not exposed to strangers.
@@ -218,7 +219,7 @@ export const fetchFriendRecipes = async (friendUserId) => {
     .select(
       `id, title, slug, images, source, instructions, created_at, updated_at,
        recipe_categories(categoriy_id, categories(name, translated_category)),
-       recipe_ingredients!recipe_ingredients_recipe_id_fkey(id)`
+       ${RECIPE_INGREDIENT_NAMES_SELECT}`
     )
     .eq("user_id", friendUserId)
     .order("created_at", { ascending: false });

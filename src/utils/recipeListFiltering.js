@@ -1,7 +1,50 @@
+import { getIngredientNamesForLanguage } from "./ingredientFormatting";
+
+// Ingredient name fields needed for search
+export const RECIPE_INGREDIENT_NAMES_SELECT = `recipe_ingredients!recipe_ingredients_recipe_id_fkey(
+  id,
+  name_overrides,
+  ingredients(singular_name, plural_name, translated_names)
+)`;
+
+// Ingredient names in the given language, lowercased
+export const getSearchableIngredientNames = (
+  recipeIngredients = [],
+  language = "en"
+) => {
+  const names = new Set();
+  const add = (name) => {
+    if (typeof name === "string" && name.trim()) {
+      names.add(name.toLowerCase().trim());
+    }
+  };
+
+  for (const ri of recipeIngredients) {
+    add(ri.name_overrides?.[language]);
+    if (ri.ingredients) {
+      const { singular_name, plural_name } = getIngredientNamesForLanguage(
+        ri,
+        language
+      );
+      add(singular_name);
+      add(plural_name);
+    }
+  }
+
+  return [...names];
+};
+
+const recipeMatchesTerm = (recipe, term, language) =>
+  recipe.title?.toLowerCase().includes(term) ||
+  getSearchableIngredientNames(recipe.recipe_ingredients, language).some(
+    (name) => name.includes(term)
+  );
+
 // Shared filter/sort/paginate logic for recipe lists
 export const filterSortPaginateRecipes = ({
   recipes,
   searchTerm,
+  language = "en",
   category,
   sortBy,
   page,
@@ -10,7 +53,7 @@ export const filterSortPaginateRecipes = ({
   const term = searchTerm?.toLowerCase().trim();
 
   const searchFilteredRecipes = term
-    ? recipes.filter((recipe) => recipe.title?.toLowerCase().includes(term))
+    ? recipes.filter((recipe) => recipeMatchesTerm(recipe, term, language))
     : recipes;
 
   // When searching, show all search results regardless of category
