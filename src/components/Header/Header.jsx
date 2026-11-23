@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Plus,
-  Squirrel,
   Menu,
   User,
   Users,
@@ -183,7 +182,6 @@ const Header = ({ friendBar }) => {
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-8 md:pb-6">
           {/* User Icon, always on the left; min-h keeps header height stable */}
           <div className="flex min-h-9 shrink-0 items-center">
-            {/* <Squirrel className="hidden md:block md:size-14 md:pr-4" /> */}
             {!isAuthPage && <UserMenu align="start" />}
           </div>
 

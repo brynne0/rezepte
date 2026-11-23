@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Mail, User, ChefHat, Lock, Eye, EyeOff, Squirrel } from "lucide-react";
+import { Mail, User, ChefHat, Lock, Eye, EyeOff } from "lucide-react";
 import { signUp, signIn, resendConfirmationEmail } from "../../services/auth";
 import {
   validateAuthForm,
@@ -234,7 +234,17 @@ const Auth = () => {
       <Card className="w-full">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="flex w-full items-center justify-center">
-            <Squirrel className="size-9 text-primary" />
+            {/* <Squirrel className="size-9 text-primary" /> */}
+            <img
+              src="/eichhörnchen/squirrel-santa.svg"
+              alt=""
+              className="size-11 dark:hidden"
+            />
+            <img
+              src="/eichhörnchen/squirrel-santa-dark.svg"
+              alt=""
+              className="hidden size-11 dark:block"
+            />
           </div>
 
           {!awaitingConfirmation && (
