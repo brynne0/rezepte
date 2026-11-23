@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { cn } from "cn";
 import {
   RotateCcw,
   Minus,
@@ -61,6 +60,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
+import { RecipeSection, RecipeSectionLabel } from "./components/RecipeSection";
 import {
   readCachedValue,
   writeCachedValue,
@@ -397,11 +397,6 @@ const Recipe = () => {
     (recipe.ingredientSections && recipe.ingredientSections.length > 0) ||
     (recipe.ingredients && recipe.ingredients.length > 0);
 
-  // Receipt styling: small printed section labels, dashed rules between sections
-  const sectionLabel =
-    "font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase";
-  const sectionRule = "border-t border-dashed border-muted-foreground/40 pt-4";
-
   // Back link names where it leads: your recipes, or the friend's
   const friendName = !isOwner ? friendProfile?.first_name : null;
   const backLabel = friendName
@@ -549,10 +544,8 @@ const Recipe = () => {
 
           {/* Servings */}
           {recipe.servings && (
-            <div
-              className={cn("flex flex-wrap items-center gap-x-2", sectionRule)}
-            >
-              <h2 className={sectionLabel}>{t("servings")}</h2>
+            <RecipeSection className="flex flex-wrap items-center gap-x-2">
+              <RecipeSectionLabel>{t("servings")}</RecipeSectionLabel>
               {hasIngredients ? (
                 <>
                   <div className="flex items-center gap-2">
@@ -602,19 +595,17 @@ const Recipe = () => {
               ) : (
                 <span className="ml-2">{recipe.servings}</span>
               )}
-            </div>
+            </RecipeSection>
           )}
 
           {/* Ingredients */}
           {hasIngredients && (
-            <div
-              className={cn(
-                "flex flex-col gap-2",
-                !recipe.servings && sectionRule
-              )}
+            <RecipeSection
+              className="flex flex-col gap-2"
+              rule={!recipe.servings}
             >
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className={sectionLabel}>{t("ingredients")}</h2>
+                <RecipeSectionLabel>{t("ingredients")}</RecipeSectionLabel>
                 {!recipe.servings && (
                   <div className="flex items-center gap-2">
                     <Button
@@ -686,50 +677,43 @@ const Recipe = () => {
                     ))}
                   </>
                 )}
-            </div>
+            </RecipeSection>
           )}
 
           {/* Instructions */}
           {recipe.instructions && recipe.instructions.length > 0 && (
-            <div className={cn("flex flex-col gap-2", sectionRule)}>
-              <h2 className={sectionLabel}>{t("instructions")}</h2>
+            <RecipeSection className="flex flex-col gap-2">
+              <RecipeSectionLabel>{t("instructions")}</RecipeSectionLabel>
 
               <ol className="list-decimal space-y-1 pl-8">
                 {recipe.instructions.map((instruction, i) => (
                   <li key={i}>{instruction}</li>
                 ))}
               </ol>
-            </div>
+            </RecipeSection>
           )}
 
           {/* Source */}
           {recipe.source && (
-            <div
-              className={cn(
-                "flex flex-wrap items-baseline gap-x-2 gap-y-0",
-                sectionRule
-              )}
-            >
-              <h2 className={sectionLabel}>{t("source")}</h2>
+            <RecipeSection className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+              <RecipeSectionLabel>{t("source")}</RecipeSectionLabel>
               <span className="[word-wrap:break-word] whitespace-pre-wrap">
                 {linkifyText(recipe.source)}
               </span>
-            </div>
+            </RecipeSection>
           )}
 
           {/* Extra Notes */}
           {recipe.notes && recipe.notes.length > 0 && (
-            <div
-              className={cn(
-                "flex flex-wrap items-baseline gap-x-2 gap-y-0",
-                !recipe.source && sectionRule
-              )}
+            <RecipeSection
+              className="flex flex-wrap items-baseline gap-x-2 gap-y-0"
+              rule={!recipe.source}
             >
-              <h2 className={sectionLabel}>{t("notes")}</h2>
+              <RecipeSectionLabel>{t("notes")}</RecipeSectionLabel>
               <div className="[word-break:break-word] whitespace-pre-wrap">
                 {recipe.notes}
               </div>
-            </div>
+            </RecipeSection>
           )}
 
           {/* Nutrition */}

@@ -113,7 +113,7 @@
   "account_deleted_goodbye": "Goodbye, {{name}}! Your account has been successfully deleted.",
   "delete_account_error": "Failed to delete account. Please try again.",
 
-  "search": "Search recipes",
+  "search": "Search recipes or ingredients",
   "clear_search": "Clear search",
   "recipe_count_one": "{{count}} recipe",
   "recipe_count_other": "{{count}} recipes",

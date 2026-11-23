@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabase from "../../lib/supabase";
 import { getTranslatedRecipeTitle } from "../../services/recipeTranslationService";
-import { filterSortPaginateRecipes } from "../../utils/recipeListFiltering";
+import {
+  filterSortPaginateRecipes,
+  RECIPE_INGREDIENT_NAMES_SELECT,
+} from "../../utils/recipeListFiltering";
 import { useAuth } from "./useAuth";
 
 // Fetch recipes with category information for the given user
@@ -22,7 +25,7 @@ export const fetchRecipesWithCategories = async (userId) => {
           translated_category
         )
       ),
-      recipe_ingredients!recipe_ingredients_recipe_id_fkey(id)
+      ${RECIPE_INGREDIENT_NAMES_SELECT}
     `
     )
     .eq("user_id", userId)
@@ -78,12 +81,13 @@ export const useRecipesPagination = (
       filterSortPaginateRecipes({
         recipes: allRecipes,
         searchTerm,
+        language: currentLanguage,
         category,
         sortBy,
         page,
         limit,
       }),
-    [allRecipes, page, limit, category, searchTerm, sortBy]
+    [allRecipes, page, limit, category, searchTerm, sortBy, currentLanguage]
   );
 
   return {

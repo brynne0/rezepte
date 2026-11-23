@@ -57,8 +57,8 @@ export default defineConfig({
       manifest: {
         name: "Rezepte",
         short_name: "Rezepte",
-        theme_color: "#f2e7d2",
-        background_color: "#f2e7d2",
+        theme_color: "#efe6d6",
+        background_color: "#efe6d6",
         display: "standalone",
         start_url: "/",
         scope: "/",

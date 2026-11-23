@@ -34,7 +34,7 @@ const applyTheme = () => {
     .forEach((tag) => tag.remove());
   const metaTag = document.createElement("meta");
   metaTag.name = "theme-color";
-  metaTag.content = resolved === "dark" ? "#241d19" : "#f2e7d2";
+  metaTag.content = resolved === "dark" ? "#241d19" : "#efe6d6";
   document.head.appendChild(metaTag);
 };
 

@@ -79,7 +79,7 @@ const RecipeCard = ({ recipe, showImages = true, onClick }) => {
       <CardHeader>
         <CardTitle
           className={cn(
-            "min-w-0 font-receipt text-sm leading-snug font-semibold wrap-break-word md:text-[15px]",
+            "min-w-0 font-receipt text-[13px] leading-snug font-semibold wrap-break-word md:text-sm",
             !isSourceLinkHovered && "group-hover/card:text-accent-red"
           )}
         >

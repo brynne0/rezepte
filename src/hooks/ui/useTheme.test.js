@@ -48,7 +48,7 @@ describe("useTheme Hook", () => {
     initTheme();
 
     expect(document.documentElement.classList.contains("dark")).toBe(false);
-    expect(themeColor()).toBe("#f2e7d2");
+    expect(themeColor()).toBe("#efe6d6");
   });
 
   test("system preference follows the OS (dark)", () => {

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   InputGroup,
   InputGroupAddon,
@@ -13,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import FilterStrip from "../FilterStrip/FilterStrip";
 
 const RecipeFilters = ({
   categories,
@@ -93,26 +93,17 @@ const RecipeFilters = ({
         </div>
       </div>
 
-      <div
-        className="flex flex-wrap justify-center gap-x-2 gap-y-2 pb-4 md:gap-x-4"
+      <FilterStrip
+        className="px-2 pb-4 md:px-0"
+        items={categories}
+        selected={selectedCategory}
+        onSelect={(value) => {
+          setSearchTerm("");
+          setSelectedCategory(value);
+        }}
+        labelAs="h3"
         data-nosnippet
-      >
-        {categories.map((category) => (
-          <Button
-            key={category.value}
-            variant="text"
-            aria-pressed={category.value === selectedCategory}
-            onClick={() => {
-              setSearchTerm("");
-              setSelectedCategory(category.value);
-            }}
-          >
-            <h3 className="font-receipt text-[13px] font-normal tracking-wider uppercase">
-              {category.label}
-            </h3>
-          </Button>
-        ))}
-      </div>
+      />
     </>
   );
 };

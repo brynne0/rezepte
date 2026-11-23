@@ -13,7 +13,7 @@ const RouteError = () => {
   const isOnline = useOnlineStatus();
 
   return (
-    <div className="mx-auto mt-20 flex max-w-sm flex-col items-center gap-4 text-center">
+    <div className="mx-auto mt-40 flex max-w-sm flex-col items-center gap-4 text-center">
       {isOnline ? (
         <>
           <TriangleAlert className="size-9 text-destructive" />
