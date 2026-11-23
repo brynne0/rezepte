@@ -42,6 +42,8 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { detectLanguage, recipeFormText } from "../../utils/detectLanguage";
 import BackLink from "../BackLink/BackLink";
 
 const RecipeForm = ({
@@ -50,11 +52,37 @@ const RecipeForm = ({
   title = "",
   isEditingTranslation = false,
   isEditingOriginal = false,
-  contentLanguage,
   onSwitchEditVersion,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  // Which language the recipe is written in: set on new recipes, correctable on edit
+  const appLanguage = i18n.language?.split("-")[0] || "en";
+  const savedLanguage = initialRecipe?.original_language || "en";
+  const [recipeLanguage, setRecipeLanguage] = useState(() =>
+    initialRecipe ? savedLanguage : appLanguage
+  );
+  // Picked by hand or by autofill, so no need to ask on save
+  const [languageChosen, setLanguageChosen] = useState(false);
+  const chooseRecipeLanguage = (language) => {
+    setRecipeLanguage(language);
+    setLanguageChosen(true);
+  };
+  const isCreating = !initialRecipe;
+  const languageCorrected = !isCreating && recipeLanguage !== savedLanguage;
+  // One notice at the top; a changed language outweighs "editing the original"
+  const editNoticeKey = isEditingTranslation
+    ? "editing_translation_notice"
+    : languageCorrected
+      ? "recipe_language_changed_notice"
+      : isEditingOriginal
+        ? "editing_original_notice"
+        : null;
+  // Your translation is typed in the app language; everything else in the recipe's
+  const formContentLanguage = isEditingTranslation
+    ? appLanguage
+    : recipeLanguage;
 
   const {
     formData,
@@ -86,12 +114,25 @@ const RecipeForm = ({
     showCategoryConfirm,
     confirmSaveWithoutCategory,
     cancelCategoryConfirm,
+    languageSuggestion,
+    resolveLanguageSuggestion,
     toTitleCase,
     handleIngredientLink,
     removeIngredientLink,
     getIngredientLink,
     generateUniqueId,
-  } = useRecipeForm({ initialRecipe, isEditingTranslation });
+  } = useRecipeForm({
+    initialRecipe,
+    isEditingTranslation,
+    recipeLanguage: isEditingTranslation ? undefined : recipeLanguage,
+    // Only new recipes, and only if nobody picked a language: ask when the text clearly isn't in it
+    getLanguageSuggestion: () => {
+      if (!isCreating || languageChosen) return null;
+      const detected = detectLanguage(recipeFormText(formData));
+      return detected && detected !== recipeLanguage ? detected : null;
+    },
+    onRecipeLanguageChange: chooseRecipeLanguage,
+  });
 
   const [showPasteArea, setShowPasteArea] = useState(false);
   const [pendingEditVersion, setPendingEditVersion] = useState(null);
@@ -117,6 +158,7 @@ const RecipeForm = ({
     toTitleCase,
     generateUniqueId,
     onDone: () => setShowPasteArea(false),
+    onLanguageDetected: chooseRecipeLanguage,
   });
 
   // Unsaved changes detection
@@ -154,7 +196,7 @@ const RecipeForm = ({
           <div className="relative flex w-full items-center justify-center">
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
-          {/* Same printed link as "Show original" on the recipe page */}
+          {/* Printed link, same as "Show original" on the recipe page */}
           {canSwitchEditVersion && (
             <div className="flex justify-center">
               <Button
@@ -177,19 +219,9 @@ const RecipeForm = ({
         </CardHeader>
 
         <CardContent className="flex flex-col gap-6">
-          {/* Translation Editing Notice */}
-          {isEditingTranslation && (
+          {editNoticeKey && (
             <Alert>
-              <AlertDescription>
-                {t("editing_translation_notice")}
-              </AlertDescription>
-            </Alert>
-          )}
-          {isEditingOriginal && (
-            <Alert>
-              <AlertDescription>
-                {t("editing_original_notice")}
-              </AlertDescription>
+              <AlertDescription>{t(editNoticeKey)}</AlertDescription>
             </Alert>
           )}
 
@@ -215,6 +247,7 @@ const RecipeForm = ({
                     onAutofill={handleAutofill}
                     onCancel={() => setShowPasteArea(false)}
                     categories={categories}
+                    targetLanguage={recipeLanguage}
                   />
                 ) : (
                   <Button
@@ -229,8 +262,11 @@ const RecipeForm = ({
                 ))}
 
               {/* Recipe Title and Servings */}
-              <FieldGroup className="grid gap-4 sm:grid-cols-[1fr_140px]">
-                <Field data-invalid={!!validationErrors.title}>
+              <FieldGroup className="grid grid-cols-[1fr_auto] gap-4 sm:grid-cols-[1fr_140px_auto]">
+                <Field
+                  className="col-span-2 sm:col-span-1"
+                  data-invalid={!!validationErrors.title}
+                >
                   <FieldLabel htmlFor="title">{t("recipe_title")}</FieldLabel>
                   <Input
                     id="title"
@@ -275,6 +311,26 @@ const RecipeForm = ({
                     data-enter-nav
                   />
                 </Field>
+
+                {/* Recipe language: a small toggle, rarely changed; locked like servings in translation mode */}
+                <Field className={isEditingTranslation ? "opacity-50" : ""}>
+                  <FieldLabel id="recipe-language-label">
+                    {t("recipe_language")}
+                  </FieldLabel>
+                  <ToggleGroup
+                    variant="outline"
+                    spacing={0}
+                    aria-labelledby="recipe-language-label"
+                    value={[recipeLanguage]}
+                    disabled={isEditingTranslation}
+                    onValueChange={(groupValue) => {
+                      if (groupValue[0]) chooseRecipeLanguage(groupValue[0]);
+                    }}
+                  >
+                    <ToggleGroupItem value="de">DE</ToggleGroupItem>
+                    <ToggleGroupItem value="en">EN</ToggleGroupItem>
+                  </ToggleGroup>
+                </Field>
               </FieldGroup>
 
               {/* Category */}
@@ -315,7 +371,7 @@ const RecipeForm = ({
                   ingredientSections={formData.ingredientSections}
                   validationErrors={validationErrors}
                   isEditingTranslation={isEditingTranslation}
-                  contentLanguage={contentLanguage}
+                  contentLanguage={formContentLanguage}
                   addSection={addSection}
                   addIngredient={addIngredient}
                   removeSection={removeSection}
@@ -523,6 +579,39 @@ const RecipeForm = ({
             <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
             <AlertDialogAction onClick={cancelNavigation}>
               {t("stay")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* The text looks like the other language */}
+      <AlertDialog
+        open={!!languageSuggestion}
+        onOpenChange={(open) => {
+          if (!open) resolveLanguageSuggestion(false);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("recipe_language_detected_title", {
+                language: t(`language_name_${languageSuggestion}`),
+              })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("recipe_language_detected_description", {
+                language: t(`language_name_${languageSuggestion}`),
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("recipe_language_detected_keep", {
+                language: t(`language_name_${recipeLanguage}`),
+              })}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => resolveLanguageSuggestion(true)}>
+              {t("recipe_language_detected_accept")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

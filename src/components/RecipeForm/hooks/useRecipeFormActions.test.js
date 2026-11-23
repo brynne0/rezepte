@@ -58,6 +58,9 @@ const setup = ({
   initialFormData = formData,
   initialRecipe = null,
   isEditingTranslation = false,
+  recipeLanguage,
+  getLanguageSuggestion,
+  onRecipeLanguageChange,
   validateForm = vi.fn(() => ({})),
   recipeActionsOverrides = {},
   queryClient = createTestQueryClient(),
@@ -90,6 +93,9 @@ const setup = ({
         setUploadingImageIds,
         initialRecipe,
         isEditingTranslation,
+        recipeLanguage,
+        getLanguageSuggestion,
+        onRecipeLanguageChange,
         validateForm,
         setInitialFormData,
       }),
@@ -170,6 +176,38 @@ describe("useRecipeFormActions", () => {
       expect(mockNavigate).toHaveBeenCalledWith(-1);
     });
 
+    test("saves a corrected language and re-saves ingredients with it", async () => {
+      const formData = buildFormData();
+      const { result, updateRecipeMock } = setup({
+        formData,
+        initialFormData: formData,
+        initialRecipe: { id: "recipe-1", original_language: "en" },
+        recipeLanguage: "de",
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      const [, payload] = updateRecipeMock.mock.calls[0];
+      expect(payload).toHaveProperty("original_language", "de");
+      expect(payload).toHaveProperty("ungroupedIngredients");
+    });
+
+    test("leaves the language out of the update when it is unchanged", async () => {
+      const { result, updateRecipeMock } = setup({
+        initialRecipe: { id: "recipe-1", original_language: "en" },
+        recipeLanguage: "en",
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      const [, payload] = updateRecipeMock.mock.calls[0];
+      expect(payload).not.toHaveProperty("original_language");
+    });
+
     test("omits ingredients and categories from the update payload when unchanged", async () => {
       const formData = buildFormData();
       const { result, updateRecipeMock } = setup({
@@ -244,6 +282,106 @@ describe("useRecipeFormActions", () => {
         type: "error",
       });
       expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    test("saves a new recipe in the language picked on the form", async () => {
+      const createRecipe = vi.fn().mockResolvedValue({ id: "new-id" });
+      const { result } = setup({
+        recipeLanguage: "de",
+        recipeActionsOverrides: { createRecipe },
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      expect(createRecipe).toHaveBeenCalledWith(
+        expect.objectContaining({ original_language: "de" }),
+        expect.any(Function)
+      );
+    });
+
+    describe("language check", () => {
+      test("asks before saving when the text looks like another language", async () => {
+        const createRecipe = vi.fn().mockResolvedValue({ id: "new-id" });
+        const { result } = setup({
+          recipeLanguage: "en",
+          getLanguageSuggestion: () => "de",
+          recipeActionsOverrides: { createRecipe },
+        });
+
+        await act(async () => {
+          await result.current.handleSubmit(fakeSubmitEvent());
+        });
+
+        expect(result.current.languageSuggestion).toBe("de");
+        expect(createRecipe).not.toHaveBeenCalled();
+      });
+
+      test("saves in the suggested language when accepted", async () => {
+        const createRecipe = vi.fn().mockResolvedValue({ id: "new-id" });
+        const onRecipeLanguageChange = vi.fn();
+        const { result } = setup({
+          recipeLanguage: "en",
+          getLanguageSuggestion: () => "de",
+          onRecipeLanguageChange,
+          recipeActionsOverrides: { createRecipe },
+        });
+
+        await act(async () => {
+          await result.current.handleSubmit(fakeSubmitEvent());
+        });
+        await act(async () => {
+          await result.current.resolveLanguageSuggestion(true);
+        });
+
+        expect(onRecipeLanguageChange).toHaveBeenCalledWith("de");
+        expect(createRecipe).toHaveBeenCalledWith(
+          expect.objectContaining({ original_language: "de" }),
+          expect.any(Function)
+        );
+      });
+
+      test("keeps the chosen language when declined, and doesn't ask again", async () => {
+        const createRecipe = vi.fn().mockResolvedValue({ id: "new-id" });
+        const getLanguageSuggestion = vi.fn(() => "de");
+        const { result } = setup({
+          recipeLanguage: "en",
+          getLanguageSuggestion,
+          recipeActionsOverrides: { createRecipe },
+        });
+
+        await act(async () => {
+          await result.current.handleSubmit(fakeSubmitEvent());
+        });
+        await act(async () => {
+          await result.current.resolveLanguageSuggestion(false);
+        });
+
+        expect(createRecipe).toHaveBeenCalledWith(
+          expect.objectContaining({ original_language: "en" }),
+          expect.any(Function)
+        );
+
+        await act(async () => {
+          await result.current.handleSubmit(fakeSubmitEvent());
+        });
+        expect(getLanguageSuggestion).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    test("falls back to the app language when no recipe language is given", async () => {
+      const createRecipe = vi.fn().mockResolvedValue({ id: "new-id" });
+      const { result } = setup({ recipeActionsOverrides: { createRecipe } });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      expect(createRecipe).toHaveBeenCalledWith(
+        expect.objectContaining({ original_language: "en" }),
+        expect.any(Function)
+      );
     });
 
     test("shows a duplicate-title validation error and scrolls to the field instead of a toast", async () => {

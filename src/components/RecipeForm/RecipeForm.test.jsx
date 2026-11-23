@@ -714,6 +714,112 @@ describe("RecipeForm", () => {
     });
   });
 
+  describe("Recipe Language", () => {
+    it("lets a new recipe switch language, starting with the app language", () => {
+      renderComponent();
+
+      expect(screen.getByText("recipe_language")).toBeInTheDocument();
+      expect(useRecipeForm).toHaveBeenLastCalledWith(
+        expect.objectContaining({ recipeLanguage: "en" })
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "DE" }));
+
+      expect(useRecipeForm).toHaveBeenLastCalledWith(
+        expect.objectContaining({ recipeLanguage: "de" })
+      );
+    });
+
+    it("lets an existing recipe's language be corrected, warning about the translation", () => {
+      renderComponent({ initialRecipe: { id: "r1", original_language: "en" } });
+
+      expect(useRecipeForm).toHaveBeenLastCalledWith(
+        expect.objectContaining({ recipeLanguage: "en" })
+      );
+      expect(
+        screen.queryByText("recipe_language_changed_notice")
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "DE" }));
+
+      expect(useRecipeForm).toHaveBeenLastCalledWith(
+        expect.objectContaining({ recipeLanguage: "de" })
+      );
+      expect(
+        screen.getByText("recipe_language_changed_notice")
+      ).toBeInTheDocument();
+    });
+
+    it("shows the recipe's language but locked while editing your translation", () => {
+      renderComponent({
+        initialRecipe: { id: "r1", original_language: "de" },
+        isEditingTranslation: true,
+      });
+
+      expect(screen.getByText("recipe_language")).toBeInTheDocument();
+      const de = screen.getByRole("button", { name: "DE" });
+      expect(de).toHaveAttribute("aria-pressed", "true");
+      expect(de).toBeDisabled();
+      expect(screen.getByRole("button", { name: "EN" })).toBeDisabled();
+    });
+
+    it("suggests the other language only for new recipes with clear text", () => {
+      const germanText = {
+        ...mockFormData,
+        title: "Linsensuppe",
+        instructions: [
+          "Die Zwiebel mit dem Öl in einem Topf anbraten und dann die Linsen zugeben.",
+          "Mit der Brühe etwa 20 Minuten kochen.",
+        ],
+      };
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        formData: germanText,
+      });
+      renderComponent();
+
+      const { getLanguageSuggestion } = useRecipeForm.mock.lastCall[0];
+      expect(getLanguageSuggestion()).toBe("de");
+    });
+
+    it("does not suggest a language once one was picked", () => {
+      const germanText = {
+        ...mockFormData,
+        instructions: [
+          "Die Zwiebel mit dem Öl in einem Topf anbraten und dann die Linsen zugeben.",
+        ],
+      };
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        formData: germanText,
+      });
+      renderComponent();
+
+      fireEvent.click(screen.getByRole("button", { name: "DE" }));
+      fireEvent.click(screen.getByRole("button", { name: "EN" }));
+
+      const { getLanguageSuggestion } = useRecipeForm.mock.lastCall[0];
+      expect(getLanguageSuggestion()).toBeNull();
+    });
+
+    it("asks with Yes / No when the hook has a suggestion", () => {
+      const resolveLanguageSuggestion = vi.fn();
+      useRecipeForm.mockReturnValue({
+        ...mockHookReturn,
+        languageSuggestion: "de",
+        resolveLanguageSuggestion,
+      });
+      renderComponent();
+
+      expect(
+        screen.getByText("recipe_language_detected_title")
+      ).toBeInTheDocument();
+      fireEvent.click(screen.getByText("recipe_language_detected_accept"));
+
+      expect(resolveLanguageSuggestion).toHaveBeenCalledWith(true);
+    });
+  });
+
   describe("Edit Version Toggle", () => {
     it("is hidden for a recipe in your own language", () => {
       renderComponent({ onSwitchEditVersion: vi.fn() });

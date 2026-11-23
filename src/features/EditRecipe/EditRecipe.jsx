@@ -56,7 +56,6 @@ const EditRecipePage = ({ categories }) => {
       title={t("edit_recipe")}
       isEditingTranslation={isEditingTranslation}
       isEditingOriginal={editOriginal && isForeignRecipe}
-      contentLanguage={recipeLanguage}
       onSwitchEditVersion={(version) =>
         setSearchParams(version === "original" ? { original: "1" } : {}, {
           replace: true,

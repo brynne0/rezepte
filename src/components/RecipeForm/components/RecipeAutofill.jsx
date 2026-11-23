@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
+const RecipeAutofill = ({
+  onAutofill,
+  onCancel,
+  categories = [],
+  targetLanguage,
+}) => {
   const { t, i18n } = useTranslation();
   const [pastedText, setPastedText] = useState("");
   const [isParsing, setIsParsing] = useState(false);
@@ -79,7 +84,8 @@ const RecipeAutofill = ({ onAutofill, onCancel, categories = [] }) => {
           pastedText: isUrlInput ? null : trimmedText,
           recipeUrl: isUrlInput ? trimmedText : null,
           availableCategories: availableCategories,
-          language: i18n.language?.split("-")[0] || "en",
+          // Used only when the source isn't English or German
+          language: targetLanguage || i18n.language?.split("-")[0] || "en",
         }),
       });
 

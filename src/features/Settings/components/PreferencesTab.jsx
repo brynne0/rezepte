@@ -59,6 +59,7 @@ const PreferencesTab = ({
         <span className="font-medium">{t("appearance")}</span>
         <ToggleGroup
           variant="outline"
+          spacing={0}
           aria-label={t("appearance")}
           value={[theme]}
           onValueChange={(groupValue) => {
@@ -84,6 +85,7 @@ const PreferencesTab = ({
         <span className="font-medium">{t("preferred_language")}</span>
         <ToggleGroup
           variant="outline"
+          spacing={0}
           aria-label={t("preferred_language")}
           value={[profileData?.preferred_language || "en"]}
           onValueChange={(groupValue) => {

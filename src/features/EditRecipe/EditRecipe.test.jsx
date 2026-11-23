@@ -47,7 +47,6 @@ vi.mock("../../components/RecipeForm/RecipeForm", () => ({
       categories,
       isEditingTranslation,
       isEditingOriginal,
-      contentLanguage,
       onSwitchEditVersion,
     }) => (
       <div
@@ -55,7 +54,6 @@ vi.mock("../../components/RecipeForm/RecipeForm", () => ({
         data-categories={categories ? JSON.stringify(categories) : undefined}
         data-is-editing-translation={isEditingTranslation}
         data-is-editing-original={isEditingOriginal}
-        data-content-language={contentLanguage}
       >
         {title}
         <button onClick={() => onSwitchEditVersion("original")}>
@@ -153,7 +151,6 @@ describe("EditRecipePage", () => {
         "false"
       );
       expect(recipeForm).toHaveAttribute("data-is-editing-original", "true");
-      expect(recipeForm).toHaveAttribute("data-content-language", "de");
     });
 
     it("edits the translation by default for a recipe in another language", () => {

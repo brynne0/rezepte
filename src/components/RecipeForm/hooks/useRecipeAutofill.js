@@ -4,8 +4,14 @@ export const useRecipeAutofill = ({
   toTitleCase,
   generateUniqueId,
   onDone,
+  onLanguageDetected,
 }) => {
   const handleAutofill = (parsed) => {
+    // The recipe stays in its source language when it's English or German
+    if (parsed.language) {
+      onLanguageDetected?.(parsed.language);
+    }
+
     // Clear existing form data first
     setFormData((prev) => ({
       ...prev,

@@ -34,6 +34,24 @@ const setup = (overrides = {}) => {
 };
 
 describe("useRecipeAutofill", () => {
+  test("reports the detected recipe language", () => {
+    const onLanguageDetected = vi.fn();
+    const { handleAutofill } = setup({ onLanguageDetected });
+
+    handleAutofill({ language: "de", title: "Linsensuppe" });
+
+    expect(onLanguageDetected).toHaveBeenCalledWith("de");
+  });
+
+  test("leaves the language alone when none is reported", () => {
+    const onLanguageDetected = vi.fn();
+    const { handleAutofill } = setup({ onLanguageDetected });
+
+    handleAutofill({ title: "Soup" });
+
+    expect(onLanguageDetected).not.toHaveBeenCalled();
+  });
+
   test("clears existing form fields before applying parsed data", () => {
     const { handleAutofill, getFormData } = setup();
 

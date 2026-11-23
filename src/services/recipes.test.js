@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 
+import { updateRecipeTranslations } from "./recipeTranslationService";
 vi.mock("./recipeTranslationService", () => ({
   updateRecipeTranslations: vi.fn(),
   translateText: vi.fn((text) => Promise.resolve(text)),
@@ -486,6 +487,31 @@ describe("recipes service", () => {
       // Only the two calls above - no recipe_ingredients or
       // recipe_categories touched since neither field was provided
       expect(supabase.from).toHaveBeenCalledTimes(2);
+    });
+
+    test("a corrected language clears translations instead of updating them", async () => {
+      const updateBuilder = makeQueryBuilder({
+        data: { id: "r1", title: "Suppe" },
+        error: null,
+      });
+      supabase.from
+        .mockReturnValueOnce(
+          makeQueryBuilder({
+            data: { title: "Suppe", images: [] },
+            error: null,
+          })
+        )
+        .mockReturnValueOnce(updateBuilder);
+
+      await updateRecipe("r1", { title: "Suppe", original_language: "de" });
+
+      expect(updateBuilder.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          original_language: "de",
+          translated_recipe: null,
+        })
+      );
+      expect(updateRecipeTranslations).not.toHaveBeenCalled();
     });
 
     test("throws when the recipe update fails", async () => {

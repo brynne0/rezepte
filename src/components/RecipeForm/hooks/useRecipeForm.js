@@ -39,6 +39,9 @@ export const useRecipeForm = (options) => {
     setUploadingImageIds: formState.setUploadingImageIds,
     initialRecipe: options.initialRecipe,
     isEditingTranslation: options.isEditingTranslation,
+    recipeLanguage: options.recipeLanguage,
+    getLanguageSuggestion: options.getLanguageSuggestion,
+    onRecipeLanguageChange: options.onRecipeLanguageChange,
     validateForm: validation.validateForm,
     setInitialFormData: formState.setInitialFormData,
   });
@@ -91,5 +94,7 @@ export const useRecipeForm = (options) => {
     showCategoryConfirm: actions.showCategoryConfirm,
     confirmSaveWithoutCategory: actions.confirmSaveWithoutCategory,
     cancelCategoryConfirm: actions.cancelCategoryConfirm,
+    languageSuggestion: actions.languageSuggestion,
+    resolveLanguageSuggestion: actions.resolveLanguageSuggestion,
   };
 };

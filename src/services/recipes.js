@@ -1024,9 +1024,19 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
     }).filter(([, v]) => v !== undefined)
   );
 
+  // A corrected language makes every saved translation wrong, so they're rebuilt
+  const languageChanged = recipeData.original_language !== undefined;
   const { data: recipe, error: recipeError } = await supabase
     .from("recipes")
-    .update(cleanRecipeData)
+    .update(
+      languageChanged
+        ? {
+            ...cleanRecipeData,
+            original_language: recipeData.original_language,
+            translated_recipe: null,
+          }
+        : cleanRecipeData
+    )
     .eq("id", id)
     .select()
     .single();
@@ -1039,7 +1049,9 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
   reportProgress("recipe", 1, 1);
 
   // Smart update translations based on what changed
-  await updateRecipeTranslations(id, originalRecipe, cleanRecipeData);
+  if (!languageChanged) {
+    await updateRecipeTranslations(id, originalRecipe, cleanRecipeData);
+  }
 
   // Omitted fields mean "unchanged" - leave existing ingredients as-is
   if (

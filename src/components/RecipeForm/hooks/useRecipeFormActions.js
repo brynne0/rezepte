@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import {
   buildNutritionColumns,
@@ -53,6 +53,9 @@ export const useRecipeFormActions = ({
   setUploadingImageIds,
   initialRecipe,
   isEditingTranslation,
+  recipeLanguage,
+  getLanguageSuggestion,
+  onRecipeLanguageChange,
   validateForm,
   setInitialFormData,
 }) => {
@@ -184,6 +187,15 @@ export const useRecipeFormActions = ({
   // Confirmed saving without a category, for this session
   const categoryConfirmedRef = useRef(false);
   const [showCategoryConfirm, setShowCategoryConfirm] = useState(false);
+
+  // Language the recipe is saved in; a ref so an answer applies to this save
+  const languageRef = useRef(recipeLanguage);
+  useEffect(() => {
+    languageRef.current = recipeLanguage;
+  }, [recipeLanguage]);
+  // Asked at most once per form, and only when the text looks like the other language
+  const languageCheckedRef = useRef(false);
+  const [languageSuggestion, setLanguageSuggestion] = useState(null);
 
   // Called directly, or after confirming a no-category save
   const performSubmit = useCallback(async () => {
@@ -331,7 +343,14 @@ export const useRecipeFormActions = ({
             JSON.stringify(normaliseCategories(initialFormData.categories));
 
           const updateData = { ...recipeData };
-          if (ingredientsUnchanged) {
+          // A corrected language re-saves ingredients so they're matched in that language
+          const languageChanged =
+            !!languageRef.current &&
+            languageRef.current !== (initialRecipe.original_language || "en");
+          if (languageChanged) {
+            updateData.original_language = languageRef.current;
+          }
+          if (ingredientsUnchanged && !languageChanged) {
             delete updateData.ungroupedIngredients;
             delete updateData.ingredientSections;
           }
@@ -346,9 +365,9 @@ export const useRecipeFormActions = ({
           );
         }
       } else {
-        // Create mode - set original_language based on current UI language
-        const currentLanguage = i18n.language?.split("-")[0] || "en";
-        recipeData.original_language = currentLanguage;
+        // Create mode - the language picked on the form, else the app language
+        recipeData.original_language =
+          languageRef.current || i18n.language?.split("-")[0] || "en";
 
         result = await createRecipe(recipeData, handleSubmitProgress);
       }
@@ -424,6 +443,20 @@ export const useRecipeFormActions = ({
     i18n,
   ]);
 
+  // Remaining checks after validation, then save
+  const continueSubmit = useCallback(async () => {
+    if (
+      !isEditingTranslation &&
+      (formData.categories?.length ?? 0) === 0 &&
+      !categoryConfirmedRef.current
+    ) {
+      setShowCategoryConfirm(true);
+      return;
+    }
+
+    await performSubmit();
+  }, [formData, isEditingTranslation, performSubmit]);
+
   // Handle form submission
   const handleSubmit = useCallback(
     async (e) => {
@@ -445,25 +478,38 @@ export const useRecipeFormActions = ({
       // Clear validation errors if form is valid
       setValidationErrors({});
 
-      if (
-        !isEditingTranslation &&
-        (formData.categories?.length ?? 0) === 0 &&
-        !categoryConfirmedRef.current
-      ) {
-        setShowCategoryConfirm(true);
-        return;
+      if (!languageCheckedRef.current) {
+        const suggestion = getLanguageSuggestion?.();
+        if (suggestion) {
+          setLanguageSuggestion(suggestion);
+          return;
+        }
       }
 
-      await performSubmit();
+      await continueSubmit();
     },
     [
       loading,
-      formData,
-      isEditingTranslation,
       validateForm,
       setValidationErrors,
-      performSubmit,
+      getLanguageSuggestion,
+      continueSubmit,
     ]
+  );
+
+  // Answer to "this looks like another language": switch to it or keep the current one
+  const resolveLanguageSuggestion = useCallback(
+    async (accept) => {
+      languageCheckedRef.current = true;
+      const suggestion = languageSuggestion;
+      setLanguageSuggestion(null);
+      if (accept && suggestion) {
+        languageRef.current = suggestion;
+        onRecipeLanguageChange?.(suggestion);
+      }
+      await continueSubmit();
+    },
+    [languageSuggestion, onRecipeLanguageChange, continueSubmit]
   );
 
   // Confirm saving the recipe without a category
@@ -514,5 +560,7 @@ export const useRecipeFormActions = ({
     showCategoryConfirm,
     confirmSaveWithoutCategory,
     cancelCategoryConfirm,
+    languageSuggestion,
+    resolveLanguageSuggestion,
   };
 };
