@@ -84,6 +84,7 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
   const translatedResult = {
     ...recipe,
     ...translatedRecipeData,
+    nutrition: await getTranslatedNutrition(recipe, targetLanguage),
     isTranslated: true,
     translatedFrom: recipe.original_language,
   };
@@ -99,27 +100,17 @@ export const getTranslatedRecipe = async (recipe, targetLanguage) => {
 
   // Handle ingredient sections
   if (recipe.ingredientSections) {
+    const subheadings = await getTranslatedSubheadings(recipe, targetLanguage);
     translatedResult.ingredientSections = await Promise.all(
-      recipe.ingredientSections.map(async (section) => {
-        const translatedIngredients = await getTranslatedIngredients(
+      recipe.ingredientSections.map(async (section, i) => ({
+        ...section,
+        subheading: subheadings[i] || section.subheading,
+        ingredients: await getTranslatedIngredients(
           section.ingredients,
           targetLanguage,
           recipe.original_language
-        );
-        // Translate the section subheading with food context
-        const translatedSubheading = section.subheading
-          ? await translateText(
-              section.subheading,
-              targetLanguage,
-              "Food section"
-            )
-          : section.subheading;
-        return {
-          ...section,
-          subheading: translatedSubheading,
-          ingredients: translatedIngredients,
-        };
-      })
+        ),
+      }))
     );
   }
 
@@ -217,6 +208,99 @@ const rebuildSource = (sourceParts, sourceTextParts, translatedParts) => {
 const sourceLinksIntact = (originalSource, cachedSource) => {
   const urls = splitTextAndUrls(originalSource).filter((part) => part.isUrl);
   return urls.every((url) => cachedSource?.includes(url.text));
+};
+
+// Short texts saved on their own, each with the originals they came from
+const SAVED_TEXT_KEYS = ["nutrition_labels", "section_subheadings"];
+const keepSavedTexts = (translation) =>
+  Object.fromEntries(
+    SAVED_TEXT_KEYS.filter((key) => translation?.[key]).map((key) => [
+      key,
+      translation[key],
+    ])
+  );
+
+// Translates short texts once and saves them next to their originals, so they're
+// only translated again after an original changes. Null when there's nothing to
+// translate or translation failed.
+const getSavedTextTranslations = async (
+  recipe,
+  targetLanguage,
+  key,
+  texts,
+  context = null
+) => {
+  if (!texts.some((text) => text?.trim())) return null;
+
+  const saved = recipe.translated_recipe?.[targetLanguage]?.[key];
+  if (saved && JSON.stringify(saved.source) === JSON.stringify(texts)) {
+    return saved.translated;
+  }
+
+  let failed = false;
+  const onFailure = () => {
+    failed = true;
+  };
+  const translated = await Promise.all(
+    texts.map((text) =>
+      text?.trim()
+        ? translateText(
+            text,
+            targetLanguage,
+            context,
+            recipe.original_language || "en",
+            onFailure
+          )
+        : text
+    )
+  );
+  if (failed) return null;
+
+  await mergeTranslatedField(
+    "recipes",
+    recipe.id,
+    "translated_recipe",
+    targetLanguage,
+    (existing) => ({ ...existing, [key]: { source: texts, translated } })
+  );
+  return translated;
+};
+
+// Nutrition with its column labels ("pro Portion") translated
+export const getTranslatedNutrition = async (recipe, targetLanguage) => {
+  const nutrition = recipe.nutrition;
+  if (!nutrition?.columns) return nutrition;
+
+  const translated = await getSavedTextTranslations(
+    recipe,
+    targetLanguage,
+    "nutrition_labels",
+    nutrition.columns.map((col) => col.label || "")
+  );
+  if (!translated) return nutrition;
+
+  return {
+    ...nutrition,
+    columns: nutrition.columns.map((col, i) => ({
+      ...col,
+      label: translated[i] || col.label,
+    })),
+  };
+};
+
+// Ingredient section headings ("Für den Teig"), translated once and saved
+export const getTranslatedSubheadings = async (recipe, targetLanguage) => {
+  const subheadings = (recipe.ingredientSections || []).map(
+    (section) => section.subheading || ""
+  );
+  const translated = await getSavedTextTranslations(
+    recipe,
+    targetLanguage,
+    "section_subheadings",
+    subheadings,
+    "Food section"
+  );
+  return translated || subheadings;
 };
 
 // Get translated recipe data (title, instructions, notes, category, source)
@@ -534,7 +618,8 @@ const saveRecipeTranslationToStorage = (recipeId, language, translatedData) => {
     recipeId,
     "translated_recipe",
     language,
-    () => cleanTranslatedData
+    // Keep saved short texts; they're checked against the originals on read
+    (existing) => ({ ...cleanTranslatedData, ...keepSavedTexts(existing) })
   );
 };
 
@@ -636,7 +721,18 @@ export const updateRecipeTranslations = async (
                 : translation.instructions,
             ]);
 
-          return [language, { title, category, notes, source, instructions }];
+          return [
+            language,
+            {
+              title,
+              category,
+              notes,
+              source,
+              instructions,
+              // Re-checked against their originals when the recipe is read
+              ...keepSavedTexts(translation),
+            },
+          ];
         }
       )
     );

@@ -2,6 +2,8 @@ import { describe, test, expect, beforeEach, vi } from "vitest";
 import {
   getTranslatedRecipe,
   getTranslatedRecipeTitle,
+  getTranslatedNutrition,
+  getTranslatedSubheadings,
   translateIngredientNames,
   normaliseInstructions,
 } from "./recipeTranslationService";
@@ -794,6 +796,143 @@ describe("Translation Service", () => {
       );
 
       expect(names).toBeNull();
+      expect(supabase.from).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Nutrition Column Labels", () => {
+    const recipeWithLabels = (translated_recipe) => ({
+      id: "recipe-n",
+      original_language: "de",
+      nutrition: {
+        columns: [
+          { label: "pro Portion", calories: 300 },
+          { label: "", calories: 100 },
+        ],
+      },
+      translated_recipe,
+    });
+
+    test("leaves nutrition alone when no column has a label", async () => {
+      const recipe = {
+        id: "r",
+        original_language: "de",
+        nutrition: { columns: [{ label: "", calories: 1 }] },
+      };
+
+      expect(await getTranslatedNutrition(recipe, "en")).toBe(recipe.nutrition);
+      expect(supabase.functions.invoke).not.toHaveBeenCalled();
+    });
+
+    test("uses saved labels while the originals are unchanged", async () => {
+      const result = await getTranslatedNutrition(
+        recipeWithLabels({
+          en: {
+            nutrition_labels: {
+              source: ["pro Portion", ""],
+              translated: ["per serving", ""],
+            },
+          },
+        }),
+        "en"
+      );
+
+      expect(result.columns.map((c) => c.label)).toEqual(["per serving", ""]);
+      expect(result.columns[0].calories).toBe(300);
+      expect(supabase.functions.invoke).not.toHaveBeenCalled();
+    });
+
+    test("translates again and saves when a label was edited", async () => {
+      supabase.functions.invoke.mockResolvedValueOnce({
+        data: { translatedText: "per serving" },
+        error: null,
+      });
+
+      const result = await getTranslatedNutrition(
+        recipeWithLabels({
+          en: {
+            nutrition_labels: {
+              source: ["pro Stück", ""],
+              labels: ["each", ""],
+            },
+          },
+        }),
+        "en"
+      );
+
+      expect(result.columns[0].label).toBe("per serving");
+      expect(supabase.from).toHaveBeenCalledWith("recipes");
+    });
+
+    test("keeps the original labels when translation fails", async () => {
+      supabase.functions.invoke.mockResolvedValueOnce({
+        data: null,
+        error: { message: "offline" },
+      });
+      const recipe = recipeWithLabels(undefined);
+
+      expect(await getTranslatedNutrition(recipe, "en")).toBe(recipe.nutrition);
+      expect(supabase.from).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Section Headings", () => {
+    const recipeWithSections = (translated_recipe) => ({
+      id: "recipe-s",
+      original_language: "de",
+      ingredientSections: [
+        { subheading: "Für den Teig", ingredients: [] },
+        { subheading: "", ingredients: [] },
+      ],
+      translated_recipe,
+    });
+
+    test("reuses saved headings instead of translating on every view", async () => {
+      const headings = await getTranslatedSubheadings(
+        recipeWithSections({
+          en: {
+            section_subheadings: {
+              source: ["Für den Teig", ""],
+              translated: ["For the dough", ""],
+            },
+          },
+        }),
+        "en"
+      );
+
+      expect(headings).toEqual(["For the dough", ""]);
+      expect(supabase.functions.invoke).not.toHaveBeenCalled();
+    });
+
+    test("translates and saves headings the first time", async () => {
+      supabase.functions.invoke.mockResolvedValueOnce({
+        data: { translatedText: "For the dough" },
+        error: null,
+      });
+
+      const headings = await getTranslatedSubheadings(
+        recipeWithSections(undefined),
+        "en"
+      );
+
+      expect(headings).toEqual(["For the dough", ""]);
+      // Only the one non-empty heading is sent
+      expect(supabase.functions.invoke).toHaveBeenCalledTimes(1);
+      expect(supabase.from).toHaveBeenCalledWith("recipes");
+    });
+
+    test("keeps the original headings when translation fails", async () => {
+      supabase.functions.invoke.mockResolvedValueOnce({
+        data: null,
+        error: { message: "offline" },
+      });
+
+      const headings = await getTranslatedSubheadings(
+        recipeWithSections(undefined),
+        "en"
+      );
+
+      expect(headings).toEqual(["Für den Teig", ""]);
       expect(supabase.from).not.toHaveBeenCalled();
     });
   });
