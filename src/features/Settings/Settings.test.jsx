@@ -192,32 +192,28 @@ describe("Settings", () => {
       });
     });
 
-    it("enables editing both fields when edit button is clicked", () => {
-      const firstNameInput = screen.getByDisplayValue("John");
-      const usernameInput = screen.getByDisplayValue("johndoe");
-      expect(firstNameInput).toHaveAttribute("readonly");
-      expect(usernameInput).toHaveAttribute("readonly");
-
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
-
-      expect(firstNameInput).not.toHaveAttribute("readonly");
-      expect(usernameInput).not.toHaveAttribute("readonly");
+    it("lets both fields be edited straight away", () => {
+      expect(screen.getByDisplayValue("John")).not.toHaveAttribute("readonly");
+      expect(screen.getByDisplayValue("johndoe")).not.toHaveAttribute(
+        "readonly"
+      );
     });
 
-    it("shows save and cancel buttons when editing", () => {
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
+    it("enables save and cancel only once something changes", () => {
+      const save = screen.getByRole("button", { name: "save_changes" });
+      const cancel = screen.getByRole("button", { name: "cancel" });
+      expect(save).toBeDisabled();
+      expect(cancel).toBeDisabled();
 
-      expect(
-        screen.getByRole("button", { name: "save_changes" })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "cancel" })
-      ).toBeInTheDocument();
+      fireEvent.change(screen.getByDisplayValue("John"), {
+        target: { value: "Jane" },
+      });
+
+      expect(save).toBeEnabled();
+      expect(cancel).toBeEnabled();
     });
 
     it("updates first name and username together", async () => {
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
-
       fireEvent.change(screen.getByDisplayValue("John"), {
         target: { value: "Jane" },
       });
@@ -241,8 +237,6 @@ describe("Settings", () => {
     });
 
     it("does not re-check username when it is unchanged", async () => {
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
-
       fireEvent.change(screen.getByDisplayValue("John"), {
         target: { value: "Jane" },
       });
@@ -262,8 +256,6 @@ describe("Settings", () => {
     it("shows error when username already exists", async () => {
       mockCheckUsernameExists.mockResolvedValue(true);
 
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
-
       fireEvent.change(screen.getByDisplayValue("johndoe"), {
         target: { value: "existinguser" },
       });
@@ -279,8 +271,6 @@ describe("Settings", () => {
 
     it("clears username error when user types", async () => {
       mockCheckUsernameExists.mockResolvedValue(true);
-
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
       const usernameInput = screen.getByDisplayValue("johndoe");
       fireEvent.change(usernameInput, { target: { value: "existinguser" } });
@@ -299,16 +289,14 @@ describe("Settings", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("cancels editing when cancel button is clicked", () => {
+    it("reverts changes when cancel button is clicked", () => {
       const firstNameInput = screen.getByDisplayValue("John");
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
       fireEvent.click(screen.getByRole("button", { name: "cancel" }));
 
       expect(firstNameInput).toHaveValue("John");
-      expect(firstNameInput).toHaveAttribute("readonly");
     });
   });
 
@@ -542,7 +530,6 @@ describe("Settings", () => {
 
       // Trigger a successful update
       const firstNameInput = screen.getByDisplayValue("John");
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
@@ -568,7 +555,6 @@ describe("Settings", () => {
       });
 
       const firstNameInput = screen.getByDisplayValue("John");
-      fireEvent.click(screen.getByRole("button", { name: "edit_profile" }));
 
       fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 

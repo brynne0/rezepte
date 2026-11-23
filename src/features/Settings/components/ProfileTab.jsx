@@ -1,4 +1,3 @@
-import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -13,7 +12,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -23,13 +22,11 @@ import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 
 const ProfileTab = ({
   profileData,
-  isEditingProfile,
-  tempFirstName,
-  tempUsername,
+  firstName,
+  username,
   usernameError,
-  firstNameInputRef,
-  profileContainerRef,
-  handleEditProfile,
+  hasUnsavedChanges,
+  isSaving,
   handleSaveProfile,
   handleCancelProfile,
   handleChangePassword,
@@ -42,42 +39,50 @@ const ProfileTab = ({
 }) => {
   const isOnline = useOnlineStatus();
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSaveProfile();
-    } else if (e.key === "Escape") {
-      handleCancelProfile();
-    }
+    if (e.key === "Escape") handleCancelProfile();
   };
 
-  return (
-    <div ref={profileContainerRef} className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold">{t("profile")}</h2>
-        {!isEditingProfile && (
-          <Button variant="ghost" size="sm" onClick={handleEditProfile}>
-            <Pencil />
-            {t("edit_profile")}
-          </Button>
-        )}
-      </div>
+  const deleteButton = (
+    <Button
+      type="button"
+      variant="destructive"
+      className="w-full sm:mr-auto sm:w-auto"
+      onClick={handleDeleteAccount}
+      disabled={!isOnline}
+    >
+      {t("delete_account")}
+    </Button>
+  );
 
-      <FieldGroup className="grid gap-4 sm:grid-cols-2">
+  const saveButton = (
+    <Button
+      type="submit"
+      className="w-full sm:w-auto"
+      disabled={!hasUnsavedChanges || isSaving || !isOnline}
+    >
+      {isSaving && <Spinner />}
+      {t("save_changes")}
+    </Button>
+  );
+
+  return (
+    // Same layout as the recipe form: fields, then one action row
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSaveProfile();
+      }}
+    >
+      <FieldGroup className="grid gap-6 sm:grid-cols-2 sm:gap-4">
         <Field>
           <FieldLabel htmlFor="first_name">{t("first_name")}</FieldLabel>
           <Input
-            ref={firstNameInputRef}
             id="first_name"
             type="text"
-            value={
-              isEditingProfile ? tempFirstName : profileData?.first_name || ""
-            }
-            onChange={
-              isEditingProfile
-                ? (e) => setTempFirstName(e.target.value)
-                : undefined
-            }
-            onKeyDown={isEditingProfile ? handleKeyDown : undefined}
-            readOnly={!isEditingProfile}
+            value={firstName}
+            onChange={(e) => setTempFirstName(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </Field>
 
@@ -86,20 +91,13 @@ const ProfileTab = ({
           <Input
             id="username"
             type="text"
-            value={
-              isEditingProfile ? tempUsername : profileData?.username || ""
-            }
-            onChange={
-              isEditingProfile
-                ? (e) => {
-                    setTempUsername(e.target.value);
-                    setUsernameError("");
-                  }
-                : undefined
-            }
-            onKeyDown={isEditingProfile ? handleKeyDown : undefined}
+            value={username}
+            onChange={(e) => {
+              setTempUsername(e.target.value);
+              setUsernameError("");
+            }}
+            onKeyDown={handleKeyDown}
             aria-invalid={!!usernameError}
-            readOnly={!isEditingProfile}
           />
           <FieldError>{usernameError}</FieldError>
         </Field>
@@ -112,13 +110,9 @@ const ProfileTab = ({
               type="email"
               value={profileData?.email || ""}
               readOnly
-              disabled={isEditingProfile}
             />
             <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                onClick={handleChangeEmail}
-                disabled={isEditingProfile}
-              >
+              <InputGroupButton type="button" onClick={handleChangeEmail}>
                 {t("change_email")}
               </InputGroupButton>
             </InputGroupAddon>
@@ -133,13 +127,9 @@ const ProfileTab = ({
               type="password"
               value="**************"
               readOnly
-              disabled={isEditingProfile}
             />
             <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                onClick={handleChangePassword}
-                disabled={isEditingProfile}
-              >
+              <InputGroupButton type="button" onClick={handleChangePassword}>
                 {t("change_password")}
               </InputGroupButton>
             </InputGroupAddon>
@@ -147,43 +137,34 @@ const ProfileTab = ({
         </Field>
       </FieldGroup>
 
-      {isEditingProfile && (
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button
-            className="w-full sm:w-auto"
-            variant="outline"
-            onClick={handleCancelProfile}
-          >
-            {t("cancel")}
-          </Button>
-          <Button className="w-full sm:w-auto" onClick={handleSaveProfile}>
-            {t("save_changes")}
-          </Button>
-        </div>
-      )}
-
-      <Separator />
-
-      <div className="flex justify-center">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                className="w-full sm:w-auto"
-                variant="destructive"
-                onClick={handleDeleteAccount}
-                disabled={!isOnline}
-              >
-                {t("delete_account")}
-              </Button>
-            }
-          />
-          <TooltipContent>
-            {isOnline ? t("delete_account") : t("action_requires_internet")}
-          </TooltipContent>
-        </Tooltip>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        {isOnline ? (
+          deleteButton
+        ) : (
+          <Tooltip>
+            <TooltipTrigger render={deleteButton} />
+            <TooltipContent>{t("action_requires_internet")}</TooltipContent>
+          </Tooltip>
+        )}
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full sm:w-auto"
+          onClick={handleCancelProfile}
+          disabled={!hasUnsavedChanges || isSaving}
+        >
+          {t("cancel")}
+        </Button>
+        {isOnline ? (
+          saveButton
+        ) : (
+          <Tooltip>
+            <TooltipTrigger render={saveButton} />
+            <TooltipContent>{t("action_requires_internet")}</TooltipContent>
+          </Tooltip>
+        )}
       </div>
-    </div>
+    </form>
   );
 };
 

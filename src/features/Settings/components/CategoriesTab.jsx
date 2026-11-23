@@ -40,6 +40,7 @@ import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import {
   Tooltip,
   TooltipContent,
@@ -56,7 +57,6 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
     () => allCategories.filter((category) => category.value !== "all_recipes"),
     [allCategories]
   );
-  const [isEditingCategories, setIsEditingCategories] = useState(false);
   const [categoryPreferences, setCategoryPreferences] = useState([]);
   const [originalCategoryPreferences, setOriginalCategoryPreferences] =
     useState([]);
@@ -191,7 +191,6 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
         title: t("category_preferences_saved"),
         type: "success",
       });
-      setIsEditingCategories(false);
     } catch (error) {
       console.error("Error saving category preferences:", error);
       toast.add({
@@ -210,7 +209,6 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
     setEditingCategoryId(null);
     setEditingCategoryName("");
     setCategoryError("");
-    setIsEditingCategories(false);
   };
 
   // Add new category
@@ -482,128 +480,105 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
         e.preventDefault();
       }}
     >
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{t("categories")}</h2>
-        {!isEditingCategories && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsEditingCategories(true)}
-            disabled={categoriesLoading}
-          >
-            <Pencil />
-            {t("edit_categories")}
-          </Button>
-        )}
-      </div>
-      <div className="-mt-4 flex items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
+      {/* Laid out like the recipe form's instructions list */}
+      <Field>
+        <FieldLabel>{t("categories")}</FieldLabel>
+        <FieldDescription>
           {t("category_management_description")}
-        </p>
-        {isEditingCategories && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddCategory}
-            disabled={isAddingCategory || editingCategoryId !== null}
-          >
-            <Plus size={16} />
-            {t("add_category")}
-          </Button>
-        )}
-      </div>
+        </FieldDescription>
 
-      {categoriesLoading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 rounded-lg border border-border bg-card p-2"
-            >
-              <Skeleton className="h-5 w-32" />
-            </div>
-          ))}
-        </div>
-      ) : categoryPreferences.length === 0 ? (
-        <Empty className="rounded-lg border border-border bg-card">
-          <EmptyHeader>
-            <EmptyMedia>
-              <Tag />
-            </EmptyMedia>
-            <EmptyTitle>{t("no_categories")}</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="categories">
-            {(provided, snapshot) => (
+        {categoriesLoading ? (
+          <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
+            {Array.from({ length: 8 }).map((_, index) => (
               <div
+                key={index}
                 className={cn(
-                  "flex flex-col gap-2 rounded-lg",
-                  snapshot.isDraggingOver && "bg-muted/50"
+                  "flex h-12 items-center gap-2 p-2",
+                  index > 0 && "border-t border-border"
                 )}
-                {...provided.droppableProps}
-                ref={provided.innerRef}
               >
-                {categoryPreferences.map((category, index) => (
-                  <Draggable
-                    key={category.id}
-                    draggableId={category.id.toString()}
-                    index={index}
-                    isDragDisabled={!isEditingCategories}
-                  >
-                    {(provided, snapshot) => (
-                      <div className="flex flex-col">
+                <Skeleton className="h-5 w-32" />
+              </div>
+            ))}
+          </div>
+        ) : categoryPreferences.length === 0 ? (
+          <Empty className="rounded-lg border border-border bg-card">
+            <EmptyHeader>
+              <EmptyMedia>
+                <Tag />
+              </EmptyMedia>
+              <EmptyTitle>{t("no_categories")}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="categories">
+              {(provided, snapshot) => (
+                <div
+                  className={cn(
+                    "flex flex-col overflow-hidden rounded-lg border border-border bg-card",
+                    snapshot.isDraggingOver && "bg-muted/50"
+                  )}
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {categoryPreferences.map((category, index) => (
+                    <Draggable
+                      key={category.id}
+                      draggableId={category.id.toString()}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           className={cn(
-                            "flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-2 transition-colors",
-                            snapshot.isDragging && "shadow-md"
+                            "flex flex-col gap-1 p-2 transition-colors",
+                            index > 0 && "border-t border-border",
+                            snapshot.isDragging &&
+                              "rounded-lg border border-border bg-card shadow-md"
                           )}
                         >
-                          {isEditingCategories && (
+                          <div className="flex min-h-8 items-center gap-2">
                             <div
                               {...provided.dragHandleProps}
+                              data-slot="drag-handle"
                               className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
                             >
                               <GripVertical size={16} />
                             </div>
-                          )}
 
-                          <div className="flex flex-1 items-center gap-2">
-                            {editingCategoryId === category.id ? (
-                              <Input
-                                type="text"
-                                value={editingCategoryName}
-                                onChange={(e) => {
-                                  setEditingCategoryName(e.target.value);
-                                  setCategoryError("");
-                                }}
-                                aria-invalid={
-                                  !!categoryError &&
-                                  editingCategoryId === category.id
-                                }
-                                placeholder={t("category_name")}
-                                autoFocus
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") {
-                                    e.preventDefault();
-                                    handleSaveEditCategory();
-                                  } else if (e.key === "Escape") {
-                                    handleCancelEditCategory();
+                            <div className="flex min-w-0 flex-1 items-center gap-2">
+                              {editingCategoryId === category.id ? (
+                                <Input
+                                  type="text"
+                                  value={editingCategoryName}
+                                  onChange={(e) => {
+                                    setEditingCategoryName(e.target.value);
+                                    setCategoryError("");
+                                  }}
+                                  aria-invalid={
+                                    !!categoryError &&
+                                    editingCategoryId === category.id
                                   }
-                                }}
-                              />
-                            ) : (
-                              <span className="text-sm font-medium">
-                                {category.label}
-                              </span>
-                            )}
-                          </div>
+                                  placeholder={t("category_name")}
+                                  autoFocus
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      handleSaveEditCategory();
+                                    } else if (e.key === "Escape") {
+                                      handleCancelEditCategory();
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <span className="text-sm font-medium [word-break:break-word]">
+                                  {category.label}
+                                </span>
+                              )}
+                            </div>
 
-                          {isEditingCategories && (
                             <div className="flex shrink-0 items-center gap-1">
                               {editingCategoryId === category.id ? (
                                 <>
@@ -694,46 +669,62 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                 </>
                               )}
                             </div>
-                          )}
+                          </div>
+                          {categoryError &&
+                            editingCategoryId === category.id && (
+                              <span className="pl-6 text-sm text-destructive">
+                                {categoryError}
+                              </span>
+                            )}
                         </div>
-                        {categoryError && editingCategoryId === category.id && (
-                          <span className="mt-1 text-sm text-destructive">
-                            {categoryError}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      )}
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
 
-      {isEditingCategories && (
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div>
           <Button
-            className="w-full sm:w-auto"
             type="button"
             variant="outline"
-            onClick={handleCancelPreferences}
-            disabled={preferencesLoading}
+            size="sm"
+            onClick={handleAddCategory}
+            disabled={
+              categoriesLoading ||
+              isAddingCategory ||
+              editingCategoryId !== null
+            }
           >
-            {t("cancel")}
-          </Button>
-          <Button
-            className="w-full sm:w-auto"
-            type="button"
-            onClick={handleSavePreferences}
-            disabled={preferencesLoading || !hasUnsavedChanges()}
-          >
-            {preferencesLoading && <Spinner />}
-            {t("save_category_preferences")}
+            <Plus size={16} />
+            {t("add_category")}
           </Button>
         </div>
-      )}
+      </Field>
+
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button
+          className="w-full sm:w-auto"
+          type="button"
+          variant="outline"
+          onClick={handleCancelPreferences}
+          disabled={preferencesLoading || !hasUnsavedChanges()}
+        >
+          {t("cancel")}
+        </Button>
+        <Button
+          className="w-full sm:w-auto"
+          type="button"
+          onClick={handleSavePreferences}
+          disabled={preferencesLoading || !hasUnsavedChanges()}
+        >
+          {preferencesLoading && <Spinner />}
+          {t("save_category_preferences")}
+        </Button>
+      </div>
 
       {/* Delete Category Confirmation Modal */}
       <AlertDialog

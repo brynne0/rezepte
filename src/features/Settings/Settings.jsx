@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -49,9 +49,10 @@ const Settings = ({ resetCategoryFilter }) => {
   } = useUserProfile();
   const [actionLoading, setActionLoading] = useState(false);
   const [usernameError, setUsernameError] = useState("");
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [tempFirstName, setTempFirstName] = useState("");
-  const [tempUsername, setTempUsername] = useState("");
+  // null means untouched, so the field shows the saved value
+  const [tempFirstName, setTempFirstName] = useState(null);
+  const [tempUsername, setTempUsername] = useState(null);
+  const [profileSaving, setProfileSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deletedAccountInfo, setDeletedAccountInfo] = useState(null);
@@ -59,25 +60,23 @@ const Settings = ({ resetCategoryFilter }) => {
     useState(false);
   const [pendingTabSwitch, setPendingTabSwitch] = useState(null);
   const [isTabSwitchModalOpen, setIsTabSwitchModalOpen] = useState(false);
-  const firstNameInputRef = useRef(null);
-  const profileContainerRef = useRef(null);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
-  const handleEditProfile = () => {
-    setTempFirstName(profileData?.first_name || "");
-    setTempUsername(profileData?.username || "");
-    setUsernameError("");
-    setIsEditingProfile(true);
-    setTimeout(() => firstNameInputRef.current?.focus(), 0);
-  };
+  const firstName = tempFirstName ?? profileData?.first_name ?? "";
+  const username = tempUsername ?? profileData?.username ?? "";
+  const profileHasUnsavedChanges =
+    firstName !== (profileData?.first_name ?? "") ||
+    username !== (profileData?.username ?? "");
 
   const handleSaveProfile = async () => {
+    if (!profileHasUnsavedChanges || profileSaving) return;
     try {
+      setProfileSaving(true);
       setUsernameError("");
 
-      if (tempUsername !== profileData.username) {
-        const usernameExists = await checkUsernameExists(tempUsername);
+      if (username !== profileData.username) {
+        const usernameExists = await checkUsernameExists(username);
         if (usernameExists) {
           setUsernameError(t("username_already_exists"));
           return;
@@ -85,50 +84,29 @@ const Settings = ({ resetCategoryFilter }) => {
       }
 
       await updateUserProfile({
-        first_name: tempFirstName,
-        username: tempUsername,
+        first_name: firstName,
+        username: username,
       });
       setProfileData({
         ...profileData,
-        first_name: tempFirstName,
-        username: tempUsername,
+        first_name: firstName,
+        username: username,
       });
-      setIsEditingProfile(false);
+      setTempFirstName(null);
+      setTempUsername(null);
       toast.add({ title: t("successfully_updated_profile"), type: "success" });
     } catch (err) {
       toast.add({ title: err.message, type: "error" });
+    } finally {
+      setProfileSaving(false);
     }
   };
 
-  const handleCancelProfile = useCallback(() => {
-    setTempFirstName("");
-    setTempUsername("");
+  const handleCancelProfile = () => {
+    setTempFirstName(null);
+    setTempUsername(null);
     setUsernameError("");
-    setIsEditingProfile(false);
-  }, []);
-
-  // Cancel editing when clicking outside the profile fields
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        isEditingProfile &&
-        profileContainerRef.current &&
-        !profileContainerRef.current.contains(event.target) &&
-        !event.target.closest('[data-slot="tabs-list"]') &&
-        !event.target.closest('[data-slot^="alert-dialog"]')
-      ) {
-        handleCancelProfile();
-      }
-    };
-
-    if (isEditingProfile) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isEditingProfile, handleCancelProfile]);
+  };
 
   const handleChangePassword = () => {
     navigate("/change-password", { state: { fromSettings: true } });
@@ -186,12 +164,12 @@ const Settings = ({ resetCategoryFilter }) => {
     cancelNavigation,
     message: unsavedChangesMessage,
   } = useUnsavedChanges(
-    isEditingProfile || categoriesHasUnsavedChanges,
+    profileHasUnsavedChanges || categoriesHasUnsavedChanges,
     t("unsaved_changes_warning")
   );
 
   const handleTabSwitch = (targetTab) => {
-    if (isEditingProfile || categoriesHasUnsavedChanges) {
+    if (profileHasUnsavedChanges || categoriesHasUnsavedChanges) {
       setPendingTabSwitch(targetTab);
       setIsTabSwitchModalOpen(true);
     } else {
@@ -202,9 +180,7 @@ const Settings = ({ resetCategoryFilter }) => {
   const handleConfirmTabSwitch = () => {
     setActiveTab(pendingTabSwitch);
     setPendingTabSwitch(null);
-    if (isEditingProfile) {
-      handleCancelProfile();
-    }
+    handleCancelProfile();
     setIsTabSwitchModalOpen(false);
   };
 
@@ -214,9 +190,7 @@ const Settings = ({ resetCategoryFilter }) => {
   };
 
   const handleConfirmRouteLeave = () => {
-    if (isEditingProfile) {
-      handleCancelProfile();
-    }
+    handleCancelProfile();
     confirmNavigation();
   };
 
@@ -326,13 +300,11 @@ const Settings = ({ resetCategoryFilter }) => {
               {activeTab === "profile" && (
                 <ProfileTab
                   profileData={profileData}
-                  isEditingProfile={isEditingProfile}
-                  tempFirstName={tempFirstName}
-                  tempUsername={tempUsername}
+                  firstName={firstName}
+                  username={username}
                   usernameError={usernameError}
-                  firstNameInputRef={firstNameInputRef}
-                  profileContainerRef={profileContainerRef}
-                  handleEditProfile={handleEditProfile}
+                  hasUnsavedChanges={profileHasUnsavedChanges}
+                  isSaving={profileSaving}
                   handleSaveProfile={handleSaveProfile}
                   handleCancelProfile={handleCancelProfile}
                   handleChangePassword={handleChangePassword}

@@ -94,19 +94,12 @@ describe("CategoriesTab - Adding Categories", () => {
     },
   ];
 
-  // Renders the tab and enters editing mode so the add/edit/reorder controls
-  // (gated behind the "edit_categories" button) are available.
+  // Renders the tab and waits for the categories to load
   const renderInEditMode = async () => {
     renderCategoriesTab();
 
     await waitFor(() => {
-      expect(screen.getByText("edit_categories")).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText("edit_categories"));
-
-    await waitFor(() => {
-      expect(screen.getByText("add_category")).toBeInTheDocument();
+      expect(screen.getByText("Dinner")).toBeInTheDocument();
     });
   };
 
@@ -141,15 +134,17 @@ describe("CategoriesTab - Adding Categories", () => {
     mockSupabase.from.mockReturnValue(mockQuery);
   });
 
-  describe("Edit Categories Button", () => {
-    it("does not show management controls until edit mode is entered", async () => {
-      renderCategoriesTab();
+  describe("Always Editable", () => {
+    it("shows management controls without an edit step", async () => {
+      await renderInEditMode();
 
-      await waitFor(() => {
-        expect(screen.getByText("edit_categories")).toBeInTheDocument();
-      });
-
-      expect(screen.queryByText("add_category")).not.toBeInTheDocument();
+      expect(screen.queryByText("edit_categories")).not.toBeInTheDocument();
+      expect(
+        screen.getAllByRole("button", { name: "edit_category_name" })
+      ).toHaveLength(2);
+      expect(
+        screen.getByRole("button", { name: "save_category_preferences" })
+      ).toBeDisabled();
     });
   });
 
