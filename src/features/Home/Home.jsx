@@ -47,6 +47,7 @@ function Home() {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         onSearchSubmit={() => navigate("/")}
+        showSquirrel
       />
       {totalRecipeCount > 0 && (
         <ResultsBar
