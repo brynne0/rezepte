@@ -22,6 +22,7 @@
   else if (m === 12 || mmdd === "01-01") season = "nye";
   else if (daysFromEaster >= -7 && daysFromEaster <= 1) season = "easter"; // Palm Sunday to Easter Monday
   else if (m === 10 && d >= 17) season = "halloween";
+  else if (m === 2 && d >= 7 && d <= 14) season = "valentines";
 
   var forced = location.search.match(/[?&]season=(\w+)/);
   if (forced) season = forced[1];
@@ -58,6 +59,9 @@
     halloween: HAT_BODY +
       '<g stroke-width="1.3"><path fill="#5b3f73" d="M15.4 9.9 17.5 3.7c.6-1.8 1.7-2.3 3.1-2.3-1.3 1-1.3 2.2-1.2 3.1l1 5.4Z"/>' +
       '<path stroke="#e8862a" d="M15.9 8.5h4.3"/><path fill="#5b3f73" d="M13.2 10.3c2.8-1.1 6.2-1.1 9 0-2.8.7-6.2.7-9 0Z"/></g>',
+    valentines: FULL +
+      '<path transform="translate(21.5 20.3) scale(1.35)" fill="#e0624c" stroke-width=".89" ' +
+      'd="M0 .9c-1-.6-1.4-1.1-1.4-1.6 0-.4.3-.7.7-.7.3 0 .5.2.7.4.2-.2.4-.4.7-.4.4 0 .7.3.7.7 0 .5-.4 1-1.4 1.6Z"/>',
     birthday: HAT_BODY +
       '<g stroke-width="1.3"><path fill="#e8b339" d="M15 10.2 18.4 2.4l2.6 7.8Z"/><circle fill="#e0624c" cx="18.4" cy="1.9" r="1"/>' +
       '<g fill="#fffaf2" stroke="none"><circle cx="17.9" cy="6.4" r=".55"/><circle cx="19.3" cy="8.6" r=".55"/><circle cx="16.7" cy="8.9" r=".55"/></g></g>',
