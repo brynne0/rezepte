@@ -150,7 +150,6 @@ const FriendRecipes = () => {
           showImages={showImages}
           onShowImagesChange={setShowImages}
           showImageToggle={!!friend?.friends_can_view_images}
-          showRecentSort={false}
         />
       )}
 
