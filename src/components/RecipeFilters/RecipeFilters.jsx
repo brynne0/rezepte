@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import FilterStrip from "../FilterStrip/FilterStrip";
-import SquirrelSanta from "../SquirrelSanta/SquirrelSanta";
+import SeasonalSquirrel from "../SeasonalSquirrel/SeasonalSquirrel";
 import { cn } from "cn";
 
 const RecipeFilters = ({
@@ -67,7 +67,7 @@ const RecipeFilters = ({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setSquirrelDown((down) => !down)}
               >
-                <SquirrelSanta className="size-8 text-foreground" />
+                <SeasonalSquirrel className="size-8 text-foreground" />
               </button>
             )}
             <InputGroup variant="paper" className="h-10">
