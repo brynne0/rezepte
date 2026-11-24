@@ -40,11 +40,13 @@
       '<g stroke-width="1.3"><path fill="#b8402f" d="M20 7.3c0-3.1-1.3-5.2-3.4-5.4-1.7-.1-3 1-3.3 2.6l1.5.6.2 2.2Z"/>' +
       '<circle fill="#fffaf2" cx="13.3" cy="5.1" r="1.3"/>' +
       '<path fill="#fffaf2" d="M15.5 10.45h4a1.6 1.6 0 0 0 0-3.2h-4a1.6 1.6 0 0 0 0 3.2Z"/></g>',
-    "christmas-dark": PAW +
-      '<path d="M16 20a3 3 0 0 1 3-3h1a2 2 0 0 0 2-2v-2A4 4 0 0 0 20.88 10.23"/>' +
-      '<path d="M13.91 9.98A7 7 0 0 0 7 17c0-5 4-5 4-10.5a4.5 4.5 0 1 0-9 0 2.5 2.5 0 0 0 5 0C7 10 3 11 3 17c0 2.8 2.2 5 5 5h10"/>' +
-      '<g stroke-width="1.3"><path stroke="#e0624c" d="M20 6.7C20 4.2 18.7 2.1 16.6 1.9 15 1.8 14.1 2.5 13.8 3.2M15.24 5.3 15.1 6.7"/>' +
-      '<g stroke="#f2e7d2"><circle cx="13.3" cy="5.1" r="1.3"/><path d="M15.5 10.45h4a1.6 1.6 0 0 0 0-3.2h-4a1.6 1.6 0 0 0 0 3.2Z"/></g></g>',
+    // Reindeer: antlers and a glowing nose
+    "christmas-dark": HAT_BODY + '<path d="M14.5 10C15.5 7.6 19.2 7.4 20.646 10"/>' +
+      '<defs><filter id="squirrel-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation=".7" result="b"/>' +
+      '<feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
+      '<g stroke="#8a5a3b" stroke-width="1.3"><path d="M16.2 8.9 15.3 4.4M15.6 5.8l-1.4-1.1M15.3 4.4l-.3-1.6"/>' +
+      '<path d="M19.1 8.6 20.2 4.2M19.9 5.5l1.5-1M20.2 4.2l.5-1.6"/></g>' +
+      '<circle fill="#e0624c" stroke="none" cx="22.1" cy="13.7" r=".85" filter="url(#squirrel-glow)"/>',
     nye: FULL +
       '<g stroke-width="1.4"><path stroke="#e0624c" d="m12.6 2.2.6.9"/><path stroke="#5a8fd6" d="M15.2 1.4h1"/>' +
       '<path stroke="#e8b339" d="m14.4 4.6.8-.5"/><path stroke="#7fb58e" d="m20.6 2.1.5.8"/>' +
