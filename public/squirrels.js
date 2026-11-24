@@ -24,6 +24,9 @@
   else if (m === 10 && d >= 17) season = "halloween";
   else if (m === 2 && d >= 7 && d <= 14) season = "valentines";
 
+  // Christmas is Santa or reindeer, 50/50 each time the app opens
+  if (season === "christmas" && Math.random() < 0.5) season = "reindeer";
+
   var forced = location.search.match(/[?&]season=(\w+)/);
   if (forced) season = forced[1];
 
@@ -41,8 +44,13 @@
       '<g stroke-width="1.3"><path fill="#b8402f" d="M20 7.3c0-3.1-1.3-5.2-3.4-5.4-1.7-.1-3 1-3.3 2.6l1.5.6.2 2.2Z"/>' +
       '<circle fill="#fffaf2" cx="13.3" cy="5.1" r="1.3"/>' +
       '<path fill="#fffaf2" d="M15.5 10.45h4a1.6 1.6 0 0 0 0-3.2h-4a1.6 1.6 0 0 0 0 3.2Z"/></g>',
-    // Reindeer: antlers and a glowing nose
-    "christmas-dark": HAT_BODY + '<path d="M14.5 10C15.5 7.6 19.2 7.4 20.646 10"/>' +
+    // Outline hat with a red cone; trim filled with the dark background
+    "christmas-dark": HAT_BODY +
+      '<g stroke-width="1.3"><path fill="#b8402f" d="M20 7.3c0-3.1-1.3-5.2-3.4-5.4-1.7-.1-3 1-3.3 2.6l1.5.6.2 2.2Z"/>' +
+      '<circle fill="#241d19" cx="13.3" cy="5.1" r="1.3"/>' +
+      '<path fill="#241d19" d="M15.5 10.45h4a1.6 1.6 0 0 0 0-3.2h-4a1.6 1.6 0 0 0 0 3.2Z"/></g>',
+    // Antlers and a glowing nose
+    reindeer: HAT_BODY + '<path d="M14.5 10C15.5 7.6 19.2 7.4 20.646 10"/>' +
       '<defs><filter id="squirrel-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation=".7" result="b"/>' +
       '<feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
       '<g stroke="#8a5a3b" stroke-width="1.3"><path d="M16.2 8.9 15.3 4.4M15.6 5.8l-1.4-1.1M15.3 4.4l-.3-1.6"/>' +
