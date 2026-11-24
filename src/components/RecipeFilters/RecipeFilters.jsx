@@ -36,7 +36,7 @@ const RecipeFilters = ({
 
   return (
     <>
-      <div className="flex justify-center px-4 pb-4 md:px-6">
+      <div className="flex justify-center pb-4 md:px-6">
         <div className="flex w-full max-w-xl flex-col items-stretch gap-3 md:flex-row md:items-center">
           <form
             className="w-full md:flex-1"
