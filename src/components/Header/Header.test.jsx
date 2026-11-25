@@ -694,6 +694,7 @@ describe("Header Component", () => {
       renderOn("/shared/tok/red-lentil-dal", false);
 
       expect(screen.getByTestId("shared-signup-bar")).toBeInTheDocument();
+      expect(screen.getByText("shared_signup_free")).toBeInTheDocument();
       fireEvent.click(screen.getByText("shared_signup_action"));
       expect(mockNavigate).toHaveBeenCalledWith("/login", {
         state: { from: "/shared/tok/red-lentil-dal" },

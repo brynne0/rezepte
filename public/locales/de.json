@@ -221,6 +221,7 @@
   "add_as_friend": "{{name}} als Freund hinzufügen",
   "friend_request_sent": "Freundschaftsanfrage gesendet",
   "friend_request_failed": "Freundschaftsanfrage konnte nicht gesendet werden",
+  "shared_signup_free": "Kostenlos",
   "shared_signup_prompt": "Bewahre all deine Rezepte an einem Ort auf und teile sie mit Freunden.",
   "shared_signup_action": "Registrieren oder anmelden",
   "recipe_privacy_update_failed": "Privatsphäre-Einstellung konnte nicht aktualisiert werden",

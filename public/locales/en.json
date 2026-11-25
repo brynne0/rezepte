@@ -221,6 +221,7 @@
   "add_as_friend": "Add {{name}} as friend",
   "friend_request_sent": "Friend request sent",
   "friend_request_failed": "Failed to send friend request",
+  "shared_signup_free": "Free",
   "shared_signup_prompt": "Keep all your recipes in one place, and share them with friends.",
   "shared_signup_action": "Sign up or log in",
   "recipe_privacy_update_failed": "Failed to update recipe privacy",
