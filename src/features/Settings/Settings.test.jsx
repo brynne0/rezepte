@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { BrowserRouter, MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import Settings from "./Settings";
 import { createTestQueryClient } from "../../test-utils/queryClient";
@@ -73,9 +73,9 @@ vi.mock("react-i18next", () => ({
 let testQueryClient;
 const SettingsWrapper = () => (
   <QueryClientProvider client={testQueryClient}>
-    <BrowserRouter>
+    <MemoryRouter initialEntries={["/settings"]}>
       <Settings />
-    </BrowserRouter>
+    </MemoryRouter>
   </QueryClientProvider>
 );
 
@@ -370,11 +370,7 @@ describe("Settings", () => {
   it("opens on this tab when linked from the share panel", async () => {
     render(
       <QueryClientProvider client={testQueryClient}>
-        <MemoryRouter
-          initialEntries={[
-            { pathname: "/settings", state: { tab: "preferences" } },
-          ]}
-        >
+        <MemoryRouter initialEntries={["/settings?tab=preferences"]}>
           <Settings />
         </MemoryRouter>
       </QueryClientProvider>

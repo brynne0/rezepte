@@ -628,9 +628,7 @@ const Recipe = ({ isSharedView = false }) => {
                     onShareLink={handleShareLink}
                     photoVisibility={photoVisibility}
                     onChangePhotoVisibility={() =>
-                      navigate("/settings", {
-                        state: { tab: "preferences" },
-                      })
+                      navigate("/settings?tab=preferences")
                     }
                   />
                 </>

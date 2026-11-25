@@ -779,9 +779,7 @@ describe("Recipe Component", () => {
 
       fireEvent.click(screen.getByTestId("visibility-btn"));
       fireEvent.click(await screen.findByTestId("photo-visibility-change"));
-      expect(mockNavigate).toHaveBeenCalledWith("/settings", {
-        state: { tab: "preferences" },
-      });
+      expect(mockNavigate).toHaveBeenCalledWith("/settings?tab=preferences");
     });
 
     test("is hidden when the recipe has no photos", async () => {

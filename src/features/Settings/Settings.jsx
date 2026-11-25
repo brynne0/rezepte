@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   updateUserPreferredLanguage,
@@ -38,11 +38,22 @@ import {
 } from "@/components/ui/alert-dialog";
 import BackLink from "../../components/BackLink/BackLink";
 
+const SETTINGS_TABS = ["profile", "preferences", "categories"];
+
 const Settings = ({ resetCategoryFilter }) => {
   const isOnline = useOnlineStatus();
-  // Other pages can open a specific tab
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState(location.state?.tab ?? "profile");
+  // Tab lives in the URL so refresh and links keep it
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab = SETTINGS_TABS.includes(tabParam) ? tabParam : "profile";
+  const setActiveTab = (tab) =>
+    setSearchParams(
+      (prev) => {
+        prev.set("tab", tab);
+        return prev;
+      },
+      { replace: true }
+    );
   const {
     profile: profileData,
     loading: profileLoading,

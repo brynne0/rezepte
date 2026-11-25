@@ -1,6 +1,6 @@
 import { useState } from "react";
 import FilterStrip from "../../components/FilterStrip/FilterStrip";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Plus, Timer, ArrowLeftRight } from "lucide-react";
 import CookingTimeRow from "./components/CookingTimeRow";
@@ -41,7 +41,18 @@ const CookingTimes = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const isOnline = useOnlineStatus();
-  const [activeTab, setActiveTab] = useState("cooking-times");
+  // Tab lives in the URL so refresh keeps it
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab =
+    searchParams.get("tab") === "conversions" ? "conversions" : "cooking-times";
+  const setActiveTab = (tab) =>
+    setSearchParams(
+      (prev) => {
+        prev.set("tab", tab);
+        return prev;
+      },
+      { replace: true }
+    );
   const [showExitEditModeModal, setShowExitEditModeModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -211,7 +222,9 @@ const CookingTimes = () => {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          {loading ? (
+          {activeTab === "conversions" ? (
+            <ConversionsTab />
+          ) : loading ? (
             <>
               {[3, 2].map((rows, index) => (
                 <Card key={index} size="sm" className="gap-0 bg-muted/20 pb-0">
@@ -233,8 +246,6 @@ const CookingTimes = () => {
                 </Card>
               ))}
             </>
-          ) : activeTab === "conversions" ? (
-            <ConversionsTab />
           ) : !hasAnyItems && !isEditMode ? (
             <Empty>
               <EmptyHeader>
