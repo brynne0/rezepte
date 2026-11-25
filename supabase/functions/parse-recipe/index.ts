@@ -13,7 +13,7 @@ const DAILY_AUTOFILL_LIMIT = 50;
 
 // Removes <tag ...>...</tag> blocks in one linear pass
 const stripTagBlocks = (html: string, tag: string): string => {
-  const openRe = new RegExp(`<${tag}[^>]*>`, "gi");
+  const openRe = new RegExp(`<${tag}`, "gi");
   const closeRe = new RegExp(`</${tag}>`, "gi");
   let out = "";
   let pos = 0;
@@ -21,11 +21,33 @@ const stripTagBlocks = (html: string, tag: string): string => {
     openRe.lastIndex = pos;
     const open = openRe.exec(html);
     if (!open) break;
-    closeRe.lastIndex = openRe.lastIndex;
+    const openEnd = html.indexOf(">", open.index);
+    if (openEnd === -1) break;
+    closeRe.lastIndex = openEnd + 1;
     const close = closeRe.exec(html);
     if (!close) break;
     out += html.slice(pos, open.index);
     pos = closeRe.lastIndex;
+  }
+  return out + html.slice(pos);
+};
+
+// Replaces each <...> tag with a space; unclosed "<" is left as text
+const stripTags = (html: string): string => {
+  let out = "";
+  let pos = 0;
+  for (;;) {
+    const lt = html.indexOf("<", pos);
+    if (lt === -1) break;
+    if (html[lt + 1] === ">") {
+      out += html.slice(pos, lt + 2);
+      pos = lt + 2;
+      continue;
+    }
+    const gt = html.indexOf(">", lt + 1);
+    if (gt === -1) break;
+    out += html.slice(pos, lt) + " ";
+    pos = gt + 1;
   }
   return out + html.slice(pos);
 };
@@ -226,11 +248,9 @@ serve(async (req) => {
         // If no structured data found, convert HTML to text
         if (!textToProcess) {
           // Simple HTML to text conversion
-          textToProcess = stripTagBlocks(
-            stripTagBlocks(html, "script"),
-            "style"
+          textToProcess = stripTags(
+            stripTagBlocks(stripTagBlocks(html, "script"), "style")
           )
-            .replace(/<[^>]+>/g, " ")
             .replace(/\s+/g, " ")
             .trim();
 

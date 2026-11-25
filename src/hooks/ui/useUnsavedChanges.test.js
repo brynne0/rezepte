@@ -202,7 +202,7 @@ describe("useUnsavedChanges", () => {
       window.dispatchEvent(beforeUnloadEvent);
 
       expect(beforeUnloadEvent.preventDefault).toHaveBeenCalled();
-      expect(beforeUnloadEvent.returnValue).toBe("Test message");
+      expect(beforeUnloadEvent).toHaveProperty("returnValue", "Test message");
     });
 
     it("should not prevent beforeunload when no unsaved changes", () => {
