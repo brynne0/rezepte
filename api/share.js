@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
   DEFAULT_TITLE,
+  FALLBACK_IMAGE_PATH,
   buildPreviewHtml,
   createSupabase,
   fetchSharedRecipe,
@@ -48,12 +49,18 @@ export default async function handler(req, res) {
   }
 
   // Unknown or revoked links get generic tags so nothing about the recipe leaks
+  // The image route serves the recipe photo or the squirrel card
   const preview = recipe
     ? {
         title: recipe.title,
+        imageUrl: `${origin}/api/share-image/${token}`,
         pageUrl: `${origin}/shared/${token}${recipe.slug ? `/${recipe.slug}` : ""}`,
       }
-    : { title: DEFAULT_TITLE, pageUrl: origin };
+    : {
+        title: DEFAULT_TITLE,
+        imageUrl: `${origin}${FALLBACK_IMAGE_PATH}`,
+        pageUrl: origin,
+      };
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader(

@@ -2,6 +2,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 export const DEFAULT_TITLE = "Rezepte";
+export const FALLBACK_IMAGE_PATH = encodeURI("/eichhörnchen/og-image.png");
 
 // Share tokens are 20 hex chars; reject anything else before hitting Supabase
 export const isValidToken = (token) =>
@@ -20,14 +21,23 @@ export const getOrigin = (req) => {
   return `${proto}://${host}`;
 };
 
-// Swaps the <title> and adds Open Graph tags to the app's index.html.
-// No og:image, so Messages shows the small apple-touch-icon instead of a big image.
-export const buildPreviewHtml = (html, { title, pageUrl }) => {
+// Same choice as getMainImage in the app
+export const getMainImagePath = (recipe) => {
+  const images = recipe?.images || [];
+  return (images.find((img) => img.is_main) || images[0])?.path || null;
+};
+
+// Swaps the <title> and adds Open Graph tags to the app's index.html
+export const buildPreviewHtml = (html, { title, imageUrl, pageUrl }) => {
   const safeTitle = escapeHtml(title);
   const tags = [
     `<meta property="og:type" content="website" />`,
     `<meta property="og:title" content="${safeTitle}" />`,
     `<meta property="og:url" content="${escapeHtml(pageUrl)}" />`,
+    `<meta property="og:image" content="${escapeHtml(imageUrl)}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
   ].join("\n    ");
 
   return html

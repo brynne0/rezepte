@@ -2,7 +2,9 @@ import { describe, it, expect, vi } from "vitest";
 import {
   buildPreviewHtml,
   escapeHtml,
+  FALLBACK_IMAGE_PATH,
   fetchSharedRecipe,
+  getMainImagePath,
   getOrigin,
   isValidToken,
 } from "./sharePreview.js";
@@ -18,6 +20,7 @@ const INDEX_HTML = `<!doctype html>
 describe("buildPreviewHtml", () => {
   const preview = {
     title: "Pumpkin soup",
+    imageUrl: "https://example.com/api/share-image/abc123def456",
     pageUrl: "https://example.com/shared/abc123def456/pumpkin-soup",
   };
 
@@ -31,10 +34,14 @@ describe("buildPreviewHtml", () => {
     expect(html).toContain(`content="${preview.pageUrl}"`);
   });
 
-  it("leaves out the image so Messages uses the small app icon", () => {
+  it("adds a large rectangular image", () => {
     const html = buildPreviewHtml(INDEX_HTML, preview);
-    expect(html).not.toContain("og:image");
-    expect(html).not.toContain("twitter:card");
+    expect(html).toContain(
+      `<meta property="og:image" content="${preview.imageUrl}" />`
+    );
+    expect(html).toContain('property="og:image:width" content="1200"');
+    expect(html).toContain('property="og:image:height" content="630"');
+    expect(html).toContain('name="twitter:card" content="summary_large_image"');
   });
 
   it("puts the tags inside the head and keeps the app root", () => {
@@ -66,6 +73,27 @@ describe("escapeHtml", () => {
     expect(escapeHtml(`<a href="x">&</a>`)).toBe(
       "&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;"
     );
+  });
+});
+
+describe("getMainImagePath", () => {
+  it("prefers the main image", () => {
+    expect(
+      getMainImagePath({
+        images: [{ path: "u/1/a.jpg" }, { path: "u/1/b.jpg", is_main: true }],
+      })
+    ).toBe("u/1/b.jpg");
+  });
+
+  it("falls back to the first image", () => {
+    expect(getMainImagePath({ images: [{ path: "u/1/a.jpg" }] })).toBe(
+      "u/1/a.jpg"
+    );
+  });
+
+  it("returns null without images or recipe", () => {
+    expect(getMainImagePath({ images: [] })).toBeNull();
+    expect(getMainImagePath(null)).toBeNull();
   });
 });
 
@@ -123,4 +151,8 @@ describe("getOrigin", () => {
       })
     ).toBe("https://www.acorn-rezepte.com");
   });
+});
+
+it("percent-encodes the fallback image path", () => {
+  expect(FALLBACK_IMAGE_PATH).toBe("/eichh%C3%B6rnchen/og-image.png");
 });

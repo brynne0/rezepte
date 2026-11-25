@@ -21,6 +21,10 @@
       "destination": "/api/share?token=:token"
     },
     {
+      "source": "/api/share-image/:token",
+      "destination": "/api/share-image?token=:token"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
