@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import {
-  FALLBACK_IMAGE_PATH,
+  PREVIEW_IMAGE_PATH,
   buildPreviewHtml,
   escapeHtml,
   fetchSharedRecipe,
@@ -19,7 +19,8 @@ const INDEX_HTML = `<!doctype html>
 describe("buildPreviewHtml", () => {
   const preview = {
     title: "Pumpkin soup",
-    imageUrl: "https://example.com/eichh%C3%B6rnchen/og-image.png",
+    imageUrl:
+      "https://example.com/eichh%C3%B6rnchen/web-app-manifest-512x512.png",
     pageUrl: "https://example.com/shared/abc123def456/pumpkin-soup",
   };
 
@@ -32,7 +33,8 @@ describe("buildPreviewHtml", () => {
     );
     expect(html).toContain(`content="${preview.imageUrl}"`);
     expect(html).toContain(`content="${preview.pageUrl}"`);
-    expect(html).toContain('name="twitter:card" content="summary_large_image"');
+    expect(html).toContain('name="twitter:card" content="summary"');
+    expect(html).toContain('property="og:image:width" content="512"');
   });
 
   it("puts the tags inside the head and keeps the app root", () => {
@@ -123,6 +125,8 @@ describe("getOrigin", () => {
   });
 });
 
-it("percent-encodes the fallback image path", () => {
-  expect(FALLBACK_IMAGE_PATH).toBe("/eichh%C3%B6rnchen/og-image.png");
+it("percent-encodes the preview image path", () => {
+  expect(PREVIEW_IMAGE_PATH).toBe(
+    "/eichh%C3%B6rnchen/web-app-manifest-512x512.png"
+  );
 });

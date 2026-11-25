@@ -1,7 +1,10 @@
 // Shared helpers for share-link previews (the _lib folder is not deployed as a function)
 import { createClient } from "@supabase/supabase-js";
 
-export const FALLBACK_IMAGE_PATH = encodeURI("/eichhörnchen/og-image.png");
+// Square image so chat apps show a small thumbnail beside the title
+export const PREVIEW_IMAGE_PATH = encodeURI(
+  "/eichhörnchen/web-app-manifest-512x512.png"
+);
 export const DEFAULT_TITLE = "Rezepte";
 
 // Share tokens are 20 hex chars; reject anything else before hitting Supabase
@@ -29,9 +32,9 @@ export const buildPreviewHtml = (html, { title, imageUrl, pageUrl }) => {
     `<meta property="og:title" content="${safeTitle}" />`,
     `<meta property="og:url" content="${escapeHtml(pageUrl)}" />`,
     `<meta property="og:image" content="${escapeHtml(imageUrl)}" />`,
-    `<meta property="og:image:width" content="1200" />`,
-    `<meta property="og:image:height" content="630" />`,
-    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta property="og:image:width" content="512" />`,
+    `<meta property="og:image:height" content="512" />`,
+    `<meta name="twitter:card" content="summary" />`,
   ].join("\n    ");
 
   return html

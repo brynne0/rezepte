@@ -101,7 +101,7 @@ const SharePanel = ({
               onFocus={(e) => e.target.select()}
               aria-label={t("share_link_label")}
               data-testid="share-link-input"
-              className="h-8 text-xs"
+              className="h-8 w-0 flex-1 text-xs"
             />
             <Button
               size="sm"
