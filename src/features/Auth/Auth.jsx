@@ -11,6 +11,7 @@ import {
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 import BackLink from "../../components/BackLink/BackLink";
+import SeasonalSquirrel from "../../components/SeasonalSquirrel/SeasonalSquirrel";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/toast";
@@ -250,17 +251,7 @@ const Auth = () => {
       <Card className="w-full">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="flex w-full items-center justify-center">
-            {/* <Squirrel className="size-9 text-primary" /> */}
-            <img
-              src="/eichhörnchen/squirrel-santa.svg"
-              alt=""
-              className="size-11 dark:hidden"
-            />
-            <img
-              src="/eichhörnchen/squirrel-santa-dark.svg"
-              alt=""
-              className="hidden size-11 dark:block"
-            />
+            <SeasonalSquirrel className="size-11 text-primary" />
           </div>
 
           {!awaitingConfirmation && (
