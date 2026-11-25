@@ -5,6 +5,7 @@ import {
   Link as LinkIcon,
   ChevronDown,
   CheckIcon,
+  Camera,
 } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,8 @@ const SharePanel = ({
   canNativeShare,
   onVisibilityChange,
   onShareLink,
+  photoVisibility,
+  onChangePhotoVisibility,
 }) => {
   const { t } = useTranslation();
   const TriggerIcon = VISIBILITY_ICONS[visibility] ?? Users;
@@ -108,6 +111,25 @@ const SharePanel = ({
             >
               {canNativeShare ? t("share") : t("copy")}
             </Button>
+          </div>
+        )}
+
+        {photoVisibility && visibility !== "private" && (
+          <div
+            className="mt-1 flex items-center gap-1.5 border-t px-1.5 pt-2 pb-1 text-xs text-muted-foreground [&_svg]:size-3.5 [&_svg]:shrink-0"
+            data-testid="photo-visibility-note"
+          >
+            <Camera />
+            <span>{t(`photo_visibility_note_${photoVisibility}`)}</span>
+            <span aria-hidden="true">·</span>
+            <button
+              type="button"
+              onClick={onChangePhotoVisibility}
+              className="cursor-pointer underline underline-offset-2 hover:text-foreground"
+              data-testid="photo-visibility-change"
+            >
+              {t("change")}
+            </button>
           </div>
         )}
       </PopoverContent>

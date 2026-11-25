@@ -200,8 +200,7 @@ export const checkFriendship = async (otherUserId) => {
   return !!data;
 };
 
-// Friendship with another user: "accepted", "sent" (pending, from you),
-// "received" (pending, to you), or null when there's none
+// "accepted", "sent", "received", or null
 export const getFriendshipStatus = async (otherUserId) => {
   const {
     data: { user },
@@ -218,7 +217,6 @@ export const getFriendshipStatus = async (otherUserId) => {
   if (error) throw error;
   if (!data?.length) return null;
   if (data.some((row) => row.status === "accepted")) return "accepted";
-  // Their request wins so we accept it rather than send a mirror one
   return data.some((row) => row.requester_id === otherUserId)
     ? "received"
     : "sent";

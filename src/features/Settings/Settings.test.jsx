@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import Settings from "./Settings";
 import { createTestQueryClient } from "../../test-utils/queryClient";
@@ -367,7 +367,25 @@ describe("Settings", () => {
     });
   });
 
-  describe("Friends Can View Images", () => {
+  it("opens on this tab when linked from the share panel", async () => {
+    render(
+      <QueryClientProvider client={testQueryClient}>
+        <MemoryRouter
+          initialEntries={[
+            { pathname: "/settings", state: { tab: "preferences" } },
+          ]}
+        >
+          <Settings />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    expect(
+      await screen.findByRole("group", { name: "photo_visibility" })
+    ).toBeInTheDocument();
+  });
+
+  describe("Photo Visibility", () => {
     beforeEach(async () => {
       render(<SettingsWrapper />);
       await waitFor(() => {
@@ -376,24 +394,32 @@ describe("Settings", () => {
       fireEvent.click(screen.getByRole("tab", { name: "preferences" }));
     });
 
-    it("reflects the current preference", () => {
-      expect(screen.getByRole("switch")).not.toBeChecked();
+    it("defaults to anyone with link", () => {
+      expect(
+        screen.getByRole("button", { name: "photo_visibility_link" })
+      ).toHaveAttribute("aria-pressed", "true");
     });
 
-    it("saves immediately when toggled on", async () => {
-      fireEvent.click(screen.getByRole("switch"));
+    it("saves immediately when changed", async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: "photo_visibility_friends" })
+      );
 
       await waitFor(() => {
         expect(mockUpdateUserProfile).toHaveBeenCalledWith({
-          friends_can_view_images: true,
+          photo_visibility: "friends",
         });
       });
-      expect(screen.getByRole("switch")).toBeChecked();
+      expect(
+        screen.getByRole("button", { name: "photo_visibility_friends" })
+      ).toHaveAttribute("aria-pressed", "true");
     });
 
     it("shows an error toast if saving fails", async () => {
       mockUpdateUserProfile.mockRejectedValue(new Error("network error"));
-      fireEvent.click(screen.getByRole("switch"));
+      fireEvent.click(
+        screen.getByRole("button", { name: "photo_visibility_private" })
+      );
 
       await waitFor(() => {
         expect(mockToastAdd).toHaveBeenCalledWith(

@@ -34,6 +34,11 @@ import BackLink from "../../components/BackLink/BackLink";
 import AddToMyRecipesModal from "../../components/AddToMyRecipesModal/AddToMyRecipesModal";
 import { useAuth } from "../../hooks/data/useAuth";
 import { useSignedImageUrls } from "../../hooks/data/useSignedImageUrls";
+import { useUserProfile } from "../../hooks/data/useUserProfile";
+import {
+  effectivePhotoVisibility,
+  friendsCanSeePhotos,
+} from "../../utils/photoVisibility";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import ImageGallery from "./components/ImageGallery";
 import {
@@ -208,11 +213,16 @@ const Recipe = ({ isSharedView = false }) => {
     enabled: showFriendBar,
   });
 
-  // Show images for the owner, or when the owner shares photos with
-  // friends (link viewers follow the same setting).
   const canViewImages =
     isOwner ||
-    !!(isSharedView ? recipe?.owner : friendProfile)?.friends_can_view_images;
+    (isSharedView
+      ? recipe?.owner?.photo_visibility === "link"
+      : friendsCanSeePhotos(friendProfile?.photo_visibility));
+  const { profile: ownProfile } = useUserProfile();
+  const photoVisibility =
+    isOwner && recipe?.images?.length
+      ? effectivePhotoVisibility(visibility, ownProfile?.photo_visibility)
+      : null;
   const { signedImages } = useSignedImageUrls(
     canViewImages ? recipe?.images : []
   );
@@ -616,6 +626,12 @@ const Recipe = ({ isSharedView = false }) => {
                     canNativeShare={canNativeShare}
                     onVisibilityChange={handleVisibilityChange}
                     onShareLink={handleShareLink}
+                    photoVisibility={photoVisibility}
+                    onChangePhotoVisibility={() =>
+                      navigate("/settings", {
+                        state: { tab: "preferences" },
+                      })
+                    }
                   />
                 </>
               )}

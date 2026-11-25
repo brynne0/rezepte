@@ -1,10 +1,18 @@
 import { useState } from "react";
-import { Download, X, Trash2, Sun, Moon, SunMoon } from "lucide-react";
+import {
+  Download,
+  X,
+  Trash2,
+  Sun,
+  Moon,
+  SunMoon,
+  Lock,
+  Users,
+  Link as LinkIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
@@ -30,7 +38,7 @@ const STALE_DOWNLOAD_THRESHOLD_DAYS = 30;
 const PreferencesTab = ({
   profileData,
   handleLanguageChange,
-  handleFriendsCanViewImagesChange,
+  handlePhotoVisibilityChange,
   t,
 }) => {
   const isOnline = useOnlineStatus();
@@ -99,19 +107,37 @@ const PreferencesTab = ({
 
       <Separator />
 
-      <Label htmlFor="friends-can-view-images" className="justify-between">
-        <span className="flex flex-col">
-          <span className="font-medium">{t("friends_can_view_images")}</span>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <span className="flex min-w-0 flex-col sm:flex-1">
+          <span className="font-medium">{t("photo_visibility")}</span>
           <span className="text-sm text-muted-foreground">
-            {t("friends_can_view_images_description")}
+            {t("photo_visibility_description")}
           </span>
         </span>
-        <Switch
-          id="friends-can-view-images"
-          checked={!!profileData?.friends_can_view_images}
-          onCheckedChange={handleFriendsCanViewImagesChange}
-        />
-      </Label>
+        <ToggleGroup
+          variant="outline"
+          spacing={0}
+          aria-label={t("photo_visibility")}
+          className="shrink-0 self-end sm:self-auto"
+          value={[profileData?.photo_visibility || "link"]}
+          onValueChange={(groupValue) => {
+            if (groupValue[0]) handlePhotoVisibilityChange(groupValue[0]);
+          }}
+        >
+          <ToggleGroupItem value="private">
+            <Lock />
+            {t("photo_visibility_private")}
+          </ToggleGroupItem>
+          <ToggleGroupItem value="friends">
+            <Users />
+            {t("photo_visibility_friends")}
+          </ToggleGroupItem>
+          <ToggleGroupItem value="link">
+            <LinkIcon />
+            {t("photo_visibility_link")}
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
       <Separator />
 

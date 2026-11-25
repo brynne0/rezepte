@@ -78,6 +78,11 @@ vi.mock("../../hooks/data/useAuth", () => ({
   useAuth: () => mockAuth,
 }));
 
+let mockProfile = null;
+vi.mock("../../hooks/data/useUserProfile", () => ({
+  useUserProfile: () => ({ profile: mockProfile }),
+}));
+
 vi.mock("../../hooks/data/useSignedImageUrls", () => ({
   useSignedImageUrls: (images) => ({
     signedImages: images || [],
@@ -154,6 +159,7 @@ describe("Recipe Component", () => {
     mockParams = { id: "test-recipe-id" };
     mockSharedRecipeHook = { recipe: null, loading: false, error: null };
     mockGetFriendshipStatus.mockResolvedValue(null);
+    mockProfile = { photo_visibility: "link" };
     mockSendFriendRequest.mockClear();
     mockAcceptFriendRequest.mockClear();
     mockLanguage = "en";
@@ -748,6 +754,48 @@ describe("Recipe Component", () => {
     });
   });
 
+  describe("Photo visibility note", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        visibility: "link",
+        share_token: "existing",
+        images: [{ id: 1, url: "a.jpg" }],
+      };
+    });
+
+    test("shows the narrower of recipe and photo visibility", async () => {
+      mockProfile = { photo_visibility: "friends" };
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      expect(
+        await screen.findByTestId("photo-visibility-note")
+      ).toHaveTextContent("photo_visibility_note_friends");
+    });
+
+    test("links to the photo setting", async () => {
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      fireEvent.click(await screen.findByTestId("photo-visibility-change"));
+      expect(mockNavigate).toHaveBeenCalledWith("/settings", {
+        state: { tab: "preferences" },
+      });
+    });
+
+    test("is hidden when the recipe has no photos", async () => {
+      mockRecipeHook.recipe = { ...mockRecipeHook.recipe, images: [] };
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      await screen.findByTestId("visibility-link");
+      expect(
+        screen.queryByTestId("photo-visibility-note")
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe("Shared View", () => {
     const sharedRecipe = {
       ...mockRecipeData,
@@ -758,7 +806,7 @@ describe("Recipe Component", () => {
         id: "owner-1",
         username: "anna",
         first_name: "Anna",
-        friends_can_view_images: true,
+        photo_visibility: "link",
       },
     };
 
@@ -865,7 +913,7 @@ describe("Recipe Component", () => {
       mockSharedRecipeHook.recipe = {
         ...sharedRecipe,
         images: [{ id: 1, url: "a.jpg" }],
-        owner: { ...sharedRecipe.owner, friends_can_view_images: false },
+        owner: { ...sharedRecipe.owner, photo_visibility: "friends" },
       };
       renderRecipe({ isSharedView: true });
 
@@ -894,7 +942,7 @@ describe("Recipe Component", () => {
     test("hides images from a friend who hasn't been granted image access", () => {
       mockAuth.user = { id: "some-other-user" };
       mockGetFriendProfile.mockResolvedValue({
-        friends_can_view_images: false,
+        photo_visibility: "private",
       });
 
       renderRecipe();
@@ -905,7 +953,7 @@ describe("Recipe Component", () => {
     test("shows images to a friend who has been granted image access", async () => {
       mockAuth.user = { id: "some-other-user" };
       mockGetFriendProfile.mockResolvedValue({
-        friends_can_view_images: true,
+        photo_visibility: "friends",
       });
 
       renderRecipe();

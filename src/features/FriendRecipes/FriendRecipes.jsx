@@ -13,6 +13,7 @@ import ResultsBar from "../../components/ResultsBar/ResultsBar";
 import Pagination from "../../components/Pagination/Pagination";
 import RecipeFilters from "../../components/RecipeFilters/RecipeFilters";
 import { WifiOff } from "lucide-react";
+import { friendsCanSeePhotos } from "../../utils/photoVisibility";
 import {
   Empty,
   EmptyHeader,
@@ -149,7 +150,7 @@ const FriendRecipes = () => {
           onPageReset={() => setCurrentPage(1)}
           showImages={showImages}
           onShowImagesChange={setShowImages}
-          showImageToggle={!!friend?.friends_can_view_images}
+          showImageToggle={friendsCanSeePhotos(friend?.photo_visibility)}
         />
       )}
 
@@ -173,7 +174,9 @@ const FriendRecipes = () => {
             searchTerm={searchTerm}
             isPaginated={true}
             loading={loading}
-            showImages={!!friend?.friends_can_view_images && showImages}
+            showImages={
+              friendsCanSeePhotos(friend?.photo_visibility) && showImages
+            }
           />
           <Pagination
             currentPage={currentPage}

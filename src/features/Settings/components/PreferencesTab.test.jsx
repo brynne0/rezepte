@@ -45,10 +45,10 @@ describe("PreferencesTab", () => {
   const mockProps = {
     profileData: {
       preferred_language: "en",
-      friends_can_view_images: false,
+      photo_visibility: "link",
     },
     handleLanguageChange: vi.fn(),
-    handleFriendsCanViewImagesChange: vi.fn(),
+    handlePhotoVisibilityChange: vi.fn(),
     t,
   };
 
@@ -88,12 +88,19 @@ describe("PreferencesTab", () => {
     });
   });
 
-  describe("Friends can view images", () => {
-    it("calls the handler when toggled", () => {
+  describe("Photo visibility", () => {
+    it("shows the current level and calls the handler on change", () => {
       render(<PreferencesTab {...mockProps} />);
 
-      fireEvent.click(screen.getByRole("switch"));
-      expect(mockProps.handleFriendsCanViewImagesChange).toHaveBeenCalled();
+      expect(
+        screen.getByRole("button", { name: "photo_visibility_link" })
+      ).toHaveAttribute("aria-pressed", "true");
+      fireEvent.click(
+        screen.getByRole("button", { name: "photo_visibility_friends" })
+      );
+      expect(mockProps.handlePhotoVisibilityChange).toHaveBeenCalledWith(
+        "friends"
+      );
     });
   });
 

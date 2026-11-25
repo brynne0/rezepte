@@ -4,9 +4,7 @@ import { fetchSharedRecipe } from "../../services/recipes";
 import { getTranslatedRecipe } from "../../services/recipeTranslationService";
 import { useAuth } from "./useAuth";
 
-// Fetches a link-shared recipe by token. Signed-out viewers get the original
-// language so anonymous visits never trigger paid translation calls; signed-in
-// non-owners can't save translations (RLS), so theirs are cached per session only.
+// Signed-out viewers get the original language to avoid paid translations
 export const useSharedRecipe = (token, { original = false } = {}) => {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language.split("-")[0];

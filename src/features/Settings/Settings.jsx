@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   updateUserPreferredLanguage,
@@ -40,7 +40,9 @@ import BackLink from "../../components/BackLink/BackLink";
 
 const Settings = ({ resetCategoryFilter }) => {
   const isOnline = useOnlineStatus();
-  const [activeTab, setActiveTab] = useState("profile");
+  // Other pages can open a specific tab
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? "profile");
   const {
     profile: profileData,
     loading: profileLoading,
@@ -134,27 +136,22 @@ const Settings = ({ resetCategoryFilter }) => {
     }
   };
 
-  const handleFriendsCanViewImagesChange = async (friendsCanViewImages) => {
-    const previous = profileData.friends_can_view_images;
-    setProfileData({
-      ...profileData,
-      friends_can_view_images: friendsCanViewImages,
-    });
+  const handlePhotoVisibilityChange = async (photoVisibility) => {
+    const previous = profileData.photo_visibility;
+    setProfileData({ ...profileData, photo_visibility: photoVisibility });
     try {
-      await updateUserProfile({
-        friends_can_view_images: friendsCanViewImages,
-      });
+      await updateUserProfile({ photo_visibility: photoVisibility });
       toast.add({
-        title: t("successfully_updated_friends_can_view_images"),
+        title: t("successfully_updated_photo_visibility"),
         type: "success",
       });
     } catch (err) {
-      setProfileData({ ...profileData, friends_can_view_images: previous });
+      setProfileData({ ...profileData, photo_visibility: previous });
       toast.add({
-        title: `${t("failed_to_update_friends_can_view_images")}: ${err.message}`,
+        title: `${t("failed_to_update_photo_visibility")}: ${err.message}`,
         type: "error",
       });
-      console.error("Friends image visibility save error:", err);
+      console.error("Photo visibility save error:", err);
     }
   };
 
@@ -320,9 +317,7 @@ const Settings = ({ resetCategoryFilter }) => {
                 <PreferencesTab
                   profileData={profileData}
                   handleLanguageChange={handleLanguageChange}
-                  handleFriendsCanViewImagesChange={
-                    handleFriendsCanViewImagesChange
-                  }
+                  handlePhotoVisibilityChange={handlePhotoVisibilityChange}
                   t={t}
                 />
               )}
