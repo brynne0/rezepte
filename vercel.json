@@ -10,7 +10,16 @@
       ]
     }
   ],
+  "functions": {
+    "api/share.js": {
+      "includeFiles": "dist/index.html"
+    }
+  },
   "rewrites": [
+    {
+      "source": "/shared/:token/:slug?",
+      "destination": "/api/share?token=:token"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
