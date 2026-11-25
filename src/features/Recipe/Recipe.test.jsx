@@ -764,14 +764,38 @@ describe("Recipe Component", () => {
       };
     });
 
-    test("shows the narrower of recipe and photo visibility", async () => {
+    test("says link viewers can't see friends-only photos", async () => {
       mockProfile = { photo_visibility: "friends" };
       renderRecipe();
 
       fireEvent.click(screen.getByTestId("visibility-btn"));
       expect(
         await screen.findByTestId("photo-visibility-note")
-      ).toHaveTextContent("photo_visibility_note_friends");
+      ).toHaveTextContent("photo_note_hidden_link");
+    });
+
+    test("caps photos at the recipe's visibility", async () => {
+      mockProfile = { photo_visibility: "link" };
+      mockRecipeHook.recipe = {
+        ...mockRecipeHook.recipe,
+        visibility: "friends",
+      };
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      expect(
+        await screen.findByTestId("photo-visibility-note")
+      ).toHaveTextContent("photo_note_visible_friends");
+    });
+
+    test("says when photos are hidden from everyone", async () => {
+      mockProfile = { photo_visibility: "private" };
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      expect(
+        await screen.findByTestId("photo-visibility-note")
+      ).toHaveTextContent("photo_note_hidden_all");
     });
 
     test("links to the photo setting", async () => {

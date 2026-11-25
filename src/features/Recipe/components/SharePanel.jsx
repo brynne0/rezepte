@@ -6,6 +6,8 @@ import {
   ChevronDown,
   CheckIcon,
   Camera,
+  CameraOff,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,15 @@ const VISIBILITY_ICONS = {
 
 const OPTIONS = ["private", "friends", "link"];
 
+// Says who sees the photos, relative to who sees the recipe
+const photoNoteKey = (visibility, photoVisibility) => {
+  if (photoVisibility === visibility) return `photo_note_visible_${visibility}`;
+  if (photoVisibility === "friends") return "photo_note_hidden_link";
+  return visibility === "friends"
+    ? "photo_note_hidden_friends"
+    : "photo_note_hidden_all";
+};
+
 // Owner's share panel: who can see the recipe, plus the link once it's shareable.
 // Styled like the dropdown menus (check on the right, no radio circles).
 const SharePanel = ({
@@ -38,6 +49,7 @@ const SharePanel = ({
 }) => {
   const { t } = useTranslation();
   const TriggerIcon = VISIBILITY_ICONS[visibility] ?? Users;
+  const photosHidden = photoVisibility !== visibility;
 
   return (
     <Popover>
@@ -55,7 +67,7 @@ const SharePanel = ({
           </Button>
         }
       />
-      <PopoverContent align="start" className="w-max min-w-64 gap-0 p-1">
+      <PopoverContent align="start" className="w-max min-w-76 gap-0 p-1">
         <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">
           {t("recipe_visibility_label")}
         </div>
@@ -115,20 +127,21 @@ const SharePanel = ({
         )}
 
         {photoVisibility && visibility !== "private" && (
-          <div
-            className="mt-1 flex items-center gap-1.5 border-t px-1.5 pt-2 pb-1 text-xs text-muted-foreground [&_svg]:size-3.5 [&_svg]:shrink-0"
-            data-testid="photo-visibility-note"
-          >
-            <Camera />
-            <span>{t(`photo_visibility_note_${photoVisibility}`)}</span>
-            <span aria-hidden="true">·</span>
+          <div className="mt-1 w-0 min-w-full border-t pt-1">
             <button
               type="button"
               onClick={onChangePhotoVisibility}
-              className="cursor-pointer underline underline-offset-2 hover:text-foreground"
+              className="flex w-full cursor-pointer items-center gap-1.5 rounded-md px-1.5 py-1.5 text-left text-xs text-muted-foreground outline-hidden hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent [&_svg]:size-3.5 [&_svg]:shrink-0"
               data-testid="photo-visibility-change"
             >
-              {t("change")}
+              {photosHidden ? <CameraOff /> : <Camera />}
+              <span
+                className="min-w-0 flex-1"
+                data-testid="photo-visibility-note"
+              >
+                {t(photoNoteKey(visibility, photoVisibility))}
+              </span>
+              <ChevronRight />
             </button>
           </div>
         )}

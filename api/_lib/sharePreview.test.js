@@ -6,6 +6,7 @@ import {
   fetchSharedRecipe,
   getMainImagePath,
   getOrigin,
+  getPreviewImageUrl,
   isValidToken,
 } from "./sharePreview.js";
 
@@ -73,6 +74,36 @@ describe("escapeHtml", () => {
     expect(escapeHtml(`<a href="x">&</a>`)).toBe(
       "&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;"
     );
+  });
+});
+
+describe("getPreviewImageUrl", () => {
+  const origin = "https://example.com";
+
+  it("uses the squirrel card when photos aren't shared", () => {
+    expect(getPreviewImageUrl(origin, "abc123def456", { images: [] })).toBe(
+      `${origin}${FALLBACK_IMAGE_PATH}`
+    );
+  });
+
+  it("versions the photo URL by the photo", () => {
+    const first = getPreviewImageUrl(origin, "abc123def456", {
+      images: [{ path: "u/1/a.jpg" }],
+    });
+    const second = getPreviewImageUrl(origin, "abc123def456", {
+      images: [{ path: "u/1/b.jpg" }],
+    });
+    expect(first).toMatch(
+      /^https:\/\/example\.com\/api\/share-image\/abc123def456\?v=[0-9a-f]{8}$/
+    );
+    expect(first).not.toBe(second);
+  });
+
+  it("doesn't put the storage path in the URL", () => {
+    const url = getPreviewImageUrl(origin, "abc123def456", {
+      images: [{ path: "user-id/1/a.jpg" }],
+    });
+    expect(url).not.toContain("user-id");
   });
 });
 

@@ -1,4 +1,4 @@
-// Serves /shared/:token/:slug with Open Graph tags so chat apps show a preview
+// Share page with Open Graph tags for link previews
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
@@ -8,11 +8,12 @@ import {
   createSupabase,
   fetchSharedRecipe,
   getOrigin,
+  getPreviewImageUrl,
 } from "./_lib/sharePreview.js";
 
 let cachedIndexHtml = null;
 
-// Reads the built index.html, falling back to fetching it from this deployment
+// Built index.html from disk, else fetched
 const loadIndexHtml = async (origin) => {
   if (cachedIndexHtml) return cachedIndexHtml;
   try {
@@ -48,12 +49,11 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Unknown or revoked links get generic tags so nothing about the recipe leaks
-  // The image route serves the recipe photo or the squirrel card
+  // Generic tags for dead links so nothing leaks
   const preview = recipe
     ? {
         title: recipe.title,
-        imageUrl: `${origin}/api/share-image/${token}`,
+        imageUrl: getPreviewImageUrl(origin, token, recipe),
         pageUrl: `${origin}/shared/${token}${recipe.slug ? `/${recipe.slug}` : ""}`,
       }
     : {
@@ -62,10 +62,8 @@ export default async function handler(req, res) {
         pageUrl: origin,
       };
 
+  // No caching so visibility changes apply immediately
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader(
-    "Cache-Control",
-    "public, max-age=0, s-maxage=60, stale-while-revalidate=60"
-  );
+  res.setHeader("Cache-Control", "no-store");
   res.status(200).send(buildPreviewHtml(html, preview));
 }

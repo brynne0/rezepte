@@ -1,4 +1,4 @@
-// Preview image for a share link: the main photo at 1200x630, or the squirrel card
+// Share preview image: main photo or squirrel card
 import sharp from "sharp";
 import {
   FALLBACK_IMAGE_PATH,
@@ -9,14 +9,14 @@ import {
 } from "./_lib/sharePreview.js";
 
 const sendFallback = (req, res) => {
-  res.setHeader("Cache-Control", "public, max-age=0, s-maxage=300");
+  res.setHeader("Cache-Control", "no-store");
   res.redirect(302, `${getOrigin(req)}${FALLBACK_IMAGE_PATH}`);
 };
 
 export default async function handler(req, res) {
   try {
     const supabase = createSupabase();
-    // The RPC only returns images when photos are shared with anyone with the link
+    // RPC only returns images if photos are link-visible
     const recipe = await fetchSharedRecipe(supabase, req.query.token);
     const imagePath = getMainImagePath(recipe);
     if (!imagePath) return sendFallback(req, res);
@@ -34,11 +34,8 @@ export default async function handler(req, res) {
       .toBuffer();
 
     res.setHeader("Content-Type", "image/jpeg");
-    // Short cache so turning sharing off takes effect within minutes
-    res.setHeader(
-      "Cache-Control",
-      "public, max-age=0, s-maxage=300, stale-while-revalidate=300"
-    );
+    // No caching so hiding photos applies immediately
+    res.setHeader("Cache-Control", "no-store");
     res.status(200).send(image);
   } catch (error) {
     console.error("Share preview image failed:", error);
