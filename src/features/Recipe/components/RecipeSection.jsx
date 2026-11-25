@@ -14,7 +14,7 @@ function RecipeSection({ className, rule = true, ...props }) {
   );
 }
 
-function RecipeSectionLabel({ className, ...props }) {
+function RecipeSectionLabel({ className, children, ...props }) {
   return (
     <h2
       data-slot="recipe-section-label"
@@ -23,7 +23,9 @@ function RecipeSectionLabel({ className, ...props }) {
         className
       )}
       {...props}
-    />
+    >
+      {children}
+    </h2>
   );
 }
 

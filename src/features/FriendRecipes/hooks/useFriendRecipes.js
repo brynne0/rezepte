@@ -25,7 +25,21 @@ const buildFriendCategories = (translatedRecipes, currentLanguage) => {
 
   const usedNames = Array.from(
     new Set(translatedRecipes.flatMap((r) => r.categories ?? []))
-  ).sort();
+  );
+
+  const categories = usedNames.map((name) => {
+    const translations = categoryTranslations[name];
+    let label = name.charAt(0).toUpperCase() + name.slice(1);
+    if (translations && translations[currentLanguage]) {
+      label = translations[currentLanguage];
+    }
+    return { value: name, label };
+  });
+
+  // Sort by displayed label so umlauts and case order correctly
+  categories.sort((a, b) =>
+    a.label.localeCompare(b.label, currentLanguage, { sensitivity: "base" })
+  );
 
   return [
     {
@@ -33,14 +47,7 @@ const buildFriendCategories = (translatedRecipes, currentLanguage) => {
       label: currentLanguage === "de" ? "Alle Rezepte" : "All Recipes",
       isSystem: true,
     },
-    ...usedNames.map((name) => {
-      const translations = categoryTranslations[name];
-      let label = name.charAt(0).toUpperCase() + name.slice(1);
-      if (translations && translations[currentLanguage]) {
-        label = translations[currentLanguage];
-      }
-      return { value: name, label };
-    }),
+    ...categories,
   ];
 };
 

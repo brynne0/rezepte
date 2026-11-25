@@ -97,7 +97,7 @@ export const useSignedImageUrls = (images) => {
       }
     };
 
-    fetchSignedUrls();
+    void fetchSignedUrls();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imagesKey, userId, isOnline]); // Use imagesKey instead of images to prevent infinite loops
 

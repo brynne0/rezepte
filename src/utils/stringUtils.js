@@ -10,3 +10,8 @@ export const toTitleCase = (str) => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
+
+// Dots split the domain, so the regex can't backtrack
+const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
+
+export const isEmail = (input) => EMAIL_REGEX.test(input.trim());

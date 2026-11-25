@@ -22,7 +22,7 @@ export const sanitizeNutritionInput = (value) => {
 // Form value to number for saving; accepts a decimal comma, null if not a number
 export const toNutritionValue = (value) => {
   if (value === "" || value === null || value === undefined) return null;
-  const number = parseFloat(String(value).replace(",", "."));
+  const number = Number.parseFloat(String(value).replace(",", "."));
   return Number.isFinite(number) ? number : null;
 };
 

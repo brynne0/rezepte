@@ -1,5 +1,6 @@
 import supabase from "../lib/supabase";
 import i18n from "../lib/i18n";
+import { isEmail } from "../utils/stringUtils";
 
 // Where the confirmation email lands, e.g. back on a shared recipe
 const confirmationRedirect = (path, language) =>
@@ -53,10 +54,7 @@ export const resendConfirmationEmail = async (email, redirectPath = "/") => {
 
 export const signIn = async (usernameOrEmail, password) => {
   try {
-    // Check if input is an email
-    const isEmailInput = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      usernameOrEmail.trim()
-    );
+    const isEmailInput = isEmail(usernameOrEmail);
 
     let email;
 

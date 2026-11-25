@@ -246,13 +246,13 @@ const ImageUpload = ({
     setFileDragDepth(0);
 
     if (disabled || !isFileDrag(e)) return;
-    handleFileSelect(e.dataTransfer.files);
+    void handleFileSelect(e.dataTransfer.files);
   };
 
   const handleInputChange = (e) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      handleFileSelect(files);
+      void handleFileSelect(files);
     }
     // Reset input so same file can be selected again
     e.target.value = "";

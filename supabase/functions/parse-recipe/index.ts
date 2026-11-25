@@ -11,6 +11,25 @@ const corsHeaders = {
 // Per-user daily cap on autofill (AI recipe parsing) calls.
 const DAILY_AUTOFILL_LIMIT = 50;
 
+// Removes <tag ...>...</tag> blocks in one linear pass
+const stripTagBlocks = (html: string, tag: string): string => {
+  const openRe = new RegExp(`<${tag}[^>]*>`, "gi");
+  const closeRe = new RegExp(`</${tag}>`, "gi");
+  let out = "";
+  let pos = 0;
+  for (;;) {
+    openRe.lastIndex = pos;
+    const open = openRe.exec(html);
+    if (!open) break;
+    closeRe.lastIndex = openRe.lastIndex;
+    const close = closeRe.exec(html);
+    if (!close) break;
+    out += html.slice(pos, open.index);
+    pos = closeRe.lastIndex;
+  }
+  return out + html.slice(pos);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { status: 200, headers: corsHeaders });
@@ -207,9 +226,10 @@ serve(async (req) => {
         // If no structured data found, convert HTML to text
         if (!textToProcess) {
           // Simple HTML to text conversion
-          textToProcess = html
-            .replace(/<script[^>]*>.*?<\/script>/gis, "")
-            .replace(/<style[^>]*>.*?<\/style>/gis, "")
+          textToProcess = stripTagBlocks(
+            stripTagBlocks(html, "script"),
+            "style"
+          )
             .replace(/<[^>]+>/g, " ")
             .replace(/\s+/g, " ")
             .trim();

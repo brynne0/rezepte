@@ -375,7 +375,7 @@ const Recipe = ({ isSharedView = false }) => {
   const servingsInfo = (() => {
     if (!recipe?.servings) return null;
     const str = recipe.servings.toString().trim();
-    const plain = parseInt(str, 10);
+    const plain = Number.parseInt(str, 10);
     if (plain > 0 && plain.toString() === str) {
       return { type: "plain", base: plain };
     }
@@ -383,8 +383,8 @@ const Recipe = ({ isSharedView = false }) => {
     if (rangeMatch) {
       return {
         type: "range",
-        base: parseFloat(rangeMatch[1]),
-        end: parseFloat(rangeMatch[2]),
+        base: Number.parseFloat(rangeMatch[1]),
+        end: Number.parseFloat(rangeMatch[2]),
       };
     }
     return { type: "text", label: str };

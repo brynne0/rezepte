@@ -3,10 +3,16 @@ const URL_REGEX = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
 
 // Trailing punctuation is almost never part of the URL itself (e.g. "see www.example.com."
 // or "(www.example.com)"), so strip it before using the match as an href.
-const TRAILING_PUNCTUATION_REGEX = /[.,;:!?)\]}]+$/;
+const TRAILING_PUNCTUATION = new Set(".,;:!?)]}");
+
+const stripTrailingPunctuation = (url) => {
+  let end = url.length;
+  while (end > 0 && TRAILING_PUNCTUATION.has(url[end - 1])) end--;
+  return url.slice(0, end);
+};
 
 const normalizeUrl = (url) => {
-  const trimmed = url.replace(TRAILING_PUNCTUATION_REGEX, "");
+  const trimmed = stripTrailingPunctuation(url);
   return trimmed.startsWith("www.") ? `https://${trimmed}` : trimmed;
 };
 

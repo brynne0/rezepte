@@ -82,7 +82,7 @@ export const isTranslatable = (value) => {
   if (!value) return false;
   const timeStr = String(value).trim();
   const numericValue = Number(timeStr);
-  return isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
+  return Number.isNaN(numericValue) && !/^\d+\s*-\s*\d+$/.test(timeStr);
 };
 
 // German nouns are always capitalised; other languages use lowercase

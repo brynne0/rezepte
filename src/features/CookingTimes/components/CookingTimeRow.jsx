@@ -38,7 +38,7 @@ const CookingTimeRow = ({
 
     // Check if it's a pure number or range like "40-50"
     const numericValue = Number(timeStr);
-    if (!isNaN(numericValue) || /^\d+\s*-\s*\d+$/.test(timeStr)) {
+    if (!Number.isNaN(numericValue) || /^\d+\s*-\s*\d+$/.test(timeStr)) {
       return `${timeStr} ${unit}`;
     }
 

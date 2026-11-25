@@ -48,7 +48,7 @@ const collectNutrientKeys = (columns) => {
 };
 
 const formatNutrientValue = (value, unit) => {
-  const parsed = parseFloat(value);
+  const parsed = Number.parseFloat(value);
   const display = Number.isNaN(parsed) ? value : parsed;
   return unit ? `${display} ${unit}` : `${display}`;
 };

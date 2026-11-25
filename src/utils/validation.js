@@ -4,12 +4,15 @@ import {
   checkEmailExistsForSignup,
   checkEmailExists,
 } from "../services/userService";
+import { isEmail } from "./stringUtils";
+
+export { isEmail };
 
 export const validateEmail = (email, t) => {
   if (!email.trim()) {
     return t("email_required");
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+  if (!isEmail(email)) {
     return t("email_invalid");
   }
   return null;
@@ -232,9 +235,4 @@ export const validateEmailUniqueForChange = async (email, t) => {
     { label: "email", errorKey: "email_already_exists" },
     t
   );
-};
-
-// Utility function to check if input is an email
-export const isEmail = (input) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
 };

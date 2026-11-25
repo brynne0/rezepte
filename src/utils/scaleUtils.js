@@ -1,4 +1,4 @@
-import { parseFraction, formatQuantity } from "./fractionUtils";
+import { parseFraction, formatQuantity, splitRange } from "./fractionUtils";
 
 // Scale up: if scaled value >= threshold, convert to bigger unit
 const UNIT_UP = {
@@ -22,7 +22,8 @@ const UNIT_DOWN = {
 const METRIC_UNITS = new Set(["ml", "l", "g", "kg"]);
 
 function formatScaledQuantity(value, unit) {
-  if (METRIC_UNITS.has(unit)) return parseFloat(value.toFixed(2)).toString();
+  if (METRIC_UNITS.has(unit))
+    return Number.parseFloat(value.toFixed(2)).toString();
   return formatQuantity(value);
 }
 
@@ -54,11 +55,11 @@ export function scaleIngredient(quantity, unit, multiplier) {
   const str = quantity.toString().trim();
 
   // Handle ranges like "1-2", "1/2 - 1", "2–3"
-  const rangeMatch = str.match(/^(.+?)\s*([-–—])\s*(.+)$/);
-  if (rangeMatch) {
-    const [, startStr, sep, endStr] = rangeMatch;
-    const startVal = parseFraction(startStr.trim());
-    const endVal = parseFraction(endStr.trim());
+  const range = splitRange(str);
+  if (range) {
+    const { sep } = range;
+    const startVal = parseFraction(range.start);
+    const endVal = parseFraction(range.end);
     if (typeof startVal === "number" && typeof endVal === "number") {
       // Scale both ends but keep the original unit (unit conversion is ambiguous for ranges)
       return {
@@ -70,9 +71,9 @@ export function scaleIngredient(quantity, unit, multiplier) {
   }
 
   // Strip a leading ~ (approximately) prefix and reattach after scaling
-  const approxMatch = str.match(/^(~)\s*(.+)$/);
-  const prefix = approxMatch ? "~" : "";
-  const valueStr = approxMatch ? approxMatch[2] : str;
+  const isApprox = str.length > 1 && str.startsWith("~");
+  const prefix = isApprox ? "~" : "";
+  const valueStr = isApprox ? str.slice(1).trimStart() : str;
 
   // Parse single quantity value
   const parsed = parseFraction(valueStr);
@@ -96,7 +97,7 @@ const MULTIPLIER_STEPS = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 6, 8];
 export function getNextMultiplierStep(current, direction) {
   if (direction === 1) {
     const next = MULTIPLIER_STEPS.find((s) => s > current);
-    return next ?? MULTIPLIER_STEPS[MULTIPLIER_STEPS.length - 1];
+    return next ?? MULTIPLIER_STEPS.at(-1);
   } else {
     const prev = [...MULTIPLIER_STEPS].reverse().find((s) => s < current);
     return prev ?? MULTIPLIER_STEPS[0];

@@ -32,7 +32,7 @@ export const useScrollRestoration = (
 
     if (navigationType === "POP" && canRestore) {
       const saved = sessionStorage.getItem(`scroll-${location.key}`);
-      el.scrollTo(0, saved ? parseInt(saved, 10) : 0);
+      el.scrollTo(0, saved ? Number.parseInt(saved, 10) : 0);
     } else {
       el.scrollTo(0, 0);
     }

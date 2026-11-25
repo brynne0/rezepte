@@ -129,7 +129,7 @@ const ChangePassword = () => {
       hashParams.get("refresh_token") || searchParams.get("refresh_token");
 
     // Initialize session handling
-    initializePasswordReset(accessToken, refreshToken);
+    void initializePasswordReset(accessToken, refreshToken);
   }, [fromSettings, t]);
 
   const handleChangePassword = async (e) => {

@@ -197,8 +197,9 @@ const rebuildSource = (sourceParts, sourceTextParts, translatedParts) => {
       const index = sourceTextParts.indexOf(part);
       if (index === -1) return part.text;
       const translated = translatedParts[index] || part.text.trim();
-      const leading = part.text.match(/^\s*/)[0];
-      const trailing = part.text.match(/\s*$/)[0];
+      const { text } = part;
+      const leading = text.slice(0, text.length - text.trimStart().length);
+      const trailing = text.slice(text.trimEnd().length);
       return `${leading}${translated}${trailing}`;
     })
     .join("");

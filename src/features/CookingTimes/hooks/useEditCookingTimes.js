@@ -319,9 +319,9 @@ export const useEditCookingTimes = ({
           ingredient_name: item.ingredient_name.trim(),
           cooking_time: item.cooking_time || null,
           soaking_time: item.soaking_time || null,
-          dry_weight: item.dry_weight ? parseInt(item.dry_weight) : null,
+          dry_weight: item.dry_weight ? Number.parseInt(item.dry_weight) : null,
           cooked_weight: item.cooked_weight
-            ? parseInt(item.cooked_weight)
+            ? Number.parseInt(item.cooked_weight)
             : null,
           notes: item.notes?.trim() || null,
         };
@@ -351,9 +351,9 @@ export const useEditCookingTimes = ({
           ingredient_name: item.ingredient_name.trim(),
           cooking_time: item.cooking_time || null,
           soaking_time: item.soaking_time || null,
-          dry_weight: item.dry_weight ? parseInt(item.dry_weight) : null,
+          dry_weight: item.dry_weight ? Number.parseInt(item.dry_weight) : null,
           cooked_weight: item.cooked_weight
-            ? parseInt(item.cooked_weight)
+            ? Number.parseInt(item.cooked_weight)
             : null,
           notes: item.notes?.trim() || null,
           section_name: item.section_name,

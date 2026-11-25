@@ -67,6 +67,21 @@ export const convertToUnicodeFractions = (input) => {
   return display;
 };
 
+// Splits "1-2" / "1/2 – 1" on the first dash after the first char, or null
+export const splitRange = (input) => {
+  const str = input.toString();
+  for (let i = 1; i < str.length - 1; i++) {
+    if (str[i] === "-" || str[i] === "–" || str[i] === "—") {
+      return {
+        start: str.slice(0, i).trimEnd(),
+        sep: str[i],
+        end: str.slice(i + 1).trimStart(),
+      };
+    }
+  }
+  return null;
+};
+
 // Parses user input and converts fractions to decimal numbers
 export const parseFraction = (input) => {
   if (!input && input !== 0) return "";
@@ -81,8 +96,7 @@ export const parseFraction = (input) => {
   }
 
   // Handle ranges like "1/2 - 1", "1-2", "1/4-1/2"
-  const rangeMatch = str.match(/^(.+?)\s*[-–—]\s*(.+)$/);
-  if (rangeMatch) {
+  if (splitRange(str)) {
     // For ranges, return the original string as-is for display
     // The backend/storage can handle this as needed
     return input;
@@ -92,19 +106,22 @@ export const parseFraction = (input) => {
   const mixedMatch = str.match(/^(\d+)\s+(\d+)\/(\d+)$/);
   if (mixedMatch) {
     const [, whole, numerator, denominator] = mixedMatch;
-    return parseFloat(whole) + parseFloat(numerator) / parseFloat(denominator);
+    return (
+      Number.parseFloat(whole) +
+      Number.parseFloat(numerator) / Number.parseFloat(denominator)
+    );
   }
 
   // Already a decimal or whole number (no spaces)
-  if (!isNaN(str) && !str.includes("/") && !str.includes(" ")) {
-    return parseFloat(str);
+  if (!Number.isNaN(Number(str)) && !str.includes("/") && !str.includes(" ")) {
+    return Number.parseFloat(str);
   }
 
   // Handle simple fractions like "1/4", "3/4"
   const fractionMatch = str.match(/^(\d+)\/(\d+)$/);
   if (fractionMatch) {
     const [, numerator, denominator] = fractionMatch;
-    return parseFloat(numerator) / parseFloat(denominator);
+    return Number.parseFloat(numerator) / Number.parseFloat(denominator);
   }
 
   // Fallback to original input if can't parse
@@ -117,13 +134,12 @@ export const formatQuantity = (decimal) => {
 
   // If input is a string that looks like a range, return as-is
   if (typeof decimal === "string") {
-    const rangeMatch = decimal.match(/^(.+?)\s*[-–—]\s*(.+)$/);
-    if (rangeMatch) {
+    if (splitRange(decimal)) {
       return decimal;
     }
   }
 
-  const num = parseFloat(decimal);
+  const num = Number.parseFloat(decimal);
 
   // Common fractions mapping
   const commonFractions = {
@@ -166,7 +182,7 @@ export const formatQuantity = (decimal) => {
 
   // Check for close matches (within 0.001 to handle floating point precision)
   for (const [decimalKey, fractionValue] of Object.entries(commonFractions)) {
-    if (Math.abs(parseFloat(decimalKey) - num) < 0.001) {
+    if (Math.abs(Number.parseFloat(decimalKey) - num) < 0.001) {
       return fractionValue;
     }
   }
@@ -212,7 +228,7 @@ export const formatQuantity = (decimal) => {
   }
 
   // Fall back to a clean decimal (2dp max, trailing zeros stripped)
-  return parseFloat(num.toFixed(2)).toString();
+  return Number.parseFloat(num.toFixed(2)).toString();
 };
 
 // Helper function to determine if quantity should use plural form
@@ -221,14 +237,13 @@ export const shouldUsePlural = (quantity) => {
   if (!quantity) return false;
 
   // Handle ranges like "1-3", "1/2 - 2"
-  const rangeMatch = quantity.toString().match(/^(.+?)\s*[-–—]\s*(.+)$/);
-  if (rangeMatch) {
-    const [, _, end] = rangeMatch;
-    const endValue = parseFraction(end.trim());
-    return !isNaN(endValue) && endValue > 1;
+  const range = splitRange(quantity);
+  if (range) {
+    const endValue = parseFraction(range.end);
+    return !Number.isNaN(Number(endValue)) && endValue > 1;
   }
 
   // Single value
   const num = parseFraction(quantity);
-  return !isNaN(num) && num > 1;
+  return !Number.isNaN(Number(num)) && num > 1;
 };

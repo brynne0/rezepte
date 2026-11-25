@@ -309,7 +309,7 @@ const FriendsPanel = ({ onNavigate, renderTrigger, tooltipLabel } = {}) => {
                           size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleRemoveFriend(friend.id);
+                            void handleRemoveFriend(friend.id);
                           }}
                           disabled={loadingAction === friend.id}
                           aria-label={t("friends_remove")}

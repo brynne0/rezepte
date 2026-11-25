@@ -559,7 +559,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
                                   onKeyDown={(e) => {
                                     if (e.key === "Enter") {
                                       e.preventDefault();
-                                      handleSaveEditCategory();
+                                      void handleSaveEditCategory();
                                     } else if (e.key === "Escape") {
                                       handleCancelEditCategory();
                                     }

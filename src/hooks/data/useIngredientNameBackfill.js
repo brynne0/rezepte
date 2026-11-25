@@ -87,7 +87,7 @@ export const useIngredientNameBackfill = (recipes, language) => {
         });
         if (results.some(Boolean)) setVersion((v) => v + 1);
       }
-    })();
+    })().catch((err) => console.error("Ingredient name backfill failed:", err));
   }, [recipes, language, isOnline]);
 
   return useMemo(

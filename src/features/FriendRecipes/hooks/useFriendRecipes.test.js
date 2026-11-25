@@ -84,6 +84,36 @@ describe("useFriendRecipes", () => {
     ]);
   });
 
+  test("sorts categories by translated label, handling umlauts and case", async () => {
+    mockUseTranslation.i18n.language = "de";
+    getUserByUsername.mockResolvedValue({ id: "friend-1", username: "alice" });
+    checkFriendship.mockResolvedValue(true);
+    getFriendProfile.mockResolvedValue({ id: "friend-1", first_name: "Alice" });
+    fetchFriendRecipes.mockResolvedValue([
+      {
+        id: "r1",
+        title: "Soup",
+        categories: ["zucker", "dinner", "oil", "Apfel"],
+        categoryTranslations: {
+          dinner: { de: "Abendessen" },
+          oil: { de: "Ölgebäck" },
+        },
+      },
+    ]);
+
+    const { result } = renderUseFriendRecipes("alice");
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.friendCategories.map((c) => c.label)).toEqual([
+      "Alle Rezepte",
+      "Abendessen",
+      "Apfel",
+      "Ölgebäck",
+      "Zucker",
+    ]);
+  });
+
   test("flags recipes the current user has already copied", async () => {
     getUserByUsername.mockResolvedValue({ id: "friend-1", username: "alice" });
     checkFriendship.mockResolvedValue(true);
