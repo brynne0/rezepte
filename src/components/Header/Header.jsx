@@ -402,9 +402,6 @@ const Header = ({ friendBar }) => {
       {showSignupBar && (
         <div className="border-t border-b" data-testid="shared-signup-bar">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-3 py-2 text-center text-sm md:px-8">
-            <span className="-rotate-3 rounded border-[1.5px] border-accent-red px-1.5 pt-1 pb-0.5 font-receipt text-[11px] leading-none tracking-[0.16em] text-accent-red uppercase">
-              {t("shared_signup_free")}
-            </span>
             <span>{t("shared_signup_prompt")}</span>
             <Button
               variant="printed"

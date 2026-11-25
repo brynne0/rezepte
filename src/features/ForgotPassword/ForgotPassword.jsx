@@ -4,7 +4,6 @@ import { useLocation } from "react-router-dom";
 import { Mail } from "lucide-react";
 import { forgotPassword } from "../../services/auth";
 import { validateForgotPasswordForm } from "../../utils/validation";
-import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -81,10 +80,6 @@ const ForgotPassword = () => {
       setResendMessage("");
     }, 3000);
   };
-
-  if (loading) {
-    return <LoadingAcorn />;
-  }
 
   return (
     <div className="mx-auto mt-20 max-w-sm">

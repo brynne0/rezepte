@@ -1,10 +1,4 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  waitForElementToBeRemoved,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import ForgotPassword from "./ForgotPassword";
@@ -23,10 +17,6 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key) => key,
   }),
-}));
-
-vi.mock("../../components/LoadingAcorn/LoadingAcorn", () => ({
-  default: () => <div data-testid="loading-acorn">Loading...</div>,
 }));
 
 const mockNavigate = vi.fn();
@@ -174,10 +164,12 @@ describe("ForgotPassword", () => {
     fireEvent.change(emailInput, { target: { value: "test@example.com" } });
     fireEvent.click(submitButton);
 
-    expect(screen.getByTestId("loading-acorn")).toBeInTheDocument();
+    // Form stays visible with a disabled button while sending
+    expect(screen.getByLabelText("email")).toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
 
-    await waitForElementToBeRemoved(
-      () => screen.queryByTestId("loading-acorn"),
+    await waitFor(
+      () => expect(screen.getByText("password_reset_sent")).toBeInTheDocument(),
       { timeout: 2000 }
     );
   });
