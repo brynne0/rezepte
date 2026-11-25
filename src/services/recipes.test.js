@@ -672,7 +672,7 @@ describe("recipes service", () => {
           source: "Grandma's book",
           user_id: currentUser.id,
           images: [],
-          private: false,
+          visibility: "friends",
           copied_from_recipe_id: "r1",
           copied_from_name: "Jane",
         }),

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import Auth from "./Auth";
 
 // Create mock functions
@@ -944,6 +944,42 @@ describe("Auth", () => {
       await waitFor(() => {
         expect(usernameInput).toHaveAttribute("aria-invalid", "true");
       });
+    });
+  });
+  describe("Back to shared recipe", () => {
+    it("shows a back link when sent from a shared recipe", () => {
+      render(
+        <MemoryRouter
+          initialEntries={[
+            { pathname: "/login", state: { from: "/shared/tok/dal" } },
+          ]}
+        >
+          <Auth />
+        </MemoryRouter>
+      );
+
+      fireEvent.click(screen.getByText("back_to_recipe"));
+      expect(mockNavigate).toHaveBeenCalledWith("/shared/tok/dal");
+    });
+
+    it("has no back link on a normal visit", () => {
+      render(<AuthWrapper />);
+
+      expect(screen.queryByText("back_to_recipe")).not.toBeInTheDocument();
+    });
+
+    it("ignores external return paths", () => {
+      render(
+        <MemoryRouter
+          initialEntries={[
+            { pathname: "/login", state: { from: "//evil.example" } },
+          ]}
+        >
+          <Auth />
+        </MemoryRouter>
+      );
+
+      expect(screen.queryByText("back_to_recipe")).not.toBeInTheDocument();
     });
   });
 });

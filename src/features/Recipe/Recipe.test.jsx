@@ -23,7 +23,7 @@ vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
-    useParams: () => ({ id: "test-recipe-id" }),
+    useParams: () => mockParams,
     useNavigate: () => mockNavigate,
   };
 });
@@ -67,6 +67,13 @@ vi.mock("../../hooks/data/useRecipe", () => ({
   },
 }));
 
+vi.mock("../../hooks/data/useSharedRecipe", () => ({
+  useSharedRecipe: (token) =>
+    token
+      ? mockSharedRecipeHook
+      : { recipe: null, loading: false, error: null },
+}));
+
 vi.mock("../../hooks/data/useAuth", () => ({
   useAuth: () => mockAuth,
 }));
@@ -97,18 +104,23 @@ vi.mock("@/components/ui/toast", () => ({
   toast: { add: (...args) => mockToastAdd(...args) },
 }));
 
-const mockSetRecipePrivate = vi.fn();
+const mockSetRecipeVisibility = vi.fn();
 const mockCopyRecipeFromFriend = vi.fn();
 const mockFindCopiedRecipe = vi.fn();
 vi.mock("../../services/recipes", () => ({
-  setRecipePrivate: (...args) => mockSetRecipePrivate(...args),
+  setRecipeVisibility: (...args) => mockSetRecipeVisibility(...args),
   copyRecipeFromFriend: (...args) => mockCopyRecipeFromFriend(...args),
   findCopiedRecipe: (...args) => mockFindCopiedRecipe(...args),
+  getShareUrl: (token, slug) => `https://app.test/shared/${token}/${slug}`,
 }));
 
 const mockGetFriendProfile = vi.fn();
+const mockCheckFriendship = vi.fn();
+const mockSendFriendRequest = vi.fn();
 vi.mock("../../services/friendsService", () => ({
   getFriendProfile: (...args) => mockGetFriendProfile(...args),
+  checkFriendship: (...args) => mockCheckFriendship(...args),
+  sendFriendRequest: (...args) => mockSendFriendRequest(...args),
 }));
 
 vi.mock("@/hooks/data/useCategories", () => ({
@@ -119,7 +131,9 @@ vi.mock("@/hooks/data/useCategories", () => ({
 
 // Mock variables
 let mockNavigate;
+let mockParams;
 let mockRecipeHook;
+let mockSharedRecipeHook;
 let mockAuth;
 let mockSetFriendBar;
 
@@ -135,6 +149,9 @@ describe("Recipe Component", () => {
 
     // Default mock values
     mockNavigate = vi.fn();
+    mockParams = { id: "test-recipe-id" };
+    mockSharedRecipeHook = { recipe: null, loading: false, error: null };
+    mockCheckFriendship.mockResolvedValue(false);
     mockLanguage = "en";
     mockAuth = {
       isLoggedIn: false,
@@ -150,13 +167,13 @@ describe("Recipe Component", () => {
     mockFindCopiedRecipe.mockResolvedValue(null);
   });
 
-  const renderRecipe = () => {
+  const renderRecipe = (props = {}) => {
     const queryClient = createTestQueryClient();
     return render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AppStateContext.Provider value={{ setFriendBar: mockSetFriendBar }}>
-            <Recipe />
+            <Recipe {...props} />
           </AppStateContext.Provider>
         </BrowserRouter>
       </QueryClientProvider>
@@ -317,15 +334,14 @@ describe("Recipe Component", () => {
       );
     });
 
-    test("hides the edit, copy, and privacy-toggle buttons when viewing someone else's recipe", () => {
+    test("hides the edit, copy, share and visibility buttons when viewing someone else's recipe", () => {
       mockAuth.user = { id: "some-other-user" };
       renderRecipe();
 
       expect(screen.queryByTestId("edit-recipe-btn")).not.toBeInTheDocument();
       expect(screen.queryByTestId("share-recipe-btn")).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId("toggle-private-btn")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("share-link-btn")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("visibility-btn")).not.toBeInTheDocument();
     });
 
     test("tells Header it's showing a friend's recipe when viewing someone else's", () => {
@@ -608,49 +624,224 @@ describe("Recipe Component", () => {
     });
   });
 
-  describe("Recipe Privacy Toggle", () => {
+  describe("Recipe Visibility", () => {
     beforeEach(() => {
       mockRecipeHook.recipe = mockRecipeData;
     });
 
-    test("marks a public recipe as private when clicked", async () => {
-      mockSetRecipePrivate.mockResolvedValue(true);
+    test("shows the current visibility on the menu button", () => {
+      mockRecipeHook.recipe = { ...mockRecipeData, visibility: "private" };
       renderRecipe();
 
-      fireEvent.click(screen.getByTestId("toggle-private-btn"));
+      expect(screen.getByTestId("visibility-btn")).toHaveTextContent(
+        "recipe_status_private"
+      );
+    });
+
+    test("changes visibility from the menu", async () => {
+      mockSetRecipeVisibility.mockResolvedValue(null);
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      fireEvent.click(await screen.findByTestId("visibility-private"));
 
       await waitFor(() => {
-        expect(mockSetRecipePrivate).toHaveBeenCalledWith("recipe-1", true);
+        expect(mockSetRecipeVisibility).toHaveBeenCalledWith(
+          "recipe-1",
+          "private"
+        );
       });
     });
 
-    test("makes a private recipe visible to friends again when clicked", async () => {
-      mockSetRecipePrivate.mockResolvedValue(true);
-      mockRecipeHook.recipe = { ...mockRecipeData, private: true };
+    test("reverts the visibility if the update fails", async () => {
+      mockSetRecipeVisibility.mockRejectedValue(new Error("network error"));
       renderRecipe();
 
-      fireEvent.click(screen.getByTestId("toggle-private-btn"));
-
-      await waitFor(() => {
-        expect(mockSetRecipePrivate).toHaveBeenCalledWith("recipe-1", false);
-      });
-    });
-
-    test("reverts the toggle if the update fails", async () => {
-      mockSetRecipePrivate.mockRejectedValue(new Error("network error"));
-      renderRecipe();
-
-      const toggleButton = screen.getByTestId("toggle-private-btn");
-      fireEvent.click(toggleButton);
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      fireEvent.click(await screen.findByTestId("visibility-private"));
 
       await waitFor(() => {
         expect(mockToastAdd).toHaveBeenCalledWith(
           expect.objectContaining({ type: "error" })
         );
       });
+      expect(screen.getByTestId("visibility-btn")).toHaveTextContent(
+        "recipe_status_friends"
+      );
+    });
+  });
 
-      // Reverted to visible to friends: the button reads what it shows
-      expect(toggleButton).toHaveAccessibleName("recipe_status_friends");
+  describe("Share Link", () => {
+    beforeEach(() => {
+      mockRecipeHook.recipe = mockRecipeData;
+      delete navigator.share;
+    });
+
+    test("only shows the link once 'Anyone with link' is chosen", async () => {
+      mockSetRecipeVisibility.mockResolvedValue("tok123");
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      await screen.findByTestId("visibility-link");
+      expect(screen.queryByTestId("share-link-input")).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId("visibility-link"));
+
+      expect(await screen.findByTestId("share-link-input")).toHaveValue(
+        "https://app.test/shared/tok123/test-recipe"
+      );
+      expect(mockSetRecipeVisibility).toHaveBeenCalledWith("recipe-1", "link");
+
+      fireEvent.click(screen.getByTestId("share-link-btn"));
+      await waitFor(() => {
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          "https://app.test/shared/tok123/test-recipe"
+        );
+      });
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "share_link_copied" })
+      );
+    });
+
+    test("reuses the existing link without changing visibility", async () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        visibility: "link",
+        share_token: "existing",
+      };
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      fireEvent.click(await screen.findByTestId("share-link-btn"));
+
+      await waitFor(() => {
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          "https://app.test/shared/existing/test-recipe"
+        );
+      });
+      expect(mockSetRecipeVisibility).not.toHaveBeenCalled();
+    });
+
+    test("opens the native share sheet when available", async () => {
+      navigator.share = vi.fn(() => Promise.resolve());
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        visibility: "link",
+        share_token: "existing",
+      };
+      renderRecipe();
+
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      fireEvent.click(await screen.findByTestId("share-link-btn"));
+
+      await waitFor(() => {
+        expect(navigator.share).toHaveBeenCalledWith({
+          title: "Test Recipe",
+          url: "https://app.test/shared/existing/test-recipe",
+        });
+      });
+      delete navigator.share;
+    });
+  });
+
+  describe("Shared View", () => {
+    const sharedRecipe = {
+      ...mockRecipeData,
+      user_id: "owner-1",
+      visibility: "link",
+      share_token: "tok",
+      owner: {
+        id: "owner-1",
+        username: "anna",
+        first_name: "Anna",
+        friends_can_view_images: true,
+      },
+    };
+
+    beforeEach(() => {
+      mockParams = { shareToken: "tok", slug: "test-recipe" };
+      mockSharedRecipeHook = {
+        recipe: sharedRecipe,
+        loading: false,
+        error: null,
+      };
+    });
+
+    test("shows the recipe to signed-out viewers without owner or save actions", () => {
+      mockAuth = { isLoggedIn: false, user: null };
+      renderRecipe({ isSharedView: true });
+
+      expect(screen.getByText("Test Recipe")).toBeInTheDocument();
+      expect(screen.getByText("shared_by")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("add-to-my-recipes-btn")
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("edit-recipe-btn")).not.toBeInTheDocument();
+    });
+
+    test("shows an inactive-link message when the link was turned off", () => {
+      mockSharedRecipeHook = {
+        recipe: null,
+        loading: false,
+        error: "SHARED_RECIPE_NOT_FOUND",
+      };
+      renderRecipe({ isSharedView: true });
+
+      expect(screen.getByText("shared_recipe_not_found")).toBeInTheDocument();
+    });
+
+    test("lets a signed-in non-friend save and send a friend request", async () => {
+      mockAuth = { isLoggedIn: true, user: { id: "stranger" } };
+      mockSendFriendRequest.mockResolvedValue();
+      renderRecipe({ isSharedView: true });
+
+      expect(
+        await screen.findByTestId("add-to-my-recipes-btn")
+      ).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId("add-friend-btn"));
+
+      await waitFor(() => {
+        expect(mockSendFriendRequest).toHaveBeenCalledWith("owner-1");
+      });
+      expect(screen.getByTestId("add-friend-btn")).toHaveTextContent(
+        "friend_request_sent"
+      );
+    });
+
+    test("redirects friends to the full recipe page", async () => {
+      mockAuth = { isLoggedIn: true, user: { id: "friend-1" } };
+      mockCheckFriendship.mockResolvedValue(true);
+      renderRecipe({ isSharedView: true });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith("/recipe-1/test-recipe", {
+          replace: true,
+        });
+      });
+    });
+
+    test("redirects the owner to the full recipe page", async () => {
+      mockAuth = { isLoggedIn: true, user: { id: "owner-1" } };
+      renderRecipe({ isSharedView: true });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith("/recipe-1/test-recipe", {
+          replace: true,
+        });
+      });
+    });
+
+    test("follows the owner's photo setting for images", () => {
+      mockAuth = { isLoggedIn: false, user: null };
+      mockSharedRecipeHook.recipe = {
+        ...sharedRecipe,
+        images: [{ id: 1, url: "a.jpg" }],
+        owner: { ...sharedRecipe.owner, friends_can_view_images: false },
+      };
+      renderRecipe({ isSharedView: true });
+
+      expect(screen.queryByTestId("image-gallery")).not.toBeInTheDocument();
     });
   });
 

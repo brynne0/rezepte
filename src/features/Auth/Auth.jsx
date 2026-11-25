@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Mail, User, ChefHat, Lock, Eye, EyeOff } from "lucide-react";
 import { signUp, signIn, resendConfirmationEmail } from "../../services/auth";
 import {
@@ -10,6 +10,7 @@ import {
 } from "../../utils/validation";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
+import BackLink from "../../components/BackLink/BackLink";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/toast";
@@ -63,7 +64,14 @@ const Auth = () => {
   const [isResending, setIsResending] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, i18n } = useTranslation();
+  // Only follow in-app paths (e.g. back to a shared recipe)
+  const from = location.state?.from;
+  const returnTo =
+    typeof from === "string" && from.startsWith("/") && !from.startsWith("//")
+      ? from
+      : "/";
 
   const hasUnsavedChanges =
     isSignUpMode &&
@@ -118,7 +126,7 @@ const Auth = () => {
         // Clear form fields and navigate
         setUsername("");
         setPassword("");
-        navigate("/");
+        navigate(returnTo);
       }, 1000);
     }
 
@@ -231,6 +239,14 @@ const Auth = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-sm">
+      {/* Only when sent here from a shared recipe */}
+      {returnTo !== "/" && (
+        <BackLink
+          label={t("back_to_recipe")}
+          onClick={() => navigate(returnTo)}
+          className="mb-2"
+        />
+      )}
       <Card className="w-full">
         <CardHeader className="flex flex-col items-stretch gap-4">
           <div className="flex w-full items-center justify-center">

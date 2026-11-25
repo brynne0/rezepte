@@ -679,4 +679,37 @@ describe("Header Component", () => {
       expect(addButton).toBeInTheDocument();
     });
   });
+  describe("Shared recipe sign-up bar", () => {
+    const renderOn = (pathname, isLoggedIn) => {
+      useLocation.mockReturnValue({ pathname });
+      mockUseAuth.mockReturnValue({ isLoggedIn, loading: false });
+      render(
+        <TestWrapper>
+          <Header {...defaultProps} />
+        </TestWrapper>
+      );
+    };
+
+    test("shows for signed-out visitors on a shared recipe", () => {
+      renderOn("/shared/tok/red-lentil-dal", false);
+
+      expect(screen.getByTestId("shared-signup-bar")).toBeInTheDocument();
+      fireEvent.click(screen.getByText("shared_signup_action"));
+      expect(mockNavigate).toHaveBeenCalledWith("/login", {
+        state: { from: "/shared/tok/red-lentil-dal" },
+      });
+    });
+
+    test("hides when signed in", () => {
+      renderOn("/shared/tok/red-lentil-dal", true);
+
+      expect(screen.queryByTestId("shared-signup-bar")).not.toBeInTheDocument();
+    });
+
+    test("hides on other pages", () => {
+      renderOn("/login", false);
+
+      expect(screen.queryByTestId("shared-signup-bar")).not.toBeInTheDocument();
+    });
+  });
 });

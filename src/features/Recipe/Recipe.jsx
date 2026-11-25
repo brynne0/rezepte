@@ -7,8 +7,9 @@ import {
   Minus,
   Plus,
   WifiOff,
-  Lock,
-  LockOpen,
+  Link as LinkIcon,
+  UserPlus,
+  UserCheck,
   BookmarkCheck,
   BookmarkPlus,
   Languages,
@@ -16,12 +17,18 @@ import {
 
 import { AppStateContext } from "../../contexts/AppStateContext";
 import { useRecipe } from "../../hooks/data/useRecipe";
+import { useSharedRecipe } from "../../hooks/data/useSharedRecipe";
 import {
-  setRecipePrivate,
+  setRecipeVisibility,
   copyRecipeFromFriend,
   findCopiedRecipe,
+  getShareUrl,
 } from "../../services/recipes";
-import { getFriendProfile } from "../../services/friendsService";
+import {
+  getFriendProfile,
+  checkFriendship,
+  sendFriendRequest,
+} from "../../services/friendsService";
 import BackLink from "../../components/BackLink/BackLink";
 import AddToMyRecipesModal from "../../components/AddToMyRecipesModal/AddToMyRecipesModal";
 import { useAuth } from "../../hooks/data/useAuth";
@@ -42,6 +49,7 @@ import { linkifyText } from "../../utils/linkUtils";
 import { recipeToText } from "../../utils/recipeToText";
 import { useWakeLock } from "./hooks/useWakeLock";
 import NutritionPanel from "./components/NutritionPanel";
+import SharePanel from "./components/SharePanel";
 import { toast } from "@/components/ui/toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -55,11 +63,6 @@ import {
 } from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useOnlineStatus } from "../../hooks/ui/useOnlineStatus";
 import { RecipeSection, RecipeSectionLabel } from "./components/RecipeSection";
 import {
@@ -69,15 +72,21 @@ import {
 
 const RECIPE_STATE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-const Recipe = () => {
-  const { id } = useParams();
+const Recipe = ({ isSharedView = false }) => {
+  const { id, shareToken } = useParams();
   const [showOriginal, setShowOriginal] = useState(false);
+  const ownRecipe = useRecipe(isSharedView ? null : id, {
+    original: showOriginal,
+  });
+  const sharedRecipe = useSharedRecipe(isSharedView ? shareToken : null, {
+    original: showOriginal,
+  });
   const {
     recipe,
     loading,
     switching: switchingVersion,
     error,
-  } = useRecipe(id, { original: showOriginal });
+  } = isSharedView ? sharedRecipe : ownRecipe;
   const {
     active: wakeLockActive,
     supported: wakeLockSupported,
@@ -85,15 +94,19 @@ const Recipe = () => {
   } = useWakeLock();
   const [multiplier, setMultiplier] = useState(1);
   const [checkedIngredients, setCheckedIngredients] = useState({});
-  const [privateOverride, setPrivateOverride] = useState(null);
-  const recipeStorageKey = id;
+  const [visibilityOverride, setVisibilityOverride] = useState(null);
+  const [shareTokenOverride, setShareTokenOverride] = useState(null);
+  const [friendRequestSent, setFriendRequestSent] = useState(false);
+  const recipeStorageKey = isSharedView ? `shared-${shareToken}` : id;
   const isOnline = useOnlineStatus();
 
   // Reset per-recipe view state when navigating to a different recipe
   useEffect(() => {
-    setPrivateOverride(null);
+    setVisibilityOverride(null);
+    setShareTokenOverride(null);
+    setFriendRequestSent(false);
     setShowOriginal(false);
-  }, [id]);
+  }, [recipeStorageKey]);
 
   // Restore ticked-off ingredients for this recipe (ignored once older than
   // RECIPE_STATE_MAX_AGE_MS, so a stale cooking session doesn't linger)
@@ -138,7 +151,7 @@ const Recipe = () => {
   };
 
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoggedIn } = useAuth();
   const { t, i18n } = useTranslation();
   const { setFriendBar } = useContext(AppStateContext);
   const queryClient = useQueryClient();
@@ -147,7 +160,29 @@ const Recipe = () => {
   const [isCopying, setIsCopying] = useState(false);
 
   const isOwner = !!user?.id && recipe?.user_id === user?.id;
-  const isPrivate = privateOverride ?? recipe?.private ?? false;
+  const visibility = visibilityOverride ?? recipe?.visibility ?? "friends";
+  const recipeShareToken = shareTokenOverride ?? recipe?.share_token;
+  const shareUrl =
+    visibility === "link" && recipeShareToken
+      ? getShareUrl(recipeShareToken, recipe?.slug)
+      : null;
+  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+  // Signed-out shared viewers only ever get the original language
+  const canSwitchLanguage = !isSharedView || isLoggedIn;
+
+  // On a shared link, owners and friends get the full recipe page instead
+  const sharedOwnerId = isSharedView ? recipe?.owner?.id : null;
+  const { data: isFriendOfOwner, isLoading: friendCheckLoading } = useQuery({
+    queryKey: ["isFriend", sharedOwnerId],
+    queryFn: () => checkFriendship(sharedOwnerId),
+    enabled: !!sharedOwnerId && isLoggedIn && !isOwner,
+  });
+  const redirectToFullPage = isSharedView && (isOwner || !!isFriendOfOwner);
+  useEffect(() => {
+    if (redirectToFullPage) {
+      navigate(`/${recipe.id}/${recipe.slug}`, { replace: true });
+    }
+  }, [redirectToFullPage, recipe, navigate]);
 
   // Recipes written in another language can be flipped back to the original
   const appLanguage = i18n.language.split("-")[0];
@@ -161,15 +196,18 @@ const Recipe = () => {
 
   // When viewing a friend's recipe, show the "viewing a friend" banner in
   // Header (fetching their profile for the name pill); hide it for your own.
-  const showFriendBar = !!recipe && !isOwner;
+  const showFriendBar = !!recipe && !isOwner && !isSharedView;
   const { data: friendProfile, isLoading: friendProfileLoading } = useQuery({
     queryKey: ["friendProfile", recipe?.user_id],
     queryFn: () => getFriendProfile(recipe.user_id),
     enabled: showFriendBar,
   });
 
-  // Show images for the owner, or for a friend who has image sharing enabled.
-  const canViewImages = isOwner || !!friendProfile?.friends_can_view_images;
+  // Show images for the owner, or when the owner shares photos with
+  // friends (link viewers follow the same setting).
+  const canViewImages =
+    isOwner ||
+    !!(isSharedView ? recipe?.owner : friendProfile)?.friends_can_view_images;
   const { signedImages } = useSignedImageUrls(
     canViewImages ? recipe?.images : []
   );
@@ -178,7 +216,7 @@ const Recipe = () => {
   const { data: existingCopy } = useQuery({
     queryKey: ["copiedRecipe", recipe?.id],
     queryFn: () => findCopiedRecipe(recipe.id),
-    enabled: showFriendBar,
+    enabled: showFriendBar || (isSharedView && isLoggedIn && !isOwner),
   });
 
   const existingCopyDate = existingCopy
@@ -206,23 +244,57 @@ const Recipe = () => {
     return () => setFriendBar(null);
   }, [showFriendBar, friendProfile, friendProfileLoading, setFriendBar]);
 
-  const handleTogglePrivate = async () => {
-    const next = !isPrivate;
-    setPrivateOverride(next);
+  const handleVisibilityChange = async (next) => {
+    if (next === visibility) return;
+    const previous = visibility;
+    setVisibilityOverride(next);
     try {
-      await setRecipePrivate(recipe.id, next);
-      toast.add({
-        title: next
-          ? t("recipe_marked_private")
-          : t("recipe_visible_to_friends"),
-        type: "success",
-      });
+      const token = await setRecipeVisibility(recipe.id, next);
+      if (token) setShareTokenOverride(token);
+      // No success toast: the panel itself shows the new state
+      queryClient.invalidateQueries({ queryKey: ["recipe", id] });
     } catch {
-      setPrivateOverride(!next);
+      setVisibilityOverride(previous);
       toast.add({
         title: t("recipe_privacy_update_failed"),
         type: "error",
       });
+    }
+  };
+
+  // Opens the share sheet where available, otherwise copies the URL
+  const handleShareLink = async () => {
+    if (!shareUrl) return;
+    if (canNativeShare) {
+      try {
+        await navigator.share({ title: recipe.title, url: shareUrl });
+      } catch (err) {
+        if (err?.name !== "AbortError") {
+          toast.add({ title: t("share_link_failed"), type: "error" });
+        }
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.add({ title: t("share_link_copied"), type: "success" });
+    } catch {
+      toast.add({ title: t("share_link_failed"), type: "error" });
+    }
+  };
+
+  const handleAddFriend = async () => {
+    try {
+      await sendFriendRequest(recipe.owner.id);
+      setFriendRequestSent(true);
+      toast.add({ title: t("friend_request_sent"), type: "success" });
+    } catch (err) {
+      // Unique violation: a request between you already exists
+      if (err?.code === "23505") {
+        setFriendRequestSent(true);
+        return;
+      }
+      toast.add({ title: t("friend_request_failed"), type: "error" });
     }
   };
 
@@ -231,7 +303,10 @@ const Recipe = () => {
     try {
       const newRecipe = await copyRecipeFromFriend(recipe.id, {
         categoryNames,
-        friendFirstName: friendProfile?.first_name,
+        friendFirstName: isSharedView
+          ? recipe.owner?.first_name
+          : friendProfile?.first_name,
+        shareToken: isSharedView ? shareToken : undefined,
       });
       queryClient.invalidateQueries({ queryKey: ["recipes"] });
       queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -337,6 +412,15 @@ const Recipe = () => {
     return { ...rest, quantity, unit, is_plural };
   };
 
+  // Shared views only link to other recipes that are link-shared too
+  const linkedRecipeHref = (linked) => {
+    if (!linked) return null;
+    if (!isSharedView) return `/${linked.id}/${linked.slug}`;
+    return linked.share_token
+      ? `/shared/${linked.share_token}/${linked.slug}`
+      : null;
+  };
+
   // Helper to render an ingredient item
   const renderIngredientItem = (ingredient, keyPrefix, index) => {
     const scaled = getScaledIngredient(ingredient);
@@ -365,10 +449,10 @@ const Recipe = () => {
           <span className="font-semibold">{measurement}</span>
           {measurement && " "}
 
-          {ingredient.linked_recipe ? (
+          {linkedRecipeHref(ingredient.linked_recipe) ? (
             <a
               className="text-muted-foreground inline-flex items-center gap-1 underline decoration-2 underline-offset-2 transition-colors hover:text-accent-red"
-              href={`/${ingredient.linked_recipe.id}/${ingredient.linked_recipe.slug}`}
+              href={linkedRecipeHref(ingredient.linked_recipe)}
               onClick={(e) => e.stopPropagation()}
             >
               {getIngredientDisplayName(scaled, displayLanguage)}
@@ -385,8 +469,24 @@ const Recipe = () => {
     );
   };
 
-  if (loading) {
+  if (
+    loading ||
+    redirectToFullPage ||
+    (isSharedView && isLoggedIn && !isOwner && friendCheckLoading)
+  ) {
     return <LoadingAcorn />;
+  }
+  if (error === "SHARED_RECIPE_NOT_FOUND") {
+    return (
+      <Empty className="mt-20">
+        <EmptyHeader>
+          <EmptyMedia>
+            <LinkIcon />
+          </EmptyMedia>
+          <EmptyTitle>{t("shared_recipe_not_found")}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    );
   }
   if (error) {
     if (!isOnline) {
@@ -415,7 +515,10 @@ const Recipe = () => {
     (recipe.ingredients && recipe.ingredients.length > 0);
 
   // Back link names where it leads: your recipes, or the friend's
-  const friendName = !isOwner ? friendProfile?.first_name : null;
+  const friendName =
+    !isOwner && !isSharedView ? friendProfile?.first_name : null;
+  const sharedOwnerName = isSharedView ? recipe.owner?.first_name : null;
+  const isSharedGuest = isSharedView && !isOwner;
   const backLabel = friendName
     ? t("recipe_action_back_friend", { name: friendName })
     : t("recipe_action_back");
@@ -427,11 +530,13 @@ const Recipe = () => {
   return (
     <>
       {/* Navigation sits off the paper; the receipt only holds the recipe */}
-      <BackLink
-        label={backLabel}
-        fallback={backFallback}
-        className="mx-auto max-w-3xl"
-      />
+      {(!isSharedView || isLoggedIn) && (
+        <BackLink
+          label={backLabel}
+          fallback={backFallback}
+          className="mx-auto max-w-3xl"
+        />
+      )}
 
       <Card
         size="lg"
@@ -456,14 +561,17 @@ const Recipe = () => {
                   })}
                 </span>
               )}
+              {isSharedGuest && sharedOwnerName && (
+                <span className="text-sm font-medium text-muted-foreground">
+                  {t("shared_by", { name: sharedOwnerName })}
+                </span>
+              )}
               <CardTitle className="text-accent-red font-receipt [word-wrap:break-word] text-xl leading-snug font-semibold md:text-2xl">
                 {recipe.title}
               </CardTitle>
             </div>
 
-            {/* Actions printed as text links under the title. Only the privacy
-                link has a tooltip: its label shows the state, the tooltip says
-                what tapping it does. */}
+            {/* Actions printed as text links under the title */}
             <div className="-ml-2.5 flex flex-wrap items-center">
               {isOwner && (
                 <>
@@ -490,32 +598,18 @@ const Recipe = () => {
                   >
                     {t("recipe_action_copy")}
                   </Button>
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="printed"
-                          onClick={handleTogglePrivate}
-                          data-testid="toggle-private-btn"
-                          disabled={!isOnline}
-                        >
-                          {isPrivate ? <Lock /> : <LockOpen />}
-                          {isPrivate
-                            ? t("recipe_status_private")
-                            : t("recipe_status_friends")}
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>
-                      {isPrivate
-                        ? t("make_recipe_visible_to_friends")
-                        : t("make_recipe_private")}
-                    </TooltipContent>
-                  </Tooltip>
+                  <SharePanel
+                    visibility={visibility}
+                    shareUrl={shareUrl}
+                    disabled={!isOnline}
+                    canNativeShare={canNativeShare}
+                    onVisibilityChange={handleVisibilityChange}
+                    onShareLink={handleShareLink}
+                  />
                 </>
               )}
 
-              {!isOwner && (
+              {!isOwner && (!isSharedView || isLoggedIn) && (
                 <>
                   {existingCopy && (
                     <Button
@@ -540,10 +634,23 @@ const Recipe = () => {
                     <BookmarkPlus />
                     {t("save")}
                   </Button>
+                  {isSharedGuest && (
+                    <Button
+                      variant="printed"
+                      onClick={handleAddFriend}
+                      disabled={!isOnline || friendRequestSent}
+                      data-testid="add-friend-btn"
+                    >
+                      {friendRequestSent ? <UserCheck /> : <UserPlus />}
+                      {friendRequestSent
+                        ? t("friend_request_sent")
+                        : t("add_as_friend", { name: sharedOwnerName })}
+                    </Button>
+                  )}
                 </>
               )}
 
-              {isForeignRecipe && (
+              {isForeignRecipe && canSwitchLanguage && (
                 <Button
                   variant="printed"
                   onClick={() => setShowOriginal((prev) => !prev)}

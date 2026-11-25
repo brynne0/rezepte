@@ -502,6 +502,12 @@ export const fetchRecipe = async (id) => {
     throw error;
   }
 
+  return shapeRecipe(data);
+};
+
+// Flatten a recipe row (nested recipe_ingredients/recipe_categories) into the
+// shape the UI uses: grouped ingredient sections and category names.
+const shapeRecipe = (data) => {
   // Transform ingredients to hierarchical structure grouped by subheading
   const ingredientsList =
     data.recipe_ingredients
@@ -575,6 +581,21 @@ export const fetchRecipe = async (id) => {
 
   return transformedData;
 };
+
+// Load a link-shared recipe by its share token (works signed out)
+export const fetchSharedRecipe = async (token) => {
+  const { data, error } = await supabase.rpc("get_shared_recipe", {
+    p_token: token,
+  });
+
+  if (error) throw error;
+  if (!data) throw new Error("SHARED_RECIPE_NOT_FOUND");
+
+  return shapeRecipe(data);
+};
+
+export const getShareUrl = (token, slug) =>
+  `${window.location.origin}/shared/${token}${slug ? `/${slug}` : ""}`;
 
 // Escape % and _ so a typed name isn't read as an ILIKE wildcard
 const escapeForIlike = (value) => value.replace(/[%_]/g, "\\$&");
@@ -1367,27 +1388,27 @@ export const deleteRecipe = async (id) => {
   return true;
 };
 
-// Hides (or unhides) a recipe from friends. A targeted single-field update,
-// separate from updateRecipe, which doesn't touch this field.
-export const setRecipePrivate = async (id, isPrivate) => {
-  const { error } = await supabase
-    .from("recipes")
-    .update({ private: isPrivate })
-    .eq("id", id);
+// Set who can see a recipe ('private' | 'friends' | 'link'); returns the share token
+export const setRecipeVisibility = async (id, visibility) => {
+  const { data, error } = await supabase.rpc("set_recipe_visibility", {
+    p_recipe_id: id,
+    p_visibility: visibility,
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return true;
+  return data;
 };
 
 // Create an independent copy of a friend's recipe for the current user.
 // Ingredients are reused by id, no images are copied, and attribution is
 // stored separately in copied_from_name rather than in the source field.
+// Pass shareToken to copy a link-shared recipe from someone who isn't a friend.
 export const copyRecipeFromFriend = async (
   friendRecipeId,
-  { categoryNames, friendFirstName } = {}
+  { categoryNames, friendFirstName, shareToken } = {}
 ) => {
   const {
     data: { user },
@@ -1397,7 +1418,9 @@ export const copyRecipeFromFriend = async (
     throw new Error("User not authenticated");
   }
 
-  const original = await fetchRecipe(friendRecipeId);
+  const original = shareToken
+    ? await fetchSharedRecipe(shareToken)
+    : await fetchRecipe(friendRecipeId);
 
   if (original.user_id === user.id) {
     throw new Error("Cannot copy your own recipe");
@@ -1416,7 +1439,7 @@ export const copyRecipeFromFriend = async (
         original_language: original.original_language,
         images: [],
         nutrition: original.nutrition,
-        private: false,
+        visibility: "friends",
         copied_from_recipe_id: friendRecipeId,
         copied_from_name: friendFirstName || null,
       },

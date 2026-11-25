@@ -48,7 +48,10 @@ const Header = ({ friendBar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading: authLoading } = useAuth();
+  // Signed-out visitors on a shared recipe get a sign-up strip
+  const showSignupBar =
+    !isLoggedIn && !authLoading && location.pathname.startsWith("/shared/");
   const { installPrompt, isIOS, triggerInstall } = useInstallPrompt();
   const isOnline = useOnlineStatus();
 
@@ -176,7 +179,9 @@ const Header = ({ friendBar }) => {
       <header
         className={cn(
           "sticky top-0 z-20 border-b bg-background",
-          isScrolled && !friendBar ? "border-border/60" : "border-transparent"
+          isScrolled && !friendBar && !showSignupBar
+            ? "border-border/60"
+            : "border-transparent"
         )}
       >
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-3 py-4 md:px-8 md:pt-8 md:pb-6">
@@ -390,6 +395,23 @@ const Header = ({ friendBar }) => {
                 </Badge>
               )
             )}
+          </div>
+        </div>
+      )}
+
+      {showSignupBar && (
+        <div className="border-t border-b" data-testid="shared-signup-bar">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-3 py-2 text-center text-sm md:px-8">
+            <span>{t("shared_signup_prompt")}</span>
+            <Button
+              variant="printed"
+              className="text-foreground"
+              onClick={() =>
+                navigate("/login", { state: { from: location.pathname } })
+              }
+            >
+              {t("shared_signup_action")}
+            </Button>
           </div>
         </div>
       )}
