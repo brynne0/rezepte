@@ -26,8 +26,9 @@ import {
 } from "../../services/recipes";
 import {
   getFriendProfile,
-  checkFriendship,
+  getFriendshipStatus,
   sendFriendRequest,
+  acceptFriendRequest,
 } from "../../services/friendsService";
 import BackLink from "../../components/BackLink/BackLink";
 import AddToMyRecipesModal from "../../components/AddToMyRecipesModal/AddToMyRecipesModal";
@@ -160,6 +161,8 @@ const Recipe = ({ isSharedView = false }) => {
   const [isCopying, setIsCopying] = useState(false);
 
   const isOwner = !!user?.id && recipe?.user_id === user?.id;
+  const isSharedGuest = isSharedView && !isOwner;
+  const isSignedInGuest = isSharedGuest && isLoggedIn;
   const visibility = visibilityOverride ?? recipe?.visibility ?? "friends";
   const recipeShareToken = shareTokenOverride ?? recipe?.share_token;
   const shareUrl =
@@ -172,12 +175,14 @@ const Recipe = ({ isSharedView = false }) => {
 
   // On a shared link, owners and friends get the full recipe page instead
   const sharedOwnerId = isSharedView ? recipe?.owner?.id : null;
-  const { data: isFriendOfOwner, isLoading: friendCheckLoading } = useQuery({
-    queryKey: ["isFriend", sharedOwnerId],
-    queryFn: () => checkFriendship(sharedOwnerId),
-    enabled: !!sharedOwnerId && isLoggedIn && !isOwner,
+  const { data: friendshipStatus, isLoading: friendCheckLoading } = useQuery({
+    queryKey: ["friendshipStatus", sharedOwnerId],
+    queryFn: () => getFriendshipStatus(sharedOwnerId),
+    enabled: !!sharedOwnerId && isSignedInGuest,
   });
-  const redirectToFullPage = isSharedView && (isOwner || !!isFriendOfOwner);
+  const isFriendOfOwner = friendshipStatus === "accepted";
+  const requestSent = friendRequestSent || friendshipStatus === "sent";
+  const redirectToFullPage = isSharedView && (isOwner || isFriendOfOwner);
   useEffect(() => {
     if (redirectToFullPage) {
       navigate(`/${recipe.id}/${recipe.slug}`, { replace: true });
@@ -216,7 +221,7 @@ const Recipe = ({ isSharedView = false }) => {
   const { data: existingCopy } = useQuery({
     queryKey: ["copiedRecipe", recipe?.id],
     queryFn: () => findCopiedRecipe(recipe.id),
-    enabled: showFriendBar || (isSharedView && isLoggedIn && !isOwner),
+    enabled: showFriendBar || isSignedInGuest,
   });
 
   const existingCopyDate = existingCopy
@@ -285,6 +290,13 @@ const Recipe = ({ isSharedView = false }) => {
 
   const handleAddFriend = async () => {
     try {
+      // The owner already asked: accept, which redirects to the full page
+      if (friendshipStatus === "received") {
+        await acceptFriendRequest(recipe.owner.id);
+        queryClient.invalidateQueries({ queryKey: ["friendshipStatus"] });
+        queryClient.invalidateQueries({ queryKey: ["friends"] });
+        return;
+      }
       await sendFriendRequest(recipe.owner.id);
       setFriendRequestSent(true);
       toast.add({ title: t("friend_request_sent"), type: "success" });
@@ -472,7 +484,7 @@ const Recipe = ({ isSharedView = false }) => {
   if (
     loading ||
     redirectToFullPage ||
-    (isSharedView && isLoggedIn && !isOwner && friendCheckLoading)
+    (isSignedInGuest && friendCheckLoading)
   ) {
     return <LoadingAcorn />;
   }
@@ -518,7 +530,6 @@ const Recipe = ({ isSharedView = false }) => {
   const friendName =
     !isOwner && !isSharedView ? friendProfile?.first_name : null;
   const sharedOwnerName = isSharedView ? recipe.owner?.first_name : null;
-  const isSharedGuest = isSharedView && !isOwner;
   const backLabel = friendName
     ? t("recipe_action_back_friend", { name: friendName })
     : t("recipe_action_back");
@@ -638,11 +649,11 @@ const Recipe = ({ isSharedView = false }) => {
                     <Button
                       variant="printed"
                       onClick={handleAddFriend}
-                      disabled={!isOnline || friendRequestSent}
+                      disabled={!isOnline || requestSent}
                       data-testid="add-friend-btn"
                     >
-                      {friendRequestSent ? <UserCheck /> : <UserPlus />}
-                      {friendRequestSent
+                      {requestSent ? <UserCheck /> : <UserPlus />}
+                      {requestSent
                         ? t("friend_request_sent")
                         : t("add_as_friend", { name: sharedOwnerName })}
                     </Button>

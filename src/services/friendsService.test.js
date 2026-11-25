@@ -36,6 +36,7 @@ import {
   getSentRequests,
   getUserByUsername,
   checkFriendship,
+  getFriendshipStatus,
   getFriendProfile,
   fetchFriendRecipes,
 } from "./friendsService";
@@ -402,6 +403,36 @@ describe("Friends Service", () => {
     test("returns false when user is not authenticated", async () => {
       supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
       expect(await checkFriendship("user-2")).toBe(false);
+    });
+  });
+
+  describe("getFriendshipStatus", () => {
+    test.each([
+      [[{ requester_id: "user-1", status: "accepted" }], "accepted"],
+      [[{ requester_id: "user-1", status: "pending" }], "sent"],
+      [[{ requester_id: "user-2", status: "pending" }], "received"],
+      [[], null],
+    ])("rows %j give %s", async (rows, expected) => {
+      supabase.from.mockReturnValue(mockChain({ data: rows, error: null }));
+      expect(await getFriendshipStatus("user-2")).toBe(expected);
+    });
+
+    test("prefers their pending request over a mirror one of yours", async () => {
+      supabase.from.mockReturnValue(
+        mockChain({
+          data: [
+            { requester_id: "user-1", status: "pending" },
+            { requester_id: "user-2", status: "pending" },
+          ],
+          error: null,
+        })
+      );
+      expect(await getFriendshipStatus("user-2")).toBe("received");
+    });
+
+    test("returns null when not authenticated", async () => {
+      supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
+      expect(await getFriendshipStatus("user-2")).toBeNull();
     });
   });
 

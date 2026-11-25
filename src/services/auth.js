@@ -1,12 +1,17 @@
 import supabase from "../lib/supabase";
 import i18n from "../lib/i18n";
 
+// Where the confirmation email lands, e.g. back on a shared recipe
+const confirmationRedirect = (path, language) =>
+  `${window.location.origin}${path}?lang=${language}`;
+
 export const signUp = async (
   email,
   first_name,
   username,
   password,
-  language
+  language,
+  redirectPath = "/"
 ) => {
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -17,7 +22,7 @@ export const signUp = async (
         username,
         language,
       },
-      emailRedirectTo: `${window.location.origin}/?lang=${language}`,
+      emailRedirectTo: confirmationRedirect(redirectPath, language),
     },
   });
 
@@ -28,14 +33,14 @@ export const signUp = async (
   return { data, error };
 };
 
-export const resendConfirmationEmail = async (email) => {
+export const resendConfirmationEmail = async (email, redirectPath = "/") => {
   try {
     const language = i18n.language.split("-")[0];
     const { data, error } = await supabase.auth.resend({
       type: "signup",
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/?lang=${language}`,
+        emailRedirectTo: confirmationRedirect(redirectPath, language),
       },
     });
 

@@ -74,7 +74,23 @@ CREATE FUNCTION public.get_shared_recipe(p_token text)
   LANGUAGE sql STABLE SECURITY DEFINER
   SET search_path = public
   AS $$
-    SELECT (to_jsonb(r) - 'last_viewed_at') || jsonb_build_object(
+    -- Explicit columns so owner-only fields never reach link viewers
+    SELECT jsonb_build_object(
+      'id', r.id,
+      'user_id', r.user_id,
+      'title', r.title,
+      'slug', r.slug,
+      'servings', r.servings,
+      'instructions', r.instructions,
+      'source', r.source,
+      'notes', r.notes,
+      'nutrition', r.nutrition,
+      'original_language', r.original_language,
+      'translated_recipe', r.translated_recipe,
+      'created_at', r.created_at,
+      'visibility', r.visibility,
+      'images', CASE WHEN u.friends_can_view_images THEN r.images
+                     ELSE '[]'::jsonb END,
       'recipe_ingredients', COALESCE((
         SELECT jsonb_agg(jsonb_build_object(
           'id', ri.id,
@@ -92,12 +108,9 @@ CREATE FUNCTION public.get_shared_recipe(p_token text)
             'plural_name', i.plural_name,
             'translated_names', i.translated_names
           ),
-          -- Other recipes only link through when they're link-shared too
-          'linked_recipe', CASE
-            WHEN lr.id IS NULL THEN NULL
-            WHEN lr.visibility = 'link' THEN jsonb_build_object(
-              'title', lr.title, 'slug', lr.slug, 'share_token', lr.share_token)
-            ELSE jsonb_build_object('title', lr.title)
+          -- Other recipes only appear when they're link-shared too
+          'linked_recipe', CASE WHEN lr.visibility = 'link' THEN jsonb_build_object(
+            'title', lr.title, 'slug', lr.slug, 'share_token', lr.share_token)
           END
         ))
         FROM recipe_ingredients ri
@@ -133,7 +146,8 @@ GRANT EXECUTE ON FUNCTION public.get_shared_recipe(text) TO anon, authenticated;
 
 -- Storage predicate: images of link-shared recipes are viewable when the owner
 -- lets friends see photos (link viewers follow the same setting).
-CREATE FUNCTION public.recipe_image_link_viewable(p_recipe_id text)
+-- Takes the path's owner and recipe folders; the guarded cast keeps the PK index usable.
+CREATE FUNCTION public.recipe_image_link_viewable(p_owner_id text, p_recipe_id text)
   RETURNS boolean
   LANGUAGE sql STABLE SECURITY DEFINER
   SET search_path = public
@@ -142,19 +156,21 @@ CREATE FUNCTION public.recipe_image_link_viewable(p_recipe_id text)
       SELECT 1
       FROM recipes r
       JOIN users u ON u.id = r.user_id
-      WHERE r.id::text = p_recipe_id
+      WHERE r.id = CASE WHEN p_recipe_id ~ '^\d{1,5}$' THEN p_recipe_id::int END
+        AND r.user_id::text = p_owner_id
         AND r.visibility = 'link'
         AND u.friends_can_view_images
     );
   $$;
 
-REVOKE ALL ON FUNCTION public.recipe_image_link_viewable(text) FROM public;
-GRANT EXECUTE ON FUNCTION public.recipe_image_link_viewable(text) TO anon, authenticated;
+REVOKE ALL ON FUNCTION public.recipe_image_link_viewable(text, text) FROM public;
+GRANT EXECUTE ON FUNCTION public.recipe_image_link_viewable(text, text) TO anon, authenticated;
 
 CREATE POLICY "Anyone can view images of link-shared recipes"
   ON storage.objects FOR SELECT
   TO anon, authenticated
   USING (
     bucket_id = 'recipe-images'
-    AND public.recipe_image_link_viewable((storage.foldername(name))[2])
+    AND public.recipe_image_link_viewable(
+      (storage.foldername(name))[1], (storage.foldername(name))[2])
   );

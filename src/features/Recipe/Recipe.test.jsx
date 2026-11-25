@@ -115,12 +115,14 @@ vi.mock("../../services/recipes", () => ({
 }));
 
 const mockGetFriendProfile = vi.fn();
-const mockCheckFriendship = vi.fn();
+const mockGetFriendshipStatus = vi.fn();
 const mockSendFriendRequest = vi.fn();
+const mockAcceptFriendRequest = vi.fn();
 vi.mock("../../services/friendsService", () => ({
   getFriendProfile: (...args) => mockGetFriendProfile(...args),
-  checkFriendship: (...args) => mockCheckFriendship(...args),
+  getFriendshipStatus: (...args) => mockGetFriendshipStatus(...args),
   sendFriendRequest: (...args) => mockSendFriendRequest(...args),
+  acceptFriendRequest: (...args) => mockAcceptFriendRequest(...args),
 }));
 
 vi.mock("@/hooks/data/useCategories", () => ({
@@ -151,7 +153,9 @@ describe("Recipe Component", () => {
     mockNavigate = vi.fn();
     mockParams = { id: "test-recipe-id" };
     mockSharedRecipeHook = { recipe: null, loading: false, error: null };
-    mockCheckFriendship.mockResolvedValue(false);
+    mockGetFriendshipStatus.mockResolvedValue(null);
+    mockSendFriendRequest.mockClear();
+    mockAcceptFriendRequest.mockClear();
     mockLanguage = "en";
     mockAuth = {
       isLoggedIn: false,
@@ -809,9 +813,33 @@ describe("Recipe Component", () => {
       );
     });
 
+    test("accepts the owner's pending request instead of sending a new one", async () => {
+      mockAuth = { isLoggedIn: true, user: { id: "stranger" } };
+      mockGetFriendshipStatus.mockResolvedValue("received");
+      mockAcceptFriendRequest.mockResolvedValue();
+      renderRecipe({ isSharedView: true });
+
+      fireEvent.click(await screen.findByTestId("add-friend-btn"));
+
+      await waitFor(() => {
+        expect(mockAcceptFriendRequest).toHaveBeenCalledWith("owner-1");
+      });
+      expect(mockSendFriendRequest).not.toHaveBeenCalled();
+    });
+
+    test("shows an already-sent request on load", async () => {
+      mockAuth = { isLoggedIn: true, user: { id: "stranger" } };
+      mockGetFriendshipStatus.mockResolvedValue("sent");
+      renderRecipe({ isSharedView: true });
+
+      const button = await screen.findByTestId("add-friend-btn");
+      expect(button).toHaveTextContent("friend_request_sent");
+      expect(button).toBeDisabled();
+    });
+
     test("redirects friends to the full recipe page", async () => {
       mockAuth = { isLoggedIn: true, user: { id: "friend-1" } };
-      mockCheckFriendship.mockResolvedValue(true);
+      mockGetFriendshipStatus.mockResolvedValue("accepted");
       renderRecipe({ isSharedView: true });
 
       await waitFor(() => {

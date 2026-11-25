@@ -130,6 +130,19 @@ describe("Auth Service", () => {
       });
     });
 
+    test("redirects the confirmation email to the given path", async () => {
+      supabase.auth.signUp.mockResolvedValue({
+        data: { user: { identities: [{ id: "identity-1" }] } },
+        error: null,
+      });
+
+      await signUp("a@b.c", "Jan", "jandoe", "pw", "de", "/shared/tok/dal");
+
+      expect(
+        supabase.auth.signUp.mock.calls[0][0].options.emailRedirectTo
+      ).toBe("https://example.com/shared/tok/dal?lang=de");
+    });
+
     test("returns EMAIL_EXISTS error when Supabase signals duplicate via empty identities", async () => {
       supabase.auth.signUp.mockResolvedValue({
         data: {
@@ -362,6 +375,16 @@ describe("Auth Service", () => {
         },
       });
       expect(result).toEqual({ data: {}, error: null });
+    });
+
+    test("resends with a redirect back to the given path", async () => {
+      supabase.auth.resend.mockResolvedValue({ data: {}, error: null });
+
+      await resendConfirmationEmail("test@example.com", "/shared/tok/dal");
+
+      expect(
+        supabase.auth.resend.mock.calls[0][0].options.emailRedirectTo
+      ).toBe("https://example.com/shared/tok/dal?lang=en");
     });
 
     test("returns the error when resending fails", async () => {

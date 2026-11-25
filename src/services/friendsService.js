@@ -200,6 +200,30 @@ export const checkFriendship = async (otherUserId) => {
   return !!data;
 };
 
+// Friendship with another user: "accepted", "sent" (pending, from you),
+// "received" (pending, to you), or null when there's none
+export const getFriendshipStatus = async (otherUserId) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("friendships")
+    .select("requester_id, status")
+    .or(
+      `and(requester_id.eq.${user.id},addressee_id.eq.${otherUserId}),and(addressee_id.eq.${user.id},requester_id.eq.${otherUserId})`
+    );
+
+  if (error) throw error;
+  if (!data?.length) return null;
+  if (data.some((row) => row.status === "accepted")) return "accepted";
+  // Their request wins so we accept it rather than send a mirror one
+  return data.some((row) => row.requester_id === otherUserId)
+    ? "received"
+    : "sent";
+};
+
 // Get a confirmed friend's full profile including first_name.
 // Returns null if no accepted friendship exists.
 export const getFriendProfile = async (friendId) => {

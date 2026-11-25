@@ -457,7 +457,8 @@ describe("Auth", () => {
           "John",
           "uniqueuser",
           "testpass",
-          "en"
+          "en",
+          "/"
         );
       });
     });
@@ -730,7 +731,8 @@ describe("Auth", () => {
           "John",
           "testuser",
           "testpass",
-          "en"
+          "en",
+          "/"
         );
       });
     });
@@ -811,7 +813,8 @@ describe("Auth", () => {
 
       await waitFor(() => {
         expect(mockResendConfirmationEmail).toHaveBeenCalledWith(
-          "test@example.com"
+          "test@example.com",
+          "/"
         );
         expect(mockToastAdd).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -960,6 +963,36 @@ describe("Auth", () => {
 
       fireEvent.click(screen.getByText("back_to_recipe"));
       expect(mockNavigate).toHaveBeenCalledWith("/shared/tok/dal");
+    });
+
+    it("sends the confirmation email back to the shared recipe", async () => {
+      mockValidateAuthForm.mockReturnValue({});
+      render(
+        <MemoryRouter
+          initialEntries={[
+            { pathname: "/login", state: { from: "/shared/tok/dal" } },
+          ]}
+        >
+          <Auth />
+        </MemoryRouter>
+      );
+
+      fireEvent.click(screen.getByRole("tab", { name: "signup" }));
+      fireEvent.change(screen.getByLabelText("email"), {
+        target: { value: "test@example.com" },
+      });
+      fireEvent.submit(screen.getByTestId("auth-form"));
+
+      await waitFor(() => {
+        expect(mockSignUp).toHaveBeenCalledWith(
+          "test@example.com",
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          "en",
+          "/shared/tok/dal"
+        );
+      });
     });
 
     it("has no back link on a normal visit", () => {

@@ -175,7 +175,8 @@ const Auth = () => {
       firstName,
       username,
       password,
-      i18n.language.split("-")[0]
+      i18n.language.split("-")[0],
+      returnTo
     );
 
     if (error) {
@@ -229,7 +230,7 @@ const Auth = () => {
   const handleResendConfirmation = async () => {
     setIsResending(true);
 
-    const { error } = await resendConfirmationEmail(sentToEmail);
+    const { error } = await resendConfirmationEmail(sentToEmail, returnTo);
 
     setIsResending(false);
     toast.add({
