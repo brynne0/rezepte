@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
   DEFAULT_TITLE,
-  PREVIEW_IMAGE_PATH,
   buildPreviewHtml,
   createSupabase,
   fetchSharedRecipe,
@@ -49,15 +48,12 @@ export default async function handler(req, res) {
   }
 
   // Unknown or revoked links get generic tags so nothing about the recipe leaks
-  const preview = {
-    imageUrl: `${origin}${PREVIEW_IMAGE_PATH}`,
-    ...(recipe
-      ? {
-          title: recipe.title,
-          pageUrl: `${origin}/shared/${token}${recipe.slug ? `/${recipe.slug}` : ""}`,
-        }
-      : { title: DEFAULT_TITLE, pageUrl: origin }),
-  };
+  const preview = recipe
+    ? {
+        title: recipe.title,
+        pageUrl: `${origin}/shared/${token}${recipe.slug ? `/${recipe.slug}` : ""}`,
+      }
+    : { title: DEFAULT_TITLE, pageUrl: origin };
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader(

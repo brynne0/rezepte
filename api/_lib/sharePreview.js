@@ -1,10 +1,6 @@
 // Shared helpers for share-link previews (the _lib folder is not deployed as a function)
 import { createClient } from "@supabase/supabase-js";
 
-// Square image so chat apps show a small thumbnail beside the title
-export const PREVIEW_IMAGE_PATH = encodeURI(
-  "/eichhörnchen/web-app-manifest-512x512.png"
-);
 export const DEFAULT_TITLE = "Rezepte";
 
 // Share tokens are 20 hex chars; reject anything else before hitting Supabase
@@ -24,17 +20,14 @@ export const getOrigin = (req) => {
   return `${proto}://${host}`;
 };
 
-// Swaps the <title> and adds Open Graph tags to the app's index.html
-export const buildPreviewHtml = (html, { title, imageUrl, pageUrl }) => {
+// Swaps the <title> and adds Open Graph tags to the app's index.html.
+// No og:image, so Messages shows the small apple-touch-icon instead of a big image.
+export const buildPreviewHtml = (html, { title, pageUrl }) => {
   const safeTitle = escapeHtml(title);
   const tags = [
     `<meta property="og:type" content="website" />`,
     `<meta property="og:title" content="${safeTitle}" />`,
     `<meta property="og:url" content="${escapeHtml(pageUrl)}" />`,
-    `<meta property="og:image" content="${escapeHtml(imageUrl)}" />`,
-    `<meta property="og:image:width" content="512" />`,
-    `<meta property="og:image:height" content="512" />`,
-    `<meta name="twitter:card" content="summary" />`,
   ].join("\n    ");
 
   return html
