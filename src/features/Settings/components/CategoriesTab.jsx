@@ -436,27 +436,13 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
   // (and cascades to remove it from the user's recipes) once preferences
   // are saved
   const handleConfirmDeleteCategory = () => {
-    try {
-      setCategoryError("");
-
-      setCategoryPreferences((prev) =>
-        prev.filter((cat) => cat.id !== deleteCategoryId)
-      );
-
-      // Reset edit state if we were editing this category
-      if (editingCategoryId === deleteCategoryId) {
-        setEditingCategoryId(null);
-        setEditingCategoryName("");
-        setIsAddingCategory(false);
-      }
-
-      setShowDeleteModal(false);
-      setDeleteCategoryId(null);
-      setDeleteCategoryName("");
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      setCategoryError(error.message);
-    }
+    setCategoryError("");
+    setCategoryPreferences((prev) =>
+      prev.filter((cat) => cat.id !== deleteCategoryId)
+    );
+    setShowDeleteModal(false);
+    setDeleteCategoryId(null);
+    setDeleteCategoryName("");
   };
 
   // Cancel delete modal
@@ -465,6 +451,211 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
     setDeleteCategoryId(null);
     setDeleteCategoryName("");
   };
+
+  // Skeleton while loading, empty state, or the sortable list
+  let categoriesContent;
+  if (categoriesLoading) {
+    categoriesContent = (
+      <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div
+            key={index}
+            className={cn(
+              "flex h-12 items-center gap-2 p-2",
+              index > 0 && "border-t border-border"
+            )}
+          >
+            <Skeleton className="h-5 w-32" />
+          </div>
+        ))}
+      </div>
+    );
+  } else if (categoryPreferences.length === 0) {
+    categoriesContent = (
+      <Empty className="rounded-lg border border-border bg-card">
+        <EmptyHeader>
+          <EmptyMedia>
+            <Tag />
+          </EmptyMedia>
+          <EmptyTitle>{t("no_categories")}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    );
+  } else {
+    categoriesContent = (
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="categories">
+          {(provided, snapshot) => (
+            <div
+              className={cn(
+                "flex flex-col overflow-hidden rounded-lg border border-border bg-card",
+                snapshot.isDraggingOver && "bg-muted/50"
+              )}
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {categoryPreferences.map((category, index) => (
+                <Draggable
+                  key={category.id}
+                  draggableId={category.id.toString()}
+                  index={index}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={cn(
+                        "flex flex-col gap-1 p-2 transition-colors",
+                        index > 0 && "border-t border-border",
+                        snapshot.isDragging &&
+                          "rounded-lg border border-border bg-card shadow-md"
+                      )}
+                    >
+                      <div className="flex min-h-8 items-center gap-2">
+                        <div
+                          {...provided.dragHandleProps}
+                          data-slot="drag-handle"
+                          className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
+                        >
+                          <GripVertical size={16} />
+                        </div>
+
+                        <div className="flex min-w-0 flex-1 items-center gap-2">
+                          {editingCategoryId === category.id ? (
+                            <Input
+                              type="text"
+                              value={editingCategoryName}
+                              onChange={(e) => {
+                                setEditingCategoryName(e.target.value);
+                                setCategoryError("");
+                              }}
+                              aria-invalid={
+                                !!categoryError &&
+                                editingCategoryId === category.id
+                              }
+                              placeholder={t("category_name")}
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  void handleSaveEditCategory();
+                                } else if (e.key === "Escape") {
+                                  handleCancelEditCategory();
+                                }
+                              }}
+                            />
+                          ) : (
+                            <span className="text-sm font-medium [word-break:break-word]">
+                              {category.label}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-1">
+                          {editingCategoryId === category.id ? (
+                            <>
+                              <Tooltip>
+                                <TooltipTrigger
+                                  render={
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={handleSaveEditCategory}
+                                      aria-label={t("save_changes")}
+                                    >
+                                      <Check size={16} />
+                                    </Button>
+                                  }
+                                />
+                                <TooltipContent>
+                                  {t("save_changes")}
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger
+                                  render={
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={handleCancelEditCategory}
+                                      aria-label={t("cancel")}
+                                    >
+                                      <X size={16} />
+                                    </Button>
+                                  }
+                                />
+                                <TooltipContent>{t("cancel")}</TooltipContent>
+                              </Tooltip>
+                            </>
+                          ) : (
+                            <>
+                              <Tooltip>
+                                <TooltipTrigger
+                                  render={
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={() =>
+                                        handleEditCategory(category)
+                                      }
+                                      aria-label={t("edit_category_name")}
+                                    >
+                                      <Pencil size={16} />
+                                    </Button>
+                                  }
+                                />
+                                <TooltipContent>
+                                  {t("edit_category_name")}
+                                </TooltipContent>
+                              </Tooltip>
+                              {!category.isTemp && (
+                                <Tooltip>
+                                  <TooltipTrigger
+                                    render={
+                                      <Button
+                                        type="button"
+                                        variant="ghost-destructive"
+                                        size="icon-sm"
+                                        onClick={() =>
+                                          handleDeleteCategory(
+                                            category.id,
+                                            category.label
+                                          )
+                                        }
+                                        aria-label={t("delete_category")}
+                                      >
+                                        <Trash2 size={16} />
+                                      </Button>
+                                    }
+                                  />
+                                  <TooltipContent>
+                                    {t("delete_category")}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {categoryError && editingCategoryId === category.id && (
+                        <span className="pl-6 text-sm text-destructive">
+                          {categoryError}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    );
+  }
 
   return (
     <form
@@ -480,205 +671,7 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
           {t("category_management_description")}
         </FieldDescription>
 
-        {categoriesLoading ? (
-          <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "flex h-12 items-center gap-2 p-2",
-                  index > 0 && "border-t border-border"
-                )}
-              >
-                <Skeleton className="h-5 w-32" />
-              </div>
-            ))}
-          </div>
-        ) : categoryPreferences.length === 0 ? (
-          <Empty className="rounded-lg border border-border bg-card">
-            <EmptyHeader>
-              <EmptyMedia>
-                <Tag />
-              </EmptyMedia>
-              <EmptyTitle>{t("no_categories")}</EmptyTitle>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="categories">
-              {(provided, snapshot) => (
-                <div
-                  className={cn(
-                    "flex flex-col overflow-hidden rounded-lg border border-border bg-card",
-                    snapshot.isDraggingOver && "bg-muted/50"
-                  )}
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {categoryPreferences.map((category, index) => (
-                    <Draggable
-                      key={category.id}
-                      draggableId={category.id.toString()}
-                      index={index}
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className={cn(
-                            "flex flex-col gap-1 p-2 transition-colors",
-                            index > 0 && "border-t border-border",
-                            snapshot.isDragging &&
-                              "rounded-lg border border-border bg-card shadow-md"
-                          )}
-                        >
-                          <div className="flex min-h-8 items-center gap-2">
-                            <div
-                              {...provided.dragHandleProps}
-                              data-slot="drag-handle"
-                              className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
-                            >
-                              <GripVertical size={16} />
-                            </div>
-
-                            <div className="flex min-w-0 flex-1 items-center gap-2">
-                              {editingCategoryId === category.id ? (
-                                <Input
-                                  type="text"
-                                  value={editingCategoryName}
-                                  onChange={(e) => {
-                                    setEditingCategoryName(e.target.value);
-                                    setCategoryError("");
-                                  }}
-                                  aria-invalid={
-                                    !!categoryError &&
-                                    editingCategoryId === category.id
-                                  }
-                                  placeholder={t("category_name")}
-                                  autoFocus
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      e.preventDefault();
-                                      void handleSaveEditCategory();
-                                    } else if (e.key === "Escape") {
-                                      handleCancelEditCategory();
-                                    }
-                                  }}
-                                />
-                              ) : (
-                                <span className="text-sm font-medium [word-break:break-word]">
-                                  {category.label}
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="flex shrink-0 items-center gap-1">
-                              {editingCategoryId === category.id ? (
-                                <>
-                                  <Tooltip>
-                                    <TooltipTrigger
-                                      render={
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="icon-sm"
-                                          onClick={handleSaveEditCategory}
-                                          aria-label={t("save_changes")}
-                                        >
-                                          <Check size={16} />
-                                        </Button>
-                                      }
-                                    />
-                                    <TooltipContent>
-                                      {t("save_changes")}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger
-                                      render={
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="icon-sm"
-                                          onClick={handleCancelEditCategory}
-                                          aria-label={t("cancel")}
-                                        >
-                                          <X size={16} />
-                                        </Button>
-                                      }
-                                    />
-                                    <TooltipContent>
-                                      {t("cancel")}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </>
-                              ) : (
-                                <>
-                                  <Tooltip>
-                                    <TooltipTrigger
-                                      render={
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="icon-sm"
-                                          onClick={() =>
-                                            handleEditCategory(category)
-                                          }
-                                          aria-label={t("edit_category_name")}
-                                        >
-                                          <Pencil size={16} />
-                                        </Button>
-                                      }
-                                    />
-                                    <TooltipContent>
-                                      {t("edit_category_name")}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                  {!category.isTemp && (
-                                    <Tooltip>
-                                      <TooltipTrigger
-                                        render={
-                                          <Button
-                                            type="button"
-                                            variant="ghost-destructive"
-                                            size="icon-sm"
-                                            onClick={() =>
-                                              handleDeleteCategory(
-                                                category.id,
-                                                category.label
-                                              )
-                                            }
-                                            aria-label={t("delete_category")}
-                                          >
-                                            <Trash2 size={16} />
-                                          </Button>
-                                        }
-                                      />
-                                      <TooltipContent>
-                                        {t("delete_category")}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </div>
-                          {categoryError &&
-                            editingCategoryId === category.id && (
-                              <span className="pl-6 text-sm text-destructive">
-                                {categoryError}
-                              </span>
-                            )}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        )}
+        {categoriesContent}
 
         <div>
           <Button

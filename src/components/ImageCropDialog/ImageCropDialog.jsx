@@ -9,6 +9,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { getCroppedImageFile } from "../../utils/cropImage";
 
 const ImageCropDialog = ({
@@ -42,6 +43,10 @@ const ImageCropDialog = ({
         file
       );
       onSave(croppedFile, croppedArea);
+    } catch (error) {
+      // Stay open so the user can retry or cancel
+      console.error("Failed to crop image:", error);
+      toast.add({ title: t("crop_image_failed"), type: "error" });
     } finally {
       setSaving(false);
     }

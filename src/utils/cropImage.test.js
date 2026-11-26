@@ -50,4 +50,23 @@ describe("getCroppedImageFile", () => {
       getCroppedImageFile("x", area, { name: "a.jpg", type: "image/jpeg" })
     ).rejects.toThrow("Failed to load image for cropping");
   });
+
+  test("rejects when the canvas is too large for the device", async () => {
+    installFakeImage();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+    await expect(
+      getCroppedImageFile("x", area, { name: "a.jpg", type: "image/jpeg" })
+    ).rejects.toThrow("Image too large to crop");
+  });
+
+  test("rejects instead of hanging when drawing throws", async () => {
+    installFakeImage();
+    const { ctx } = mockCanvas(new Blob(["png"]));
+    ctx.drawImage.mockImplementation(() => {
+      throw new DOMException("tainted", "SecurityError");
+    });
+    await expect(
+      getCroppedImageFile("x", area, { name: "a.jpg", type: "image/jpeg" })
+    ).rejects.toThrow("tainted");
+  });
 });

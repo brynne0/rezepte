@@ -17,14 +17,14 @@ const chainMethods = [
   "range",
 ];
 
-// Chainable Supabase query builder that resolves to `resolvedValue` when awaited
-export const mockChain = (resolvedValue = { data: null, error: null }) => {
-  const chain = {
+const EMPTY_RESULT = Object.freeze({ data: null, error: null });
+
+// Chainable Supabase query builder: a resolved promise with query methods attached
+export const mockChain = (resolvedValue = EMPTY_RESULT) => {
+  const chain = Object.assign(Promise.resolve(resolvedValue), {
     single: vi.fn().mockResolvedValue(resolvedValue),
     maybeSingle: vi.fn().mockResolvedValue(resolvedValue),
-    then: (resolve, reject) =>
-      Promise.resolve(resolvedValue).then(resolve, reject),
-  };
+  });
   for (const method of chainMethods) {
     chain[method] = vi.fn().mockReturnValue(chain);
   }

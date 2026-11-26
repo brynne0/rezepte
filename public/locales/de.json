@@ -342,6 +342,7 @@
   "main": "Hauptbild",
   "delete_image": "Bild löschen",
   "crop_image": "Bild zuschneiden",
+  "crop_image_failed": "Bild konnte nicht zugeschnitten werden. Bitte versuche es erneut.",
   "zoom": "Zoom",
 
   "recipe_with_ingredients": "Rezept mit",

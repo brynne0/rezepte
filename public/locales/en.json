@@ -341,6 +341,7 @@
   "main": "Main",
   "delete_image": "Delete image",
   "crop_image": "Crop image",
+  "crop_image_failed": "Couldn't crop this image. Please try again.",
   "zoom": "Zoom",
 
   "recipe_with_ingredients": "Recipe with",

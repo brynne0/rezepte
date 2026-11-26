@@ -63,10 +63,6 @@ const ImageUpload = ({
     }, 500); // Minimum 500ms loading display
   };
 
-  const handleImageLoadStart = (imageId) => {
-    setLoadingImages((prev) => new Set(prev).add(imageId));
-  };
-
   // Files pending the crop step, cropped one at a time.
   const [cropQueue, setCropQueue] = useState([]);
   const [cropSrc, setCropSrc] = useState(null);
@@ -329,7 +325,6 @@ const ImageUpload = ({
                               alt={image.filename}
                               loading="lazy"
                               className={isLoading ? "invisible" : undefined}
-                              onLoadStart={() => handleImageLoadStart(image.id)}
                               onLoad={() => handleImageLoad(image.id)}
                               onError={() => handleImageLoad(image.id)}
                             />
