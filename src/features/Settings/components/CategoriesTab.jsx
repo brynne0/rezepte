@@ -128,40 +128,37 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
         .filter((cat) => !currentIds.has(cat.id))
         .map((cat) => cat.id);
 
-      for (const categoryId of removedIds) {
-        await deleteCategory(categoryId);
-      }
+      // Steps run in order (a rename may reuse a deleted name); calls within each run in parallel
+      await Promise.all(
+        removedIds.map((categoryId) => deleteCategory(categoryId))
+      );
 
       // Save renames of existing categories
       const originalLabels = new Map(
         originalCategoryPreferences.map((cat) => [cat.id, cat.label])
       );
-      for (const cat of categoryPreferences) {
-        if (
+      const renamed = categoryPreferences.filter(
+        (cat) =>
           !cat.isTemp &&
           originalLabels.has(cat.id) &&
           originalLabels.get(cat.id) !== cat.label
-        ) {
-          await updateCategoryName(cat.id, cat.label, {
-            [i18n.language]: cat.label,
-          });
-        }
-      }
+      );
+      await Promise.all(
+        renamed.map((cat) =>
+          updateCategoryName(cat.id, cat.label, { [i18n.language]: cat.label })
+        )
+      );
 
-      // Then, create any pending categories in the database
-      const updatedPreferences = [...categoryPreferences];
-
-      for (let i = 0; i < updatedPreferences.length; i++) {
-        const cat = updatedPreferences[i];
-        if (cat.pendingCreation && cat.isTemp) {
+      // Then, create any pending categories, replacing each temp entry
+      const updatedPreferences = await Promise.all(
+        categoryPreferences.map(async (cat) => {
+          if (!cat.pendingCreation || !cat.isTemp) return cat;
           try {
             const newCategory = await createCategory(
               cat.value,
               cat.translations || {}
             );
-
-            // Replace temp category with real category
-            updatedPreferences[i] = {
+            return {
               id: newCategory.id,
               value: newCategory.name,
               label: cat.label,
@@ -174,8 +171,8 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
               `Error creating category "${cat.label}": ${error.message}`
             );
           }
-        }
-      }
+        })
+      );
 
       // Filter out any remaining temporary categories before saving
       const validCategoryPreferences = updatedPreferences.filter(
@@ -195,8 +192,8 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
 
       // Refresh categories and recipes in the main app to reflect changes
       // (renamed/deleted categories affect how recipes display)
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      queryClient.invalidateQueries({ queryKey: ["recipes"] });
+      void queryClient.invalidateQueries({ queryKey: ["categories"] });
+      void queryClient.invalidateQueries({ queryKey: ["recipes"] });
 
       // Reset selected category to "all_recipes" so user sees all recipes when going back
       if (resetCategoryFilter) {
@@ -279,19 +276,15 @@ const CategoriesTab = ({ t, onUnsavedChangesChange, resetCategoryFilter }) => {
       const { data: existingCategory } = await supabase
         .from("categories")
         .select("id, name, translated_category")
-        .ilike("name", trimmedName.replace(/[%_]/g, "\\$&"))
+        .ilike("name", trimmedName.replace(/[%_]/g, String.raw`\$&`))
         .eq("user_id", user?.id)
         .single();
 
       if (existingCategory) {
         // Category exists! Add it to user's list instead of creating new one
-        let label = existingCategory.name;
-        if (
-          existingCategory.translated_category &&
-          existingCategory.translated_category[i18n.language]
-        ) {
-          label = existingCategory.translated_category[i18n.language];
-        }
+        const label =
+          existingCategory.translated_category?.[i18n.language] ||
+          existingCategory.name;
 
         // Replace temp category with existing category
         setCategoryPreferences((prev) =>
