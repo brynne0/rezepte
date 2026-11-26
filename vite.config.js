@@ -85,5 +85,18 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/test/setup.js",
     css: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text-summary", "html", "lcov"],
+      include: ["src/**/*.{js,jsx}"],
+      // ui/ is generated shadcn library code
+      exclude: [
+        "src/test/**",
+        "src/test-utils/**",
+        "src/**/*.test.{js,jsx}",
+        "src/components/ui/**",
+        "src/main.jsx",
+      ],
+    },
   },
 });

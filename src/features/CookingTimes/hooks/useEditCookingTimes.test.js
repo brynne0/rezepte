@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from "vitest";
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useEditCookingTimes } from "./useEditCookingTimes";
 import {
@@ -600,6 +600,275 @@ describe("useEditCookingTimes", () => {
         "s2",
         "s1",
       ]);
+    });
+  });
+
+  describe("section edits", () => {
+    test("handleCookingTimeChange updates an item in a section", () => {
+      const { result, getFormData, rerender } = setup();
+      act(() => {
+        result.current.handleCookingTimeChange(
+          "s1",
+          "t-Lentils",
+          "cooking_time",
+          "25"
+        );
+      });
+      rerender();
+      expect(
+        getFormData().cookingTimeSections[0].cookingTimes[0]
+      ).toMatchObject({ cooking_time: "25" });
+      expect(getFormData().ungroupedCookingTimes[0].cooking_time).toBe("");
+    });
+
+    test("removeCookingTime removes an ungrouped item", () => {
+      const { result, getFormData, rerender } = setup();
+      act(() => {
+        result.current.removeCookingTime("ungrouped", "t-Tofu");
+      });
+      rerender();
+      expect(getFormData().ungroupedCookingTimes).toEqual([]);
+    });
+
+    test("deletes a removed item that was in a section", async () => {
+      const formData = { ungroupedCookingTimes: [], cookingTimeSections: [] };
+      const { result } = renderHook(
+        () =>
+          useEditCookingTimes({
+            isEditMode: true,
+            formData,
+            setFormData: vi.fn(),
+            originalData: {
+              ungroupedCookingTimes: [],
+              cookingTimeSections: [
+                {
+                  id: "s1",
+                  subheading: "Legumes",
+                  cookingTimes: [{ id: "orig-2", ingredient_name: "Lentils" }],
+                },
+              ],
+            },
+            generateTempId: vi.fn(),
+            loadData: vi.fn().mockResolvedValue(),
+            t: (k) => k,
+          }),
+        { wrapper: createQueryClientWrapper() }
+      );
+
+      await act(async () => {
+        await result.current.saveAllChanges();
+      });
+      expect(deleteCookingTime).toHaveBeenCalledWith("orig-2");
+    });
+  });
+
+  describe("handleCookingTimeFieldEnter", () => {
+    const enter = (extra = {}) => ({
+      key: "Enter",
+      shiftKey: false,
+      preventDefault: vi.fn(),
+      ...extra,
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = "";
+    });
+
+    test("ignores other keys and Shift+Enter", () => {
+      const { result, setFormData } = setup();
+      const shift = enter({ shiftKey: true });
+      result.current.handleCookingTimeFieldEnter(
+        enter({ key: "a" }),
+        "notes",
+        "ungrouped",
+        "t-Tofu",
+        0
+      );
+      result.current.handleCookingTimeFieldEnter(
+        shift,
+        "notes",
+        "ungrouped",
+        "t-Tofu",
+        0
+      );
+      expect(shift.preventDefault).not.toHaveBeenCalled();
+      expect(setFormData).not.toHaveBeenCalled();
+    });
+
+    test("moves to the next field of the same item", () => {
+      document.body.innerHTML =
+        '<input id="cooking-time-cooking-time-ungrouped-0-t-Tofu" />';
+      const { result } = setup();
+      const e = enter();
+      result.current.handleCookingTimeFieldEnter(
+        e,
+        "ingredient_name",
+        "ungrouped",
+        "t-Tofu",
+        0
+      );
+      expect(e.preventDefault).toHaveBeenCalled();
+      expect(document.activeElement.id).toBe(
+        "cooking-time-cooking-time-ungrouped-0-t-Tofu"
+      );
+    });
+
+    test("tolerates a missing next field", () => {
+      const { result } = setup();
+      expect(() =>
+        result.current.handleCookingTimeFieldEnter(
+          enter(),
+          "cooking_time",
+          "ungrouped",
+          "t-Tofu",
+          0
+        )
+      ).not.toThrow();
+    });
+
+    test("moves from the last field to the next item", () => {
+      document.body.innerHTML =
+        '<input id="cooking-time-ingredient-name-s1-1-t-Beans" />';
+      const { result, setFormData } = setup({
+        cookingTimeSections: [
+          {
+            id: "s1",
+            subheading: "Legumes",
+            cookingTimes: [cookingTime("Lentils"), cookingTime("Beans")],
+          },
+        ],
+      });
+      result.current.handleCookingTimeFieldEnter(
+        enter(),
+        "notes",
+        "s1",
+        "t-Lentils",
+        0
+      );
+      expect(document.activeElement.id).toBe(
+        "cooking-time-ingredient-name-s1-1-t-Beans"
+      );
+      expect(setFormData).not.toHaveBeenCalled();
+    });
+
+    test("does nothing when the next item's input isn't rendered", () => {
+      const { result, setFormData } = setup({
+        ungroupedCookingTimes: [cookingTime("Tofu"), { id: "x" }],
+      });
+      result.current.handleCookingTimeFieldEnter(
+        enter(),
+        "notes",
+        "ungrouped",
+        "t-Tofu",
+        0
+      );
+      expect(setFormData).not.toHaveBeenCalled();
+    });
+
+    test.each(["ungrouped", "s1", "missing-section"])(
+      "adds a new item after the last one (%s)",
+      (sectionId) => {
+        const { result, setFormData } = setup();
+        result.current.handleCookingTimeFieldEnter(
+          enter(),
+          "notes",
+          sectionId,
+          "t",
+          0
+        );
+        expect(setFormData).toHaveBeenCalled();
+      }
+    );
+  });
+
+  describe("handleDragEnd between containers", () => {
+    const twoSections = {
+      ungroupedCookingTimes: [cookingTime("Tofu")],
+      cookingTimeSections: [
+        {
+          id: "s1",
+          subheading: "A",
+          cookingTimes: [cookingTime("Lentils"), cookingTime("Beans")],
+        },
+        { id: "s2", subheading: "B", cookingTimes: [cookingTime("Rice")] },
+      ],
+    };
+    const names = (items) => items.map((i) => i.ingredient_name);
+
+    const drag = (from, fromIndex, to, toIndex) => {
+      const ctx = setup(twoSections);
+      act(() => {
+        ctx.result.current.handleDragEnd({
+          type: "cooking-time-item",
+          source: { droppableId: from, index: fromIndex },
+          destination: { droppableId: to, index: toIndex },
+        });
+      });
+      return ctx.getFormData();
+    };
+
+    test("reorders within a section", () => {
+      const data = drag("s1", 0, "s1", 1);
+      expect(names(data.cookingTimeSections[0].cookingTimes)).toEqual([
+        "Beans",
+        "Lentils",
+      ]);
+      expect(names(data.cookingTimeSections[1].cookingTimes)).toEqual(["Rice"]);
+    });
+
+    test("moves from ungrouped into a section", () => {
+      const data = drag("ungrouped", 0, "s2", 0);
+      expect(data.ungroupedCookingTimes).toEqual([]);
+      expect(names(data.cookingTimeSections[1].cookingTimes)).toEqual([
+        "Tofu",
+        "Rice",
+      ]);
+    });
+
+    test("moves from a section to ungrouped", () => {
+      const data = drag("s1", 1, "ungrouped", 1);
+      expect(names(data.ungroupedCookingTimes)).toEqual(["Tofu", "Beans"]);
+      expect(names(data.cookingTimeSections[0].cookingTimes)).toEqual([
+        "Lentils",
+      ]);
+    });
+
+    test("moves between sections", () => {
+      const data = drag("s1", 0, "s2", 1);
+      expect(names(data.cookingTimeSections[0].cookingTimes)).toEqual([
+        "Beans",
+      ]);
+      expect(names(data.cookingTimeSections[1].cookingTimes)).toEqual([
+        "Rice",
+        "Lentils",
+      ]);
+      expect(names(data.ungroupedCookingTimes)).toEqual(["Tofu"]);
+    });
+
+    test("ignores drags outside edit mode", () => {
+      const setFormData = vi.fn();
+      const { result } = renderHook(
+        () =>
+          useEditCookingTimes({
+            isEditMode: false,
+            formData: twoSections,
+            setFormData,
+            originalData: twoSections,
+            generateTempId: vi.fn(),
+            loadData: vi.fn(),
+            t: (k) => k,
+          }),
+        { wrapper: createQueryClientWrapper() }
+      );
+      act(() => {
+        result.current.handleDragEnd({
+          type: "cooking-time-item",
+          source: { droppableId: "s1", index: 0 },
+          destination: { droppableId: "s2", index: 0 },
+        });
+      });
+      expect(setFormData).not.toHaveBeenCalled();
+      expect(result.current.hasUnsavedChanges()).toBe(false);
     });
   });
 });

@@ -605,4 +605,163 @@ describe("useRecipeFormActions", () => {
       expect(result.current.isOnline).toBe(navigator.onLine);
     });
   });
+
+  describe("more submit paths", () => {
+    const submit = async (result) =>
+      act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+    test("reports progress and tracks uploading images", async () => {
+      const createRecipe = vi.fn(async (_data, onProgress) => {
+        onProgress({ completed: 1, total: 4, phase: "recipe" });
+        onProgress({
+          completed: 3,
+          total: 4,
+          phase: "images",
+          imageId: "img",
+          uploading: true,
+        });
+        onProgress({
+          completed: 4,
+          total: 4,
+          phase: "images",
+          imageId: "img",
+          uploading: false,
+        });
+        return { id: "new-id", slug: "chili" };
+      });
+      const { result, setSubmitStatus, setUploadingImageIds } = setup({
+        recipeActionsOverrides: { createRecipe },
+      });
+      await submit(result);
+
+      expect(setSubmitStatus).toHaveBeenCalledWith(
+        expect.objectContaining({ percent: 25, phase: "recipe" })
+      );
+      const updaters = setUploadingImageIds.mock.calls
+        .map(([u]) => u)
+        .filter((u) => typeof u === "function");
+      const added = updaters[0](new Set());
+      expect([...added]).toEqual(["img"]);
+      expect([...updaters[1](added)]).toEqual([]);
+    });
+
+    test("scrolls to and focuses the first invalid field", async () => {
+      vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
+        cb();
+        return 0;
+      });
+      document.body.innerHTML =
+        '<div data-invalid="true"><input id="title" /></div>';
+      const field = document.querySelector("[data-invalid]");
+      field.scrollIntoView = vi.fn();
+
+      const { result } = setup({ validateForm: () => ({ title: "x" }) });
+      await submit(result);
+
+      expect(field.scrollIntoView).toHaveBeenCalled();
+      expect(document.activeElement.id).toBe("title");
+      document.body.innerHTML = "";
+      vi.restoreAllMocks();
+    });
+
+    test("focuses an invalid input directly, or scrolls to the top", async () => {
+      vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
+        cb();
+        return 0;
+      });
+      document.body.innerHTML =
+        '<textarea aria-invalid="true" id="notes"></textarea>';
+      document.querySelector("textarea").scrollIntoView = vi.fn();
+      const { result } = setup({ validateForm: () => ({ notes: "x" }) });
+      await submit(result);
+      expect(document.activeElement.id).toBe("notes");
+
+      document.body.innerHTML = "";
+      await submit(result);
+      expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+      vi.restoreAllMocks();
+    });
+
+    test("asks before saving without a category, then saves on confirm", async () => {
+      const createRecipe = vi
+        .fn()
+        .mockResolvedValue({ id: "new-id", slug: "chili" });
+      const { result } = setup({
+        formData: buildFormData({ categories: [] }),
+        recipeActionsOverrides: { createRecipe },
+      });
+
+      await submit(result);
+      expect(result.current.showCategoryConfirm).toBe(true);
+      expect(createRecipe).not.toHaveBeenCalled();
+
+      act(() => result.current.cancelCategoryConfirm());
+      expect(result.current.showCategoryConfirm).toBe(false);
+
+      await act(async () => {
+        await result.current.confirmSaveWithoutCategory();
+      });
+      expect(createRecipe).toHaveBeenCalled();
+    });
+
+    test("ignores a second submit while saving", async () => {
+      const createRecipe = vi.fn();
+      const { result } = setup({
+        recipeActionsOverrides: { createRecipe, loading: true },
+      });
+      await submit(result);
+      expect(createRecipe).not.toHaveBeenCalled();
+    });
+
+    test("warns when the recipe saved but its images didn't", async () => {
+      const { result } = setup({
+        recipeActionsOverrides: {
+          createRecipe: vi.fn().mockResolvedValue({
+            id: "new-id",
+            slug: "chili",
+            imageUpdateFailed: true,
+          }),
+        },
+      });
+      await submit(result);
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        title: "recipe_saved_image_failed",
+        type: "error",
+      });
+    });
+
+    test("keeps sections that have a subheading or a named ingredient", async () => {
+      const createRecipe = vi
+        .fn()
+        .mockResolvedValue({ id: "new-id", slug: "chili" });
+      const { result } = setup({
+        formData: buildFormData({
+          ingredientSections: [
+            {
+              id: "a",
+              subheading: "Sauce",
+              ingredients: [baseIngredient({ name: "" })],
+            },
+            {
+              id: "b",
+              subheading: "",
+              ingredients: [baseIngredient({ tempId: "t2" })],
+            },
+            {
+              id: "c",
+              subheading: " ",
+              ingredients: [baseIngredient({ name: " " })],
+            },
+          ],
+        }),
+        recipeActionsOverrides: { createRecipe },
+      });
+      await submit(result);
+      expect(
+        createRecipe.mock.calls[0][0].ingredientSections.map((s) => s.id)
+      ).toEqual(["a", "b"]);
+    });
+  });
 });

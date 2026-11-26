@@ -339,4 +339,67 @@ describe("useIngredientManagement", () => {
       ]);
     });
   });
+
+  describe("handleDragEnd between containers", () => {
+    const data = {
+      ungroupedIngredients: [baseIngredient("u1", { name: "Salt" })],
+      ingredientSections: [
+        {
+          id: "s1",
+          subheading: "A",
+          ingredients: [
+            baseIngredient("a1", { name: "Flour" }),
+            baseIngredient("a2", { name: "Sugar" }),
+          ],
+        },
+        {
+          id: "s2",
+          subheading: "B",
+          ingredients: [baseIngredient("b1", { name: "Oil" })],
+        },
+      ],
+    };
+    const names = (list) => list.map((i) => i.name);
+
+    const drag = (from, fromIndex, to, toIndex) => {
+      const ctx = setup(data);
+      act(() => {
+        ctx.result.current.handleDragEnd({
+          type: "ingredient",
+          source: { droppableId: from, index: fromIndex },
+          destination: { droppableId: to, index: toIndex },
+        });
+      });
+      return ctx.getFormData();
+    };
+
+    test("reorders within a section", () => {
+      const result = drag("s1", 0, "s1", 1);
+      expect(names(result.ingredientSections[0].ingredients)).toEqual([
+        "Sugar",
+        "Flour",
+      ]);
+      expect(names(result.ingredientSections[1].ingredients)).toEqual(["Oil"]);
+    });
+
+    test("moves from a section to ungrouped", () => {
+      const result = drag("s1", 1, "ungrouped", 0);
+      expect(names(result.ungroupedIngredients)).toEqual(["Sugar", "Salt"]);
+      expect(names(result.ingredientSections[0].ingredients)).toEqual([
+        "Flour",
+      ]);
+    });
+
+    test("moves between sections", () => {
+      const result = drag("s1", 0, "s2", 1);
+      expect(names(result.ingredientSections[0].ingredients)).toEqual([
+        "Sugar",
+      ]);
+      expect(names(result.ingredientSections[1].ingredients)).toEqual([
+        "Oil",
+        "Flour",
+      ]);
+      expect(names(result.ungroupedIngredients)).toEqual(["Salt"]);
+    });
+  });
 });

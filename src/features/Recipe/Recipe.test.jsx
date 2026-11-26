@@ -1875,4 +1875,191 @@ describe("Recipe Component", () => {
       );
     });
   });
+
+  describe("Sharing and friend request failures", () => {
+    const linkRecipe = {
+      ...mockRecipeData,
+      visibility: "link",
+      share_token: "existing",
+    };
+
+    const clickShare = async () => {
+      fireEvent.click(screen.getByTestId("visibility-btn"));
+      fireEvent.click(await screen.findByTestId("share-link-btn"));
+    };
+
+    beforeEach(() => {
+      mockRecipeHook.recipe = linkRecipe;
+    });
+
+    test("reports a failed native share but not a cancelled one", async () => {
+      navigator.share = vi.fn().mockRejectedValue({ name: "AbortError" });
+      renderRecipe();
+      await clickShare();
+      await waitFor(() => expect(navigator.share).toHaveBeenCalled());
+      expect(mockToastAdd).not.toHaveBeenCalled();
+
+      navigator.share.mockRejectedValue(new Error("nope"));
+      fireEvent.click(screen.getByTestId("share-link-btn"));
+      await waitFor(() =>
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ title: "share_link_failed" })
+        )
+      );
+      delete navigator.share;
+    });
+
+    test("reports a failed clipboard copy of the link", async () => {
+      delete navigator.share;
+      navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error());
+      renderRecipe();
+      await clickShare();
+      await waitFor(() =>
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ title: "share_link_failed" })
+        )
+      );
+    });
+
+    describe("friend requests from a shared link", () => {
+      beforeEach(() => {
+        mockParams = { shareToken: "tok", slug: "test-recipe" };
+        mockAuth = { isLoggedIn: true, user: { id: "stranger" } };
+        mockSharedRecipeHook = {
+          recipe: {
+            ...linkRecipe,
+            user_id: "owner-1",
+            share_token: "tok",
+            owner: { id: "owner-1", username: "anna", first_name: "Anna" },
+          },
+          loading: false,
+          error: null,
+        };
+      });
+
+      test("treats an existing request as sent", async () => {
+        mockSendFriendRequest.mockRejectedValue({ code: "23505" });
+        renderRecipe({ isSharedView: true });
+        fireEvent.click(await screen.findByTestId("add-friend-btn"));
+        await waitFor(() =>
+          expect(screen.getByTestId("add-friend-btn")).toHaveTextContent(
+            "friend_request_sent"
+          )
+        );
+        expect(mockToastAdd).not.toHaveBeenCalled();
+      });
+
+      test("shows an error when the request fails", async () => {
+        mockSendFriendRequest.mockRejectedValue(new Error("x"));
+        renderRecipe({ isSharedView: true });
+        fireEvent.click(await screen.findByTestId("add-friend-btn"));
+        await waitFor(() =>
+          expect(mockToastAdd).toHaveBeenCalledWith(
+            expect.objectContaining({ title: "friend_request_failed" })
+          )
+        );
+      });
+
+      test("only links ingredients to other link-shared recipes", () => {
+        mockAuth = { isLoggedIn: false, user: null };
+        mockSharedRecipeHook.recipe.ungroupedIngredients = [
+          {
+            id: "a",
+            recipe_ingredient_id: "ra",
+            singular_name: "pesto",
+            linked_recipe: { id: "p", slug: "pesto", share_token: "ptok" },
+          },
+          {
+            id: "b",
+            recipe_ingredient_id: "rb",
+            singular_name: "stock",
+            linked_recipe: { id: "s", slug: "stock" },
+          },
+        ];
+        renderRecipe({ isSharedView: true });
+        expect(screen.getByText("pesto").closest("a")).toHaveAttribute(
+          "href",
+          "/shared/ptok/pesto"
+        );
+        expect(screen.getByText("stock").closest("a")).toBeNull();
+      });
+    });
+  });
+
+  describe("Offline errors", () => {
+    test("explains that the recipe isn't available offline", () => {
+      const onLine = vi
+        .spyOn(navigator, "onLine", "get")
+        .mockReturnValue(false);
+      mockRecipeHook.error = "Failed to fetch";
+      renderRecipe();
+      expect(
+        screen.getByText("recipe_unavailable_offline")
+      ).toBeInTheDocument();
+      onLine.mockRestore();
+    });
+  });
+
+  describe("Servings scaling", () => {
+    const servingsText = () =>
+      screen.getByLabelText("decrease_servings").nextElementSibling.textContent;
+
+    test("scales a servings range and resets", () => {
+      mockRecipeHook.recipe = { ...mockRecipeData, servings: "2-3" };
+      renderRecipe();
+      expect(servingsText()).toBe("2–3");
+
+      fireEvent.click(screen.getByLabelText("increase_servings"));
+      expect(servingsText()).toBe("3–5");
+
+      fireEvent.click(screen.getByLabelText("reset_servings"));
+      expect(servingsText()).toBe("2–3");
+    });
+
+    test("can't go below one serving", () => {
+      mockRecipeHook.recipe = { ...mockRecipeData, servings: "2" };
+      renderRecipe();
+      fireEvent.click(screen.getByLabelText("decrease_servings"));
+      expect(servingsText()).toBe("1");
+      expect(screen.getByLabelText("decrease_servings")).toBeDisabled();
+    });
+
+    test("uses multiplier steps for text servings", () => {
+      mockRecipeHook.recipe = { ...mockRecipeData, servings: "1 loaf" };
+      renderRecipe();
+      expect(servingsText()).toBe("1 loaf");
+
+      fireEvent.click(screen.getByLabelText("increase_servings"));
+      expect(screen.getByText("1.5x")).toBeInTheDocument();
+      fireEvent.click(screen.getByLabelText("decrease_servings"));
+      fireEvent.click(screen.getByLabelText("decrease_servings"));
+      expect(screen.getByText("3/4x")).toBeInTheDocument();
+    });
+
+    test("shows plain servings text when there are no ingredients", () => {
+      mockRecipeHook.recipe = {
+        ...mockRecipeData,
+        servings: "6",
+        ungroupedIngredients: [],
+      };
+      renderRecipe();
+      expect(screen.queryByLabelText("increase_servings")).toBeNull();
+      expect(screen.getByText("6")).toBeInTheDocument();
+    });
+
+    test("scales ingredients directly when there are no servings", () => {
+      mockRecipeHook.recipe = { ...mockRecipeData, servings: null };
+      renderRecipe();
+      expect(screen.getByText("1x")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByLabelText("increase_scale"));
+      expect(screen.getByText("1.5x")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByLabelText("reset_scale"));
+      expect(screen.getByText("1x")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByLabelText("decrease_scale"));
+      expect(screen.getByText("3/4x")).toBeInTheDocument();
+    });
+  });
 });
