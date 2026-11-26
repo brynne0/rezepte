@@ -3,23 +3,142 @@ import { Plus, GripVertical, Trash2 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import CookingTimeRow from "./CookingTimeRow";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog/UnsavedChangesDialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "cn";
+import SectionTitleInput from "@/components/SectionTitleInput/SectionTitleInput";
+
+// Drop zone of draggable cooking time rows, for one section or "ungrouped"
+const CookingTimeList = ({ sectionId, items, itemHandlers }) => (
+  <Droppable droppableId={sectionId} type="cooking-time-item">
+    {(provided, snapshot) => (
+      <div
+        className={cn(
+          "flex flex-col overflow-hidden rounded-lg border border-border bg-card",
+          snapshot.isDraggingOver && "bg-muted/50"
+        )}
+        {...provided.droppableProps}
+        ref={provided.innerRef}
+      >
+        {items.map((item, index) => {
+          const dragId = `${sectionId}-${index}-${item.tempId || item.id}`;
+          return (
+            <Draggable
+              key={dragId}
+              draggableId={dragId}
+              index={index}
+              type="cooking-time-item"
+            >
+              {(itemProvided, itemSnapshot) => (
+                <CookingTimeRow
+                  item={item}
+                  index={index}
+                  sectionId={sectionId}
+                  isEditMode={true}
+                  provided={itemProvided}
+                  snapshot={itemSnapshot}
+                  {...itemHandlers}
+                />
+              )}
+            </Draggable>
+          );
+        })}
+        {provided.placeholder}
+      </div>
+    )}
+  </Droppable>
+);
+
+// One draggable section: title, remove button, its rows and an add button
+const CookingTimeSection = ({
+  section,
+  index,
+  isEditingTitle,
+  setEditingSectionId,
+  handleSectionChange,
+  removeSection,
+  addCookingTime,
+  itemHandlers,
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <Draggable
+      draggableId={section.id}
+      index={index}
+      type="cooking-time-section"
+    >
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className={cn(
+            "flex flex-col gap-2 rounded-lg border border-border bg-muted/20 p-2",
+            snapshot.isDragging && "shadow-md"
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              {...provided.dragHandleProps}
+              data-slot="drag-handle"
+              className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
+            >
+              <GripVertical size={16} />
+            </div>
+            <SectionTitleInput
+              value={section.subheading}
+              isEditing={isEditingTitle}
+              onChange={(value) =>
+                handleSectionChange(section.id, "subheading", value)
+              }
+              onEditingChange={(editing) =>
+                setEditingSectionId(editing ? section.id : null)
+              }
+            />
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost-destructive"
+                    size="icon-sm"
+                    onClick={() => removeSection(section.id)}
+                    aria-label={t("remove_section")}
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                }
+              />
+              <TooltipContent>{t("remove_section")}</TooltipContent>
+            </Tooltip>
+          </div>
+
+          <CookingTimeList
+            sectionId={section.id}
+            items={section.cookingTimes}
+            itemHandlers={itemHandlers}
+          />
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => addCookingTime(section.id)}
+            aria-label={t("add_cooking_time")}
+          >
+            <Plus size={16} data-testid="add-section-cooking-time-btn" />
+            {t("add_cooking_time")}
+          </Button>
+        </div>
+      )}
+    </Draggable>
+  );
+};
 
 const EditCookingTimes = ({
   formData,
@@ -43,26 +162,11 @@ const EditCookingTimes = ({
 }) => {
   const { t } = useTranslation();
 
-  const renderCookingTimeItem = (
-    item,
-    index,
-    sectionId,
-    provided,
-    snapshot
-  ) => (
-    <CookingTimeRow
-      key={item.tempId || item.id}
-      item={item}
-      index={index}
-      sectionId={sectionId}
-      isEditMode={true}
-      provided={provided}
-      snapshot={snapshot}
-      handleItemChange={handleCookingTimeChange}
-      handleItemFieldEnter={handleCookingTimeFieldEnter}
-      removeItem={removeCookingTime}
-    />
-  );
+  const itemHandlers = {
+    handleItemChange: handleCookingTimeChange,
+    handleItemFieldEnter: handleCookingTimeFieldEnter,
+    removeItem: removeCookingTime,
+  };
 
   return (
     <>
@@ -80,38 +184,11 @@ const EditCookingTimes = ({
 
           {/* Ungrouped Cooking Times */}
           {formData.ungroupedCookingTimes.length > 0 && (
-            <Droppable droppableId="ungrouped" type="cooking-time-item">
-              {(provided, snapshot) => (
-                <div
-                  className={cn(
-                    "flex flex-col overflow-hidden rounded-lg border border-border bg-card",
-                    snapshot.isDraggingOver && "bg-muted/50"
-                  )}
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {formData.ungroupedCookingTimes.map((item, index) => (
-                    <Draggable
-                      key={`ungrouped-${index}-${item.tempId || item.id}`}
-                      draggableId={`ungrouped-${index}-${item.tempId || item.id}`}
-                      index={index}
-                      type="cooking-time-item"
-                    >
-                      {(provided, snapshot) =>
-                        renderCookingTimeItem(
-                          item,
-                          index,
-                          "ungrouped",
-                          provided,
-                          snapshot
-                        )
-                      }
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
+            <CookingTimeList
+              sectionId="ungrouped"
+              items={formData.ungroupedCookingTimes}
+              itemHandlers={itemHandlers}
+            />
           )}
 
           {/* Add Cooking Time Button for Ungrouped */}
@@ -135,144 +212,17 @@ const EditCookingTimes = ({
                   ref={provided.innerRef}
                 >
                   {formData.cookingTimeSections.map((section, sectionIndex) => (
-                    <Draggable
+                    <CookingTimeSection
                       key={section.id}
-                      draggableId={section.id}
+                      section={section}
                       index={sectionIndex}
-                      type="cooking-time-section"
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className={cn(
-                            "flex flex-col gap-2 rounded-lg border border-border bg-muted/20 p-2",
-                            snapshot.isDragging && "shadow-md"
-                          )}
-                        >
-                          {/* Section Header */}
-                          <div className="flex items-center gap-2">
-                            <div
-                              {...provided.dragHandleProps}
-                              data-slot="drag-handle"
-                              className="flex cursor-grab items-center text-muted-foreground active:cursor-grabbing"
-                            >
-                              <GripVertical size={16} />
-                            </div>
-                            {editingSectionId === section.id ||
-                            !section.subheading ? (
-                              <Input
-                                type="text"
-                                value={section.subheading}
-                                onChange={(e) =>
-                                  handleSectionChange(
-                                    section.id,
-                                    "subheading",
-                                    e.target.value
-                                  )
-                                }
-                                onKeyDown={(e) => {
-                                  if (
-                                    e.key === "Enter" &&
-                                    section.subheading.trim()
-                                  ) {
-                                    e.preventDefault();
-                                    setEditingSectionId(null);
-                                  }
-                                }}
-                                onFocus={() => setEditingSectionId(section.id)}
-                                onBlur={() => {
-                                  if (section.subheading.trim()) {
-                                    setEditingSectionId(null);
-                                  }
-                                }}
-                                autoFocus={editingSectionId === section.id}
-                                className="section-title-input flex-1"
-                                placeholder={t("section_title")}
-                              />
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setEditingSectionId(section.id)}
-                                className="flex-1 truncate text-left font-medium [word-break:break-word]"
-                              >
-                                {section.subheading}
-                              </button>
-                            )}
-                            <Tooltip>
-                              <TooltipTrigger
-                                render={
-                                  <Button
-                                    type="button"
-                                    variant="ghost-destructive"
-                                    size="icon-sm"
-                                    onClick={() => removeSection(section.id)}
-                                    aria-label={t("remove_section")}
-                                  >
-                                    <Trash2 size={16} />
-                                  </Button>
-                                }
-                              />
-                              <TooltipContent>
-                                {t("remove_section")}
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
-
-                          {/* Section Cooking Times */}
-                          <Droppable
-                            droppableId={section.id}
-                            type="cooking-time-item"
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                className={cn(
-                                  "flex flex-col overflow-hidden rounded-lg border border-border bg-card",
-                                  snapshot.isDraggingOver && "bg-muted/50"
-                                )}
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                              >
-                                {section.cookingTimes.map((item, itemIndex) => (
-                                  <Draggable
-                                    key={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
-                                    draggableId={`${section.id}-${itemIndex}-${item.tempId || item.id}`}
-                                    index={itemIndex}
-                                    type="cooking-time-item"
-                                  >
-                                    {(provided, snapshot) =>
-                                      renderCookingTimeItem(
-                                        item,
-                                        itemIndex,
-                                        section.id,
-                                        provided,
-                                        snapshot
-                                      )
-                                    }
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </div>
-                            )}
-                          </Droppable>
-
-                          {/* Add Cooking Time Button */}
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => addCookingTime(section.id)}
-                            aria-label={t("add_cooking_time")}
-                          >
-                            <Plus
-                              size={16}
-                              data-testid="add-section-cooking-time-btn"
-                            />
-                            {t("add_cooking_time")}
-                          </Button>
-                        </div>
-                      )}
-                    </Draggable>
+                      isEditingTitle={editingSectionId === section.id}
+                      setEditingSectionId={setEditingSectionId}
+                      handleSectionChange={handleSectionChange}
+                      removeSection={removeSection}
+                      addCookingTime={addCookingTime}
+                      itemHandlers={itemHandlers}
+                    />
                   ))}
                   {provided.placeholder}
                 </div>
@@ -316,28 +266,12 @@ const EditCookingTimes = ({
       </DragDropContext>
 
       {/* Exit Edit Mode Modal - for exiting edit mode with unsaved changes */}
-      <AlertDialog
+      <UnsavedChangesDialog
         open={showExitEditModeModal}
-        onOpenChange={(open) => {
-          if (!open) handleCancelExitEditMode();
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("unsaved_changes_warning")}</AlertDialogTitle>
-          </AlertDialogHeader>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("stay")}</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleConfirmExitEditMode}
-            >
-              {t("leave_page")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        message={t("unsaved_changes_warning")}
+        onLeave={handleConfirmExitEditMode}
+        onStay={handleCancelExitEditMode}
+      />
     </>
   );
 };

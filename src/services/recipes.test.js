@@ -442,17 +442,12 @@ describe("recipes service", () => {
         error: null,
       });
       const deleteIngredientsBuilder = makeQueryBuilder({ error: null });
-      const languageLookupBuilder = makeQueryBuilder({
-        data: { original_language: "en" },
-        error: null,
-      });
       const insertIngredientsBuilder = makeQueryBuilder({ error: null });
 
       supabase.from
         .mockReturnValueOnce(fetchOriginalBuilder) // fetch original recipe
         .mockReturnValueOnce(updateBuilder) // update recipe
         .mockReturnValueOnce(deleteIngredientsBuilder) // delete old ingredients
-        .mockReturnValueOnce(languageLookupBuilder) // per-ingredient language lookup
         .mockReturnValueOnce(insertIngredientsBuilder); // insert new ingredients
 
       const result = await updateRecipe("r1", {
@@ -464,6 +459,58 @@ describe("recipes service", () => {
       expect(deleteIngredientsBuilder.delete).toHaveBeenCalled();
       expect(insertIngredientsBuilder.insert).toHaveBeenCalledWith([
         expect.objectContaining({ recipe_id: "r1", ingredient_id: "i1" }),
+      ]);
+    });
+
+    test("uses the saved recipe's language without re-fetching it per ingredient", async () => {
+      const insertIngredientsBuilder = makeQueryBuilder({ error: null });
+      supabase.from
+        .mockReturnValueOnce(
+          makeQueryBuilder({ data: { title: "Old", images: [] }, error: null })
+        ) // fetch original recipe
+        .mockReturnValueOnce(
+          makeQueryBuilder({
+            data: { id: "r1", original_language: "en" },
+            error: null,
+          })
+        ) // update recipe
+        .mockReturnValueOnce(makeQueryBuilder({ error: null })) // delete old ingredients
+        .mockReturnValueOnce(insertIngredientsBuilder); // insert new ingredients
+
+      await updateRecipe("r1", {
+        ungroupedIngredients: [{ ingredient_id: "i1", tempId: "t1" }],
+        ingredientSections: [
+          {
+            id: "s1",
+            subheading: "Sauce",
+            ingredients: [
+              { ingredient_id: "i2", tempId: "t2", name: "tomatoes" },
+              { ingredient_id: "i3", tempId: "t3" },
+            ],
+          },
+        ],
+      });
+
+      // Four queries total, however many ingredients there are
+      expect(supabase.from).toHaveBeenCalledTimes(4);
+      expect(insertIngredientsBuilder.insert).toHaveBeenCalledWith([
+        expect.objectContaining({
+          ingredient_id: "i1",
+          subheading: null,
+          order_index: 0,
+        }),
+        expect.objectContaining({
+          ingredient_id: "i2",
+          subheading: "Sauce",
+          order_index: 1,
+          is_plural: true,
+        }),
+        expect.objectContaining({
+          ingredient_id: "i3",
+          subheading: "Sauce",
+          order_index: 2,
+          is_plural: false,
+        }),
       ]);
     });
 

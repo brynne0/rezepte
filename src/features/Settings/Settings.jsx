@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/empty";
 import { WifiOff } from "lucide-react";
 import { toast } from "@/components/ui/toast";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
@@ -37,15 +36,16 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import BackLink from "../../components/BackLink/BackLink";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog/UnsavedChangesDialog";
 
-const SETTINGS_TABS = ["profile", "preferences", "categories"];
+const SETTINGS_TABS = new Set(["profile", "preferences", "categories"]);
 
 const Settings = ({ resetCategoryFilter }) => {
   const isOnline = useOnlineStatus();
   // Tab lives in the URL so refresh and links keep it
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const activeTab = SETTINGS_TABS.includes(tabParam) ? tabParam : "profile";
+  const activeTab = SETTINGS_TABS.has(tabParam) ? tabParam : "profile";
   const setActiveTab = (tab) =>
     setSearchParams(
       (prev) => {
@@ -133,13 +133,13 @@ const Settings = ({ resetCategoryFilter }) => {
     const previous = profileData?.preferred_language || "en";
     if (language === previous) return;
     setProfileData({ ...profileData, preferred_language: language });
-    i18n.changeLanguage(language);
+    void i18n.changeLanguage(language);
     try {
       await updateUserPreferredLanguage(language);
       toast.add({ title: t("successfully_updated_language"), type: "success" });
     } catch (err) {
       setProfileData({ ...profileData, preferred_language: previous });
-      i18n.changeLanguage(previous);
+      void i18n.changeLanguage(previous);
       toast.add({
         title: `${t("failed_to_update_language")}: ${err.message}`,
         type: "error",
@@ -363,47 +363,19 @@ const Settings = ({ resetCategoryFilter }) => {
             </AlertDialogContent>
           </AlertDialog>
 
-          <AlertDialog
+          <UnsavedChangesDialog
             open={isUnsavedChangesModalOpen}
-            onOpenChange={(open) => {
-              if (!open) handleConfirmRouteLeave();
-            }}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
-              </AlertDialogHeader>
+            message={unsavedChangesMessage}
+            onLeave={handleConfirmRouteLeave}
+            onStay={cancelNavigation}
+          />
 
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
-                <AlertDialogAction onClick={cancelNavigation}>
-                  {t("stay")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <AlertDialog
+          <UnsavedChangesDialog
             open={isTabSwitchModalOpen}
-            onOpenChange={(open) => {
-              if (!open) handleConfirmTabSwitch();
-            }}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {t("unsaved_changes_warning")}
-                </AlertDialogTitle>
-              </AlertDialogHeader>
-
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancelTabSwitch}>
-                  {t("stay")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            message={t("unsaved_changes_warning")}
+            onLeave={handleConfirmTabSwitch}
+            onStay={handleCancelTabSwitch}
+          />
         </>
       )}
     </div>

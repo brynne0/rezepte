@@ -45,6 +45,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { detectLanguage, recipeFormText } from "../../utils/detectLanguage";
 import BackLink from "../BackLink/BackLink";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog/UnsavedChangesDialog";
 
 const RecipeForm = ({
   categories,
@@ -563,26 +564,12 @@ const RecipeForm = ({
       </AlertDialog>
 
       {/* Unsaved Changes Modal */}
-      <AlertDialog
+      <UnsavedChangesDialog
         open={isUnsavedChangesModalOpen}
-        onOpenChange={(open) => {
-          // Dismissing (overlay click / Escape) is treated the same as
-          // explicitly choosing to leave the page.
-          if (!open) confirmNavigation();
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
-            <AlertDialogAction onClick={cancelNavigation}>
-              {t("stay")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        message={unsavedChangesMessage}
+        onLeave={confirmNavigation}
+        onStay={cancelNavigation}
+      />
 
       {/* The text looks like the other language */}
       <AlertDialog

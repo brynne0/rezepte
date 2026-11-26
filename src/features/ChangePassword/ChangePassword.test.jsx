@@ -76,12 +76,10 @@ describe("ChangePassword", () => {
   beforeEach(async () => {
     // Import the mocked modules
     const supabase = await import("../../lib/supabase");
-    const { changePassword, verifyCurrentPassword } = await import(
-      "../../services/auth"
-    );
-    const { validateChangePasswordForm, isPasswordStrong } = await import(
-      "../../utils/validation"
-    );
+    const { changePassword, verifyCurrentPassword } =
+      await import("../../services/auth");
+    const { validateChangePasswordForm, isPasswordStrong } =
+      await import("../../utils/validation");
 
     mockSupabase = supabase.default;
     mockChangePassword = changePassword;
@@ -107,6 +105,39 @@ describe("ChangePassword", () => {
     mockIsPasswordStrong.mockReturnValue(true); // Strong password by default
   });
 
+  const mockValidSession = () => {
+    mockSupabase.auth.getSession.mockResolvedValue({
+      data: { session: { access_token: "test-token" } },
+      error: null,
+    });
+    mockSupabase.auth.getUser.mockResolvedValue({
+      data: { user: { id: "test-user" } },
+      error: null,
+    });
+  };
+
+  const waitForForm = () =>
+    waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "confirm" })
+      ).toBeInTheDocument();
+    });
+
+  // Repeat defaults to the same value
+  const fillNewPasswords = (password, repeat = password) => {
+    fireEvent.change(screen.getByLabelText("new_password"), {
+      target: { value: password },
+    });
+    fireEvent.change(screen.getByLabelText("new_password_repeat"), {
+      target: { value: repeat },
+    });
+  };
+
+  const submitForm = () =>
+    fireEvent.submit(
+      screen.getByRole("button", { name: "confirm" }).closest("form")
+    );
+
   describe("Component Rendering", () => {
     it("renders loading state initially", async () => {
       mockSupabase.auth.getSession.mockImplementation(
@@ -119,15 +150,7 @@ describe("ChangePassword", () => {
     });
 
     it("renders password change form when session is valid", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
 
       render(<ChangePasswordWrapper />);
 
@@ -160,42 +183,17 @@ describe("ChangePassword", () => {
     });
 
     it("renders success message after successful password change", async () => {
-      // Set up mocks for successful flow
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockChangePassword.mockResolvedValue({ error: null });
       mockValidateChangePasswordForm.mockReturnValue({});
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      // Fill in the password fields
-      const newPasswordInput = screen.getByLabelText("new_password");
-      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+      fillNewPasswords("newPassword123");
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-      fireEvent.change(repeatPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-
-      // Submit the form
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(screen.getByText("password_changed")).toBeInTheDocument();
@@ -255,15 +253,7 @@ describe("ChangePassword", () => {
     });
 
     it("uses existing session when no URL tokens provided", async () => {
-      // Set up mocks for existing session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
 
       render(<ChangePasswordWrapper />);
 
@@ -306,24 +296,12 @@ describe("ChangePassword", () => {
 
   describe("Form Submission and Validation", () => {
     it("calls validation before password change", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockValidateChangePasswordForm.mockReturnValue({});
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
       const newPasswordInput = screen.getByLabelText("new_password");
       const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
@@ -331,10 +309,7 @@ describe("ChangePassword", () => {
       fireEvent.change(newPasswordInput, { target: { value: "newpass" } });
       fireEvent.change(repeatPasswordInput, { target: { value: "newpass" } });
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       expect(mockValidateChangePasswordForm).toHaveBeenCalledWith(
         {
@@ -348,15 +323,7 @@ describe("ChangePassword", () => {
     });
 
     it("displays validation errors", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockValidateChangePasswordForm.mockReturnValue({
         newPassword: "Password too short",
         newPasswordRepeat: "Passwords must match",
@@ -364,16 +331,9 @@ describe("ChangePassword", () => {
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(screen.getByText("Password too short")).toBeInTheDocument();
@@ -382,70 +342,32 @@ describe("ChangePassword", () => {
     });
 
     it("prevents submission when validation fails", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockValidateChangePasswordForm.mockReturnValue({
         newPassword: "Password too short",
       });
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       expect(mockChangePassword).not.toHaveBeenCalled();
     });
 
     it("calls changePassword with new password when validation passes", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockChangePassword.mockResolvedValue({ error: null });
       mockValidateChangePasswordForm.mockReturnValue({});
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const newPasswordInput = screen.getByLabelText("new_password");
-      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+      fillNewPasswords("newPassword123");
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-      fireEvent.change(repeatPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(mockChangePassword).toHaveBeenCalledWith("newPassword123");
@@ -453,40 +375,17 @@ describe("ChangePassword", () => {
     });
 
     it("shows success message on successful password change", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockChangePassword.mockResolvedValue({ error: null });
       mockValidateChangePasswordForm.mockReturnValue({});
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const newPasswordInput = screen.getByLabelText("new_password");
-      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+      fillNewPasswords("newPassword123");
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-      fireEvent.change(repeatPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(screen.getByText("password_changed")).toBeInTheDocument();
@@ -494,15 +393,7 @@ describe("ChangePassword", () => {
     });
 
     it("shows error message when password change fails", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockChangePassword.mockResolvedValue({
         error: { message: "Password change failed" },
       });
@@ -510,26 +401,11 @@ describe("ChangePassword", () => {
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const newPasswordInput = screen.getByLabelText("new_password");
-      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+      fillNewPasswords("newPassword123");
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-      fireEvent.change(repeatPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -539,40 +415,17 @@ describe("ChangePassword", () => {
     });
 
     it("handles exceptions during password change", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockChangePassword.mockRejectedValue(new Error("Network error"));
       mockValidateChangePasswordForm.mockReturnValue({});
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const newPasswordInput = screen.getByLabelText("new_password");
-      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+      fillNewPasswords("newPassword123");
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-      fireEvent.change(repeatPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -608,26 +461,11 @@ describe("ChangePassword", () => {
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const newPasswordInput = screen.getByLabelText("new_password");
-      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+      fillNewPasswords("newPassword123");
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-      fireEvent.change(repeatPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(screen.getByText("session_expired")).toBeInTheDocument();
@@ -635,15 +473,7 @@ describe("ChangePassword", () => {
     });
 
     it("clears error messages when user types", async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
 
       // First trigger an error
       mockValidateChangePasswordForm.mockReturnValue({
@@ -652,16 +482,9 @@ describe("ChangePassword", () => {
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(screen.getByText("Password too short")).toBeInTheDocument();
@@ -682,15 +505,7 @@ describe("ChangePassword", () => {
       // Set up location state to simulate coming from settings
       mockLocation.state = { fromSettings: true };
 
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
     });
 
     it("renders old password field when coming from account settings", async () => {
@@ -711,11 +526,7 @@ describe("ChangePassword", () => {
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
       const oldPasswordInput = screen.getByLabelText("current_password");
       const newPasswordInput = screen.getByLabelText("new_password");
@@ -725,10 +536,7 @@ describe("ChangePassword", () => {
       fireEvent.change(newPasswordInput, { target: { value: "newpass" } });
       fireEvent.change(repeatPasswordInput, { target: { value: "newpass" } });
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       expect(mockValidateChangePasswordForm).toHaveBeenCalledWith(
         {
@@ -748,11 +556,7 @@ describe("ChangePassword", () => {
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
       const oldPasswordInput = screen.getByLabelText("current_password");
       const newPasswordInput = screen.getByLabelText("new_password");
@@ -762,10 +566,7 @@ describe("ChangePassword", () => {
       fireEvent.change(newPasswordInput, { target: { value: "newpass" } });
       fireEvent.change(repeatPasswordInput, { target: { value: "newpass" } });
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(mockVerifyCurrentPassword).toHaveBeenCalledWith("oldpass");
@@ -782,11 +583,7 @@ describe("ChangePassword", () => {
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
       const oldPasswordInput = screen.getByLabelText("current_password");
       const newPasswordInput = screen.getByLabelText("new_password");
@@ -796,10 +593,7 @@ describe("ChangePassword", () => {
       fireEvent.change(newPasswordInput, { target: { value: "newpass" } });
       fireEvent.change(repeatPasswordInput, { target: { value: "newpass" } });
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -817,16 +611,9 @@ describe("ChangePassword", () => {
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(screen.getByText("password_required")).toBeInTheDocument();
@@ -858,41 +645,17 @@ describe("ChangePassword", () => {
     });
 
     it("navigates to auth page from success message", async () => {
-      // Set up mocks for successful password change flow
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
       mockChangePassword.mockResolvedValue({ error: null });
       mockValidateChangePasswordForm.mockReturnValue({});
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
 
-      // Submit form to show success message
-      const newPasswordInput = screen.getByLabelText("new_password");
-      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+      fillNewPasswords("newPassword123");
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-      fireEvent.change(repeatPasswordInput, {
-        target: { value: "newPassword123" },
-      });
-
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -910,11 +673,7 @@ describe("ChangePassword", () => {
     beforeEach(async () => {
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
     });
 
     it("updates password values when user types", () => {
@@ -936,10 +695,7 @@ describe("ChangePassword", () => {
         newPasswordRepeat: "Passwords must match",
       });
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         const newPasswordInput = screen.getByLabelText("new_password");
@@ -955,23 +711,11 @@ describe("ChangePassword", () => {
 
   describe("Password Validation and Requirements", () => {
     beforeEach(async () => {
-      // Set up mocks for valid session
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-        error: null,
-      });
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: { id: "test-user" } },
-        error: null,
-      });
+      mockValidSession();
 
       render(<ChangePasswordWrapper />);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "confirm" })
-        ).toBeInTheDocument();
-      });
+      await waitForForm();
     });
 
     it("shows password requirements when user types in new password field", async () => {
@@ -1001,10 +745,7 @@ describe("ChangePassword", () => {
       fireEvent.change(newPasswordInput, { target: { value: "weak" } });
       fireEvent.change(repeatPasswordInput, { target: { value: "weak" } });
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(mockIsPasswordStrong).toHaveBeenCalledWith("weak");
@@ -1020,20 +761,9 @@ describe("ChangePassword", () => {
       mockIsPasswordStrong.mockReturnValue(true);
       mockChangePassword.mockResolvedValue({ error: null });
 
-      const newPasswordInput = screen.getByLabelText("new_password");
-      const repeatPasswordInput = screen.getByLabelText("new_password_repeat");
+      fillNewPasswords("StrongPass123!");
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: "StrongPass123!" },
-      });
-      fireEvent.change(repeatPasswordInput, {
-        target: { value: "StrongPass123!" },
-      });
-
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(mockIsPasswordStrong).toHaveBeenCalledWith("StrongPass123!");
@@ -1053,10 +783,7 @@ describe("ChangePassword", () => {
       fireEvent.change(newPasswordInput, { target: { value: "weak" } });
       fireEvent.change(repeatPasswordInput, { target: { value: "different" } });
 
-      const form = screen
-        .getByRole("button", { name: "confirm" })
-        .closest("form");
-      fireEvent.submit(form);
+      submitForm();
 
       await waitFor(() => {
         expect(

@@ -1,5 +1,12 @@
 // React & hooks
-import { useState, useEffect, useRef, useContext } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+  useCallback,
+  useMemo,
+} from "react";
 
 // Data hooks
 import { useRecipesPagination } from "./hooks/data/useRecipesPagination";
@@ -151,7 +158,7 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const lang = params.get("lang");
     if (lang && ["en", "de"].includes(lang)) {
-      i18n.changeLanguage(lang);
+      void i18n.changeLanguage(lang);
       params.delete("lang");
       const query = params.toString();
       window.history.replaceState(
@@ -167,7 +174,7 @@ function App() {
   const userLanguage = isLoggedIn ? profile?.preferred_language : null;
   useEffect(() => {
     if (userLanguage && userLanguage !== i18n.language) {
-      i18n.changeLanguage(userLanguage);
+      void i18n.changeLanguage(userLanguage);
     }
   }, [userLanguage, i18n]);
 
@@ -201,24 +208,25 @@ function App() {
     }
   }, [isLoggedIn]);
 
-  const handlePageChange = (page) => {
+  // Stable handlers so the context value below only changes with real state
+  const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
     mainScrollRef.current?.scrollTo(0, 0);
-  };
+  }, []);
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = useCallback((category) => {
     setSelectedCategory(category);
     setCurrentPage(1); // Reset to first page when changing category
-  };
+  }, []);
 
-  const handleSearchChange = (search) => {
+  const handleSearchChange = useCallback((search) => {
     setSearchTerm(search);
     setCurrentPage(1); // Reset to first page when searching
-  };
+  }, []);
 
-  const handlePageReset = () => {
+  const handlePageReset = useCallback(() => {
     setCurrentPage(1);
-  };
+  }, []);
 
   const [router] = useState(() =>
     createBrowserRouter([
@@ -265,27 +273,47 @@ function App() {
     ])
   );
 
-  const appStateValue = {
-    setSelectedCategory: handleCategoryChange,
-    setSearchTerm: handleSearchChange,
-    sortBy,
-    setSortBy,
-    showImages,
-    setShowImages,
-    t,
-    categories,
-    selectedCategory,
-    recipes,
-    totalRecipeCount,
-    searchTerm,
-    isFetchingRecipes,
-    paginationInfo,
-    onPageChange: handlePageChange,
-    onPageReset: handlePageReset,
-    isLoggedIn,
-    friendBar,
-    setFriendBar,
-  };
+  const appStateValue = useMemo(
+    () => ({
+      setSelectedCategory: handleCategoryChange,
+      setSearchTerm: handleSearchChange,
+      sortBy,
+      setSortBy,
+      showImages,
+      setShowImages,
+      t,
+      categories,
+      selectedCategory,
+      recipes,
+      totalRecipeCount,
+      searchTerm,
+      isFetchingRecipes,
+      paginationInfo,
+      onPageChange: handlePageChange,
+      onPageReset: handlePageReset,
+      isLoggedIn,
+      friendBar,
+      setFriendBar,
+    }),
+    [
+      handleCategoryChange,
+      handleSearchChange,
+      sortBy,
+      showImages,
+      t,
+      categories,
+      selectedCategory,
+      recipes,
+      totalRecipeCount,
+      searchTerm,
+      isFetchingRecipes,
+      paginationInfo,
+      handlePageChange,
+      handlePageReset,
+      isLoggedIn,
+      friendBar,
+    ]
+  );
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">

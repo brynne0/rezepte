@@ -18,15 +18,7 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "@/components/ui/empty";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog/UnsavedChangesDialog";
 import {
   Tooltip,
   TooltipContent,
@@ -141,6 +133,146 @@ const CookingTimes = () => {
     setIsEditMode(false);
   };
 
+  // Picks what the card body shows: conversions, loading, empty, edit or list
+  const renderTabContent = () => {
+    if (activeTab === "conversions") {
+      return <ConversionsTab />;
+    }
+    if (loading) {
+      return (
+        <>
+          {[3, 2].map((rows, index) => (
+            <Card key={index} size="sm" className="gap-0 bg-muted/20 pb-0">
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent className="flex flex-col divide-y divide-border">
+                {Array.from({ length: rows }).map((_, rowIndex) => (
+                  <div
+                    key={rowIndex}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 py-2"
+                  >
+                    <Skeleton className="h-5 w-2/3" />
+                    <Skeleton className="h-5 w-14" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </>
+      );
+    }
+    if (!hasAnyItems && !isEditMode) {
+      return (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia>
+              <Timer />
+            </EmptyMedia>
+            <EmptyTitle>
+              {t("no_cooking_times_title", "No cooking times yet")}
+            </EmptyTitle>
+            <EmptyDescription>
+              {t("add_first_cooking_time", "Add your first cooking time")}
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button
+              type="button"
+              disabled={!isOnline}
+              onClick={() => {
+                setIsEditMode(true);
+                addCookingTime("ungrouped");
+                setSelectedSection("all");
+              }}
+            >
+              <Plus size={16} />
+              {t("add_cooking_time")}
+            </Button>
+          </EmptyContent>
+        </Empty>
+      );
+    }
+    if (
+      filteredData.ungroupedCookingTimes.length === 0 &&
+      filteredData.cookingTimeSections.length === 0 &&
+      selectedSection !== "all"
+    ) {
+      return (
+        <p className="py-8 text-center text-sm text-muted-foreground">
+          {t("no_items_in_category", "No items in this category.")}
+        </p>
+      );
+    }
+    if (isEditMode) {
+      return (
+        <EditCookingTimes
+          formData={formData}
+          editingSectionId={editingSectionId}
+          setEditingSectionId={setEditingSectionId}
+          handleDragEnd={handleDragEnd}
+          addSection={addSection}
+          addCookingTime={addCookingTime}
+          removeSection={removeSection}
+          handleSectionChange={handleSectionChange}
+          handleCookingTimeChange={handleCookingTimeChange}
+          handleCookingTimeFieldEnter={handleCookingTimeFieldEnter}
+          removeCookingTime={removeCookingTime}
+          handleCancelEdit={handleCancelEdit}
+          handleSaveEdit={handleSaveEdit}
+          isSaving={isSaving}
+          isOnline={isOnline}
+          showExitEditModeModal={showExitEditModeModal}
+          handleConfirmExitEditMode={handleConfirmExitEditMode}
+          handleCancelExitEditMode={handleCancelExitEditMode}
+        />
+      );
+    }
+    return (
+      <>
+        {/* Ungrouped Cooking Times */}
+        {filteredData.ungroupedCookingTimes.length > 0 && (
+          <Card size="sm" className="bg-muted/20 py-0">
+            <CardContent className="flex flex-col divide-y divide-border">
+              {filteredData.ungroupedCookingTimes.map((item, index) => (
+                <CookingTimeRow
+                  key={item.tempId || item.id}
+                  item={item}
+                  index={index}
+                  sectionId="ungrouped"
+                  isEditMode={false}
+                />
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Cooking Time Sections: panels matching the Conversions tab */}
+        {filteredData.cookingTimeSections.map((section) => (
+          <Card key={section.id} size="sm" className="gap-0 bg-muted/20 pb-0">
+            <CardHeader>
+              <h2 className="font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase [word-break:break-word]">
+                {section.subheading}
+              </h2>
+            </CardHeader>
+            <CardContent className="flex flex-col divide-y divide-border">
+              {section.cookingTimes.map((item, itemIndex) => (
+                <CookingTimeRow
+                  key={item.tempId || item.id}
+                  item={item}
+                  index={itemIndex}
+                  sectionId={section.id}
+                  isEditMode={false}
+                />
+              ))}
+            </CardContent>
+          </Card>
+        ))}
+      </>
+    );
+  };
+
   return (
     <>
       <BackLink className="mx-auto max-w-3xl" onClick={handleBackNavigation} />
@@ -222,156 +354,16 @@ const CookingTimes = () => {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          {activeTab === "conversions" ? (
-            <ConversionsTab />
-          ) : loading ? (
-            <>
-              {[3, 2].map((rows, index) => (
-                <Card key={index} size="sm" className="gap-0 bg-muted/20 pb-0">
-                  <CardHeader>
-                    <Skeleton className="h-4 w-24" />
-                  </CardHeader>
-                  <CardContent className="flex flex-col divide-y divide-border">
-                    {Array.from({ length: rows }).map((_, rowIndex) => (
-                      <div
-                        key={rowIndex}
-                        className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 py-2"
-                      >
-                        <Skeleton className="h-5 w-2/3" />
-                        <Skeleton className="h-5 w-14" />
-                        <Skeleton className="h-4 w-1/2" />
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
-            </>
-          ) : !hasAnyItems && !isEditMode ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia>
-                  <Timer />
-                </EmptyMedia>
-                <EmptyTitle>
-                  {t("no_cooking_times_title", "No cooking times yet")}
-                </EmptyTitle>
-                <EmptyDescription>
-                  {t("add_first_cooking_time", "Add your first cooking time")}
-                </EmptyDescription>
-              </EmptyHeader>
-              <EmptyContent>
-                <Button
-                  type="button"
-                  disabled={!isOnline}
-                  onClick={() => {
-                    setIsEditMode(true);
-                    addCookingTime("ungrouped");
-                    setSelectedSection("all");
-                  }}
-                >
-                  <Plus size={16} />
-                  {t("add_cooking_time")}
-                </Button>
-              </EmptyContent>
-            </Empty>
-          ) : filteredData.ungroupedCookingTimes.length === 0 &&
-            filteredData.cookingTimeSections.length === 0 &&
-            selectedSection !== "all" ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              {t("no_items_in_category", "No items in this category.")}
-            </p>
-          ) : isEditMode ? (
-            <EditCookingTimes
-              formData={formData}
-              editingSectionId={editingSectionId}
-              setEditingSectionId={setEditingSectionId}
-              handleDragEnd={handleDragEnd}
-              addSection={addSection}
-              addCookingTime={addCookingTime}
-              removeSection={removeSection}
-              handleSectionChange={handleSectionChange}
-              handleCookingTimeChange={handleCookingTimeChange}
-              handleCookingTimeFieldEnter={handleCookingTimeFieldEnter}
-              removeCookingTime={removeCookingTime}
-              handleCancelEdit={handleCancelEdit}
-              handleSaveEdit={handleSaveEdit}
-              isSaving={isSaving}
-              isOnline={isOnline}
-              showExitEditModeModal={showExitEditModeModal}
-              handleConfirmExitEditMode={handleConfirmExitEditMode}
-              handleCancelExitEditMode={handleCancelExitEditMode}
-            />
-          ) : (
-            <>
-              {/* Ungrouped Cooking Times */}
-              {filteredData.ungroupedCookingTimes.length > 0 && (
-                <Card size="sm" className="bg-muted/20 py-0">
-                  <CardContent className="flex flex-col divide-y divide-border">
-                    {filteredData.ungroupedCookingTimes.map((item, index) => (
-                      <CookingTimeRow
-                        key={item.tempId || item.id}
-                        item={item}
-                        index={index}
-                        sectionId="ungrouped"
-                        isEditMode={false}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Cooking Time Sections: panels matching the Conversions tab */}
-              {filteredData.cookingTimeSections.map((section) => (
-                <Card
-                  key={section.id}
-                  size="sm"
-                  className="gap-0 bg-muted/20 pb-0"
-                >
-                  <CardHeader>
-                    <h2 className="font-receipt text-xs font-normal tracking-widest text-muted-foreground uppercase [word-break:break-word]">
-                      {section.subheading}
-                    </h2>
-                  </CardHeader>
-                  <CardContent className="flex flex-col divide-y divide-border">
-                    {section.cookingTimes.map((item, itemIndex) => (
-                      <CookingTimeRow
-                        key={item.tempId || item.id}
-                        item={item}
-                        index={itemIndex}
-                        sectionId={section.id}
-                        isEditMode={false}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
-            </>
-          )}
+          {renderTabContent()}
         </CardContent>
 
         {/* Unsaved Changes Modal - for page navigation */}
-        <AlertDialog
+        <UnsavedChangesDialog
           open={isUnsavedChangesModalOpen}
-          onOpenChange={(open) => {
-            if (!open) cancelNavigation();
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t("stay")}</AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
-                onClick={confirmNavigation}
-              >
-                {t("leave_page")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          message={unsavedChangesMessage}
+          onLeave={confirmNavigation}
+          onStay={cancelNavigation}
+        />
       </Card>
     </>
   );

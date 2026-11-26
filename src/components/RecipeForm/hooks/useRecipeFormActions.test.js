@@ -138,6 +138,66 @@ describe("useRecipeFormActions", () => {
   });
 
   describe("handleSubmit", () => {
+    test("in translation mode, sends only changed ingredient names and notes", async () => {
+      const updateTranslation = vi.fn().mockResolvedValue();
+      const formData = buildFormData({
+        ungroupedIngredients: [
+          baseIngredient({ recipe_ingredient_id: "ri1", name: "Räuchertofu" }),
+          baseIngredient({ tempId: "t2", recipe_ingredient_id: "ri2" }),
+        ],
+        ingredientSections: [
+          {
+            id: "s1",
+            subheading: "Sauce",
+            ingredients: [
+              baseIngredient({
+                tempId: "t3",
+                recipe_ingredient_id: "ri3",
+                name: "Tomaten",
+                notes: "gehackt",
+              }),
+            ],
+          },
+        ],
+      });
+      const { result } = setup({
+        formData,
+        isEditingTranslation: true,
+        initialRecipe: {
+          id: "recipe-1",
+          ungroupedIngredients: [
+            { recipe_ingredient_id: "ri1", singular_name: "Tofu" },
+            { recipe_ingredient_id: "ri2", singular_name: "Tofu" },
+          ],
+          ingredientSections: [
+            {
+              id: "s1",
+              ingredients: [
+                {
+                  recipe_ingredient_id: "ri3",
+                  name_overrides: [{ language: "en", name: "Tomaten" }],
+                  notes: "chopped",
+                },
+              ],
+            },
+          ],
+        },
+        recipeActionsOverrides: { updateTranslation },
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit(fakeSubmitEvent());
+      });
+
+      expect(updateTranslation).toHaveBeenCalledWith(
+        "recipe-1",
+        "en",
+        expect.any(Object),
+        [{ recipe_ingredient_id: "ri1", name: "Räuchertofu", language: "en" }],
+        [{ recipe_ingredient_id: "ri3", notes: "gehackt", language: "en" }]
+      );
+    });
+
     test("shows validation errors and does not submit when the form is invalid", async () => {
       const validateForm = vi.fn(() => ({ title: "title_required" }));
       const { result, setValidationErrors } = setup({ validateForm });

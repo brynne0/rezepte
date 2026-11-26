@@ -240,86 +240,46 @@ export const useRecipeFormActions = ({
             return notes[currentLanguage] || originalIngredient.notes || "";
           };
 
-          // Process ungrouped ingredients
-          formData.ungroupedIngredients.forEach((ingredient) => {
-            if (ingredient.recipe_ingredient_id) {
-              const originalIngredient =
-                initialRecipe.ungroupedIngredients?.find(
-                  (orig) =>
-                    orig.recipe_ingredient_id ===
-                    ingredient.recipe_ingredient_id
-                );
+          // Records a name or notes change against the original ingredient
+          const collectChanges = (ingredient, originalIngredients) => {
+            if (!ingredient.recipe_ingredient_id) return;
+            const originalIngredient = originalIngredients?.find(
+              (orig) =>
+                orig.recipe_ingredient_id === ingredient.recipe_ingredient_id
+            );
+            if (!originalIngredient) return;
 
-              if (originalIngredient) {
-                // Handle name overrides
-                if (ingredient.name) {
-                  const originalDisplayName =
-                    getOriginalDisplayName(originalIngredient);
-                  if (originalDisplayName !== ingredient.name) {
-                    ingredientOverrides.push({
-                      recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                      name: ingredient.name,
-                      language: currentLanguage,
-                    });
-                  }
-                }
-
-                // Handle notes updates
-                const originalDisplayNotes =
-                  getOriginalDisplayNotes(originalIngredient);
-                const currentNotes = ingredient.notes || "";
-                if (originalDisplayNotes !== currentNotes) {
-                  ingredientNotesUpdates.push({
-                    recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                    notes: currentNotes,
-                    language: currentLanguage,
-                  });
-                }
-              }
+            if (
+              ingredient.name &&
+              getOriginalDisplayName(originalIngredient) !== ingredient.name
+            ) {
+              ingredientOverrides.push({
+                recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                name: ingredient.name,
+                language: currentLanguage,
+              });
             }
-          });
 
-          // Process ingredient sections
+            const currentNotes = ingredient.notes || "";
+            if (getOriginalDisplayNotes(originalIngredient) !== currentNotes) {
+              ingredientNotesUpdates.push({
+                recipe_ingredient_id: ingredient.recipe_ingredient_id,
+                notes: currentNotes,
+                language: currentLanguage,
+              });
+            }
+          };
+
+          formData.ungroupedIngredients.forEach((ingredient) =>
+            collectChanges(ingredient, initialRecipe.ungroupedIngredients)
+          );
           formData.ingredientSections.forEach((section) => {
-            section.ingredients.forEach((ingredient) => {
-              if (ingredient.recipe_ingredient_id) {
-                const originalSection = initialRecipe.ingredientSections?.find(
-                  (origSection) => origSection.id === section.id
-                );
-                const originalIngredient = originalSection?.ingredients?.find(
-                  (orig) =>
-                    orig.recipe_ingredient_id ===
-                    ingredient.recipe_ingredient_id
-                );
-
-                if (originalIngredient) {
-                  // Handle name overrides
-                  if (ingredient.name) {
-                    const originalDisplayName =
-                      getOriginalDisplayName(originalIngredient);
-                    if (originalDisplayName !== ingredient.name) {
-                      ingredientOverrides.push({
-                        recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                        name: ingredient.name,
-                        language: currentLanguage,
-                      });
-                    }
-                  }
-
-                  // Handle notes updates
-                  const originalDisplayNotes =
-                    getOriginalDisplayNotes(originalIngredient);
-                  const currentNotes = ingredient.notes || "";
-                  if (originalDisplayNotes !== currentNotes) {
-                    ingredientNotesUpdates.push({
-                      recipe_ingredient_id: ingredient.recipe_ingredient_id,
-                      notes: currentNotes,
-                      language: currentLanguage,
-                    });
-                  }
-                }
-              }
-            });
+            const originalSection = initialRecipe.ingredientSections?.find(
+              (origSection) => origSection.id === section.id
+            );
+            section.ingredients.forEach((ingredient) =>
+              collectChanges(ingredient, originalSection?.ingredients)
+            );
           });
 
           await updateTranslation(

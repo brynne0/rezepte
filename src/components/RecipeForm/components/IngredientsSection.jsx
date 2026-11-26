@@ -6,13 +6,13 @@ import { cn } from "cn";
 
 import IngredientRow from "./IngredientRow";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import SectionTitleInput from "@/components/SectionTitleInput/SectionTitleInput";
 
 const IngredientsSection = ({
   ungroupedIngredients,
@@ -150,47 +150,17 @@ const IngredientsSection = ({
                         >
                           <GripVertical size={16} />
                         </div>
-                        {editingSectionId === section.id ||
-                        !section.subheading ? (
-                          <Input
-                            type="text"
-                            value={section.subheading}
-                            onChange={(e) =>
-                              handleSectionChange(
-                                section.id,
-                                "subheading",
-                                e.target.value
-                              )
-                            }
-                            onKeyDown={(e) => {
-                              if (
-                                e.key === "Enter" &&
-                                section.subheading.trim()
-                              ) {
-                                e.preventDefault();
-                                setEditingSectionId(null);
-                              }
-                            }}
-                            onFocus={() => setEditingSectionId(section.id)}
-                            onBlur={() => {
-                              if (section.subheading.trim()) {
-                                setEditingSectionId(null);
-                              }
-                            }}
-                            autoFocus={editingSectionId === section.id}
-                            className="section-title-input flex-1"
-                            placeholder={t("section_title")}
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setEditingSectionId(section.id)}
-                            disabled={isEditingTranslation}
-                            className="flex-1 truncate text-left font-medium [word-break:break-word]"
-                          >
-                            {section.subheading}
-                          </button>
-                        )}
+                        <SectionTitleInput
+                          value={section.subheading}
+                          isEditing={editingSectionId === section.id}
+                          onChange={(value) =>
+                            handleSectionChange(section.id, "subheading", value)
+                          }
+                          onEditingChange={(editing) =>
+                            setEditingSectionId(editing ? section.id : null)
+                          }
+                          disabled={isEditingTranslation}
+                        />
                         <Tooltip>
                           <TooltipTrigger
                             render={

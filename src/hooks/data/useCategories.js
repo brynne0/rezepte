@@ -18,6 +18,8 @@ const readCachedCategories = (language) =>
 const writeCachedCategories = (language, categories) =>
   writeCachedValue(categoriesCacheKey(language), categories);
 
+const NO_CATEGORIES = [];
+
 export const useCategories = () => {
   const { i18n } = useTranslation();
 
@@ -28,7 +30,7 @@ export const useCategories = () => {
   const userId = user?.id;
 
   const {
-    data: categories = [],
+    data: categories = NO_CATEGORIES,
     isLoading: loading,
     error,
   } = useQuery({

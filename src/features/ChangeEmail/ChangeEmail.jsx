@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail } from "lucide-react";
 import supabase from "../../lib/supabase";
 import { changeEmail, verifyCurrentPassword } from "../../services/auth";
 import {
@@ -9,8 +9,6 @@ import {
   validateEmailUniqueForChange,
 } from "../../utils/validation";
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -22,30 +20,16 @@ import {
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
-import BackLink from "../../components/BackLink/BackLink";
+import PasswordInput from "@/components/PasswordInput/PasswordInput";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog/UnsavedChangesDialog";
+import AccountFormCard from "@/components/AccountFormCard/AccountFormCard";
 
 const ChangeEmail = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newEmailRepeat, setNewEmailRepeat] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -136,164 +120,103 @@ const ChangeEmail = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-sm">
-      <BackLink fallback="/settings" />
-      <Card className="w-full">
-        <CardHeader className="flex flex-col items-stretch gap-4">
-          <div className="relative flex w-full items-center justify-center">
-            <h1 className="text-lg font-semibold">{t("change_email")}</h1>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          {showSuccessMessage ? (
-            <div className="flex flex-col items-center gap-4 text-center">
-              <p>{t("email_change_requested")}</p>
-              <Button type="button" onClick={() => navigate("/settings")}>
-                {t("go_to_settings")}
-              </Button>
-            </div>
-          ) : (
-            <>
-              {errorMessage && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>{errorMessage}</AlertDescription>
-                </Alert>
-              )}
-
-              <form onSubmit={handleChangeEmail}>
-                <FieldGroup>
-                  <Field data-invalid={!!validationErrors.currentPassword}>
-                    <FieldLabel htmlFor="current-password">
-                      {t("current_password")}
-                    </FieldLabel>
-                    <InputGroup>
-                      <InputGroupAddon>
-                        <Lock />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        id="current-password"
-                        type={showPassword ? "text" : "password"}
-                        value={currentPassword}
-                        onChange={(e) => {
-                          setCurrentPassword(e.target.value);
-                          setErrorMessage("");
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            currentPassword: "",
-                          }));
-                        }}
-                        aria-invalid={!!validationErrors.currentPassword}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <InputGroupButton
-                                type="button"
-                                onClick={() => setShowPassword((prev) => !prev)}
-                                aria-label={
-                                  showPassword
-                                    ? t("hide_password")
-                                    : t("show_password")
-                                }
-                              >
-                                {showPassword ? <EyeOff /> : <Eye />}
-                              </InputGroupButton>
-                            }
-                          />
-                          <TooltipContent>
-                            {showPassword
-                              ? t("hide_password")
-                              : t("show_password")}
-                          </TooltipContent>
-                        </Tooltip>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    <FieldError>{validationErrors.currentPassword}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={!!validationErrors.newEmail}>
-                    <FieldLabel htmlFor="new-email">
-                      {t("new_email")}
-                    </FieldLabel>
-                    <InputGroup>
-                      <InputGroupAddon>
-                        <Mail />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        id="new-email"
-                        type="email"
-                        value={newEmail}
-                        onChange={(e) => {
-                          setNewEmail(e.target.value);
-                          setErrorMessage("");
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            newEmail: "",
-                          }));
-                        }}
-                        aria-invalid={!!validationErrors.newEmail}
-                      />
-                    </InputGroup>
-                    <FieldError>{validationErrors.newEmail}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={!!validationErrors.newEmailRepeat}>
-                    <FieldLabel htmlFor="new-email-repeat">
-                      {t("new_email_repeat")}
-                    </FieldLabel>
-                    <InputGroup>
-                      <InputGroupAddon>
-                        <Mail />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        id="new-email-repeat"
-                        type="email"
-                        value={newEmailRepeat}
-                        onChange={(e) => {
-                          setNewEmailRepeat(e.target.value);
-                          setErrorMessage("");
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            newEmailRepeat: "",
-                          }));
-                        }}
-                        aria-invalid={!!validationErrors.newEmailRepeat}
-                      />
-                    </InputGroup>
-                    <FieldError>{validationErrors.newEmailRepeat}</FieldError>
-                  </Field>
-
-                  <Button type="submit" size="lg" disabled={isSubmitting}>
-                    {isSubmitting && <Spinner />}
-                    {t("confirm")}
-                  </Button>
-                </FieldGroup>
-              </form>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      <AlertDialog
-        open={isUnsavedChangesModalOpen}
-        onOpenChange={(open) => {
-          if (!open) confirmNavigation();
-        }}
+      <AccountFormCard
+        title={t("change_email")}
+        success={
+          showSuccessMessage && {
+            message: t("email_change_requested"),
+            actionLabel: t("go_to_settings"),
+            onAction: () => navigate("/settings"),
+          }
+        }
+        errorMessage={errorMessage}
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
-          </AlertDialogHeader>
+        <form onSubmit={handleChangeEmail}>
+          <FieldGroup>
+            <Field data-invalid={!!validationErrors.currentPassword}>
+              <FieldLabel htmlFor="current-password">
+                {t("current_password")}
+              </FieldLabel>
+              <PasswordInput
+                id="current-password"
+                value={currentPassword}
+                onChange={(e) => {
+                  setCurrentPassword(e.target.value);
+                  setErrorMessage("");
+                  setValidationErrors((prev) => ({
+                    ...prev,
+                    currentPassword: "",
+                  }));
+                }}
+                aria-invalid={!!validationErrors.currentPassword}
+              />
+              <FieldError>{validationErrors.currentPassword}</FieldError>
+            </Field>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
-            <AlertDialogAction onClick={cancelNavigation}>
-              {t("stay")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            <Field data-invalid={!!validationErrors.newEmail}>
+              <FieldLabel htmlFor="new-email">{t("new_email")}</FieldLabel>
+              <InputGroup>
+                <InputGroupAddon>
+                  <Mail />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="new-email"
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => {
+                    setNewEmail(e.target.value);
+                    setErrorMessage("");
+                    setValidationErrors((prev) => ({
+                      ...prev,
+                      newEmail: "",
+                    }));
+                  }}
+                  aria-invalid={!!validationErrors.newEmail}
+                />
+              </InputGroup>
+              <FieldError>{validationErrors.newEmail}</FieldError>
+            </Field>
+
+            <Field data-invalid={!!validationErrors.newEmailRepeat}>
+              <FieldLabel htmlFor="new-email-repeat">
+                {t("new_email_repeat")}
+              </FieldLabel>
+              <InputGroup>
+                <InputGroupAddon>
+                  <Mail />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="new-email-repeat"
+                  type="email"
+                  value={newEmailRepeat}
+                  onChange={(e) => {
+                    setNewEmailRepeat(e.target.value);
+                    setErrorMessage("");
+                    setValidationErrors((prev) => ({
+                      ...prev,
+                      newEmailRepeat: "",
+                    }));
+                  }}
+                  aria-invalid={!!validationErrors.newEmailRepeat}
+                />
+              </InputGroup>
+              <FieldError>{validationErrors.newEmailRepeat}</FieldError>
+            </Field>
+
+            <Button type="submit" size="lg" disabled={isSubmitting}>
+              {isSubmitting && <Spinner />}
+              {t("confirm")}
+            </Button>
+          </FieldGroup>
+        </form>
+      </AccountFormCard>
+
+      <UnsavedChangesDialog
+        open={isUnsavedChangesModalOpen}
+        message={unsavedChangesMessage}
+        onLeave={confirmNavigation}
+        onStay={cancelNavigation}
+      />
     </div>
   );
 };

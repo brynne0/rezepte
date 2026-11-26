@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Lock, Eye, EyeOff } from "lucide-react";
 import supabase from "../../lib/supabase";
 import {
   changePassword,
@@ -15,8 +14,6 @@ import {
 import { useUnsavedChanges } from "../../hooks/ui/useUnsavedChanges";
 import PasswordRequirements from "../../components/PasswordRequirements/PasswordRequirements";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -25,35 +22,14 @@ import {
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
-import BackLink from "../../components/BackLink/BackLink";
+import PasswordInput from "@/components/PasswordInput/PasswordInput";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog/UnsavedChangesDialog";
+import AccountFormCard from "@/components/AccountFormCard/AccountFormCard";
 
 const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
-  const [showOldPassword, setShowOldPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showNewPasswordRepeat, setShowNewPasswordRepeat] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -221,225 +197,96 @@ const ChangePassword = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-sm">
-      <BackLink fallback="/settings" />
-      <Card className="w-full">
-        <CardHeader className="flex flex-col items-stretch gap-4">
-          <div className="relative flex w-full items-center justify-center">
-            <h1 className="text-lg font-semibold">{t("set_new_password")}</h1>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          {showSuccessMessage ? (
-            <div className="flex flex-col items-center gap-4 text-center">
-              <p>{t("password_changed")}</p>
-              <Button type="button" onClick={() => navigate("/login")}>
-                {t("login")}
-              </Button>
-            </div>
-          ) : (
-            <>
-              {errorMessage && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>{errorMessage}</AlertDescription>
-                </Alert>
-              )}
-
-              <form onSubmit={handleChangePassword}>
-                <FieldGroup>
-                  {fromSettings && (
-                    <Field data-invalid={!!validationErrors.oldPassword}>
-                      <FieldLabel htmlFor="old-password">
-                        {t("current_password")}
-                      </FieldLabel>
-                      <InputGroup>
-                        <InputGroupAddon>
-                          <Lock />
-                        </InputGroupAddon>
-                        <InputGroupInput
-                          id="old-password"
-                          type={showOldPassword ? "text" : "password"}
-                          value={oldPassword}
-                          onChange={(e) => {
-                            setOldPassword(e.target.value);
-                            setErrorMessage("");
-                            setValidationErrors((prev) => ({
-                              ...prev,
-                              oldPassword: "",
-                            }));
-                          }}
-                          aria-invalid={!!validationErrors.oldPassword}
-                        />
-                        <InputGroupAddon align="inline-end">
-                          <Tooltip>
-                            <TooltipTrigger
-                              render={
-                                <InputGroupButton
-                                  type="button"
-                                  onClick={() =>
-                                    setShowOldPassword((prev) => !prev)
-                                  }
-                                  aria-label={
-                                    showOldPassword
-                                      ? t("hide_password")
-                                      : t("show_password")
-                                  }
-                                >
-                                  {showOldPassword ? <EyeOff /> : <Eye />}
-                                </InputGroupButton>
-                              }
-                            />
-                            <TooltipContent>
-                              {showOldPassword
-                                ? t("hide_password")
-                                : t("show_password")}
-                            </TooltipContent>
-                          </Tooltip>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      <FieldError>{validationErrors.oldPassword}</FieldError>
-                    </Field>
-                  )}
-
-                  <Field data-invalid={!!validationErrors.newPassword}>
-                    <FieldLabel htmlFor="new-password">
-                      {t("new_password")}
-                    </FieldLabel>
-                    <InputGroup>
-                      <InputGroupAddon>
-                        <Lock />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        id="new-password"
-                        type={showNewPassword ? "text" : "password"}
-                        value={newPassword}
-                        onChange={(e) => {
-                          setNewPassword(e.target.value);
-                          setErrorMessage("");
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            newPassword: "",
-                          }));
-                        }}
-                        aria-invalid={!!validationErrors.newPassword}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <InputGroupButton
-                                type="button"
-                                onClick={() =>
-                                  setShowNewPassword((prev) => !prev)
-                                }
-                                aria-label={
-                                  showNewPassword
-                                    ? t("hide_password")
-                                    : t("show_password")
-                                }
-                              >
-                                {showNewPassword ? <EyeOff /> : <Eye />}
-                              </InputGroupButton>
-                            }
-                          />
-                          <TooltipContent>
-                            {showNewPassword
-                              ? t("hide_password")
-                              : t("show_password")}
-                          </TooltipContent>
-                        </Tooltip>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    <FieldError>{validationErrors.newPassword}</FieldError>
-                    {newPassword && (
-                      <PasswordRequirements password={newPassword} />
-                    )}
-                  </Field>
-
-                  <Field data-invalid={!!validationErrors.newPasswordRepeat}>
-                    <FieldLabel htmlFor="new-password-repeat">
-                      {t("new_password_repeat")}
-                    </FieldLabel>
-                    <InputGroup>
-                      <InputGroupAddon>
-                        <Lock />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        id="new-password-repeat"
-                        type={showNewPasswordRepeat ? "text" : "password"}
-                        value={newPasswordRepeat}
-                        onChange={(e) => {
-                          setNewPasswordRepeat(e.target.value);
-                          setErrorMessage("");
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            newPasswordRepeat: "",
-                          }));
-                        }}
-                        aria-invalid={!!validationErrors.newPasswordRepeat}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <InputGroupButton
-                                type="button"
-                                onClick={() =>
-                                  setShowNewPasswordRepeat((prev) => !prev)
-                                }
-                                aria-label={
-                                  showNewPasswordRepeat
-                                    ? t("hide_password")
-                                    : t("show_password")
-                                }
-                              >
-                                {showNewPasswordRepeat ? <EyeOff /> : <Eye />}
-                              </InputGroupButton>
-                            }
-                          />
-                          <TooltipContent>
-                            {showNewPasswordRepeat
-                              ? t("hide_password")
-                              : t("show_password")}
-                          </TooltipContent>
-                        </Tooltip>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    <FieldError>
-                      {validationErrors.newPasswordRepeat}
-                    </FieldError>
-                  </Field>
-
-                  <Button type="submit" size="lg" disabled={isSubmitting}>
-                    {isSubmitting && <Spinner />}
-                    {t("confirm")}
-                  </Button>
-                </FieldGroup>
-              </form>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      <AlertDialog
-        open={isUnsavedChangesModalOpen}
-        onOpenChange={(open) => {
-          if (!open) confirmNavigation();
-        }}
+      <AccountFormCard
+        title={t("set_new_password")}
+        success={
+          showSuccessMessage && {
+            message: t("password_changed"),
+            actionLabel: t("login"),
+            onAction: () => navigate("/login"),
+          }
+        }
+        errorMessage={errorMessage}
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
-          </AlertDialogHeader>
+        <form onSubmit={handleChangePassword}>
+          <FieldGroup>
+            {fromSettings && (
+              <Field data-invalid={!!validationErrors.oldPassword}>
+                <FieldLabel htmlFor="old-password">
+                  {t("current_password")}
+                </FieldLabel>
+                <PasswordInput
+                  id="old-password"
+                  value={oldPassword}
+                  onChange={(e) => {
+                    setOldPassword(e.target.value);
+                    setErrorMessage("");
+                    setValidationErrors((prev) => ({
+                      ...prev,
+                      oldPassword: "",
+                    }));
+                  }}
+                  aria-invalid={!!validationErrors.oldPassword}
+                />
+                <FieldError>{validationErrors.oldPassword}</FieldError>
+              </Field>
+            )}
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
-            <AlertDialogAction onClick={cancelNavigation}>
-              {t("stay")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            <Field data-invalid={!!validationErrors.newPassword}>
+              <FieldLabel htmlFor="new-password">
+                {t("new_password")}
+              </FieldLabel>
+              <PasswordInput
+                id="new-password"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  setErrorMessage("");
+                  setValidationErrors((prev) => ({
+                    ...prev,
+                    newPassword: "",
+                  }));
+                }}
+                aria-invalid={!!validationErrors.newPassword}
+              />
+              <FieldError>{validationErrors.newPassword}</FieldError>
+              {newPassword && <PasswordRequirements password={newPassword} />}
+            </Field>
+
+            <Field data-invalid={!!validationErrors.newPasswordRepeat}>
+              <FieldLabel htmlFor="new-password-repeat">
+                {t("new_password_repeat")}
+              </FieldLabel>
+              <PasswordInput
+                id="new-password-repeat"
+                value={newPasswordRepeat}
+                onChange={(e) => {
+                  setNewPasswordRepeat(e.target.value);
+                  setErrorMessage("");
+                  setValidationErrors((prev) => ({
+                    ...prev,
+                    newPasswordRepeat: "",
+                  }));
+                }}
+                aria-invalid={!!validationErrors.newPasswordRepeat}
+              />
+              <FieldError>{validationErrors.newPasswordRepeat}</FieldError>
+            </Field>
+
+            <Button type="submit" size="lg" disabled={isSubmitting}>
+              {isSubmitting && <Spinner />}
+              {t("confirm")}
+            </Button>
+          </FieldGroup>
+        </form>
+      </AccountFormCard>
+
+      <UnsavedChangesDialog
+        open={isUnsavedChangesModalOpen}
+        message={unsavedChangesMessage}
+        onLeave={confirmNavigation}
+        onStay={cancelNavigation}
+      />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Mail, User, ChefHat, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, User, ChefHat } from "lucide-react";
 import { signUp, signIn, resendConfirmationEmail } from "../../services/auth";
 import {
   validateAuthForm,
@@ -27,23 +27,10 @@ import {
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
+import PasswordInput from "@/components/PasswordInput/PasswordInput";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog/UnsavedChangesDialog";
 
 const Auth = () => {
   // Form input states
@@ -51,7 +38,6 @@ const Auth = () => {
   const [firstName, setFirstName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   // Error message
   const [errorMessage, setErrorMessage] = useState("");
@@ -207,7 +193,6 @@ const Auth = () => {
     setFirstName("");
     setUsername("");
     setPassword("");
-    setShowPassword(false);
     setValidationErrors({});
   };
 
@@ -215,7 +200,6 @@ const Auth = () => {
     setIsSignUpMode(true);
     setUsername("");
     setPassword("");
-    setShowPassword(false);
     setValidationErrors({});
   };
 
@@ -398,49 +382,20 @@ const Auth = () => {
                         </Button>
                       )}
                     </div>
-                    <InputGroup>
-                      <InputGroupAddon>
-                        <Lock className="" />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            password: "",
-                          }));
-                        }}
-                        aria-invalid={!!validationErrors.password}
-                        data-testid="password-input"
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <InputGroupButton
-                                type="button"
-                                onClick={() => setShowPassword((prev) => !prev)}
-                                aria-label={
-                                  showPassword
-                                    ? t("hide_password")
-                                    : t("show_password")
-                                }
-                              >
-                                {showPassword ? <EyeOff /> : <Eye />}
-                              </InputGroupButton>
-                            }
-                          />
-                          <TooltipContent>
-                            {showPassword
-                              ? t("hide_password")
-                              : t("show_password")}
-                          </TooltipContent>
-                        </Tooltip>
-                      </InputGroupAddon>
-                    </InputGroup>
+                    <PasswordInput
+                      key={isSignUpMode ? "signup" : "login"}
+                      id="password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          password: "",
+                        }));
+                      }}
+                      aria-invalid={!!validationErrors.password}
+                      data-testid="password-input"
+                    />
                     <FieldError>{validationErrors.password}</FieldError>
                     {isSignUpMode && password && (
                       <PasswordRequirements password={password} />
@@ -464,25 +419,12 @@ const Auth = () => {
         </CardContent>
       </Card>
 
-      <AlertDialog
+      <UnsavedChangesDialog
         open={isUnsavedChangesModalOpen}
-        onOpenChange={(open) => {
-          if (!open) confirmNavigation();
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{unsavedChangesMessage}</AlertDialogTitle>
-          </AlertDialogHeader>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("leave_page")}</AlertDialogCancel>
-            <AlertDialogAction onClick={cancelNavigation}>
-              {t("stay")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        message={unsavedChangesMessage}
+        onLeave={confirmNavigation}
+        onStay={cancelNavigation}
+      />
     </div>
   );
 };

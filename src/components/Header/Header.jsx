@@ -117,7 +117,7 @@ const Header = ({ friendBar }) => {
     <Button
       variant="ghost"
       className="text-base"
-      onClick={() => i18n.changeLanguage(nextLanguage)}
+      onClick={() => void i18n.changeLanguage(nextLanguage)}
       aria-label={
         nextLanguage === "en" ? t("switch_to_english") : t("switch_to_german")
       }
@@ -216,84 +216,80 @@ const Header = ({ friendBar }) => {
           {/* Desktop Navigation */}
           {isLoggedIn && (
             <nav className="hidden items-center gap-2 md:flex md:gap-4">
-              <>
-                <FriendsPanel
-                  tooltipLabel={
-                    isOnline ? t("friends") : t("action_requires_internet")
-                  }
-                  renderTrigger={(pendingCount) => (
+              <FriendsPanel
+                tooltipLabel={
+                  isOnline ? t("friends") : t("action_requires_internet")
+                }
+                renderTrigger={(pendingCount) => (
+                  <Button
+                    variant="ghost"
+                    size="icon-lg"
+                    disabled={!isOnline}
+                    className={
+                      isFriendsPageActive
+                        ? "relative text-accent-red"
+                        : "relative"
+                    }
+                    aria-label={t("friends")}
+                  >
+                    <Users className="size-7" />
+                    {pendingCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.625rem]"
+                      >
+                        {pendingCount}
+                      </Badge>
+                    )}
+                  </Button>
+                )}
+              />
+              <Tooltip>
+                <TooltipTrigger
+                  render={
                     <Button
+                      data-testid="lucide-plus"
                       variant="ghost"
                       size="icon-lg"
+                      onClick={() => navigate("/add-recipe")}
                       disabled={!isOnline}
                       className={
-                        isFriendsPageActive
-                          ? "relative text-accent-red"
-                          : "relative"
+                        isActivePage("/add-recipe") ? "text-accent-red" : ""
                       }
-                      aria-label={t("friends")}
+                      aria-label={t("add_new_recipe")}
                     >
-                      <Users className="size-7" />
-                      {pendingCount > 0 && (
-                        <Badge
-                          variant="destructive"
-                          className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.625rem]"
-                        >
-                          {pendingCount}
-                        </Badge>
-                      )}
+                      <Plus className="size-7" />
                     </Button>
-                  )}
+                  }
                 />
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        data-testid="lucide-plus"
-                        variant="ghost"
-                        size="icon-lg"
-                        onClick={() => navigate("/add-recipe")}
-                        disabled={!isOnline}
-                        className={
-                          isActivePage("/add-recipe") ? "text-accent-red" : ""
-                        }
-                        aria-label={t("add_new_recipe")}
-                      >
-                        <Plus className="size-7" />
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>
-                    {isOnline
-                      ? t("add_new_recipe")
-                      : t("action_requires_internet")}
-                  </TooltipContent>
-                </Tooltip>
-                {/* Cooking Times */}
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        data-testid="lucide-clock"
-                        variant="ghost"
-                        size="icon-lg"
-                        onClick={() => navigate("/cooking-times")}
-                        className={
-                          isActivePage("/cooking-times")
-                            ? "text-accent-red"
-                            : ""
-                        }
-                        aria-label={t("cooking_times", "Cooking Times")}
-                      >
-                        <Clock className="size-7" />
-                      </Button>
-                    }
-                  />
-                  <TooltipContent>
-                    {t("cooking_times", "Cooking Times")}
-                  </TooltipContent>
-                </Tooltip>
-              </>
+                <TooltipContent>
+                  {isOnline
+                    ? t("add_new_recipe")
+                    : t("action_requires_internet")}
+                </TooltipContent>
+              </Tooltip>
+              {/* Cooking Times */}
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      data-testid="lucide-clock"
+                      variant="ghost"
+                      size="icon-lg"
+                      onClick={() => navigate("/cooking-times")}
+                      className={
+                        isActivePage("/cooking-times") ? "text-accent-red" : ""
+                      }
+                      aria-label={t("cooking_times", "Cooking Times")}
+                    >
+                      <Clock className="size-7" />
+                    </Button>
+                  }
+                />
+                <TooltipContent>
+                  {t("cooking_times", "Cooking Times")}
+                </TooltipContent>
+              </Tooltip>
             </nav>
           )}
 

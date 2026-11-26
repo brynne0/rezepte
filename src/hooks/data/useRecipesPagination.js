@@ -104,18 +104,23 @@ export const useRecipesPagination = (
     ]
   );
 
+  const paginationInfo = useMemo(
+    () => ({
+      totalCount: paginatedData.totalCount,
+      totalPages: paginatedData.totalPages,
+      currentPage: paginatedData.currentPage,
+      hasNextPage: paginatedData.hasNextPage,
+      hasPrevPage: paginatedData.hasPrevPage,
+    }),
+    [paginatedData]
+  );
+
   return {
     recipes: paginatedData.recipes,
     loading,
     isFetchingRecipes,
     refreshRecipes,
     totalRecipeCount: allRecipes.length,
-    paginationInfo: {
-      totalCount: paginatedData.totalCount,
-      totalPages: paginatedData.totalPages,
-      currentPage: paginatedData.currentPage,
-      hasNextPage: paginatedData.hasNextPage,
-      hasPrevPage: paginatedData.hasPrevPage,
-    },
+    paginationInfo,
   };
 };

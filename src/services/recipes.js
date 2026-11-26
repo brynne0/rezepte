@@ -732,17 +732,8 @@ const assignCategories = async (
   }
 };
 
-// Create a new recipe
-export const createRecipe = async (recipeData, onProgress = null) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
-
-  // Steps for progress: recipe write + each ingredient/category/local image
+// Progress for a save: recipe write + each ingredient/category/local image
+const createSaveProgress = (recipeData, onProgress) => {
   const ingredientCount =
     (recipeData.ungroupedIngredients?.length || 0) +
     (recipeData.ingredientSections || []).reduce(
@@ -755,18 +746,134 @@ export const createRecipe = async (recipeData, onProgress = null) => {
   const localImageCount = (recipeData.images || []).filter(
     (image) => image.isLocal && image.file
   ).length;
-  const totalSteps = 1 + ingredientCount + categoryCount + localImageCount;
-  let completedSteps = 0;
-  let ingredientsDone = 0;
-  const reportProgress = (phase, phaseCompleted, phaseTotal) =>
-    onProgress?.({
-      completed: completedSteps,
-      total: totalSteps,
-      phase,
-      phaseCompleted,
-      phaseTotal,
-    });
-  reportProgress("recipe", 0, 1);
+  const total = 1 + ingredientCount + categoryCount + localImageCount;
+  let completed = 0;
+
+  const report = (phase, phaseCompleted, phaseTotal) =>
+    onProgress?.({ completed, total, phase, phaseCompleted, phaseTotal });
+
+  return {
+    report,
+    step: (phase, phaseCompleted, phaseTotal) => {
+      completed++;
+      report(phase, phaseCompleted, phaseTotal);
+    },
+    ingredientDone: (done) => {
+      completed++;
+      report("ingredients", done, ingredientCount);
+    },
+    // Image uploads report their own count, offset by the steps already done
+    imageCallback: () => {
+      if (!onProgress) return null;
+      const before = completed;
+      return ({ current, imageId, uploading }) =>
+        onProgress({
+          completed: before + current,
+          total,
+          phase: "images",
+          phaseCompleted: current,
+          phaseTotal: localImageCount,
+          imageId,
+          uploading,
+        });
+    },
+  };
+};
+
+// Resolves ingredients (ungrouped first, then sections) into recipe_ingredients rows
+const buildRecipeIngredientRows = async (
+  recipeId,
+  recipeData,
+  language,
+  onIngredientDone
+) => {
+  const groups = [
+    {
+      ingredients: recipeData.ungroupedIngredients || [],
+      subheading: null,
+      linkPrefix: "ungrouped",
+    },
+    ...(recipeData.ingredientSections || []).map((section) => ({
+      ingredients: section.ingredients,
+      subheading: section.subheading || null,
+      linkPrefix: section.id,
+    })),
+  ];
+
+  const rows = [];
+  for (const { ingredients, subheading, linkPrefix } of groups) {
+    if (ingredients.length === 0) continue;
+
+    const translations = await translateIngredientNamesToEnglish(
+      ingredients.map((ingredient) => ingredient.name),
+      language
+    );
+
+    for (const [index, ingredient] of ingredients.entries()) {
+      const translatedToEnglish = ingredient.name ? translations[index] : null;
+
+      // Determine if the input was plural based on the entered text
+      const isPlural = await determineIngredientPlurality(
+        ingredient.name,
+        language,
+        translatedToEnglish
+      );
+
+      let ingredientId;
+      if (ingredient.ingredient_id) {
+        ingredientId = ingredient.ingredient_id;
+      } else if (ingredient.name) {
+        const ingredientResult = await getOrCreateIngredient(
+          ingredient.name,
+          language,
+          translatedToEnglish
+        );
+        ingredientId = ingredientResult.id;
+      } else {
+        throw new Error("Ingredient must have either ingredient_id or name");
+      }
+
+      const linkedRecipe =
+        recipeData.ingredientLinks?.[`${linkPrefix}-${ingredient.tempId}`];
+
+      rows.push({
+        recipe_id: recipeId,
+        ingredient_id: ingredientId,
+        quantity: ingredient.quantity,
+        unit: ingredient.unit,
+        notes: ingredient.notes,
+        subheading,
+        order_index: rows.length,
+        is_plural: isPlural,
+        linked_recipe_id: linkedRecipe?.id || null,
+      });
+
+      onIngredientDone(rows.length);
+    }
+  }
+  return rows;
+};
+
+const insertRecipeIngredients = async (rows, errorPrefix) => {
+  if (rows.length === 0) return;
+  const { error } = await supabase.from("recipe_ingredients").insert(rows);
+  if (error) {
+    throw new Error(`${errorPrefix}: ${error.message}`);
+  }
+};
+
+// Create a new recipe
+export const createRecipe = async (recipeData, onProgress = null) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const progress = createSaveProgress(recipeData, onProgress);
+  progress.report("recipe", 0, 1);
 
   // Create the main recipe record (no category field anymore)
   const cleanRecipeData = Object.fromEntries(
@@ -793,147 +900,18 @@ export const createRecipe = async (recipeData, onProgress = null) => {
     throw new Error(recipeError.message);
   }
 
-  completedSteps++;
-  reportProgress("recipe", 1, 1);
+  progress.step("recipe", 1, 1);
 
-  // Process ingredients in order: ungrouped first, then sections
-  let recipeIngredientsToInsert = [];
-  let globalOrderIndex = 0;
-
-  // Handle ungrouped ingredients first
-  if (
-    recipeData.ungroupedIngredients &&
-    recipeData.ungroupedIngredients.length > 0
-  ) {
-    const ungroupedTranslations = await translateIngredientNamesToEnglish(
-      recipeData.ungroupedIngredients.map((ingredient) => ingredient.name),
-      recipeData.original_language
-    );
-
-    for (const [
-      index,
-      ingredient,
-    ] of recipeData.ungroupedIngredients.entries()) {
-      let ingredientId;
-
-      const translatedToEnglish = ingredient.name
-        ? ungroupedTranslations[index]
-        : null;
-
-      // Determine if the input was plural based on the entered text
-      const isPlural = await determineIngredientPlurality(
-        ingredient.name,
-        recipeData.original_language,
-        translatedToEnglish
-      );
-
-      if (ingredient.ingredient_id) {
-        ingredientId = ingredient.ingredient_id;
-      } else if (ingredient.name) {
-        const ingredientResult = await getOrCreateIngredient(
-          ingredient.name,
-          recipeData.original_language,
-          translatedToEnglish
-        );
-        ingredientId = ingredientResult.id;
-      } else {
-        throw new Error("Ingredient must have either ingredient_id or name");
-      }
-
-      // Check for linked recipe
-      const linkKey = `ungrouped-${ingredient.tempId}`;
-      const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
-
-      recipeIngredientsToInsert.push({
-        recipe_id: recipe.id,
-        ingredient_id: ingredientId,
-        quantity: ingredient.quantity,
-        unit: ingredient.unit,
-        notes: ingredient.notes,
-        subheading: null, // Ungrouped ingredients have no subheading
-        order_index: globalOrderIndex++,
-        is_plural: isPlural,
-        linked_recipe_id: linkedRecipe?.id || null,
-      });
-
-      completedSteps++;
-      ingredientsDone++;
-      reportProgress("ingredients", ingredientsDone, ingredientCount);
-    }
-  }
-
-  // Handle ingredient sections
-  if (
-    recipeData.ingredientSections &&
-    recipeData.ingredientSections.length > 0
-  ) {
-    for (const section of recipeData.ingredientSections) {
-      const sectionTranslations = await translateIngredientNamesToEnglish(
-        section.ingredients.map((ingredient) => ingredient.name),
-        recipeData.original_language
-      );
-
-      for (const [index, ingredient] of section.ingredients.entries()) {
-        let ingredientId;
-
-        const translatedToEnglish = ingredient.name
-          ? sectionTranslations[index]
-          : null;
-
-        // Determine if the input was plural based on the entered text
-        const isPlural = await determineIngredientPlurality(
-          ingredient.name,
-          recipeData.original_language,
-          translatedToEnglish
-        );
-
-        if (ingredient.ingredient_id) {
-          ingredientId = ingredient.ingredient_id;
-        } else if (ingredient.name) {
-          const ingredientResult = await getOrCreateIngredient(
-            ingredient.name,
-            recipeData.original_language,
-            translatedToEnglish
-          );
-          ingredientId = ingredientResult.id;
-        } else {
-          throw new Error("Ingredient must have either ingredient_id or name");
-        }
-
-        // Check for linked recipe
-        const linkKey = `${section.id}-${ingredient.tempId}`;
-        const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
-
-        recipeIngredientsToInsert.push({
-          recipe_id: recipe.id,
-          ingredient_id: ingredientId,
-          quantity: ingredient.quantity,
-          unit: ingredient.unit,
-          notes: ingredient.notes,
-          subheading: section.subheading || null,
-          order_index: globalOrderIndex++,
-          is_plural: isPlural,
-          linked_recipe_id: linkedRecipe?.id || null,
-        });
-
-        completedSteps++;
-        ingredientsDone++;
-        reportProgress("ingredients", ingredientsDone, ingredientCount);
-      }
-    }
-  }
-
-  if (recipeIngredientsToInsert.length > 0) {
-    const { error: ingredientsError } = await supabase
-      .from("recipe_ingredients")
-      .insert(recipeIngredientsToInsert);
-
-    if (ingredientsError) {
-      throw new Error(
-        `Recipe created but failed to add ingredients: ${ingredientsError.message}`
-      );
-    }
-  }
+  const ingredientRows = await buildRecipeIngredientRows(
+    recipe.id,
+    recipeData,
+    recipeData.original_language,
+    progress.ingredientDone
+  );
+  await insertRecipeIngredients(
+    ingredientRows,
+    "Recipe created but failed to add ingredients"
+  );
 
   // Handle category assignment using new many-to-many system
   if (recipeData.categories && recipeData.categories.length > 0) {
@@ -941,32 +919,17 @@ export const createRecipe = async (recipeData, onProgress = null) => {
       recipe.id,
       recipeData.categories,
       recipeData.original_language || "en",
-      (done, total) => {
-        completedSteps++;
-        reportProgress("categories", done, total);
-      }
+      (done, total) => progress.step("categories", done, total)
     );
   }
 
   if (recipeData.images && recipeData.images.length > 0) {
     try {
-      const stepsBeforeImages = completedSteps;
       const uploadedImages = await uploadLocalImages(
         recipeData.images,
         user.id,
         recipe.id,
-        onProgress
-          ? ({ current, imageId, uploading }) =>
-              onProgress({
-                completed: stepsBeforeImages + current,
-                total: totalSteps,
-                phase: "images",
-                phaseCompleted: current,
-                phaseTotal: localImageCount,
-                imageId,
-                uploading,
-              })
-          : null
+        progress.imageCallback()
       );
 
       // Update the recipe with the uploaded images
@@ -996,31 +959,8 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
     throw new Error("User not authenticated");
   }
 
-  // Steps for progress: recipe write + each ingredient/category/local image
-  const ingredientCount =
-    (recipeData.ungroupedIngredients?.length || 0) +
-    (recipeData.ingredientSections || []).reduce(
-      (sum, section) => sum + section.ingredients.length,
-      0
-    );
-  const categoryCount = (recipeData.categories || []).filter(
-    (name) => name && name !== "all_recipes"
-  ).length;
-  const localImageCount = (recipeData.images || []).filter(
-    (image) => image.isLocal && image.file
-  ).length;
-  const totalSteps = 1 + ingredientCount + categoryCount + localImageCount;
-  let completedSteps = 0;
-  let ingredientsDone = 0;
-  const reportProgress = (phase, phaseCompleted, phaseTotal) =>
-    onProgress?.({
-      completed: completedSteps,
-      total: totalSteps,
-      phase,
-      phaseCompleted,
-      phaseTotal,
-    });
-  reportProgress("recipe", 0, 1);
+  const progress = createSaveProgress(recipeData, onProgress);
+  progress.report("recipe", 0, 1);
 
   // First fetch the original recipe for smart translation updates and image cleanup
   const { data: originalRecipe, error: fetchError } = await supabase
@@ -1066,8 +1006,7 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
     throw new Error(recipeError.message);
   }
 
-  completedSteps++;
-  reportProgress("recipe", 1, 1);
+  progress.step("recipe", 1, 1);
 
   // Smart update translations based on what changed
   if (!languageChanged) {
@@ -1091,168 +1030,16 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
       );
     }
 
-    // Insert new ingredients (ungrouped + sections or flat)
-    let recipeIngredientsToInsert = [];
-    let globalOrderIndex = 0;
-
-    // Handle ungrouped ingredients first
-    if (
-      recipeData.ungroupedIngredients &&
-      recipeData.ungroupedIngredients.length > 0
-    ) {
-      for (const ingredient of recipeData.ungroupedIngredients) {
-        let ingredientId;
-        let existingRecipe = null;
-        let translatedToEnglish = null;
-
-        if (ingredient.ingredient_id) {
-          ingredientId = ingredient.ingredient_id;
-          // Still need to get the recipe language for plurality determination
-          const { data: recipe } = await supabase
-            .from("recipes")
-            .select("original_language")
-            .eq("id", id)
-            .single();
-          existingRecipe = recipe;
-        } else if (ingredient.name) {
-          // For updates, get the original language from the existing recipe
-          const { data: recipe } = await supabase
-            .from("recipes")
-            .select("original_language")
-            .eq("id", id)
-            .single();
-          existingRecipe = recipe;
-          // Translate once, share it with the plurality check below
-          translatedToEnglish = await translateIngredientNameToEnglish(
-            ingredient.name,
-            existingRecipe?.original_language || "en"
-          );
-          const ingredientResult = await getOrCreateIngredient(
-            ingredient.name,
-            existingRecipe?.original_language || "en",
-            translatedToEnglish
-          );
-          ingredientId = ingredientResult.id;
-        } else {
-          throw new Error("Ingredient must have either ingredient_id or name");
-        }
-
-        // Determine if the input was plural based on the entered text
-        const isPlural = await determineIngredientPlurality(
-          ingredient.name,
-          existingRecipe?.original_language || "en",
-          translatedToEnglish
-        );
-
-        // Check for linked recipe
-        const linkKey = `ungrouped-${ingredient.tempId}`;
-        const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
-
-        recipeIngredientsToInsert.push({
-          recipe_id: id,
-          ingredient_id: ingredientId,
-          quantity: ingredient.quantity,
-          unit: ingredient.unit,
-          notes: ingredient.notes,
-          subheading: null, // Ungrouped ingredients have no subheading
-          order_index: globalOrderIndex++,
-          is_plural: isPlural,
-          linked_recipe_id: linkedRecipe?.id || null,
-        });
-
-        completedSteps++;
-        ingredientsDone++;
-        reportProgress("ingredients", ingredientsDone, ingredientCount);
-      }
-    }
-
-    // Handle ingredient sections
-    if (
-      recipeData.ingredientSections &&
-      recipeData.ingredientSections.length > 0
-    ) {
-      for (const section of recipeData.ingredientSections) {
-        for (const ingredient of section.ingredients) {
-          let ingredientId;
-          let existingRecipe = null;
-          let translatedToEnglish = null;
-
-          // Handle both cases: ingredient_id provided OR name provided
-          if (ingredient.ingredient_id) {
-            ingredientId = ingredient.ingredient_id;
-            // Still need to get the recipe language for plurality determination
-            const { data: recipe } = await supabase
-              .from("recipes")
-              .select("original_language")
-              .eq("id", id)
-              .single();
-            existingRecipe = recipe;
-          } else if (ingredient.name) {
-            // For updates, get the original language from the existing recipe
-            const { data: recipe } = await supabase
-              .from("recipes")
-              .select("original_language")
-              .eq("id", id)
-              .single();
-            existingRecipe = recipe;
-            // Translate once, share it with the plurality check below
-            translatedToEnglish = await translateIngredientNameToEnglish(
-              ingredient.name,
-              existingRecipe?.original_language || "en"
-            );
-            const ingredientResult = await getOrCreateIngredient(
-              ingredient.name,
-              existingRecipe?.original_language || "en",
-              translatedToEnglish
-            );
-            ingredientId = ingredientResult.id;
-          } else {
-            throw new Error(
-              "Ingredient must have either ingredient_id or name"
-            );
-          }
-
-          // Determine if the input was plural based on the entered text
-          const isPlural = await determineIngredientPlurality(
-            ingredient.name,
-            existingRecipe?.original_language || "en",
-            translatedToEnglish
-          );
-
-          // Check for linked recipe
-          const linkKey = `${section.id}-${ingredient.tempId}`;
-          const linkedRecipe = recipeData.ingredientLinks?.[linkKey];
-
-          recipeIngredientsToInsert.push({
-            recipe_id: id,
-            ingredient_id: ingredientId,
-            quantity: ingredient.quantity,
-            unit: ingredient.unit,
-            notes: ingredient.notes,
-            subheading: section.subheading || null,
-            order_index: globalOrderIndex++,
-            is_plural: isPlural,
-            linked_recipe_id: linkedRecipe?.id || null,
-          });
-
-          completedSteps++;
-          ingredientsDone++;
-          reportProgress("ingredients", ingredientsDone, ingredientCount);
-        }
-      }
-    }
-
-    if (recipeIngredientsToInsert.length > 0) {
-      const { error: ingredientsError } = await supabase
-        .from("recipe_ingredients")
-        .insert(recipeIngredientsToInsert);
-
-      if (ingredientsError) {
-        throw new Error(
-          `Failed to add updated ingredients: ${ingredientsError.message}`
-        );
-      }
-    }
+    const ingredientRows = await buildRecipeIngredientRows(
+      id,
+      recipeData,
+      recipe.original_language || "en",
+      progress.ingredientDone
+    );
+    await insertRecipeIngredients(
+      ingredientRows,
+      "Failed to add updated ingredients"
+    );
   }
 
   // Handle category updates using new many-to-many system
@@ -1262,21 +1049,11 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
 
     // Add new categories if provided
     if (recipeData.categories && recipeData.categories.length > 0) {
-      // Get the recipe's original language for translation
-      const { data: recipeLanguage } = await supabase
-        .from("recipes")
-        .select("original_language")
-        .eq("id", id)
-        .single();
-
       await assignCategories(
         id,
         recipeData.categories,
-        recipeLanguage?.original_language || "en",
-        (done, total) => {
-          completedSteps++;
-          reportProgress("categories", done, total);
-        }
+        recipe.original_language || "en",
+        (done, total) => progress.step("categories", done, total)
       );
     }
   }
@@ -1294,23 +1071,11 @@ export const updateRecipe = async (id, recipeData, onProgress = null) => {
 
       // Upload any local images if there are images to process
       if (recipeData.images && recipeData.images.length > 0) {
-        const stepsBeforeImages = completedSteps;
         const uploadedImages = await uploadLocalImages(
           recipeData.images,
           user.id,
           id,
-          onProgress
-            ? ({ current, imageId, uploading }) =>
-                onProgress({
-                  completed: stepsBeforeImages + current,
-                  total: totalSteps,
-                  phase: "images",
-                  phaseCompleted: current,
-                  phaseTotal: localImageCount,
-                  imageId,
-                  uploading,
-                })
-            : null
+          progress.imageCallback()
         );
 
         // Update the recipe with the uploaded images
