@@ -24,8 +24,8 @@
   else if (m === 10 && d >= 17) season = "halloween";
   else if (m === 2 && d >= 7 && d <= 14) season = "valentines";
 
-  // Christmas is Santa or reindeer, 50/50 each time the app opens
-  if (season === "christmas" && Math.random() < 0.5) season = "reindeer";
+  // Reindeer through Advent, Santa from Dec 20
+  if (season === "christmas" && d < 20) season = "reindeer";
 
   var forced = location.search.match(/[?&]season=(\w+)/);
   if (forced) season = forced[1];

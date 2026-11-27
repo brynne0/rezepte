@@ -2,39 +2,29 @@ import { useTranslation } from "react-i18next";
 import { TriangleAlert, WifiOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useOnlineStatus } from "@/hooks/ui/useOnlineStatus";
 
-// Fallback shown by react-router when a route throws during render/loading,
-// instead of the framework's raw "Unexpected Application Error!" stack trace.
-// A thrown error while offline is usually just a failed network request, not
-// a real bug, so it gets a distinct, less alarming message.
+// Route crash fallback; offline gets a calmer message
 const RouteError = () => {
   const { t } = useTranslation();
   const isOnline = useOnlineStatus();
+  const Icon = isOnline ? TriangleAlert : WifiOff;
 
   return (
-    <div className="mx-auto mt-40 flex max-w-sm flex-col items-center gap-4 text-center">
-      {isOnline ? (
-        <>
-          <TriangleAlert className="size-9 text-destructive" />
-          <p className="font-medium">{t("something_went_wrong")}</p>
-          <p className="text-muted-foreground">
-            {t("unexpected_error_message")}
-          </p>
-        </>
-      ) : (
-        <>
-          <WifiOff className="size-9 text-muted-foreground" />
-          <p className="font-medium">{t("no_internet_connection")}</p>
-          <p className="text-muted-foreground">
-            {t("route_error_offline_message")}
-          </p>
-        </>
-      )}
+    <Card className="mx-auto mt-40 w-full max-w-sm items-center gap-4 p-6 text-center text-base">
+      <Icon
+        className={
+          isOnline ? "size-9 text-destructive" : "size-9 text-muted-foreground"
+        }
+      />
+      <p className="font-medium">
+        {t(isOnline ? "something_went_wrong" : "no_internet_connection")}
+      </p>
       <Button onClick={() => window.location.reload()}>
         {t("reload_page")}
       </Button>
-    </div>
+    </Card>
   );
 };
 
