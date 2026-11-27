@@ -40,6 +40,8 @@ import {
   friendsCanSeePhotos,
 } from "../../utils/photoVisibility";
 import LoadingAcorn from "../../components/LoadingAcorn/LoadingAcorn";
+import SeasonalSquirrel from "../../components/SeasonalSquirrel/SeasonalSquirrel";
+import { squirrelVisits } from "../../utils/squirrelVisit";
 import ImageGallery from "./components/ImageGallery";
 import {
   formatIngredientMeasurement,
@@ -564,6 +566,15 @@ const Recipe = ({ isSharedView = false }) => {
         variant="receipt"
         className="mx-auto my-2 w-full max-w-3xl text-left"
       >
+        {/* Seasonal squirrel perches on some recipes */}
+        {squirrelVisits(recipe.id) && (
+          <div
+            aria-hidden
+            className="squirrel-perch pointer-events-none absolute right-6 bottom-[calc(100%+4px)]"
+          >
+            <SeasonalSquirrel className="size-8 text-foreground" />
+          </div>
+        )}
         <CardHeader>
           <div className="flex flex-col gap-3">
             {recipe.translationUnavailable && (
