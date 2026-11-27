@@ -45,17 +45,17 @@ export const useSignedImageUrls = (images) => {
         const cachedResults = [];
         const imagesToFetch = [];
 
-        // Check cache first (signed URLs are valid for days, so reuse them
-        // even while online to avoid needless refetches and image reloads)
+        // Offline, keep old URLs so they match the SW-cached images
+        const maxAge = isOnline ? CACHE_DURATION : undefined;
         images.forEach((image) => {
           const cached = userId
             ? readCachedValue(
                 signedImageUrlCacheKey(userId, image.path),
-                CACHE_DURATION
+                maxAge
               )
             : null;
 
-          if (cached) {
+          if (cached?.url) {
             cachedResults.push(cached);
           } else {
             imagesToFetch.push(image);
@@ -67,14 +67,16 @@ export const useSignedImageUrls = (images) => {
         if (imagesToFetch.length > 0) {
           const freshUrls = await getSignedImageUrls(imagesToFetch);
 
-          // Cache new URLs
+          // Don't cache failures so they're retried
           if (userId) {
-            freshUrls.forEach((image) => {
-              writeCachedValue(
-                signedImageUrlCacheKey(userId, image.path),
-                image
-              );
-            });
+            freshUrls
+              .filter((image) => image.url)
+              .forEach((image) => {
+                writeCachedValue(
+                  signedImageUrlCacheKey(userId, image.path),
+                  image
+                );
+              });
           }
 
           newSignedImages = [...newSignedImages, ...freshUrls];

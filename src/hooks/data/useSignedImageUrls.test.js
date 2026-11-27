@@ -2,8 +2,11 @@ import { describe, test, expect, beforeEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 
 const auth = { user: { id: "u1" } };
+const online = { value: true };
 vi.mock("./useAuth", () => ({ useAuth: () => auth }));
-vi.mock("../ui/useOnlineStatus", () => ({ useOnlineStatus: () => true }));
+vi.mock("../ui/useOnlineStatus", () => ({
+  useOnlineStatus: () => online.value,
+}));
 vi.mock("../../services/imageService", () => ({
   getSignedImageUrls: vi.fn(),
 }));
@@ -21,6 +24,7 @@ describe("useSignedImageUrls", () => {
     vi.clearAllMocks();
     localStorage.clear();
     auth.user = { id: "u1" };
+    online.value = true;
     vi.spyOn(console, "error").mockImplementation(() => {});
     getSignedImageUrls.mockImplementation(sign);
   });
@@ -67,6 +71,59 @@ describe("useSignedImageUrls", () => {
     const { result } = renderHook(() => useSignedImageUrls(images));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(getSignedImageUrls).not.toHaveBeenCalled();
+  });
+
+  test("doesn't cache images that failed to sign", async () => {
+    getSignedImageUrls.mockResolvedValue([{ path: "a.jpg", url: null }]);
+    const { result } = renderHook(() =>
+      useSignedImageUrls([{ path: "a.jpg" }])
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(
+      localStorage.getItem(signedImageUrlCacheKey("u1", "a.jpg"))
+    ).toBeNull();
+  });
+
+  test("refetches cached entries that have no URL", async () => {
+    writeCachedValue(signedImageUrlCacheKey("u1", "a.jpg"), {
+      path: "a.jpg",
+      url: null,
+    });
+    const { result } = renderHook(() =>
+      useSignedImageUrls([{ path: "a.jpg" }])
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.signedImages[0].url).toBe("signed:a.jpg");
+  });
+
+  test("uses expired cached URLs while offline", async () => {
+    online.value = false;
+    localStorage.setItem(
+      signedImageUrlCacheKey("u1", "a.jpg"),
+      JSON.stringify({ value: { path: "a.jpg", url: "old" }, timestamp: 0 })
+    );
+    const { result } = renderHook(() =>
+      useSignedImageUrls([{ path: "a.jpg" }])
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(getSignedImageUrls).not.toHaveBeenCalled();
+    expect(result.current.signedImages[0].url).toBe("old");
+  });
+
+  test("refetches expired cached URLs while online", async () => {
+    localStorage.setItem(
+      signedImageUrlCacheKey("u1", "a.jpg"),
+      JSON.stringify({ value: { path: "a.jpg", url: "old" }, timestamp: 0 })
+    );
+    const { result } = renderHook(() =>
+      useSignedImageUrls([{ path: "a.jpg" }])
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.signedImages[0].url).toBe("signed:a.jpg");
   });
 
   test("doesn't use the cache when signed out", async () => {
