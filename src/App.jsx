@@ -147,9 +147,17 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [friendBar, setFriendBar] = useState(null);
 
-  // Remove the static HTML splash once React has mounted and painted
+  // Fade out the static HTML splash once React has mounted, then remove it
   useEffect(() => {
-    document.getElementById("splash")?.remove();
+    const splash = document.getElementById("splash");
+    if (!splash) return;
+    splash.classList.add("splash-out");
+    // Fallback in case transitionend never fires (e.g. background tab)
+    const timer = setTimeout(() => splash.remove(), 300);
+    splash.addEventListener("transitionend", () => splash.remove(), {
+      once: true,
+    });
+    return () => clearTimeout(timer);
   }, []);
 
   // Apply the language requested by an auth email link (e.g. ?lang=de), then

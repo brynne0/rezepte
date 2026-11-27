@@ -56,7 +56,7 @@
       href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400..900&family=IBM+Plex+Mono:wght@400;600&display=swap"
       rel="stylesheet"
       media="print"
-      onload="this.media='all'"
+      onload="this.media = 'all'"
     />
     <noscript>
       <link
@@ -101,6 +101,11 @@
         justify-content: center;
         background: #efe6d6;
         z-index: 9999;
+        transition: opacity 150ms ease-out;
+      }
+      #splash.splash-out {
+        opacity: 0;
+        pointer-events: none;
       }
       html.dark #splash {
         background: #241d19;
@@ -109,6 +114,14 @@
         width: 80px;
         height: 80px;
         stroke: #55443c;
+        /* Only show the squirrel on slow loads so fast ones don't flash */
+        opacity: 0;
+        animation: splash-in 200ms ease-out 400ms forwards;
+      }
+      @keyframes splash-in {
+        to {
+          opacity: 1;
+        }
       }
       html.dark #splash svg {
         stroke: #f2e7d2;
