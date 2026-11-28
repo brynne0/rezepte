@@ -307,7 +307,8 @@ describe("uploadLocalImages", () => {
       caption: "hi",
       crop_area: { x: 1 },
     });
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:1");
+    // The form still shows the preview, so it's revoked on unmount instead
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
     expect(onProgress).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ uploading: true, progress: 0, total: 1 })

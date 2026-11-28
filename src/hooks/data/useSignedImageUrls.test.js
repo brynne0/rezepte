@@ -65,6 +65,25 @@ describe("useSignedImageUrls", () => {
     ]);
   });
 
+  test("keeps current order and is_main over stale cached entries", async () => {
+    writeCachedValue(signedImageUrlCacheKey("u1", "a.jpg"), {
+      path: "a.jpg",
+      url: "cached:a",
+      is_main: true,
+    });
+    const images = [
+      { path: "b.jpg", is_main: true },
+      { path: "a.jpg", is_main: false },
+    ];
+    const { result } = renderHook(() => useSignedImageUrls(images));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.signedImages).toEqual([
+      { path: "b.jpg", is_main: true, url: "signed:b.jpg" },
+      { path: "a.jpg", is_main: false, url: "cached:a" },
+    ]);
+  });
+
   test("skips fetching when everything is cached", async () => {
     writeCachedValue(signedImageUrlCacheKey("u1", "a.jpg"), { url: "cached" });
     const images = [{ path: "a.jpg" }];

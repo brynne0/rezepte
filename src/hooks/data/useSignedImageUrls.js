@@ -42,7 +42,7 @@ export const useSignedImageUrls = (images) => {
     const fetchSignedUrls = async () => {
       try {
         setLoading(true);
-        const cachedResults = [];
+        const urlsByPath = new Map();
         const imagesToFetch = [];
 
         // Offline, keep old URLs so they match the SW-cached images
@@ -56,31 +56,33 @@ export const useSignedImageUrls = (images) => {
             : null;
 
           if (cached?.url) {
-            cachedResults.push(cached);
+            urlsByPath.set(image.path, cached.url);
           } else {
             imagesToFetch.push(image);
           }
         });
 
         // Fetch uncached images
-        let newSignedImages = [...cachedResults];
         if (imagesToFetch.length > 0) {
           const freshUrls = await getSignedImageUrls(imagesToFetch);
 
-          // Don't cache failures so they're retried
-          if (userId) {
-            freshUrls
-              .filter((image) => image.url)
-              .forEach((image) => {
-                writeCachedValue(
-                  signedImageUrlCacheKey(userId, image.path),
-                  image
-                );
-              });
-          }
-
-          newSignedImages = [...newSignedImages, ...freshUrls];
+          freshUrls.forEach((image) => {
+            urlsByPath.set(image.path, image.url);
+            // Don't cache failures so they're retried
+            if (userId && image.url) {
+              writeCachedValue(
+                signedImageUrlCacheKey(userId, image.path),
+                image
+              );
+            }
+          });
         }
+
+        // Only the URL comes from cache; order and is_main stay current
+        const newSignedImages = images.map((image) => ({
+          ...image,
+          url: urlsByPath.get(image.path) ?? null,
+        }));
 
         if (mountedRef.current) {
           setSignedImages(newSignedImages);

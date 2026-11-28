@@ -307,9 +307,6 @@ export const uploadLocalImages = async (
           crop_area: image.crop_area,
         });
 
-        // Clean up the local preview URL
-        URL.revokeObjectURL(image.url);
-
         uploadedCount++;
 
         // Update progress after successful upload

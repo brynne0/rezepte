@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Plus, Trash2, Crop } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -32,6 +32,17 @@ const ImageUpload = ({
 }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
+
+  // Previews stay on screen during save, so only revoke them on unmount
+  const imagesRef = useRef(images);
+  imagesRef.current = images;
+  useEffect(
+    () => () =>
+      imagesRef.current
+        .filter((img) => img.isLocal)
+        .forEach((img) => URL.revokeObjectURL(img.url)),
+    []
+  );
 
   const [fileDragDepth, setFileDragDepth] = useState(0);
   const isDraggingFile = fileDragDepth > 0;
